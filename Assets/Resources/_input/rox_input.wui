@@ -1,0 +1,359 @@
+{
+    "simName": "rox",
+    "deltaTime": 1.0,
+    "numberOfRuns": 1,
+    "lowerLeftLatLong": {
+        "x": 39.409924,
+        "y": -105.104505
+    },
+    "size": {
+        "x": 5000.0,
+        "y": 10000.0
+    },
+    "zoomLevel": 13,
+    "evac": {
+        "overrideTotalPopulation": true,
+        "totalPopulation": 500,
+        "routeCellSize": 200.0,
+        "routeCellCount": {
+            "x": 0,
+            "y": 0
+        },
+        "allowMoreThanOneCar": true,
+        "maxCars": 2,
+        "maxCarsChance": 0.30000001192092898,
+        "minHouseholdSize": 1,
+        "maxHouseholdSize": 5,
+        "walkingDistanceModifier": 1.0,
+        "walkingSpeedMinMax": {
+            "x": 0.699999988079071,
+            "y": 1.0
+        },
+        "walkingSpeedModifier": 1.0,
+        "evacuationOrderStart": 420.0,
+        "responseCurve": [
+            {
+                "probability": 0.14000000059604646,
+                "timeMinMax": {
+                    "x": -420.0,
+                    "y": 0.0
+                }
+            },
+            {
+                "probability": 0.8100000023841858,
+                "timeMinMax": {
+                    "x": 0.0,
+                    "y": 1200.0
+                }
+            },
+            {
+                "probability": 0.949999988079071,
+                "timeMinMax": {
+                    "x": 1200.0,
+                    "y": 3600.0
+                }
+            }
+        ],
+        "blockGoalEvents": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "triggered": false,
+                "goalIndex": 0
+            }
+        ],
+        "evacuationForceMap": {
+            "instanceID": 0
+        },
+        "forcedGoals": []
+    },
+    "traffic": {
+        "evacuationGoals": [
+            {
+                "name": "Rox_Goal_E",
+                "latLong": {
+                    "x": 39.426692,
+                    "y": -105.071401
+                },
+                "color": {
+                    "r": 1.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 1.0
+                },
+                "blocked": false,
+                "marker": {
+                    "instanceID": 0
+                },
+                "goalType": 0,
+                "cumulativeWeight": 0.0,
+                "maxCars": 0,
+                "currentPeople": 0
+            },
+            {
+                "name": "Rox_Goal_R",
+                "latLong": {
+                    "x": 39.473858,
+                    "y": -105.092137
+                },
+                "color": {
+                    "r": 0.0,
+                    "g": 1.0,
+                    "b": 0.0,
+                    "a": 1.0
+                },
+                "blocked": false,
+                "marker": {
+                    "instanceID": 0
+                },
+                "goalType": 0,
+                "cumulativeWeight": 0.0,
+                "maxCars": 0,
+                "currentPeople": 0
+            },
+            {
+                "name": "Rox_Goal_F",
+                "latLong": {
+                    "x": 39.466157,
+                    "y": -105.082197
+                },
+                "color": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 1.0,
+                    "a": 1.0
+                },
+                "blocked": false,
+                "marker": {
+                    "instanceID": 0
+                },
+                "goalType": 0,
+                "cumulativeWeight": 0.0,
+                "maxCars": 0,
+                "currentPeople": 0
+            }
+        ],
+        "routeChoice": 1,
+        "stallSpeed": 5.0,
+        "backGroundDensityMinMax": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "visibilityAffectsSpeed": false,
+        "opticalDensity": 0.05000000074505806,
+        "roadTypes": {
+            "roadData": [
+                {
+                    "name": "motorway",
+                    "speedLimit": 120.0,
+                    "lanes": 2,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "motorway_link",
+                    "speedLimit": 120.0,
+                    "lanes": 2,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "trunk",
+                    "speedLimit": 90.0,
+                    "lanes": 2,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "trunk_link",
+                    "speedLimit": 90.0,
+                    "lanes": 2,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "primary",
+                    "speedLimit": 90.0,
+                    "lanes": 1,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "primary_link",
+                    "speedLimit": 90.0,
+                    "lanes": 1,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "secondary",
+                    "speedLimit": 70.0,
+                    "lanes": 1,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "secondary_link",
+                    "speedLimit": 70.0,
+                    "lanes": 1,
+                    "maxCapacity": 75.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "tertiary",
+                    "speedLimit": 70.0,
+                    "lanes": 1,
+                    "maxCapacity": 60.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "tertiary_link",
+                    "speedLimit": 70.0,
+                    "lanes": 1,
+                    "maxCapacity": 60.0,
+                    "canBeReversed": true
+                },
+                {
+                    "name": "unclassified",
+                    "speedLimit": 50.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "residential",
+                    "speedLimit": 50.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "service",
+                    "speedLimit": 30.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "services",
+                    "speedLimit": 30.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "road",
+                    "speedLimit": 30.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "track",
+                    "speedLimit": 30.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "living_street",
+                    "speedLimit": 5.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "ferry",
+                    "speedLimit": 5.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "movable",
+                    "speedLimit": 5.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "shuttle_train",
+                    "speedLimit": 10.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "custom0",
+                    "speedLimit": 40.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "custom1",
+                    "speedLimit": 40.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "custom2",
+                    "speedLimit": 40.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "custom3",
+                    "speedLimit": 40.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "custom4",
+                    "speedLimit": 40.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                },
+                {
+                    "name": "default",
+                    "speedLimit": 10.0,
+                    "lanes": 1,
+                    "maxCapacity": 50.0,
+                    "canBeReversed": false
+                }
+            ]
+        },
+        "saveInterval": 600.0,
+        "trafficAccidents": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "endTime": 3.4028234663852887e38,
+                "isActive": false
+            }
+        ],
+        "reverseLanes": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "endTime": 3.4028234663852887e38,
+                "isActive": false
+            }
+        ]
+    },
+    "gpw": {
+        "readGPWFromSave": true,
+        "localGPWFilename": "roxburough.gpw"
+    },
+    "itinero": {
+        "osmDataName": "colorado-latest",
+        "routerDatabaseName": "colorado-latest"
+    },
+    "farsite": {
+        "outputPrefix": "rox"
+    },
+    "visuals": {
+        "drawRoads": false
+    }
+}
