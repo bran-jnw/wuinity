@@ -705,17 +705,20 @@ namespace WUInity
         int[] currentPeopleInCells;
         public void DisplayClosestDensityData(float time)
         {
-            int index = (int)time / (int)input.traffic.saveInterval;
-            if (index > outputTextures.Count - 1)
+            if(sim.runTrafficSim)
             {
-                index = outputTextures.Count - 1;
-            }
-            Texture2D tex = outputTextures[index];
+                int index = (int)time / (int)input.traffic.saveInterval;
+                if (index > outputTextures.Count - 1)
+                {
+                    index = outputTextures.Count - 1;
+                }
+                Texture2D tex = outputTextures[index];
 
-            currenttrafficDensityData = trafficDensityData[index];
-            currentPeopleInCells = peopleInCells[index];
+                currenttrafficDensityData = trafficDensityData[index];
+                currentPeopleInCells = peopleInCells[index];
 
-            SetDataPlaneTexture(tex);
+                SetDataPlaneTexture(tex);
+            }            
         }
 
         public void DisplayRawPop()

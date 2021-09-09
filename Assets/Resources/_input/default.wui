@@ -60,7 +60,6 @@
         "blockGoalEvents": [
             {
                 "startTime": 3.4028234663852887e38,
-                "triggered": false,
                 "goalIndex": 0
             }
         ],
@@ -139,11 +138,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 0.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             },
             {
                 "name": "Rox_Goal_R",
@@ -158,11 +157,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 0.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             },
             {
                 "name": "Rox_Goal_F",
@@ -177,11 +176,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 0.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             }
         ],
         "routeChoice": 1,

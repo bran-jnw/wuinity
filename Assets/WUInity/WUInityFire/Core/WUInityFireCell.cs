@@ -231,9 +231,11 @@ namespace WUInity.Fire
 
         public void UpdateSpreadRates()
         {
-            UpdateCrownFireSpreadRates();
-            return;
+            //replaces code below as it calls surface calc too
+            /*UpdateCrownFireSpreadRates();
+            return;*/
 
+            
             FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
             double moistureOneHour = moisture.OneHour;// 6.0;
             double moistureTenHour = moisture.TenHour; //7.0;
@@ -379,7 +381,7 @@ namespace WUInity.Fire
 
 
             //feed new data
-            //updates bith surface and crown
+            //updates both surface and crown
             fireMesh.crownFire.updateCrownInputs(fuelModelNumber,
                 moistureOneHour, moistureTenHour, moistureHundredHour, moistureLiveHerbaceous, moistureLiveWoody, moistureFoliar, moistureUnits,
                 windSpeed, windSpeedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode,
@@ -393,7 +395,7 @@ namespace WUInity.Fire
                 slope, slopeUnits, aspect, 
                 canopyCover, coverUnits, canopyHeight, canopyHeightUnits, crownRatio);*/
 
-            //do new calc, do not use doCrownRunRothermel() as it seems buggy sine it doesn't save all sirface parameters as well as overwrites it with crown fire run
+            //do new calc, do not use doCrownRunRothermel() as it seems buggy since it doesn't save all surface parameters as well as overwrites it with crown fire run
             fireMesh.crownFire.doCrownRunScottAndReinhardt();
             double currentMaxSpreadRate = fireMesh.crownFire.getFinalSpreadRate(BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond);
             //bran-jnw: these output has been added by me in Crown.cs

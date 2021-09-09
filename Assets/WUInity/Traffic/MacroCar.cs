@@ -85,7 +85,7 @@ namespace WUInity.Traffic
                 MonoBehaviour.print("new route");
             }*/
 
-            this.routeData = desiredNewRoute;
+            routeData = desiredNewRoute;
             currentShapeIndex = 1;
             //add old distance left to the new route piece length to keep somewhat consistent travel distance
             currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance + currentDistanceLeft;
@@ -163,7 +163,7 @@ namespace WUInity.Traffic
             }
         }*/
 
-        public void MoveCarSpeed(float deltaTime, float speed)
+        public void MoveCarSpeed(float timeStamp, float deltaTime, float speed)
         {
             currentDistanceLeft -= deltaTime * speed;
             totalTravelDistance += deltaTime * speed;
@@ -174,10 +174,20 @@ namespace WUInity.Traffic
                 //check if we have arrived or just going to next shape/node
                 if (currentShapeIndex == routeData.route.ShapeMeta.Length)
                 {
-                    hasArrived = true;
-                    //reduce with overshooting distance
-                    totalTravelDistance += currentDistanceLeft;
-                    routeData.evacGoal.CarArrives(this);
+                    //check if we can actually arrive based on flow at goal
+                    if (routeData.evacGoal.CarArrives(this, timeStamp, deltaTime))
+                    {
+                        hasArrived = true;
+                        //reduce with overshooting distance
+                        totalTravelDistance += currentDistanceLeft;
+                    }     
+                    else
+                    {          
+                        //keep these numbers the same
+                        currentDistanceLeft += deltaTime * speed;
+                        totalTravelDistance -= deltaTime * speed;
+                        --currentShapeIndex;
+                    }
                 }
                 else
                 {

@@ -125,6 +125,7 @@ namespace WUInity.Traffic
             for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; ++i)
             {
                 start += ", Goal: " + WUInity.WUINITY_IN.traffic.evacuationGoals[i].name;
+                start += ", " + WUInity.WUINITY_IN.traffic.evacuationGoals[i].name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -137,9 +138,9 @@ namespace WUInity.Traffic
             routeCreator = rC;
         }
 
-        public void InsertNewCar(RouteData routeData, int numberOfPopleInCar)
+        public void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
         {
-            MacroCar car = new MacroCar(routeData, numberOfPopleInCar);
+            MacroCar car = new MacroCar(routeData, numberOfPeopleInCar);
             macroCars.Add(car);
             ++totalCarsSimulated;            
         }
@@ -328,7 +329,7 @@ namespace WUInity.Traffic
                     }*/
 
                     //move car, replaces stuff above
-                    car.MoveCarSpeed(deltaTime, speed);
+                    car.MoveCarSpeed(currentTime, deltaTime, speed);
 
                     //flag cars that have arrived
                     if (car.hasArrived)
@@ -362,6 +363,7 @@ namespace WUInity.Traffic
             for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; ++i)
             {
                 newOut += "," + WUInity.WUINITY_IN.traffic.evacuationGoals[i].currentPeople;
+                newOut += "," + WUInity.WUINITY_IN.traffic.evacuationGoals[i].currentFlow;
             }
 
             output.Add(newOut);

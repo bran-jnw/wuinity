@@ -5,21 +5,7 @@ using UnityEngine;
 namespace WUInity
 {
     [System.Serializable] 
-    public enum RoutePriority { Fastest, Closest, Forced }
-
-    [System.Serializable]
-    public struct TrafficInjection
-    {
-        public int cars;
-        public Vector2D startPos, endPos;
-
-        public TrafficInjection(int cars, Vector2D startPos, Vector2D endPos)
-        {
-            this.cars = cars;
-            this.startPos = startPos;
-            this.endPos = endPos;
-        }
-    }
+    public enum RoutePriority { Fastest, Closest, Forced }    
 
     [System.Serializable]
     public class RouteData

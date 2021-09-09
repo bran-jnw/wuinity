@@ -46,7 +46,7 @@ namespace WUInity.Fire
             if(dataPoints.Length > 1)
             {
                 w.direction = directionSpline.GetYValue(time);
-                w.speed = speedSpline.GetYValue(time);
+                w.speed = speedSpline.GetYValue(time) * WUInity.WUINITY_IN.fire.windMultiplier;
                 w.cloudCover = cloudSpline.GetYValue(time);
             }
             

@@ -12,7 +12,7 @@ namespace WUInity
         public Vector2D latLong;
         public Color color;
         public bool blocked = false;
-        public int maxFlow; //cars per second?
+        public float maxFlow = 1f; //cars per second?
         //public GameObject marker;
         public EvacGoalType goalType = EvacGoalType.Refugee;
         public float cumulativeWeight;
@@ -21,12 +21,52 @@ namespace WUInity
         [System.NonSerialized] public int currentPeople;
         public List<MacroCar> cars = new List<MacroCar>();
 
-        public void CarArrives(MacroCar arrivingCar)
-        {
-            cars.Add(arrivingCar);
-            currentPeople += arrivingCar.numberOfPopleInCar;
+        [System.NonSerialized] public float currentFlow = 0f;
+        private float firstArrivalTime, currentTimeStep = float.MinValue;
+        private int timeStepCars;        
 
-            if(goalType == EvacGoalType.Refugee)
+        public EvacuationGoal()
+        {
+            name = "New goal";
+            latLong = Vector2D.zero;
+            color = Color.white;
+        }
+
+        public EvacuationGoal(string name, Vector2D latLong, Color color)
+        {
+            this.name = name;
+            this.latLong = latLong;
+            this.color = color;
+        }
+
+        /// <summary>
+        /// Checks flow and returns true if car arrives at goal safe and sound, returns false if the car have to wait.
+        /// </summary>
+        /// <param name="arrivingCar"></param>
+        /// <param name="timeStep"></param>
+        /// <param name="deltaTime"></param>
+        /// <returns></returns>
+        public bool CarArrives(MacroCar arrivingCar, float timeStep, float deltaTime)
+        {
+            UpdateFlow(timeStep, deltaTime);
+
+            //car can arrive
+            if(currentFlow < maxFlow && !blocked)
+            {
+                ++timeStepCars;
+                cars.Add(arrivingCar);
+                currentPeople += arrivingCar.numberOfPopleInCar;
+                UpdateCapacity();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        void UpdateCapacity()
+        {
+            if (goalType == EvacGoalType.Refugee)
             {
                 //track cars and respond
                 if (maxCars > 0 && cars.Count >= maxCars && !blocked)
@@ -40,7 +80,7 @@ namespace WUInity
                     WUInity.WUINITY_SIM.LogMessage("Additional car arrived at " + name + ", arrived during same time step.");
                 }
 
-                //tracka and respond people
+                //track and respond people
                 if (maxPeople > -1 && currentPeople >= maxPeople && !blocked)
                 {
                     blocked = true;
@@ -51,13 +91,51 @@ namespace WUInity
                 {
                     WUInity.WUINITY_SIM.LogMessage("Additional people arrived at " + name + ", arrived during same time step.");
                 }
-            }            
+            }
+        }
+
+        private void UpdateFlow(float timeStamp, float deltaTime)
+        {
+            //new timestamp?
+            if (currentTimeStep != timeStamp)
+            {
+                currentTimeStep = timeStamp;
+                timeStepCars = 0;
+            }
+
+            //calc current flow
+            if (cars.Count == 0)
+            {
+                firstArrivalTime = timeStamp;
+                currentFlow = 0f;
+            }
+            else
+            {
+                float timestepFlow = timeStepCars / deltaTime;
+                if (timeStamp == firstArrivalTime)
+                {
+                    currentFlow = timestepFlow;
+                }
+                else
+                {
+                    currentFlow = cars.Count / (timeStamp - firstArrivalTime);
+                }
+                currentFlow = Mathf.Max(timestepFlow, currentFlow);
+            }
         }
 
         public void ResetPeopleAndCars()
         {
+            blocked = false; 
+
             currentPeople = 0;
             cars.Clear();
+
+            //reset stuff for flow calc
+            currentFlow = 0f;
+            timeStepCars = 0;
+            firstArrivalTime = float.MinValue;
+            currentTimeStep = float.MinValue;
         }
 
         public static EvacuationGoal[] GetRoxburoughGoals()

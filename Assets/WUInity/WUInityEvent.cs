@@ -16,9 +16,10 @@ namespace WUInity
     public class BlockGoalEvent : WUInityEvent
     {
         public int goalIndex;
-        public BlockGoalEvent(float startTime)
+        public BlockGoalEvent(float startTime, int goalIndex)
         {
             this.startTime = startTime;
+            this.goalIndex = goalIndex;
             triggered = false;
         }
 
@@ -35,7 +36,7 @@ namespace WUInity
         public static BlockGoalEvent[] GetDummy()
         {
             BlockGoalEvent[] wE = new BlockGoalEvent[1];
-            wE[0] = new BlockGoalEvent(float.MaxValue);
+            wE[0] = new BlockGoalEvent(float.MaxValue, 0);
             return wE;
         }
     }

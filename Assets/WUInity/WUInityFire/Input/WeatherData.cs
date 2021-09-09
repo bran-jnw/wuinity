@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static WUInity.InterpolationLibrary;
 
 namespace WUInity.Fire
 {
@@ -45,6 +46,36 @@ namespace WUInity.Fire
             this.Humid2 = Humid2;
             this.Elevation = Elevation;
         }
+
+        public void GetMinHourData(out int minHour, out int minTemp, out int minHumid)
+        {
+            minHour = Mathf.Max(Hour1, Hour2);
+            if (minHour == Hour1)
+            {
+                minTemp = Temp1;
+                minHumid = Humid1;
+            }
+            else
+            {
+                minTemp = Temp2;
+                minHumid = Humid2;
+            }
+        }
+
+        public void GetMaxHourData(out int maxHour, out int maxTemp, out int maxHumid)
+        {
+            maxHour = Mathf.Max(Hour1, Hour2);
+            if (maxHour == Hour1)
+            {
+                maxTemp = Temp1;
+                maxHumid = Humid1;
+            }
+            else
+            {
+                maxTemp = Temp2;
+                maxHumid = Humid2;
+            }
+        }
     }
 
     [System.Serializable]
@@ -68,5 +99,79 @@ namespace WUInity.Fire
 
             return w;
         }
+
+        public WeatherPoint GetCurrentWeather(int currentMonth, int currentDay, int currentSecond)
+        {
+            WeatherPoint currentWeather = new WeatherPoint();
+
+            float currentHour = 2400f * currentSecond / (3600f * 24);
+            for (int i = 0; i < weatherInputs.Length; i++)
+            {
+                if(currentMonth == weatherInputs[i].Month && currentDay == weatherInputs[i].Day)
+                {
+                    currentWeather.Elevation = weatherInputs[i].Elevation;
+                    currentWeather.Precipitation = weatherInputs[i].Precip;
+
+                    int minHour = Mathf.Min(weatherInputs[i].Hour1, weatherInputs[i].Hour2);
+                    int maxHour = Mathf.Max(weatherInputs[i].Hour1, weatherInputs[i].Hour2);
+                    int temp1, temp2, humid1, humid2;
+                    if(minHour == weatherInputs[i].Hour1)
+                    {
+                        temp1 = weatherInputs[i].Temp1;
+                        temp2 = weatherInputs[i].Temp2;
+                        humid1 = weatherInputs[i].Humid1;
+                        humid2 = weatherInputs[i].Humid2;
+                    }
+                    else
+                    {
+                        temp1 = weatherInputs[i].Temp2;
+                        temp2 = weatherInputs[i].Temp1;
+                        humid1 = weatherInputs[i].Humid2;
+                        humid2 = weatherInputs[i].Humid1;
+                    }
+
+                    if (currentHour >= minHour && currentHour <= maxHour)
+                    {
+                        float frac = (currentHour - minHour) / (maxHour - minHour);
+                        currentWeather.Temperature = (int)CosineInterpolate(temp1, temp2, frac);
+                        currentWeather.Humidity = (int)CosineInterpolate(humid1, humid2, frac);
+                    }
+                    else if(currentHour < minHour)
+                    {
+                        if(i == 0)
+                        {
+                            currentWeather.Temperature = temp1;
+                            currentWeather.Humidity = humid1;
+                        }
+                        else
+                        {
+                            float frac = (currentHour - minHour) / (maxHour - minHour);
+                            currentWeather.Temperature = (int)CosineInterpolate(temp1, temp2, frac);
+                            currentWeather.Humidity = (int)CosineInterpolate(humid1, humid2, frac);
+                        }
+                    }
+                    else if (currentHour > maxHour)
+                    {
+                        if (i == weatherInputs.Length - 1)
+                        {
+                            currentWeather.Temperature =temp2;
+                            currentWeather.Humidity = humid2;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return currentWeather;
+        }
+    }
+
+    [System.Serializable]
+    public struct WeatherPoint
+    {
+        public int Elevation, Temperature, Humidity, Precipitation;
     }
 }

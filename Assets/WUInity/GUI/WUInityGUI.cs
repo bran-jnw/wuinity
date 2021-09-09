@@ -555,11 +555,11 @@ namespace WUInity
             opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
             ++buttonIndex;
 
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply Changes"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))
             {
-                ParseTrafficInput();
+                Traffic.MacroTrafficVerification.RunTrafficVerificationTests();
             }
-            ++buttonIndex;-*/                      
+            ++buttonIndex;
         }
 
         void ParseTrafficInput()
@@ -704,6 +704,12 @@ namespace WUInity
                 ++buttonIndex;
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated);
+            ++buttonIndex;
+
+            //fire output stuff
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUInity.WUINITY_SIM.GetFireWindSpeed() + " m/s");
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.WUINITY_SIM.GetFireWindDirection() + " degrees");
             ++buttonIndex;
         }
 

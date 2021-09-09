@@ -13,10 +13,22 @@ namespace WUInity
 {
     [System.Serializable]
     public class RouteCreator
-    {        
+    {
         private Router router;
         List<RouterPoint> validEvacuationGoalRouterPoints;
-        List<EvacuationGoal> validEvacuationGoals;       
+        List<EvacuationGoal> validEvacuationGoals;
+
+        /// <summary>
+        /// Hack to allow using a route creator from traffic verification
+        /// </summary>
+        public void SetValidGoals()
+        {
+            if (router == null)
+            {
+                router = new Router(WUInity.WUINITY_SIM.GetRouterDb());
+            }
+            DetermineValidGoalsAndRouterPoints(false);
+        }
 
         /// <summary>
         /// Calculates available routes in all raster cells, updates them instead if old routes are supplied
@@ -33,9 +45,9 @@ namespace WUInity
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
             //create all waypoints in cells
-            for (int y = 0; y<cells.y; ++y)
+            for (int y = 0; y < cells.y; ++y)
             {
-                for (int x = 0; x<cells.x; ++x)
+                for (int x = 0; x < cells.x; ++x)
                 {
                     float xPos = (float)size.x * ((float)x + 0.5f) / (float)cells.x;
                     float yPos = (float)size.y * ((float)y + 0.5f) / (float)cells.y;
@@ -70,8 +82,8 @@ namespace WUInity
                     if (startRouterPoint == null)
                     {
                         continue;
-                    }                    
-                    
+                    }
+
                     //check if we have the same start as any neighboring cells, if so just use those calculations as they will will be the same
                     RouteCollection rC = CheckIfNeighborsHaveSameStart(startRouterPoint, i, cellRoutes, cellSize);
                     if (rC != null)
@@ -100,7 +112,7 @@ namespace WUInity
 
                         //check that at least 1 route is not null to make sure we have a valid route to go somewhere
                         if (routeData.Count > 0)
-                        {                            
+                        {
                             //save actual routes
                             cellRoutes[i] = new RouteCollection(routeData.Count);
                             for (int j = 0; j < routeData.Count; j++)
@@ -117,7 +129,7 @@ namespace WUInity
                                 WUInity.WUINITY.DrawRoad(cellRoutes[i], i);
                             }
                         }
-                    }    
+                    }
                 }
             }
             return cellRoutes;
@@ -165,17 +177,17 @@ namespace WUInity
                     RouterPoint rP = router.Resolve(routerProfile, (float)evacuatonGoals[i].latLong.x, (float)evacuatonGoals[i].latLong.y, 200f);
                     validEvacuationGoalRouterPoints.Add(rP);
                     validEvacuationGoals.Add(evacuatonGoals[i]);
-                    if(logMessages)
+                    if (logMessages)
                     {
                         WUInity.WUINITY_SIM.LogMessage("Evac goal start position valid: " + evacuatonGoals[i].name);
-                    }                    
+                    }
                 }
                 catch (Itinero.Exceptions.ResolveFailedException)
                 {
                     if (logMessages)
                     {
                         WUInity.WUINITY_SIM.LogMessage("WARNING! Evac goal start position NOT valid: " + evacuatonGoals[i].name);
-                    }                    
+                    }
                 }
             }
         }
@@ -369,7 +381,7 @@ namespace WUInity
             //this is a quick way of getting a route from an approximate position of the car
             //we just check if cell we are in has a good route and use that
             RouteCollection rC = WUInity.WUINITY_SIM.GetCellRouteCollection(startPos);
-            if(rC != null && rC.GetSelectedRoute() != null)
+            if (rC != null && rC.GetSelectedRoute() != null)
             {
                 return rC.GetSelectedRoute();
             }
@@ -389,7 +401,7 @@ namespace WUInity
             //list that will contain all valid routes to avoid null ref in route collections
             List<RouteData> routeData = new List<RouteData>();
             //loop through all defined goals and save them for potential use later (old way only saved the currently needed route and the re-calced if needed)
-            if(validEvacuationGoals == null || validEvacuationGoalRouterPoints == null)
+            if (validEvacuationGoals == null || validEvacuationGoalRouterPoints == null)
             {
                 DetermineValidGoalsAndRouterPoints(false);
             }
@@ -405,7 +417,7 @@ namespace WUInity
                 }*/
 
                 //skip blocked goals
-                if(validEvacuationGoals[i].blocked)
+                if (validEvacuationGoals[i].blocked)
                 {
                     continue;
                 }
@@ -417,7 +429,7 @@ namespace WUInity
                     routeData.Add(rD);
                     foundOneValidRoute = true;
                 }
-            }            
+            }
 
             //check that at least 1 route is not null to make sure we have a valid route to go somewhere
             if (!foundOneValidRoute)
@@ -496,7 +508,7 @@ namespace WUInity
             {
                 int randomChoice = Random.Range(0, tO.evacuationGoals.Length);
                 rC.SelectForcedNonBlocked(tO.evacuationGoals[randomChoice]);
-            }            
+            }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
             {
                 rC.SelectClosestNonBlocked();
@@ -506,5 +518,10 @@ namespace WUInity
                 rC.SelectFastestNonBlocked();
             }
         }
-    }
+
+        /*public static void SelectCorrectRoute(RouteCollection rC)
+        {
+            SelectCorrectRoute(rC, false, -1);
+        }*/
+    }        
 }

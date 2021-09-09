@@ -361,6 +361,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -572,8 +573,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
+      propertyPath: sim.runEvacSim
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
       propertyPath: sim.runFireSim
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: sim.runTrafficSim
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}

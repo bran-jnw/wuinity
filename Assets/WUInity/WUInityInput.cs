@@ -12,9 +12,11 @@ namespace WUInity
     {
         public string simName = "rox";
         public float deltaTime = 1f;
+        public float maxSimTime = 864000f; //10 days
+        public bool stopWhenEvacuated = true;
         public int numberOfRuns = 1;
         public Vector2D lowerLeftLatLong = new Vector2D(39.409924, -105.104505);
-        public Vector2D size = new Vector2D(5000, 10000);
+        public Vector2D size = new Vector2D(10000, 10000);
         public int zoomLevel = 13;
         public bool runInRealTime = false;
 
@@ -93,6 +95,7 @@ namespace WUInity
 
         public MacroTrafficSim.TrafficAccident[] trafficAccidents = MacroTrafficSim.TrafficAccident.GetDummy();
         public MacroTrafficSim.ReverseLanes[] reverseLanes = MacroTrafficSim.ReverseLanes.GetDummy();
+        public TrafficInjection[] trafficInjections = TrafficInjection.GetTemplate();
 
         public string precalcRoutesName = "roxborough";
     }
@@ -112,11 +115,13 @@ namespace WUInity
     [System.Serializable]
     public class FireInput
     {
+        public string lcpFileName;
         public Fire.WUInityFireIgnition[] ignitionPoints = Fire.WUInityFireIgnition.GetDefault();
-        public Fire.SpreadMode spreadMode = Fire.SpreadMode.EightDirections;
+        public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
         public Fire.WeatherInput weather = Fire.WeatherInput.GetTemplate();
         public Fire.WindInput wind = Fire.WindInput.GetTemplate();
         public Fire.InitialFuelMoistureData initialFuelMoisture = Fire.InitialFuelMoistureData.GetDefaults();
+        public float windMultiplier = 1f;
     }
 }
 
