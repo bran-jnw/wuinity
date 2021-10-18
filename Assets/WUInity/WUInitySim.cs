@@ -543,6 +543,10 @@ namespace WUInity
             }
         }
 
+        public Fire.WUInityFireMesh GetFireMesh()
+        {
+            return fireMesh;
+        }
         public float GetFireWindSpeed()
         {
             return fireMesh.currentWindData.speed;
@@ -551,6 +555,11 @@ namespace WUInity
         {
             return fireMesh.currentWindData.direction;
         }   
+
+        public int[,] GetWUIarea()
+        {
+            return new int[1, 1];
+        }
 
         /// <summary>
         /// Called from goal when blocked internally.

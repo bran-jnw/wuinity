@@ -229,6 +229,36 @@ namespace WUInity.Fire
             return maxSpreadRate;
         }
 
+        /// <summary>
+        /// Direction zero is North, then goes clockwise, only 0-7 is valid.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        public int GetMaxSpreadrateInDirection(int direction)
+        {
+            int rate = 0;
+            if(fireMesh.spreadMode == SpreadMode.FourDirections)
+            {
+                //interpolate?
+            }
+            else
+            {
+                //north, east, south, west
+                if(direction == 0 || direction % 2 != 0)
+                {
+                    direction = direction / 2;
+                }
+                //NE, SE, SW, NW
+                else
+                {
+                    direction = direction / 2 + 4;
+                }
+                rate = (int)maxSpreadRates[direction];
+            }
+
+            return rate;
+        }
+
         public void UpdateSpreadRates()
         {
             //replaces code below as it calls surface calc too
