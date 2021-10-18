@@ -574,7 +574,7 @@ PrefabInstance:
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: sim.runEvacSim
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
@@ -583,13 +583,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
+      propertyPath: dataPlaneMaterial
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
       propertyPath: sim.runTrafficSim
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: input.visuals.drawRoads
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}

@@ -640,12 +640,12 @@ namespace WUInity
                     {
                         trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].peopleCount = cars[i].numberOfPopleInCar;
+                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].peopleCount = cars[i].numberOfPeopleInCar;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].peopleCount += cars[i].numberOfPopleInCar;
+                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].peopleCount += cars[i].numberOfPeopleInCar;
                     }
                 }
 

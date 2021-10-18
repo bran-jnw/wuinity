@@ -138,7 +138,7 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0.0,
+                "maxFlow": 3600.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": -1,

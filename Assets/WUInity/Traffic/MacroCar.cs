@@ -7,7 +7,7 @@ namespace WUInity.Traffic
     public class MacroCar
     {
         public RouteData routeData;
-        public int numberOfPopleInCar;
+        public int numberOfPeopleInCar;
         public int currentShapeIndex;
         public float currentSpeedLimit;
         public float currentDistanceLeft;        
@@ -23,7 +23,7 @@ namespace WUInity.Traffic
         public MacroCar(RouteData desiredRoute, int numberOfPeopleInCar)
         {
             routeData = desiredRoute;
-            this.numberOfPopleInCar = numberOfPeopleInCar;
+            this.numberOfPeopleInCar = numberOfPeopleInCar;
             //go directly to shape 1 since shape 0 is just meta data telling that we are a car
             currentShapeIndex = 1;
             currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance;

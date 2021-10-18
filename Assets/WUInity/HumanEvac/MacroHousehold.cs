@@ -14,6 +14,7 @@ namespace WUInity.Evac
         public bool reachedCar;
         public int cars;
         public bool isMoving;
+        public float walkingDistance;
 
         /// <summary>
         /// Creates a household that will move as a unit.
@@ -35,7 +36,7 @@ namespace WUInity.Evac
             {
                 if (peopleInHousehold >= 2)
                 {
-                    if (Random.Range(0f, 1f) < eO.maxCarsChance)
+                    if (Random.Range(0f, 1f) <= eO.maxCarsChance)
                     {
                         cars = Mathf.Min(peopleInHousehold, eO.maxCars);
                     }
@@ -43,8 +44,8 @@ namespace WUInity.Evac
             }
 
             reachedCar = false;
-            float distanceToClosestNode = (float)Vector2D.Distance(pos, humanRaster.closestNodeUnitySpace) * eO.walkingDistanceModifier;
-            float travelTime = distanceToClosestNode / walkingSpeed;
+            walkingDistance = (float)Vector2D.Distance(pos, humanRaster.closestNodeUnitySpace) * eO.walkingDistanceModifier;
+            float travelTime = walkingDistance / walkingSpeed;
             this.responseTime = responseTime;
             if (responseTime == float.MaxValue)
             {

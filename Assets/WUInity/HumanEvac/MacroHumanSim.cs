@@ -22,6 +22,8 @@ namespace WUInity.Evac
         RouteCollection[] cellRoutes;
         HumanEvacCell[] humanEvacCells;
         int totalPopulation;
+        int totalCars;
+        int totalCarsReached;
         int totalPeopleWhoWillNotEvacuate;
         public bool evacuationDone = false;
         int peopleLeft;
@@ -31,7 +33,7 @@ namespace WUInity.Evac
         public MacroHumanSim()
         {
             output = new List<string>();
-            output.Add("Time(s),People left, People started moving,People reached car");
+            output.Add("Time(s),Households left,People left,Households starting moving,People started moving,Households reached car,People reached car,Total cars activated,Avg. walking dist.");
             //string output = "Time(s),People reached car";
             //SaveToFile(output, true);
         }
@@ -76,6 +78,9 @@ namespace WUInity.Evac
             {
                 int peopleWhoReachedCar = 0;
                 int peopleStartedMoving = 0;
+                int householdsLeft = 0, householdsStartedMoving = 0, householdsReachedCar = 0;
+                float walkingDistance = 0f;
+                int householdsDone = 0;
 
                 for (int i = 0; i < humanEvacCells.Length; ++i)
                 {
@@ -88,21 +93,37 @@ namespace WUInity.Evac
                             //if evac time is float.MaxValue they have decided to stay forever
                             if (household.evacuationTime != float.MaxValue)
                             {
-                                //see if the household has reacted yet, if so, set them in motion
-                                if (!household.isMoving && household.responseTime <= currentTime)
+                                if(!household.reachedCar)
                                 {
-                                    household.isMoving = true;
-                                    peopleStartedMoving += household.peopleInHousehold;
-                                }
+                                    //see if the household has reacted yet, if so, set them in motion
+                                    if (!household.isMoving && household.responseTime <= currentTime)
+                                    {
+                                        household.isMoving = true;
+                                        ++householdsStartedMoving;
+                                        peopleStartedMoving += household.peopleInHousehold;
+                                    }
 
-                                //if we yet have not reached our car, check if we have
-                                if (!household.reachedCar)
-                                {
+                                    //if we yet have not reached our car, check if we have
                                     if (household.evacuationTime <= currentTime)
                                     {
-                                        ReachedCar(household, cell, ref peopleWhoReachedCar);   
+                                        ReachedCar(household, cell, ref peopleWhoReachedCar);
+                                        ++householdsReachedCar;
+                                        totalCarsReached += household.cars;
                                     }
+                                    else
+                                    {
+                                        ++householdsLeft;
+                                    }
+                                } 
+                                else
+                                {
+                                    walkingDistance += household.walkingDistance;
+                                    ++householdsDone;
                                 }
+                            }
+                            else
+                            {
+                                householdsLeft++;
                             }
                         }
                     }
@@ -114,27 +135,67 @@ namespace WUInity.Evac
                     evacuationDone = true;
                 }
 
-                output.Add(currentTime + "," + peopleLeft + "," + peopleStartedMoving + "," + peopleWhoReachedCar);
+                float avgWalkDist = 0f;
+                if (householdsDone > 0)
+                {
+                    avgWalkDist = walkingDistance / householdsDone;
+                }
+
+                //Time(s),Households left,People left,Households starting moving,People started moving,Households reached car,People reached car,Cars activated
+                output.Add(currentTime + "," + householdsLeft + "," + peopleLeft + "," + householdsStartedMoving + "," + peopleStartedMoving + "," + householdsReachedCar + "," + peopleWhoReachedCar + "," + totalCarsReached + "," + avgWalkDist);
                 //string output = currentTime + "," +  peopleWhoReachedCar";
                 //SaveToFile(output, false);
             }
         }
 
+        public int GetPeopleLeft()
+        {
+            return peopleLeft;
+        }
+
+        public int GetTotalCars()
+        {
+            return totalCars;
+        }
+
+        public int GetCarsReached()
+        {
+            return totalCarsReached;
+        }
+
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
-            if (household.cars == 2)
+            if(WUInity.WUINITY_SIM.runTrafficSim)
             {
-                int car1 = Random.Range(1, household.peopleInHousehold);
-                int car2 = household.peopleInHousehold - car1;
-                WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), car1);
-                WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), car2);
-            }
-            else
-            {
-                WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
-            }
-            household.reachedCar = true;
+                if (household.cars > 1)
+                {
+                    int peopleLeftInHousehold = household.peopleInHousehold;
+                    int carIndex = 0;
+                    int[] cars = new int[household.cars];
 
+                    while(peopleLeftInHousehold > 0)
+                    {
+                        ++cars[carIndex];
+                        ++carIndex;
+                        if(carIndex > household.cars - 1)
+                        {
+                            carIndex = 0;
+                        }
+                        --peopleLeftInHousehold;
+                    }
+
+                    for (int i = 0; i < household.cars; i++)
+                    {
+                        WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), cars[i]);
+                    }
+                }
+                else
+                {
+                    WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
+                }
+            }
+            
+            household.reachedCar = true;
             //update counter
             peopleWhoReachedCar += household.peopleInHousehold;
         }
@@ -169,7 +230,7 @@ namespace WUInity.Evac
             double cellSizeX = realWorldSize.x / xSize;
             double cellSizeY = realWorldSize.y / ySize;
             cellWorldSize = new Vector2D(cellSizeX, cellSizeY);
-            double cellArea = cellSizeX * cellSizeY / (1000000d); //people /square km
+            double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
             totalPopulation = 0;
             for (int y = 0; y < ySize; ++y)
             {
@@ -232,25 +293,25 @@ namespace WUInity.Evac
         /// <param name="stuckPeople"></param>
         public void RelocateStuckPeople(int stuckPeople)
         {
-            if (stuckPeople <= 0)
+            if (stuckPeople > 0)
             {
-                return;
+                int remainingPop = totalPopulation - stuckPeople;
+                int addedPop = 0;
+                for (int i = 0; i < population.Length; ++i)
+                {
+                    if (population[i] > 0)
+                    {
+                        float weight = population[i] / (float)remainingPop;
+                        int extraPersonsToCell = Mathf.CeilToInt(weight * stuckPeople);
+                        population[i] += extraPersonsToCell;
+                        addedPop += extraPersonsToCell;
+                    }
+                }
+                totalPopulation = remainingPop + addedPop;
+                peopleLeft = totalPopulation;
             }
 
-            int remainingPop = totalPopulation - stuckPeople;
-            int addedPop = 0;
-            for (int i = 0; i < population.Length; ++i)
-            {
-                if (population[i] > 0)
-                {
-                    float weight = population[i] / (float)remainingPop;
-                    int extraPersonsToCell = Mathf.RoundToInt(weight * stuckPeople);
-                    population[i] += extraPersonsToCell;
-                    addedPop += extraPersonsToCell;
-                }
-            }
-            totalPopulation = remainingPop + addedPop;
-            peopleLeft = totalPopulation;
+            WUInity.WUINITY_OUT.evac.actualTotalEvacuees = totalPopulation;
         }
 
         /// <summary>
@@ -345,8 +406,9 @@ namespace WUInity.Evac
                 }
             }
 
-            //sum up the number of people which will not evacuate
+            //sum up the number of people which will not evacuate and total cars
             totalPeopleWhoWillNotEvacuate = 0;
+            totalCars = 0;
             for (int i = 0; i < humanEvacCells.Length; ++i)
             {
                 if (population[i] > 0)
@@ -359,11 +421,16 @@ namespace WUInity.Evac
                         {
                             totalPeopleWhoWillNotEvacuate += rH.peopleInHousehold;
                         }
+                        else
+                        {
+                            totalCars += rH.cars;
+                        }                        
                     }
                 }
             }
 
             WUInity.WUINITY_SIM.LogMessage("Total households: " + totalHouseholds);
+            WUInity.WUINITY_SIM.LogMessage("Total cars: " +  totalCars);
             WUInity.WUINITY_SIM.LogMessage("Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
             WUInity.WUINITY_OUT.evac.stayingPeople = totalPeopleWhoWillNotEvacuate;
         }

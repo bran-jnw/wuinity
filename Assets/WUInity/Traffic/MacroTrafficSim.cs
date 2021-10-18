@@ -15,6 +15,7 @@ namespace WUInity.Traffic
 
             public abstract void ApplyEffects(MacroTrafficSim mTS);
             public abstract void RemoveEffects(MacroTrafficSim mTS);
+            public abstract void ResetEvent();
         }
 
         [System.Serializable]
@@ -50,6 +51,11 @@ namespace WUInity.Traffic
 
                 mTS.reverseLanes = false;
                 //mCS.stallBigRoads = false;
+                isActive = false;
+            }
+
+            public override void ResetEvent()
+            {
                 isActive = false;
             }
 
@@ -92,6 +98,11 @@ namespace WUInity.Traffic
                 }
 
                 mTS.stallBigRoads = false;
+                isActive = false;
+            }
+
+            public override void ResetEvent()
+            {
                 isActive = false;
             }
 
@@ -158,6 +169,11 @@ namespace WUInity.Traffic
         public bool EvacComplete()
         {
             return macroCars.Count == 0 ? true : false;
+        }
+
+        public int GetCarsInSystem()
+        {
+            return macroCars.Count;
         }
 
         bool evacGoalsDirty = false;
@@ -335,7 +351,7 @@ namespace WUInity.Traffic
                     if (car.hasArrived)
                     {
                         carsToRemove.Add(car);
-                        exitingPeople += car.numberOfPopleInCar;
+                        exitingPeople += car.numberOfPeopleInCar;
                     }  
                 }                
             }
@@ -446,7 +462,7 @@ namespace WUInity.Traffic
 
                 float dens = cars.Count / (length * 0.001f * laneCount);
                 //added background traffic
-                dens += Random.Range(tO.backGroundDensityMinMax.x, tO.backGroundDensityMinMax.y);
+                dens += Random.Range(tO.backGroundDensityMinMax.x, tO.backGroundDensityMinMax.y);                
 
                 //we use the same function to check if a road is blocked due to being main road or if they reverse lanes for now
                 if (mCS.stallBigRoads && CanReverseLanes(highwayType))
@@ -455,7 +471,7 @@ namespace WUInity.Traffic
                 }
                 //reverse traffic in lanes means double the amount of lanes
                 else if (mCS.reverseLanes && CanReverseLanes(highwayType))
-                {
+                {                    
                     dens *= 0.5f;
                 }
                 float speed = Mathf.Lerp(speedLimit, tO.stallSpeed / 3.6f, dens / maxCapacity);
@@ -483,7 +499,7 @@ namespace WUInity.Traffic
                         visibilityLimitedSpeed = stallSpeed;
                     }
                     speed_visibilty = Mathf.Lerp(visibilityLimitedSpeed, stallSpeed, dens / maxCapacity);
-                }                
+                }
 
                 return Mathf.Min(speed, speed_visibilty);                
             }

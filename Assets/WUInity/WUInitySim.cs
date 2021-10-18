@@ -275,7 +275,7 @@ namespace WUInity
             }
         }*/
         
-        void CreateSims(int i)
+        private void CreateSims(int i)
         {
             WUInityInput input = WUInity.WUINITY_IN;
             WUInityOutput output = WUInity.WUINITY_OUT;
@@ -290,7 +290,7 @@ namespace WUInity
             {
                 macroHumanSim = new MacroHumanSim();
                 //place people
-                output.evac.actualTotalEvacuees = macroHumanSim.PopulateCells(input.evac.routeCellCount, input.size, gpwViewer.gpwData);
+                macroHumanSim.PopulateCells(input.evac.routeCellCount, input.size, gpwViewer.gpwData);
                 if (i == 0)
                 {
                     //save raw pop

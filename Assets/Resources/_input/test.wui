@@ -1,6 +1,8 @@
 {
     "simName": "test",
     "deltaTime": 1.0,
+    "maxSimTime": 864000.0,
+    "stopWhenEvacuated": true,
     "numberOfRuns": 1,
     "lowerLeftLatLong": {
         "x": 39.409924,
@@ -60,7 +62,6 @@
         "blockGoalEvents": [
             {
                 "startTime": 3.4028234663852887e38,
-                "triggered": false,
                 "goalIndex": 0
             }
         ],
@@ -139,11 +140,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 3600.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             },
             {
                 "name": "Rox_Goal_F",
@@ -158,11 +159,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 3600.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             },
             {
                 "name": "Rox_Goal_TEST",
@@ -177,11 +178,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 3600.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             },
             {
                 "name": "Rox_Goal_TEST2",
@@ -196,11 +197,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 3600.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             },
             {
                 "name": "Rox_Goal_TEST3",
@@ -215,11 +216,11 @@
                     "a": 1.0
                 },
                 "blocked": false,
-                "maxFlow": 0,
+                "maxFlow": 3600.0,
                 "goalType": 0,
                 "cumulativeWeight": 0.0,
                 "maxCars": 0,
-                "currentPeople": 0
+                "maxPeople": -1
             }
         ],
         "routeChoice": 0,
@@ -431,6 +432,45 @@
                 "isActive": false
             }
         ],
+        "trafficInjections": [
+            {
+                "cars": 1,
+                "latLong": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "desiredGoal": {
+                    "name": "New goal",
+                    "latLong": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "color": {
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    },
+                    "blocked": false,
+                    "maxFlow": 1.0,
+                    "goalType": 1,
+                    "cumulativeWeight": 0.0,
+                    "maxCars": -1,
+                    "maxPeople": -1
+                },
+                "pickGoalFromMap": false,
+                "timeFlow": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    }
+                ]
+            }
+        ],
         "precalcRoutesName": "roxborough_big"
     },
     "gpw": {
@@ -446,9 +486,10 @@
         "outputPrefix": "rox"
     },
     "visuals": {
-        "drawRoads": true
+        "drawRoads":false
     },
     "fire": {
+        "lcpFileName": "roxborough_big_UTM",
         "ignitionPoints": [
             {
                 "latLong": {
@@ -473,6 +514,34 @@
             }
         ],
         "spreadMode": 2,
+        "weather": {
+            "weatherInputs": [
+                {
+                    "Month": 7,
+                    "Day": 15,
+                    "Precip": 0,
+                    "Hour1": 4,
+                    "Hour2": 16,
+                    "Temp1": 13,
+                    "Temp2": 33,
+                    "Humid1": 10,
+                    "Humid2": 10,
+                    "Elevation": 1803
+                },
+                {
+                    "Month": 7,
+                    "Day": 16,
+                    "Precip": 25,
+                    "Hour1": 4,
+                    "Hour2": 16,
+                    "Temp1": 10,
+                    "Temp2": 30,
+                    "Humid1": 18,
+                    "Humid2": 15,
+                    "Elevation": 1803
+                }
+            ]
+        },
         "wind": {
             "dataPoints": [
                 {
@@ -500,6 +569,102 @@
                     "cloudCover": 0.0
                 }
             ]
-        }
+        },
+        "initialFuelMoisture": {
+            "fuelMoistures": [
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                },
+                {
+                    "OneHour": 6.0,
+                    "TenHour": 7.0,
+                    "HundredHour": 8.0,
+                    "LiveHerbaceous": 60.0,
+                    "LiveWoody": 90.0
+                }
+            ]
+        },
+        "windMultiplier": 1.0
     }
 }

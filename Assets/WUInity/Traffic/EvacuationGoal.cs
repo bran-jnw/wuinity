@@ -12,7 +12,7 @@ namespace WUInity
         public Vector2D latLong;
         public Color color;
         public bool blocked = false;
-        public float maxFlow = 1f; //cars per second?
+        public float maxFlow = 3600f; //cars per hour
         //public GameObject marker;
         public EvacGoalType goalType = EvacGoalType.Refugee;
         public float cumulativeWeight;
@@ -37,6 +37,15 @@ namespace WUInity
             this.name = name;
             this.latLong = latLong;
             this.color = color;
+            maxFlow = 3600f;
+        }
+
+        public EvacuationGoal(string name, Vector2D latLong, Color color, float maxFlow)
+        {
+            this.name = name;
+            this.latLong = latLong;
+            this.color = color;
+            this.maxFlow = maxFlow;
         }
 
         /// <summary>
@@ -52,10 +61,11 @@ namespace WUInity
 
             //car can arrive
             if(currentFlow < maxFlow && !blocked)
-            {
+            {         
+                //add new cars and people that has arrived during timestep
                 ++timeStepCars;
                 cars.Add(arrivingCar);
-                currentPeople += arrivingCar.numberOfPopleInCar;
+                currentPeople += arrivingCar.numberOfPeopleInCar;
                 UpdateCapacity();
 
                 return true;
@@ -120,7 +130,7 @@ namespace WUInity
                 {
                     currentFlow = cars.Count / (timeStamp - firstArrivalTime);
                 }
-                currentFlow = Mathf.Max(timestepFlow, currentFlow);
+                currentFlow = Mathf.Max(timestepFlow, currentFlow) * 3600f;
             }
         }
 

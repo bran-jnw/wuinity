@@ -166,13 +166,13 @@ namespace WUInity.GPW
 
             Vector2D degreesToRead = SizeToDegrees(latLong, size);
             //number of columns and rows
-            dataSize = new Vector2Int((int)(0.5 + degreesToRead.x / cellsize), (int)(0.5 + degreesToRead.y / cellsize));
+            dataSize = new Vector2Int(MathD.CeilToInt(degreesToRead.x / cellsize), MathD.CeilToInt(degreesToRead.y / cellsize));
             //start point to read data
             int xSI = (int)((latLong.y - xllcorner) / cellsize);
             int ySI = (int)((latLong.x - yllcorner) / cellsize);
             //end point to read data
             int xEI = xSI + (int)(degreesToRead.x / cellsize);
-            int yEI = ySI + (int)(degreesToRead.y / cellsize);
+            int yEI = ySI + (int)(degreesToRead.y / cellsize);            
 
             //handle negative stuff when recalculating origin and consequently offset
             actualOriginDegrees = new Vector2D(ySI * cellsize - Math.Abs(yllcorner), xSI * cellsize - Math.Abs(xllcorner));
@@ -204,6 +204,8 @@ namespace WUInity.GPW
                 realWorldSize = DegreesToSize(latLong, new Vector2D(dataSize.x * cellsize, dataSize.y * cellsize));
             }
 
+            WUInity.WUINITY_SIM.LogMessage("xSI: " + xSI + ", ySI: " + ySI + ", xEI: " + xEI + "yEI: " + yEI);
+
             //create needed array
             density = new double[dataSize.x * dataSize.y];
 
@@ -216,7 +218,7 @@ namespace WUInity.GPW
                 {
                     if (j >= xSI && j <= xEI && realYIndex >= ySI && realYIndex <= yEI)
                     {
-                        int index = (j - xSI) + (realYIndex - ySI) * dataSize.x;
+                        int index = (j - xSI) + (realYIndex - ySI) * dataSize.x;                        
                         double.TryParse(e[j], out density[index]);
                     }
                 }
@@ -303,18 +305,22 @@ namespace WUInity.GPW
                 if (latLong.y < -90.000000000005)
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_1.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 1");
                 }
                 else if (latLong.y < -1.0231815394945e-011)
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_2.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 2");
                 }
                 else if (latLong.y < 89.999999999985)
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_3.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 3");
                 }
                 else
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_4.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 4");
                 }
             }
             else
@@ -322,22 +328,129 @@ namespace WUInity.GPW
                 if (latLong.y < -90.000000000005)
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_5.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 5");
                 }
                 else if (latLong.y < -1.0231815394945e-011)
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_6.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 6");
                 }
                 else if (latLong.x < 89.999999999985)
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_7.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 7");
                 }
                 else
                 {
                     path += "gpw_v4_population_density_rev10_2015_30_sec_8.asc";
+                    WUInity.WUINITY_SIM.LogMessage("Loading GPW from sector 8");
                 }
             }
 
             ReadGPW(path, latLong, size, saveDataToFilename);
+        }
+
+        //not done, array too big, out of memory
+        public static void CreateBinaryDatabase()
+        {
+            int totalNCols = 0;
+            int totalNrows = 0;
+            double minX = double.MaxValue, minY = double.MaxValue, maxX = double.MinValue, maxY = double.MinValue;
+            for (int i = 0; i < 8; i++)
+            {
+                string file = Application.dataPath + "/Resources/_input/gpw-v4-population-density-rev10_2015_30_sec_asc/";
+                file += "gpw_v4_population_density_rev10_2015_30_sec_" + (i + 1) + ".asc";
+
+                string[] d = new string[6];
+                StreamReader sr = new StreamReader(file);
+                if (File.Exists(file))
+                {
+                    for (int j = 0; j < 6; ++j)
+                    {
+                        d[j] = sr.ReadLine();
+                    }
+                }
+                else
+                {
+                    WUInity.WUINITY_SIM.LogMessage("GPW data file not found.");
+                    return;
+                }
+
+                int ncols, nrows;
+                double xllcorner, yllcorner, cellsize;
+                //read and save general stuff
+                string[] dummy = d[0].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out ncols);
+                dummy = d[1].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out nrows);
+                dummy = d[2].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out xllcorner);
+                dummy = d[3].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out yllcorner);
+                dummy = d[4].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out cellsize);
+
+                totalNCols += ncols;
+                totalNrows += nrows;
+                minX = MathD.Min(minX, xllcorner);
+                minY = MathD.Min(minY, yllcorner);
+                maxX = MathD.Max(maxX, xllcorner + ncols * cellsize);
+                maxY = MathD.Max(maxY, yllcorner + nrows * cellsize);
+            }
+
+            double[] gpwDatabase = new double[totalNCols * totalNrows];
+
+            for (int i = 0; i < 8; i++)
+            {
+                string file = Application.dataPath + "/Resources/_input/gpw-v4-population-density-rev10_2015_30_sec_asc/";
+                file += "gpw_v4_population_density_rev10_2015_30_sec_" + (i + 1) + ".asc";
+
+                string[] d = new string[6];
+                StreamReader sr = new StreamReader(file);
+                if (File.Exists(file))
+                {
+                    for (int j = 0; j < 6; ++j)
+                    {
+                        d[i] = sr.ReadLine();
+                    }
+                }
+                else
+                {
+                    WUInity.WUINITY_SIM.LogMessage("GPW data file not found.");
+                    return;
+                }
+
+                int ncols, nrows, NODATA_value;
+                double xllcorner, yllcorner, cellsize;
+                //read and save general stuff
+                string[] dummy = d[0].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out ncols);
+                dummy = d[1].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out nrows);
+                dummy = d[2].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out xllcorner);
+                dummy = d[3].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out yllcorner);
+                dummy = d[4].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out cellsize);
+                dummy = d[5].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out NODATA_value);
+
+                for (int y = 0; y < nrows; ++y)
+                {
+                    int yOffset = MathD.RoundToInt((yllcorner - minY) / cellsize);
+                    //since read begin from upper corner and not lower
+                    int realYindex = nrows - 1 - i + yOffset;
+                    string[] e = sr.ReadLine().Split(' ');
+                    for (int x = 0; x < ncols; ++x)
+                    {
+                        int xOffset = MathD.RoundToInt((xllcorner - minX) / cellsize);
+                        int realXindex = x + xOffset;
+                        double.TryParse(e[x], out gpwDatabase[realXindex + realYindex * totalNCols]);
+                    }
+                }
+                
+            }
         }
     }
 }
