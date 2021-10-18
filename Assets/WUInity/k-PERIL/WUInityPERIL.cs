@@ -56,19 +56,19 @@ public class WUInityPERIL
         //look for all of the files in subfolder which contains intermediate output files, gets number of cases
         // tbuffer - actual evac time, user specify desired extra buffer time in input file
         //get cell size from input file
-        int cell = WUInity.WUInity.WUINITY_IN.fire.
+        //int cell = WUInity.WUInity.WUINITY_IN.fire.
         //get yDim and xDim from input file
         //get wuiarea from a user defined map painted in wuinity
 
-        for (int i = 0; i < numberOfCases; i++)
+        /*for (int i = 0; i < numberOfCases; i++)
         {
             RunPeril(i, cell, tBuffer, yDim, xDim, WUIarea, midFlameWindspeed, ROSpathInput, AzimuthPathInput, PerilOutput, EPIoutput);
-        }        
+        }*/     
     }
 
     void RunPeril(int caseNumber, int cell, int tBuffer, int yDim, int xDim, int[,] WUIarea, float midFlameWindspeed, string ROSpathInput, string AzimuthPathInput, string PerilOutput, string EPIoutput)
     {
-        peril.Run(caseNumber, cell, tBuffer, yDim, xDim, WUIarea, midFlameWindspeed, ROSpathInput, AzimuthPathInput, PerilOutput, EPIoutput);
+        //peril.Run(caseNumber, cell, tBuffer, yDim, xDim, WUIarea, midFlameWindspeed, ROSpathInput, AzimuthPathInput, PerilOutput, EPIoutput);
     }
 
     public static int[,] GetDefaultWUIArea()
