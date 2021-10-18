@@ -104,3 +104,6 @@ Assets/WUInity/k-PERIL/Source/obj/Debug/netstandard2.1/k_PERIL.csproj.FileListAb
 Assets/WUInity/k-PERIL/Source/obj/Debug/netstandard2.1/k_PERIL.csprojAssemblyReference.cache
 Assets/WUInity/k-PERIL/Source/K_PERIL_RUN.cs
 Assets/WUInity/k-PERIL/Source/bin/Debug/netstandard2.1/k_PERIL.deps.json
+Assets/WUInity/k-PERIL/Source/bin/Debug/netstandard2.1/k_PERIL.dll
+.gitignore
+Assets/WUInity/k-PERIL/Source/obj/Debug/netstandard2.1/k_PERIL.dll

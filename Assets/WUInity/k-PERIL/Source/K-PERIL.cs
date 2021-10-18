@@ -630,5 +630,19 @@ namespace k_PERIL_DLL
             return EVAXmatrix;
         }
 
+        public int[,] getUpdateBoundary(int cellSize, int tBuffer, int WUIarea, int maxROS)                 //placeholder for method with ready ROScardinal inputs
+        {
+            int[,] output = new int[,]
+                {
+                    {1,1,1,1,1,1,1,1,1,1 },
+                    {1,1,1,1,1,1,1,1,1,1 },
+                    {1,1,1,1,1,1,1,1,1,1 },
+                    {1,1,1,1,1,1,1,1,1,1 },
+                    {1,1,1,1,1,1,1,1,1,1 },
+                    {1,1,1,1,1,1,1,1,1,1 },
+                };
+            return output;
+        }
+
     }
 }
