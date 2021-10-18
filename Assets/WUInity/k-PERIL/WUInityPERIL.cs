@@ -75,6 +75,7 @@ public class WUInityPERIL
     {
         int[,] WUIarea = new int[,]                                                        
             {
+                { 38, 24},
                 { 38, 25},
                 { 39, 24},
                 { 39, 25},
@@ -94,3 +95,68 @@ public class WUInityPERIL
         return WUIarea;
     }
 }
+
+
+
+/*
+
+using System;
+using System.IO;
+using k_PERIL_DLL;
+
+namespace EXPERIMENTAL_PERIL
+{
+    class perilTester
+    {
+        static void Main(string[] args)     //where PERIL is actually called
+        {
+            PERIL peril = new PERIL();
+            int[,] WUIarea = new int[,]                                                         //WUI Area
+            {
+                { 7,1 },
+            };
+
+            int[,,] boundaries = new int[10, 6, 10];
+
+
+            for (int i = 0; i < 10; i++)
+            {
+                Console.WriteLine("---------------------------------------");
+                Console.WriteLine("SIMULATION " + (i+1) + " NOW RUNNING");
+                float[,] ROS = new float[,]
+                {
+                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
+                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
+                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
+                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
+                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
+                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
+                };
+
+                int[,] Azimuth = new int[,]
+                {
+                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
+                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
+                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
+                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
+                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
+                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
+                };
+                int[,] currentBoundary = peril.getSingularBoundary(30, 140, (float)4.47, WUIarea, ROS, Azimuth);
+
+                for (int j = 0; j < currentBoundary.GetLength(0); j++)
+                {
+                    for (int k = 0; k < currentBoundary.GetLength(1); k++)
+                    {
+                        boundaries[j, k, i] = currentBoundary[j, k];
+                    }
+                }
+            }
+            int[,] evax = peril.getEVAXmatrix(boundaries, WUIarea);
+            int[,] overallboundary = peril.getCompoundBoundary(boundaries);
+        }
+    }
+}
+
+
+*/
