@@ -528,15 +528,6 @@ namespace WUInity
             }
         }
 
-        public float GetFireWindSpeed()
-        {
-            return fireMesh.currentWindData.speed;
-        }
-        public float GetFireWindDirection()
-        {
-            return fireMesh.currentWindData.direction;
-        }
-
         public void StopSim(string stopMessage)
         {
             stopSim = true;
@@ -545,12 +536,21 @@ namespace WUInity
 
         public void BlockEvacGoal(int index)
         {
-            if(!WUInity.WUINITY_IN.traffic.evacuationGoals[index].blocked)
+            if (!WUInity.WUINITY_IN.traffic.evacuationGoals[index].blocked)
             {
                 WUInity.WUINITY_IN.traffic.evacuationGoals[index].blocked = true;
                 UpdateRoutes();
-            }            
+            }
         }
+
+        public float GetFireWindSpeed()
+        {
+            return fireMesh.currentWindData.speed;
+        }
+        public float GetFireWindDirection()
+        {
+            return fireMesh.currentWindData.direction;
+        }   
 
         /// <summary>
         /// Called from goal when blocked internally.
