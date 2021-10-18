@@ -30,12 +30,8 @@ public class WUInityPERIL
     */
 
     private k_PERIL_DLL.PERIL peril = new k_PERIL_DLL.PERIL();
-
-    public struct PerilOutput
-    {
-        public int[,] peril;
-        public int[,] epi;
-    }
+    int[,] compoundBoundary;
+    int heatmapMax;
 
     /// <summary>
     /// Runs a desired number of cases inside the folders specifed.
@@ -53,6 +49,11 @@ public class WUInityPERIL
     /// <param name="EPIoutput"></param>
     public void RunKPeril(int tBuffer, int[,] WUIarea, float midFlameWindspeed, string ROSpathInput, string AzimuthPathInput, string PerilOutput, string EPIoutput)
     {
+        if(compoundBoundary != null)
+        {
+            int[,] compoundBoundary = new int[xDim, yDim];
+            heatmapMax = 0;
+        }
         //look for all of the files in subfolder which contains intermediate output files, gets number of cases
         // tbuffer - actual evac time, user specify desired extra buffer time in input file
         //get cell size from input file
@@ -66,9 +67,24 @@ public class WUInityPERIL
         }*/     
     }
 
+    //how to send ROS data ROStheta[X*Y,8], y first, x second
+
+
     void RunPeril(int caseNumber, int cell, int tBuffer, int yDim, int xDim, int[,] WUIarea, float midFlameWindspeed, string ROSpathInput, string AzimuthPathInput, string PerilOutput, string EPIoutput)
     {
         //peril.Run(caseNumber, cell, tBuffer, yDim, xDim, WUIarea, midFlameWindspeed, ROSpathInput, AzimuthPathInput, PerilOutput, EPIoutput);
+        int[,] boundary = new int[1, 1] ;// peril.getSingularBoundary(0, 0, 0f, WUIarea, );
+        for (int y = 0; y < boundary.GetLength(1); y++)
+        {
+            for (int x = 0; x < boundary.GetLength(0); x++)
+            {
+                compoundBoundary[x, y] += boundary[x, y];
+                if(compoundBoundary[x, y] > heatmapMax)
+                {
+                    heatmapMax = compoundBoundary[x, y];
+                }
+            }
+        }
     }
 
     public static int[,] GetDefaultWUIArea()
