@@ -462,7 +462,9 @@ namespace WUInity.Fire
             {
                 for (int j = 0; j < cellCount.y; j++)
                 {
-                    WUInityFireCell f = fireCells[GetCellIndex(i, j)];
+                    //flip on y-axis
+                    int yIndex = cellCount.y - 1 - j;
+                    WUInityFireCell f = fireCells[GetCellIndex(i, yIndex)];
                     for (int k = 0; k < 8; k++)
                     {
                         ros[j + i * cellCount.y, k] = f.GetMaxSpreadrateInDirection(k);

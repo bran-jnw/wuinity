@@ -70,7 +70,7 @@ namespace WUInity
             int[,] maxROS = WUInity.WUINITY_SIM.GetFireMesh().GetMaxROS();
 
             //calc new boundary
-            int[,] boundary = peril.getSingularBoundary(0, 0, 0f, WUIarea, maxROS);
+            int[,] boundary = peril.getSingularBoundary(cellSize, tBuffer, WUIarea, maxROS);
 
             //update heatmap           
             for (int y = 0; y < boundary.GetLength(1); y++)
