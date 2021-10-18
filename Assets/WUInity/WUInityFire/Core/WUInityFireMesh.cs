@@ -444,5 +444,32 @@ namespace WUInity.Fire
             color.a = 1f;
             return color;
         }
+
+        public int GetCellSize()
+        {
+            return (int)cellSize.x;
+        }
+
+        public Vector2Int GetCellCount()
+        {
+            return cellCount;
+        }
+
+        public int[,] GetMaxROS()
+        {
+            int[,] ros = new int[cellCount.x * cellCount.y, 8];
+            for (int i = 0; i < cellCount.x; i++)
+            {
+                for (int j = 0; j < cellCount.y; j++)
+                {
+                    WUInityFireCell f = fireCells[GetCellIndex(i, j)];
+                    for (int k = 0; k < 8; k++)
+                    {
+                        ros[j + i * cellCount.y, k] = f.GetMaxSpreadrateInDirection(k);
+                    }
+                }
+            }
+            return ros;
+        }
     }
 }
