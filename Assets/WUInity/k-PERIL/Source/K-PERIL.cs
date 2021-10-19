@@ -562,11 +562,11 @@ namespace k_PERIL_DLL
             return safetyMatrix;
         }
 
-        private int[,] getCompoundBoundary(int[,,] allBoundaries)
+        private int[,] getCompoundBoundary(int[,,] allBoundaries)   //OUTDATED, REPLACED WITH getLineBoundary. This method aims to get the coordinates of the boundary nodes from the array with all the safety matrices 
         {
-            List<int> uniqueBoundary = new List<int>();
+            List<int> uniqueBoundary = new List<int>();                                     //make a new list that will contain all the nodes whose safetyboundary value is nonzero
 
-            for (int i = 0; i < allBoundaries.GetLength(2); i++)
+            for (int i = 0; i < allBoundaries.GetLength(2); i++)                            //For every point in the compound safety matrix (i.e. every node in every case)
             {
                 for (int x = 0; x < allBoundaries.GetLength(0); x++)
                 {
@@ -574,101 +574,100 @@ namespace k_PERIL_DLL
                     {
                         if (allBoundaries[x, y, i] == 1)
                         {
-                            uniqueBoundary.Add(x * allBoundaries.GetLength(1) + y);
+                            uniqueBoundary.Add(x * allBoundaries.GetLength(1) + y);         //If the value of the cell is 1 (inside the safety boundary) add it to the list (by linearising its index)
                         }
                     }
                 }
             }
 
-            List<int> lineBoundary = new List<int>();                           //create a new list to include all nodes NOT on the edge of the boundary (made like this for debugging purposes)
-            List<int> noDupes = uniqueBoundary.Distinct().ToList();
+            List<int> lineBoundary = new List<int>();                                       //create a new list to include all nodes NOT on the edge of the boundary (made like this for debugging purposes)
+            List<int> noDupes = uniqueBoundary.Distinct().ToList();                         //Get rid of duplicate cell indices from the list
 
-            for (int i = 0; i < noDupes.Count; i++)
+            for (int i = 0; i < noDupes.Count; i++)                                         //For every element inside a boundary
             {
                 if (!(noDupes.Contains(noDupes.ElementAt(i) + 1) && noDupes.Contains(noDupes.ElementAt(i) - 1) && noDupes.Contains(noDupes.ElementAt(i) - allBoundaries.GetLength(1)) && noDupes.Contains(noDupes.ElementAt(i) + allBoundaries.GetLength(1))))
                 {
-                    //if all neighbors of the target node are in the boundary matrix
-                    lineBoundary.Add(noDupes.ElementAt(i));  //Add the node to the new List
+                    //if NOT all neighbors of the target node are in the boundary matrix / if any of the nodes 4 neighbors is missing from the noDupes list 
+                lineBoundary.Add(noDupes.ElementAt(i));                                     //Add the node to the new List
                 }
             }
 
-            int[,] output = new int[lineBoundary.Count, 2];
+            int[,] output = new int[lineBoundary.Count, 2];                                 //make a new matrix to export the boundary in [X,Y] form
             int count = 0;
 
-            foreach (int boundaryPoint in lineBoundary)
+            foreach (int boundaryPoint in lineBoundary)                                     //For every boundary point, add its X and Y values to the output matrix
             {
                 output[count, 0] = boundaryPoint / allBoundaries.GetLength(1);
                 output[count, 1] = boundaryPoint % allBoundaries.GetLength(1);
                 count++;
             }
 
-            return output;   //return the difference between the old and new boundary list, should only include the edge nodes
+            return output;                                                                  //return the boundary list, should only include the edge nodes
         }
 
-        public int[,] getLineBoundary(int[,] compoundBoundary)
+        public int[,] getLineBoundary(int[,] compoundBoundary)          //Method to get the boundary line from a safety matrix (unlike getCompoundBoundary which needs multiple safety matrices in one matrix to work)
         {
-            List<int> uniqueBoundary = new List<int>();
+            List<int> uniqueBoundary = new List<int>();                         //make a new list that will contain all the nodes whose safetyboundary value is nonzero
 
-            for (int x = 0; x < allBoundaries.GetLength(0); x++)
+            for (int x = 0; x < allBoundaries.GetLength(0); x++)                //For all the elements in the safetymatrix
             {
                 for (int y = 0; y < allBoundaries.GetLength(1); y++)
                 {
-                    if (allBoundaries[x, y] != 0)
+                    if (allBoundaries[x, y] != 0)                               //If the value of the cell is nonzero (thus inside the safety boundary) add it to the list (by linearising its index)
                     {
                         uniqueBoundary.Add(x * allBoundaries.GetLength(1) + y);
                     }
                 }
             }
-            
 
             List<int> lineBoundary = new List<int>();                           //create a new list to include all nodes NOT on the edge of the boundary (made like this for debugging purposes)
            
-            for (int i = 0; i < uniqueBoundary.Count; i++)
+            for (int i = 0; i < uniqueBoundary.Count; i++)                      //For every element in the current boundary list
             {
                 if (!(uniqueBoundary.Contains(uniqueBoundary.ElementAt(i) + 1) && uniqueBoundary.Contains(uniqueBoundary.ElementAt(i) - 1) && uniqueBoundary.Contains(uniqueBoundary.ElementAt(i) - allBoundaries.GetLength(1)) && uniqueBoundary.Contains(uniqueBoundary.ElementAt(i) + allBoundaries.GetLength(1))))
                 {
-                    //if all neighbors of the target node are in the boundary matrix
+                    //if NOT all neighbors of the target node are in the boundary matrix
                     lineBoundary.Add(uniqueBoundary.ElementAt(i));  //Add the node to the new List
                 }
             }
 
-            int[,] output = new int[lineBoundary.Count, 2];
+            int[,] output = new int[lineBoundary.Count, 2];                     //Instantiate the output matrix (to be used in [x,y] format)
             int count = 0;
 
-            foreach (int boundaryPoint in lineBoundary)
+            foreach (int boundaryPoint in lineBoundary)                         //For every boundary point, add its X and Y values to the output matrix
             {
                 output[count, 0] = boundaryPoint / allBoundaries.GetLength(1);
                 output[count, 1] = boundaryPoint % allBoundaries.GetLength(1);
                 count++;
             }
 
-            return output;   //return the difference between the old and new boundary list, should only include the edge nodes
+            return output;   //return the new boundary matrix, should only include the edge nodes
         }
 
-        public int[,] getEVAXmatrix(int[,,] allBoundaries, int[,] WUIarea)
+        public int[,] getEVAXmatrix(int[,,] allBoundaries, int[,] WUIarea)      //OUTDATED, NO LONGER USED. Method to add multiple safetymatrices together. 
         {
-            int[,] EVAXmatrix = new int[allBoundaries.GetLength(0), allBoundaries.GetLength(1)];
+            int[,] EVAXmatrix = new int[allBoundaries.GetLength(0), allBoundaries.GetLength(1)];                //Create a new matrix, witht hte same size as the safety matrices
 
-            for (int y = 0; y < allBoundaries.GetLength(1); y++)
+            for (int y = 0; y < allBoundaries.GetLength(1); y++)                                                //For every element in the allboundaries compound matrix
             {
                 for (int x = 0; x < allBoundaries.GetLength(0); x++)
                 {
                     for (int i = 0; i < allBoundaries.GetLength(2); i++)
                     {
-                        EVAXmatrix[x,y] += allBoundaries[x, y, i];
+                        EVAXmatrix[x,y] += allBoundaries[x, y, i];                                              //Add up- the values of each cell in each safety matrix
                     }
                 }
             }
 
             for (int i = 0; i < WUIarea.GetLength(0); i++)
             {
-                EVAXmatrix[WUIarea[i, 0], WUIarea[i, 1]] = 255;
+                EVAXmatrix[WUIarea[i, 0], WUIarea[i, 1]] = 255;                                                 //Mark WUI areas in the EVAX matrix as 255
             }
 
             return EVAXmatrix;
         }
 
-        public int[,] getUpdateBoundary(int cellSize, int tBuffer, int[,] WUIarea, int[,] ROStheta)                 //placeholder for method with ready ROScardinal inputs
+        public int[,] getUpdateBoundary(int cellSize, int tBuffer, int[,] WUIarea, int[,] ROStheta)                 //Method to call the main k-PERIL program with ready ROScardinal inputs
         {
             Preparation solve01 = new Preparation();                                        //instantiate peril preparation
             Pathfinder pathfinder = new Pathfinder();                                       //instantiate pathfinder
