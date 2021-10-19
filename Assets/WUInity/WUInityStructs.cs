@@ -108,19 +108,23 @@ namespace WUInity
             hasBeenCorrected = false;
         }
 
-        public static ResponseCurve GetStandardCurve()
+        public static ResponseCurve[] GetStandardCurve()
         {
             ResponseData[] r = new ResponseData[3];
             r[0] = new ResponseData(0.14f, new Vector2(-420f, 0f));
             r[1] = new ResponseData(0.81f, new Vector2(0f, 1200f));
             r[2] = new ResponseData(0.95f, new Vector2(1200f, 3600f));
 
+
             ResponseCurve rC = new ResponseCurve(r);
 
-            return rC;
+            ResponseCurve[] rCs = new ResponseCurve[1];
+            rCs[0] = rC;
+
+            return rCs;
         }
 
-        public static ResponseCurve GetRoxburoughCurve()
+        public static ResponseCurve[] GetRoxburoughCurve()
         {
             ResponseData[] r = new ResponseData[4];
             r[0] = new ResponseData(0.69f, new Vector2(0f, 1200f));
@@ -130,7 +134,10 @@ namespace WUInity
 
             ResponseCurve rC = new ResponseCurve(r);
 
-            return rC;
+            ResponseCurve[] rCs = new ResponseCurve[1];
+            rCs[0] = rC;
+
+            return rCs;
         }
 
         public static void CorrectForEvacOrderTime(ResponseCurve responseCurve, float evacOrderTime)

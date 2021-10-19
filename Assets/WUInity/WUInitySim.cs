@@ -29,6 +29,12 @@ namespace WUInity
         private MacroHumanSim macroHumanSim;
         private Fire.WUInityFireMesh fireMesh;
 
+        private float startTime;
+        public float StartTime 
+        {
+            get { return startTime; }
+        }
+
         
         private  RouteCollection[] routes;
 
@@ -166,7 +172,10 @@ namespace WUInity
             }
 
             //offset response curve based on evac order
-            ResponseCurve.CorrectForEvacOrderTime(input.evac.responseCurve, input.evac.evacuationOrderStart);            
+            /*for (int i = 0; i < input.evac.responseCurves.Length; i++)
+            {
+                ResponseCurve.CorrectForEvacOrderTime(input.evac.responseCurves[i], input.evac.evacuationOrderStart);
+            }*/                     
         }        
 
         public bool StartSimFromGUI()
@@ -351,8 +360,13 @@ namespace WUInity
             }
 
             //pick start time based on curve or 0 (fire start)
-            time = input.evac.responseCurve.dataPoints[0].timeMinMax.x;
-            time = Mathf.Min(time, 0f);
+            time = 0f;
+            for (int i = 0; i < input.evac.responseCurves.Length; i++)
+            {
+                float t = input.evac.responseCurves[i].dataPoints[0].timeMinMax.x;
+                time = Mathf.Min(time, t);
+            }
+            startTime = time;
 
             if(runTrafficSim)
             {
@@ -618,11 +632,11 @@ namespace WUInity
         {
             WUInityInput input = WUInity.WUINITY_IN;
 
-            if (input.evac.paintedEvacGroups.Length < input.evac.routeCellCount.x * input.evac.routeCellCount.y)
+            if (input.evac.evacGroupIndices.Length < input.evac.routeCellCount.x * input.evac.routeCellCount.y)
             {
                 return null;
             }
-            return input.evac.paintedEvacGroups[x + y * input.evac.routeCellCount.x];
+            return WUInity.WUINITY_IN.evac.evacGroups[input.evac.evacGroupIndices[x + y * input.evac.routeCellCount.x]];
         }
 
         public RouteCollection GetCellRouteCollection(Vector2D pos)
@@ -640,6 +654,33 @@ namespace WUInity
             }            
 
             return null;
+        }
+
+        public void UpdateEvacGroups(int[] evacGroupIndices)
+        {
+            WUInity.WUINITY_IN.evac.evacGroupIndices = new int[WUInity.WUINITY_IN.evac.routeCellCount.x * WUInity.WUINITY_IN.evac.routeCellCount.y];
+            for (int y = 0; y < WUInity.WUINITY_IN.evac.routeCellCount.y; y++)
+            {
+                for (int x = 0; x < WUInity.WUINITY_IN.evac.routeCellCount.x; x++)
+                {
+                    int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
+                    if (evacGroupIndices != null)
+                    {
+                        WUInity.WUINITY_IN.evac.evacGroupIndices[index] = evacGroupIndices[index];
+                    }
+                    else
+                    {
+                        WUInity.WUINITY_IN.evac.evacGroupIndices[index] = 0;
+                    }                    
+                }
+            }
+        }
+
+        public EvacGroup GetEvacGroup(int x, int y)
+        {
+            int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
+            index = WUInity.WUINITY_IN.evac.evacGroupIndices[index];
+            return WUInity.WUINITY_IN.evac.evacGroups[index];
         }
     }
 }

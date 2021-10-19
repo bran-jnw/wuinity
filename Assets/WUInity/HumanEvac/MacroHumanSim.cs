@@ -348,11 +348,14 @@ namespace WUInity.Evac
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
 
-            for (int i = 0; i < eO.responseCurve.dataPoints.Length; i++)
+            //get curve index from evac group
+            int curveIndex = 0;
+
+            for (int i = 0; i < eO.responseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= eO.responseCurve.dataPoints[i].probability)
+                if (r <= eO.responseCurves[curveIndex].dataPoints[i].probability)
                 {
-                    responseTime = Random.Range(eO.responseCurve.dataPoints[i].timeMinMax.x, eO.responseCurve.dataPoints[i].timeMinMax.y);
+                    responseTime = Random.Range(eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.x, eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.y);
                     break;
                 }
             }

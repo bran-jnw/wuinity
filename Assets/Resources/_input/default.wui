@@ -1,6 +1,8 @@
 {
     "simName": "default",
     "deltaTime": 1.0,
+    "maxSimTime": 864000.0,
+    "stopWhenEvacuated": true,
     "numberOfRuns": 1,
     "lowerLeftLatLong": {
         "x": 39.409924,
@@ -17,8 +19,8 @@
         "totalPopulation": 500,
         "routeCellSize": 200.0,
         "routeCellCount": {
-            "x": 0,
-            "y": 0
+            "x": 25,
+            "y": 50
         },
         "allowMoreThanOneCar": true,
         "maxCars": 2,
@@ -32,31 +34,33 @@
         },
         "walkingSpeedModifier": 1.0,
         "evacuationOrderStart": 420.0,
-        "responseCurve": {
-            "dataPoints": [
-                {
-                    "probability": 0.14000000059604646,
-                    "timeMinMax": {
-                        "x": -420.0,
-                        "y": 0.0
+        "responseCurves": [
+            {
+                "dataPoints": [
+                    {
+                        "probability": 0.14000000059604646,
+                        "timeMinMax": {
+                            "x": -420.0,
+                            "y": 0.0
+                        }
+                    },
+                    {
+                        "probability": 0.8100000023841858,
+                        "timeMinMax": {
+                            "x": 0.0,
+                            "y": 1200.0
+                        }
+                    },
+                    {
+                        "probability": 0.949999988079071,
+                        "timeMinMax": {
+                            "x": 1200.0,
+                            "y": 3600.0
+                        }
                     }
-                },
-                {
-                    "probability": 0.8100000023841858,
-                    "timeMinMax": {
-                        "x": 0.0,
-                        "y": 1200.0
-                    }
-                },
-                {
-                    "probability": 0.949999988079071,
-                    "timeMinMax": {
-                        "x": 1200.0,
-                        "y": 3600.0
-                    }
-                }
-            ]
-        },
+                ]
+            }
+        ],
         "blockGoalEvents": [
             {
                 "startTime": 3.4028234663852887e38,
@@ -70,11 +74,12 @@
                     1,
                     2
                 ],
-                "cumulativeWeights": [
+                "goalsCumulativeWeights": [
                     0.4,
                     0.7,
                     1.0
                 ],
+                "responseCurveIndex": 0,
                 "name": "Group1",
                 "color": {
                     "r": 1.0,
@@ -89,11 +94,12 @@
                     1,
                     2
                 ],
-                "cumulativeWeights": [
+                "goalsCumulativeWeights": [
                     0.4,
                     0.7,
                     1.0
                 ],
+                "responseCurveIndex": 0,
                 "name": "Group2",
                 "color": {
                     "r": 0.0,
@@ -108,11 +114,12 @@
                     1,
                     2
                 ],
-                "cumulativeWeights": [
+                "goalsCumulativeWeights": [
                     0.4,
                     0.7,
                     1.0
                 ],
+                "responseCurveIndex": 0,
                 "name": "Group3",
                 "color": {
                     "r": 1.0,
@@ -392,6 +399,45 @@
                 "isActive": false
             }
         ],
+        "trafficInjections": [
+            {
+                "cars": 1,
+                "latLong": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "desiredGoal": {
+                    "name": "New goal",
+                    "latLong": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "color": {
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    },
+                    "blocked": false,
+                    "maxFlow": 3600.0,
+                    "goalType": 1,
+                    "cumulativeWeight": 0.0,
+                    "maxCars": -1,
+                    "maxPeople": -1
+                },
+                "pickGoalFromMap": false,
+                "timeFlow": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    }
+                ]
+            }
+        ],
         "precalcRoutesName": "roxborough"
     },
     "gpw": {
@@ -410,6 +456,7 @@
         "drawRoads": true
     },
     "fire": {
+        "lcpFileName": "",
         "ignitionPoints": [
             {
                 "latLong": {
@@ -558,6 +605,7 @@
                     "LiveWoody": 90.0
                 }
             ]
-        }
+        },
+        "windMultiplier": 1.0
     }
 }

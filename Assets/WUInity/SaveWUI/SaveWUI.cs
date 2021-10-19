@@ -13,6 +13,7 @@ namespace WUInity
         {
             string json = JsonUtility.ToJson(WUInity.WUINITY_IN, true);
             System.IO.File.WriteAllText(Application.dataPath + "/Resources/_input/" + filename + ".wui", json);
+            EvacGroup.SaveEvacGroupIndices();
         }
 
         public static void LoadInput(string filename)
@@ -31,17 +32,7 @@ namespace WUInity
 
         public static void LoadDefaultInputs()
         {
-            string input = System.IO.File.ReadAllText(Application.dataPath + "/Resources/_input/default.wui");
-
-            if (input != null)
-            {
-                WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
-                WUInity.WUINITY.LoadInputData(wui);
-            }
-            else
-            {
-                WUInity.WUINITY_SIM.LogMessage("WARNING: Default input file not found.");
-            }            
+            LoadInput("default");         
         }
 
         public static void SaveOutput(string filename)

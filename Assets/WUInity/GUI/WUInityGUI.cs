@@ -696,8 +696,8 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            float timeRange = WUInity.WUINITY_OUT.totalEvacTime - WUInity.WUINITY_IN.evac.responseCurve.dataPoints[0].timeMinMax.x;
-            float time = sliderVtraffic * timeRange + WUInity.WUINITY_IN.evac.responseCurve.dataPoints[0].timeMinMax.x;
+            float timeRange = WUInity.WUINITY_OUT.totalEvacTime - WUInity.WUINITY_SIM.StartTime;
+            float time = sliderVtraffic * timeRange + WUInity.WUINITY_SIM.StartTime;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
                 WUInity.WUINITY.DisplayClosestDensityData(time);

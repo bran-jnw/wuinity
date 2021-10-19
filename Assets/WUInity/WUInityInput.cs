@@ -57,13 +57,12 @@ namespace WUInity
         public float walkingSpeedModifier = 1.0f;
 
         public float evacuationOrderStart = 420.0f;
-        public ResponseCurve responseCurve = ResponseCurve.GetStandardCurve();
+        public ResponseCurve[] responseCurves = ResponseCurve.GetStandardCurve();
 
         public BlockGoalEvent[] blockGoalEvents = BlockGoalEvent.GetDummy();
 
         public EvacGroup[] evacGroups = EvacGroup.GetDefault();
-        [System.NonSerialized] public Texture2D evacGroupTex;
-        [System.NonSerialized] public  EvacGroup[] paintedEvacGroups;
+        [System.NonSerialized] public int[] evacGroupIndices;
 
         //TODO: fix saving these?
         [System.NonSerialized] public Texture2D evacuationForceTex;

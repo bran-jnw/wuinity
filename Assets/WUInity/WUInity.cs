@@ -175,12 +175,13 @@ namespace WUInity
         {
             this.input = input;
             LoadMapbox();
-            SpawnMarkers();            
+            SpawnMarkers();
+            EvacGroup.LoadEvacGroupIndices();
         }
 
         public void InitEditorMode()
         {
-            input.evac.responseCurve = ResponseCurve.GetRoxburoughCurve(); //WUInity.ResponseData.GetStandardCurve(); //
+            input.evac.responseCurves = ResponseCurve.GetRoxburoughCurve(); //WUInity.ResponseData.GetStandardCurve(); //
             LoadMapbox();
             LoadGPW();
             gpwViewer.ToggleDensityMapVisibility();
@@ -614,7 +615,7 @@ namespace WUInity
                 peopleInCells = new List<int[]>();
             }
             //if new data interval
-            int outputIndex = (int)(time - input.evac.responseCurve.dataPoints[0].timeMinMax.x) / (int)input.traffic.saveInterval;
+            int outputIndex = (int)(time - WUINITY_SIM.StartTime) / (int)input.traffic.saveInterval;
             if (outputIndex > trafficDensityData.Count - 1)
             {
                 trafficDensityData.Add(new TrafficCellData[input.evac.routeCellCount.x * input.evac.routeCellCount.y]);
@@ -748,7 +749,7 @@ namespace WUInity
 
         public void DisplayEvacGroupMap()
         {
-            SetDataPlaneTexture(input.evac.evacGroupTex);
+            SetDataPlaneTexture(eP.GetEvacGroupTexture());
         }
 
         public void ToggleDataPlane()

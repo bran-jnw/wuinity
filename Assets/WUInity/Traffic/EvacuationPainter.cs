@@ -6,21 +6,20 @@ namespace WUInity
 {
     public class EvacuationPainter : MonoBehaviour
     {
-        //heneral stuff
+        //general stuff
         Vector2D size;
         Vector2 uv;
         Color c = Color.red;
         int width;
         int height;
 
-        //evac goals
         Texture2D evacGoalTex;        
         EvacuationGoal evacGoal;        
         int evacGoalIndex = 0;
         Color[] evacGoalColorArray;
 
         //evac groups
-        EvacGroup evacGroup;
+        //EvacGroup evacGroup;
         Texture2D evacGroupTex;
         int evacGroupIndex;
         Color[] evacGroupColorArray;
@@ -28,6 +27,14 @@ namespace WUInity
         public enum PaintMode {EvacGroup, ForceGoal };
         PaintMode paintMode = PaintMode.EvacGroup;
         
+        public Texture2D GetEvacGroupTexture()
+        {
+            if(evacGroupTex == null)
+            {
+                CheckEvacGroupData();
+            }
+            return evacGroupTex;
+        }
 
         void CheckForceMapData()
         {
@@ -88,12 +95,11 @@ namespace WUInity
         {
             WUInityInput input = WUInity.WUINITY_IN;
 
-            if (input.evac.evacGroupTex == null)
+            if (evacGroupTex == null)
             {
                 //need to update cell size
-                WUInity.WUINITY_SIM.UpdateNeededData();
+                WUInity.WUINITY_SIM.UpdateNeededData();            
 
-                input.evac.paintedEvacGroups = new EvacGroup[input.evac.routeCellCount.x * input.evac.routeCellCount.y];                
                 //painter
                 Vector2Int res = new Vector2Int(2, 2);
                 while (input.evac.routeCellCount.x > res.x)
@@ -105,37 +111,24 @@ namespace WUInity
                     res.y *= 2;
                 }
                 evacGroupColorArray = new Color[res.x * res.y];
-                for (int y = 0; y < res.y; y++)
-                {
-                    for (int x = 0; x < res.x; x++)
-                    {
-                        Color c = input.evac.evacGroups[0].color;
-                        c.a = 0.5f;
-                        evacGroupColorArray[x + y * res.x] = c;
-                    }
-                }
-
-                input.evac.evacGroupTex = new Texture2D(res.x, res.y);
-                input.evac.evacGroupTex.filterMode = FilterMode.Point;
+                evacGroupTex = new Texture2D(res.x, res.y);
+                evacGroupTex.filterMode = FilterMode.Point;
                 for (int y = 0; y < input.evac.routeCellCount.y; y++)
                 {
                     for (int x = 0; x < input.evac.routeCellCount.x; x++)
                     {
-                        Color c = input.evac.evacGroups[0].color;
+                        Color c = WUInity.WUINITY_SIM.GetEvacGroup(x, y).color;
                         c.a = 0.5f;
-                        input.evac.evacGroupTex.SetPixel(x, y, c);
-                        input.evac.paintedEvacGroups[x + y * input.evac.routeCellCount.x] = input.evac.evacGroups[0];
-                        evacGroupColorArray[x + y * input.evac.routeCellCount.x] = c;
+                        evacGroupColorArray[x + y * res.x] = c;
+                        evacGroupTex.SetPixel(x, y, c);
                     }
                 }
-                input.evac.evacGroupTex.Apply();
+                evacGroupTex.Apply();
                 uv = new Vector2((float)input.evac.routeCellCount.x / res.x, (float)input.evac.routeCellCount.y / res.y);
 
                 size = WUInity.WUINITY_IN.size;
                 width = res.x;
                 height = res.y;
-
-                evacGroupTex = input.evac.evacGroupTex;
             }
         }
 
@@ -156,8 +149,8 @@ namespace WUInity
             CheckEvacGroupData();
 
             //select first zone
-            evacGroup = WUInity.WUINITY_IN.evac.evacGroups[0];
-            c = evacGroup.color;
+            evacGroupIndex = 0;
+            c = WUInity.WUINITY_IN.evac.evacGroups[evacGroupIndex].color;
             c.a = 0.5f;
 
             paintMode = PaintMode.EvacGroup;
@@ -198,8 +191,7 @@ namespace WUInity
                 {
                     evacGroupIndex = 0;
                 }
-                evacGroup = WUInity.WUINITY_IN.evac.evacGroups[evacGroupIndex];
-                c = evacGroup.color;
+                c = WUInity.WUINITY_IN.evac.evacGroups[evacGroupIndex].color;
                 c.a = 0.5f;
             }
 
@@ -328,7 +320,7 @@ namespace WUInity
 
             if(paintMode == PaintMode.EvacGroup)
             {
-                WUInity.WUINITY_IN.evac.paintedEvacGroups[x + y * WUInity.WUINITY_IN.evac.routeCellCount.x] = evacGroup;
+                WUInity.WUINITY_IN.evac.evacGroupIndices[x + y * WUInity.WUINITY_IN.evac.routeCellCount.x] = evacGroupIndex;
             }
             else if(paintMode == PaintMode.ForceGoal)
             {
