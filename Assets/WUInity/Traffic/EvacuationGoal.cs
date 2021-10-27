@@ -15,7 +15,6 @@ namespace WUInity
         public float maxFlow = 3600f; //cars per hour
         //public GameObject marker;
         public EvacGoalType goalType = EvacGoalType.Refugee;
-        public float cumulativeWeight;
         public int maxCars = -1;
         public int maxPeople = -1;
         [System.NonSerialized] public int currentPeople;

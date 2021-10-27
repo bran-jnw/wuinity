@@ -471,33 +471,9 @@ namespace WUInity
             {
                 if (cellIndex > 0)
                 {
-                    EvacGroup group = WUInity.WUINITY_SIM.GetPaintedEvacGroup(cellIndex % cells.x, cellIndex / cells.y);
+                    EvacGroup group = WUInity.WUINITY_SIM.GetEvacGroup(cellIndex % cells.x, cellIndex / cells.y);
                     EvacuationGoal goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
-                }
-                else
-                {
-                    rC.SelectFastestNonBlocked();
-                }
-            }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.WeightedRandom)
-            {
-                float randomChoice = Random.value;
-                for (int j = 0; j < tO.evacuationGoals.Length; j++)
-                {
-                    if (randomChoice < tO.evacuationGoals[j].cumulativeWeight)
-                    {
-                        rC.SelectForcedNonBlocked(tO.evacuationGoals[j]);
-                        break;
-                    }
-                }
-            }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.ForceMap)
-            {
-                if (considerForceMap && cellIndex > 0)
-                {
-                    EvacuationGoal eG = WUInity.WUINITY_SIM.GetForcedGoal(cellIndex % cells.x, cellIndex / cells.y);
-                    rC.SelectForcedNonBlocked(eG);
                 }
                 else
                 {

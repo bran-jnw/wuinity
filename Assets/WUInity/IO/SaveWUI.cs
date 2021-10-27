@@ -14,6 +14,7 @@ namespace WUInity
             string json = JsonUtility.ToJson(WUInity.WUINITY_IN, true);
             System.IO.File.WriteAllText(Application.dataPath + "/Resources/_input/" + filename + ".wui", json);
             EvacGroup.SaveEvacGroupIndices();
+            GraphicalFireInput.SaveGraphicalFireInput();
         }
 
         public static void LoadInput(string filename)

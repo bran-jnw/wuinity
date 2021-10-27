@@ -122,8 +122,9 @@ namespace WUInity
             }
             catch (System.Exception e)
             {
+                WUInity.WUINITY_SIM.UpdateEvacGroups(null);
                 WUInity.WUINITY_SIM.LogMessage("WARNING: Evac groups file " + path + " not found, using default.");
-                WUInity.WUINITY_SIM.LogMessage(e.Message);
+                //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }
             
         }

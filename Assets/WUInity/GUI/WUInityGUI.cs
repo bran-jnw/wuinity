@@ -454,6 +454,15 @@ namespace WUInity
 
             if (WUInity.WUINITY.IsPainterActive())
             {
+                for (int i = 0; i < WUInity.WUINITY_IN.evac.evacGroups.Length; i++)
+                {
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint group " + (i + 1)))
+                    {
+                        WUInity.PAINTER.SetEvacGroupColor(i);
+                    }
+                    ++buttonIndex;
+                }
+
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop painting"))
                 {
                     WUInity.WUINITY.StopPainter();
@@ -461,16 +470,10 @@ namespace WUInity
                 ++buttonIndex;
             }
             else
-            {                
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint exit choice"))
-                {
-                    WUInity.WUINITY.StartPainter(EvacuationPainter.PaintMode.ForceGoal);
-                }
-                ++buttonIndex;
-
+            {    
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint evac group"))
                 {
-                    WUInity.WUINITY.StartPainter(EvacuationPainter.PaintMode.EvacGroup);
+                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.EvacGroup);
                 }
                 ++buttonIndex;
             }  
@@ -641,6 +644,55 @@ namespace WUInity
             ++buttonIndex;
             fI.lcpFileName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), fI.lcpFileName);
             ++buttonIndex;
+
+            if (WUInity.WUINITY.IsPainterActive())
+            {
+                if(WUInity.PAINTER.GetPaintMode() == WUInityPainter.PaintMode.WUIArea)
+                {
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add WUI area"))
+                    {
+                        WUInity.PAINTER.SetWUIAreaColor(true);
+                    }
+                    ++buttonIndex;
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove WUI area"))
+                    {
+                        WUInity.PAINTER.SetWUIAreaColor(false);
+                    }
+                    ++buttonIndex;
+                }
+                else if (WUInity.PAINTER.GetPaintMode() == WUInityPainter.PaintMode.RandomIgnitionArea)
+                {
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add ignition area"))
+                    {
+                        WUInity.PAINTER.SetRandomIgnitionAreaColor(true);
+                    }
+                    ++buttonIndex;
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove ignition area"))
+                    {
+                        WUInity.PAINTER.SetRandomIgnitionAreaColor(false);
+                    }
+                    ++buttonIndex;
+                }
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop painting"))
+                {
+                    WUInity.WUINITY.StopPainter();
+                }
+                ++buttonIndex;
+            }
+            else
+            {
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint WUI area"))
+                {
+                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.WUIArea);
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint random ignition area"))
+                {
+                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.RandomIgnitionArea);
+                }
+                ++buttonIndex;
+            }
         }
 
         string outputTime;

@@ -559,6 +559,11 @@ namespace WUInity
 
         public Fire.WUInityFireMesh GetFireMesh()
         {
+            if(fireMesh == null)
+            {
+                CreateFireSim();
+            }
+
             return fireMesh;
         }
         public float GetFireWindSpeed()
@@ -628,15 +633,17 @@ namespace WUInity
             return input.evac.paintedForcedGoals[x + y * input.evac.routeCellCount.x];
         }
 
-        public EvacGroup GetPaintedEvacGroup(int x, int y)
+        public EvacGroup GetEvacGroup(int x, int y)
         {
             WUInityInput input = WUInity.WUINITY_IN;
-
             if (input.evac.evacGroupIndices.Length < input.evac.routeCellCount.x * input.evac.routeCellCount.y)
             {
                 return null;
             }
-            return WUInity.WUINITY_IN.evac.evacGroups[input.evac.evacGroupIndices[x + y * input.evac.routeCellCount.x]];
+
+            int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
+            index = WUInity.WUINITY_IN.evac.evacGroupIndices[index];
+            return WUInity.WUINITY_IN.evac.evacGroups[index];
         }
 
         public RouteCollection GetCellRouteCollection(Vector2D pos)
@@ -676,11 +683,22 @@ namespace WUInity
             }
         }
 
-        public EvacGroup GetEvacGroup(int x, int y)
+        public void UpdateWUIArea(int[] wuiAreaIndices)
         {
-            int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
-            index = WUInity.WUINITY_IN.evac.evacGroupIndices[index];
-            return WUInity.WUINITY_IN.evac.evacGroups[index];
+            if(wuiAreaIndices == null)
+            {
+                wuiAreaIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
+            }
+            WUInity.WUINITY_IN.fire.wuiAreaIndices = wuiAreaIndices;
         }
-    }
+
+        public void UpdateIgnitionIndices(int[] ignitionIndices)
+        {
+            if (ignitionIndices == null)
+            {
+                ignitionIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
+            }
+            WUInity.WUINITY_IN.fire.ignitionIndices = ignitionIndices;
+        }
+    }    
 }

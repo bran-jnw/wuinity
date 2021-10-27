@@ -38,7 +38,36 @@ namespace WUInity.Evac
                 WUInity.WUINITY_SIM.StartSimFromGUI();
             }
 
-            
+            //P3, need more curves
+            SaveWUI.LoadInput("evac_verification");
+            wuinityOptions = WUInity.WUINITY_IN;
+            evacOptions = WUInity.WUINITY_IN.evac;
+
+            wuinityOptions.simName = "P3_1";
+            evacOptions.overrideTotalPopulation = true;
+            evacOptions.totalPopulation = 1000;
+            WUInity.WUINITY_SIM.StartSimFromGUI();
+
+            wuinityOptions.simName = "P3_2";
+            evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 500f;
+            WUInity.WUINITY_SIM.StartSimFromGUI();
+
+            wuinityOptions.simName = "P3_3";
+            evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 1000f;
+            WUInity.WUINITY_SIM.StartSimFromGUI();
+
+            //P4 - can't do it
+
+            //PT1            
+            evacOptions.overrideTotalPopulation = true;
+            evacOptions.totalPopulation = 100;
+            evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 1f;
+            for (int i = 0; i < 3; i++)
+            {
+                wuinityOptions.simName = "PT1_mod" + (i + 1);
+                evacOptions.walkingDistanceModifier = (i + 1);
+                WUInity.WUINITY_SIM.StartSimFromGUI();
+            }            
         }
     }
 }

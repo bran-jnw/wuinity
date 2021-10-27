@@ -80,7 +80,7 @@ namespace WUInity
     [System.Serializable]
     public class TrafficInput
     {
-        public enum RouteChoice { Fastest, Closest, ForceMap, Random, WeightedRandom, EvacGroup };
+        public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
 
         public EvacuationGoal[] evacuationGoals = EvacuationGoal.GetRoxburoughGoals();
         public RouteChoice routeChoice = RouteChoice.Closest;
@@ -121,6 +121,8 @@ namespace WUInity
         public Fire.WindInput wind = Fire.WindInput.GetTemplate();
         public Fire.InitialFuelMoistureData initialFuelMoisture = Fire.InitialFuelMoistureData.GetDefaults();
         public float windMultiplier = 1f;
+        [System.NonSerialized] public int[] wuiAreaIndices;
+        [System.NonSerialized] public int[] ignitionIndices;
     }
 }
 

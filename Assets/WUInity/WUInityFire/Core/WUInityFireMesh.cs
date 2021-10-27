@@ -41,10 +41,19 @@ namespace WUInity.Fire
 
         private double timeSinceStart = 0.0;
 
+
         public WUInityFireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)
         {
             lcpData = new LCPData(lcpFilename);
-            cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
+            //create empry if we cannot read properly
+            if(lcpData.CantAllocLCP)
+            {
+                cellSize = new Vector2D(30, 30);                
+            }
+            else
+            {
+                cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);                
+            }
             cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.y / cellSize.x)));
 
             this.weather = weather;

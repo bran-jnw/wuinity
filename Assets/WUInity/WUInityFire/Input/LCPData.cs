@@ -297,7 +297,8 @@ namespace WUInity.Fire
 			string path = Application.dataPath + "/Resources/_input/" + filename + ".lcp";
 			if (!File.Exists(path))
 			{
-				WUInity.WUINITY_SIM.LogMessage("WARNING: LCP file not found in " + path);
+				CantAllocLCP = true;
+				WUInity.WUINITY_SIM.LogMessage("WARNING: LCP file not found in " + path + ", using default.");
 				return;
 			}
 
@@ -538,7 +539,7 @@ namespace WUInity.Fire
 								}								
 							}
 
-							//fseek(landfile, headsize, SEEK_SET); //bran-jnw: resets popsitiuon in reader, not really needed I think
+							//fseek(landfile, headsize, SEEK_SET); //bran-jnw: resets position in reader, not really needed I think
 							//OldFilePosition=0;     // thread local
 							CantAllocLCP = false;
 						}

@@ -68,6 +68,7 @@ namespace WUInity
             int tBuffer = (int)WUInity.WUINITY_OUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file
             //collect ROS, how to send ROS data is ROStheta[X*Y,8], y first, x second, start in north and then clockwise
             int[,] maxROS = WUInity.WUINITY_SIM.GetFireMesh().GetMaxROS();
+            int[,] wuiArea = GetWUIArea();
 
             //calc new boundary
             /*int[,] boundary = peril.getSingularBoundary(cellSize, tBuffer, WUIarea, maxROS);
@@ -84,8 +85,39 @@ namespace WUInity
                     }
                 }
             }*/
-        }        
-    }
+        }
+
+        private int[,] GetWUIArea()
+        {
+            //first count how many cells we have to add to array
+            int count = 0;
+            for (int i = 0; i < WUInity.WUINITY_IN.fire.wuiAreaIndices.Length; i++)
+            {
+                int xIndex = i % WUInity.WUINITY_SIM.GetFireMesh().GetCellCount().x;
+                int yIndex = i / WUInity.WUINITY_SIM.GetFireMesh().GetCellCount().x;
+                if(WUInity.WUINITY_IN.fire.wuiAreaIndices[i] == 1)
+                {
+                    ++count;
+                }
+            }
+
+            //then create array of correct size and fill it
+            int[,] wuiArea = new int[2, count];
+            int position = 0;
+            for (int i = 0; i < count; i++)
+            {
+                int xIndex = i % WUInity.WUINITY_SIM.GetFireMesh().GetCellCount().x;
+                int yIndex = i / WUInity.WUINITY_SIM.GetFireMesh().GetCellCount().x;
+                if (WUInity.WUINITY_IN.fire.wuiAreaIndices[i] == 1)
+                {
+                    wuiArea[0, position] = xIndex;
+                    wuiArea[1, position] = yIndex; //need to flip Y?
+                    ++position;    
+                }
+            }
+            return wuiArea;
+        }
+    }    
 }
 
 /*

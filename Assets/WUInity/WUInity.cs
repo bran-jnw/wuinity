@@ -83,6 +83,14 @@ namespace WUInity
             }
         }
 
+        public static WUInityPainter PAINTER
+        {
+            get
+            {
+                return WUINITY.painter;
+            }
+        }
+
         [Header("Options")]
         [SerializeField] private bool editorMode = false;
         [SerializeField] private WUInityInput input = new WUInityInput();
@@ -103,7 +111,9 @@ namespace WUInity
         [SerializeField] [HideInInspector] private WUInityGUI wuiGUI;
         [SerializeField] [HideInInspector] private Farsite.FarsiteViewer farsiteViewer;
         [SerializeField] [HideInInspector] private GPWViewer gpwViewer;
-        [SerializeField][HideInInspector] private GameObject dataPlane;
+        [SerializeField][HideInInspector] private GameObject evacDataPlane;
+        [SerializeField] [HideInInspector] private GameObject fireDataPlane;
+        [SerializeField] [HideInInspector] private WUInityPainter painter;
 
         List<GameObject> drawnRoads;
 
@@ -177,6 +187,7 @@ namespace WUInity
             LoadMapbox();
             SpawnMarkers();
             EvacGroup.LoadEvacGroupIndices();
+            GraphicalFireInput.LoadGraphicalFireInput();
         }
 
         public void InitEditorMode()
@@ -188,10 +199,10 @@ namespace WUInity
             LoadFarsite();
             farsiteViewer.ToggleTerrain();
             sim.LoadItineroDatabase();
-            if (input.traffic.routeChoice == TrafficInput.RouteChoice.ForceMap)
+            /*if (input.traffic.routeChoice == TrafficInput.RouteChoice.ForceMap)
             {
-                StartPainter(EvacuationPainter.PaintMode.ForceGoal);
-            }
+                StartPainter(WUInityPaint.PaintMode.ForceGoal);
+            }*/
         }
 
         private void SetRoxburough()
@@ -436,7 +447,7 @@ namespace WUInity
             {
 
             }
-            else if (dataPlane != null && dataPlane.activeSelf)
+            else if (evacDataPlane != null && evacDataPlane.activeSelf)
             {
                 if (dataSampleMode == DataSampleMode.Raw)
                 {
@@ -485,18 +496,11 @@ namespace WUInity
             File.WriteAllBytes(Application.dataPath + "/Resources/_output/relocatedPopulation.png", bytes);
             bytes = output.evac.popStayingTexture.EncodeToPNG();
             File.WriteAllBytes(Application.dataPath + "/Resources/_output/stayingPopulation.png", bytes);
-            if (input.traffic.routeChoice == TrafficInput.RouteChoice.ForceMap)
-            {
-                bytes = input.evac.evacuationForceTex.EncodeToPNG();
-                File.WriteAllBytes(Application.dataPath + "/Resources/_output/forceMap.png", bytes);
-            }
-        }
-
-        EvacuationPainter eP;
+        }        
 
         public bool IsPainterActive()
         {
-            if(eP == null || !eP.gameObject.activeSelf)
+            if(painter == null || !painter.gameObject.activeSelf)
             {
                 return false;
             }
@@ -504,22 +508,26 @@ namespace WUInity
             return true;
         }
 
-        public void StartPainter(EvacuationPainter.PaintMode paintMode)
+        public void StartPainter(WUInityPainter.PaintMode paintMode)
         {
-            if (eP == null)
+            if (painter == null)
             {                
                 GameObject gO = new GameObject();
                 gO.name = "EvacGoalPainter";
-                eP = gO.AddComponent<EvacuationPainter>();
+                painter = gO.AddComponent<WUInityPainter>();
             }
 
-            eP.gameObject.SetActive(true);
-            eP.SetPainterMode(paintMode);            
-            if(paintMode == EvacuationPainter.PaintMode.ForceGoal)
+            painter.gameObject.SetActive(true);
+            painter.SetPainterMode(paintMode);            
+            if(paintMode == WUInityPainter.PaintMode.WUIArea)
             {
-                DisplayForceMap();                
+                DisplayWUIAreaMap();                
             }
-            else if(paintMode == EvacuationPainter.PaintMode.EvacGroup)
+            else if (paintMode == WUInityPainter.PaintMode.RandomIgnitionArea)
+            {
+                DisplayRandomIgnitionAreaMap();
+            }
+            else if(paintMode == WUInityPainter.PaintMode.EvacGroup)
             {
                 DisplayEvacGroupMap();
             }
@@ -528,18 +536,22 @@ namespace WUInity
 
         public void StopPainter()
         {
-            if (eP != null)
+            if (painter != null)
             {
-                eP.gameObject.SetActive(false);
+                painter.gameObject.SetActive(false);
             }
             dataSampleMode = DataSampleMode.None;
-            if (dataPlane != null)
+            if (evacDataPlane != null)
             {
-                dataPlane.SetActive(false);
+                evacDataPlane.SetActive(false);
+            }
+            if (fireDataPlane != null)
+            {
+                fireDataPlane.SetActive(false);
             }
         }
 
-        private MeshRenderer CreateDataPlane(Texture2D tex, string name)
+        private MeshRenderer CreateDataPlane(Texture2D tex, string name, Vector2Int cellCount)
         {
             GameObject gO = new GameObject(name);
             gO.transform.parent = this.transform;
@@ -559,7 +571,7 @@ namespace WUInity
 
             Vector3 offset = Vector3.zero;
 
-            Vector2 maxUV = new Vector2((float)input.evac.routeCellCount.x / tex.width, (float)input.evac.routeCellCount.y / tex.height);
+            Vector2 maxUV = new Vector2((float)cellCount.x / tex.width, (float)cellCount.y / tex.height);
 
             GPWViewer.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
 
@@ -701,7 +713,8 @@ namespace WUInity
             }
         }
 
-        MeshRenderer dataPlaneMeshRenderer;
+        MeshRenderer evacDataPlaneMeshRenderer;
+        MeshRenderer fireDataPlaneMeshRenderer;
         TrafficCellData[] currenttrafficDensityData;
         int[] currentPeopleInCells;
         public void DisplayClosestDensityData(float time)
@@ -742,35 +755,73 @@ namespace WUInity
             SetDataPlaneTexture(output.evac.popStuckTexture);
         }
 
-        public void DisplayForceMap()
+        private void DisplayWUIAreaMap()
         {
-            SetDataPlaneTexture(input.evac.evacuationForceTex);
+            SetDataPlaneTexture(painter.GetWUIAreaTexture(), true);
+        }
+
+        public void DisplayRandomIgnitionAreaMap()
+        {
+            SetDataPlaneTexture(painter.GetRandomIgnitionTexture(), true);
         }
 
         public void DisplayEvacGroupMap()
         {
-            SetDataPlaneTexture(eP.GetEvacGroupTexture());
+            SetDataPlaneTexture(painter.GetEvacGroupTexture());
         }
 
         public void ToggleDataPlane()
         {
-            if (dataPlaneMeshRenderer != null)
+            if (evacDataPlaneMeshRenderer != null)
             {
-                dataPlaneMeshRenderer.gameObject.SetActive(!dataPlaneMeshRenderer.gameObject.activeSelf);
+                evacDataPlaneMeshRenderer.gameObject.SetActive(!evacDataPlaneMeshRenderer.gameObject.activeSelf);
             }
         }
 
-        private void SetDataPlaneTexture(Texture2D tex)
+        private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
         {
-            if (dataPlaneMeshRenderer == null)
+            //turn everything off first
+            if(fireDataPlane != null)
             {
-                dataPlaneMeshRenderer = CreateDataPlane(tex, "Data Plane");
-                dataPlane = dataPlaneMeshRenderer.gameObject;
+                fireDataPlane.SetActive(false);
+            }
+            if (evacDataPlane != null)
+            {
+                evacDataPlane.SetActive(false);
+            }
+
+            //pick needed data plane
+            MeshRenderer activeMeshRenderer = evacDataPlaneMeshRenderer;
+            Vector2Int cellCount = input.evac.routeCellCount;
+            string name = "Evac Data Plane";
+            GameObject activeDataPlane = evacDataPlane;
+            if (fireMeshMode)
+            {
+                activeMeshRenderer = fireDataPlaneMeshRenderer;
+                cellCount = WUINITY_SIM.GetFireMesh().cellCount;
+                name = "Fire Data Plane";
+                activeDataPlane = fireDataPlane;
+            }
+
+            //make sure it exists, else create
+            if (activeMeshRenderer == null)
+            {
+                activeMeshRenderer = CreateDataPlane(tex, name, cellCount);
+                if(fireMeshMode)
+                {
+                    fireDataPlaneMeshRenderer = activeMeshRenderer;
+                    fireDataPlane = activeMeshRenderer.gameObject;
+                }
+                else
+                {
+                    evacDataPlaneMeshRenderer = activeMeshRenderer;
+                    evacDataPlane = activeMeshRenderer.gameObject;
+                }                
             }
             else
             {
-                dataPlaneMeshRenderer.material.mainTexture = tex;
-                dataPlane.SetActive(true);
+                activeMeshRenderer.material.mainTexture = tex;
+                activeDataPlane.SetActive(true);
             }
         }
 

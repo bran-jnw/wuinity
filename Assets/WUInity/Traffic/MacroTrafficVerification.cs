@@ -175,7 +175,7 @@ namespace WUInity.Traffic
             trafficOptions.roadTypes.roadData[11].speedLimit = 90f;
             trafficOptions.roadTypes.roadData[20].speedLimit = 90f;
             trafficOptions.roadTypes.roadData[21].speedLimit = 90f;
-            trafficOptions.routeChoice = TrafficInput.RouteChoice.ForceMap;
+            trafficOptions.routeChoice = TrafficInput.RouteChoice.EvacGroup;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
             trafficOptions.roadTypes.roadData[11].speedLimit = oldSpeedLimit;
@@ -227,7 +227,7 @@ namespace WUInity.Traffic
             trafficOptions.evacuationGoals[0] = node4;
             trafficOptions.evacuationGoals[1] = node7;
             oldSpeedLimit = trafficOptions.roadTypes.roadData[11].speedLimit;
-            trafficOptions.routeChoice = TrafficInput.RouteChoice.ForceMap;
+            trafficOptions.routeChoice = TrafficInput.RouteChoice.EvacGroup;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Fastest;
@@ -326,7 +326,7 @@ namespace WUInity.Traffic
 
             //WT4 - full refuge
             wuinityOptions.simName = "WT4";
-            trafficOptions.routeChoice = TrafficInput.RouteChoice.ForceMap;
+            trafficOptions.routeChoice = TrafficInput.RouteChoice.EvacGroup;
             trafficInjections[0] = new SimpleTrafficInjection(2, node2.latLong, node8);
             trafficOptions.evacuationGoals = new EvacuationGoal[2];
             node8.maxCars = 1;            

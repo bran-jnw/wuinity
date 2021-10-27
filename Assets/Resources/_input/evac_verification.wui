@@ -1,6 +1,8 @@
 {
     "simName": "evac_verification",
     "deltaTime": 1.0,
+    "maxSimTime": 864000.0,
+    "stopWhenEvacuated": true,
     "numberOfRuns": 1,
     "lowerLeftLatLong": {
         "x": 0.0090009,
@@ -17,8 +19,8 @@
         "totalPopulation": 500,
         "routeCellSize": 100.0,
         "routeCellCount": {
-            "x": 0,
-            "y": 0
+            "x": 20,
+            "y": 20
         },
         "allowMoreThanOneCar": true,
         "maxCars": 2,
@@ -32,36 +34,27 @@
         },
         "walkingSpeedModifier": 1.0,
         "evacuationOrderStart": 0.0,
-        "responseCurve": {
-            "dataPoints": [
-                {
-                    "probability": 0.0,
-                    "timeMinMax": {
-                        "x": 0.0,
-                        "y": 0.0
+        "responseCurves": [
+            {
+                "dataPoints": [
+                    {
+                        "probability": 1.0,
+                        "timeMinMax": {
+                            "x": 0.0,
+                            "y": 300.0
+                        }
                     }
-                },
-                {
-                    "probability": 1.0,
-                    "timeMinMax": {
-                        "x": 0.0,
-                        "y": 300.0
-                    }
-                }
-            ]
-        },
-        "blockGoalEvents": [
+                ]
+            }
         ],
+        "blockGoalEvents": [],
         "evacGroups": [
             {
                 "goalIndices": [
                     0
                 ],
-                "cumulativeWeights": [
-                    0.4,
-                    0.7,
-                    1.0
-                ],
+                "goalsCumulativeWeights": [],
+                "responseCurveIndex": 0,
                 "name": "Group1",
                 "color": {
                     "r": 1.0,
@@ -89,7 +82,6 @@
                 "blocked": false,
                 "maxFlow": 3600.0,
                 "goalType": 0,
-                "cumulativeWeight": 0.0,
                 "maxCars": -1,
                 "maxPeople": -1
             }
@@ -303,6 +295,44 @@
                 "isActive": false
             }
         ],
+        "trafficInjections": [
+            {
+                "cars": 1,
+                "latLong": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "desiredGoal": {
+                    "name": "New goal",
+                    "latLong": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "color": {
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    },
+                    "blocked": false,
+                    "maxFlow": 3600.0,
+                    "goalType": 1,
+                    "maxCars": -1,
+                    "maxPeople": -1
+                },
+                "pickGoalFromMap": false,
+                "timeFlow": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    }
+                ]
+            }
+        ],
         "precalcRoutesName": "evac_verification"
     },
     "gpw": {
@@ -321,6 +351,7 @@
         "drawRoads": true
     },
     "fire": {
+        "lcpFileName": "",
         "ignitionPoints": [
             {
                 "latLong": {
@@ -469,6 +500,7 @@
                     "LiveWoody": 90.0
                 }
             ]
-        }
+        },
+        "windMultiplier": 1.0
     }
 }
