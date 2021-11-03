@@ -1,18 +1,18 @@
 {
-    "totalEvacTime": 407.0,
+    "totalEvacTime": 412.0,
     "evac": {
         "actualTotalEvacuees": 1014,
         "rawPopTexture": {
-            "instanceID": -86780
+            "instanceID": -32146
         },
         "relocatedPopTexture": {
-            "instanceID": -86784
+            "instanceID": -32150
         },
         "popStuckTexture": {
-            "instanceID": -86782
+            "instanceID": -32148
         },
         "popStayingTexture": {
-            "instanceID": -86786
+            "instanceID": -32152
         },
         "stayingPeople": 0,
         "rawPopulation": [

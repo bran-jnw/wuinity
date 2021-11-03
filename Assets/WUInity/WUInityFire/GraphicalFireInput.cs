@@ -11,7 +11,7 @@ namespace WUInity
         {
             string filename = WUInity.WUINITY_IN.simName;
 
-            string[] data = new string[4];
+            string[] data = new string[5];
             //x cells
             data[0] = WUInity.WUINITY_SIM.GetFireMesh().cellCount.x.ToString();
             //y cells
@@ -19,10 +19,27 @@ namespace WUInity
             //actual data, first wuiArea, then ignition map
             data[2] = "";
             data[3] = "";
+            data[4] = "";
             for (int i = 0; i < WUInity.WUINITY_IN.fire.wuiAreaIndices.Length; ++i)
             {
-                data[2] += WUInity.WUINITY_IN.fire.wuiAreaIndices[i] + " ";
-                data[3] += WUInity.WUINITY_IN.fire.ignitionIndices[i] + " ";
+                if(WUInity.WUINITY_IN.fire.wuiAreaIndices[i] == 1)
+                {
+                    data[2] += i + " ";
+                }
+
+                if (WUInity.WUINITY_IN.fire.randomIgnitionIndices[i] == 1)
+                {
+                    data[3] += i + " ";
+                }
+
+                if (WUInity.WUINITY_IN.fire.initialIgnitionIndices[i] == 1)
+                {
+                    data[4] += i + " ";
+                }
+
+                /*data[2] += WUInity.WUINITY_IN.fire.wuiAreaIndices[i] + " ";
+                data[3] += WUInity.WUINITY_IN.fire.randomIgnitionIndices[i] + " ";
+                data[4] += WUInity.WUINITY_IN.fire.initialIgnitionIndices[i] + " ";*/
             }
 
             System.IO.File.WriteAllLines(Application.dataPath + "/Resources/_input/" + filename + ".gfi", data); //graphical fire input
@@ -38,7 +55,7 @@ namespace WUInity
                 using (StreamReader sr = new StreamReader(path))
                 {
                     string[] header = new string[4];
-                    for (int i = 0; i < 4; ++i)
+                    for (int i = 0; i < 5; ++i)
                     {
                         header[i] = sr.ReadLine();
                     }
@@ -51,6 +68,36 @@ namespace WUInity
                     {
                         string[] data = header[2].Split(' ');
                         int[] wuiAreaIndices = new int[ncols * nrows];
+                        for (int i = 0; i < data.Length; ++i)
+                        {
+                            int pos;
+                            int.TryParse(data[i], out pos);
+                            wuiAreaIndices[pos] = 1;
+                        }
+                        WUInity.WUINITY_SIM.UpdateWUIArea(wuiAreaIndices);
+
+                        data = header[3].Split(' ');
+                        int[] randomIgnitionArea = new int[ncols * nrows];
+                        for (int i = 0; i < data.Length; ++i)
+                        {
+                            int pos;
+                            int.TryParse(data[i], out pos);
+                            randomIgnitionArea[pos] = 1;
+                        }
+                        WUInity.WUINITY_SIM.UpdateRandomIgnitionIndices(randomIgnitionArea);
+
+                        data = header[4].Split(' ');
+                        int[] initialIgnitionIndices = new int[ncols * nrows];
+                        for (int i = 0; i < data.Length; ++i)
+                        {
+                            int pos;
+                            int.TryParse(data[i], out pos);
+                            initialIgnitionIndices[pos] = 1;
+                        }
+                        WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);
+
+                        /*string[] data = header[2].Split(' ');
+                        int[] wuiAreaIndices = new int[ncols * nrows];
                         for (int i = 0; i < wuiAreaIndices.Length; ++i)
                         {
                             int.TryParse(data[i], out wuiAreaIndices[i]);
@@ -58,12 +105,20 @@ namespace WUInity
                         WUInity.WUINITY_SIM.UpdateWUIArea(wuiAreaIndices);
 
                         data = header[3].Split(' ');
-                        int[] ignitionIndices = new int[ncols * nrows];
-                        for (int i = 0; i < ignitionIndices.Length; ++i)
+                        int[] randomIgnitionArea = new int[ncols * nrows];
+                        for (int i = 0; i < randomIgnitionArea.Length; ++i)
                         {
-                            int.TryParse(data[i], out ignitionIndices[i]);
+                            int.TryParse(data[i], out randomIgnitionArea[i]);
                         }
-                        WUInity.WUINITY_SIM.UpdateIgnitionIndices(ignitionIndices);
+                        WUInity.WUINITY_SIM.UpdateRandomIgnitionIndices(randomIgnitionArea);
+
+                        data = header[4].Split(' ');
+                        int[] initialIgnitionIndices = new int[ncols * nrows];
+                        for (int i = 0; i < initialIgnitionIndices.Length; ++i)
+                        {
+                            int.TryParse(data[i], out initialIgnitionIndices[i]);
+                        }
+                        WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);*/
                     }
                     else
                     {
@@ -84,7 +139,8 @@ namespace WUInity
         private static void CreateDefaultInputs()
         {
             WUInity.WUINITY_SIM.UpdateWUIArea(null);
-            WUInity.WUINITY_SIM.UpdateIgnitionIndices(null);
+            WUInity.WUINITY_SIM.UpdateRandomIgnitionIndices(null);
+            WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(null);
         }
     }
 }

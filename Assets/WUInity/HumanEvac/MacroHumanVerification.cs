@@ -60,7 +60,7 @@ namespace WUInity.Evac
 
             //PT1            
             evacOptions.overrideTotalPopulation = true;
-            evacOptions.totalPopulation = 100;
+            evacOptions.totalPopulation = 1000;
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 1f;
             for (int i = 0; i < 3; i++)
             {

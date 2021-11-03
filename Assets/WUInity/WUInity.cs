@@ -527,6 +527,10 @@ namespace WUInity
             {
                 DisplayRandomIgnitionAreaMap();
             }
+            else if (paintMode == WUInityPainter.PaintMode.InitialIgnition)
+            {
+                DisplayInitialIgnitionMap();
+            }
             else if(paintMode == WUInityPainter.PaintMode.EvacGroup)
             {
                 DisplayEvacGroupMap();
@@ -763,6 +767,11 @@ namespace WUInity
         public void DisplayRandomIgnitionAreaMap()
         {
             SetDataPlaneTexture(painter.GetRandomIgnitionTexture(), true);
+        }
+
+        public void DisplayInitialIgnitionMap()
+        {
+            SetDataPlaneTexture(painter.GetInitialIgnitionTexture(), true);
         }
 
         public void DisplayEvacGroupMap()

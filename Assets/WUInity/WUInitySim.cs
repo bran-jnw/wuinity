@@ -692,13 +692,22 @@ namespace WUInity
             WUInity.WUINITY_IN.fire.wuiAreaIndices = wuiAreaIndices;
         }
 
-        public void UpdateIgnitionIndices(int[] ignitionIndices)
+        public void UpdateRandomIgnitionIndices(int[] randomIgnitionIndices)
         {
-            if (ignitionIndices == null)
+            if (randomIgnitionIndices == null)
             {
-                ignitionIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
+                randomIgnitionIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
             }
-            WUInity.WUINITY_IN.fire.ignitionIndices = ignitionIndices;
+            WUInity.WUINITY_IN.fire.randomIgnitionIndices = randomIgnitionIndices;
+        }
+
+        public void UpdateInitialIgnitionIndices(int[] initialIgnitionIndices)
+        {
+            if (initialIgnitionIndices == null)
+            {
+                initialIgnitionIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
+            }
+            WUInity.WUINITY_IN.fire.initialIgnitionIndices = initialIgnitionIndices;
         }
     }    
 }

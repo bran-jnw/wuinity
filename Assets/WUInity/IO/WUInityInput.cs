@@ -122,7 +122,8 @@ namespace WUInity
         public Fire.InitialFuelMoistureData initialFuelMoisture = Fire.InitialFuelMoistureData.GetDefaults();
         public float windMultiplier = 1f;
         [System.NonSerialized] public int[] wuiAreaIndices;
-        [System.NonSerialized] public int[] ignitionIndices;
+        [System.NonSerialized] public int[] randomIgnitionIndices;
+        [System.NonSerialized] public int[] initialIgnitionIndices;
     }
 }
 
