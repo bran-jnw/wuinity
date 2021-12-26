@@ -5,56 +5,56 @@ using System;
 
 namespace WUInity.Fire
 {
-    [System.Serializable]
-    public class WUInityFireMesh
+    [System.Serializable]                                           //Enable parallel processing
+    public class WUInityFireMesh                        
     {
-        public Vector2Int cellCount;
-        public SpreadMode spreadMode;
-        public WUInityFireIgnition[] ignitionPoints;
-        WUInityFireCell[] fireCells;
-        public Vector2D cellSize = new Vector2D(30.0, 30.0);
-        public Texture2D burnTexture;        
-        public WindData currentWindData;
-        public double dt;
-        double[] angleOffsets;
-        public HashSet<WUInityFireCell> activeCells;
-        public HashSet<WUInityFireCell> cellsToKill;
-        public HashSet<WUInityFireCell> cellsToIgnite;
-        public Mesh terrainMesh;
+        public Vector2Int cellCount;                                //cellCount 2D Vector
+        public SpreadMode spreadMode;                               //Enumerable spreadMode (has five choices about which spread model is used)
+        public WUInityFireIgnition[] ignitionPoints;                //array of ignition points based on the WUInityFireIgnition Object
+        WUInityFireCell[] fireCells;                                //firecell array based on WUInityFireCell object
+        public Vector2D cellSize = new Vector2D(30.0, 30.0);        //start the cellSize vector as 30,30 (S-size,Y-size) in meters (Hardcoded as standard)
+        public Texture2D burnTexture;                               //Texture for burnt cells
+        public WindData currentWindData;                            //Wind data object
+        public double dt;                                           //time step
+        double[] angleOffsets;                                      //?????????????????????
+        public HashSet<WUInityFireCell> activeCells;                //active cells hash set
+        public HashSet<WUInityFireCell> cellsToKill;                //cells to be made burnt?
+        public HashSet<WUInityFireCell> cellsToIgnite;              //cells to be ignited?
+        public Mesh terrainMesh;                                    //instantiate the terrain?
 
-        public Vector2Int[] neighborIndices;
-        public double cellSizeDiagonal;
+        public Vector2Int[] neighborIndices;                        //2D vector array with integers to hold on to the neighbors?
+        public double cellSizeDiagonal;                             //vars below to contain the distance between target cell and all the neighbors?
         public double cellSizeSquared;
         public double cellSizeDiagonalSquared;
         public double sixteenDist;
         public double sixteenDistSquared;
-        public int indexSize;
+        public int indexSize;                                       //don't know yet
 
-        private WeatherInput weather;
-        private WindInput wind;
-        public InitialFuelMoistureData initialFuelMoisture;
+        private WeatherInput weather;                               //prep weather input
+        private WindInput wind;                                     //prep wind
+        public InitialFuelMoistureData initialFuelMoisture;         //prep moisture
         
-        public LCPData lcpData;
-        public FuelModelSet fuelModelSet;
-        public Surface surfaceFire;
-        public Crown crownFire;
+        public LCPData lcpData;                                     //prep landscape data input
+        public FuelModelSet fuelModelSet;                           //??
+        public Surface surfaceFire;                                 //idk what a Surface is yet
+        public Crown crownFire;                                     //idk what a Crown is yet
 
-        private double timeSinceStart = 0.0;
+        private double timeSinceStart = 0.0;                        //keeps track of elapsed simulated time?
 
 
-        public WUInityFireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)
+        public WUInityFireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)         //CONSTRUCTOR if LCP data is to be parsed by file.
         {
-            lcpData = new LCPData(lcpFilename);
+            lcpData = new LCPData(lcpFilename);                 //import LCP data
             //create empry if we cannot read properly
-            if(lcpData.CantAllocLCP)
+            if(lcpData.CantAllocLCP)        
             {
                 cellSize = new Vector2D(30, 30);                
             }
             else
             {
-                cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);                
+                cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);          //Set cellSize properly, overwrite hardcoded value      
             }
-            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.y / cellSize.x)));
+            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.y / cellSize.x)));         //get raster cell size by dividing the total length of each edge by the length of an individual cell.
 
             this.weather = weather;
             this.wind = wind;
@@ -63,7 +63,7 @@ namespace WUInity.Fire
             this.ignitionPoints = ignitionPoints;
         }
 
-        public WUInityFireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)
+        public WUInityFireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)        //CONSTRUCTOR if LCP data is to be parsed from memory
         {
             this.lcpData = lcpData;
             cellCount = new Vector2Int(lcpData.Header.numeast, lcpData.Header.numnorth);
@@ -76,7 +76,7 @@ namespace WUInity.Fire
             this.ignitionPoints = ignitionPoints;
         }
 
-        void InitializeMesh()
+        void InitializeMesh()                                                       //dont know yet
         {
             fuelModelSet = new FuelModelSet();
             surfaceFire = new Surface(fuelModelSet);

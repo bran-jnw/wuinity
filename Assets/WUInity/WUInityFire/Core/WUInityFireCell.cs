@@ -8,10 +8,10 @@ using UnityEditor;
 namespace WUInity.Fire
 {  
     //[System.Serializable]
-    public class WUInityFireCell
+    public class WUInityFireCell                
     {       
-        public Vector2Int cellIndex;
-        public FireCellState cellState;
+        public Vector2Int cellIndex;            //Declare a cellIndex vector   
+        public FireCellState cellState;         //Declare a variable of type FireCellState (where is that defined)
 
         //firefront is the different spread directions and how far they have travelled
         double[] fireFront; //gets set to -1 when done spreading, otherwise always positive
@@ -30,8 +30,8 @@ namespace WUInity.Fire
         double heatPerUnitArea;
 
         //calls BEHAVE DLL
-        [DllImport("BEHAVEDLL", EntryPoint = "CalcFireMaxSpreadRate")]
-        public static extern double CalcFireMaxSpreadRate(int fuelModelNumber,
+        [DllImport("BEHAVEDLL", EntryPoint = "CalcFireMaxSpreadRate")]          //Import BEHAVE dll, but only the specified method (??)
+        public static extern double CalcFireMaxSpreadRate(int fuelModelNumber,  //Declare the method from the above DLL. 
             double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody,
             double windSpeed, double windDirection,
             double slope, double aspect,
@@ -39,11 +39,11 @@ namespace WUInity.Fire
             double canopyCover, double canopyHeight, double crownRatio);
         
 
-        public WUInityFireCell(WUInityFireMesh fireMesh, int xIndex, int yIndex, LandScapeStruct lcp)
+        public WUInityFireCell(WUInityFireMesh fireMesh, int xIndex, int yIndex, LandScapeStruct lcp) //CONSTRUCTOR
         {
             this.fireMesh = fireMesh;
             cellIndex = new Vector2Int(xIndex, yIndex);
-            cellState = FireCellState.CanBurn;            
+            cellState = FireCellState.CanBurn;                                  //save the cellState as CanBurn (based on the enumerable called FireCellState) 
 
             fireFront = new double[fireMesh.indexSize];
             distances = new double[fireMesh.indexSize];
@@ -60,19 +60,19 @@ namespace WUInity.Fire
         public void InitCell()
         {            
             //calc distance to next cell center in current direction
-            for (int i = 0; i < distances.Length; i++)
+            for (int i = 0; i < distances.Length; i++)                                  
             {
-                int xI = cellIndex.x + fireMesh.neighborIndices[i].x;
-                int yI = cellIndex.y + fireMesh.neighborIndices[i].y;                
-                if (fireMesh.IsInsideMesh(xI, yI) && fireMesh.GetFireCell(xI, yI).cellState == FireCellState.CanBurn)
+                int xI = cellIndex.x + fireMesh.neighborIndices[i].x;               //save the x dimension of the neighbor cell
+                int yI = cellIndex.y + fireMesh.neighborIndices[i].y;               //save the y dimension of the neighbor cell
+                if (fireMesh.IsInsideMesh(xI, yI) && fireMesh.GetFireCell(xI, yI).cellState == FireCellState.CanBurn)               //if the neighbor is inside the mesh AND it has a CanBurn cellState
                 {
-                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);
+                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);               //
                     //set neighbor since it exists
-                    neighbors[i] = f;
+                    neighbors[i] = f;                                               //save neighbor
                     
                     //caclulate actual distance
                     double dist;
-                    if(i < 4)
+                    if(i < 4)                                                       //save cartesian distance based on the neighbor orientation (i am guessing there is a standard pattern for this)
                     {
                         dist = fireMesh.cellSizeSquared;
                     }
@@ -85,23 +85,23 @@ namespace WUInity.Fire
                         dist = fireMesh.sixteenDistSquared;
                     }
                     //assumes x = y cell size
-                    distances[i] = sqrt(2 * dist + pow2(lcp.elevation- f.lcp.elevation));
+                    distances[i] = sqrt(2 * dist + pow2(lcp.elevation- f.lcp.elevation));           //account for elevation changes
                 }
-                else
+                else                                                            //if the cell cannot be burned for whatever reason
                 {
                     fireFront[i] = -1.0;
-                    distances[i] = -1.0;                    
+                    distances[i] = -1.0;  
                 }
                 maxSpreadRates[i] = 0.0;
             }
-            if(lcp.slope == -1 && lcp.aspect == -1)
+            if(lcp.slope == -1 && lcp.aspect == -1)                                                 //if slope and aspect are not given from the lcp
             {
                 CalculateSlopeAndAspect();
             }                      
             maxSpreadRate = -1.0;                 
         }
 
-        public void Ignite(double timeOfArrival)
+        public void Ignite(double timeOfArrival)            //change the state of a cell to burning
         {
             this.timeOfArrival = timeOfArrival;
             if (cellState == FireCellState.CanBurn)
@@ -116,7 +116,7 @@ namespace WUInity.Fire
             }
         }
 
-        public void QueueIgnition(int directionIndex, double firefrontSpill)
+        public void QueueIgnition(int directionIndex, double firefrontSpill)            //I do not really understand what this is.
         {
             if (cellState == FireCellState.CanBurn)
             {
@@ -132,13 +132,13 @@ namespace WUInity.Fire
             double[] neighborElevations = new double[4];
             for (int i = 0; i < 4; ++i)
             {
-                neighborElevations[i] = lcp.elevation;
-                if (neighbors[i] != null)
+                neighborElevations[i] = lcp.elevation;                      //set all the neighbor elevations as the same elevation as the target cell
+                if (neighbors[i] != null)                                   //for all the neighbors that do exist
                 {
-                    neighborElevations[i] = neighbors[i].lcp.elevation;
+                    neighborElevations[i] = neighbors[i].lcp.elevation;     //update/overwrite their elevation value (clever!)
                 }
             }
-            double e1 = neighborElevations[3];
+            double e1 = neighborElevations[3];                              //From here on below various math ensues
             double e2 = neighborElevations[0];
             double e3 = neighborElevations[1];
             double e4 = neighborElevations[2];
@@ -173,7 +173,7 @@ namespace WUInity.Fire
             //MonoBehaviour.print("Slope: " + slope + ", Aspect: " + aspect);
         }
         
-        public int GetFuelModelNumber()
+        public int GetFuelModelNumber()                             //A bunch of getter functions below.
         {
             return lcp.fuel_model;
         }
@@ -244,9 +244,9 @@ namespace WUInity.Fire
             else
             {
                 //north, east, south, west
-                if(direction == 0 || direction % 2 != 0)
+                if(direction == 0 || direction % 2 != 0)                    //@Jonathan, this if condition returns true for direction = [0,1,3,5,7], did you mean mode2 == 0?
                 {
-                    direction = direction / 2;
+                    direction = direction / 2;                              //I can only guess this is because BEHAVE and WUINITY have different schemes for the neighbor nodes
                 }
                 //NE, SE, SW, NW
                 else
@@ -255,7 +255,6 @@ namespace WUInity.Fire
                 }
                 rate = (int)maxSpreadRates[direction];
             }
-
             return rate;
         }
 
@@ -266,7 +265,7 @@ namespace WUInity.Fire
             return;*/
 
             
-            FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
+            FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);        //extract moisture data from lcp and split it into other variables
             double moistureOneHour = moisture.OneHour;// 6.0;
             double moistureTenHour = moisture.TenHour; //7.0;
             double moistureHundredHour = moisture.HundredHour; //8.0;
@@ -284,7 +283,7 @@ namespace WUInity.Fire
             double canopyHeight = lcp.canopy_height;
             double crownRatio = lcp.bulk_density; //TODO: is this correct?
 
-            //C#
+            //C# (What is even going on here? What is being called?)
             TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
             BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
             WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
