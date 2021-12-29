@@ -16,10 +16,10 @@ namespace WUInity.Fire
     [System.Serializable]    
     public struct WeatherData
     {
-        public int Month, Day, Precip, Hour1, Hour2, Temp1, Temp2, Humid1, Humid2, Elevation;
+        public int Month, Day, Precip, Hour1, Hour2, Temp1, Temp2, Humid1, Humid2, Elevation;                                                   //declare all needed variables
 
 
-        public WeatherData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)
+        public WeatherData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)   //constructor
         {
             this.Month = Month;
             this.Day = Day;
@@ -33,7 +33,7 @@ namespace WUInity.Fire
             this.Elevation = Elevation;
         }
 
-        public void UpdateData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)
+        public void UpdateData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)       //updater of sorts
         {
             this.Month = Month;
             this.Day = Day;
@@ -47,7 +47,7 @@ namespace WUInity.Fire
             this.Elevation = Elevation;
         }
 
-        public void GetMinHourData(out int minHour, out int minTemp, out int minHumid)
+        public void GetMinHourData(out int minHour, out int minTemp, out int minHumid)          //getter with multiple outputs
         {
             minHour = Mathf.Max(Hour1, Hour2);
             if (minHour == Hour1)

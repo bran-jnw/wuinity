@@ -66,7 +66,7 @@ namespace WUInity.Fire
                 int yI = cellIndex.y + fireMesh.neighborIndices[i].y;               //save the y dimension of the neighbor cell
                 if (fireMesh.IsInsideMesh(xI, yI) && fireMesh.GetFireCell(xI, yI).cellState == FireCellState.CanBurn)               //if the neighbor is inside the mesh AND it has a CanBurn cellState
                 {
-                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);               //
+                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);               //create fire cell f
                     //set neighbor since it exists
                     neighbors[i] = f;                                               //save neighbor
                     
@@ -396,7 +396,7 @@ namespace WUInity.Fire
             double canopyHeight = lcp.canopy_height;
             double crownRatio = lcp.bulk_density; //TODO: is this correct?
 
-            //C#
+            //C#, i guess this sets up a lot of enumerators that set the units?
             TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
             BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
             WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
@@ -410,7 +410,7 @@ namespace WUInity.Fire
 
 
             //feed new data
-            //updates both surface and crown
+            //updates both surface and crown (shove it all in behave?)
             fireMesh.crownFire.updateCrownInputs(fuelModelNumber,
                 moistureOneHour, moistureTenHour, moistureHundredHour, moistureLiveHerbaceous, moistureLiveWoody, moistureFoliar, moistureUnits,
                 windSpeed, windSpeedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode,

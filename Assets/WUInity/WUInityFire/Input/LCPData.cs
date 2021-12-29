@@ -20,23 +20,23 @@ namespace WUInity.Fire
 		public long coarse_woody_model;
 	}
 
-	// structure for holding basic cell information
+	// structure for holding basic cell information (is there a reason to have short variable names here?)
 	struct celldata
 	{		
 		public short e;                 // elevation
 		public short s;                 // slope
 		public short a;                 // aspect
 		public short f;                 // fuel models
-		public short c;                 // canopy cover
+		public short c;					// canopy cover
 	}
 
 	// structure for holding optional crown fuel information
 	struct crowndata
 	{
 
-		public short h;                // canopy height
-		public short b;                // crown base
-		public short p;				// bulk density
+		public short h;					// canopy height
+		public short b;					// crown base
+		public short p;					// bulk density
 	}
 
 	// structure for holding duff and woody fuel information
@@ -145,12 +145,12 @@ namespace WUInity.Fire
 		public short[] landscape;
 		static readonly int headsize = 7316; //header size taken from farsite source code
 
-		public LCPData()
+		public LCPData()								//blank constructor does nothing
 		{
 			
 		}
 
-		public LCPData(string filename)
+		public LCPData(string filename)					//constructor with file string reads file
 		{
 			ReadLCP(filename);
 		}
@@ -179,7 +179,7 @@ namespace WUInity.Fire
 			l.fuel_model = cell.f;
 			l.canopy_cover = cell.c;
 
-			switch (NumVals)
+			switch (NumVals)									//So the number of values can be used to find what kind of vegetation is used??
 			{
 				case 7:
 					// 5 basic and duff and woody
@@ -214,7 +214,7 @@ namespace WUInity.Fire
 			return cell;
 		}
 
-		long GetCellPosition(double east, double north)
+		long GetCellPosition(double east, double north)								//Is there not another method to do this in another class?
 		{
 			double xpt = (east - Header.loeast) / GetCellResolutionX();
 			double ypt = (north - Header.lonorth) / GetCellResolutionY();
@@ -257,7 +257,6 @@ namespace WUInity.Fire
             for (int i = 0; i < NumVals; i++)
             {
 				ldata[i] = landscape[posit * NumVals + i];
-
 			}
 
 			//always save this data
@@ -503,7 +502,7 @@ namespace WUInity.Fire
 						//fseek(landfile, headsize, SEEK_SET);
 						//if((landscape=(short *) calloc(Header.numnorth*Header.numeast, NumVals*sizeof(short)))!=NULL)
 						NumAlloc = (double)(Header.numnorth * Header.numeast * NumVals * sizeof(short));
-						if (NumAlloc > 2147483647)
+						if (NumAlloc > 2147483647)	//if that number above is not above max (i think int.max), but why is it phrased like this?
 						{
 							CantAllocLCP = true;
 							return;
