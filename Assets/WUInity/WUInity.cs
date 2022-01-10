@@ -1,24 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using OsmSharp.Streams;
-using WUInity.Evac;
-using WUInity.Traffic;
-using WUInity.GPW;
-using System;
-using System.IO;
-using Mapbox.Utils;
-using Mapbox.Unity.Utilities;
+using System.Collections;               //Namespace to enable various standard class types (arraylist, stack, Hashtable, etc) and Interfaces (IEnumerable etc.)
+using System.Collections.Generic;       //Similar as above but allows for more strongly typed collections (??)
+using UnityEngine;                      //Just unity
+using OsmSharp.Streams;                 //OpenStreetMap data stream?
+using WUInity.Evac;                     //Pedestrian evacuation Part
+using WUInity.Traffic;                  //Traffic evacuation part
+using WUInity.GPW;                      //Gridded Population of the World data
+using System;                           //general System Namespace
+using System.IO;                        //general IO Namespace
+using Mapbox.Utils;                     //Navigation and map data API and SDK
+using Mapbox.Unity.Utilities;           //Similar as above but ported in Unity?
 
 
 namespace WUInity
 {
-    [RequireComponent(typeof(Farsite.FarsiteViewer))]
-    [RequireComponent(typeof(WUInityGUI))]
+    [RequireComponent(typeof(Farsite.FarsiteViewer))]               //Apparently this makes sure that when an object is made, unity is absolutely sure that the following types are applied.
+    [RequireComponent(typeof(WUInityGUI))]                          //however this part is not in a class or method so idk what is going on here. 
     [RequireComponent(typeof(GPWViewer))]
-    public class WUInity : MonoBehaviour
+    public class WUInity : MonoBehaviour                            //Declare the WUINITY public class (meaning other namespaces and classes can instantiate it / use it) and have it inherit the methods & variables of the MonoBehaviour class (Unity's Base class)
     {
-        private static WUInity wuinity_internal;
+        private static WUInity wuinity_internal;                    //
         public static WUInity WUINITY
         {
             get

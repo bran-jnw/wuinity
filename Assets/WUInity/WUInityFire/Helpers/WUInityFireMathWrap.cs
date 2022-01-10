@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace WUInity.Fire
 {
-    public static class MathWrap
+    public static class MathWrap                        //Define a "wrapper class" that contains helpful math functions (possibly to avoid including the entire of System.math?). Static since we want it to work irrespective of instantiated object. 
     {
         public static double PI = System.Math.PI;
         public static double M_PI = System.Math.PI;
