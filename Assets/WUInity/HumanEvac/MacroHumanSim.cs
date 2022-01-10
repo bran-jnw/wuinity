@@ -165,7 +165,7 @@ namespace WUInity.Evac
 
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
-            if(WUInity.WUINITY_SIM.runTrafficSim)
+            if(WUInity.WUINITY_IN.runTrafficSim)
             {
                 if (household.cars > 1)
                 {

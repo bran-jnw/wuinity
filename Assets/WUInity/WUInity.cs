@@ -723,7 +723,7 @@ namespace WUInity
         int[] currentPeopleInCells;
         public void DisplayClosestDensityData(float time)
         {
-            if(sim.runTrafficSim)
+            if(input.runTrafficSim)
             {
                 int index = (int)time / (int)input.traffic.saveInterval;
                 if (index > outputTextures.Count - 1)

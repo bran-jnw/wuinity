@@ -11,9 +11,9 @@ namespace WUInity.Evac
             SaveWUI.LoadInput("evac_verification");
             EvacInput evacOptions = WUInity.WUINITY_IN.evac;
             WUInityInput wuinityOptions = WUInity.WUINITY_IN;
-            WUInity.WUINITY_SIM.runEvacSim = true;
-            WUInity.WUINITY_SIM.runTrafficSim = false;
-            WUInity.WUINITY_SIM.runFireSim = false;
+            WUInity.WUINITY_IN.runEvacSim = true;
+            WUInity.WUINITY_IN.runTrafficSim = false;
+            WUInity.WUINITY_IN.runFireSim = false;
             wuinityOptions.runInRealTime = false;
 
             WUInity.WUINITY.LoadGPW();

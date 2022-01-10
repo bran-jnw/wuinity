@@ -19,6 +19,9 @@ namespace WUInity
         public Vector2D size = new Vector2D(10000, 10000);
         public int zoomLevel = 13;
         public bool runInRealTime = false;
+        public bool runEvacSim = true;
+        public bool runTrafficSim = true;
+        public bool runFireSim = false;
 
         public EvacInput evac;
         public TrafficInput traffic;

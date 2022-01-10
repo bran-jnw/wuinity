@@ -16,10 +16,7 @@ namespace WUInity
 {
     [System.Serializable]
     public class WUInitySim
-    {     
-        public bool runEvacSim = true;
-        public bool runTrafficSim = true;
-        public bool runFireSim = true;
+    {    
         public bool showResults = false;
 
         private bool stopSim;
@@ -207,7 +204,7 @@ namespace WUInity
             }
 
             //all things evac
-            if(WUInity.WUINITY_SIM.runEvacSim)
+            if(WUInity.WUINITY_IN.runEvacSim)
             {
                 //need gpw data
                 if (WUInity.WUINITY_GPW == null)
@@ -218,7 +215,7 @@ namespace WUInity
             }
 
             //all things traffic
-            if (WUInity.WUINITY_SIM.runTrafficSim)
+            if (WUInity.WUINITY_IN.runTrafficSim)
             {
                 //need router db
                 if (routerDb == null)
@@ -290,12 +287,12 @@ namespace WUInity
             WUInityOutput output = WUInity.WUINITY_OUT;
             GPWViewer gpwViewer = WUInity.WUINITY_GPW;
 
-            if (runFireSim)
+            if (input.runFireSim)
             {
                 CreateFireSim();
             }
 
-            if (runEvacSim)
+            if (input.runEvacSim)
             {
                 macroHumanSim = new MacroHumanSim();
                 //place people
@@ -335,7 +332,7 @@ namespace WUInity
                 }
             }
 
-            if (runTrafficSim)
+            if (input.runTrafficSim)
             {
                 macroTrafficSim = new MacroTrafficSim(routeCreator);
             }
@@ -368,7 +365,7 @@ namespace WUInity
             }
             startTime = time;
 
-            if(runTrafficSim)
+            if(input.runTrafficSim)
             {
                 for (int i = 0; i < WUInity.WUINITY_IN.traffic.trafficAccidents.Length; i++)
                 {
@@ -408,12 +405,13 @@ namespace WUInity
 
         void SaveOutput(int runNumber)
         {
-            if(runTrafficSim)
+            WUInityInput input = WUInity.WUINITY_IN;
+            if (input.runTrafficSim)
             {
                 LogMessage("Total cars in simulation: " + macroTrafficSim.GetTotalCarsSimulated());
                 macroTrafficSim.SaveToFile(runNumber);
             }
-            if(runEvacSim)
+            if(input.runEvacSim)
             {
                 macroHumanSim.SaveToFile(runNumber);
             }            
@@ -429,12 +427,12 @@ namespace WUInity
             if (input.stopWhenEvacuated)
             {
                 bool evacDone = true;
-                if (runEvacSim)
+                if (input.runEvacSim)
                 {
                     evacDone = macroHumanSim.evacuationDone;
                 }
                 bool trafficDone = true;
-                if (runTrafficSim)
+                if (input.runTrafficSim)
                 {
                     trafficDone = macroTrafficSim.EvacComplete();
                 }
@@ -474,7 +472,7 @@ namespace WUInity
         {
             WUInityInput input = WUInity.WUINITY_IN;
             
-            if(runTrafficSim)
+            if(input.runTrafficSim)
             {
                 //check for global events
                 for (int i = 0; i < WUInity.WUINITY_IN.evac.blockGoalEvents.Length; i++)
@@ -488,7 +486,7 @@ namespace WUInity
             }
             
             //update fire mesh if needed
-            if (runFireSim)
+            if (input.runFireSim)
             {   
                 if (time >= 0.0f && time >= nextFireUpdate)
                 {
@@ -505,20 +503,20 @@ namespace WUInity
             }
 
             //advance evac
-            if (runEvacSim)
+            if (input.runEvacSim)
             {
                 macroHumanSim.AdvanceEvacuatePopulation(input.deltaTime, time);
             }
 
             //advance traffic
-            if (runTrafficSim)
+            if (input.runTrafficSim)
             {
                 macroTrafficSim.AdvanceTrafficSimulation(input.deltaTime, time);
             }
 
             //increase time
             float deltaTime = input.deltaTime;
-            if (runFireSim && !runEvacSim && !runTrafficSim)
+            if (input.runFireSim && !input.runEvacSim && !input.runTrafficSim)
             {
                 deltaTime = (float)fireMesh.dt;
             }

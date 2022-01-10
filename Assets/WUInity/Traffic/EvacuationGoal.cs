@@ -59,7 +59,7 @@ namespace WUInity
             UpdateFlow(timeStep, deltaTime);
 
             //car can arrive
-            if(currentFlow < maxFlow && !blocked)
+            if((maxFlow <= 0 && !blocked) || (currentFlow < maxFlow && !blocked))
             {         
                 //add new cars and people that has arrived during timestep
                 ++timeStepCars;
