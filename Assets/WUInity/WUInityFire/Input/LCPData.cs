@@ -150,14 +150,14 @@ namespace WUInity.Fire
 			
 		}
 
-		public LCPData(string filename)					//constructor with file string reads file
+		public LCPData(string path)					//constructor with file string reads file
 		{
-			ReadLCP(filename);
+			ReadLCP(path);
 		}
 
-		public void ReadLCP(string filename)
+		public void ReadLCP(string path)
 		{
-			ReadData(filename);
+			ReadData(path);
 			//SetCustFuelModelID(HaveCustomFuelModels());
 			//SetConvFuelModelID(HaveFuelConversions());
 		}
@@ -291,9 +291,8 @@ namespace WUInity.Fire
 			}
 		}
 
-		void ReadData(string filename)
+		void ReadData(string path)
 		{
-			string path = Application.dataPath + "/Resources/_input/" + filename + ".lcp";
 			if (!File.Exists(path))
 			{
 				CantAllocLCP = true;
@@ -410,6 +409,8 @@ namespace WUInity.Fire
 				Header.DuffFile = reader.ReadChars(256);
 				Header.WoodyFile = reader.ReadChars(256);
 				Header.Description = reader.ReadChars(512);
+
+				WUInity.WUINITY_SIM.LogMessage("INFO: LCP found in " + path + ", read succesfully.");
 			}
 
 			/*// do this in case a version 1.0 file has gotten through

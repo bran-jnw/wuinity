@@ -54,7 +54,7 @@ namespace WUInity
 
         public void LoadRouteCollections()
         {
-            RouteCollection[] newRoutes = SaveWUI.LoadRouteCollections(WUInity.WUINITY_IN.traffic.precalcRoutesName);
+            RouteCollection[] newRoutes = SaveLoadWUI.LoadRouteCollections(WUInity.WUINITY_IN.traffic.precalcRoutesName);
             if(newRoutes != null)
             {
                 routes = newRoutes;
@@ -306,7 +306,7 @@ namespace WUInity
                     if(routes == null)
                     {
                         routes = routeCreator.CalculateCellRoutes();
-                        SaveWUI.SaveRouteCollections(WUInity.WUINITY_IN.traffic.precalcRoutesName);
+                        SaveLoadWUI.SaveRouteCollections(WUInity.WUINITY_IN.traffic.precalcRoutesName);
                     }                    
                 }
                 //apply routes
@@ -338,9 +338,14 @@ namespace WUInity
             }
         }
 
+        public void UpdateLCPFile()
+        {
+            fireMesh = new Fire.WUInityFireMesh(WUInity.WUINITY_IN.fire.lcpFile, WUInity.WUINITY_IN.fire.weather, WUInity.WUINITY_IN.fire.wind, WUInity.WUINITY_IN.fire.initialFuelMoisture, WUInity.WUINITY_IN.fire.ignitionPoints);
+        }
+
         private void CreateFireSim()
         {            
-            fireMesh = new Fire.WUInityFireMesh(WUInity.WUINITY_IN.fire.lcpFileName, WUInity.WUINITY_IN.fire.weather, WUInity.WUINITY_IN.fire.wind, WUInity.WUINITY_IN.fire.initialFuelMoisture, WUInity.WUINITY_IN.fire.ignitionPoints);
+            fireMesh = new Fire.WUInityFireMesh(WUInity.WUINITY_IN.fire.lcpFile, WUInity.WUINITY_IN.fire.weather, WUInity.WUINITY_IN.fire.wind, WUInity.WUINITY_IN.fire.initialFuelMoisture, WUInity.WUINITY_IN.fire.ignitionPoints);
             fireMesh.terrainMesh = WUInity.WUINITY.terrainMeshFilter.mesh;
             fireMesh.spreadMode = WUInity.WUINITY_IN.fire.spreadMode;
             //WUInity.WUINITY.terrainMeshFilter.gameObject.GetComponent<MeshRenderer>().material = WUInity.WUINITY.fireMaterial;            
@@ -416,7 +421,7 @@ namespace WUInity
                 macroHumanSim.SaveToFile(runNumber);
             }            
             
-            SaveWUI.SaveOutput(WUInity.WUINITY_IN.simName + "_" + runNumber);
+            SaveLoadWUI.SaveOutput(WUInity.WUINITY_IN.simName + "_" + runNumber);
         }
 
         void UpdateSimStatus()

@@ -77,7 +77,7 @@ namespace WUInity
                 data[3] += WUInity.WUINITY_IN.evac.evacGroupIndices[i] + " ";
             }
 
-            System.IO.File.WriteAllLines(Application.dataPath + "/Resources/_input/" + filename + ".egs", data);
+            System.IO.File.WriteAllLines(WUInity.WORKING_FOLDER + "/" + filename + ".egs", data);
         }
 
         public static void LoadEvacGroupIndices()
@@ -86,7 +86,7 @@ namespace WUInity
             WUInity.WUINITY_SIM.UpdateNeededData();
 
             string filename = WUInity.WUINITY_IN.simName;
-            string path = Application.dataPath + "/Resources/_input/" + filename + ".egs";
+            string path = WUInity.WORKING_FOLDER + "/" + filename + ".egs";
 
             try
             {

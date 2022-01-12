@@ -22,7 +22,7 @@ namespace WUInity
         public static WUInity WUINITY
         {
             get
-            {                
+            {
                 return wuinity_internal;
             }
         }
@@ -91,6 +91,44 @@ namespace WUInity
             }
         }
 
+        public static string DATA_FOLDER
+        {
+            get
+            {
+                return Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "external_data");
+            }
+        }
+
+        public static string WORKING_FILE
+        {
+            get
+            {
+                return WUINITY.workingFilePath;
+            }
+            set
+            {
+                WUINITY.workingFilePath = value;
+            }
+        }
+
+        public static string WORKING_FOLDER
+        {
+            get
+            {
+                return Path.GetDirectoryName(WORKING_FILE);            
+            }
+        }
+
+        public static string OUTPUT_FOLDER
+        {
+            get
+            {
+                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WORKING_FILE).ToString(), "output"));
+                return path.ToString();
+            }
+        }
+
+
         [Header("Options")]
         [SerializeField] private bool editorMode = false;
         [SerializeField] private WUInityInput input = new WUInityInput();
@@ -113,9 +151,11 @@ namespace WUInity
         [SerializeField] [HideInInspector] private GPWViewer gpwViewer;
         [SerializeField][HideInInspector] private GameObject evacDataPlane;
         [SerializeField] [HideInInspector] private GameObject fireDataPlane;
-        [SerializeField] [HideInInspector] private WUInityPainter painter;
+        [SerializeField] [HideInInspector] private WUInityPainter painter;        
 
         List<GameObject> drawnRoads;
+        string workingFilePath;
+        public bool haveInput = false;
 
         public enum DataSampleMode { None, GPW, Raw, Relocated, Staying, TrafficDens, Paint, Farsite}
         [SerializeField] public DataSampleMode dataSampleMode = DataSampleMode.None;
@@ -178,11 +218,12 @@ namespace WUInity
             /*WUInityPERIL peril = new WUInityPERIL();
             string path = Application.dataPath + "/Resources/_input/k_PERIL/";
             peril.RunAllCases(5, 30, 30, 50, 50, WUInityPERIL.GetDefaultWUIArea(), 5f, path, path, path + "/peril_test.csv", path + "/peril_EPI.csv");*/
-            SaveWUI.LoadDefaultInputs();
+            //SaveLoadWUI.LoadDefaultInputs();
         }
 
         public void LoadInputData(WUInityInput input)
         {
+            WUINITY.haveInput = true;
             this.input = input;
             LoadMapbox();
             SpawnMarkers();

@@ -8,7 +8,7 @@ namespace WUInity.Evac
     {
         public static void RunVerification()
         {
-            SaveWUI.LoadInput("evac_verification");
+            SaveLoadWUI.LoadInput("evac_verification");
             EvacInput evacOptions = WUInity.WUINITY_IN.evac;
             WUInityInput wuinityOptions = WUInity.WUINITY_IN;
             WUInity.WUINITY_IN.runEvacSim = true;
@@ -39,7 +39,7 @@ namespace WUInity.Evac
             }
 
             //P3, need more curves
-            SaveWUI.LoadInput("evac_verification");
+            SaveLoadWUI.LoadInput("evac_verification");
             wuinityOptions = WUInity.WUINITY_IN;
             evacOptions = WUInity.WUINITY_IN.evac;
 

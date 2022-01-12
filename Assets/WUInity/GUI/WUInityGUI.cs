@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleFileBrowser;
+using System.IO;
 
 namespace WUInity
 {
@@ -42,6 +44,9 @@ namespace WUInity
         GUIButton hideMenu = new GUIButton(7, buttonHeight, "Hide Menu");
         GUIButton exitMenu = new GUIButton(8, buttonHeight, "Exit");
 
+        string[] wuiFilter = new string[] { ".wui" };
+        string[] lcpFilter = new string[] { ".lcp" };
+
         void OnGUI()
         {
             //select menu
@@ -59,86 +64,89 @@ namespace WUInity
                 }
             }
 
-            if (GUI.Button(gpwMenu.rect, gpwMenu.text))
+            if(WUInity.WUINITY.haveInput)
             {
-                if (menuChoice == ActiveMenu.GPWMenu)
+                if (GUI.Button(gpwMenu.rect, gpwMenu.text))
                 {
-                    //menuChoice = ActiveMenu.None;
-                }
-                else
-                {
-                    menuChoice = ActiveMenu.GPWMenu;
-                    WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.GPW);
-                }
-            }
-
-            if (GUI.Button(evacMenu.rect, evacMenu.text))
-            {
-                if (menuChoice == ActiveMenu.EvacMenu)
-                {
-                    //menuChoice = ActiveMenu.None;
-                }
-                else
-                {
-                    menuChoice = ActiveMenu.EvacMenu;
-                    WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
-                }
-            }
-
-            if (GUI.Button(trafficMenu.rect, trafficMenu.text))
-            {
-                if (menuChoice == ActiveMenu.TrafficMenu)
-                {
-                    //menuChoice = ActiveMenu.None;
-                }
-                else
-                {
-                    menuChoice = ActiveMenu.TrafficMenu;
-                    WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
-                }
-            }
-
-            if (GUI.Button(farsiteMenu.rect, farsiteMenu.text))
-            {
-                if (menuChoice == ActiveMenu.FarsiteMenu)
-                {
-                    //menuChoice = ActiveMenu.None;
-                }
-                else
-                {
-                    menuChoice = ActiveMenu.FarsiteMenu;
-                    WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Farsite);
-                }
-            }
-
-            if (GUI.Button(fireMenu.rect, fireMenu.text))
-            {
-                if (menuChoice == ActiveMenu.FireMenu)
-                {
-                    //menuChoice = ActiveMenu.None;
-                }
-                else
-                {
-                    menuChoice = ActiveMenu.FireMenu;
-                    WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
-                }
-            }
-
-            if (WUInity.WUINITY_SIM.showResults)
-            {
-                if (GUI.Button(outputMenu.rect, outputMenu.text))
-                {
-                    if (menuChoice == ActiveMenu.OutputMenu)
+                    if (menuChoice == ActiveMenu.GPWMenu)
                     {
                         //menuChoice = ActiveMenu.None;
                     }
                     else
                     {
-                        menuChoice = ActiveMenu.OutputMenu;
+                        menuChoice = ActiveMenu.GPWMenu;
+                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.GPW);
+                    }
+                }
+
+                if (GUI.Button(evacMenu.rect, evacMenu.text))
+                {
+                    if (menuChoice == ActiveMenu.EvacMenu)
+                    {
+                        //menuChoice = ActiveMenu.None;
+                    }
+                    else
+                    {
+                        menuChoice = ActiveMenu.EvacMenu;
                         WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
-            }           
+
+                if (GUI.Button(trafficMenu.rect, trafficMenu.text))
+                {
+                    if (menuChoice == ActiveMenu.TrafficMenu)
+                    {
+                        //menuChoice = ActiveMenu.None;
+                    }
+                    else
+                    {
+                        menuChoice = ActiveMenu.TrafficMenu;
+                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                    }
+                }
+
+                if (GUI.Button(farsiteMenu.rect, farsiteMenu.text))
+                {
+                    if (menuChoice == ActiveMenu.FarsiteMenu)
+                    {
+                        //menuChoice = ActiveMenu.None;
+                    }
+                    else
+                    {
+                        menuChoice = ActiveMenu.FarsiteMenu;
+                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Farsite);
+                    }
+                }
+
+                if (GUI.Button(fireMenu.rect, fireMenu.text))
+                {
+                    if (menuChoice == ActiveMenu.FireMenu)
+                    {
+                        //menuChoice = ActiveMenu.None;
+                    }
+                    else
+                    {
+                        menuChoice = ActiveMenu.FireMenu;
+                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                    }
+                }
+
+                if (WUInity.WUINITY_SIM.showResults)
+                {
+                    if (GUI.Button(outputMenu.rect, outputMenu.text))
+                    {
+                        if (menuChoice == ActiveMenu.OutputMenu)
+                        {
+                            //menuChoice = ActiveMenu.None;
+                        }
+                        else
+                        {
+                            menuChoice = ActiveMenu.OutputMenu;
+                            WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                        }
+                    }
+                }
+            }                  
 
             /*if (GUI.Button(hideMenu.rect, hideMenu.text))
             {
@@ -204,30 +212,47 @@ namespace WUInity
             int buttonIndex = 0;
             int buttonColumnStart = 140;
 
+            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load inputs"))
+            {
+                OpenLoadInput();
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load defaults"))
+            {
+                SaveLoadWUI.LoadDefaultInputs();
+                mainInputDirty = true;
+            }
+            ++buttonIndex;
+
+            if(!WUInity.WUINITY.haveInput)
+            {
+                return;
+            }
+
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
             ++buttonIndex;
             wO.simName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simName);
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load inputs"))
-            {
-                SaveWUI.LoadInput(wO.simName);
-                mainInputDirty = true;
-            }
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load defaults"))
-            {
-                SaveWUI.LoadDefaultInputs();
-                mainInputDirty = true;
-            }
-            ++buttonIndex;
-
             if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save input file"))
             {
-                ParseMainData(wO);
-                SaveWUI.SaveInput(wO.simName);
+                if(wO.simName == "default")
+                {
+                    OpenSaveInput();
+                }
+                else
+                {
+                    ParseMainData(wO);
+                    SaveLoadWUI.SaveInput();
+                }                
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save as"))
+            {
+                OpenSaveInput();
             }
             ++buttonIndex;
 
@@ -287,6 +312,54 @@ namespace WUInity
                 }
             }
             ++buttonIndex;
+        }
+
+        void OpenSaveInput()
+        {
+            FileBrowser.SetFilters(false, wuiFilter);
+            WUInityInput wO = WUInity.WUINITY_IN;
+            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.simName + ".wui", "Save file", "Save");
+        }
+
+        void OpenLoadInput()
+        {
+            FileBrowser.SetFilters(false, wuiFilter);
+            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load file", "Load");
+        }
+
+        void OpenLoadLCP()
+        {
+            FileBrowser.SetFilters(false, lcpFilter);
+            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            FileBrowser.ShowLoadDialog(LoadLCP, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load file", "Load");
+        }
+
+        void SaveInput(string[] paths)
+        {
+            WUInity.WORKING_FILE = paths[0];
+            WUInityInput wO = WUInity.WUINITY_IN;
+            ParseMainData(wO);
+            SaveLoadWUI.SaveInput();
+        }
+
+        void LoadInput(string[] paths)
+        {
+            SaveLoadWUI.LoadInput(paths[0]);
+            mainInputDirty = true;
+        }
+
+        void LoadLCP(string[] paths)
+        {
+            WUInityInput wO = WUInity.WUINITY_IN; 
+            wO.fire.lcpFile = paths[0];
+            WUInity.WUINITY_SIM.UpdateLCPFile();
+        }
+
+        void CancelSaveLoad()
+        {
+
         }
 
         void ParseMainData(WUInityInput wO)
@@ -640,9 +713,15 @@ namespace WUInity
             int buttonIndex = 0;
 
             //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP file name:");
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP file:");
             ++buttonIndex;
-            fI.lcpFileName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), fI.lcpFileName);
+            fI.lcpFile = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), fI.lcpFile);
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load LCP file"))
+            {
+                OpenLoadLCP();
+            }
             ++buttonIndex;
 
             if (WUInity.WUINITY.IsPainterActive())

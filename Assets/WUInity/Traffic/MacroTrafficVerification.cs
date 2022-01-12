@@ -10,7 +10,7 @@ namespace WUInity.Traffic
     {
         public static void RunTrafficVerificationTests()
         {
-            SaveWUI.LoadInput("traffic_verification");
+            SaveLoadWUI.LoadInput("traffic_verification");
             TrafficInput trafficOptions = WUInity.WUINITY_IN.traffic;
             WUInityInput wuinityOptions = WUInity.WUINITY_IN;
 

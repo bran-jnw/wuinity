@@ -10,7 +10,7 @@ namespace WUInity
     [System.Serializable]
     public class WUInityInput
     {
-        public string simName = "rox";
+        public string simName = "default";
         public float deltaTime = 1f;
         public float maxSimTime = 864000f; //10 days
         public bool stopWhenEvacuated = true;
@@ -117,7 +117,7 @@ namespace WUInity
     [System.Serializable]
     public class FireInput
     {
-        public string lcpFileName;
+        public string lcpFile;
         public Fire.WUInityFireIgnition[] ignitionPoints = Fire.WUInityFireIgnition.GetDefault();
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
         public Fire.WeatherInput weather = Fire.WeatherInput.GetTemplate();

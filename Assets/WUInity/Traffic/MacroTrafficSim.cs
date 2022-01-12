@@ -5,7 +5,7 @@ using UnityEngine;
 namespace WUInity.Traffic
 {
     [System.Serializable]
-    public class MacroTrafficSim
+    public class MacroTrafficSim : ITrafficSim
     {        
         public abstract class TrafficEvent
         {

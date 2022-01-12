@@ -42,19 +42,20 @@ namespace WUInity
                 data[4] += WUInity.WUINITY_IN.fire.initialIgnitionIndices[i] + " ";*/
             }
 
-            System.IO.File.WriteAllLines(Application.dataPath + "/Resources/_input/" + filename + ".gfi", data); //graphical fire input
+            string path = Path.Combine(WUInity.WORKING_FOLDER, filename + ".gfi");
+            System.IO.File.WriteAllLines(path, data); //graphical fire input
         }
 
         public static void LoadGraphicalFireInput()
         {
             string filename = WUInity.WUINITY_IN.simName;
-            string path = Application.dataPath + "/Resources/_input/" + filename + ".gfi"; //graphical fire input
+            string path = Path.Combine(WUInity.WORKING_FOLDER, filename + ".gfi"); //graphical fire input
 
             try
             {
                 using (StreamReader sr = new StreamReader(path))
                 {
-                    string[] header = new string[4];
+                    string[] header = new string[5];
                     for (int i = 0; i < 5; ++i)
                     {
                         header[i] = sr.ReadLine();
@@ -70,9 +71,10 @@ namespace WUInity
                         int[] wuiAreaIndices = new int[ncols * nrows];
                         for (int i = 0; i < data.Length; ++i)
                         {
+                            
                             int pos;
                             int.TryParse(data[i], out pos);
-                            wuiAreaIndices[pos] = 1;
+                            wuiAreaIndices[pos] = 1;                       
                         }
                         WUInity.WUINITY_SIM.UpdateWUIArea(wuiAreaIndices);
 
@@ -82,17 +84,17 @@ namespace WUInity
                         {
                             int pos;
                             int.TryParse(data[i], out pos);
-                            randomIgnitionArea[pos] = 1;
+                            randomIgnitionArea[pos] = 1;                          
                         }
                         WUInity.WUINITY_SIM.UpdateRandomIgnitionIndices(randomIgnitionArea);
 
                         data = header[4].Split(' ');
                         int[] initialIgnitionIndices = new int[ncols * nrows];
                         for (int i = 0; i < data.Length; ++i)
-                        {
+                        {                            
                             int pos;
                             int.TryParse(data[i], out pos);
-                            initialIgnitionIndices[pos] = 1;
+                            initialIgnitionIndices[pos] = 1;                    
                         }
                         WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);
 
@@ -130,8 +132,8 @@ namespace WUInity
             catch (System.Exception e)
             {
                 CreateDefaultInputs();
-                WUInity.WUINITY_SIM.LogMessage("WARNING: Graphical fire input file " + path + " not found, using default.");
-                //WUInity.WUINITY_SIM.LogMessage(e.Message);
+                WUInity.WUINITY_SIM.LogMessage("WARNING: could not read GFI due to: " + e.ToString() + ". Creating empty default.");
+                //WUInity.WUINITY_SIM.LogMessage("WARNING: Graphical fire input file " + path + " not found, using default.");
             }
 
         }
