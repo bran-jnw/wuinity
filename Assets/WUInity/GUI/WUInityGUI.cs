@@ -775,6 +775,8 @@ namespace WUInity
                     ++buttonIndex;
                 }
 
+                //add some extra space
+                ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop painting"))
                 {
                     WUInity.WUINITY.StopPainter();

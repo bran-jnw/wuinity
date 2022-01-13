@@ -146,7 +146,11 @@ namespace WUInity
                         target.Pull();
                     }
                     // create the network for cars only.
-                    routerDb.LoadOsmData(filtered, Vehicle.Car);
+                    LoadSettings settings = new LoadSettings();
+                    settings.KeepNodeIds = true; //use to enable measure flow at nodes
+                    //settings.KeepWayIds = true; //can be used to calc density easier?
+                    settings.OptimizeNetwork = true;
+                    routerDb.LoadOsmData(filtered, settings, Vehicle.Car);
                 }
 
                 // write the routerdb to disk.
