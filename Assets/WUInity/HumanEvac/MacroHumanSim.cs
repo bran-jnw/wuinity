@@ -203,7 +203,8 @@ namespace WUInity.Evac
         public void SaveToFile(int runNumber)
         {
             WUInityInput wO = WUInity.WUINITY_IN;
-            System.IO.File.WriteAllLines(Application.dataPath + "/Resources/_output/" + wO.simName + "_pedestrian_output_" + runNumber + ".csv", output);
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.simName + "_pedestrian_output_" + runNumber + ".csv");
+            System.IO.File.WriteAllLines(path, output);
         }
 
         //alternate way of saving, neeed to print each loop iteration, saves memory but is way slower. Update: useless? uses more memory?

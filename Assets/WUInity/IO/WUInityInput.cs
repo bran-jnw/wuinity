@@ -35,8 +35,8 @@ namespace WUInity
     [System.Serializable]
     public class GPWInput
     {
-        public bool readGPWFromSave = true;
-        public string localGPWFilename = "roxburough.gpw";
+        public string gpwDataFolder = "gpw-v4-population-density-rev10_2015_30_sec_asc";
+        public bool tryReadGPWFromSave = true;
     }
 
     [System.Serializable]
@@ -75,8 +75,7 @@ namespace WUInity
     [System.Serializable]
     public class ItineroInput
     {
-        public string osmDataName = "colorado-latest";
-        public string routerDatabaseName = "colorado-latest";
+        public string osmFile = "colorado-latest";
         public float osmBorderSize = 1000f;
     }
 

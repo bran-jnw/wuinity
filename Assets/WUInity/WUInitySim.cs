@@ -111,11 +111,11 @@ namespace WUInity
         {
             WUInityInput input = WUInity.WUINITY_IN;
 
-            string internalRouterName = input.itinero.routerDatabaseName + ".routerdb";
-            string internalOSMName = input.itinero.osmDataName + ".osm.pbf";
-            if (File.Exists(Application.dataPath + "/Resources/_input/osm_itinero/" + internalRouterName))
+            string internalRouterName = input.simName + ".routerdb";
+            string path = Path.Combine(WUInity.WORKING_FOLDER, internalRouterName);
+            if (File.Exists(path))
             {
-                using (FileStream stream = new FileInfo(Application.dataPath + "/Resources/_input/osm_itinero/" + internalRouterName).OpenRead())
+                using (FileStream stream = new FileInfo(path).OpenRead())
                 {
                     routerDb = RouterDb.Deserialize(stream);
                 }
@@ -125,7 +125,7 @@ namespace WUInity
             {
                 // load some routing data and build a routing network.
                 routerDb = new RouterDb();
-                using (FileStream stream = new FileInfo(Application.dataPath + "/Resources/_input/osm_itinero/" + internalOSMName).OpenRead())
+                using (FileStream stream = new FileInfo(input.itinero.osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
                     Vector2D border = GPWData.SizeToDegrees(input.lowerLeftLatLong, new Vector2D(WUInity.WUINITY_IN.itinero.osmBorderSize, WUInity.WUINITY_IN.itinero.osmBorderSize));
@@ -137,7 +137,9 @@ namespace WUInity
                     //print("" + left + ", " + bottom + ", " + right + ", " + top);
                     OsmStreamSource filtered = source.FilterBox(left, top, right, bottom, true);
                     //create a new filtered file
-                    using (FileStream targetStream = File.OpenWrite(Application.dataPath + "/Resources/_input/osm_itinero/" + input.itinero.routerDatabaseName + "_filtered.osm.pbf"))
+                    string fName = Path.GetFileName(input.itinero.osmFile);
+                    path = Path.Combine(WUInity.WORKING_FOLDER, "filtered_" + fName);
+                    using (FileStream targetStream = File.OpenWrite(path))
                     {
                         PBFOsmStreamTarget target = new PBFOsmStreamTarget(targetStream, compress: false);
                         target.RegisterSource(filtered);
@@ -148,7 +150,8 @@ namespace WUInity
                 }
 
                 // write the routerdb to disk.
-                using (FileStream stream = new FileInfo(Application.dataPath + "/Resources/_input/osm_itinero/" + internalRouterName).Open(FileMode.Create))
+                path = Path.Combine(WUInity.WORKING_FOLDER, internalRouterName);
+                using (FileStream stream = new FileInfo(path).Open(FileMode.Create))
                 {
                     routerDb.Serialize(stream);
                 }

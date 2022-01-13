@@ -406,7 +406,8 @@ namespace WUInity.Traffic
         public void SaveToFile(int runNumber)
         {
             WUInityInput wuiIn = WUInity.WUINITY_IN;
-            System.IO.File.WriteAllLines(Application.dataPath + "/Resources/_output/" + wuiIn.simName + "_traffic_output_" + runNumber + ".csv", output);
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simName + "_traffic_output_" + runNumber + ".csv");
+            System.IO.File.WriteAllLines(path, output);
         }
 
         //alternate way of saving, neeed to print each loop iteration, saves memory but is way slower. Update: useless? uses more memory?

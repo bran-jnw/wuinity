@@ -252,9 +252,7 @@ namespace WUInity
             input.lowerLeftLatLong = new Vector2D(39.409924, -105.104505);
             input.size = new Vector2D(5000, 10000);
             input.zoomLevel = 13;
-            input.itinero.osmDataName = "colorado-latest";
-            input.itinero.routerDatabaseName = "colorado-latest";
-            input.gpw.localGPWFilename = "roxburough.gpw";
+            input.itinero.osmFile = "colorado-latest";
             input.evac.routeCellSize = 200.0f;
         }
 
@@ -388,7 +386,7 @@ namespace WUInity
         public void LoadGPW()
         {
             //get all population data set
-            gpwViewer.CreateGPW(input.lowerLeftLatLong, input.size, input.gpw.localGPWFilename);
+            gpwViewer.CreateGPW(input.lowerLeftLatLong, input.size);
             //gpwViewer.SetDensityMapVisibility(input.gpw.displayGPW);
 
             wuiGUI.PrintInfo("GPW Data loaded succesfully.");

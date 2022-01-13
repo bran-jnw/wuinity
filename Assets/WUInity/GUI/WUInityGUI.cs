@@ -46,6 +46,7 @@ namespace WUInity
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp" };
+        string[] osmFilter = new string[] { ".pbf" };
 
         void OnGUI()
         {
@@ -326,20 +327,29 @@ namespace WUInity
         {
             FileBrowser.SetFilters(false, wuiFilter);
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load file", "Load");
+            FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
         }
 
         void OpenLoadLCP()
         {
             FileBrowser.SetFilters(false, lcpFilter);
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(LoadLCP, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load file", "Load");
+            FileBrowser.ShowLoadDialog(LoadLCP, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load LCP file", "Load");
+        }
+
+        void OpenLoadOSM()
+        {
+            FileBrowser.SetFilters(false, osmFilter);
+            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            FileBrowser.ShowLoadDialog(LoadOSM, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load OSM file", "Load");
         }
 
         void SaveInput(string[] paths)
         {
             WUInity.WORKING_FILE = paths[0];
+            string name = Path.GetFileNameWithoutExtension(paths[0]);
             WUInityInput wO = WUInity.WUINITY_IN;
+            wO.simName = name;
             ParseMainData(wO);
             SaveLoadWUI.SaveInput();
         }
@@ -355,6 +365,12 @@ namespace WUInity
             WUInityInput wO = WUInity.WUINITY_IN; 
             wO.fire.lcpFile = paths[0];
             WUInity.WUINITY_SIM.UpdateLCPFile();
+        }
+
+        void LoadOSM(string[] paths)
+        {
+            WUInityInput wO = WUInity.WUINITY_IN;
+            wO.itinero.osmFile = paths[0];
         }
 
         void CancelSaveLoad()
@@ -392,12 +408,6 @@ namespace WUInity
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
             int buttonIndex = 0;
             int buttonColumnStart = 140;
-
-            //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW data filename:");
-            ++buttonIndex;
-            gpwIn.localGPWFilename = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), gpwIn.localGPWFilename);
-            ++buttonIndex;
 
             /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply Changes"))
             {
@@ -591,20 +601,19 @@ namespace WUInity
             int buttonIndex = 0;
 
             //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM data filename");
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM file");
             ++buttonIndex;
-            iO.osmDataName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), iO.osmDataName);
+            iO.osmFile = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), iO.osmFile);
+            ++buttonIndex;
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load OSM file"))
+            {
+                OpenLoadOSM();
+            }
             ++buttonIndex;
 
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM border size [m]");
             ++buttonIndex;
             borderSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), borderSize);
-            ++buttonIndex;
-
-            //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Itinero routerDB name");
-            ++buttonIndex;
-            iO.routerDatabaseName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), iO.routerDatabaseName);
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load Router Database"))

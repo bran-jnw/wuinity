@@ -72,11 +72,6 @@ crashlytics-build.properties
 
 #WUInity stuff
 /[Ee]xternal_data/
-*.asc
-*.pbf
-*.rc
-*.routerdb
-*.lcp
 .vscode/launch.json
 .vscode/tasks.json
 Assets/WUInity/k-PERIL/Source/bin/Debug/netstandard2.1/k-PERIL.deps.json

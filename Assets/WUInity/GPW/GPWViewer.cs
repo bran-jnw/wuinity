@@ -15,7 +15,7 @@ namespace WUInity.GPW
         private GameObject gpwDensityMap;
         Material mat;
 
-        public void CreateGPW(Vector2D lowerLeftLatLong, Vector2D mapSize, string gpwDataFilename)
+        public void CreateGPW(Vector2D lowerLeftLatLong, Vector2D mapSize)
         {
             if (gpwDensityMap != null)
             {
@@ -24,7 +24,7 @@ namespace WUInity.GPW
             size = mapSize;
             this.lowerLeftlatLong = lowerLeftLatLong;
             gpwData = new GPWData();
-            gpwData.LoadGPWData(lowerLeftlatLong, size, gpwDataFilename);
+            gpwData.LoadGPWData(lowerLeftlatLong, size);
 
             CreateTexture();
             CreateDensityPlane();

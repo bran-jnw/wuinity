@@ -410,7 +410,7 @@ namespace WUInity.Fire
 				Header.WoodyFile = reader.ReadChars(256);
 				Header.Description = reader.ReadChars(512);
 
-				WUInity.WUINITY_SIM.LogMessage("INFO: LCP found in " + path + ", read succesfully.");
+				WUInity.WUINITY_SIM.LogMessage("LOG: LCP found in " + path + ", read succesfully.");
 			}
 
 			/*// do this in case a version 1.0 file has gotten through
