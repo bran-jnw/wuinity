@@ -75,7 +75,7 @@ namespace WUInity
     [System.Serializable]
     public class ItineroInput
     {
-        public string osmFile = "colorado-latest";
+        public string osmFile = "";
         public float osmBorderSize = 1000f;
     }
 
@@ -97,8 +97,9 @@ namespace WUInity
         public MacroTrafficSim.TrafficAccident[] trafficAccidents = MacroTrafficSim.TrafficAccident.GetDummy();
         public MacroTrafficSim.ReverseLanes[] reverseLanes = MacroTrafficSim.ReverseLanes.GetDummy();
         public TrafficInjection[] trafficInjections = TrafficInjection.GetTemplate();
+        public TrafficProbe[] trafficProbes = TrafficProbe.GetTemplate();
 
-        public string precalcRoutesName = "roxborough";
+        //public string precalcRoutesName = "roxborough";
     }
 
     [System.Serializable]

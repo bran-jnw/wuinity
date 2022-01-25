@@ -50,9 +50,9 @@ namespace WUInity
         /// Saves a collection of routes by converting to a format that is serializable (Itinero objects does not serialize using Unitys JSONUtility)
         /// </summary>
         /// <param name="filename"></param>
-        public static void SaveRouteCollections(string filename)
+        public static void SaveRouteCollections()
         {    
-            string path = Path.Combine(WUInity.WORKING_FOLDER, filename + ".rc");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.WUINITY_IN.simName + ".rc");
             
             RouteCollectionWrapper save = new  RouteCollectionWrapper(WUInity.WUINITY_SIM.GetRouteCollection());
             string json = JsonUtility.ToJson(save, false);
@@ -72,9 +72,9 @@ namespace WUInity
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        public static RouteCollection[] LoadRouteCollections(string filename)
+        public static RouteCollection[] LoadRouteCollections()
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, filename + ".rc");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.WUINITY_IN.simName + ".rc");
             if(System.IO.File.Exists(path))
             {
                 string input = System.IO.File.ReadAllText(path);

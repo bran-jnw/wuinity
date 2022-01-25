@@ -54,7 +54,7 @@ namespace WUInity
 
         public void LoadRouteCollections()
         {
-            RouteCollection[] newRoutes = SaveLoadWUI.LoadRouteCollections(WUInity.WUINITY_IN.traffic.precalcRoutesName);
+            RouteCollection[] newRoutes = SaveLoadWUI.LoadRouteCollections();
             if(newRoutes != null)
             {
                 routes = newRoutes;
@@ -148,7 +148,7 @@ namespace WUInity
                     // create the network for cars only.
                     LoadSettings settings = new LoadSettings();
                     settings.KeepNodeIds = true; //use to enable measure flow at nodes
-                    //settings.KeepWayIds = true; //can be used to calc density easier?
+                    settings.KeepWayIds = true; //can be used to calc density easier?
                     settings.OptimizeNetwork = true;
                     routerDb.LoadOsmData(filtered, settings, Vehicle.Car);
                 }
@@ -313,7 +313,7 @@ namespace WUInity
                     if(routes == null)
                     {
                         routes = routeCreator.CalculateCellRoutes();
-                        SaveLoadWUI.SaveRouteCollections(WUInity.WUINITY_IN.traffic.precalcRoutesName);
+                        SaveLoadWUI.SaveRouteCollections();
                     }                    
                 }
                 //apply routes

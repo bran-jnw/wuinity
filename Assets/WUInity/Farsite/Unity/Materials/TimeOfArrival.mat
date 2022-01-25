@@ -93,7 +93,7 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
-    - _normalizedMask: 0.49867022
+    - _normalizedMask: 0
     - _normalizedTime: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

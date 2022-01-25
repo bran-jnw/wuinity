@@ -623,11 +623,6 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            //route collections
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pre-calc routes filename");
-            ++buttonIndex;
-            tO.precalcRoutesName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), tO.precalcRoutesName);
-            ++buttonIndex;
             /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load pre-calc routes"))
             {
                 ParseTrafficInput();

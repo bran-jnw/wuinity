@@ -9,6 +9,7 @@ using System;                           //general System Namespace
 using System.IO;                        //general IO Namespace
 using Mapbox.Utils;                     //Navigation and map data API and SDK
 using Mapbox.Unity.Utilities;           //Similar as above but ported in Unity?
+using System.Runtime.InteropServices;
 
 
 namespace WUInity
@@ -181,6 +182,21 @@ namespace WUInity
             gpwViewer.hideFlags = HideFlags.NotEditable;
         }
 
+        [DllImport("cityflow_unity.dll")]
+        private static extern int Test();
+        [DllImport("cityflow_unity.dll")]
+        private static extern IntPtr CreateEngine(string configFile, int threadNum);
+        [DllImport("cityflow_unity.dll")]
+        private static extern int NextStep(IntPtr engine);
+        [DllImport("cityflow_unity.dll")]
+        private static extern int GetVehicleCount(IntPtr engine);
+        [DllImport("cityflow_unity.dll")]
+        private static extern double GetCurrentTime(IntPtr engine);
+        [DllImport("cityflow_unity.dll")]
+        private static extern int GetSuccess(IntPtr engine);
+        [DllImport("cityflow_unity.dll")]
+        private static extern string GetFilePath(IntPtr engine);
+
         private void Awake()
         {
             if (wuinity_internal == null)
@@ -205,6 +221,16 @@ namespace WUInity
             godCamera.SetCameraStartPosition(input.size);
 
             //UnityEngine.Random.InitState(0);
+            /*print(Test());
+            IntPtr engine = CreateEngine("D:\\UNITY\\_PROJECTS\\CityFlow\\examples\\config.json", 1);
+            for (int i = 0; i < 600; i++)
+            {
+                NextStep(engine);
+            }
+            print(GetCurrentTime(engine));
+            print(GetSuccess(engine));
+            print(GetFilePath(engine));
+            print(GetVehicleCount(engine));*/
         }
         
         void Start()
@@ -528,13 +554,13 @@ namespace WUInity
         {
             // Encode texture into PNG
             byte[] bytes = output.evac.rawPopTexture.EncodeToPNG();
-            File.WriteAllBytes(Application.dataPath + "/Resources/_output/rawPopulation.png", bytes);
+            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "rawPopulation.png"), bytes);
             bytes = output.evac.popStuckTexture.EncodeToPNG();
-            File.WriteAllBytes(Application.dataPath + "/Resources/_output/stuckPopulation.png", bytes);
+            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "stuckPopulation.png"), bytes);
             bytes = output.evac.relocatedPopTexture.EncodeToPNG();
-            File.WriteAllBytes(Application.dataPath + "/Resources/_output/relocatedPopulation.png", bytes);
+            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "relocatedPopulation.png"), bytes);
             bytes = output.evac.popStayingTexture.EncodeToPNG();
-            File.WriteAllBytes(Application.dataPath + "/Resources/_output/stayingPopulation.png", bytes);
+            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "stayingPopulation.png"), bytes);
         }        
 
         public bool IsPainterActive()
@@ -752,7 +778,7 @@ namespace WUInity
                 tex.Apply();
                 outputTextures.Add(tex);
                 byte[] bytes = tex.EncodeToPNG();
-                File.WriteAllBytes(Application.dataPath + "/Resources/_output/trafficDens_" + (int)time + "s.png", bytes);
+                File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "trafficDens_" + (int)time + "s.png"), bytes);
             }
         }
 
