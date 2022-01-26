@@ -134,7 +134,7 @@ namespace WUInity
                 {
                     WUInity.WUINITY_SIM.UpdateNeededData();
                     WUInityInput input = WUInity.WUINITY_IN;
-                    evacDataCellCount = new Vector2Int(input.evac.routeCellCount.x, input.evac.routeCellCount.y);
+                    evacDataCellCount = new Vector2Int(WUInity.WUINITY_SIM.EvacCellCount.x, WUInity.WUINITY_SIM.EvacCellCount.y);
                     cellCount = evacDataCellCount;
                     evacDataRealSize = WUInity.WUINITY_IN.size;
                 }
@@ -368,7 +368,7 @@ namespace WUInity
 
             if(paintMode == PaintMode.EvacGroup)
             {
-                WUInity.WUINITY_IN.evac.evacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
+                WUInity.WUINITY_SIM.evacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
             }
             else if(paintMode == PaintMode.WUIArea)
             {

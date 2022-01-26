@@ -25,6 +25,7 @@ namespace WUInity
         private MacroTrafficSim macroTrafficSim;
         private MacroHumanSim macroHumanSim;
         private Fire.WUInityFireMesh fireMesh;
+        public int[] evacGroupIndices;
 
         private float startTime;
         public float StartTime 
@@ -32,7 +33,18 @@ namespace WUInity
             get { return startTime; }
         }
 
-        
+        private Vector2Int cellCount;
+        public Vector2Int EvacCellCount
+        {
+            get 
+            {
+                WUInityInput input = WUInity.WUINITY_IN;
+                cellCount.x = Mathf.CeilToInt((float)input.size.x / input.evac.routeCellSize);
+                cellCount.y = Mathf.CeilToInt((float)input.size.y / input.evac.routeCellSize);
+                return cellCount;
+            }
+        }
+
         private  RouteCollection[] routes;
 
         private List<string> simLog = new List<string>(200);
@@ -168,8 +180,7 @@ namespace WUInity
         {
             WUInityInput input = WUInity.WUINITY_IN;
 
-            //do some calc for number of cells and set parameters in directions manager
-            input.evac.routeCellCount = new Vector2Int(Mathf.CeilToInt((float)input.size.x / input.evac.routeCellSize), Mathf.CeilToInt((float)input.size.y / input.evac.routeCellSize));
+            //set parameters in directions manager
             if (routeCreator == null)
             {
                 routeCreator = new RouteCreator();
@@ -303,7 +314,7 @@ namespace WUInity
             {
                 macroHumanSim = new MacroHumanSim();
                 //place people
-                macroHumanSim.PopulateCells(input.evac.routeCellCount, input.size, gpwViewer.gpwData);
+                macroHumanSim.PopulateCells(EvacCellCount, input.size, gpwViewer.gpwData);
                 if (i == 0)
                 {
                     //save raw pop
@@ -636,23 +647,37 @@ namespace WUInity
         {
             WUInityInput input = WUInity.WUINITY_IN;
 
-            if (input.evac.paintedForcedGoals.Length < input.evac.routeCellCount.x * input.evac.routeCellCount.y)
+            if (input.evac.paintedForcedGoals.Length < EvacCellCount.x * EvacCellCount.y)
             {
                 return null;
             }
-            return input.evac.paintedForcedGoals[x + y * input.evac.routeCellCount.x];
+            return input.evac.paintedForcedGoals[x + y * EvacCellCount.x];
+        }
+
+        public EvacGroup GetEvacGroup(int index)
+        {
+            WUInityInput input = WUInity.WUINITY_IN;
+            if (evacGroupIndices.Length < EvacCellCount.x * EvacCellCount.y)
+            {
+                MonoBehaviour.print("got here, " + evacGroupIndices.Length + "," + EvacCellCount.x * EvacCellCount.y);
+                return null;
+            }
+
+            index = evacGroupIndices[index];
+            return WUInity.WUINITY_IN.evac.evacGroups[index];
         }
 
         public EvacGroup GetEvacGroup(int x, int y)
         {
             WUInityInput input = WUInity.WUINITY_IN;
-            if (input.evac.evacGroupIndices.Length < input.evac.routeCellCount.x * input.evac.routeCellCount.y)
+            if (evacGroupIndices.Length < EvacCellCount.x * EvacCellCount.y)
             {
+                MonoBehaviour.print("got here, " + evacGroupIndices.Length + "," + EvacCellCount.x * EvacCellCount.y);
                 return null;
             }
 
-            int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
-            index = WUInity.WUINITY_IN.evac.evacGroupIndices[index];
+            int index = x + y * EvacCellCount.x;
+            index = evacGroupIndices[index];
             return WUInity.WUINITY_IN.evac.evacGroups[index];
         }
 
@@ -663,7 +688,7 @@ namespace WUInity
                 Mapbox.Utils.Vector2d p = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(pos.x, pos.y, WUInity.WUINITY_MAP.CenterMercator, WUInity.WUINITY_MAP.WorldRelativeScale);
                 int x = (int)(p.x / WUInity.WUINITY_IN.evac.routeCellSize);
                 int y = (int)(p.y / WUInity.WUINITY_IN.evac.routeCellSize);
-                int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
+                int index = x + y * EvacCellCount.x;
                 if (index >= 0 && index < routes.Length && routes[index] != null)
                 {
                     return routes[index];
@@ -673,21 +698,22 @@ namespace WUInity
             return null;
         }
 
-        public void UpdateEvacGroups(int[] evacGroupIndices)
+        public void UpdateEvacGroups(int[] indices)
         {
-            WUInity.WUINITY_IN.evac.evacGroupIndices = new int[WUInity.WUINITY_IN.evac.routeCellCount.x * WUInity.WUINITY_IN.evac.routeCellCount.y];
-            for (int y = 0; y < WUInity.WUINITY_IN.evac.routeCellCount.y; y++)
+            evacGroupIndices = new int[EvacCellCount.x * EvacCellCount.y];
+            for (int y = 0; y < EvacCellCount.y; y++)
             {
-                for (int x = 0; x < WUInity.WUINITY_IN.evac.routeCellCount.x; x++)
+                for (int x = 0; x < EvacCellCount.x; x++)
                 {
-                    int index = x + y * WUInity.WUINITY_IN.evac.routeCellCount.x;
-                    if (evacGroupIndices != null)
+                    int index = x + y * EvacCellCount.x;
+                    if (indices != null)
                     {
-                        WUInity.WUINITY_IN.evac.evacGroupIndices[index] = evacGroupIndices[index];
+                        evacGroupIndices[index] = indices[index];
                     }
                     else
                     {
-                        WUInity.WUINITY_IN.evac.evacGroupIndices[index] = 0;
+                        //default
+                        evacGroupIndices[index] = 0;
                     }                    
                 }
             }

@@ -65,16 +65,16 @@ namespace WUInity
 
             string[] data = new string[4];
             //nrows
-            data[0] = WUInity.WUINITY_IN.evac.routeCellCount.x.ToString();
+            data[0] = WUInity.WUINITY_SIM.EvacCellCount.x.ToString();
             //ncols
-            data[1] = WUInity.WUINITY_IN.evac.routeCellCount.y.ToString();
+            data[1] = WUInity.WUINITY_SIM.EvacCellCount.y.ToString();
             //how many evac groups
             data[2] = WUInity.WUINITY_IN.evac.evacGroups.Length.ToString();
             //actual data
             data[3] = "";
-            for (int i = 0; i < WUInity.WUINITY_IN.evac.evacGroupIndices.Length; ++i)
+            for (int i = 0; i < WUInity.WUINITY_SIM.evacGroupIndices.Length; ++i)
             {
-                data[3] += WUInity.WUINITY_IN.evac.evacGroupIndices[i] + " ";
+                data[3] += WUInity.WUINITY_SIM.evacGroupIndices[i] + " ";
             }
 
             System.IO.File.WriteAllLines(WUInity.WORKING_FOLDER + "/" + filename + ".egs", data);
@@ -103,7 +103,7 @@ namespace WUInity
                     int.TryParse(header[1], out nrows);
                     int.TryParse(header[2], out evacGroupCount);
                     //make sure we have the correct size
-                    if (ncols == WUInity.WUINITY_IN.evac.routeCellCount.x && nrows == WUInity.WUINITY_IN.evac.routeCellCount.y && evacGroupCount <= WUInity.WUINITY_IN.evac.evacGroups.Length)
+                    if (ncols == WUInity.WUINITY_SIM.EvacCellCount.x && nrows == WUInity.WUINITY_SIM.EvacCellCount.y && evacGroupCount <= WUInity.WUINITY_IN.evac.evacGroups.Length)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];
@@ -112,6 +112,7 @@ namespace WUInity
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
                         WUInity.WUINITY_SIM.UpdateEvacGroups(eGsIndices);
+                        WUInity.WUINITY_SIM.LogMessage("LOG: Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                     }
                     else
                     {

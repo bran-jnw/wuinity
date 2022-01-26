@@ -46,7 +46,7 @@ namespace WUInity
         public int totalPopulation = 500;
         public float routeCellSize = 200f;
 
-        public Vector2Int routeCellCount;
+        //public Vector2Int routeCellCount;
 
         public bool allowMoreThanOneCar = true;
         public int maxCars = 2;
@@ -64,8 +64,7 @@ namespace WUInity
 
         public BlockGoalEvent[] blockGoalEvents = BlockGoalEvent.GetDummy();
 
-        public EvacGroup[] evacGroups = EvacGroup.GetDefault();
-        [System.NonSerialized] public int[] evacGroupIndices;
+        public EvacGroup[] evacGroups = EvacGroup.GetDefault();        
 
         //TODO: fix saving these?
         [System.NonSerialized] public Texture2D evacuationForceTex;

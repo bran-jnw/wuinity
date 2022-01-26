@@ -41,7 +41,7 @@ namespace WUInity
             WUInity.WUINITY.DeleteDrawnRoads();
 
             Vector2D size = WUInity.WUINITY_IN.size;
-            Vector2Int cells = WUInity.WUINITY_IN.evac.routeCellCount;
+            Vector2Int cells = WUInity.WUINITY_SIM.EvacCellCount;
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
             //create all waypoints in cells
@@ -465,13 +465,14 @@ namespace WUInity
         public static void SelectCorrectRoute(RouteCollection rC, bool considerForceMap, int cellIndex)
         {
             TrafficInput tO = WUInity.WUINITY_IN.traffic;
-            Vector2Int cells = WUInity.WUINITY_IN.evac.routeCellCount;
+            Vector2Int cells = WUInity.WUINITY_SIM.EvacCellCount;
 
             if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
             {
                 if (cellIndex > 0)
                 {
-                    EvacGroup group = WUInity.WUINITY_SIM.GetEvacGroup(cellIndex % cells.x, cellIndex / cells.y);
+                    //EvacGroup group = WUInity.WUINITY_SIM.GetEvacGroup(cellIndex % cells.x, cellIndex / cells.y);
+                    EvacGroup group = WUInity.WUINITY_SIM.GetEvacGroup(cellIndex);
                     EvacuationGoal goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }

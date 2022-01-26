@@ -98,6 +98,8 @@ namespace WUInity
                         }
                         WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);
 
+                        WUInity.WUINITY_SIM.LogMessage("LOG: Graphical fire input loaded, cells: " + ncols + ", " + nrows);
+
                         /*string[] data = header[2].Split(' ');
                         int[] wuiAreaIndices = new int[ncols * nrows];
                         for (int i = 0; i < wuiAreaIndices.Length; ++i)

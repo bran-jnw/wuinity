@@ -39,9 +39,7 @@ namespace WUInity.Traffic
 
             currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance;
 
-            totalDrivingTime = 0f;
-
-            MonoBehaviour.print(1);                
+            totalDrivingTime = 0f;               
         }
 
         public int CalcHashCode()

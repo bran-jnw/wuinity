@@ -231,6 +231,12 @@ namespace WUInity
                 return;
             }
 
+            if(!WUInity.WUINITY_MAP.IsAccessTokenValid)
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "ERROR: Mapbox token not valid.");
+                return;
+            }
+
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
             ++buttonIndex;

@@ -367,7 +367,7 @@ namespace WUInity
             wuiGUI.PrintInfo("Farsite loaded succesfully.");
         }
 
-        public void LoadMapbox()
+        public bool LoadMapbox()
         {
             if (mapboxMap == null)
             {
@@ -399,9 +399,18 @@ namespace WUInity
             mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
             mOptions.placementOptions.snapMapToZero = true;
             mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
+
+            if (!mapboxMap.IsAccessTokenValid)
+            {
+                WUINITY_SIM.LogMessage("ERROR: Mapbox token not valid.");
+                return false;
+            }
+            WUINITY_SIM.LogMessage("LOG: Starting to load Mapbox map.");
+
             mapboxMap.Initialize(new Mapbox.Utils.Vector2d(input.lowerLeftLatLong.x, input.lowerLeftLatLong.y), input.zoomLevel);
 
-            WUINITY_SIM.LogMessage("Map loaded succesfully.");
+            WUINITY_SIM.LogMessage("LOG: Map loaded succesfully.");
+            return true;
         }
 
         public void SetSampleMode(DataSampleMode sampleMode)
@@ -436,11 +445,11 @@ namespace WUInity
                     Vector3 hitPoint = ray.GetPoint(enter);
                     float xNorm = hitPoint.x / (float)input.size.x;
                     //xNorm = Mathf.Clamp01(xNorm);
-                    int x = (int)(input.evac.routeCellCount.x * xNorm);
+                    int x = (int)(WUInity.WUINITY_SIM.EvacCellCount.x * xNorm);
 
                     float yNorm = hitPoint.z / (float)input.size.y;
                     //yNorm = Mathf.Clamp01(yNorm);
-                    int y = (int)(input.evac.routeCellCount.y * yNorm);
+                    int y = (int)(WUInity.WUINITY_SIM.EvacCellCount.y * yNorm);
                     GetCellInfo(hitPoint, x, y);
                 }
             }
@@ -499,7 +508,7 @@ namespace WUInity
                     }
                 }
             }
-            else if (x < 0 || x > input.evac.routeCellCount.x || y < 0 || y > input.evac.routeCellCount.y)
+            else if (x < 0 || x > WUInity.WUINITY_SIM.EvacCellCount.x || y < 0 || y > WUInity.WUINITY_SIM.EvacCellCount.y)
             {
                 wuiGUI.PrintInfo("Outside of data range.");
                 return;
@@ -516,7 +525,7 @@ namespace WUInity
             {
                 if (dataSampleMode == DataSampleMode.Raw)
                 {
-                    m = "Interpolated people count: " + output.evac.rawPopulation[x + y * input.evac.routeCellCount.x];
+                    m = "Interpolated people count: " + output.evac.rawPopulation[x + y * WUInity.WUINITY_SIM.EvacCellCount.x];
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
@@ -527,16 +536,16 @@ namespace WUInity
                 }
                 else if (dataSampleMode == DataSampleMode.Staying)
                 {
-                    m = "Staying people count: " + output.evac.stayingPopulation[x + y * input.evac.routeCellCount.x];
+                    m = "Staying people count: " + output.evac.stayingPopulation[x + y * WUInity.WUINITY_SIM.EvacCellCount.x];
                 }
                 else if (dataSampleMode == DataSampleMode.TrafficDens)
                 {
-                    int people = currentPeopleInCells[x + y * input.evac.routeCellCount.x];
+                    int people = currentPeopleInCells[x + y * WUInity.WUINITY_SIM.EvacCellCount.x];
                     m = "People: " + people;
-                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * input.evac.routeCellCount.x] != null)
+                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * WUInity.WUINITY_SIM.EvacCellCount.x] != null)
                     {
-                        int peopleInCars = currenttrafficDensityData[x + y * input.evac.routeCellCount.x].peopleCount;
-                        int cars = currenttrafficDensityData[x + y * input.evac.routeCellCount.x].carCount;
+                        int peopleInCars = currenttrafficDensityData[x + y * WUInity.WUINITY_SIM.EvacCellCount.x].peopleCount;
+                        int cars = currenttrafficDensityData[x + y * WUInity.WUINITY_SIM.EvacCellCount.x].carCount;
 
                         m += " | People in cars: " + peopleInCars + " (Cars: " + cars + "). Total people " + (people + peopleInCars);
                     }
@@ -699,7 +708,7 @@ namespace WUInity
             int outputIndex = (int)(time - WUINITY_SIM.StartTime) / (int)input.traffic.saveInterval;
             if (outputIndex > trafficDensityData.Count - 1)
             {
-                trafficDensityData.Add(new TrafficCellData[input.evac.routeCellCount.x * input.evac.routeCellCount.y]);
+                trafficDensityData.Add(new TrafficCellData[WUInity.WUINITY_SIM.EvacCellCount.x * WUInity.WUINITY_SIM.EvacCellCount.y]);
 
                 for (int i = 0; i < cars.Count; i++)
                 {
@@ -712,42 +721,42 @@ namespace WUInity
                     int y = (int)(pos.y / input.evac.routeCellSize);
 
                     //outside of mapped data
-                    if (x < 0 || x > input.evac.routeCellCount.x - 1 || y < 0 || y > input.evac.routeCellCount.y - 1)
+                    if (x < 0 || x > WUInity.WUINITY_SIM.EvacCellCount.x - 1 || y < 0 || y > WUInity.WUINITY_SIM.EvacCellCount.y - 1)
                     {
                         continue;
                     }
 
                     //add or update data
-                    if (trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x] == null)
+                    if (trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x] == null)
                     {
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x] = new TrafficCellData();
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].peopleCount = cars[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x] = new TrafficCellData();
+                        trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x].carCount = 1;
+                        trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x].peopleCount = cars[i].numberOfPeopleInCar;
                     }
                     else
                     {
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].peopleCount += cars[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x].carCount += 1;
+                        trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x].peopleCount += cars[i].numberOfPeopleInCar;
                     }
                 }
 
                 //save data from human re as well
-                peopleInCells.Add(new int[input.evac.routeCellCount.x * input.evac.routeCellCount.y]);
-                for (int y = 0; y < input.evac.routeCellCount.y; y++)
+                peopleInCells.Add(new int[WUInity.WUINITY_SIM.EvacCellCount.x * WUInity.WUINITY_SIM.EvacCellCount.y]);
+                for (int y = 0; y < WUInity.WUINITY_SIM.EvacCellCount.y; y++)
                 {
-                    for (int x = 0; x < input.evac.routeCellCount.x; x++)
+                    for (int x = 0; x < WUInity.WUINITY_SIM.EvacCellCount.x; x++)
                     {
-                        peopleInCells[outputIndex][x + y * input.evac.routeCellCount.x] = sim.GetMacroHumanSim().GetPeopleLeftInCell(x, y);
+                        peopleInCells[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x] = sim.GetMacroHumanSim().GetPeopleLeftInCell(x, y);
                     }
                 }
 
                 //create texture
                 Vector2Int res = new Vector2Int(2, 2);
-                while (input.evac.routeCellCount.x > res.x)
+                while (WUInity.WUINITY_SIM.EvacCellCount.x > res.x)
                 {
                     res.x *= 2;
                 }
-                while (input.evac.routeCellCount.y > res.y)
+                while (WUInity.WUINITY_SIM.EvacCellCount.y > res.y)
                 {
                     res.y *= 2;
                 }
@@ -755,18 +764,18 @@ namespace WUInity
                 Texture2D tex = new Texture2D(res.x, res.y);
                 tex.filterMode = FilterMode.Point;
 
-                for (int y = 0; y < input.evac.routeCellCount.y; ++y)
+                for (int y = 0; y < WUInity.WUINITY_SIM.EvacCellCount.y; ++y)
                 {
-                    for (int x = 0; x < input.evac.routeCellCount.x; ++x)
+                    for (int x = 0; x < WUInity.WUINITY_SIM.EvacCellCount.x; ++x)
                     {
                         Color c = Color.grey;
                         c.a = 0.0f;
                         int count = 0;
-                        if (trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x] != null)
+                        if (trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x] != null)
                         {
-                            count += trafficDensityData[outputIndex][x + y * input.evac.routeCellCount.x].carCount;
+                            count += trafficDensityData[outputIndex][x + y * WUInity.WUINITY_SIM.EvacCellCount.x].carCount;
                         }
-                        //count += peopleInCells[outputIndex][x + y * input.evac.routeCellCount.x];
+                        //count += peopleInCells[outputIndex][x + y * WUInity.WUINITY_SIM.GetCellCount.x];
                         if (count > 0)
                         {
                             c = GetTrafficDensityColor(count);
@@ -790,7 +799,7 @@ namespace WUInity
         {
             if(input.runTrafficSim)
             {
-                int index = (int)time / (int)input.traffic.saveInterval;
+                int index = Mathf.Max(0, (int)time / (int)input.traffic.saveInterval);
                 if (index > outputTextures.Count - 1)
                 {
                     index = outputTextures.Count - 1;
@@ -866,7 +875,7 @@ namespace WUInity
 
             //pick needed data plane
             MeshRenderer activeMeshRenderer = evacDataPlaneMeshRenderer;
-            Vector2Int cellCount = input.evac.routeCellCount;
+            Vector2Int cellCount = WUInity.WUINITY_SIM.EvacCellCount;
             string name = "Evac Data Plane";
             GameObject activeDataPlane = evacDataPlane;
             if (fireMeshMode)
