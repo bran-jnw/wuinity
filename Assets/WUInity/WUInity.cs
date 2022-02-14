@@ -196,6 +196,10 @@ namespace WUInity
         private static extern int GetSuccess(IntPtr engine);
         [DllImport("cityflow_unity.dll")]
         private static extern string GetFilePath(IntPtr engine);
+        [DllImport("cityflow_unity.dll")]
+        private static extern IntPtr GetVehicle(IntPtr engine, int index);
+        [DllImport("cityflow_unity.dll")]
+        private static extern void GetVehicles(IntPtr engine);
 
         private void Awake()
         {
@@ -221,18 +225,8 @@ namespace WUInity
             godCamera.SetCameraStartPosition(input.size);
 
             //UnityEngine.Random.InitState(0);
-            /*print(Test());
-            IntPtr engine = CreateEngine("D:\\UNITY\\_PROJECTS\\CityFlow\\examples\\config.json", 1);
-            for (int i = 0; i < 600; i++)
-            {
-                NextStep(engine);
-            }
-            print(GetCurrentTime(engine));
-            print(GetSuccess(engine));
-            print(GetFilePath(engine));
-            print(GetVehicleCount(engine));*/
         }
-        
+
         void Start()
         {       
             //clicks all buttons for us
@@ -245,6 +239,36 @@ namespace WUInity
             string path = Application.dataPath + "/Resources/_input/k_PERIL/";
             peril.RunAllCases(5, 30, 30, 50, 50, WUInityPERIL.GetDefaultWUIArea(), 5f, path, path, path + "/peril_test.csv", path + "/peril_EPI.csv");*/
             //SaveLoadWUI.LoadDefaultInputs();
+            //IEnumerable<string> s = new List<string> { "-n", "D:\\UNITY\\_PROJECTS\\SUMO\\tests\\complex\\tutorial\\hello\\data\\hello.net.xml" };
+            //var test = new SUMO.StringVector(s);
+            //SUMO.Simulation.load(new SUMO.StringVector(new string[] { "-n", "D:\\UNITY\\_PROJECTS\\SUMO\\tests\\complex\\tutorial\\hello\\data\\hello.net.xml" }));
+            /*for (int i = 0; i < 5; i++)
+            {
+                SUMO.Simulation.step();
+            }
+            SUMO.Simulation.close();*/
+
+            
+            /*print(Test());
+            IntPtr engine = CreateEngine("D:\\UNITY\\_PROJECTS\\CityFlow\\examples\\config.json", 1);
+            for (int i = 0; i < 600; i++)
+            {
+                NextStep(engine);
+                int vehicles = GetVehicleCount(engine);
+                //GetVehicles(engine);
+                for (int j = 0; j < vehicles; ++j)
+                {
+                    IntPtr b = GetVehicle(engine, j);
+                    string c = Marshal.PtrToStringAnsi(b);
+                    print(c);
+                    //print(vehicles);
+                }
+            }
+            print(GetCurrentTime(engine));
+            print(GetSuccess(engine));
+            //print(GetFilePath(engine));
+            //print(GetFilePath(engine));
+            //print(GetVehicle(engine));*/
         }
 
         public void LoadInputData(WUInityInput input)
