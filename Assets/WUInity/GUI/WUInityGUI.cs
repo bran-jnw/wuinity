@@ -35,14 +35,14 @@ namespace WUInity
         static int buttonColumnStart = 140;
 
         GUIButton mainMenu = new GUIButton(0, buttonHeight, "Main Menu");
-        GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
-        GUIButton fireMenu = new GUIButton(2, buttonHeight, "Fire spread");
-        GUIButton gpwMenu = new GUIButton(3, buttonHeight, "GPW Menu");
-        GUIButton evacMenu = new GUIButton(4, buttonHeight, "Evac Menu");
-        GUIButton trafficMenu = new GUIButton(5, buttonHeight, "Traffic Menu");
-        GUIButton outputMenu = new GUIButton(6, buttonHeight, "Output Menu");
-        GUIButton hideMenu = new GUIButton(7, buttonHeight, "Hide Menu");
-        GUIButton exitMenu = new GUIButton(8, buttonHeight, "Exit");
+        //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
+        GUIButton fireMenu = new GUIButton(1, buttonHeight, "Fire spread");
+        GUIButton gpwMenu = new GUIButton(2, buttonHeight, "GPW Menu");
+        GUIButton evacMenu = new GUIButton(3, buttonHeight, "Evac Menu");
+        GUIButton trafficMenu = new GUIButton(4, buttonHeight, "Traffic Menu");
+        GUIButton outputMenu = new GUIButton(5, buttonHeight, "Output Menu");
+        GUIButton hideMenu = new GUIButton(6, buttonHeight, "Hide Menu");
+        GUIButton exitMenu = new GUIButton(7, buttonHeight, "Exit");
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp" };
@@ -103,19 +103,6 @@ namespace WUInity
                     {
                         menuChoice = ActiveMenu.TrafficMenu;
                         WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
-                    }
-                }
-
-                if (GUI.Button(farsiteMenu.rect, farsiteMenu.text))
-                {
-                    if (menuChoice == ActiveMenu.FarsiteMenu)
-                    {
-                        //menuChoice = ActiveMenu.None;
-                    }
-                    else
-                    {
-                        menuChoice = ActiveMenu.FarsiteMenu;
-                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Farsite);
                     }
                 }
 
@@ -219,12 +206,13 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load defaults"))
+            //will remove default and use example instead
+            /*if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load defaults"))
             {
                 SaveLoadWUI.LoadDefaultInputs();
                 mainInputDirty = true;
             }
-            ++buttonIndex;
+            ++buttonIndex;*/
 
             if(!WUInity.WUINITY.haveInput)
             {
@@ -332,7 +320,7 @@ namespace WUInity
         void OpenLoadInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            string initialPath = Path.GetDirectoryName(WUInity.DATA_FOLDER);
             FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
         }
 
@@ -535,24 +523,27 @@ namespace WUInity
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
+            if(WUInity.WUINITY.developerMode)
             {
-                Evac.MacroHumanVerification.RunVerification();
-            }
-            ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
+                {
+                    Evac.MacroHumanVerification.RunVerification();
+                }
+                ++buttonIndex;
+            }            
 
             if (WUInity.WUINITY.IsPainterActive())
             {
                 for (int i = 0; i < WUInity.WUINITY_IN.evac.evacGroups.Length; i++)
                 {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint group " + (i + 1)))
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Define group " + (i + 1)))
                     {
                         WUInity.PAINTER.SetEvacGroupColor(i);
                     }
                     ++buttonIndex;
                 }
 
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop painting"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop editing"))
                 {
                     WUInity.WUINITY.StopPainter();
                 }
@@ -560,7 +551,7 @@ namespace WUInity
             }
             else
             {    
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint evac group"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
                     WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.EvacGroup);
                 }
@@ -651,11 +642,14 @@ namespace WUInity
             opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))
+            if(WUInity.WUINITY.developerMode)
             {
-                Traffic.MacroTrafficVerification.RunTrafficVerificationTests();
-            }
-            ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))
+                {
+                    Traffic.MacroTrafficVerification.RunTrafficVerificationTests();
+                }
+                ++buttonIndex;
+            }            
         }
 
         void ParseTrafficInput()
@@ -802,6 +796,13 @@ namespace WUInity
                 }
                 ++buttonIndex;
             }
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Farsite import"))
+            {
+                menuChoice = ActiveMenu.FarsiteMenu;
+                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Farsite);
+            }
+            ++buttonIndex;
         }
 
         string outputTime;

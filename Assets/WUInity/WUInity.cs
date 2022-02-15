@@ -9,7 +9,6 @@ using System;                           //general System Namespace
 using System.IO;                        //general IO Namespace
 using Mapbox.Utils;                     //Navigation and map data API and SDK
 using Mapbox.Unity.Utilities;           //Similar as above but ported in Unity?
-using System.Runtime.InteropServices;
 
 
 namespace WUInity
@@ -131,7 +130,7 @@ namespace WUInity
 
 
         [Header("Options")]
-        [SerializeField] private bool editorMode = false;
+        [SerializeField] public bool developerMode = false;
         [SerializeField] private WUInityInput input = new WUInityInput();
         [SerializeField] private WUInitySim sim = new WUInitySim();
         [SerializeField] private WUInityOutput output = new WUInityOutput();     
@@ -180,29 +179,23 @@ namespace WUInity
                 gpwViewer = GetComponent<GPWViewer>();
             }            
             gpwViewer.hideFlags = HideFlags.NotEditable;
-        }
-
-        [DllImport("cityflow_unity.dll")]
-        private static extern int Test();
-        [DllImport("cityflow_unity.dll")]
-        private static extern IntPtr CreateEngine(string configFile, int threadNum);
-        [DllImport("cityflow_unity.dll")]
-        private static extern int NextStep(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern int GetVehicleCount(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern double GetCurrentTime(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern int GetSuccess(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern string GetFilePath(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern IntPtr GetVehicle(IntPtr engine, int index);
-        [DllImport("cityflow_unity.dll")]
-        private static extern void GetVehicles(IntPtr engine);
+        }        
 
         private void Awake()
         {
+            if (Application.isEditor)
+            {
+                developerMode = true;
+            }
+            else
+            {
+                developerMode = false;
+            }
+
+            simBorder.gameObject.SetActive(false);
+            osmBorder.gameObject.SetActive(false);
+
+            //set all singletons
             if (wuinity_internal == null)
             {
                 wuinity_internal = this;
@@ -228,47 +221,11 @@ namespace WUInity
         }
 
         void Start()
-        {       
-            //clicks all buttons for us
-            if (editorMode)
-            {
-                InitEditorMode();
-            }
-
+        {                
             /*WUInityPERIL peril = new WUInityPERIL();
             string path = Application.dataPath + "/Resources/_input/k_PERIL/";
             peril.RunAllCases(5, 30, 30, 50, 50, WUInityPERIL.GetDefaultWUIArea(), 5f, path, path, path + "/peril_test.csv", path + "/peril_EPI.csv");*/
-            //SaveLoadWUI.LoadDefaultInputs();
-            //IEnumerable<string> s = new List<string> { "-n", "D:\\UNITY\\_PROJECTS\\SUMO\\tests\\complex\\tutorial\\hello\\data\\hello.net.xml" };
-            //var test = new SUMO.StringVector(s);
-            //SUMO.Simulation.load(new SUMO.StringVector(new string[] { "-n", "D:\\UNITY\\_PROJECTS\\SUMO\\tests\\complex\\tutorial\\hello\\data\\hello.net.xml" }));
-            /*for (int i = 0; i < 5; i++)
-            {
-                SUMO.Simulation.step();
-            }
-            SUMO.Simulation.close();*/
-
-            
-            /*print(Test());
-            IntPtr engine = CreateEngine("D:\\UNITY\\_PROJECTS\\CityFlow\\examples\\config.json", 1);
-            for (int i = 0; i < 600; i++)
-            {
-                NextStep(engine);
-                int vehicles = GetVehicleCount(engine);
-                //GetVehicles(engine);
-                for (int j = 0; j < vehicles; ++j)
-                {
-                    IntPtr b = GetVehicle(engine, j);
-                    string c = Marshal.PtrToStringAnsi(b);
-                    print(c);
-                    //print(vehicles);
-                }
-            }
-            print(GetCurrentTime(engine));
-            print(GetSuccess(engine));
-            //print(GetFilePath(engine));
-            //print(GetFilePath(engine));
-            //print(GetVehicle(engine));*/
+            //SaveLoadWUI.LoadDefaultInputs();             
         }
 
         public void LoadInputData(WUInityInput input)
@@ -279,31 +236,6 @@ namespace WUInity
             SpawnMarkers();
             EvacGroup.LoadEvacGroupIndices();
             GraphicalFireInput.LoadGraphicalFireInput();
-        }
-
-        public void InitEditorMode()
-        {
-            input.evac.responseCurves = ResponseCurve.GetRoxburoughCurve(); //WUInity.ResponseData.GetStandardCurve(); //
-            LoadMapbox();
-            LoadGPW();
-            gpwViewer.ToggleDensityMapVisibility();
-            LoadFarsite();
-            farsiteViewer.ToggleTerrain();
-            sim.LoadItineroDatabase();
-            /*if (input.traffic.routeChoice == TrafficInput.RouteChoice.ForceMap)
-            {
-                StartPainter(WUInityPaint.PaintMode.ForceGoal);
-            }*/
-        }
-
-        private void SetRoxburough()
-        {
-            input.simName = "rox";
-            input.lowerLeftLatLong = new Vector2D(39.409924, -105.104505);
-            input.size = new Vector2D(5000, 10000);
-            input.zoomLevel = 13;
-            input.itinero.osmFile = "colorado-latest";
-            input.evac.routeCellSize = 200.0f;
         }
 
         GameObject directionsGO;
@@ -492,6 +424,14 @@ namespace WUInity
 
         void UpdateBorders()
         {
+            if(!WUINITY.haveInput)
+            {
+                return;
+            }
+
+            simBorder.gameObject.SetActive(true);
+            osmBorder.gameObject.SetActive(true);
+
             Vector3 upOffset = Vector3.up * 50f;
             if (simBorder != null)
             {
