@@ -718,7 +718,8 @@ PrefabInstance:
     - target: {fileID: 9009419062416531714, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: m_Name
-      value: WUInityMain
+      value: WUInity
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1323904449681020783, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3, type: 3}

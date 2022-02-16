@@ -63,7 +63,7 @@ namespace WUInity.Farsite
             max.x = float.MinValue;
             max.y = float.MinValue;
 
-            fR = FindObjectOfType<FarsiteViewer>();                       
+            fR = WUInity.FARSITE_VIEWER;                       
 
             InitiateEllipse();
         }

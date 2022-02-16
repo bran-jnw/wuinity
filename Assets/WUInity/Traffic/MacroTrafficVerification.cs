@@ -11,8 +11,8 @@ namespace WUInity.Traffic
         public static void RunTrafficVerificationTests()
         {
             SaveLoadWUI.LoadInput("traffic_verification");
-            TrafficInput trafficOptions = WUInity.WUINITY_IN.traffic;
-            WUInityInput wuinityOptions = WUInity.WUINITY_IN;
+            TrafficInput trafficOptions = WUInity.INPUT.traffic;
+            WUInityInput wuinityOptions = WUInity.INPUT;
 
             //Custom road types index start at 20 and goes to 24, residential is 11, primary is 4
             //N-E road is custom 0, S-E is custom 1
@@ -348,8 +348,8 @@ namespace WUInity.Traffic
 
         static void RunDrivingInSmokeVerification()
         {
-            TrafficInput trafficOptions = WUInity.WUINITY_IN.traffic;
-            WUInityInput wuinityOptions = WUInity.WUINITY_IN;
+            TrafficInput trafficOptions = WUInity.INPUT.traffic;
+            WUInityInput wuinityOptions = WUInity.INPUT;
 
             EvacuationGoal node4 = new EvacuationGoal("Node 4", new Vector2D(0.0, 0.0), Color.white);
             EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2D(0.0, 0.0090009), Color.white);
@@ -413,15 +413,15 @@ namespace WUInity.Traffic
 
         static void RunTrafficVerificationSimulation(SimpleTrafficInjection[] trafficInjections, Traffic.MacroTrafficSim.TrafficEvent[] events = null, BlockGoalEvent[] blockGoalEvents = null)
         {
-            TrafficInput trafficOptions = WUInity.WUINITY_IN.traffic;
-            WUInityInput wuinityOptions = WUInity.WUINITY_IN;
+            TrafficInput trafficOptions = WUInity.INPUT.traffic;
+            WUInityInput wuinityOptions = WUInity.INPUT;
 
-            WUInity.WUINITY_SIM.LoadItineroDatabase();
+            WUInity.SIM.LoadItineroDatabase();
 
             RouteCreator routeCreator = new RouteCreator();
             routeCreator.SetValidGoals();
             Traffic.MacroTrafficSim traffic = new Traffic.MacroTrafficSim(routeCreator); //WUInity.WUINITY_SIM.routeCreator
-            WUInity.WUINITY_SIM.SetMacroTrafficSim(traffic);
+            WUInity.SIM.SetMacroTrafficSim(traffic);
 
             if (events != null)
             {
@@ -431,7 +431,7 @@ namespace WUInity.Traffic
                 }
             }            
 
-            Router router = new Router(WUInity.WUINITY_SIM.GetRouterDb());
+            Router router = new Router(WUInity.SIM.GetRouterDb());
             Itinero.Profiles.Profile p;
             if (trafficOptions.routeChoice == TrafficInput.RouteChoice.Closest)
             {
@@ -491,7 +491,7 @@ namespace WUInity.Traffic
 
                 if(allGoalsBlocked)
                 {
-                    WUInity.WUINITY_SIM.LogMessage("All goals blocked, aborting verification simulation " + wuinityOptions.simName);
+                    WUInity.SIM.LogMessage("All goals blocked, aborting verification simulation " + wuinityOptions.simName);
                     break;
                 }
             }
@@ -503,9 +503,9 @@ namespace WUInity.Traffic
 
         static RouteData GetRoute(Vector2D startPos, Router router, Itinero.Profiles.Profile p, EvacuationGoal desiredGoal)
         {
-            TrafficInput trafficOptions = WUInity.WUINITY_IN.traffic;
+            TrafficInput trafficOptions = WUInity.INPUT.traffic;
             RouteCollection rC = new RouteCollection(trafficOptions.evacuationGoals.Length);
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
             {
                 Vector2D endPos = trafficOptions.evacuationGoals[i].latLong;
 
@@ -513,7 +513,7 @@ namespace WUInity.Traffic
                 RouterPoint end = router.Resolve(p, (float)endPos.x, (float)endPos.y, 100f);
 
                 Route route = router.Calculate(p, start.Latitude, start.Longitude, end.Latitude, end.Longitude);
-                RouteData routeData = new RouteData(route, WUInity.WUINITY_IN.traffic.evacuationGoals[i]);
+                RouteData routeData = new RouteData(route, WUInity.INPUT.traffic.evacuationGoals[i]);
                 rC.routes[i] = routeData;
             }
 

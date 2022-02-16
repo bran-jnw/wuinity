@@ -5,7 +5,7 @@ using static WUInity.Fire.MathWrap;
 
 namespace WUInity.Farsite
 {
-    public class FarsiteViewer : MonoBehaviour
+    public class FarsiteViewer
     {
         public float actualTime = 0.0f;
         [SerializeField] int terrainRes = 128;
@@ -34,7 +34,7 @@ namespace WUInity.Farsite
         public void ImportFarsite()
         {
             //fix fire numbers
-            FarsiteFire[] fF = FindObjectsOfType<FarsiteFire>();
+            FarsiteFire[] fF = MonoBehaviour.FindObjectsOfType<FarsiteFire>();
             for (int i = 0; i < fF.Length; ++i)
             {
                 fF[i].fireNumber = i + 1;

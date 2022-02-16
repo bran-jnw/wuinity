@@ -52,7 +52,7 @@ namespace WUInity
             {
                 if (randomChoice < goalsCumulativeWeights[i])
                 {
-                    return WUInity.WUINITY_IN.traffic.evacuationGoals[goalIndices[i]];
+                    return WUInity.INPUT.traffic.evacuationGoals[goalIndices[i]];
                 }
             }
 
@@ -61,20 +61,20 @@ namespace WUInity
 
         public static void SaveEvacGroupIndices()
         {
-            string filename = WUInity.WUINITY_IN.simName;
+            string filename = WUInity.INPUT.simName;
 
             string[] data = new string[4];
             //nrows
-            data[0] = WUInity.WUINITY_SIM.EvacCellCount.x.ToString();
+            data[0] = WUInity.SIM.EvacCellCount.x.ToString();
             //ncols
-            data[1] = WUInity.WUINITY_SIM.EvacCellCount.y.ToString();
+            data[1] = WUInity.SIM.EvacCellCount.y.ToString();
             //how many evac groups
-            data[2] = WUInity.WUINITY_IN.evac.evacGroups.Length.ToString();
+            data[2] = WUInity.INPUT.evac.evacGroups.Length.ToString();
             //actual data
             data[3] = "";
-            for (int i = 0; i < WUInity.WUINITY_SIM.evacGroupIndices.Length; ++i)
+            for (int i = 0; i < WUInity.SIM.evacGroupIndices.Length; ++i)
             {
-                data[3] += WUInity.WUINITY_SIM.evacGroupIndices[i] + " ";
+                data[3] += WUInity.SIM.evacGroupIndices[i] + " ";
             }
 
             System.IO.File.WriteAllLines(WUInity.WORKING_FOLDER + "/" + filename + ".egs", data);
@@ -83,9 +83,9 @@ namespace WUInity
         public static void LoadEvacGroupIndices()
         {
             //cell count might be dirty
-            WUInity.WUINITY_SIM.UpdateNeededData();
+            WUInity.SIM.UpdateNeededData();
 
-            string filename = WUInity.WUINITY_IN.simName;
+            string filename = WUInity.INPUT.simName;
             string path = WUInity.WORKING_FOLDER + "/" + filename + ".egs";
 
             try
@@ -103,7 +103,7 @@ namespace WUInity
                     int.TryParse(header[1], out nrows);
                     int.TryParse(header[2], out evacGroupCount);
                     //make sure we have the correct size
-                    if (ncols == WUInity.WUINITY_SIM.EvacCellCount.x && nrows == WUInity.WUINITY_SIM.EvacCellCount.y && evacGroupCount <= WUInity.WUINITY_IN.evac.evacGroups.Length)
+                    if (ncols == WUInity.SIM.EvacCellCount.x && nrows == WUInity.SIM.EvacCellCount.y && evacGroupCount <= WUInity.INPUT.evac.evacGroups.Length)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];
@@ -111,20 +111,20 @@ namespace WUInity
                         {
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
-                        WUInity.WUINITY_SIM.UpdateEvacGroups(eGsIndices);
-                        WUInity.WUINITY_SIM.LogMessage("LOG: Evac groups loaded from file, cells: " + ncols + ", " + nrows);
+                        WUInity.SIM.UpdateEvacGroups(eGsIndices);
+                        WUInity.SIM.LogMessage("LOG: Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                     }
                     else
                     {
-                        WUInity.WUINITY_SIM.UpdateEvacGroups(null);
-                        WUInity.WUINITY_SIM.LogMessage("WARNING: Evac groups file does not match current mesh, using default.");
+                        WUInity.SIM.UpdateEvacGroups(null);
+                        WUInity.SIM.LogMessage("WARNING: Evac groups file does not match current mesh, using default.");
                     }
                 }
             }
             catch (System.Exception e)
             {
-                WUInity.WUINITY_SIM.UpdateEvacGroups(null);
-                WUInity.WUINITY_SIM.LogMessage("WARNING: Evac groups file " + path + " not found, using default.");
+                WUInity.SIM.UpdateEvacGroups(null);
+                WUInity.SIM.LogMessage("WARNING: Evac groups file " + path + " not found, using default.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }
             

@@ -46,7 +46,7 @@ namespace WUInity.Fire
             if(dataPoints.Length > 1)       //if there are more than 1 data points, get the rest of the data of the specified time and rewrite them as the first point data.
             {
                 w.direction = directionSpline.GetYValue(time);
-                w.speed = speedSpline.GetYValue(time) * WUInity.WUINITY_IN.fire.windMultiplier;
+                w.speed = speedSpline.GetYValue(time) * WUInity.INPUT.fire.windMultiplier;
                 w.cloudCover = cloudSpline.GetYValue(time);
             }
 

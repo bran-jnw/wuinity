@@ -54,7 +54,7 @@ namespace WUInity.Fire
             {
                 cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);          //Set cellSize properly, overwrite hardcoded value      
             }
-            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.WUINITY_IN.size.y / cellSize.x)));         //get raster cell size by dividing the total length of each edge by the length of an individual cell.
+            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.INPUT.size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.INPUT.size.y / cellSize.x)));         //get raster cell size by dividing the total length of each edge by the length of an individual cell.
 
             this.weather = weather;
             this.wind = wind;
@@ -177,9 +177,9 @@ namespace WUInity.Fire
             }
             burnTexture.filterMode = FilterMode.Point;  
             
-            if(WUInity.WUINITY != null)                                                 //I dont really know
+            if(WUInity.INSTANCE != null)                                                 //I dont really know
             {
-                WUInity.WUINITY.fireMaterial.mainTexture = burnTexture;
+                WUInity.INSTANCE.fireMaterial.mainTexture = burnTexture;
             }
 
             StartInitialIgnition();
@@ -356,7 +356,7 @@ namespace WUInity.Fire
 
         public FireCellState GetFireCellState(Vector2D latLong)     //get cell state based on latlong 
         {
-            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.WUINITY_MAP.CenterMercator, WUInity.WUINITY_MAP.WorldRelativeScale);
+            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
             int x = (int)(pos.x / cellSize.x);
             int y = (int)(pos.y / cellSize.x);

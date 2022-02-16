@@ -5,29 +5,33 @@ using UnityEngine;
 namespace WUInity.GPW
 {
 
-    public class GPWViewer : MonoBehaviour
+    public class GPWViewer
     {
         [SerializeField] Vector2D lowerLeftlatLong;
         [SerializeField] Vector2D size = new Vector2D(20000, 20000);
 
         [SerializeField] public GPWData gpwData;
 
-        private GameObject gpwDensityMap;
+        public  GameObject gpwDensityMap;
         Material mat;
 
-        public void CreateGPW(Vector2D lowerLeftLatLong, Vector2D mapSize)
+        public bool CreateGPW(Vector2D lowerLeftLatLong, Vector2D mapSize, bool setActive)
         {
             if (gpwDensityMap != null)
             {
-                Destroy(gpwDensityMap);
+                MonoBehaviour.Destroy(gpwDensityMap);
             }
             size = mapSize;
             this.lowerLeftlatLong = lowerLeftLatLong;
             gpwData = new GPWData();
-            gpwData.LoadGPWData(lowerLeftlatLong, size);
+            bool success = gpwData.LoadGPWData(lowerLeftlatLong, size);
 
             CreateTexture();
             CreateDensityPlane();
+
+            gpwDensityMap.SetActive(setActive);
+
+            return success;
         }
 
         public void SetTexture(Texture2D tex)
@@ -38,7 +42,7 @@ namespace WUInity.GPW
         private void CreateDensityPlane()
         {
             GameObject gO = new GameObject("GPWDensityMap");
-            gO.transform.parent = this.transform;
+            gO.transform.parent = WUInity.INSTANCE.transform;
             gO.isStatic = true;
             // You can change that line to provide another MeshFilter
             MeshFilter filter = gO.AddComponent<MeshFilter>();
@@ -165,36 +169,45 @@ namespace WUInity.GPW
             densityTex.Apply();
         }
 
+        //colors from GPW website
+        static Color c0 = new Color(190f / 255f, 232f / 255f, 255f / 255f);
+        static Color c1 = new Color(1.0f, 241f / 255f, 208f / 255f);
+        static Color c2 = new Color(1.0f, 218f / 255f, 165f / 255f);
+        static Color c3 = new Color(252f / 255f, 183f / 255f, 82f / 255f);
+        static Color c4 = new Color(1.0f, 137f / 255f, 63f / 255f);
+        static Color c5 = new Color(238f / 255f, 60f / 255f, 30f / 255f);
+        static Color c6 = new Color(191f / 255f, 1f / 255f, 39f / 255f);
+
         public static Color GetGPWColor(float density)
         {
             Color color;
             if (density < 0.0f)
             {
-                color = new Color(190f / 255f, 232f / 255f, 255f / 255f);
+                color = c0;
             }
             else if (density < 1.0f)
             {
-                color = new Color(1.0f, 241f / 255f, 208f / 255f);
+                color = c1;
             }
             else if (density <= 5.0f)
             {
-                color = new Color(1.0f, 218f / 255f, 165f / 255f);
+                color = c2;
             }
             else if (density <= 25.0f)
             {
-                color = new Color(252f / 255f, 183f / 255f, 82f / 255f);
+                color = c3;
             }
             else if (density <= 250.0f)
             {
-                color = new Color(1.0f, 137f / 255f, 63f / 255f);
+                color = c4;
             }
             else if (density <= 1000.0f)
             {
-                color = new Color(238f / 255f, 60f / 255f, 30f / 255f);
+                color = c5;
             }
             else
             {
-                color = new Color(191f / 255f, 1f / 255f, 39f / 255f);
+                color = c6;
             }
             color.a = 0.7f;
             return color;

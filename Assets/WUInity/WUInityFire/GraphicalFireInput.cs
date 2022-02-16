@@ -9,30 +9,30 @@ namespace WUInity
     {
         public static void SaveGraphicalFireInput()
         {
-            string filename = WUInity.WUINITY_IN.simName;
+            string filename = WUInity.INPUT.simName;
 
             string[] data = new string[5];
             //x cells
-            data[0] = WUInity.WUINITY_SIM.GetFireMesh().cellCount.x.ToString();
+            data[0] = WUInity.SIM.GetFireMesh().cellCount.x.ToString();
             //y cells
-            data[1] = WUInity.WUINITY_SIM.GetFireMesh().cellCount.y.ToString();
+            data[1] = WUInity.SIM.GetFireMesh().cellCount.y.ToString();
             //actual data, first wuiArea, then ignition map
             data[2] = "";
             data[3] = "";
             data[4] = "";
-            for (int i = 0; i < WUInity.WUINITY_IN.fire.wuiAreaIndices.Length; ++i)
+            for (int i = 0; i < WUInity.INPUT.fire.wuiAreaIndices.Length; ++i)
             {
-                if(WUInity.WUINITY_IN.fire.wuiAreaIndices[i] == 1)
+                if(WUInity.INPUT.fire.wuiAreaIndices[i] == 1)
                 {
                     data[2] += i + " ";
                 }
 
-                if (WUInity.WUINITY_IN.fire.randomIgnitionIndices[i] == 1)
+                if (WUInity.INPUT.fire.randomIgnitionIndices[i] == 1)
                 {
                     data[3] += i + " ";
                 }
 
-                if (WUInity.WUINITY_IN.fire.initialIgnitionIndices[i] == 1)
+                if (WUInity.INPUT.fire.initialIgnitionIndices[i] == 1)
                 {
                     data[4] += i + " ";
                 }
@@ -48,7 +48,7 @@ namespace WUInity
 
         public static void LoadGraphicalFireInput()
         {
-            string filename = WUInity.WUINITY_IN.simName;
+            string filename = WUInity.INPUT.simName;
             string path = Path.Combine(WUInity.WORKING_FOLDER, filename + ".gfi"); //graphical fire input
 
             try
@@ -65,7 +65,7 @@ namespace WUInity
                     int.TryParse(header[0], out ncols);
                     int.TryParse(header[1], out nrows);
                     //make sure we have the correct size
-                    if (ncols == WUInity.WUINITY_SIM.GetFireMesh().cellCount.x && nrows == WUInity.WUINITY_SIM.GetFireMesh().cellCount.y)
+                    if (ncols == WUInity.SIM.GetFireMesh().cellCount.x && nrows == WUInity.SIM.GetFireMesh().cellCount.y)
                     {
                         string[] data = header[2].Split(' ');
                         int[] wuiAreaIndices = new int[ncols * nrows];
@@ -76,7 +76,7 @@ namespace WUInity
                             int.TryParse(data[i], out pos);
                             wuiAreaIndices[pos] = 1;                       
                         }
-                        WUInity.WUINITY_SIM.UpdateWUIArea(wuiAreaIndices);
+                        WUInity.SIM.UpdateWUIArea(wuiAreaIndices);
 
                         data = header[3].Split(' ');
                         int[] randomIgnitionArea = new int[ncols * nrows];
@@ -86,7 +86,7 @@ namespace WUInity
                             int.TryParse(data[i], out pos);
                             randomIgnitionArea[pos] = 1;                          
                         }
-                        WUInity.WUINITY_SIM.UpdateRandomIgnitionIndices(randomIgnitionArea);
+                        WUInity.SIM.UpdateRandomIgnitionIndices(randomIgnitionArea);
 
                         data = header[4].Split(' ');
                         int[] initialIgnitionIndices = new int[ncols * nrows];
@@ -96,9 +96,9 @@ namespace WUInity
                             int.TryParse(data[i], out pos);
                             initialIgnitionIndices[pos] = 1;                    
                         }
-                        WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);
+                        WUInity.SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);
 
-                        WUInity.WUINITY_SIM.LogMessage("LOG: Graphical fire input loaded, cells: " + ncols + ", " + nrows);
+                        WUInity.SIM.LogMessage("LOG: Graphical fire input loaded, cells: " + ncols + ", " + nrows);
 
                         /*string[] data = header[2].Split(' ');
                         int[] wuiAreaIndices = new int[ncols * nrows];
@@ -127,14 +127,14 @@ namespace WUInity
                     else
                     {
                         CreateDefaultInputs();
-                        WUInity.WUINITY_SIM.LogMessage("WARNING: Graphical fire input file does not match current mesh, using default.");
+                        WUInity.SIM.LogMessage("WARNING: Graphical fire input file does not match current mesh, using default.");
                     }
                 }
             }
             catch (System.Exception e)
             {
                 CreateDefaultInputs();
-                WUInity.WUINITY_SIM.LogMessage("WARNING: could not read GFI due to: " + e.ToString() + ". Creating empty default.");
+                WUInity.SIM.LogMessage("WARNING: could not read GFI due to: " + e.ToString() + ". Creating empty default.");
                 //WUInity.WUINITY_SIM.LogMessage("WARNING: Graphical fire input file " + path + " not found, using default.");
             }
 
@@ -142,9 +142,9 @@ namespace WUInity
 
         private static void CreateDefaultInputs()
         {
-            WUInity.WUINITY_SIM.UpdateWUIArea(null);
-            WUInity.WUINITY_SIM.UpdateRandomIgnitionIndices(null);
-            WUInity.WUINITY_SIM.UpdateInitialIgnitionIndices(null);
+            WUInity.SIM.UpdateWUIArea(null);
+            WUInity.SIM.UpdateRandomIgnitionIndices(null);
+            WUInity.SIM.UpdateInitialIgnitionIndices(null);
         }
     }
 }

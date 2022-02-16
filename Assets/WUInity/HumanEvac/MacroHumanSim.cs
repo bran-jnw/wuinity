@@ -165,7 +165,7 @@ namespace WUInity.Evac
 
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
-            if(WUInity.WUINITY_IN.runTrafficSim)
+            if(WUInity.INPUT.runTrafficSim)
             {
                 if (household.cars > 1)
                 {
@@ -186,12 +186,12 @@ namespace WUInity.Evac
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), cars[i]);
+                        WUInity.SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), cars[i]);
                     }
                 }
                 else
                 {
-                    WUInity.WUINITY_SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
+                    WUInity.SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
                 }
             }
             
@@ -202,7 +202,7 @@ namespace WUInity.Evac
 
         public void SaveToFile(int runNumber)
         {
-            WUInityInput wO = WUInity.WUINITY_IN;
+            WUInityInput wO = WUInity.INPUT;
             string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.simName + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
@@ -226,7 +226,7 @@ namespace WUInity.Evac
             ySize = cellCount.y;
             this.realWorldSize = realWorldSize;
             population = new int[cellCount.x * cellCount.y];
-            WUInity.WUINITY_OUT.evac.rawPopulation = new int[cellCount.x * cellCount.y];
+            WUInity.OUTPUT.evac.rawPopulation = new int[cellCount.x * cellCount.y];
 
             double cellSizeX = realWorldSize.x / xSize;
             double cellSizeY = realWorldSize.y / ySize;
@@ -249,7 +249,7 @@ namespace WUInity.Evac
                         maxPop = pop;
                     }
 
-                    WUInity.WUINITY_OUT.evac.rawPopulation[x + y * xSize] = pop;
+                    WUInity.OUTPUT.evac.rawPopulation[x + y * xSize] = pop;
                 }
             }
             return totalPopulation;
@@ -312,7 +312,7 @@ namespace WUInity.Evac
                 peopleLeft = totalPopulation;
             }
 
-            WUInity.WUINITY_OUT.evac.actualTotalEvacuees = totalPopulation;
+            WUInity.OUTPUT.evac.actualTotalEvacuees = totalPopulation;
         }
 
         /// <summary>
@@ -344,7 +344,7 @@ namespace WUInity.Evac
         /// <returns></returns>
         static public float GetRandomResponseTime()
         {
-            EvacInput eO = WUInity.WUINITY_IN.evac;
+            EvacInput eO = WUInity.INPUT.evac;
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
@@ -387,7 +387,7 @@ namespace WUInity.Evac
         /// <returns></returns>
         static public float GetRandomWalkingSpeed()
         {
-            EvacInput eO = WUInity.WUINITY_IN.evac;
+            EvacInput eO = WUInity.INPUT.evac;
             return Random.Range(eO.walkingSpeedMinMax.x, eO.walkingSpeedMinMax.y) * eO.walkingSpeedModifier;
         }
 
@@ -433,10 +433,10 @@ namespace WUInity.Evac
                 }
             }
 
-            WUInity.WUINITY_SIM.LogMessage("Total households: " + totalHouseholds);
-            WUInity.WUINITY_SIM.LogMessage("Total cars: " +  totalCars);
-            WUInity.WUINITY_SIM.LogMessage("Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
-            WUInity.WUINITY_OUT.evac.stayingPeople = totalPeopleWhoWillNotEvacuate;
+            WUInity.SIM.LogMessage("Total households: " + totalHouseholds);
+            WUInity.SIM.LogMessage("Total cars: " +  totalCars);
+            WUInity.SIM.LogMessage("Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            WUInity.OUTPUT.evac.stayingPeople = totalPeopleWhoWillNotEvacuate;
         }
 
         /// <summary>
@@ -541,7 +541,7 @@ namespace WUInity.Evac
             Texture2D popTex = new Texture2D(res.x, res.y);
             popTex.filterMode = FilterMode.Point;
 
-            WUInity.WUINITY_OUT.evac.stayingPopulation = new int[xSize * ySize];
+            WUInity.OUTPUT.evac.stayingPopulation = new int[xSize * ySize];
 
             for (int y = 0; y < ySize; y++)
             {
@@ -561,7 +561,7 @@ namespace WUInity.Evac
                     }
                     Color color = GetStayColor(peopleStaying, population[x + y * xSize]);
                     popTex.SetPixel(x, y, color);
-                    WUInity.WUINITY_OUT.evac.stayingPopulation[x + y * xSize] = peopleStaying;
+                    WUInity.OUTPUT.evac.stayingPopulation[x + y * xSize] = peopleStaying;
                 }
             }
             popTex.Apply();

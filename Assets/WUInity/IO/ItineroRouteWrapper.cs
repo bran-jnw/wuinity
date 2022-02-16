@@ -29,11 +29,11 @@ namespace WUInity
 
         public static EvacuationGoal GetRealEvacGoal(string name)
         {
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
             {
-                if (WUInity.WUINITY_IN.traffic.evacuationGoals[i].name == name)
+                if (WUInity.INPUT.traffic.evacuationGoals[i].name == name)
                 {
-                    return WUInity.WUINITY_IN.traffic.evacuationGoals[i];
+                    return WUInity.INPUT.traffic.evacuationGoals[i];
                 }
             }
 

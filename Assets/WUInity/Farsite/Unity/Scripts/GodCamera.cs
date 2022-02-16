@@ -46,7 +46,7 @@ namespace WUInity
                 {
                     cMode = CameraMode.twoD;
                 }
-                SetCameraStartPosition(WUInity.WUINITY_IN.size);
+                SetCameraStartPosition(WUInity.INPUT.size);
             }
             if (cMode == CameraMode.twoD)
             {

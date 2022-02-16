@@ -27,7 +27,7 @@ namespace WUInity.Evac
         /// <param name="responseTime"></param>
         public MacroHousehold(HumanEvacCell humanRaster, Vector2D nodeCenter, int peopleInHousehold, float walkingSpeed, float responseTime)
         {
-            EvacInput eO = WUInity.WUINITY_IN.evac;
+            EvacInput eO = WUInity.INPUT.evac;
 
             Vector2D pos = nodeCenter + humanRaster.cellWorldSize * Random.Range(-0.5f, 0.5f);
             this.peopleInHousehold = peopleInHousehold;

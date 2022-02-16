@@ -61,11 +61,11 @@ namespace WUInity
                 else
                 {
                     menuChoice = ActiveMenu.MainMenu;
-                    WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                 }
             }
 
-            if(WUInity.WUINITY.haveInput)
+            if(WUInity.INSTANCE.haveInput)
             {
                 if (GUI.Button(gpwMenu.rect, gpwMenu.text))
                 {
@@ -76,7 +76,7 @@ namespace WUInity
                     else
                     {
                         menuChoice = ActiveMenu.GPWMenu;
-                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.GPW);
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
                     }
                 }
 
@@ -89,7 +89,7 @@ namespace WUInity
                     else
                     {
                         menuChoice = ActiveMenu.EvacMenu;
-                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
 
@@ -102,7 +102,7 @@ namespace WUInity
                     else
                     {
                         menuChoice = ActiveMenu.TrafficMenu;
-                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
 
@@ -115,11 +115,11 @@ namespace WUInity
                     else
                     {
                         menuChoice = ActiveMenu.FireMenu;
-                        WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
 
-                if (WUInity.WUINITY_SIM.showResults)
+                if (WUInity.SIM.showResults)
                 {
                     if (GUI.Button(outputMenu.rect, outputMenu.text))
                     {
@@ -130,7 +130,7 @@ namespace WUInity
                         else
                         {
                             menuChoice = ActiveMenu.OutputMenu;
-                            WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                            WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                         }
                     }
                 }
@@ -184,7 +184,7 @@ namespace WUInity
         bool mainInputDirty = true;
         void MainMenu()
         {
-            WUInityInput wO = WUInity.WUINITY_IN;
+            WUInityInput wO = WUInity.INPUT;
             if (mainInputDirty)
             {
                 mainInputDirty = false;
@@ -214,12 +214,12 @@ namespace WUInity
             }
             ++buttonIndex;*/
 
-            if(!WUInity.WUINITY.haveInput)
+            if(!WUInity.INSTANCE.haveInput)
             {
                 return;
             }
 
-            if(!WUInity.WUINITY_MAP.IsAccessTokenValid)
+            if(!WUInity.MAP.IsAccessTokenValid)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "ERROR: Mapbox token not valid.");
                 return;
@@ -280,7 +280,7 @@ namespace WUInity
             if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load Map"))
             {
                 ParseMainData(wO);
-                WUInity.WUINITY.LoadMapbox();
+                WUInity.INSTANCE.LoadMapbox();
             }
             ++buttonIndex;
 
@@ -300,8 +300,8 @@ namespace WUInity
             if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
             {
                 ParseMainData(wO);
-                WUInity.WUINITY_SIM.LogMessage("Simulation started, please wait.");
-                if (WUInity.WUINITY_SIM.StartSimFromGUI())
+                WUInity.SIM.LogMessage("Simulation started, please wait.");
+                if (WUInity.SIM.StartSimFromGUI())
                 {
                     menuChoice = ActiveMenu.OutputMenu;
                 }
@@ -312,7 +312,7 @@ namespace WUInity
         void OpenSaveInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            WUInityInput wO = WUInity.WUINITY_IN;
+            WUInityInput wO = WUInity.INPUT;
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
             FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.simName + ".wui", "Save file", "Save");
         }
@@ -342,7 +342,7 @@ namespace WUInity
         {
             WUInity.WORKING_FILE = paths[0];
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            WUInityInput wO = WUInity.WUINITY_IN;
+            WUInityInput wO = WUInity.INPUT;
             wO.simName = name;
             ParseMainData(wO);
             SaveLoadWUI.SaveInput();
@@ -356,14 +356,14 @@ namespace WUInity
 
         void LoadLCP(string[] paths)
         {
-            WUInityInput wO = WUInity.WUINITY_IN; 
+            WUInityInput wO = WUInity.INPUT; 
             wO.fire.lcpFile = paths[0];
-            WUInity.WUINITY_SIM.UpdateLCPFile();
+            WUInity.SIM.UpdateLCPFile();
         }
 
         void LoadOSM(string[] paths)
         {
-            WUInityInput wO = WUInity.WUINITY_IN;
+            WUInityInput wO = WUInity.INPUT;
             wO.itinero.osmFile = paths[0];
         }
 
@@ -394,7 +394,7 @@ namespace WUInity
         bool gpwInputDirty = true;
         void GPWMenu()
         {
-            GPWInput gpwIn = WUInity.WUINITY_IN.gpw;
+            GPWInput gpwIn = WUInity.INPUT.gpw;
             if (gpwInputDirty)
             {
                 gpwInputDirty = false;
@@ -403,21 +403,27 @@ namespace WUInity
             int buttonIndex = 0;
             int buttonColumnStart = 140;
 
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply Changes"))
+            string loadText = "Load GPW Data";
+            if (WUInity.INSTANCE.gpwLoaded)
             {
-                gpwIn.localGPWFilename = gpwName;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Status: GPW data loaded");               
+                loadText = "Re-load GPW Data";
             }
-            ++buttonIndex;*/
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load GPW Data"))
+            else
             {
-                WUInity.WUINITY.LoadGPW();
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Status: GPW data NOT loaded");
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadText))
+            {
+                WUInity.INSTANCE.LoadGPW();
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/Hide GPW data"))
             {
-                WUInity.WUINITY.ToggleGPWViewer();
+                WUInity.INSTANCE.ToggleGPWViewer();
             }
             ++buttonIndex;
         }
@@ -428,7 +434,7 @@ namespace WUInity
         int columnWidth = 200;
         void EvacMenu()
         {
-            EvacInput eO = WUInity.WUINITY_IN.evac;
+            EvacInput eO = WUInity.INPUT.evac;
             if (evacInputDirty)
             {
                 evacInputDirty = false;
@@ -523,7 +529,7 @@ namespace WUInity
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
             ++buttonIndex;
 
-            if(WUInity.WUINITY.developerMode)
+            if(WUInity.INSTANCE.developerMode)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
                 {
@@ -532,9 +538,9 @@ namespace WUInity
                 ++buttonIndex;
             }            
 
-            if (WUInity.WUINITY.IsPainterActive())
+            if (WUInity.INSTANCE.IsPainterActive())
             {
-                for (int i = 0; i < WUInity.WUINITY_IN.evac.evacGroups.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.evac.evacGroups.Length; i++)
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Define group " + (i + 1)))
                     {
@@ -545,7 +551,7 @@ namespace WUInity
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop editing"))
                 {
-                    WUInity.WUINITY.StopPainter();
+                    WUInity.INSTANCE.StopPainter();
                 }
                 ++buttonIndex;
             }
@@ -553,7 +559,7 @@ namespace WUInity
             {    
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
-                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.EvacGroup);
+                    WUInity.INSTANCE.StartPainter(WUInityPainter.PaintMode.EvacGroup);
                 }
                 ++buttonIndex;
             }  
@@ -566,7 +572,7 @@ namespace WUInity
                 return;
             }
 
-            EvacInput eO = WUInity.WUINITY_IN.evac;
+            EvacInput eO = WUInity.INPUT.evac;
 
             int.TryParse(totalPop, out eO.totalPopulation);
             float.TryParse(cellSize, out eO.routeCellSize);
@@ -585,8 +591,8 @@ namespace WUInity
         bool trafficInputDirty = true;
         void TrafficMenu()
         {
-            TrafficInput tO = WUInity.WUINITY_IN.traffic;
-            ItineroInput iO = WUInity.WUINITY_IN.itinero;
+            TrafficInput tO = WUInity.INPUT.traffic;
+            ItineroInput iO = WUInity.INPUT.itinero;
             if (trafficInputDirty)
             {
                 trafficInputDirty = false;
@@ -596,6 +602,18 @@ namespace WUInity
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
             int buttonIndex = 0;
+
+            string loadText = "Load router Database";
+            if (WUInity.INSTANCE.routerDbLoaded)
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Status: RouterDb loaded");                
+                loadText = "Re-load router Database";
+            }
+            else
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Status: RouterDb NOT loaded");
+            }
+            ++buttonIndex;
 
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM file");
@@ -612,11 +630,11 @@ namespace WUInity
             ++buttonIndex;
             borderSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), borderSize);
             ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load Router Database"))
+                                  
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadText))
             {
                 ParseTrafficInput();
-                WUInity.WUINITY_SIM.LoadItineroDatabase();
+                WUInity.SIM.LoadItineroDatabase();
             }
             ++buttonIndex;
 
@@ -642,7 +660,7 @@ namespace WUInity
             opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
             ++buttonIndex;
 
-            if(WUInity.WUINITY.developerMode)
+            if(WUInity.INSTANCE.developerMode)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))
                 {
@@ -659,8 +677,8 @@ namespace WUInity
                 return;
             }
 
-            TrafficInput tO = WUInity.WUINITY_IN.traffic;
-            ItineroInput iO = WUInity.WUINITY_IN.itinero;
+            TrafficInput tO = WUInity.INPUT.traffic;
+            ItineroInput iO = WUInity.INPUT.itinero;
 
             float.TryParse(stallSpeed, out tO.stallSpeed);
             float.TryParse(opticalDensity, out tO.opticalDensity);
@@ -671,7 +689,7 @@ namespace WUInity
         Farsite.FarsiteViewer fV;
         void FarsiteMenu()
         {
-            FarsiteInput fI = WUInity.WUINITY_IN.farsite;
+            FarsiteInput fI = WUInity.INPUT.farsite;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
             int buttonIndex = 0;
@@ -684,15 +702,15 @@ namespace WUInity
 
             if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Import Farsite Data"))
             {
-                WUInity.WUINITY.LoadFarsite();
+                WUInity.INSTANCE.LoadFarsite();
             }
             ++buttonIndex;
 
-            if (WUInity.WUINITY_FARSITE != null)
+            if (WUInity.FARSITE_VIEWER != null)
             {
                 if (fV == null)
                 {
-                    fV = WUInity.WUINITY_FARSITE;
+                    fV = WUInity.FARSITE_VIEWER;
                 }
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Time: " + (int)fV.actualTime + " hours after ignition");
                 ++buttonIndex;
@@ -711,7 +729,7 @@ namespace WUInity
 
         void FireMenu()
         {
-            FireInput fI = WUInity.WUINITY_IN.fire;
+            FireInput fI = WUInity.INPUT.fire;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
             int buttonIndex = 0;
@@ -728,7 +746,7 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (WUInity.WUINITY.IsPainterActive())
+            if (WUInity.INSTANCE.IsPainterActive())
             {
                 if(WUInity.PAINTER.GetPaintMode() == WUInityPainter.PaintMode.WUIArea)
                 {
@@ -774,7 +792,7 @@ namespace WUInity
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop painting"))
                 {
-                    WUInity.WUINITY.StopPainter();
+                    WUInity.INSTANCE.StopPainter();
                 }
                 ++buttonIndex;
             }
@@ -782,17 +800,17 @@ namespace WUInity
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint WUI area"))
                 {
-                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.WUIArea);
+                    WUInity.INSTANCE.StartPainter(WUInityPainter.PaintMode.WUIArea);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint random ignition area"))
                 {
-                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.RandomIgnitionArea);
+                    WUInity.INSTANCE.StartPainter(WUInityPainter.PaintMode.RandomIgnitionArea);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Paint initial ignition"))
                 {
-                    WUInity.WUINITY.StartPainter(WUInityPainter.PaintMode.InitialIgnition);
+                    WUInity.INSTANCE.StartPainter(WUInityPainter.PaintMode.InitialIgnition);
                 }
                 ++buttonIndex;
             }
@@ -800,7 +818,7 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Farsite import"))
             {
                 menuChoice = ActiveMenu.FarsiteMenu;
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Farsite);
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Farsite);
             }
             ++buttonIndex;
         }
@@ -814,56 +832,56 @@ namespace WUInity
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
             int buttonIndex = 0;
 
-            int dummy = (int)WUInity.WUINITY_OUT.totalEvacTime;
+            int dummy = (int)WUInity.OUTPUT.totalEvacTime;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
-            dummy = WUInity.WUINITY_OUT.evac.actualTotalEvacuees;
+            dummy = WUInity.OUTPUT.evac.actualTotalEvacuees;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            dummy = WUInity.WUINITY_OUT.evac.stayingPeople;
+            dummy = WUInity.OUTPUT.evac.stayingPeople;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
             ++buttonIndex;
 
             //toatl cars
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.WUINITY_SIM.GetMacroHumanSim().GetTotalCars());
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.GetMacroHumanSim().GetTotalCars());
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Interpolated population density"))
             {
-                WUInity.WUINITY.DisplayRawPop();
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Raw);
+                WUInity.INSTANCE.DisplayRawPop();
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Raw);
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stuck population"))
             {
-                WUInity.WUINITY.DisplayStuckPop();
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.None);
+                WUInity.INSTANCE.DisplayStuckPop();
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Redist. population density"))
             {
-                WUInity.WUINITY.DisplayRelocatedPop();
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Relocated);
+                WUInity.INSTANCE.DisplayRelocatedPop();
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Relocated);
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Staying population"))
             {
-                WUInity.WUINITY.DisplayStayingPop();
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.Staying);
+                WUInity.INSTANCE.DisplayStayingPop();
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Staying);
             }
             ++buttonIndex;
 
-            float timeRange = WUInity.WUINITY_OUT.totalEvacTime - WUInity.WUINITY_SIM.StartTime;
-            float time = sliderVtraffic * timeRange + WUInity.WUINITY_SIM.StartTime;
+            float timeRange = WUInity.OUTPUT.totalEvacTime - WUInity.SIM.StartTime;
+            float time = sliderVtraffic * timeRange + WUInity.SIM.StartTime;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
-                WUInity.WUINITY.DisplayClosestDensityData(time);
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
+                WUInity.INSTANCE.DisplayClosestDensityData(time);
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             }
             ++buttonIndex;
 
@@ -871,53 +889,53 @@ namespace WUInity
             ++buttonIndex;
             sliderVtraffic = GUI.HorizontalSlider(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sliderVtraffic, 0.0f, 1.0f);
             ++buttonIndex;
-            if (WUInity.WUINITY.dataSampleMode == WUInity.DataSampleMode.TrafficDens)
+            if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.TrafficDens)
             {
-                WUInity.WUINITY.DisplayClosestDensityData(time);
+                WUInity.INSTANCE.DisplayClosestDensityData(time);
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/Hide data"))
             {
-                WUInity.WUINITY.ToggleDataPlane();
+                WUInity.INSTANCE.ToggleDataPlane();
             }
             ++buttonIndex;
 
-            if(WUInity.WUINITY_IN.runEvacSim && WUInity.WUINITY_SIM.GetMacroHumanSim() != null)
+            if(WUInity.INPUT.runEvacSim && WUInity.SIM.GetMacroHumanSim() != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.WUINITY_SIM.GetMacroHumanSim().GetPeopleLeft() + " / " + WUInity.WUINITY_OUT.evac.actualTotalEvacuees);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.GetMacroHumanSim().GetPeopleLeft() + " / " + WUInity.OUTPUT.evac.actualTotalEvacuees);
                 ++buttonIndex;
 
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUInity.WUINITY_SIM.GetMacroHumanSim().GetCarsReached());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUInity.SIM.GetMacroHumanSim().GetCarsReached());
                 ++buttonIndex;
             }            
 
             //cars still left
-            if (WUInity.WUINITY_IN.runTrafficSim &&  WUInity.WUINITY_SIM.GetMacroTrafficSim() != null)
+            if (WUInity.INPUT.runTrafficSim &&  WUInity.SIM.GetMacroTrafficSim() != null)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.WUINITY_SIM.GetMacroTrafficSim().GetCarsInSystem() + " / " + WUInity.WUINITY_SIM.GetMacroTrafficSim().GetTotalCarsSimulated());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.GetMacroTrafficSim().GetCarsInSystem() + " / " + WUInity.SIM.GetMacroTrafficSim().GetTotalCarsSimulated());
                 ++buttonIndex;
             }            
 
             int totalEvacuated = 0;
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
             {
-                totalEvacuated += WUInity.WUINITY_IN.traffic.evacuationGoals[i].currentPeople;
-                string name = WUInity.WUINITY_IN.traffic.evacuationGoals[i].name;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.WUINITY_IN.traffic.evacuationGoals[i].currentPeople + " (" + WUInity.WUINITY_IN.traffic.evacuationGoals[i].cars.Count + ")");                
+                totalEvacuated += WUInity.INPUT.traffic.evacuationGoals[i].currentPeople;
+                string name = WUInity.INPUT.traffic.evacuationGoals[i].name;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople + " (" + WUInity.INPUT.traffic.evacuationGoals[i].cars.Count + ")");                
                 ++buttonIndex;
             }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.WUINITY_OUT.evac.actualTotalEvacuees - WUInity.WUINITY_OUT.evac.stayingPeople));
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.OUTPUT.evac.actualTotalEvacuees - WUInity.OUTPUT.evac.stayingPeople));
             ++buttonIndex;
 
             //fire output stuff
-            if (WUInity.WUINITY_IN.runFireSim)
+            if (WUInity.INPUT.runFireSim)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUInity.WUINITY_SIM.GetFireWindSpeed() + " m/s");
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUInity.SIM.GetFireWindSpeed() + " m/s");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.WUINITY_SIM.GetFireWindDirection() + " degrees");
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.SIM.GetFireWindDirection() + " degrees");
                 ++buttonIndex;
             }            
         }

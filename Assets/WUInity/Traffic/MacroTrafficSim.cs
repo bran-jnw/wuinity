@@ -133,10 +133,10 @@ namespace WUInity.Traffic
             output = new List<string>();
             
             string start = "Time(s),Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; ++i)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; ++i)
             {
-                start += ", Goal: " + WUInity.WUINITY_IN.traffic.evacuationGoals[i].name;
-                start += ", " + WUInity.WUINITY_IN.traffic.evacuationGoals[i].name + " flow";
+                start += ", Goal: " + WUInity.INPUT.traffic.evacuationGoals[i].name;
+                start += ", " + WUInity.INPUT.traffic.evacuationGoals[i].name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -193,7 +193,7 @@ namespace WUInity.Traffic
                 RouteData r = routeCreator.CalcTrafficRoute(startPos);
                 if (r == null)
                 {
-                    WUInity.WUINITY_SIM.StopSim("WARNING! Null re-route returned to car, abort!");
+                    WUInity.SIM.StopSim("WARNING! Null re-route returned to car, abort!");
                 }
                 //special case where start is almost same as end
                 else if (r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
@@ -376,10 +376,10 @@ namespace WUInity.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + macroCars.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; ++i)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; ++i)
             {
-                newOut += "," + WUInity.WUINITY_IN.traffic.evacuationGoals[i].currentPeople;
-                newOut += "," + WUInity.WUINITY_IN.traffic.evacuationGoals[i].currentFlow;
+                newOut += "," + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople;
+                newOut += "," + WUInity.INPUT.traffic.evacuationGoals[i].currentFlow;
             }
 
             output.Add(newOut);
@@ -400,12 +400,12 @@ namespace WUInity.Traffic
                 UpdateEvacGoalsInternal();
             }
 
-            WUInity.WUINITY.SaveTransientDensityData(currentTime, macroCars);
+            WUInity.INSTANCE.SaveTransientDensityData(currentTime, macroCars);
         }
 
         public void SaveToFile(int runNumber)
         {
-            WUInityInput wuiIn = WUInity.WUINITY_IN;
+            WUInityInput wuiIn = WUInity.INPUT;
             string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simName + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
@@ -452,7 +452,7 @@ namespace WUInity.Traffic
 
             public float CalculateSpeedBasedOnDensity()
             {
-                TrafficInput tO = WUInity.WUINITY_IN.traffic;
+                TrafficInput tO = WUInity.INPUT.traffic;
                 //reasonable? not for now
                 /*if(cars.Count == 1)
                 {
@@ -570,7 +570,7 @@ namespace WUInity.Traffic
         public static float GetMaxCapacity(string highway)
         {
             float capacity = 50.0f;
-            RoadData[] r = WUInity.WUINITY_IN.traffic.roadTypes.roadData;
+            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -586,7 +586,7 @@ namespace WUInity.Traffic
         public static float GetSpeedLimit(string highway)
         {
             float speed = RoadTypes.default_value.speedLimit;
-            RoadData[] r = WUInity.WUINITY_IN.traffic.roadTypes.roadData;
+            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -602,7 +602,7 @@ namespace WUInity.Traffic
         public static int GetNumberOfLanes(string highway)
         {
             int lanes = RoadTypes.default_value.lanes;
-            RoadData[] r = WUInity.WUINITY_IN.traffic.roadTypes.roadData;
+            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -617,7 +617,7 @@ namespace WUInity.Traffic
         static bool CanReverseLanes(string highway)
         {
             bool canReverseLanes = RoadTypes.default_value.canBeReversed;
-            RoadData[] r = WUInity.WUINITY_IN.traffic.roadTypes.roadData;
+            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)

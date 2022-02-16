@@ -56,7 +56,7 @@ namespace WUInity.Fire
         {
             this.latLong = latLong;
 
-            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.WUINITY_MAP.CenterMercator, WUInity.WUINITY_MAP.WorldRelativeScale);
+            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
             x = (int)(pos.x / mesh.cellSize.x);
             y = (int)(pos.y / mesh.cellSize.y);
@@ -70,7 +70,7 @@ namespace WUInity.Fire
         {
             if(x < 0 && y < 0)
             {
-                Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.WUINITY_MAP.CenterMercator, WUInity.WUINITY_MAP.WorldRelativeScale);
+                Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
                 x = (int)(pos.x / mesh.cellSize.x);
                 y = (int)(pos.y / mesh.cellSize.y);

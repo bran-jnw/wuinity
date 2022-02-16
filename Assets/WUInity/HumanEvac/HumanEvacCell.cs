@@ -25,7 +25,7 @@ namespace WUInity.Evac
         /// <param name="personsInCell"></param>
         public HumanEvacCell(Vector2D nodeCenter, Vector2D cellWorldSize, RouteCollection route, int personsInCell)
         {
-            EvacInput eO = WUInity.WUINITY_IN.evac;
+            EvacInput eO = WUInity.INPUT.evac;
 
             this.cellWorldSize = cellWorldSize;
             this.rasterRoute = route;
@@ -45,7 +45,7 @@ namespace WUInity.Evac
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(rasterRoute.GetSelectedRoute().route.Shape[0].Latitude, rasterRoute.GetSelectedRoute().route.Shape[0].Longitude, WUInity.WUINITY_MAP.CenterMercator, WUInity.WUINITY_MAP.WorldRelativeScale);
+            Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(rasterRoute.GetSelectedRoute().route.Shape[0].Latitude, rasterRoute.GetSelectedRoute().route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
             closestNodeUnitySpace = new Vector2D(v.x, v.y);
 
             for (int i = 0; i < macroHouseholds.Length; ++i)

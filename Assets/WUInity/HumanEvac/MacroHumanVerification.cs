@@ -9,21 +9,21 @@ namespace WUInity.Evac
         public static void RunVerification()
         {
             SaveLoadWUI.LoadInput("evac_verification");
-            EvacInput evacOptions = WUInity.WUINITY_IN.evac;
-            WUInityInput wuinityOptions = WUInity.WUINITY_IN;
-            WUInity.WUINITY_IN.runEvacSim = true;
-            WUInity.WUINITY_IN.runTrafficSim = false;
-            WUInity.WUINITY_IN.runFireSim = false;
+            EvacInput evacOptions = WUInity.INPUT.evac;
+            WUInityInput wuinityOptions = WUInity.INPUT;
+            WUInity.INPUT.runEvacSim = true;
+            WUInity.INPUT.runTrafficSim = false;
+            WUInity.INPUT.runFireSim = false;
             wuinityOptions.runInRealTime = false;
 
-            WUInity.WUINITY.LoadGPW();
-            WUInity.WUINITY_SIM.LoadItineroDatabase();
+            WUInity.INSTANCE.LoadGPW();
+            WUInity.SIM.LoadItineroDatabase();
 
             //P1
             wuinityOptions.simName = "P1";
             evacOptions.overrideTotalPopulation = true;
             evacOptions.totalPopulation = 1000;
-            WUInity.WUINITY_SIM.StartSimFromGUI();
+            WUInity.SIM.StartSimFromGUI();
 
             //P2
             for (int i = 1; i < 6; i++)
@@ -35,26 +35,26 @@ namespace WUInity.Evac
                 evacOptions.maxCars = i;
                 evacOptions.maxCarsChance = 1f;
                 wuinityOptions.simName = "P2_" + i;
-                WUInity.WUINITY_SIM.StartSimFromGUI();
+                WUInity.SIM.StartSimFromGUI();
             }
 
             //P3, need more curves
             SaveLoadWUI.LoadInput("evac_verification");
-            wuinityOptions = WUInity.WUINITY_IN;
-            evacOptions = WUInity.WUINITY_IN.evac;
+            wuinityOptions = WUInity.INPUT;
+            evacOptions = WUInity.INPUT.evac;
 
             wuinityOptions.simName = "P3_1";
             evacOptions.overrideTotalPopulation = true;
             evacOptions.totalPopulation = 1000;
-            WUInity.WUINITY_SIM.StartSimFromGUI();
+            WUInity.SIM.StartSimFromGUI();
 
             wuinityOptions.simName = "P3_2";
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 500f;
-            WUInity.WUINITY_SIM.StartSimFromGUI();
+            WUInity.SIM.StartSimFromGUI();
 
             wuinityOptions.simName = "P3_3";
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 1000f;
-            WUInity.WUINITY_SIM.StartSimFromGUI();
+            WUInity.SIM.StartSimFromGUI();
 
             //P4 - can't do it
 
@@ -66,7 +66,7 @@ namespace WUInity.Evac
             {
                 wuinityOptions.simName = "PT1_mod" + (i + 1);
                 evacOptions.walkingDistanceModifier = (i + 1);
-                WUInity.WUINITY_SIM.StartSimFromGUI();
+                WUInity.SIM.StartSimFromGUI();
             }            
         }
     }

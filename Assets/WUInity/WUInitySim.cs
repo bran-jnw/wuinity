@@ -38,7 +38,7 @@ namespace WUInity
         {
             get 
             {
-                WUInityInput input = WUInity.WUINITY_IN;
+                WUInityInput input = WUInity.INPUT;
                 cellCount.x = Mathf.CeilToInt((float)input.size.x / input.evac.routeCellSize);
                 cellCount.y = Mathf.CeilToInt((float)input.size.y / input.evac.routeCellSize);
                 return cellCount;
@@ -114,22 +114,27 @@ namespace WUInity
             }
             
             simLog.Add(message);
-            WUInity.WUINITY_GUI.PrintInfo(message);
-            Debug.Log(message);
+            WUInity.GUI.PrintInfo(message);
+            if(Application.isEditor || Debug.isDebugBuild)
+            {
+                Debug.Log(message);
+            }            
         }
 
         //create or lead itinero database needed for pathfinding
-        public void LoadItineroDatabase()
+        public bool LoadItineroDatabase()
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
 
             string internalRouterName = input.simName + ".routerdb";
             string path = Path.Combine(WUInity.WORKING_FOLDER, internalRouterName);
+            bool success = false;
             if (File.Exists(path))
             {
                 using (FileStream stream = new FileInfo(path).OpenRead())
                 {
                     routerDb = RouterDb.Deserialize(stream);
+                    success = true;
                 }
                 //routerDb.AddContracted(routerDb.GetSupportedProfile("car"));
             }
@@ -140,7 +145,7 @@ namespace WUInity
                 using (FileStream stream = new FileInfo(input.itinero.osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-                    Vector2D border = GPWData.SizeToDegrees(input.lowerLeftLatLong, new Vector2D(WUInity.WUINITY_IN.itinero.osmBorderSize, WUInity.WUINITY_IN.itinero.osmBorderSize));
+                    Vector2D border = GPWData.SizeToDegrees(input.lowerLeftLatLong, new Vector2D(WUInity.INPUT.itinero.osmBorderSize, WUInity.INPUT.itinero.osmBorderSize));
                     float left = (float)(input.lowerLeftLatLong.y - border.x);
                     float bottom = (float)(input.lowerLeftLatLong.x - border.y);
                     Vector2D size = GPWData.SizeToDegrees(input.lowerLeftLatLong, input.size);
@@ -163,6 +168,7 @@ namespace WUInity
                     settings.KeepWayIds = true; //can be used to calc density easier?
                     settings.OptimizeNetwork = true;
                     routerDb.LoadOsmData(filtered, settings, Vehicle.Car);
+                    success = true;
                 }
 
                 // write the routerdb to disk.
@@ -173,12 +179,21 @@ namespace WUInity
                 }
             }
 
-            LogMessage("Router database loaded succesfully.");
+            if(success)
+            {
+                LogMessage("Router database loaded succesfully.");
+            }
+            else
+            {
+                LogMessage("Router database could not be loaded.");
+            }
+
+            return success;
         }
 
         public void UpdateNeededData()
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
 
             //set parameters in directions manager
             if (routeCreator == null)
@@ -199,7 +214,7 @@ namespace WUInity
             if (VerifySimulationRequirements())
             {
                 worked = true;
-                WUInity.WUINITY.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
                 StartSimulation();                
             }
             return worked;
@@ -210,22 +225,22 @@ namespace WUInity
             string error = "ERROR: ";
             bool failedInit = false;
             //is actually needed since we set a bunch of parameters in LoadMapbox()
-            if (WUInity.WUINITY_MAP == null)
+            if (WUInity.MAP == null)
             {
                 error += "No map loaded. ";
                 failedInit = true;
             }
             //discard?
-            if (WUInity.WUINITY_FARSITE == null)
+            if (WUInity.FARSITE_VIEWER == null)
             {
                 error += "No FARSITE data loaded. ";
             }
 
             //all things evac
-            if(WUInity.WUINITY_IN.runEvacSim)
+            if(WUInity.INPUT.runEvacSim)
             {
                 //need gpw data
-                if (WUInity.WUINITY_GPW == null)
+                if (WUInity.GPW_VIEWER == null)
                 {
                     error += "No GPW data loaded. ";
                     failedInit = true;
@@ -233,7 +248,7 @@ namespace WUInity
             }
 
             //all things traffic
-            if (WUInity.WUINITY_IN.runTrafficSim)
+            if (WUInity.INPUT.runTrafficSim)
             {
                 //need router db
                 if (routerDb == null)
@@ -261,7 +276,7 @@ namespace WUInity
         private void StartSimulation()
         {
 
-            WUInityInput input = WUInity.WUINITY_IN;            
+            WUInityInput input = WUInity.INPUT;            
 
             if(input.runInRealTime)
             {
@@ -281,7 +296,7 @@ namespace WUInity
                     //Resources.UnloadUnusedAssets();                    
                     System.GC.Collect();
                 }
-                WUInity.WUINITY_OUT.totalEvacTime = time;
+                WUInity.OUTPUT.totalEvacTime = time;
                 simRunning = false;
                 showResults = true;
                 LogMessage("Simulation done.");
@@ -301,9 +316,9 @@ namespace WUInity
         
         private void CreateSims(int i)
         {
-            WUInityInput input = WUInity.WUINITY_IN;
-            WUInityOutput output = WUInity.WUINITY_OUT;
-            GPWViewer gpwViewer = WUInity.WUINITY_GPW;
+            WUInityInput input = WUInity.INPUT;
+            WUInityOutput output = WUInity.OUTPUT;
+            GPWViewer gpwViewer = WUInity.GPW_VIEWER;
 
             if (input.runFireSim)
             {
@@ -346,7 +361,7 @@ namespace WUInity
                     output.evac.popStuckTexture = macroHumanSim.CreateStuckPopulationTexture();
                     output.evac.relocatedPopTexture = macroHumanSim.CreatePopulationTexture();
                     output.evac.popStayingTexture = macroHumanSim.CreateStayingPopulationTexture();
-                    WUInity.WUINITY.SaveTexturesToDisk();
+                    WUInity.INSTANCE.SaveTexturesToDisk();
                 }
             }
 
@@ -358,25 +373,25 @@ namespace WUInity
 
         public void UpdateLCPFile()
         {
-            fireMesh = new Fire.WUInityFireMesh(WUInity.WUINITY_IN.fire.lcpFile, WUInity.WUINITY_IN.fire.weather, WUInity.WUINITY_IN.fire.wind, WUInity.WUINITY_IN.fire.initialFuelMoisture, WUInity.WUINITY_IN.fire.ignitionPoints);
+            fireMesh = new Fire.WUInityFireMesh(WUInity.INPUT.fire.lcpFile, WUInity.INPUT.fire.weather, WUInity.INPUT.fire.wind, WUInity.INPUT.fire.initialFuelMoisture, WUInity.INPUT.fire.ignitionPoints);
         }
 
         private void CreateFireSim()
         {            
-            fireMesh = new Fire.WUInityFireMesh(WUInity.WUINITY_IN.fire.lcpFile, WUInity.WUINITY_IN.fire.weather, WUInity.WUINITY_IN.fire.wind, WUInity.WUINITY_IN.fire.initialFuelMoisture, WUInity.WUINITY_IN.fire.ignitionPoints);
-            fireMesh.terrainMesh = WUInity.WUINITY.terrainMeshFilter.mesh;
-            fireMesh.spreadMode = WUInity.WUINITY_IN.fire.spreadMode;
+            fireMesh = new Fire.WUInityFireMesh(WUInity.INPUT.fire.lcpFile, WUInity.INPUT.fire.weather, WUInity.INPUT.fire.wind, WUInity.INPUT.fire.initialFuelMoisture, WUInity.INPUT.fire.ignitionPoints);
+            fireMesh.terrainMesh = WUInity.INSTANCE.terrainMeshFilter.mesh;
+            fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;
             //WUInity.WUINITY.terrainMeshFilter.gameObject.GetComponent<MeshRenderer>().material = WUInity.WUINITY.fireMaterial;            
         }
 
         private void RunSimulation(int runNumber)
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
 
             //if we do multiple runs the goals have to be reset
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
             {
-                WUInity.WUINITY_IN.traffic.evacuationGoals[i].ResetPeopleAndCars();
+                WUInity.INPUT.traffic.evacuationGoals[i].ResetPeopleAndCars();
             }
 
             //pick start time based on curve or 0 (fire start)
@@ -390,14 +405,14 @@ namespace WUInity
 
             if(input.runTrafficSim)
             {
-                for (int i = 0; i < WUInity.WUINITY_IN.traffic.trafficAccidents.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.traffic.trafficAccidents.Length; i++)
                 {
-                    macroTrafficSim.InsertNewTrafficEvent(WUInity.WUINITY_IN.traffic.trafficAccidents[i]);
+                    macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.traffic.trafficAccidents[i]);
                 }
 
-                for (int i = 0; i < WUInity.WUINITY_IN.traffic.reverseLanes.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.traffic.reverseLanes.Length; i++)
                 {
-                    macroTrafficSim.InsertNewTrafficEvent(WUInity.WUINITY_IN.traffic.trafficAccidents[i]);
+                    macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.traffic.trafficAccidents[i]);
                 }
             }            
 
@@ -428,7 +443,7 @@ namespace WUInity
 
         void SaveOutput(int runNumber)
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
             if (input.runTrafficSim)
             {
                 LogMessage("Total cars in simulation: " + macroTrafficSim.GetTotalCarsSimulated());
@@ -439,12 +454,12 @@ namespace WUInity
                 macroHumanSim.SaveToFile(runNumber);
             }            
             
-            SaveLoadWUI.SaveOutput(WUInity.WUINITY_IN.simName + "_" + runNumber);
+            SaveLoadWUI.SaveOutput(WUInity.INPUT.simName + "_" + runNumber);
         }
 
         void UpdateSimStatus()
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
             stopSim = time <= input.maxSimTime ? false : true;
 
             if (input.stopWhenEvacuated)
@@ -478,7 +493,7 @@ namespace WUInity
             UpdateSimStatus();
             if (!stopSim)
             {
-                WUInity.WUINITY_OUT.totalEvacTime = time;
+                WUInity.OUTPUT.totalEvacTime = time;
                 UpdateSimLoop();
             }
             else if(simRunning)
@@ -493,14 +508,14 @@ namespace WUInity
         float nextFireUpdate;
         private void UpdateSimLoop()
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
             
             if(input.runTrafficSim)
             {
                 //check for global events
-                for (int i = 0; i < WUInity.WUINITY_IN.evac.blockGoalEvents.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.evac.blockGoalEvents.Length; i++)
                 {
-                    BlockGoalEvent bGE = WUInity.WUINITY_IN.evac.blockGoalEvents[i];
+                    BlockGoalEvent bGE = WUInity.INPUT.evac.blockGoalEvents[i];
                     if (time >= bGE.startTime && !bGE.triggered)
                     {
                         bGE.ApplyEffects();
@@ -548,9 +563,9 @@ namespace WUInity
 
         void CheckEvacuationGoalStatus()
         {
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
             {
-                EvacuationGoal eG = WUInity.WUINITY_IN.traffic.evacuationGoals[i];
+                EvacuationGoal eG = WUInity.INPUT.traffic.evacuationGoals[i];
                 if(!eG.blocked)
                 {
                     Fire.FireCellState cellState = fireMesh.GetFireCellState(eG.latLong);
@@ -571,9 +586,9 @@ namespace WUInity
 
         public void BlockEvacGoal(int index)
         {
-            if (!WUInity.WUINITY_IN.traffic.evacuationGoals[index].blocked)
+            if (!WUInity.INPUT.traffic.evacuationGoals[index].blocked)
             {
-                WUInity.WUINITY_IN.traffic.evacuationGoals[index].blocked = true;
+                WUInity.INPUT.traffic.evacuationGoals[index].blocked = true;
                 UpdateRoutes();
             }
         }
@@ -613,9 +628,9 @@ namespace WUInity
         {
             //check that we have at least one goal left
             bool allBlocked = true;
-            for (int i = 0; i < WUInity.WUINITY_IN.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
             {
-                if(!WUInity.WUINITY_IN.traffic.evacuationGoals[i].blocked)
+                if(!WUInity.INPUT.traffic.evacuationGoals[i].blocked)
                 {
                     allBlocked = false;
                     break;
@@ -645,7 +660,7 @@ namespace WUInity
 
         public EvacuationGoal GetForcedGoal(int x, int y)
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
 
             if (input.evac.paintedForcedGoals.Length < EvacCellCount.x * EvacCellCount.y)
             {
@@ -656,7 +671,7 @@ namespace WUInity
 
         public EvacGroup GetEvacGroup(int index)
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
             if (evacGroupIndices.Length < EvacCellCount.x * EvacCellCount.y)
             {
                 MonoBehaviour.print("got here, " + evacGroupIndices.Length + "," + EvacCellCount.x * EvacCellCount.y);
@@ -664,12 +679,12 @@ namespace WUInity
             }
 
             index = evacGroupIndices[index];
-            return WUInity.WUINITY_IN.evac.evacGroups[index];
+            return WUInity.INPUT.evac.evacGroups[index];
         }
 
         public EvacGroup GetEvacGroup(int x, int y)
         {
-            WUInityInput input = WUInity.WUINITY_IN;
+            WUInityInput input = WUInity.INPUT;
             if (evacGroupIndices.Length < EvacCellCount.x * EvacCellCount.y)
             {
                 MonoBehaviour.print("got here, " + evacGroupIndices.Length + "," + EvacCellCount.x * EvacCellCount.y);
@@ -678,16 +693,16 @@ namespace WUInity
 
             int index = x + y * EvacCellCount.x;
             index = evacGroupIndices[index];
-            return WUInity.WUINITY_IN.evac.evacGroups[index];
+            return WUInity.INPUT.evac.evacGroups[index];
         }
 
         public RouteCollection GetCellRouteCollection(Vector2D pos)
         {   
             if(routes != null)
             {
-                Mapbox.Utils.Vector2d p = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(pos.x, pos.y, WUInity.WUINITY_MAP.CenterMercator, WUInity.WUINITY_MAP.WorldRelativeScale);
-                int x = (int)(p.x / WUInity.WUINITY_IN.evac.routeCellSize);
-                int y = (int)(p.y / WUInity.WUINITY_IN.evac.routeCellSize);
+                Mapbox.Utils.Vector2d p = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(pos.x, pos.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+                int x = (int)(p.x / WUInity.INPUT.evac.routeCellSize);
+                int y = (int)(p.y / WUInity.INPUT.evac.routeCellSize);
                 int index = x + y * EvacCellCount.x;
                 if (index >= 0 && index < routes.Length && routes[index] != null)
                 {
@@ -725,7 +740,7 @@ namespace WUInity
             {
                 wuiAreaIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
             }
-            WUInity.WUINITY_IN.fire.wuiAreaIndices = wuiAreaIndices;
+            WUInity.INPUT.fire.wuiAreaIndices = wuiAreaIndices;
         }
 
         public void UpdateRandomIgnitionIndices(int[] randomIgnitionIndices)
@@ -734,7 +749,7 @@ namespace WUInity
             {
                 randomIgnitionIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
             }
-            WUInity.WUINITY_IN.fire.randomIgnitionIndices = randomIgnitionIndices;
+            WUInity.INPUT.fire.randomIgnitionIndices = randomIgnitionIndices;
         }
 
         public void UpdateInitialIgnitionIndices(int[] initialIgnitionIndices)
@@ -743,7 +758,7 @@ namespace WUInity
             {
                 initialIgnitionIndices = new int[GetFireMesh().cellCount.x * GetFireMesh().cellCount.y];
             }
-            WUInity.WUINITY_IN.fire.initialIgnitionIndices = initialIgnitionIndices;
+            WUInity.INPUT.fire.initialIgnitionIndices = initialIgnitionIndices;
         }
     }    
 }

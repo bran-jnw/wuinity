@@ -12,7 +12,7 @@ namespace WUInity
     {
         public static void SaveInput()
         {            
-            string json = JsonUtility.ToJson(WUInity.WUINITY_IN, true);
+            string json = JsonUtility.ToJson(WUInity.INPUT, true);
             System.IO.File.WriteAllText(WUInity.WORKING_FILE, json); //Application.dataPath + "/Resources/_input/" + filename + ".wui"
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
@@ -25,11 +25,11 @@ namespace WUInity
             {
                 WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
                 WUInity.WORKING_FILE = path;
-                WUInity.WUINITY.LoadInputData(wui);
+                WUInity.INSTANCE.LoadInputData(wui);
             }
             else
             {
-                WUInity.WUINITY_SIM.LogMessage("WARNING: Input file not found.");
+                WUInity.SIM.LogMessage("WARNING: Input file not found.");
             }
         }
 
@@ -41,7 +41,7 @@ namespace WUInity
 
         public static void SaveOutput(string filename)
         {
-            string json = JsonUtility.ToJson(WUInity.WUINITY_OUT, true);
+            string json = JsonUtility.ToJson(WUInity.OUTPUT, true);
             string path = Path.Combine(WUInity.WORKING_FOLDER, filename + ".wuiout");
             System.IO.File.WriteAllText(path, json);
         }
@@ -52,9 +52,9 @@ namespace WUInity
         /// <param name="filename"></param>
         public static void SaveRouteCollections()
         {    
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.WUINITY_IN.simName + ".rc");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".rc");
             
-            RouteCollectionWrapper save = new  RouteCollectionWrapper(WUInity.WUINITY_SIM.GetRouteCollection());
+            RouteCollectionWrapper save = new  RouteCollectionWrapper(WUInity.SIM.GetRouteCollection());
             string json = JsonUtility.ToJson(save, false);
             System.IO.File.WriteAllText(path, json);
 
@@ -64,7 +64,7 @@ namespace WUInity
             bf.Serialize(file, save);
             file.Close();*/
 
-            WUInity.WUINITY_SIM.LogMessage("Saved route collection to " + path);
+            WUInity.SIM.LogMessage("Saved route collection to " + path);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace WUInity
         /// <returns></returns>
         public static RouteCollection[] LoadRouteCollections()
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.WUINITY_IN.simName + ".rc");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".rc");
             if(System.IO.File.Exists(path))
             {
                 string input = System.IO.File.ReadAllText(path);
@@ -90,12 +90,12 @@ namespace WUInity
                 rCWS = null;
                 System.GC.Collect();
 
-                WUInity.WUINITY_SIM.LogMessage("Loaded route collection from " + path);
+                WUInity.SIM.LogMessage("Loaded route collection from " + path);
                 return collection;
             }
             else
             {
-                WUInity.WUINITY_SIM.LogMessage("WARNING: Route collection file not found in " + path);
+                WUInity.SIM.LogMessage("WARNING: Route collection file not found in " + path);
             }
 
             return null;
