@@ -9,12 +9,12 @@ namespace WUInity
     public class WUInityGUI : MonoBehaviour
     {
         [System.Serializable]
-        public class GUIButton
+        public class MenuButton
         {
             public string text;
             public Rect rect;
 
-            public GUIButton(int buttonIndex, int buttonHeight, string text)
+            public MenuButton(int buttonIndex, int buttonHeight, string text)
             {
                 rect = new Rect();
                 this.text = text;
@@ -31,27 +31,40 @@ namespace WUInity
         public enum ActiveMenu { None, MainMenu, GPWMenu, EvacMenu, TrafficMenu, FarsiteMenu, OutputMenu, FireMenu }
         ActiveMenu menuChoice = ActiveMenu.MainMenu;
 
-        static int buttonHeight = 20;
-        static int buttonColumnStart = 140;
+        int menuBarHeight;
+        const int menuBarWidth = 120;
 
-        GUIButton mainMenu = new GUIButton(0, buttonHeight, "Main Menu");
+        const int buttonHeight = 20;
+        const int subMenuXOrigin = menuBarWidth;
+        const int buttonColumnStart = subMenuXOrigin + 20;
+
+        Vector2 scrollPosition;
+        const int consoleHeight = 160;
+
+
+        MenuButton mainMenu = new MenuButton(0, buttonHeight, "Main Menu");
         //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
-        GUIButton fireMenu = new GUIButton(1, buttonHeight, "Fire spread");
-        GUIButton gpwMenu = new GUIButton(2, buttonHeight, "GPW Menu");
-        GUIButton evacMenu = new GUIButton(3, buttonHeight, "Evac Menu");
-        GUIButton trafficMenu = new GUIButton(4, buttonHeight, "Traffic Menu");
-        GUIButton outputMenu = new GUIButton(5, buttonHeight, "Output Menu");
-        GUIButton hideMenu = new GUIButton(6, buttonHeight, "Hide Menu");
-        GUIButton exitMenu = new GUIButton(7, buttonHeight, "Exit");
+        MenuButton fireMenu = new MenuButton(1, buttonHeight, "Fire spread");
+        MenuButton gpwMenu = new MenuButton(2, buttonHeight, "GPW Menu");
+        MenuButton evacMenu = new MenuButton(3, buttonHeight, "Evac Menu");
+        MenuButton trafficMenu = new MenuButton(4, buttonHeight, "Traffic Menu");
+        MenuButton outputMenu = new MenuButton(5, buttonHeight, "Output Menu");
+        MenuButton hideMenu = new MenuButton(6, buttonHeight, "Hide Menu");
+        MenuButton exitMenu = new MenuButton(7, buttonHeight, "Exit");
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp" };
         string[] osmFilter = new string[] { ".pbf" };
 
+        private void Start()
+        {
+            menuBarHeight = Screen.height - consoleHeight;
+        }
+
         void OnGUI()
         {
             //select menu
-            GUI.Box(new Rect(0, 0, 120, Screen.height), "");
+            GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
             if (GUI.Button(mainMenu.rect, mainMenu.text))
             {
                 if (menuChoice == ActiveMenu.MainMenu)
@@ -146,8 +159,17 @@ namespace WUInity
                 Application.Quit();
             }
 
-            //info menu
-            GUI.Box(new Rect(120, Screen.height - buttonHeight, Screen.width - 120, buttonHeight), infoMessage);
+            //console
+            GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
+            GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
+            List<string> log = WUInity.SIM.GetSimLog();
+            for (int i = log.Count - 1; i >= 0; i--)
+            {                
+                GUILayout.Label(log[i]);
+            }            
+            GUILayout.EndScrollView();
+            GUI.EndGroup();
 
             //call correct menu
             if (menuChoice == ActiveMenu.MainMenu)
@@ -178,13 +200,25 @@ namespace WUInity
             {
                 OutputMenu();
             }
+
+            DataSampleWindow();
+        }
+
+        const int dataSampleWindowWidth = 600;
+        const int dataSampleWindowHeight = 20;
+        private void DataSampleWindow()
+        {
+            
+            GUI.Box(new Rect(Screen.width - dataSampleWindowWidth, 0, dataSampleWindowWidth, dataSampleWindowHeight), WUInity.INSTANCE.GetDataSampleString());
         }
 
         string dT, nrRuns, Lat, Long, sizeX, sizeY, zoom;
-        bool mainInputDirty = true;
+        bool mainInputDirty = true, creatingNewFile = false;
         void MainMenu()
         {
             WUInityInput wO = WUInity.INPUT;
+            
+            //whenever we load a file we need to set the new data for the GUI
             if (mainInputDirty)
             {
                 mainInputDirty = false;
@@ -196,11 +230,24 @@ namespace WUInity
                 sizeY = wO.size.y.ToString();
                 zoom = wO.zoomLevel.ToString();
             }
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
-            int buttonIndex = 0;
-            int buttonColumnStart = 140;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load inputs"))
+            GUI.Box(new Rect(subMenuXOrigin, 0, columnWidth + 40, Screen.height - consoleHeight), "");
+            int buttonIndex = 0;
+
+            if (!WUInity.MAP.IsAccessTokenValid)
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "ERROR: Mapbox token not valid.");
+                return;
+            }
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "New file"))
+            {
+                creatingNewFile = true;
+                OpenSaveInput();
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load file"))
             {
                 OpenLoadInput();
             }
@@ -217,13 +264,7 @@ namespace WUInity
             if(!WUInity.INSTANCE.haveInput)
             {
                 return;
-            }
-
-            if(!WUInity.MAP.IsAccessTokenValid)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "ERROR: Mapbox token not valid.");
-                return;
-            }
+            }            
 
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
@@ -231,9 +272,9 @@ namespace WUInity
             wO.simName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simName);
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save input file"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save input file"))
             {
-                if(wO.simName == "default")
+                if(WUInity.WORKING_FILE == null)
                 {
                     OpenSaveInput();
                 }
@@ -245,7 +286,7 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save as"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save as"))
             {
                 OpenSaveInput();
             }
@@ -254,59 +295,96 @@ namespace WUInity
             //LatLong
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map LL Lat.:");
             ++buttonIndex;
-            Lat = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Lat);
+            Lat = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Lat);
             ++buttonIndex;
 
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map LL Long.:");
             ++buttonIndex;
-            Long = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Long);
+            Long = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Long);
             ++buttonIndex;
 
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map size x [m]:");
             ++buttonIndex;
-            sizeX = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sizeX);
+            sizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sizeX);
             ++buttonIndex;
 
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map size y [m]:");
             ++buttonIndex;
-            sizeY = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sizeY);
+            sizeY = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sizeY);
             ++buttonIndex;
 
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map zoom level:");
             ++buttonIndex;
-            zoom = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), zoom);
+            zoom = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), zoom);
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load Map"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
             {
                 ParseMainData(wO);
+                WUInity.INSTANCE.UpdateValidData();
                 WUInity.INSTANCE.LoadMapbox();
-            }
-            ++buttonIndex;
+            }       
 
             buttonIndex += 2;
             //dT
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Time step [s]:");
             ++buttonIndex;
-            dT = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
+            dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
             ++buttonIndex;
 
             //number of runs
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
             ++buttonIndex;
-            nrRuns = GUI.TextField(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
+            nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
             {
                 ParseMainData(wO);
-                WUInity.SIM.LogMessage("Simulation started, please wait.");
-                if (WUInity.SIM.StartSimFromGUI())
+                WUInity.INSTANCE.CompareValidData();
+                if(WUInity.INSTANCE.IsMapDirty())
                 {
-                    menuChoice = ActiveMenu.OutputMenu;
+                    WUInity.SIM.LogMessage("ERROR: Map is dirty, update before running simulation.");
                 }
+
+                if (WUInity.INSTANCE.IsGPWDirty())
+                {
+                    WUInity.SIM.LogMessage("ERROR: GPW data is dirty, update before running simulation.");
+                }
+
+                if (WUInity.INSTANCE.IsAnythingDirty())
+                {
+                    WUInity.SIM.LogMessage("ERROR: Could not start simulation, see error log.");
+                }
+                else
+                {
+                    WUInity.SIM.LogMessage("LOG: Simulation started, please wait.");
+                    if (WUInity.SIM.StartSimFromGUI())
+                    {
+                        menuChoice = ActiveMenu.OutputMenu;
+                    }
+                }                
             }
             ++buttonIndex;
+        }
+
+        void ParseMainData(WUInityInput wO)
+        {
+            ParseEvacInput();
+            ParseTrafficInput();
+
+            if (mainInputDirty)
+            {
+                return;
+            }
+
+            float.TryParse(dT, out wO.deltaTime);
+            int.TryParse(nrRuns, out wO.numberOfRuns);
+            double.TryParse(Lat, out wO.lowerLeftLatLong.x);
+            double.TryParse(Long, out wO.lowerLeftLatLong.y);
+            double.TryParse(sizeX, out wO.size.x);
+            double.TryParse(sizeY, out wO.size.y);
+            int.TryParse(zoom, out wO.zoomLevel);
         }
 
         void OpenSaveInput()
@@ -340,11 +418,23 @@ namespace WUInity
 
         void SaveInput(string[] paths)
         {
-            WUInity.WORKING_FILE = paths[0];
-            string name = Path.GetFileNameWithoutExtension(paths[0]);
             WUInityInput wO = WUInity.INPUT;
+
+            WUInity.WORKING_FILE = paths[0];                        
+            if (creatingNewFile)
+            {
+                mainInputDirty = true;
+                WUInity.INSTANCE.NewInputData();
+                wO = WUInity.INPUT; //have to update this since we are creating a new one
+            }
+            else
+            {
+                ParseMainData(wO);
+            }
+            creatingNewFile = false;
+            string name = Path.GetFileNameWithoutExtension(paths[0]);            
             wO.simName = name;
-            ParseMainData(wO);
+                                 
             SaveLoadWUI.SaveInput();
         }
 
@@ -369,27 +459,8 @@ namespace WUInity
 
         void CancelSaveLoad()
         {
-
-        }
-
-        void ParseMainData(WUInityInput wO)
-        {
-            ParseEvacInput();
-            ParseTrafficInput();
-
-            if(mainInputDirty)
-            {
-                return;
-            }
-
-            float.TryParse(dT, out wO.deltaTime);
-            int.TryParse(nrRuns, out wO.numberOfRuns);
-            double.TryParse(Lat, out wO.lowerLeftLatLong.x);
-            double.TryParse(Long, out wO.lowerLeftLatLong.y);
-            double.TryParse(sizeX, out wO.size.x);
-            double.TryParse(sizeY, out wO.size.y);
-            int.TryParse(zoom, out wO.zoomLevel);            
-        }
+            creatingNewFile = false;
+        }        
 
         bool gpwInputDirty = true;
         void GPWMenu()
@@ -399,7 +470,7 @@ namespace WUInity
             {
                 gpwInputDirty = false;
             }
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
+            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
             int buttonColumnStart = 140;
 
@@ -421,11 +492,28 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/Hide GPW data"))
+            if(WUInity.INSTANCE.gpwLoaded)
             {
-                WUInity.INSTANCE.ToggleGPWViewer();
-            }
-            ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Raw people count: " + WUInity.GPW_VIEWER.GetRawPopulationCount());
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide raw GPW data"))
+                {
+                    WUInity.GPW_VIEWER.ToggleDensityMapVisibility();
+                }
+                ++buttonIndex;
+
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fitted people count: " + WUInity.GPW_VIEWER.GetFittedPopulationCount());
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide fitted GPW data"))
+                {
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Fitted);
+                    WUInity.INSTANCE.ToggleDataPlane();
+                    WUInity.INSTANCE.DisplayFittedPopulation();                                                          
+                }
+                ++buttonIndex;               
+            }            
         }
 
 
@@ -451,7 +539,7 @@ namespace WUInity
                 evacOrderTime = eO.evacuationOrderStart.ToString();
 
             }
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
+            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             int buttonColumnStart = 140;
@@ -600,7 +688,7 @@ namespace WUInity
                 opticalDensity = tO.opticalDensity.ToString();
                 borderSize = iO.osmBorderSize.ToString();
             }
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
+            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             string loadText = "Load router Database";
@@ -691,7 +779,7 @@ namespace WUInity
         {
             FarsiteInput fI = WUInity.INPUT.farsite;
 
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
+            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             //name
@@ -731,20 +819,20 @@ namespace WUInity
         {
             FireInput fI = WUInity.INPUT.fire;
 
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
+            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP file:");
-            ++buttonIndex;
-            fI.lcpFile = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), fI.lcpFile);
-            ++buttonIndex;
-
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load LCP file"))
             {
                 OpenLoadLCP();
             }
             ++buttonIndex;
+
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP file:");
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), fI.lcpFile);
+            ++buttonIndex;            
 
             if (WUInity.INSTANCE.IsPainterActive())
             {
@@ -829,7 +917,7 @@ namespace WUInity
         {
             int buttonColumnStart = 140;
 
-            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - buttonHeight), "");
+            GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             int dummy = (int)WUInity.OUTPUT.totalEvacTime;
@@ -848,12 +936,12 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.GetMacroHumanSim().GetTotalCars());
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Interpolated population density"))
+            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Interpolated population density"))
             {
                 WUInity.INSTANCE.DisplayRawPop();
                 WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Raw);
             }
-            ++buttonIndex;
+            ++buttonIndex;*/
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stuck population"))
             {
@@ -938,16 +1026,6 @@ namespace WUInity
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.SIM.GetFireWindDirection() + " degrees");
                 ++buttonIndex;
             }            
-        }
-
-        string infoMessage;
-        public void PrintInfo(string message)
-        {
-            if (GUI.tooltip != null)
-            {
-
-            }
-            infoMessage = message;
         }
     }
 }

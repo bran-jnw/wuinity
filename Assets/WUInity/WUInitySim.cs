@@ -47,7 +47,7 @@ namespace WUInity
 
         private  RouteCollection[] routes;
 
-        private List<string> simLog = new List<string>(200);
+        private List<string> simLog = new List<string>();
 
         public WUInitySim()
         {
@@ -106,19 +106,32 @@ namespace WUInity
             macroTrafficSim = mTS;
         }
 
+        /// <summary>
+        /// Receives all the information from a WUINITY session, used by GUI.
+        /// </summary>
+        /// <param name="message"></param>
         public void LogMessage(string message)
         {
-            if(simRunning)
+            if (simRunning)
             {
                 message = "[" + (int)time + "s] " + message;
             }
             
-            simLog.Add(message);
-            WUInity.GUI.PrintInfo(message);
+            simLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
             if(Application.isEditor || Debug.isDebugBuild)
             {
                 Debug.Log(message);
             }            
+        }
+
+        public List<string> GetSimLog()
+        {
+            return simLog;
+        }
+
+        public void ClearSimLog()
+        {
+            simLog.Clear();
         }
 
         //create or lead itinero database needed for pathfinding
@@ -181,11 +194,11 @@ namespace WUInity
 
             if(success)
             {
-                LogMessage("Router database loaded succesfully.");
+                LogMessage("LOG: Router database loaded succesfully.");
             }
             else
             {
-                LogMessage("Router database could not be loaded.");
+                LogMessage("ERROR: Router database could not be loaded.");
             }
 
             return success;

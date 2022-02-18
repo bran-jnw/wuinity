@@ -7,10 +7,11 @@ namespace WUInity.GPW
 
     public class GPWViewer
     {
-        [SerializeField] Vector2D lowerLeftlatLong;
-        [SerializeField] Vector2D size = new Vector2D(20000, 20000);
+        Vector2D lowerLeftlatLong;
+        Vector2D size = new Vector2D(20000, 20000);
 
-        [SerializeField] public GPWData gpwData;
+        public GPWData gpwData;
+        public FittedGPWData fittedGPWData;
 
         public  GameObject gpwDensityMap;
         Material mat;
@@ -26,12 +27,35 @@ namespace WUInity.GPW
             gpwData = new GPWData();
             bool success = gpwData.LoadGPWData(lowerLeftlatLong, size);
 
-            CreateTexture();
-            CreateDensityPlane();
+            if(success)
+            {
+                CreateTexture();
+                CreateDensityPlane();
+                gpwDensityMap.SetActive(setActive);
 
-            gpwDensityMap.SetActive(setActive);
-
+                fittedGPWData = new FittedGPWData(gpwData);
+            }
             return success;
+        }
+
+        public Texture2D GetFittedTexture()
+        {
+            return fittedGPWData.GetPopulationTexture();
+        }
+
+        public int GetFittedPopulationCount()
+        {
+            return fittedGPWData.totalPopulation;
+        }
+
+        public int GetFittedCellPopulation(int x, int y)
+        {
+            return fittedGPWData.population[x + y * fittedGPWData.cells.x];
+        }
+
+        public int GetRawPopulationCount()
+        {
+            return gpwData.totalPopulation;
         }
 
         public void SetTexture(Texture2D tex)
@@ -55,8 +79,6 @@ namespace WUInity.GPW
 
             float width = (float)gpwData.realWorldSize.x; //(float)size.x;
             float length = (float)gpwData.realWorldSize.y; //(float)size.y;
-                                                           //Debug.Log("" + width + "," + length);
-
 
             Vector3 offset = new Vector3((float)gpwData.unityOriginOffset.x, 0.0f, (float)gpwData.unityOriginOffset.y);
 

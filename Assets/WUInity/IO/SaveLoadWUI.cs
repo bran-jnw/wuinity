@@ -13,9 +13,11 @@ namespace WUInity
         public static void SaveInput()
         {            
             string json = JsonUtility.ToJson(WUInity.INPUT, true);
-            System.IO.File.WriteAllText(WUInity.WORKING_FILE, json); //Application.dataPath + "/Resources/_input/" + filename + ".wui"
+            System.IO.File.WriteAllText(WUInity.WORKING_FILE, json);
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
+
+            WUInity.SIM.LogMessage("LOG: Input file " + WUInity.WORKING_FILE + " saved.");
         }
 
         public static void LoadInput(string path)
@@ -26,6 +28,7 @@ namespace WUInity
                 WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
                 WUInity.WORKING_FILE = path;
                 WUInity.INSTANCE.LoadInputData(wui);
+                WUInity.SIM.LogMessage("LOG: Input file " + WUInity.WORKING_FILE + " loaded.");
             }
             else
             {

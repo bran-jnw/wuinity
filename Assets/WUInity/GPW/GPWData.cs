@@ -8,7 +8,7 @@ namespace WUInity.GPW
 {
     [System.Serializable]
     public class GPWData
-    {
+    {     
         public int ncols;
         public int nrows;
         public double xllcorner;
@@ -20,6 +20,7 @@ namespace WUInity.GPW
         public Vector2D actualOriginDegrees;
         public Vector2D unityOriginOffset;
         public Vector2D realWorldSize;
+        public int totalPopulation;
 
         public GPWData()
         {
@@ -47,7 +48,7 @@ namespace WUInity.GPW
 
         private void SaveGPWDataToFile()
         {            
-            string[] data = new string[12];
+            string[] data = new string[13];
 
             //save data stamp to make sure data fits input
             WUInityInput input = WUInity.INPUT;
@@ -71,7 +72,8 @@ namespace WUInity.GPW
             data[8] = dataSize.x + " " + dataSize.y;
             data[9] = actualOriginDegrees.x + " " + actualOriginDegrees.y;
             data[10] = unityOriginOffset.x + " " + unityOriginOffset.y;
-            data[11] = realWorldSize.x + " " + realWorldSize.y;            
+            data[11] = realWorldSize.x + " " + realWorldSize.y;
+            data[12] = totalPopulation.ToString();
 
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
             System.IO.File.WriteAllLines(path, data);
@@ -84,10 +86,12 @@ namespace WUInity.GPW
             bool success = false;
             if (File.Exists(path))
             {
-                success = LoadGPWDataFromFile();
+                WUInity.SIM.LogMessage("LOG: Loading GPW data from pre-built file.");
+                success = LoadGPWDataFromFile();                
             }
             else
             {
+                WUInity.SIM.LogMessage("LOG: No GPW pre-built, loading from global database.");
                 success = LoadRelevantGPWData(latLong, size);
             }
 
@@ -113,20 +117,24 @@ namespace WUInity.GPW
             }
             else 
             {
-                WUInity.SIM.LogMessage("ERROR: GPW data is not valid. Delete the file and rebuild.");
+                WUInity.SIM.LogMessage("ERROR: GPW data range is not valid. Delete the file and rebuild.");
             }
             return success;
         }
 
         public bool LoadGPWDataFromFile()
         {
-            string[] d = new string[12];
+            //string[] d = new string[13];
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
-            StreamReader sr = new StreamReader(path);
-            for (int i = 0; i < 12; ++i)
+
+            //StreamReader sr = new StreamReader(path);
+
+            string[] d = File.ReadAllLines(path);
+
+            /*for (int i = 0; i < 12; ++i)
             {
                 d[i] = sr.ReadLine();
-            }
+            }*/
 
             bool success = isDataValid(d[0]);
             if(success)
@@ -169,6 +177,16 @@ namespace WUInity.GPW
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
                 realWorldSize = new Vector2D(xD, yD);
+
+                if(d.Length > 12)
+                {
+                    int.TryParse(d[12], out totalPopulation);
+                }   
+                else
+                {
+                    CalculateTotalPopulation();
+                    SaveGPWDataToFile();
+                }
             }
 
             return success;
@@ -190,7 +208,7 @@ namespace WUInity.GPW
             }
             else
             {
-                WUInity.SIM.LogMessage("GPW data file not found.");
+                WUInity.SIM.LogMessage("ERROR: Global GPW data files not found. Please make sure the folder structure is correct.");
                 return false;
             }
 
@@ -269,10 +287,30 @@ namespace WUInity.GPW
             }
             sr.Close();
 
+            CalculateTotalPopulation();
             SaveGPWDataToFile();
             return true;
         }
 
+        private void CalculateTotalPopulation()
+        {
+            totalPopulation = 0;
+
+            double cellSizeX = realWorldSize.x / dataSize.x;
+            double cellSizeY = realWorldSize.y / dataSize.y;
+            double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
+            totalPopulation = 0;
+            for (int y = 0; y < dataSize.y; ++y)
+            {
+                for (int x = 0; x < dataSize.x; ++x)
+                {
+                    double density = GetDensity(x, y);
+                    int pop = System.Convert.ToInt32(cellArea * density);
+                    pop = Mathf.Clamp(pop, 0, pop);
+                    totalPopulation += pop;
+                }
+            }
+        }
 
         /// <summary>
         /// Returns the density data at a gridpoint

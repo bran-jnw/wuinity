@@ -9,6 +9,11 @@ namespace WUInity
     {
         public float totalEvacTime;
         public EvacOutput evac;
+
+        public WUInityOutput()
+        {
+            evac = new EvacOutput();
+        }
     }
 
     [System.Serializable]

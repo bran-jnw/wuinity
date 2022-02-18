@@ -10,13 +10,13 @@ namespace WUInity
     [System.Serializable]
     public class WUInityInput
     {
-        public string simName = "default";
+        public string simName = "New file";
         public float deltaTime = 1f;
         public float maxSimTime = 864000f; //10 days
         public bool stopWhenEvacuated = true;
         public int numberOfRuns = 1;
-        public Vector2D lowerLeftLatLong = new Vector2D(39.409924, -105.104505);
-        public Vector2D size = new Vector2D(10000, 10000);
+        public Vector2D lowerLeftLatLong = new Vector2D(55.697354, 13.173808);
+        public Vector2D size = new Vector2D(3000, 3000);
         public int zoomLevel = 13;
         public bool runInRealTime = false;
         public bool runEvacSim = true;
@@ -30,6 +30,17 @@ namespace WUInity
         public FarsiteInput farsite;
         public VisualizationOptions visuals;
         public FireInput fire;
+
+        public WUInityInput()
+        {
+            evac = new EvacInput();
+            traffic = new TrafficInput();
+            gpw = new GPWInput();
+            itinero = new ItineroInput();
+            farsite = new FarsiteInput();
+            visuals = new VisualizationOptions();
+            fire = new FireInput();
+        }
     }
 
     [System.Serializable]

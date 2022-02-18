@@ -134,7 +134,7 @@ namespace WUInity
             catch (System.Exception e)
             {
                 CreateDefaultInputs();
-                WUInity.SIM.LogMessage("WARNING: could not read GFI due to: " + e.ToString() + ". Creating empty default.");
+                WUInity.SIM.LogMessage("WARNING: could not read GFI data, creating empty default.");
                 //WUInity.WUINITY_SIM.LogMessage("WARNING: Graphical fire input file " + path + " not found, using default.");
             }
 
