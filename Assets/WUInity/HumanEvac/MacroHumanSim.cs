@@ -634,7 +634,7 @@ namespace WUInity.Evac
                 for (int x = 0; x < xSize; x++)
                 {
                     float pop = GetPopulation(x, y);
-                    Color color = GPWViewer.GetGPWColor(pop / cellArea);
+                    Color color = PopulationViewer.GetGPWColor(pop / cellArea);
                     popTex.SetPixel(x, y, color);
                 }
             }

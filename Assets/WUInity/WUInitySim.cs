@@ -206,8 +206,6 @@ namespace WUInity
 
         public void UpdateNeededData()
         {
-            WUInityInput input = WUInity.INPUT;
-
             //set parameters in directions manager
             if (routeCreator == null)
             {
@@ -331,7 +329,7 @@ namespace WUInity
         {
             WUInityInput input = WUInity.INPUT;
             WUInityOutput output = WUInity.OUTPUT;
-            GPWViewer gpwViewer = WUInity.GPW_VIEWER;
+            PopulationViewer gpwViewer = WUInity.GPW_VIEWER;
 
             if (input.runFireSim)
             {
@@ -342,7 +340,7 @@ namespace WUInity
             {
                 macroHumanSim = new MacroHumanSim();
                 //place people
-                macroHumanSim.PopulateCells(EvacCellCount, input.size, gpwViewer.gpwData);
+                macroHumanSim.PopulateCells(EvacCellCount, input.size, gpwViewer.rawGPWData);
                 if (i == 0)
                 {
                     //save raw pop

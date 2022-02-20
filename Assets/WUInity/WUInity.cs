@@ -97,13 +97,13 @@ namespace WUInity
             }
         }
 
-        public static GPWViewer GPW_VIEWER
+        public static PopulationViewer GPW_VIEWER
         {
             get
             {
                 if (INSTANCE.internal_gpwViewer == null)
                 {
-                    INSTANCE.internal_gpwViewer = new GPWViewer();
+                    INSTANCE.internal_gpwViewer = new PopulationViewer();
                 }
                 return INSTANCE.internal_gpwViewer;
             }
@@ -201,7 +201,7 @@ namespace WUInity
         private WUInitySim internal_sim;
         private WUInityOutput internal_output;
         private Farsite.FarsiteViewer internal_farsiteViewer;
-        private GPWViewer internal_gpwViewer;
+        private PopulationViewer internal_gpwViewer;
         private WUInityGUI internal_wuiGUI;
         private WUInityPainter internal_painter;
         private Mapbox.Unity.Map.AbstractMap internal_mapboxMap;
@@ -573,14 +573,14 @@ namespace WUInity
             dataSampleString = "No data to sample.";
             if (dataSampleMode == DataSampleMode.GPW)
             {
-                if (GPW_VIEWER.gpwData != null && GPW_VIEWER.gpwData.density != null && GPW_VIEWER.gpwData.density.Length > 0)
+                if (GPW_VIEWER.rawGPWData != null && GPW_VIEWER.rawGPWData.density != null && GPW_VIEWER.rawGPWData.density.Length > 0)
                 {
                     if (GPW_VIEWER.gpwDensityMap.activeSelf)
                     {
-                        float xCellSize = (float)(GPW_VIEWER.gpwData.realWorldSize.x / GPW_VIEWER.gpwData.dataSize.x);
-                        float yCellSize = (float)(GPW_VIEWER.gpwData.realWorldSize.y / GPW_VIEWER.gpwData.dataSize.y);
+                        float xCellSize = (float)(GPW_VIEWER.rawGPWData.realWorldSize.x / GPW_VIEWER.rawGPWData.dataSize.x);
+                        float yCellSize = (float)(GPW_VIEWER.rawGPWData.realWorldSize.y / GPW_VIEWER.rawGPWData.dataSize.y);
                         double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(GPW_VIEWER.gpwData.GetDensityUnitySpace(new Vector2D(pos.x, pos.z)) * cellArea);
+                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(GPW_VIEWER.rawGPWData.GetDensityUnitySpace(new Vector2D(pos.x, pos.z)) * cellArea);
                     }
                     else
                     {
@@ -605,7 +605,7 @@ namespace WUInity
             {
                 if (dataSampleMode == DataSampleMode.Fitted)
                 {
-                    dataSampleString = "Interpolated people count: " + WUInity.GPW_VIEWER.GetFittedCellPopulation(x, y);
+                    dataSampleString = "Interpolated people count: " + WUInity.GPW_VIEWER.GetCellPopulation(x, y);
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
@@ -680,6 +680,10 @@ namespace WUInity
             {
                 DisplayEvacGroupMap();
             }
+            else if (paintMode == WUInityPainter.PaintMode.CustomGPW)
+            {
+                DisplayCustomGPWData();
+            }
             dataSampleMode = DataSampleMode.Paint;
         }
 
@@ -719,7 +723,7 @@ namespace WUInity
 
             Vector2 maxUV = new Vector2((float)cellCount.x / tex.width, (float)cellCount.y / tex.height);
 
-            GPWViewer.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            PopulationViewer.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
 
             Material mat = new Material(Shader.Find("Unlit/Transparent"));
             mat.mainTexture = tex;
@@ -921,6 +925,11 @@ namespace WUInity
             SetDataPlaneTexture(PAINTER.GetEvacGroupTexture());
         }
 
+        public void DisplayCustomGPWData()
+        {
+            SetDataPlaneTexture(PAINTER.GetCustomGPWTexture());
+        }
+
         public void ToggleDataPlane()
         {
             if (evacDataPlaneMeshRenderer != null)
@@ -932,18 +941,18 @@ namespace WUInity
         private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
         {
             //turn everything off first
-            /*if(fireDataPlane != null)
+            if(fireDataPlane != null)
             {
                 fireDataPlane.SetActive(false);
             }
             if (evacDataPlane != null)
             {
                 evacDataPlane.SetActive(false);
-            }*/
+            }
 
             //pick needed data plane
             MeshRenderer activeMeshRenderer = evacDataPlaneMeshRenderer;
-            Vector2Int cellCount = WUInity.SIM.EvacCellCount;
+            Vector2Int cellCount = SIM.EvacCellCount;
             string name = "Evac Data Plane";
             GameObject activeDataPlane = evacDataPlane;
             if (fireMeshMode)
@@ -972,7 +981,7 @@ namespace WUInity
             else
             {
                 activeMeshRenderer.material.mainTexture = tex;
-                //activeDataPlane.SetActive(true);
+                activeDataPlane.SetActive(true);
             }
         }
 

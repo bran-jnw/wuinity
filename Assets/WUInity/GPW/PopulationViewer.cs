@@ -5,13 +5,10 @@ using UnityEngine;
 namespace WUInity.GPW
 {
 
-    public class GPWViewer
+    public class PopulationViewer
     {
-        Vector2D lowerLeftlatLong;
-        Vector2D size = new Vector2D(20000, 20000);
-
-        public GPWData gpwData;
-        public FittedGPWData fittedGPWData;
+        public GPWData rawGPWData;
+        public PopulationData gpwData;
 
         public  GameObject gpwDensityMap;
         Material mat;
@@ -22,10 +19,8 @@ namespace WUInity.GPW
             {
                 MonoBehaviour.Destroy(gpwDensityMap);
             }
-            size = mapSize;
-            this.lowerLeftlatLong = lowerLeftLatLong;
-            gpwData = new GPWData();
-            bool success = gpwData.LoadGPWData(lowerLeftlatLong, size);
+            rawGPWData = new GPWData();
+            bool success = rawGPWData.LoadGPWData(lowerLeftLatLong, mapSize);
 
             if(success)
             {
@@ -33,29 +28,34 @@ namespace WUInity.GPW
                 CreateDensityPlane();
                 gpwDensityMap.SetActive(setActive);
 
-                fittedGPWData = new FittedGPWData(gpwData);
+                gpwData = new PopulationData(rawGPWData);
             }
             return success;
         }
 
+        public void CreateCustomGPW(int totalPopulation)
+        {
+            gpwData = new PopulationData(rawGPWData);
+        }
+
         public Texture2D GetFittedTexture()
         {
-            return fittedGPWData.GetPopulationTexture();
+            return gpwData.GetPopulationTexture();
         }
 
-        public int GetFittedPopulationCount()
-        {
-            return fittedGPWData.totalPopulation;
-        }
-
-        public int GetFittedCellPopulation(int x, int y)
-        {
-            return fittedGPWData.population[x + y * fittedGPWData.cells.x];
-        }
-
-        public int GetRawPopulationCount()
+        public int GetTotalCellPopulationCount()
         {
             return gpwData.totalPopulation;
+        }
+
+        public int GetCellPopulation(int x, int y)
+        {
+            return gpwData.cellPopulation[x + y * gpwData.cells.x];
+        }
+
+        public int GetRawTotalPopulationCount()
+        {
+            return rawGPWData.totalPopulation;
         }
 
         public void SetTexture(Texture2D tex)
@@ -77,12 +77,12 @@ namespace WUInity.GPW
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)gpwData.realWorldSize.x; //(float)size.x;
-            float length = (float)gpwData.realWorldSize.y; //(float)size.y;
+            float width = (float)rawGPWData.realWorldSize.x; //(float)size.x;
+            float length = (float)rawGPWData.realWorldSize.y; //(float)size.y;
 
-            Vector3 offset = new Vector3((float)gpwData.unityOriginOffset.x, 0.0f, (float)gpwData.unityOriginOffset.y);
+            Vector3 offset = new Vector3((float)rawGPWData.unityOriginOffset.x, 0.0f, (float)rawGPWData.unityOriginOffset.y);
 
-            Vector2 maxUV = new Vector2((float)gpwData.dataSize.x / densityTex.width, (float)gpwData.dataSize.y / densityTex.height);
+            Vector2 maxUV = new Vector2((float)rawGPWData.dataSize.x / densityTex.width, (float)rawGPWData.dataSize.y / densityTex.height);
             CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
 
             mat = new Material(Shader.Find("Unlit/Transparent"));
@@ -162,14 +162,14 @@ namespace WUInity.GPW
         private void CreateTexture()
         {
             //first find the correct texture size
-            int maxSide = Mathf.Max(gpwData.dataSize.x, gpwData.dataSize.y);
+            int maxSide = Mathf.Max(rawGPWData.dataSize.x, rawGPWData.dataSize.y);
             Vector2Int res = new Vector2Int(2, 2);
 
-            while (gpwData.dataSize.x > res.x)
+            while (rawGPWData.dataSize.x > res.x)
             {
                 res.x *= 2;
             }
-            while (gpwData.dataSize.y > res.y)
+            while (rawGPWData.dataSize.y > res.y)
             {
                 res.y *= 2;
             }
@@ -178,11 +178,11 @@ namespace WUInity.GPW
             //paint texture based time of arrival
             densityTex = new Texture2D(res.x, res.y);
             densityTex.filterMode = FilterMode.Point;
-            for (int y = 0; y < gpwData.dataSize.y; y++)
+            for (int y = 0; y < rawGPWData.dataSize.y; y++)
             {
-                for (int x = 0; x < gpwData.dataSize.x; x++)
+                for (int x = 0; x < rawGPWData.dataSize.x; x++)
                 {
-                    double density = gpwData.GetDensity(x, y);
+                    double density = rawGPWData.GetDensity(x, y);
                     Color color = GetGPWColor((float)density);
 
                     densityTex.SetPixel(x, y, color);

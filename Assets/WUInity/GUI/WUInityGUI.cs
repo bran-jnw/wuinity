@@ -460,8 +460,9 @@ namespace WUInity
         void CancelSaveLoad()
         {
             creatingNewFile = false;
-        }        
+        }
 
+        string desiredPopulation;
         bool gpwInputDirty = true;
         void GPWMenu()
         {
@@ -494,7 +495,7 @@ namespace WUInity
 
             if(WUInity.INSTANCE.gpwLoaded)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Raw people count: " + WUInity.GPW_VIEWER.GetRawPopulationCount());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Raw people count: " + WUInity.GPW_VIEWER.GetRawTotalPopulationCount());
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide raw GPW data"))
@@ -503,7 +504,7 @@ namespace WUInity
                 }
                 ++buttonIndex;
 
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fitted people count: " + WUInity.GPW_VIEWER.GetFittedPopulationCount());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fitted people count: " + WUInity.GPW_VIEWER.GetTotalCellPopulationCount());
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide fitted GPW data"))
@@ -513,7 +514,52 @@ namespace WUInity
                     WUInity.INSTANCE.DisplayFittedPopulation();                                                          
                 }
                 ++buttonIndex;               
-            }            
+            }
+
+            if (WUInity.INSTANCE.IsPainterActive())
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Desired population:");
+                ++buttonIndex;
+                desiredPopulation = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), desiredPopulation);
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cell"))
+                {
+                    WUInity.PAINTER.SetCustomGPWColor(true);
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove cell"))
+                {
+                    WUInity.PAINTER.SetCustomGPWColor(false);
+                }
+                ++buttonIndex;       
+
+                //add some extra space
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop editing"))
+                {
+                    int totalPop;
+                    bool success = int.TryParse(desiredPopulation, out totalPop);
+                    if(!success)
+                    {
+                        WUInity.SIM.LogMessage("ERROR: Total population not a number.");
+                    }
+                    else
+                    {
+                        WUInity.GPW_VIEWER.gpwData.PlaceUniformPopulation(totalPop);                        
+                    }
+                    WUInity.INSTANCE.StopPainter();
+                }
+                ++buttonIndex;
+            }
+            else
+            {
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create/edit custom GPW"))
+                {
+                    WUInity.INSTANCE.StartPainter(WUInityPainter.PaintMode.CustomGPW);
+                }
+                ++buttonIndex;
+            }
         }
 
 
