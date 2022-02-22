@@ -6,7 +6,7 @@ namespace WUInity
 {
     public class WUInityPainter : MonoBehaviour
     {
-        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, CustomGPW };
+        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, CustomPopulation };
         PaintMode paintMode = PaintMode.EvacGroup;
 
         Color activeColor = Color.red;
@@ -44,9 +44,9 @@ namespace WUInity
         Texture2D initialIgnitionTex;
         Color[] initialIgnitionColorArray;
 
-        //population painter
-        Texture2D customGPWTex;
-        Color[] customGPWColorArray;
+        //population mask painter
+        Texture2D customPopulationMaskTex;
+        Color[] customPopulationMaskColorArray;
 
         public PaintMode GetPaintMode()
         {
@@ -89,13 +89,13 @@ namespace WUInity
             return initialIgnitionTex;
         }
 
-        public Texture2D GetCustomGPWTexture()
+        public Texture2D GetCustomPopulationMaskTexture()
         {
-            if (customGPWTex == null)
+            if (customPopulationMaskTex == null)
             {
-                CheckDataResources(customGPWTex, customGPWColorArray, evacDataUV);
+                CheckDataResources(customPopulationMaskTex, customPopulationMaskColorArray, evacDataUV);
             }
-            return customGPWTex;
+            return customPopulationMaskTex;
         }
 
         public void SetEvacGroupColor(int groupIndex)
@@ -125,7 +125,7 @@ namespace WUInity
 
         private void SetColor(int arrayIndex = 0)
         {
-            if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.CustomGPW)
+            if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.CustomPopulation)
             {
                 activeColor = arrayIndex == 1 ? Color.red : Color.white;
                 addingArea = arrayIndex == 1;
@@ -157,7 +157,7 @@ namespace WUInity
             {
                 SetupPainterInitialIgnition();
             }
-            else if (mode == PaintMode.CustomGPW)
+            else if (mode == PaintMode.CustomPopulation)
             {
                 SetupPainterCustomGPW();
             }
@@ -176,8 +176,8 @@ namespace WUInity
 
         void SetupPainterCustomGPW()
         {
-            paintMode = PaintMode.CustomGPW;
-            CheckDataResources(customGPWTex, customGPWColorArray, evacDataUV);
+            paintMode = PaintMode.CustomPopulation;
+            CheckDataResources(customPopulationMaskTex, customPopulationMaskColorArray, evacDataUV);
             //select first zone
             SetCustomGPWColor(true);
             brushSize = 1;
@@ -259,9 +259,9 @@ namespace WUInity
                         {
                             c = WUInity.SIM.GetEvacGroup(x, y).color;
                         }
-                        else if (paintMode == PaintMode.CustomGPW)
+                        else if (paintMode == PaintMode.CustomPopulation)
                         {
-                            c = WUInity.GPW_VIEWER.gpwData.populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
+                            c = WUInity.POPULATION.GetPopulationData().populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
                         }
                         c.a = 0.5f;
                         requestedColorArray[x + y * res.x] = c;
@@ -296,10 +296,10 @@ namespace WUInity
                     evacGroupColorArray = requestedColorArray;
                     evacDataUV = requestedUV;
                 }
-                else if (paintMode == PaintMode.CustomGPW)
+                else if (paintMode == PaintMode.CustomPopulation)
                 {
-                    customGPWTex = requestedTexture;
-                    customGPWColorArray = requestedColorArray;
+                    customPopulationMaskTex = requestedTexture;
+                    customPopulationMaskColorArray = requestedColorArray;
                     evacDataUV = requestedUV;
                 }
             }
@@ -425,9 +425,9 @@ namespace WUInity
             {
                 WUInity.INPUT.fire.initialIgnitionIndices[x + y * activeCellCount.x] = addingArea ? 1 : 0;
             }
-            else if (paintMode == PaintMode.CustomGPW)
+            else if (paintMode == PaintMode.CustomPopulation)
             {
-                WUInity.GPW_VIEWER.gpwData.populationMask[x + y * activeCellCount.x] = addingArea;
+                WUInity.POPULATION.GetPopulationData().populationMask[x + y * activeCellCount.x] = addingArea;
             }
         }
 

@@ -220,8 +220,8 @@ namespace WUInity.Evac
         /// <summary>
         /// Populates cells based on loaded GPW data, returns total evacuees placed.
         /// </summary>
-        public int PopulateCells(Vector2Int cellCount, Vector2D realWorldSize, GPWData gpwData)
-        {
+        public void PopulateCells(Vector2Int cellCount, Vector2D realWorldSize, PopulationData populationData)
+        {          
             xSize = cellCount.x;
             ySize = cellCount.y;
             this.realWorldSize = realWorldSize;
@@ -232,27 +232,17 @@ namespace WUInity.Evac
             double cellSizeY = realWorldSize.y / ySize;
             cellWorldSize = new Vector2D(cellSizeX, cellSizeY);
             double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
-            totalPopulation = 0;
-            for (int y = 0; y < ySize; ++y)
-            {
-                double yPos = ((double)y + 0.5) * cellSizeY;
-                for (int x = 0; x < xSize; ++x)
+            totalPopulation = populationData.totalPopulation;
+            maxPop = int.MinValue;
+            for (int i = 0; i < population.Length; ++i)
+            { 
+                population[i] = populationData.cellPopulation[i];
+                if (populationData.cellPopulation[i] > maxPop)
                 {
-                    double xPos = ((double)x + 0.5) * cellSizeX;
-                    double density = gpwData.GetDensityUnitySpaceBilinear(new Vector2D(xPos, yPos));
-                    int pop = System.Convert.ToInt32(cellArea * density);
-                    pop = Mathf.Clamp(pop, 0, pop);
-                    population[x + y * xSize] = pop;
-                    totalPopulation += pop;
-                    if (pop > maxPop)
-                    {
-                        maxPop = pop;
-                    }
-
-                    WUInity.OUTPUT.evac.rawPopulation[x + y * xSize] = pop;
+                    maxPop = populationData.cellPopulation[i];
                 }
+                //WUInity.OUTPUT.evac.rawPopulation[x + y * xSize] = pop;
             }
-            return totalPopulation;
         }
 
 
@@ -634,7 +624,7 @@ namespace WUInity.Evac
                 for (int x = 0; x < xSize; x++)
                 {
                     float pop = GetPopulation(x, y);
-                    Color color = PopulationViewer.GetGPWColor(pop / cellArea);
+                    Color color = PopulationManager.GetGPWColor(pop / cellArea);
                     popTex.SetPixel(x, y, color);
                 }
             }

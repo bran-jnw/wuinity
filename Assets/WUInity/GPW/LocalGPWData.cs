@@ -7,7 +7,7 @@ using System;
 namespace WUInity.GPW
 {
     [System.Serializable]
-    public class GPWData
+    public class LocalGPWData
     {     
         public int ncols;
         public int nrows;
@@ -22,9 +22,13 @@ namespace WUInity.GPW
         public Vector2D realWorldSize;
         public int totalPopulation;
 
-        public GPWData()
-        {
+        //not saved
+        public Texture2D densityTexture;
+        public bool isLoaded;
 
+        public LocalGPWData()
+        {
+            isLoaded = false;
         }
 
         //http://www.land-navigation.com/latitude-and-longitude.html
@@ -46,7 +50,7 @@ namespace WUInity.GPW
             return new Vector2D(xSize, ySize);
         }
 
-        private void SaveGPWDataToFile()
+        private void SaveLocalGPWData()
         {            
             string[] data = new string[13];
 
@@ -79,26 +83,43 @@ namespace WUInity.GPW
             System.IO.File.WriteAllLines(path, data);
         }
 
-        public bool LoadGPWData(Vector2D latLong, Vector2D size)
+        public bool LoadLocalGPWDataFromFile()
         {
             //first try if local filtered file exists
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
             bool success = false;
             if (File.Exists(path))
-            {
-                WUInity.SIM.LogMessage("LOG: Loading GPW data from pre-built file.");
-                success = LoadGPWDataFromFile();                
+            {                
+                success = LoadLocalGPWData();                
             }
             else
             {
-                WUInity.SIM.LogMessage("LOG: No GPW pre-built, loading from global database.");
-                success = LoadRelevantGPWData(latLong, size);
+                WUInity.SIM.LogMessage("ERROR: No local GPW data was found, build from global GPW or create custom population.");                
+            }
+
+            if(success)
+            {
+                CreateTexture();
+                isLoaded = true;
             }
 
             return success;
         }
 
-        bool isDataValid(string dataStamp)
+        public bool CreateLocalGPWData()
+        {
+            bool success = LoadRelevantGPWData();
+
+            if (success)
+            {
+                CreateTexture();
+                isLoaded = true;
+            }
+
+            return success;
+        }
+
+        bool IsDataValid(string dataStamp)
         {
             string[] dummy = dataStamp.Split(' ');
 
@@ -122,7 +143,7 @@ namespace WUInity.GPW
             return success;
         }
 
-        public bool LoadGPWDataFromFile()
+        private bool LoadLocalGPWData()
         {
             //string[] d = new string[13];
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
@@ -136,7 +157,7 @@ namespace WUInity.GPW
                 d[i] = sr.ReadLine();
             }*/
 
-            bool success = isDataValid(d[0]);
+            bool success = IsDataValid(d[0]);
             if(success)
             {
                 int.TryParse(d[1], out ncols);
@@ -185,8 +206,15 @@ namespace WUInity.GPW
                 else
                 {
                     CalculateTotalPopulation();
-                    SaveGPWDataToFile();
+                    SaveLocalGPWData();
                 }
+
+                WUInity.SIM.LogMessage("LOG: Loaded local GPW data from pre-built file.");
+            }
+            else
+            {
+                success = false;
+                WUInity.SIM.LogMessage("ERROR: Local GPW data not valid for current map.");
             }
 
             return success;
@@ -195,7 +223,7 @@ namespace WUInity.GPW
         /// <summary>
         /// Reads specified dataset from GPW.
         /// </summary>
-        private bool ReadGPW(string file, Vector2D latLong, Vector2D size)
+        private bool ReadGlobalGPW(string file, Vector2D latLong, Vector2D size)
         {
             string[] d = new string[6];
             StreamReader sr = new StreamReader(file);
@@ -288,7 +316,7 @@ namespace WUInity.GPW
             sr.Close();
 
             CalculateTotalPopulation();
-            SaveGPWDataToFile();
+            SaveLocalGPWData();
             return true;
         }
 
@@ -327,22 +355,6 @@ namespace WUInity.GPW
             return density[x + y * dataSize.x];
         }
 
-        //since data is read to compensdate for the lower corner being the last row we do not have to read data mirrored on y-axis, so we use the function above instead
-        /*/// <summary>
-        /// Returns the density data at a gridpoint
-        /// </summary>
-        public double GetDensity(int x, int y)
-        {
-            double d = (double)NODATA_value;
-            if (x >= 0 && x < dataSize.x && y >= 0 && y < dataSize.y)
-            {
-                //data starts with the top left corner as first value, last value is lower right corner, 
-                //which means you have to flip the y-axis when getting the values.
-                d = density[x + (dataSize.y - y - 1) * dataSize.x];
-            }
-            return d;
-        }*/
-
         public double GetDensityUnitySpace(Vector2D pos)
         {
             Vector2D positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
@@ -377,163 +389,139 @@ namespace WUInity.GPW
             return h;
         }
 
-        /// <summary>
-        /// Returns the density data at a gridpoint based on polar coordinates.
-        /// </summary>
-        public bool LoadRelevantGPWData(Vector2D latLong, Vector2D size)
+        public static bool IsGPWAvailable()
         {
-            string path = Path.Combine(WUInity.DATA_FOLDER, WUInity.INPUT.gpw.gpwDataFolder);
-            if (latLong.x >= -3.4106051316485e-012)
+            string path = WUInity.INPUT.population.gpwDataFolder;
+            bool isAvailable = false;
+
+            if (Directory.Exists(path))
             {
-                if (latLong.y < -90.000000000005)
+                int fileCount = 0;
+                for (int i = 0; i < 8; i++)
                 {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 1");
+                    string file = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_" + (i + 1) + ".asc");
+                    if(!File.Exists(file))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        ++fileCount;
+                    }
                 }
-                else if (latLong.y < -1.0231815394945e-011)
+
+                if(fileCount == 8)
                 {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 2");
-                }
-                else if (latLong.y < 89.999999999985)
-                {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 3");
+                    isAvailable = true;
                 }
                 else
                 {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 4");
+                    WUInity.SIM.LogMessage("ERROR: Not all GPW files found.");
                 }
             }
             else
             {
-                if (latLong.y < -90.000000000005)
-                {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 5");
-                }
-                else if (latLong.y < -1.0231815394945e-011)
-                {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 6");
-                }
-                else if (latLong.x < 89.999999999985)
-                {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 7");
-                }
-                else
-                {
-                    path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
-                    WUInity.SIM.LogMessage("Loading GPW from sector 8");
-                }
+                WUInity.SIM.LogMessage("ERROR: GPW path does exist.");
             }
 
-            return ReadGPW(path, latLong, size);
+            return isAvailable;
         }
 
-        //not done, array too big, out of memory
-        public static void CreateBinaryDatabase()
+        /// <summary>
+        /// Returns the density data at a gridpoint based on polar coordinates.
+        /// </summary>
+        public bool LoadRelevantGPWData()
         {
-            int totalNCols = 0;
-            int totalNrows = 0;
-            double minX = double.MaxValue, minY = double.MaxValue, maxX = double.MinValue, maxY = double.MinValue;
-            for (int i = 0; i < 8; i++)
-            {
-                string file = Application.dataPath + "/Resources/_input/gpw-v4-population-density-rev10_2015_30_sec_asc/";
-                file += "gpw_v4_population_density_rev10_2015_30_sec_" + (i + 1) + ".asc";
+            Vector2D latLong = WUInity.INPUT.lowerLeftLatLong;
+            Vector2D size = WUInity.INPUT.size;
 
-                string[] d = new string[6];
-                StreamReader sr = new StreamReader(file);
-                if (File.Exists(file))
+            bool success = false;
+            if(IsGPWAvailable())
+            {
+                string path = WUInity.INPUT.population.gpwDataFolder;
+                if (latLong.x >= -3.4106051316485e-012)
                 {
-                    for (int j = 0; j < 6; ++j)
+                    if (latLong.y < -90.000000000005)
                     {
-                        d[j] = sr.ReadLine();
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 1");
+                    }
+                    else if (latLong.y < -1.0231815394945e-011)
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 2");
+                    }
+                    else if (latLong.y < 89.999999999985)
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 3");
+                    }
+                    else
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 4");
                     }
                 }
                 else
                 {
-                    WUInity.SIM.LogMessage("GPW data file not found.");
-                    return;
+                    if (latLong.y < -90.000000000005)
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 5");
+                    }
+                    else if (latLong.y < -1.0231815394945e-011)
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 6");
+                    }
+                    else if (latLong.x < 89.999999999985)
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 7");
+                    }
+                    else
+                    {
+                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
+                        WUInity.SIM.LogMessage("Loading GPW from sector 8");
+                    }
                 }
 
-                int ncols, nrows;
-                double xllcorner, yllcorner, cellsize;
-                //read and save general stuff
-                string[] dummy = d[0].Split(' ');
-                int.TryParse(dummy[dummy.Length - 1], out ncols);
-                dummy = d[1].Split(' ');
-                int.TryParse(dummy[dummy.Length - 1], out nrows);
-                dummy = d[2].Split(' ');
-                double.TryParse(dummy[dummy.Length - 1], out xllcorner);
-                dummy = d[3].Split(' ');
-                double.TryParse(dummy[dummy.Length - 1], out yllcorner);
-                dummy = d[4].Split(' ');
-                double.TryParse(dummy[dummy.Length - 1], out cellsize);
-
-                totalNCols += ncols;
-                totalNrows += nrows;
-                minX = MathD.Min(minX, xllcorner);
-                minY = MathD.Min(minY, yllcorner);
-                maxX = MathD.Max(maxX, xllcorner + ncols * cellsize);
-                maxY = MathD.Max(maxY, yllcorner + nrows * cellsize);
+                success = ReadGlobalGPW(path, latLong, size);
             }
 
-            double[] gpwDatabase = new double[totalNCols * totalNrows];
+            return success;
+        }
 
-            for (int i = 0; i < 8; i++)
+        private void CreateTexture()
+        {
+            //first find the correct texture size
+            int maxSide = Mathf.Max(dataSize.x, dataSize.y);
+            Vector2Int res = new Vector2Int(2, 2);
+
+            while (dataSize.x > res.x)
             {
-                string file = Path.Combine(WUInity.DATA_FOLDER, WUInity.INPUT.gpw.gpwDataFolder);
-                file = Path.Combine(file, "gpw_v4_population_density_rev10_2015_30_sec_" + (i + 1) + ".asc");
-
-                string[] d = new string[6];
-                StreamReader sr = new StreamReader(file);
-                if (File.Exists(file))
-                {
-                    for (int j = 0; j < 6; ++j)
-                    {
-                        d[i] = sr.ReadLine();
-                    }
-                }
-                else
-                {
-                    WUInity.SIM.LogMessage("GPW data file not found.");
-                    return;
-                }
-
-                int ncols, nrows, NODATA_value;
-                double xllcorner, yllcorner, cellsize;
-                //read and save general stuff
-                string[] dummy = d[0].Split(' ');
-                int.TryParse(dummy[dummy.Length - 1], out ncols);
-                dummy = d[1].Split(' ');
-                int.TryParse(dummy[dummy.Length - 1], out nrows);
-                dummy = d[2].Split(' ');
-                double.TryParse(dummy[dummy.Length - 1], out xllcorner);
-                dummy = d[3].Split(' ');
-                double.TryParse(dummy[dummy.Length - 1], out yllcorner);
-                dummy = d[4].Split(' ');
-                double.TryParse(dummy[dummy.Length - 1], out cellsize);
-                dummy = d[5].Split(' ');
-                int.TryParse(dummy[dummy.Length - 1], out NODATA_value);
-
-                for (int y = 0; y < nrows; ++y)
-                {
-                    int yOffset = MathD.RoundToInt((yllcorner - minY) / cellsize);
-                    //since read begin from upper corner and not lower
-                    int realYindex = nrows - 1 - i + yOffset;
-                    string[] e = sr.ReadLine().Split(' ');
-                    for (int x = 0; x < ncols; ++x)
-                    {
-                        int xOffset = MathD.RoundToInt((xllcorner - minX) / cellsize);
-                        int realXindex = x + xOffset;
-                        double.TryParse(e[x], out gpwDatabase[realXindex + realYindex * totalNCols]);
-                    }
-                }
-                
+                res.x *= 2;
             }
+            while (dataSize.y > res.y)
+            {
+                res.y *= 2;
+            }
+            //Debug.Log("GPW texture resolution: " + res.x + ", " + res.y);
+
+            //paint texture based time of arrival
+            densityTexture = new Texture2D(res.x, res.y);
+            densityTexture.filterMode = FilterMode.Point;
+            for (int y = 0; y < dataSize.y; y++)
+            {
+                for (int x = 0; x < dataSize.x; x++)
+                {
+                    double density = GetDensity(x, y);
+                    Color color = PopulationManager.GetGPWColor((float)density);
+
+                    densityTexture.SetPixel(x, y, color);
+                }
+            }
+            densityTexture.Apply();
         }
     }
 }

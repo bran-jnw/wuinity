@@ -25,7 +25,7 @@ namespace WUInity
 
         public EvacInput evac;
         public TrafficInput traffic;
-        public GPWInput gpw;
+        public PopulationInput population;
         public ItineroInput itinero;
         public FarsiteInput farsite;
         public VisualizationOptions visuals;
@@ -35,7 +35,7 @@ namespace WUInity
         {
             evac = new EvacInput();
             traffic = new TrafficInput();
-            gpw = new GPWInput();
+            population = new PopulationInput();
             itinero = new ItineroInput();
             farsite = new FarsiteInput();
             visuals = new VisualizationOptions();
@@ -44,10 +44,11 @@ namespace WUInity
     }
 
     [System.Serializable]
-    public class GPWInput
+    public class PopulationInput
     {
         public string gpwDataFolder = "gpw-v4-population-density-rev10_2015_30_sec_asc";
-        public bool tryReadGPWFromSave = true;
+        public string localGPWFile;
+        public string populationFile;
     }
 
     [System.Serializable]

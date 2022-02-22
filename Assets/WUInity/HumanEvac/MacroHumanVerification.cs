@@ -16,7 +16,7 @@ namespace WUInity.Evac
             WUInity.INPUT.runFireSim = false;
             wuinityOptions.runInRealTime = false;
 
-            WUInity.INSTANCE.LoadGPW();
+            //WUInity.INSTANCE.LoadGPW(); //TODO: fix this input 
             WUInity.SIM.LoadItineroDatabase();
 
             //P1

@@ -97,13 +97,13 @@ namespace WUInity
             }
         }
 
-        public static PopulationViewer GPW_VIEWER
+        public static PopulationManager POPULATION
         {
             get
             {
                 if (INSTANCE.internal_gpwViewer == null)
                 {
-                    INSTANCE.internal_gpwViewer = new PopulationViewer();
+                    INSTANCE.internal_gpwViewer = new PopulationManager();
                 }
                 return INSTANCE.internal_gpwViewer;
             }
@@ -201,7 +201,7 @@ namespace WUInity
         private WUInitySim internal_sim;
         private WUInityOutput internal_output;
         private Farsite.FarsiteViewer internal_farsiteViewer;
-        private PopulationViewer internal_gpwViewer;
+        private PopulationManager internal_gpwViewer;
         private WUInityGUI internal_wuiGUI;
         private WUInityPainter internal_painter;
         private Mapbox.Unity.Map.AbstractMap internal_mapboxMap;
@@ -209,7 +209,7 @@ namespace WUInity
         public bool haveInput = false;
         string internal_workingFilePath;
         List<GameObject> drawnRoads;     
-        public enum DataSampleMode { None, GPW, Fitted, Relocated, Staying, TrafficDens, Paint, Farsite}
+        public enum DataSampleMode { None, GPW, Population, Relocated, Staying, TrafficDens, Paint, Farsite}
         public DataSampleMode dataSampleMode = DataSampleMode.None;
         GameObject[] goalMarkers;
         private GameObject evacDataPlane;
@@ -288,7 +288,7 @@ namespace WUInity
             GraphicalFireInput.LoadGraphicalFireInput();
         }
 
-        public bool gpwLoaded = false, routerDbLoaded = false;
+        public bool routerDbLoaded = false;
         /// <summary>
         /// Load an existing file and try to validate all of the associated data.
         /// If data is valid it is also loaded.
@@ -307,7 +307,8 @@ namespace WUInity
 
             EvacGroup.LoadEvacGroupIndices();
             GraphicalFireInput.LoadGraphicalFireInput();
-            gpwLoaded = LoadGPW(false);
+            POPULATION.LoadPopulationFromFile();
+            POPULATION.LoadLocalGPWFromFile();
             routerDbLoaded = SIM.LoadItineroDatabase();            
         }
 
@@ -461,7 +462,7 @@ namespace WUInity
             //https://wiki.openstreetmap.org/wiki/Zoom_levels
             double tiles = Math.Pow(4.0, mOptions.locationOptions.zoom);
             double degreesPerTile = 360.0 / (Math.Pow(2.0, mOptions.locationOptions.zoom));
-            Vector2D mapDegrees = GPWData.SizeToDegrees(INPUT.lowerLeftLatLong, INPUT.size);
+            Vector2D mapDegrees = LocalGPWData.SizeToDegrees(INPUT.lowerLeftLatLong, INPUT.size);
             int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
             int tilesY = (int)(mapDegrees.y / (degreesPerTile * Math.Cos((Math.PI / 180.0) * INPUT.lowerLeftLatLong.x))) + 1;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
@@ -484,24 +485,6 @@ namespace WUInity
         public void SetSampleMode(DataSampleMode sampleMode)
         {
             dataSampleMode = sampleMode;
-        }
-
-        public bool LoadGPW(bool setActive = true)
-        {
-            //get all population data set
-            bool success = GPW_VIEWER.CreateGPW(INPUT.lowerLeftLatLong, INPUT.size, setActive);
-            //gpwViewer.SetDensityMapVisibility(input.gpw.displayGPW);
-
-            if(success)
-            {
-                SIM.LogMessage("LOG: GPW Data loaded succesfully.");
-            }
-            else
-            {
-                SIM.LogMessage("LOG: GPW data could not be loaded.");
-            }
-            gpwLoaded = success;
-            return success;
         }
 
         bool pauseSim = false;
@@ -573,14 +556,14 @@ namespace WUInity
             dataSampleString = "No data to sample.";
             if (dataSampleMode == DataSampleMode.GPW)
             {
-                if (GPW_VIEWER.rawGPWData != null && GPW_VIEWER.rawGPWData.density != null && GPW_VIEWER.rawGPWData.density.Length > 0)
+                if (POPULATION.GetLocalGPWData() != null && POPULATION.GetLocalGPWData().density != null && POPULATION.GetLocalGPWData().density.Length > 0)
                 {
-                    if (GPW_VIEWER.gpwDensityMap.activeSelf)
+                    if (POPULATION.DATA_PLANE.activeSelf)
                     {
-                        float xCellSize = (float)(GPW_VIEWER.rawGPWData.realWorldSize.x / GPW_VIEWER.rawGPWData.dataSize.x);
-                        float yCellSize = (float)(GPW_VIEWER.rawGPWData.realWorldSize.y / GPW_VIEWER.rawGPWData.dataSize.y);
+                        float xCellSize = (float)(POPULATION.GetLocalGPWData().realWorldSize.x / POPULATION.GetLocalGPWData().dataSize.x);
+                        float yCellSize = (float)(POPULATION.GetLocalGPWData().realWorldSize.y / POPULATION.GetLocalGPWData().dataSize.y);
                         double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(GPW_VIEWER.rawGPWData.GetDensityUnitySpace(new Vector2D(pos.x, pos.z)) * cellArea);
+                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(POPULATION.GetLocalGPWData().GetDensityUnitySpace(new Vector2D(pos.x, pos.z)) * cellArea);
                     }
                     else
                     {
@@ -603,9 +586,9 @@ namespace WUInity
             }
             else if (evacDataPlane != null && evacDataPlane.activeSelf)
             {
-                if (dataSampleMode == DataSampleMode.Fitted)
+                if (dataSampleMode == DataSampleMode.Population)
                 {
-                    dataSampleString = "Interpolated people count: " + WUInity.GPW_VIEWER.GetCellPopulation(x, y);
+                    dataSampleString = "Interpolated people count: " + WUInity.POPULATION.GetPopulation(x, y);
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
@@ -663,28 +646,43 @@ namespace WUInity
         public void StartPainter(WUInityPainter.PaintMode paintMode)
         {
             PAINTER.gameObject.SetActive(true);
-            PAINTER.SetPainterMode(paintMode);            
+            PAINTER.SetPainterMode(paintMode);
+            bool fireEdit = false;
             if(paintMode == WUInityPainter.PaintMode.WUIArea)
             {
+                fireEdit = true;
                 DisplayWUIAreaMap();                
             }
             else if (paintMode == WUInityPainter.PaintMode.RandomIgnitionArea)
             {
+                fireEdit = true;
                 DisplayRandomIgnitionAreaMap();
             }
             else if (paintMode == WUInityPainter.PaintMode.InitialIgnition)
             {
+                fireEdit = true;
                 DisplayInitialIgnitionMap();
             }
             else if(paintMode == WUInityPainter.PaintMode.EvacGroup)
             {
                 DisplayEvacGroupMap();
             }
-            else if (paintMode == WUInityPainter.PaintMode.CustomGPW)
+            else if (paintMode == WUInityPainter.PaintMode.CustomPopulation)
             {
-                DisplayCustomGPWData();
+                DisplayCustomPopulationData();
             }
             dataSampleMode = DataSampleMode.Paint;
+
+            if(fireEdit)
+            {
+                SetEvacDataPlane(false);
+                SetFireDataPlane(true);
+            }
+            else
+            {
+                SetEvacDataPlane(true);
+                SetFireDataPlane(false);
+            }
         }
 
         public void StopPainter()
@@ -723,7 +721,7 @@ namespace WUInity
 
             Vector2 maxUV = new Vector2((float)cellCount.x / tex.width, (float)cellCount.y / tex.height);
 
-            PopulationViewer.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            PopulationManager.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
 
             Material mat = new Material(Shader.Find("Unlit/Transparent"));
             mat.mainTexture = tex;
@@ -732,6 +730,7 @@ namespace WUInity
 
             //move up one meter
             gO.transform.position += Vector3.up;
+            gO.SetActive(false); //create hidden
 
             return mR;
         }
@@ -885,9 +884,9 @@ namespace WUInity
             }            
         }
 
-        public void DisplayFittedPopulation()
+        public void DisplayPopulation()
         {
-            SetDataPlaneTexture(GPW_VIEWER.GetFittedTexture());
+            SetDataPlaneTexture(POPULATION.GetPopulationTexture());
         }
 
         public void DisplayStayingPop()
@@ -925,42 +924,60 @@ namespace WUInity
             SetDataPlaneTexture(PAINTER.GetEvacGroupTexture());
         }
 
-        public void DisplayCustomGPWData()
+        public void DisplayCustomPopulationData()
         {
-            SetDataPlaneTexture(PAINTER.GetCustomGPWTexture());
+            SetDataPlaneTexture(PAINTER.GetCustomPopulationMaskTexture());
         }
 
-        public void ToggleDataPlane()
+        private void SetEvacDataPlane(bool setActive)
+        {
+            if (evacDataPlaneMeshRenderer != null)
+            {
+                evacDataPlaneMeshRenderer.gameObject.SetActive(setActive);
+            }
+        }
+
+        private void SetFireDataPlane(bool setActive)
+        {
+            if (fireDataPlaneMeshRenderer != null)
+            {
+                fireDataPlaneMeshRenderer.gameObject.SetActive(setActive);
+            }
+        }
+
+        public bool ToggleEvacDataPlane()
         {
             if (evacDataPlaneMeshRenderer != null)
             {
                 evacDataPlaneMeshRenderer.gameObject.SetActive(!evacDataPlaneMeshRenderer.gameObject.activeSelf);
+                return evacDataPlaneMeshRenderer.gameObject.activeSelf;
             }
+
+            return false;
+        }
+
+        public bool ToggleFireDataPlane()
+        {
+            if (fireDataPlaneMeshRenderer != null)
+            {
+                fireDataPlaneMeshRenderer.gameObject.SetActive(!fireDataPlaneMeshRenderer.gameObject.activeSelf);
+                return fireDataPlaneMeshRenderer.gameObject.activeSelf;
+            }
+
+            return false;
         }
 
         private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
         {
-            //turn everything off first
-            if(fireDataPlane != null)
-            {
-                fireDataPlane.SetActive(false);
-            }
-            if (evacDataPlane != null)
-            {
-                evacDataPlane.SetActive(false);
-            }
-
             //pick needed data plane
             MeshRenderer activeMeshRenderer = evacDataPlaneMeshRenderer;
             Vector2Int cellCount = SIM.EvacCellCount;
             string name = "Evac Data Plane";
-            GameObject activeDataPlane = evacDataPlane;
             if (fireMeshMode)
             {
                 activeMeshRenderer = fireDataPlaneMeshRenderer;
                 cellCount = SIM.GetFireMesh().cellCount;
                 name = "Fire Data Plane";
-                activeDataPlane = fireDataPlane;
             }
 
             //make sure it exists, else create
@@ -980,8 +997,7 @@ namespace WUInity
             }
             else
             {
-                activeMeshRenderer.material.mainTexture = tex;
-                activeDataPlane.SetActive(true);
+                activeMeshRenderer.material.mainTexture = tex;                
             }
         }
 

@@ -158,10 +158,10 @@ namespace WUInity
                 using (FileStream stream = new FileInfo(input.itinero.osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-                    Vector2D border = GPWData.SizeToDegrees(input.lowerLeftLatLong, new Vector2D(WUInity.INPUT.itinero.osmBorderSize, WUInity.INPUT.itinero.osmBorderSize));
+                    Vector2D border = LocalGPWData.SizeToDegrees(input.lowerLeftLatLong, new Vector2D(WUInity.INPUT.itinero.osmBorderSize, WUInity.INPUT.itinero.osmBorderSize));
                     float left = (float)(input.lowerLeftLatLong.y - border.x);
                     float bottom = (float)(input.lowerLeftLatLong.x - border.y);
-                    Vector2D size = GPWData.SizeToDegrees(input.lowerLeftLatLong, input.size);
+                    Vector2D size = LocalGPWData.SizeToDegrees(input.lowerLeftLatLong, input.size);
                     float right = (float)(input.lowerLeftLatLong.y + size.x + border.x);
                     float top = (float)(input.lowerLeftLatLong.x + size.y + border.y);                    
                     //print("" + left + ", " + bottom + ", " + right + ", " + top);
@@ -251,7 +251,7 @@ namespace WUInity
             if(WUInity.INPUT.runEvacSim)
             {
                 //need gpw data
-                if (WUInity.GPW_VIEWER == null)
+                if (WUInity.POPULATION == null)
                 {
                     error += "No GPW data loaded. ";
                     failedInit = true;
@@ -329,7 +329,7 @@ namespace WUInity
         {
             WUInityInput input = WUInity.INPUT;
             WUInityOutput output = WUInity.OUTPUT;
-            PopulationViewer gpwViewer = WUInity.GPW_VIEWER;
+            PopulationManager gpwViewer = WUInity.POPULATION;
 
             if (input.runFireSim)
             {
@@ -340,7 +340,7 @@ namespace WUInity
             {
                 macroHumanSim = new MacroHumanSim();
                 //place people
-                macroHumanSim.PopulateCells(EvacCellCount, input.size, gpwViewer.rawGPWData);
+                macroHumanSim.PopulateCells(EvacCellCount, input.size, WUInity.POPULATION.GetPopulationData());
                 if (i == 0)
                 {
                     //save raw pop

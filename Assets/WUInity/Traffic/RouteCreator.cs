@@ -243,7 +243,7 @@ namespace WUInity
 
                             //https://www.usna.edu/Users/oceano/pguth/md_help/html/approx_equivalents.htm
                             float maxDelta = cellSize * 0.5f; //TODO: reasonable?
-                            Vector2D v = GPWData.SizeToDegrees(new Vector2D(startRouterPoint.Latitude, startRouterPoint.Longitude), new Vector2D(maxDelta, maxDelta));
+                            Vector2D v = LocalGPWData.SizeToDegrees(new Vector2D(startRouterPoint.Latitude, startRouterPoint.Longitude), new Vector2D(maxDelta, maxDelta));
 
                             if (latDelta < v.x && longDelta < v.y)
                             {
