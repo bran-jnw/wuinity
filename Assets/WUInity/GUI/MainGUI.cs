@@ -56,7 +56,7 @@ namespace WUInity
             }
             ++buttonIndex;*/
 
-            if (!WUInity.INSTANCE.haveInput)
+            if (!WUInity.DATA_STATUS.haveInput)
             {
                 return;
             }
@@ -116,8 +116,7 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
             {
                 ParseMainData(wO);
-                WUInity.INSTANCE.UpdateValidData();
-                WUInity.INSTANCE.LoadMapbox();
+                WUInity.INSTANCE.UpdateMapResourceStatus();
             }
 
             buttonIndex += 2;
@@ -133,31 +132,32 @@ namespace WUInity
             nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
             ++buttonIndex;
 
+            WUInity.INPUT.runEvacSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runEvacSim, "Simulate evac");
+            ++buttonIndex;
+
+            WUInity.INPUT.runTrafficSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runTrafficSim, "Simulate traffic");
+            ++buttonIndex;
+
+            WUInity.INPUT.runFireSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runFireSim, "Simulate fire");
+            ++buttonIndex;
+
+            WUInity.INPUT.runInRealTime = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runInRealTime, "Update sim in GUI");
+            ++buttonIndex;
+
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
             {
-                ParseMainData(wO);
-                WUInity.INSTANCE.CompareValidData();
-                if (WUInity.INSTANCE.IsMapDirty())
+                ParseMainData(wO);  
+                if (!WUInity.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.SIM.LogMessage("ERROR: Map is dirty, update before running simulation.");
-                }
-
-                if (WUInity.INSTANCE.IsGPWDirty())
-                {
-                    WUInity.SIM.LogMessage("ERROR: GPW data is dirty, update before running simulation.");
-                }
-
-                if (WUInity.INSTANCE.IsAnythingDirty())
-                {
-                    WUInity.SIM.LogMessage("ERROR: Could not start simulation, see error log.");
+                    WUInity.LogMessage("ERROR: Could not start simulation, see error log.");
                 }
                 else
                 {
-                    WUInity.SIM.LogMessage("LOG: Simulation started, please wait.");
-                    if (WUInity.SIM.StartSimFromGUI())
-                    {
-                        menuChoice = ActiveMenu.Output;
-                    }
+                    WUInity.LogMessage("LOG: Simulation started, please wait.");
+                    menuChoice = ActiveMenu.Output;
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
+                    WUInity.INSTANCE.SetEvacDataPlane(true);
+                    WUInity.SIM.StartSimulation();                    
                 }
             }
             ++buttonIndex;
@@ -193,23 +193,13 @@ namespace WUInity
         void OpenLoadInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.DATA_FOLDER);
+            string initialPath = WUInity.DATA_FOLDER;
+            if (WUInity.DATA_STATUS.haveInput)
+            {
+                initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+            }            
             FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
-        }
-
-        void OpenLoadLCP()
-        {
-            FileBrowser.SetFilters(false, lcpFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(LoadLCP, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load LCP file", "Load");
-        }
-
-        void OpenLoadOSM()
-        {
-            FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(LoadOSM, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load OSM file", "Load");
-        }
+        }             
 
         void SaveInput(string[] paths)
         {
@@ -219,7 +209,7 @@ namespace WUInity
             if (creatingNewFile)
             {
                 mainInputDirty = true;
-                WUInity.INSTANCE.NewInputData();
+                WUInity.INSTANCE.CreateNewInputData();
                 wO = WUInity.INPUT; //have to update this since we are creating a new one
             }
             else
@@ -237,20 +227,7 @@ namespace WUInity
         {
             SaveLoadWUI.LoadInput(paths[0]);
             mainInputDirty = true;
-        }
-
-        void LoadLCP(string[] paths)
-        {
-            WUInityInput wO = WUInity.INPUT;
-            wO.fire.lcpFile = paths[0];
-            WUInity.SIM.UpdateLCPFile();
-        }
-
-        void LoadOSM(string[] paths)
-        {
-            WUInityInput wO = WUInity.INPUT;
-            wO.itinero.osmFile = paths[0];
-        }
+        }            
 
         void CancelSaveLoad()
         {

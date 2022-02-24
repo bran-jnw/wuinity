@@ -23,9 +23,9 @@ namespace WUInity.Fire
         float southElevation = 0f;
 
 
-        [SerializeField] WUInityFireMesh mesh;          //declare other variables
+        [SerializeField] FireMesh mesh;          //declare other variables
         LCPData lcpData;
-        WUInityFireIgnition[] ignitionPoints;
+        IgnitionPoint[] ignitionPoints;
         float time = 0f;
         bool simulate = false;
 
@@ -34,15 +34,15 @@ namespace WUInity.Fire
             northElevation = (float)(slope * cellCount.y * cellSize.y);                 //set maximum elevation??
             CreateLCPData();                    
 
-            ignitionPoints = new WUInityFireIgnition[1];                                    //create one ignition point
-            ignitionPoints[0] = new WUInityFireIgnition(cellCount.x / 2, cellCount.y / 2);  //at the center of the domain
+            ignitionPoints = new IgnitionPoint[1];                                    //create one ignition point
+            ignitionPoints[0] = new IgnitionPoint(cellCount.x / 2, cellCount.y / 2);  //at the center of the domain
             /*ignitionPoints = new WUInityFireIgnition[randomIgnPoints];
             for (int i = 0; i < ignitionPoints.Length; i++)
             {
                 ignitionPoints[i] = new WUInityFireIgnition(UnityEngine.Random.Range(0, xCells), UnityEngine.Random.Range(0, yCells));
             }*/
 
-            mesh = new WUInityFireMesh(lcpData, weather, wind, initialMoisture, ignitionPoints);        //create the fire mesh from constructor
+            mesh = new FireMesh(lcpData, weather, wind, initialMoisture, ignitionPoints);        //create the fire mesh from constructor
             mesh.terrainMesh = terrainMeshFilter.mesh;                                                  //guessing this is for rendering?
             mesh.spreadMode = spreadMode;                                                               //set spread mode
             //start simulation and do the init

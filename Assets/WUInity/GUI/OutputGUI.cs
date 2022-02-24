@@ -19,37 +19,16 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
-            dummy = WUInity.OUTPUT.evac.actualTotalEvacuees;
+            dummy = WUInity.POPULATION.GetTotalPopulation();
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            dummy = WUInity.OUTPUT.evac.stayingPeople;
+            dummy = WUInity.SIM.GetMacroHumanSim().GetPeopleStaying();
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
             ++buttonIndex;
 
             //toatl cars
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.GetMacroHumanSim().GetTotalCars());
-            ++buttonIndex;
-
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Interpolated population density"))
-            {
-                WUInity.INSTANCE.DisplayRawPop();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Raw);
-            }
-            ++buttonIndex;*/
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stuck population"))
-            {
-                WUInity.INSTANCE.DisplayStuckPop();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-            }
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Redist. population density"))
-            {
-                WUInity.INSTANCE.DisplayRelocatedPop();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Relocated);
-            }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Staying population"))
@@ -87,7 +66,7 @@ namespace WUInity
             if (WUInity.INPUT.runEvacSim && WUInity.SIM.GetMacroHumanSim() != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.GetMacroHumanSim().GetPeopleLeft() + " / " + WUInity.OUTPUT.evac.actualTotalEvacuees);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.GetMacroHumanSim().GetPeopleLeft() + " / " + WUInity.POPULATION.GetTotalPopulation());
                 ++buttonIndex;
 
                 //pedestrians still left
@@ -110,7 +89,7 @@ namespace WUInity
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople + " (" + WUInity.INPUT.traffic.evacuationGoals[i].cars.Count + ")");
                 ++buttonIndex;
             }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.OUTPUT.evac.actualTotalEvacuees - WUInity.OUTPUT.evac.stayingPeople));
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.GetMacroHumanSim().GetPeopleStaying()));
             ++buttonIndex;
 
             //fire output stuff

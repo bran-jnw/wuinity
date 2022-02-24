@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace WUInity
 {
-    public class WUInityPainter : MonoBehaviour
+    public class Painter : MonoBehaviour
     {
-        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, CustomPopulation };
+        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, CustomPopulation, TriggerBuffer };
         PaintMode paintMode = PaintMode.EvacGroup;
 
         Color activeColor = Color.red;
@@ -44,6 +44,10 @@ namespace WUInity
         Texture2D initialIgnitionTex;
         Color[] initialIgnitionColorArray;
 
+        //initial ignition
+        Texture2D triggerBufferTex;
+        Color[] triggerBufferColorArray;
+
         //population mask painter
         Texture2D customPopulationMaskTex;
         Color[] customPopulationMaskColorArray;
@@ -60,6 +64,15 @@ namespace WUInity
                 CheckDataResources(evacGroupTex, evacGroupColorArray, evacDataUV);
             }
             return evacGroupTex;
+        }
+
+        public Texture2D GetCustomPopulationMaskTexture()
+        {
+            if (customPopulationMaskTex == null)
+            {
+                CheckDataResources(customPopulationMaskTex, customPopulationMaskColorArray, evacDataUV);
+            }
+            return customPopulationMaskTex;
         }
 
         public Texture2D GetWUIAreaTexture()
@@ -89,13 +102,13 @@ namespace WUInity
             return initialIgnitionTex;
         }
 
-        public Texture2D GetCustomPopulationMaskTexture()
+        public Texture2D GetTriggerBufferTexture()
         {
-            if (customPopulationMaskTex == null)
+            if (triggerBufferTex == null)
             {
-                CheckDataResources(customPopulationMaskTex, customPopulationMaskColorArray, evacDataUV);
+                CheckDataResources(triggerBufferTex, triggerBufferColorArray, fireDataUV);
             }
-            return customPopulationMaskTex;
+            return triggerBufferTex;
         }
 
         public void SetEvacGroupColor(int groupIndex)
@@ -118,6 +131,11 @@ namespace WUInity
             SetColor(addArea ? 1 : 0);
         }
 
+        public void SetTriggerBufferColor(bool addArea)
+        {
+            SetColor(addArea ? 1 : 0);
+        }
+
         public void SetCustomGPWColor(bool addArea)
         {
             SetColor(addArea ? 1 : 0);
@@ -125,7 +143,8 @@ namespace WUInity
 
         private void SetColor(int arrayIndex = 0)
         {
-            if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.CustomPopulation)
+            if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition 
+                || paintMode == PaintMode.CustomPopulation || paintMode == PaintMode.TriggerBuffer)
             {
                 activeColor = arrayIndex == 1 ? Color.red : Color.white;
                 addingArea = arrayIndex == 1;
@@ -160,6 +179,14 @@ namespace WUInity
             else if (mode == PaintMode.CustomPopulation)
             {
                 SetupPainterCustomGPW();
+            }
+            else if (mode == PaintMode.TriggerBuffer)
+            {
+                SetupPainterTriggerBuffer();
+            }
+            else
+            {
+                WUInity.LogMessage("ERROR: Desired paint mode not yet implemented.");
             }
         }
 
@@ -206,13 +233,21 @@ namespace WUInity
             brushSize = 3;
         }
 
+        void SetupPainterTriggerBuffer()
+        {
+            paintMode = PaintMode.TriggerBuffer;
+            CheckDataResources(triggerBufferTex, triggerBufferColorArray, fireDataUV);
+            SetTriggerBufferColor(true);
+            brushSize = 5;
+        }
+
         void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray, Vector2 requestedUV)
         {
             if (requestedTexture == null)
             {
                 Vector2Int cellCount;
                 //get correct size, fire mesh or evac mesh
-                if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
+                if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
                 {
                     fireDataCellCount = new Vector2Int(WUInity.SIM.GetFireMesh().cellCount.x, WUInity.SIM.GetFireMesh().cellCount.y);                    
                     cellCount = fireDataCellCount;
@@ -245,15 +280,19 @@ namespace WUInity
                         Color c = Color.white;
                         if (paintMode == PaintMode.WUIArea)
                         {
-                            c = WUInity.INPUT.fire.wuiAreaIndices[x + y * fireDataCellCount.x] == 0 ? Color.white : Color.red;
+                            c = WUInity.INPUT.fire.wuiAreaIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.RandomIgnitionArea)
                         {
-                            c = WUInity.INPUT.fire.randomIgnitionIndices[x + y * fireDataCellCount.x] == 0 ? Color.white : Color.red;
+                            c = WUInity.INPUT.fire.randomIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.InitialIgnition)
                         {
-                            c = WUInity.INPUT.fire.initialIgnitionIndices[x + y * fireDataCellCount.x] == 0 ? Color.white : Color.red;
+                            c = WUInity.INPUT.fire.initialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                        }
+                        else if (paintMode == PaintMode.TriggerBuffer)
+                        {
+                            c = WUInity.INPUT.fire.triggerBufferIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
@@ -290,6 +329,12 @@ namespace WUInity
                     initialIgnitionColorArray = requestedColorArray;
                     fireDataUV = requestedUV;
                 }
+                else if (paintMode == PaintMode.TriggerBuffer)
+                {
+                    triggerBufferTex = requestedTexture;
+                    triggerBufferColorArray = requestedColorArray;
+                    fireDataUV = requestedUV;
+                }
                 else if (paintMode == PaintMode.EvacGroup)
                 {
                     evacGroupTex = requestedTexture;
@@ -304,9 +349,9 @@ namespace WUInity
                 }
             }
 
-            if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
-            {
-                
+            if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea 
+                || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
+            {                
                 activeCellCount = fireDataCellCount;
                 activeRealSize = fireDataRealSize;
             }
@@ -340,7 +385,7 @@ namespace WUInity
 
                     int x = (int)pixelUV.x;
                     int y = (int)pixelUV.y;
-                    if (x < 0 || x > activeCellCount.x || y < 0 || y > activeCellCount.y)
+                    if (x < 0 || x > activeCellCount.x - 1 || y < 0 || y > activeCellCount.y - 1)
                     {
                         return;
                     }
@@ -373,9 +418,9 @@ namespace WUInity
             else
             {
                 int minX = Mathf.Max(0, x - brushSize - 1);
-                int maxX = Mathf.Min(activeCellCount.x, x + brushSize - 1);
+                int maxX = Mathf.Min(activeCellCount.x - 1, x + brushSize - 1);
                 int minY = Mathf.Max(0, y - brushSize - 1);
-                int maxY = Mathf.Min(activeCellCount.y, y + brushSize - 1);
+                int maxY = Mathf.Min(activeCellCount.y - 1, y + brushSize - 1);
 
                 Vector2Int center = new Vector2Int(x, y);
 
@@ -415,15 +460,19 @@ namespace WUInity
             }
             else if(paintMode == PaintMode.WUIArea)
             {
-                WUInity.INPUT.fire.wuiAreaIndices[x + y * activeCellCount.x] = addingArea ? 1 : 0;
+                WUInity.INPUT.fire.wuiAreaIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.RandomIgnitionArea)
             {
-                WUInity.INPUT.fire.randomIgnitionIndices[x + y * activeCellCount.x] = addingArea ? 1 : 0;
+                WUInity.INPUT.fire.randomIgnitionIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.InitialIgnition)
             {
-                WUInity.INPUT.fire.initialIgnitionIndices[x + y * activeCellCount.x] = addingArea ? 1 : 0;
+                WUInity.INPUT.fire.initialIgnitionIndices[x + y * activeCellCount.x] = addingArea;
+            }
+            else if (paintMode == PaintMode.TriggerBuffer)
+            {
+                WUInity.INPUT.fire.triggerBufferIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.CustomPopulation)
             {

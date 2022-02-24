@@ -291,14 +291,24 @@ namespace WUInity.Fire
 			}
 		}
 
-		void ReadData(string path)
-		{
+		public static bool DoesLCPExist(string path)
+        {
 			if (!File.Exists(path))
 			{
-				CantAllocLCP = true;
-				WUInity.SIM.LogMessage("WARNING: LCP file not found in " + path + ", using default.");
-				return;
+				WUInity.LogMessage("ERROR: LCP file not found in " + path + ", using default.");
+				return false;
 			}
+
+			return true;
+		}
+
+		void ReadData(string path)
+		{
+			if(!DoesLCPExist(path))
+            {
+				CantAllocLCP = true;
+				return;
+			}			
 
 			using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
 			{
@@ -410,7 +420,7 @@ namespace WUInity.Fire
 				Header.WoodyFile = reader.ReadChars(256);
 				Header.Description = reader.ReadChars(512);
 
-				WUInity.SIM.LogMessage("LOG: LCP found in " + path + ", read succesfully.");
+				WUInity.LogMessage("LOG: LCP found in " + path + ", read succesfully.");
 			}
 
 			/*// do this in case a version 1.0 file has gotten through

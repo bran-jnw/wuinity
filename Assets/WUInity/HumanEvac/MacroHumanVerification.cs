@@ -21,21 +21,21 @@ namespace WUInity.Evac
 
             //P1
             wuinityOptions.simName = "P1";
-            evacOptions.overrideTotalPopulation = true;
-            evacOptions.totalPopulation = 1000;
-            WUInity.SIM.StartSimFromGUI();
+            //evacOptions.overrideTotalPopulation = true;
+            //evacOptions.totalPopulation = 1000;
+            WUInity.SIM.StartSimulation();
 
             //P2
             for (int i = 1; i < 6; i++)
             {
-                evacOptions.totalPopulation = 1000 * i;
+                //evacOptions.totalPopulation = 1000 * i;
                 evacOptions.allowMoreThanOneCar = true;
                 evacOptions.minHouseholdSize = i;
                 evacOptions.maxHouseholdSize = i;
                 evacOptions.maxCars = i;
                 evacOptions.maxCarsChance = 1f;
                 wuinityOptions.simName = "P2_" + i;
-                WUInity.SIM.StartSimFromGUI();
+                WUInity.SIM.StartSimulation();
             }
 
             //P3, need more curves
@@ -44,29 +44,29 @@ namespace WUInity.Evac
             evacOptions = WUInity.INPUT.evac;
 
             wuinityOptions.simName = "P3_1";
-            evacOptions.overrideTotalPopulation = true;
-            evacOptions.totalPopulation = 1000;
-            WUInity.SIM.StartSimFromGUI();
+            //evacOptions.overrideTotalPopulation = true;
+            //evacOptions.totalPopulation = 1000;
+            WUInity.SIM.StartSimulation();
 
             wuinityOptions.simName = "P3_2";
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 500f;
-            WUInity.SIM.StartSimFromGUI();
+            WUInity.SIM.StartSimulation();
 
             wuinityOptions.simName = "P3_3";
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 1000f;
-            WUInity.SIM.StartSimFromGUI();
+            WUInity.SIM.StartSimulation();
 
             //P4 - can't do it
 
             //PT1            
-            evacOptions.overrideTotalPopulation = true;
-            evacOptions.totalPopulation = 1000;
+            //evacOptions.overrideTotalPopulation = true;
+            //evacOptions.totalPopulation = 1000;
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 1f;
             for (int i = 0; i < 3; i++)
             {
                 wuinityOptions.simName = "PT1_mod" + (i + 1);
                 evacOptions.walkingDistanceModifier = (i + 1);
-                WUInity.SIM.StartSimFromGUI();
+                WUInity.SIM.StartSimulation();
             }            
         }
     }

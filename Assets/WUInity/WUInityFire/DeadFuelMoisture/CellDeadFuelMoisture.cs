@@ -12,10 +12,10 @@ namespace WUInity.Fire
         DeadFuelMoisture dfm100h;
         DeadFuelMoisture dfm1000h;
         bool use1000Hour = false;
-        WUInityFireCell cell;
+        FireCell cell;
         double latitude, longitude;
 
-        public CellDeadFuelMoisture(WUInityFireCell cell, double latitude, double longitude, int startYear, int startMonth, int startDay, int startHour, bool use1000Hour = false)
+        public CellDeadFuelMoisture(FireCell cell, double latitude, double longitude, int startYear, int startMonth, int startDay, int startHour, bool use1000Hour = false)
         {
             this.latitude = latitude;
             this.longitude = longitude;

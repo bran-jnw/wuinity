@@ -8,7 +8,7 @@ using UnityEditor;
 namespace WUInity.Fire
 {  
     //[System.Serializable]
-    public class WUInityFireCell                
+    public class FireCell                
     {       
         public Vector2Int cellIndex;            //Declare a cellIndex vector   
         public FireCellState cellState;         //Declare a variable of type FireCellState (where is that defined)
@@ -18,8 +18,8 @@ namespace WUInity.Fire
         //this is teh distance to the next cell center, so when firefront has passed distance whe have spread
         double[] distances;
         double[] spreadRates;
-        WUInityFireCell[] neighbors;
-        WUInityFireMesh fireMesh;
+        FireCell[] neighbors;
+        FireMesh fireMesh;
         LandScapeStruct lcp;
         double maxSpreadRate;
         double maxSpreadRateDirection;
@@ -39,7 +39,7 @@ namespace WUInity.Fire
             double canopyCover, double canopyHeight, double crownRatio);
         
 
-        public WUInityFireCell(WUInityFireMesh fireMesh, int xIndex, int yIndex, LandScapeStruct lcp) //CONSTRUCTOR
+        public FireCell(FireMesh fireMesh, int xIndex, int yIndex, LandScapeStruct lcp) //CONSTRUCTOR
         {
             this.fireMesh = fireMesh;
             cellIndex = new Vector2Int(xIndex, yIndex);
@@ -49,7 +49,7 @@ namespace WUInity.Fire
             distances = new double[fireMesh.indexSize];
             spreadRates = new double[fireMesh.indexSize];
             maxSpreadRates = new double[fireMesh.indexSize];
-            neighbors = new WUInityFireCell[fireMesh.indexSize];
+            neighbors = new FireCell[fireMesh.indexSize];
 
             this.lcp = lcp;       
         }
@@ -66,7 +66,7 @@ namespace WUInity.Fire
                 int yI = cellIndex.y + fireMesh.neighborIndices[i].y;               //save the y dimension of the neighbor cell
                 if (fireMesh.IsInsideMesh(xI, yI) && fireMesh.GetFireCell(xI, yI).cellState == FireCellState.CanBurn)               //if the neighbor is inside the mesh AND it has a CanBurn cellState
                 {
-                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);               //create fire cell f
+                    FireCell f = fireMesh.GetFireCell(xI, yI);               //create fire cell f
                     //set neighbor since it exists
                     neighbors[i] = f;                                               //save neighbor
                     
@@ -205,7 +205,7 @@ namespace WUInity.Fire
             }            
         }
 
-        public WUInityFireMesh GetMesh()
+        public FireMesh GetMesh()
         {
             return fireMesh;
         }
@@ -554,7 +554,7 @@ namespace WUInity.Fire
                 //int xI = cellIndex.x + fireMesh.neighborIndices[i].x;
                 //int yI = cellIndex.y + fireMesh.neighborIndices[i].y;
 
-                WUInityFireCell f = neighbors[i];
+                FireCell f = neighbors[i];
                 if (f.cellState == FireCellState.CanBurn)
                 {
                     if (fireFront[i] >= distances[i])
@@ -618,7 +618,7 @@ namespace WUInity.Fire
                     continue;
                 }
 
-                WUInityFireCell f = neighbors[i];
+                FireCell f = neighbors[i];
                 if (f.cellState != FireCellState.CanBurn)
                 {
                     fireFront[i] = -1.0;

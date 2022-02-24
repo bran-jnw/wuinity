@@ -44,10 +44,10 @@ namespace WUInity
         const int consoleHeight = 160;
 
 
-        MenuButton mainMenu = new MenuButton(0, buttonHeight, "Main Menu");
+        MenuButton mainMenu = new MenuButton(0, buttonHeight, "Main Menu");        
+        MenuButton populationMenu = new MenuButton(1, buttonHeight, "Population");
         //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
-        MenuButton fireMenu = new MenuButton(1, buttonHeight, "Fire spread");
-        MenuButton gpwMenu = new MenuButton(2, buttonHeight, "Population");
+        MenuButton fireMenu = new MenuButton(2, buttonHeight, "Fire spread");
         MenuButton evacMenu = new MenuButton(3, buttonHeight, "Evacuation");
         MenuButton trafficMenu = new MenuButton(4, buttonHeight, "Traffic");
         MenuButton outputMenu = new MenuButton(5, buttonHeight, "Output");
@@ -82,9 +82,9 @@ namespace WUInity
                 }
             }
 
-            if(WUInity.INSTANCE.haveInput)
+            if(WUInity.DATA_STATUS.haveInput)
             {
-                if (GUI.Button(gpwMenu.rect, gpwMenu.text))
+                if (GUI.Button(populationMenu.rect, populationMenu.text))
                 {
                     if (menuChoice == ActiveMenu.Population)
                     {
@@ -167,7 +167,7 @@ namespace WUInity
             GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
-            List<string> log = WUInity.SIM.GetSimLog();
+            List<string> log = WUInity.GetLog();
             for (int i = log.Count - 1; i >= 0; i--)
             {                
                 GUILayout.Label(log[i]);

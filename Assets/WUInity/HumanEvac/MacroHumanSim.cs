@@ -13,8 +13,8 @@ namespace WUInity.Evac
     public class MacroHumanSim
     {
         [SerializeField] int[] population;
-        [SerializeField] int xSize;
-        [SerializeField] int ySize;
+        [SerializeField] int cellsX;
+        [SerializeField] int cellsY;
         [SerializeField] int maxPop = -1;
 
         Vector2D realWorldSize;
@@ -48,9 +48,9 @@ namespace WUInity.Evac
         {
             int count = 0;
 
-            if (humanEvacCells[x + y * xSize] != null)
+            if (humanEvacCells[x + y * cellsX] != null)
             {
-                HumanEvacCell hR = humanEvacCells[x + y * xSize];
+                HumanEvacCell hR = humanEvacCells[x + y * cellsX];
                 for (int j = 0; j < hR.macroHouseholds.Length; ++j)
                 {
                     if (hR.macroHouseholds[j] != null)
@@ -72,7 +72,7 @@ namespace WUInity.Evac
         /// </summary>
         /// <param name="deltaTime"></param>
         /// <param name="currentTime"></param>
-        public void AdvanceEvacuatePopulation(float deltaTime, float currentTime)
+        public void Update(float deltaTime, float currentTime)
         {            
             if (!evacuationDone)
             {
@@ -153,6 +153,11 @@ namespace WUInity.Evac
             return peopleLeft;
         }
 
+        public int GetPeopleStaying()
+        {
+            return totalPeopleWhoWillNotEvacuate;
+        }
+
         public int GetTotalCars()
         {
             return totalCars;
@@ -207,32 +212,24 @@ namespace WUInity.Evac
             System.IO.File.WriteAllLines(path, output);
         }
 
-        //alternate way of saving, neeed to print each loop iteration, saves memory but is way slower. Update: useless? uses more memory?
-        /*public void SaveToFile(string output, bool newFile)
-        {
-            if (newFile)
-            {
-                System.IO.File.Delete(@"E:\unity_projects\WUI-NITY\wui-nity_git\Assets\Resources\pedestrian_output.csv");
-            }
-            System.IO.File.AppendAllText(@"E:\unity_projects\WUI-NITY\wui-nity_git\Assets\Resources\pedestrian_output.csv", output + "\n");
-        }*/
-
         /// <summary>
         /// Populates cells based on loaded GPW data, returns total evacuees placed.
         /// </summary>
-        public void PopulateCells(Vector2Int cellCount, Vector2D realWorldSize, PopulationData populationData)
+        public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
-            xSize = cellCount.x;
-            ySize = cellCount.y;
-            this.realWorldSize = realWorldSize;
-            population = new int[cellCount.x * cellCount.y];
-            WUInity.OUTPUT.evac.rawPopulation = new int[cellCount.x * cellCount.y];
+            cellsX = WUInity.SIM.EvacCellCount.x;
+            cellsY = WUInity.SIM.EvacCellCount.x;
+            this.realWorldSize = WUInity.INPUT.size;
+            population = new int[cellsX * cellsY];
 
-            double cellSizeX = realWorldSize.x / xSize;
-            double cellSizeY = realWorldSize.y / ySize;
+            cellRoutes = routeCollection;
+
+            double cellSizeX = realWorldSize.x / cellsX;
+            double cellSizeY = realWorldSize.y / cellsY;
             cellWorldSize = new Vector2D(cellSizeX, cellSizeY);
             double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
             totalPopulation = populationData.totalPopulation;
+            peopleLeft = totalPopulation;
             maxPop = int.MinValue;
             for (int i = 0; i < population.Length; ++i)
             { 
@@ -241,98 +238,14 @@ namespace WUInity.Evac
                 {
                     maxPop = populationData.cellPopulation[i];
                 }
-                //WUInity.OUTPUT.evac.rawPopulation[x + y * xSize] = pop;
-            }
-        }
-
-
-        /// <summary>
-        /// Receives an array filled with pre-calculated routes available to the cell
-        /// Should (only?) be called by the RouteCreator
-        /// </summary>
-        /// <param name="rasterRoutes"></param>
-        public void SetRasterRoutes(global::WUInity.RouteCollection[] rasterRoutes)
-        {
-            this.cellRoutes = rasterRoutes;
-        }
-
-        /// <summary>
-        /// Goues through all cells and check if they have a valid route to get away or not.
-        /// If not they are summed up for later re-distribution
-        /// </summary>
-        /// <returns></returns>
-        public int CollectStuckPeople()
-        {
-            int stuckPeople = 0;
-            for (int i = 0; i < population.Length; ++i)
-            {
-                if (population[i] > 0 && cellRoutes[i] == null)
-                {
-                    //MonoBehaviour.print(population[i] + " persons are stuck. Index: " + i);
-                    stuckPeople += population[i];
-                    //delete people in the current cell since we are relocating them
-                    population[i] = 0;
-                }
-            }
-            //MonoBehaviour.print("Total stuck people: " + stuckPeople);
-            return stuckPeople;
-        }
-
-        /// <summary>
-        /// Relocates stuck people (no route in cell), relocation based on ratio between people in cell / total people, so relative density is conserved
-        /// </summary>
-        /// <param name="stuckPeople"></param>
-        public void RelocateStuckPeople(int stuckPeople)
-        {
-            if (stuckPeople > 0)
-            {
-                int remainingPop = totalPopulation - stuckPeople;
-                int addedPop = 0;
-                for (int i = 0; i < population.Length; ++i)
-                {
-                    if (population[i] > 0)
-                    {
-                        float weight = population[i] / (float)remainingPop;
-                        int extraPersonsToCell = Mathf.CeilToInt(weight * stuckPeople);
-                        population[i] += extraPersonsToCell;
-                        addedPop += extraPersonsToCell;
-                    }
-                }
-                totalPopulation = remainingPop + addedPop;
-                peopleLeft = totalPopulation;
-            }
-
-            WUInity.OUTPUT.evac.actualTotalEvacuees = totalPopulation;
-        }
-
-        /// <summary>
-        /// Scales the actual poulation count from GPW down to desired amount of people
-        /// </summary>
-        /// <param name="wantedTotal"></param>
-        /// <returns></returns>
-        public int ScaleTotalPopulation(int wantedTotal)
-        {
-            int newTotalPop = 0;
-            for (int i = 0; i < population.Length; ++i)
-            {
-                if (population[i] > 0)
-                {
-                    float weight = population[i] / (float)totalPopulation;
-                    int newPop = Mathf.RoundToInt(weight * wantedTotal);
-                    population[i] = newPop;
-                    newTotalPop += newPop;
-                }
-            }
-            totalPopulation = newTotalPop;
-            peopleLeft = totalPopulation;
-            return totalPopulation;
+            }            
         }
 
         /// <summary>
         /// Pulls random response time along a response time curve
         /// </summary>
         /// <returns></returns>
-        static public float GetRandomResponseTime()
+        static public float GetRandomResponseTime(int evacGroupIndex)
         {
             EvacInput eO = WUInity.INPUT.evac;
 
@@ -340,7 +253,7 @@ namespace WUInity.Evac
             float r = Random.Range(0f, 1f);
 
             //get curve index from evac group
-            int curveIndex = 0;
+            int curveIndex = WUInity.INPUT.evac.evacGroups[evacGroupIndex].responseCurveIndex;
 
             for (int i = 0; i < eO.responseCurves[curveIndex].dataPoints.Length; i++)
             {
@@ -350,23 +263,6 @@ namespace WUInity.Evac
                     break;
                 }
             }
-
-            /*if(r <= 0.14f)
-            {
-                responseTime = Random.Range(-420f, 0f);
-            }
-            else if(r <= 0.81f)
-            {
-                responseTime = Random.Range(0f, 1200f);
-            }
-            else if (r <= 0.95f)
-            {
-                responseTime = Random.Range(1200f, 3600f);
-            }
-            else
-            {
-                responseTime = float.MaxValue;
-            }*/
 
             return responseTime;
         }
@@ -392,8 +288,8 @@ namespace WUInity.Evac
             {
                 if (population[i] > 0)
                 {
-                    int y = i / xSize;
-                    int x = i - y * xSize;
+                    int y = i / cellsX;
+                    int x = i - y * cellsX;
                     Vector2D worldPos = new Vector2D((x + 0.5) * cellWorldSize.x, (y + 0.5) * cellWorldSize.y);
                     humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, cellRoutes[i], population[i]);
                     totalHouseholds += humanEvacCells[i].macroHouseholds.Length;
@@ -423,10 +319,9 @@ namespace WUInity.Evac
                 }
             }
 
-            WUInity.SIM.LogMessage("Total households: " + totalHouseholds);
-            WUInity.SIM.LogMessage("Total cars: " +  totalCars);
-            WUInity.SIM.LogMessage("Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
-            WUInity.OUTPUT.evac.stayingPeople = totalPeopleWhoWillNotEvacuate;
+            WUInity.LogMessage("LOG: Total households: " + totalHouseholds);
+            WUInity.LogMessage("LOG: Total cars: " +  totalCars);
+            WUInity.LogMessage("LOG: Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>
@@ -437,14 +332,14 @@ namespace WUInity.Evac
         /// <returns></returns>
         public int GetPopulation(int x, int y)
         {
-            if (x < 0 || x > xSize - 1 || y < 0 || y > ySize - 1)
+            if (x < 0 || x > cellsX - 1 || y < 0 || y > cellsY - 1)
             {
                 //Debug.Log("Population density was polled outside of data coverage.");
                 return 0;
             }
             //x = Mathf.Clamp(x, 0, xSize - 1);
             //y = Mathf.Clamp(y, 0, ySize - 1);
-            return population[x + y * xSize];
+            return population[x + y * cellsX];
         }
 
         /// <summary>
@@ -455,61 +350,10 @@ namespace WUInity.Evac
         /// <returns></returns>
         public int GetPopulationUnitySpace(double x, double y)
         {
-            int xInt = (int)((x / realWorldSize.x) * xSize);
-            int yInt = (int)((y / realWorldSize.y) * ySize);
+            int xInt = (int)((x / realWorldSize.x) * cellsX);
+            int yInt = (int)((y / realWorldSize.y) * cellsY);
             return GetPopulation(xInt, yInt);
-        }
-
-        /// <summary>
-        /// Returns cell area in km^2
-        /// </summary>
-        /// <returns></returns>
-        private float GetCellArea()
-        {
-            return (float)(cellWorldSize.x * cellWorldSize.y / 1000000d); //people /square km
-        }
-
-        /// <summary>
-        /// Creates texture which shows cells that had people who were stuck and had to be relocated
-        /// </summary>
-        /// <returns></returns>
-        public Texture2D CreateStuckPopulationTexture()
-        {
-            //first find the correct texture size
-            int maxSide = Mathf.Max(xSize, ySize);
-            Vector2Int res = new Vector2Int(2, 2);
-
-            while (xSize > res.x)
-            {
-                res.x *= 2;
-            }
-            while (ySize > res.y)
-            {
-                res.y *= 2;
-            }
-
-            Texture2D popTex = new Texture2D(res.x, res.y);
-            popTex.filterMode = FilterMode.Point;
-            for (int y = 0; y < ySize; y++)
-            {
-                for (int x = 0; x < xSize; x++)
-                {
-                    Color color = Color.grey;
-                    if (population[x + y * xSize] == 0)
-                    {
-                        color = Color.blue;
-                    }
-                    else if (cellRoutes[x + y * xSize] == null)
-                    {
-                        color = Color.red;
-                    }
-                    color.a = 0.4f;
-                    popTex.SetPixel(x, y, color);
-                }
-            }
-            popTex.Apply();
-            return popTex;
-        }
+        }     
 
         /// <summary>
         /// Creates texture that shown cells where people have decided to stay forever.
@@ -519,11 +363,11 @@ namespace WUInity.Evac
         {
             Vector2Int res = new Vector2Int(2, 2);
 
-            while (xSize > res.x)
+            while (cellsX > res.x)
             {
                 res.x *= 2;
             }
-            while (ySize > res.y)
+            while (cellsY > res.y)
             {
                 res.y *= 2;
             }
@@ -531,16 +375,14 @@ namespace WUInity.Evac
             Texture2D popTex = new Texture2D(res.x, res.y);
             popTex.filterMode = FilterMode.Point;
 
-            WUInity.OUTPUT.evac.stayingPopulation = new int[xSize * ySize];
-
-            for (int y = 0; y < ySize; y++)
+            for (int y = 0; y < cellsY; y++)
             {
-                for (int x = 0; x < xSize; x++)
+                for (int x = 0; x < cellsX; x++)
                 {
                     int peopleStaying = 0;
-                    if (humanEvacCells[x + y * xSize] != null)
+                    if (humanEvacCells[x + y * cellsX] != null)
                     {
-                        MacroHousehold[] rH = humanEvacCells[x + y * xSize].macroHouseholds;
+                        MacroHousehold[] rH = humanEvacCells[x + y * cellsX].macroHouseholds;
                         for (int i = 0; i < rH.Length; i++)
                         {
                             if (rH[i].evacuationTime == float.MaxValue)
@@ -549,9 +391,8 @@ namespace WUInity.Evac
                             }
                         }
                     }
-                    Color color = GetStayColor(peopleStaying, population[x + y * xSize]);
+                    Color color = GetStayColor(peopleStaying, population[x + y * cellsX]);
                     popTex.SetPixel(x, y, color);
-                    WUInity.OUTPUT.evac.stayingPopulation[x + y * xSize] = peopleStaying;
                 }
             }
             popTex.Apply();
@@ -565,71 +406,7 @@ namespace WUInity.Evac
             {
                 color.a = 0f;
             }
-            /*if (peopleStaying == 0)
-            {
-                color = new Color(190f / 255f, 232f / 255f, 255f / 255f);
-            }
-            else if (peopleStaying <= 5)
-            {
-                color = new Color(1.0f, 241f / 255f, 208f / 255f);
-            }
-            else if (peopleStaying <= 10)
-            {
-                color = new Color(1.0f, 218f / 255f, 165f / 255f);
-            }
-            else if (peopleStaying <= 30.0f)
-            {
-                color = new Color(252f / 255f, 183f / 255f, 82f / 255f);
-            }
-            else if (peopleStaying <= 40)
-            {
-                color = new Color(1.0f, 137f / 255f, 63f / 255f);
-            }
-            else if (peopleStaying <= 50)
-            {
-                color = new Color(238f / 255f, 60f / 255f, 30f / 255f);
-            }
-            else
-            {
-                color = new Color(191f / 255f, 1f / 255f, 39f / 255f);
-            }*/
             return color;
-        }
-
-        /// <summary>
-        /// Returns texture with colors based on people density on the same scale as GPW.
-        /// </summary>
-        /// <returns></returns>
-        public Texture2D CreatePopulationTexture()
-        {
-            //first find the correct texture size
-            int maxSide = Mathf.Max(xSize, ySize);
-            Vector2Int res = new Vector2Int(2, 2);
-
-            while (xSize > res.x)
-            {
-                res.x *= 2;
-            }
-            while (ySize > res.y)
-            {
-                res.y *= 2;
-            }
-            Texture2D popTex = new Texture2D(res.x, res.y);
-            popTex.filterMode = FilterMode.Point;
-
-            float cellArea = GetCellArea();
-
-            for (int y = 0; y < ySize; y++)
-            {
-                for (int x = 0; x < xSize; x++)
-                {
-                    float pop = GetPopulation(x, y);
-                    Color color = PopulationManager.GetGPWColor(pop / cellArea);
-                    popTex.SetPixel(x, y, color);
-                }
-            }
-            popTex.Apply();
-            return popTex;
         }
     }
 }

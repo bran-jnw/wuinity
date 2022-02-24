@@ -95,7 +95,7 @@ namespace WUInity
             {
                 int xIndex = i % WUInity.SIM.GetFireMesh().GetCellCount().x;
                 int yIndex = i / WUInity.SIM.GetFireMesh().GetCellCount().x;
-                if(WUInity.INPUT.fire.wuiAreaIndices[i] == 1)
+                if(WUInity.INPUT.fire.wuiAreaIndices[i] == true)
                 {
                     ++count;
                 }
@@ -108,7 +108,7 @@ namespace WUInity
             {
                 int xIndex = i % WUInity.SIM.GetFireMesh().GetCellCount().x;
                 int yIndex = i / WUInity.SIM.GetFireMesh().GetCellCount().x;
-                if (WUInity.INPUT.fire.wuiAreaIndices[i] == 1)
+                if (WUInity.INPUT.fire.wuiAreaIndices[i] == true)
                 {
                     wuiArea[0, position] = xIndex;
                     wuiArea[1, position] = yIndex; //need to flip Y?

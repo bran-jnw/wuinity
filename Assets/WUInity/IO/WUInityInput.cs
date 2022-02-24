@@ -54,8 +54,6 @@ namespace WUInity
     [System.Serializable]
     public class EvacInput
     {
-        public bool overrideTotalPopulation = true;
-        public int totalPopulation = 500;
         public float routeCellSize = 200f;
 
         //public Vector2Int routeCellCount;
@@ -86,18 +84,19 @@ namespace WUInity
     [System.Serializable]
     public class ItineroInput
     {
-        public string osmFile = "";
-        public float osmBorderSize = 1000f;
+        
     }
 
     [System.Serializable]
     public class TrafficInput
     {
-        public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
+        public string osmFile = "";
+        public float osmBorderSize = 1000f;
 
+        public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
         public EvacuationGoal[] evacuationGoals = EvacuationGoal.GetRoxburoughGoals();
         public RouteChoice routeChoice = RouteChoice.Closest;
-        //public float jamModifier = 0.05f;
+                
         public float stallSpeed = 5f;
         public Vector2 backGroundDensityMinMax = Vector2.zero;
         public bool visibilityAffectsSpeed = false;
@@ -129,15 +128,21 @@ namespace WUInity
     public class FireInput
     {
         public string lcpFile;
-        public Fire.WUInityFireIgnition[] ignitionPoints = Fire.WUInityFireIgnition.GetDefault();
+        public Fire.IgnitionPoint[] ignitionPoints = Fire.IgnitionPoint.GetDefault();
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
         public Fire.WeatherInput weather = Fire.WeatherInput.GetTemplate();
         public Fire.WindInput wind = Fire.WindInput.GetTemplate();
         public Fire.InitialFuelMoistureData initialFuelMoisture = Fire.InitialFuelMoistureData.GetDefaults();
         public float windMultiplier = 1f;
-        [System.NonSerialized] public int[] wuiAreaIndices;
-        [System.NonSerialized] public int[] randomIgnitionIndices;
-        [System.NonSerialized] public int[] initialIgnitionIndices;
+
+        [System.NonSerialized] public bool[] wuiAreaIndices;
+        [System.NonSerialized] public bool[] randomIgnitionIndices;
+        [System.NonSerialized] public bool[] initialIgnitionIndices;
+        [System.NonSerialized] public bool[] triggerBufferIndices;
+
+        public bool useRandomIgnitionMap;
+        public int randomIgnitionPoints;
+        public bool useInitialIgnitionMap;
     }
 }
 

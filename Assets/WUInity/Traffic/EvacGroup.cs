@@ -112,19 +112,19 @@ namespace WUInity
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
                         WUInity.SIM.UpdateEvacGroups(eGsIndices);
-                        WUInity.SIM.LogMessage("LOG: Evac groups loaded from file, cells: " + ncols + ", " + nrows);
+                        WUInity.LogMessage("LOG: Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                     }
                     else
                     {
                         WUInity.SIM.UpdateEvacGroups(null);
-                        WUInity.SIM.LogMessage("WARNING: Evac groups file does not match current mesh, using default.");
+                        WUInity.LogMessage("WARNING: Evac groups file does not match current mesh, using default.");
                     }
                 }
             }
             catch (System.Exception e)
             {
                 WUInity.SIM.UpdateEvacGroups(null);
-                WUInity.SIM.LogMessage("WARNING: Evac groups file " + path + " not found, using default.");
+                WUInity.LogMessage("WARNING: Evac groups file " + path + " not found, using default.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }
             

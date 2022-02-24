@@ -18,7 +18,7 @@ namespace WUInity.GPW
         public bool[] populationMask;
 
         //not saved
-        public bool isLoaded;
+        public bool isLoaded, correctedForRoutes;
         public Texture2D populationTexture;
 
         public PopulationData()
@@ -35,6 +35,17 @@ namespace WUInity.GPW
             populationMask = new bool[cells.x * cells.y];
 
             isLoaded = false;
+            correctedForRoutes = false;
+        }
+
+        public int GetPeopleCount(int x, int y)
+        {
+            return cellPopulation[x + y * cells.x];
+        }
+
+        public Texture2D GetPopulationTexture()
+        {
+            return populationTexture;
         }
 
         public void CreatePopulationFromLocalGPW(LocalGPWData localGPW)
@@ -69,6 +80,7 @@ namespace WUInity.GPW
             SavePopulation();
 
             isLoaded = true;
+            correctedForRoutes = false;
         }
 
         /// <summary>
@@ -99,22 +111,53 @@ namespace WUInity.GPW
             }
 
             CreateTexture();
+            SavePopulation();
             isLoaded = true;
+            correctedForRoutes = false;
         }
 
-        public int GetPeopleCount(int x, int y)
+        public void UpdatePopulationBasedOnRoutes(RouteCollection[] cellRoutes)
         {
-            return cellPopulation[x + y * cells.x];
+            int stuckPeople = CollectStuckPeople(cellRoutes);
+            if (stuckPeople >= 0)
+            {
+                correctedForRoutes = true;
+            }
+            if (stuckPeople > 0)
+            {
+                RelocateStuckPeople(stuckPeople);
+                CreateTexture();
+                SavePopulation();
+            }
         }
 
-        public Texture2D GetPopulationTexture()
+        /// <summary>
+        /// Scales the actual poulation count from GPW down to desired amount of people
+        /// </summary>
+        /// <param name="desiredPopulation"></param>
+        /// <returns></returns>
+        public void ScaleTotalPopulation(int desiredPopulation)
         {
-            return populationTexture;
+            int newTotalPop = 0;
+            for (int i = 0; i < cellPopulation.Length; ++i)
+            {
+                if (cellPopulation[i] > 0)
+                {
+                    float weight = cellPopulation[i] / (float)totalPopulation;
+                    int newPop = Mathf.CeilToInt(weight * desiredPopulation);
+                    cellPopulation[i] = newPop;
+                    newTotalPop += newPop;
+                }
+            }
+            totalPopulation = newTotalPop;
+
+            CreateTexture();
+            SavePopulation();
         }
 
         private void SavePopulation()
         {
-            string[] data = new string[9];
+            string[] data = new string[10];
 
             data[0] = lowerLeftLatLong.x.ToString();
             data[1] = lowerLeftLatLong.y.ToString();
@@ -124,10 +167,11 @@ namespace WUInity.GPW
             data[5] = cells.y.ToString();
             data[6] = cellSize.ToString();
             data[7] = totalPopulation.ToString();
-            data[8] = "";
+            data[8] = (correctedForRoutes ? 1 : 0).ToString();
+            data[9] = "";
             for (int i = 0; i < cellPopulation.Length; i++)
             {
-                data[8] += cellPopulation[i] + " ";
+                data[9] += cellPopulation[i] + " ";
             }
 
             string path = WUInity.INPUT.population.populationFile;
@@ -150,7 +194,7 @@ namespace WUInity.GPW
             }
             else
             {
-                WUInity.SIM.LogMessage("LOG: Could not load population, file not found.");
+                WUInity.LogMessage("LOG: Could not load population, file not found.");
 
             }
 
@@ -162,7 +206,7 @@ namespace WUInity.GPW
             string[] d = File.ReadAllLines(path);
 
             bool success = true; // IsDataValid(d[0]);
-            if (success && d.Length > 8)
+            if (success && d.Length > 9)
             {
                 double.TryParse(d[0], out lowerLeftLatLong.x);
                 double.TryParse(d[1], out lowerLeftLatLong.y);
@@ -175,10 +219,12 @@ namespace WUInity.GPW
                 cells.y = temp;
                 float.TryParse(d[6], out cellSize);
                 cellArea = cellSize * cellSize / 1000000d; // people/square km
-                int.TryParse(d[7], out totalPopulation);                
+                int.TryParse(d[7], out totalPopulation);
+                int.TryParse(d[8], out temp);
+                correctedForRoutes = temp == 1 ? true : false;
                 cellPopulation = new int[cells.x * cells.y];
-                populationMask = new bool[cells.x * cells.y];
-                string[] dummy = d[8].Split(' ');
+                populationMask = new bool[cells.x * cells.y];                
+                string[] dummy = d[9].Split(' ');
                 for (int i = 0; i < cellPopulation.Length; ++i)
                 {
                     int.TryParse(dummy[i], out cellPopulation[i]);
@@ -197,14 +243,65 @@ namespace WUInity.GPW
             {
                 CreateTexture();
                 isLoaded = true;                
-                WUInity.SIM.LogMessage("LOG: Loaded population from file.");
+                WUInity.LogMessage("LOG: Loaded population from file.");
             }
             else
             {
-                WUInity.SIM.LogMessage("ERROR: Population data not valid for current map.");
+                WUInity.LogMessage("ERROR: Population data not valid for current map.");
             }
 
             return success;
+        }        
+
+        /// <summary>
+        /// Goes through all cells and check if they have a valid route to get away or not.
+        /// If not they are summed up for later re-distribution
+        /// </summary>
+        /// <returns></returns>
+        private int CollectStuckPeople(RouteCollection[] cellRoutes)
+        {
+            if(cellRoutes.Length != cellPopulation.Length)
+            {
+                WUInity.LogMessage("ERROR: Route collection and population does not have same size.");
+                return -1;
+            }
+
+            int stuckPeople = 0;
+            for (int i = 0; i < cellPopulation.Length; ++i)
+            {
+                if (cellPopulation[i] > 0 && cellRoutes[i] == null)
+                {
+                    //MonoBehaviour.print(population[i] + " persons are stuck. Index: " + i);
+                    stuckPeople += cellPopulation[i];
+                    //delete people in the current cell since we are relocating them
+                    cellPopulation[i] = 0;
+                }
+            }
+            return stuckPeople;
+        }
+
+        /// <summary>
+        /// Relocates stuck people (no route in cell), relocation based on ratio between people in cell / total people, so relative density is conserved
+        /// </summary>
+        /// <param name="stuckPeople"></param>
+        public void RelocateStuckPeople(int stuckPeople)
+        {
+            if (stuckPeople > 0)
+            {
+                int remainingPop = totalPopulation - stuckPeople;
+                int addedPop = 0;
+                for (int i = 0; i < cellPopulation.Length; ++i)
+                {
+                    if (cellPopulation[i] > 0)
+                    {
+                        float weight = cellPopulation[i] / (float)remainingPop;
+                        int extraPersonsToCell = Mathf.CeilToInt(weight * stuckPeople);
+                        cellPopulation[i] += extraPersonsToCell;
+                        addedPop += extraPersonsToCell;
+                    }
+                }
+                totalPopulation = remainingPop + addedPop;
+            }
         }
 
         private void CreateTexture()

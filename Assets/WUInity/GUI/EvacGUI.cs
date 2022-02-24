@@ -15,7 +15,6 @@ namespace WUInity
             if (evacInputDirty)
             {
                 evacInputDirty = false;
-                totalPop = eO.totalPopulation.ToString();
                 cellSize = eO.routeCellSize.ToString();
                 maxCars = eO.maxCars.ToString();
                 maxCarsProb = eO.maxCarsChance.ToString();
@@ -32,19 +31,6 @@ namespace WUInity
             int buttonIndex = 0;
 
             int buttonColumnStart = 140;
-
-            //
-            eO.overrideTotalPopulation = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), eO.overrideTotalPopulation, "Override population count");
-            ++buttonIndex;
-
-            //
-            if (eO.overrideTotalPopulation)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population [-]:");
-                ++buttonIndex;
-                totalPop = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), totalPop);
-                ++buttonIndex;
-            }
 
             //
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size [m]");
@@ -136,7 +122,7 @@ namespace WUInity
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
-                    WUInity.INSTANCE.StartPainter(WUInityPainter.PaintMode.EvacGroup);
+                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
                 }
                 ++buttonIndex;
             }
@@ -151,7 +137,6 @@ namespace WUInity
 
             EvacInput eO = WUInity.INPUT.evac;
 
-            int.TryParse(totalPop, out eO.totalPopulation);
             float.TryParse(cellSize, out eO.routeCellSize);
             int.TryParse(maxCars, out eO.maxCars);
             float.TryParse(maxCarsProb, out eO.maxCarsChance);

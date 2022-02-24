@@ -1,21 +1,21 @@
-using System.Collections;               //Namespace to enable various standard class types (arraylist, stack, Hashtable, etc) and Interfaces (IEnumerable etc.)
-using System.Collections.Generic;       //Similar as above but allows for more strongly typed collections (??)
-using UnityEngine;                      //Just unity
-using OsmSharp.Streams;                 //OpenStreetMap data stream?
-using WUInity.Evac;                     //Pedestrian evacuation Part
-using WUInity.Traffic;                  //Traffic evacuation part
-using WUInity.GPW;                      //Gridded Population of the World data
-using System;                           //general System Namespace
-using System.IO;                        //general IO Namespace
-using Mapbox.Utils;                     //Navigation and map data API and SDK
-using Mapbox.Unity.Utilities;           //Similar as above but ported in Unity?
+using System.Collections;               
+using System.Collections.Generic;       
+using UnityEngine;                     
+using OsmSharp.Streams;                 
+using WUInity.Evac;                     
+using WUInity.Traffic;                 
+using WUInity.GPW;                     
+using System;                           
+using System.IO;                        
+using Mapbox.Utils;                    
+using Mapbox.Unity.Utilities;          
 
 
 namespace WUInity
 {    
-    [RequireComponent(typeof(WUInityGUI))]                          //however this part is not in a class or method so idk what is going on here. 
-    public class WUInity : MonoBehaviour                            //Declare the WUINITY public class (meaning other namespaces and classes can instantiate it / use it) and have it inherit the methods & variables of the MonoBehaviour class (Unity's Base class)
-    {                           //
+    [RequireComponent(typeof(WUInityGUI))]                          
+    public class WUInity : MonoBehaviour                     
+    {                           
         public static WUInity INSTANCE
         {
             get
@@ -33,13 +33,25 @@ namespace WUInity
             }
         }
 
-        public static WUInitySim SIM
+        public static DataStatus DATA_STATUS
+        {
+            get
+            {
+                if (INSTANCE.internal_dataStatus == null)
+                {
+                    INSTANCE.internal_dataStatus = new DataStatus();
+                }
+                return INSTANCE.internal_dataStatus;
+            }
+        }
+
+        public static Simulation SIM
         {
             get
             {
                 if (INSTANCE.internal_sim == null)
                 {
-                    INSTANCE.internal_sim= new WUInitySim();
+                    INSTANCE.internal_sim= new Simulation();
                 }
                 return INSTANCE.internal_sim;
             }
@@ -128,7 +140,7 @@ namespace WUInity
             }
         }
 
-        public static WUInityPainter PAINTER
+        public static Painter PAINTER
         {
             get
             {
@@ -137,7 +149,7 @@ namespace WUInity
                     GameObject g = new GameObject();
                     g.transform.parent = INSTANCE.transform;
                     g.name = "WUI Painter";
-                    INSTANCE.internal_painter = g.AddComponent<WUInityPainter>();
+                    INSTANCE.internal_painter = g.AddComponent<Painter>();
                     g.SetActive(false);
                 }
                 return INSTANCE.internal_painter;
@@ -181,6 +193,66 @@ namespace WUInity
             }
         }
 
+        public class DataStatus
+        {
+            public bool haveInput;
+
+            public bool mapLoaded;
+
+            public bool populationLoaded;
+            public bool populationCorrectedForRoutes;
+            public bool globalGPWAvailable;
+            public bool localGPWLoaded;            
+
+            public bool routeCollectionLoaded;
+            public bool routerDbLoaded;
+
+            public bool osmFileValid;
+
+            public bool lcpExists;
+
+            public bool CanRunSimulation()
+            {
+                bool canRun = true;
+                if(!mapLoaded)
+                {
+                    canRun = false;
+                    LogMessage("ERROR: Map is not loaded.");
+                }
+
+                if(!populationLoaded)
+                {
+                    canRun = false;    
+                    LogMessage("ERROR: Population is not loaded.");
+                }
+
+                if(INPUT.runFireSim && !lcpExists)
+                {
+                    LogMessage("ERROR: No LCP file loaded but fire spread is activated.");
+                }
+
+                return canRun;
+            }
+
+
+            public void Reset()
+            {
+                //haveInput = false; //can never lose input after getting it once
+                mapLoaded = false;
+
+                populationLoaded = false;
+                populationCorrectedForRoutes = false;
+                globalGPWAvailable = false;
+                localGPWLoaded = false;
+
+                routeCollectionLoaded = false;
+                routerDbLoaded = false;
+                osmFileValid = false;
+
+                lcpExists = false;
+            }
+        }
+
         [Header("Options")]
         public bool developerMode = false;        
         
@@ -198,15 +270,14 @@ namespace WUInity
         //never directly call these, always use singletons (except once when setting input)
         private static WUInity internal_instance;
         private WUInityInput internal_input;
-        private WUInitySim internal_sim;
         private WUInityOutput internal_output;
+        private Simulation internal_sim;
         private Farsite.FarsiteViewer internal_farsiteViewer;
         private PopulationManager internal_gpwViewer;
         private WUInityGUI internal_wuiGUI;
-        private WUInityPainter internal_painter;
+        private Painter internal_painter;
         private Mapbox.Unity.Map.AbstractMap internal_mapboxMap;
 
-        public bool haveInput = false;
         string internal_workingFilePath;
         List<GameObject> drawnRoads;     
         public enum DataSampleMode { None, GPW, Population, Relocated, Staying, TrafficDens, Paint, Farsite}
@@ -216,22 +287,24 @@ namespace WUInity
         private GameObject fireDataPlane;
         GameObject directionsGO;
 
-        private struct CachedValidData
+        private DataStatus internal_dataStatus;
+
+        private struct ValidCriticalData
         {
             public Vector2D lowerLeftLatLong;
             public Vector2D size;
             public float routeCellSize;
             public float osmBorderSize;
 
-            public CachedValidData(WUInityInput input)
+            public ValidCriticalData(WUInityInput input)
             {
                 lowerLeftLatLong = input.lowerLeftLatLong;
                 size = input.size;
                 routeCellSize = input.evac.routeCellSize;
-                osmBorderSize = input.itinero.osmBorderSize;
+                osmBorderSize = input.traffic.osmBorderSize;
             }
         }
-        CachedValidData validInput;
+        ValidCriticalData validInput;
         string dataSampleString;
         public string GetDataSampleString()
         {
@@ -273,60 +346,54 @@ namespace WUInity
         /// Called when the user want to create a new file from scratch in the GUI.
         /// </summary>
         /// <param name="input"></param>
-        public void NewInputData()
+        public void CreateNewInputData()
         {
-            //SIM.ClearSimLog();
-            INSTANCE.haveInput = true;
-            this.internal_input = new WUInityInput();
-            UpdateValidData();
+            DATA_STATUS.Reset();
+            DATA_STATUS.haveInput = true;
+            internal_input = new WUInityInput();
+            validInput = new ValidCriticalData(internal_input);
 
-            LoadMapbox();
-            SpawnMarkers();
-            godCamera.SetCameraStartPosition(INPUT.size);
+            UpdateMapResourceStatus();
 
             EvacGroup.LoadEvacGroupIndices();
             GraphicalFireInput.LoadGraphicalFireInput();
         }
-
-        public bool routerDbLoaded = false;
+        
         /// <summary>
         /// Load an existing file and try to validate all of the associated data.
         /// If data is valid it is also loaded.
         /// </summary>
         /// <param name="input"></param>
-        public void LoadInputData(WUInityInput input)
+        public void SetNewInputData(WUInityInput input)
         {
-            //SIM.ClearSimLog();
-            INSTANCE.haveInput = true;
-            this.internal_input = input;
-            UpdateValidData();
+            DATA_STATUS.Reset();
+            DATA_STATUS.haveInput = true;
+            internal_input = input;
+            validInput = new ValidCriticalData(internal_input);
 
-            LoadMapbox();
+            UpdateMapResourceStatus();
+
+            //if they can't be found we get empty ones
+            EvacGroup.LoadEvacGroupIndices();
+            GraphicalFireInput.LoadGraphicalFireInput();
+
+            UpdateFireResourceStatus();
+            UpdatePopulationResourceStatus();
+            UpdateRoutingResourceStatus();
+            UpdateOSMResourceStatus();
+        }
+
+        public void UpdateMapResourceStatus()
+        {
+            DATA_STATUS.mapLoaded = LoadMapbox();
+            UpdateBorders();
             SpawnMarkers();
             godCamera.SetCameraStartPosition(INPUT.size);
 
-            EvacGroup.LoadEvacGroupIndices();
-            GraphicalFireInput.LoadGraphicalFireInput();
-            POPULATION.LoadPopulationFromFile();
-            POPULATION.LoadLocalGPWFromFile();
-            routerDbLoaded = SIM.LoadItineroDatabase();            
-        }
+            bool coordinatesAreDirty = true;
+            bool sizeIsDirty = true;
 
-        bool coordinatesAreDirty = true;
-        bool sizeIsDirty = true;
-        bool cellSizeIsDirty = true;
-        bool osmBorderIsDirty = true;
-        /// <summary>
-        /// Checks to see if loaded data is suitable after changes to input;
-        /// </summary>
-        public void CompareValidData()
-        {
-            coordinatesAreDirty = true;
-            sizeIsDirty = true;
-            cellSizeIsDirty = true;
-            osmBorderIsDirty = true;
-
-            if (validInput.lowerLeftLatLong.x == INPUT.lowerLeftLatLong.x 
+            if (validInput.lowerLeftLatLong.x == INPUT.lowerLeftLatLong.x
                 && validInput.lowerLeftLatLong.y == INPUT.lowerLeftLatLong.y)
             {
                 coordinatesAreDirty = false;
@@ -338,49 +405,115 @@ namespace WUInity
                 sizeIsDirty = false;
             }
 
-            if(validInput.routeCellSize == INPUT.evac.routeCellSize)
+            //fix any problems
+            if(coordinatesAreDirty || sizeIsDirty)
+            {
+                //basically mark all data as not valid anymore
+                DATA_STATUS.Reset();
+                DATA_STATUS.mapLoaded = true;
+            }
+
+            //set cached data to be current data
+            validInput.size = INPUT.size;
+            validInput.lowerLeftLatLong = INPUT.lowerLeftLatLong;
+        }
+
+        public void UpdateEvacResourceStatus()
+        {
+            bool cellSizeIsDirty = true;
+            bool osmBorderIsDirty = true;
+
+            if (validInput.routeCellSize == INPUT.evac.routeCellSize)
             {
                 cellSizeIsDirty = false;
             }
 
-            if (validInput.osmBorderSize == INPUT.itinero.osmBorderSize)
+            if (validInput.osmBorderSize == INPUT.traffic.osmBorderSize)
             {
                 osmBorderIsDirty = false;
             }
         }
 
-        public void UpdateValidData()
+        public void UpdatePopulationResourceStatus()
         {
-            validInput = new CachedValidData(INPUT);
+            DATA_STATUS.routeCollectionLoaded = SIM.LoadRouteCollections();
+            DATA_STATUS.populationLoaded = POPULATION.LoadPopulationFromFile();
+            DATA_STATUS.populationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
+            DATA_STATUS.localGPWLoaded = POPULATION.LoadLocalGPWFromFile();
+            DATA_STATUS.globalGPWAvailable = LocalGPWData.IsGPWAvailable();
         }
 
-        public bool IsMapDirty()
+        public void UpdateFireResourceStatus()
         {
-            bool isDirty = false;
-            if (coordinatesAreDirty || sizeIsDirty)
+            DATA_STATUS.lcpExists = Fire.LCPData.DoesLCPExist(INPUT.fire.lcpFile);
+        }
+
+        public void UpdateRoutingResourceStatus()
+        {
+            DATA_STATUS.routerDbLoaded = SIM.LoadItineroDatabase();
+        }   
+
+        public void UpdateOSMResourceStatus()
+        {
+            DATA_STATUS.osmFileValid = File.Exists(INPUT.traffic.osmFile);
+        }
+
+        private bool LoadMapbox()
+        {
+            //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
+            Mapbox.Unity.Map.MapOptions mOptions = MAP.Options; // new Mapbox.Unity.Map.MapOptions();
+            mOptions.locationOptions.latitudeLongitude = "" + INPUT.lowerLeftLatLong.x + "," + INPUT.lowerLeftLatLong.y;
+            mOptions.locationOptions.zoom = INPUT.zoomLevel;
+            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 1;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 1;
+            //https://wiki.openstreetmap.org/wiki/Zoom_levels
+            double tiles = Math.Pow(4.0, mOptions.locationOptions.zoom);
+            double degreesPerTile = 360.0 / (Math.Pow(2.0, mOptions.locationOptions.zoom));
+            Vector2D mapDegrees = LocalGPWData.SizeToDegrees(INPUT.lowerLeftLatLong, INPUT.size);
+            int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
+            int tilesY = (int)(mapDegrees.y / (degreesPerTile * Math.Cos((Math.PI / 180.0) * INPUT.lowerLeftLatLong.x))) + 1;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
+            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
+            mOptions.placementOptions.snapMapToZero = true;
+            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
+
+            if (!MAP.IsAccessTokenValid)
             {
-                isDirty = true;
+                LogMessage("ERROR: Mapbox token not valid.");
+                return false;
+            }
+            LogMessage("LOG: Starting to load Mapbox map.");
+            MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.lowerLeftLatLong.x, INPUT.lowerLeftLatLong.y), INPUT.zoomLevel);
+            LogMessage("LOG: Map loaded succesfully.");
+            return true;
+        }
+
+        private List<string> simLog = new List<string>();
+        /// <summary>
+        /// Receives all the information from a WUINITY session, used by GUI.
+        /// </summary>
+        /// <param name="message"></param>
+        public static void LogMessage(string message)
+        {
+            if (SIM.simRunning)
+            {
+                message = "[" + (int)SIM.time + "s] " + message;
             }
 
-            return isDirty;
-        }
-
-        public bool IsGPWDirty()
-        {
-            bool isDirty = false;
-            if (coordinatesAreDirty || sizeIsDirty)
+            INSTANCE.simLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
+            if (Application.isEditor || Debug.isDebugBuild)
             {
-                isDirty = true;
+                Debug.Log(message);
             }
-
-            return isDirty;
         }
 
-        public bool IsAnythingDirty()
+        public static List<string> GetLog()
         {
-            return true == IsMapDirty();
+            return INSTANCE.simLog;
         }
-        
+
         public void DrawRoad(RouteCollection routeCollection, int index)
         {
             if(directionsGO == null)
@@ -447,40 +580,8 @@ namespace WUInity
             FARSITE_VIEWER.ImportFarsite();
             FARSITE_VIEWER.TransformCoordinates();
 
-            SIM.LogMessage("LOG: Farsite loaded succesfully.");
-        }
-
-        public bool LoadMapbox()
-        {
-            //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
-            Mapbox.Unity.Map.MapOptions mOptions = MAP.Options; // new Mapbox.Unity.Map.MapOptions();
-            mOptions.locationOptions.latitudeLongitude = "" + INPUT.lowerLeftLatLong.x + "," + INPUT.lowerLeftLatLong.y;
-            mOptions.locationOptions.zoom = INPUT.zoomLevel;
-            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 1;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 1;
-            //https://wiki.openstreetmap.org/wiki/Zoom_levels
-            double tiles = Math.Pow(4.0, mOptions.locationOptions.zoom);
-            double degreesPerTile = 360.0 / (Math.Pow(2.0, mOptions.locationOptions.zoom));
-            Vector2D mapDegrees = LocalGPWData.SizeToDegrees(INPUT.lowerLeftLatLong, INPUT.size);
-            int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
-            int tilesY = (int)(mapDegrees.y / (degreesPerTile * Math.Cos((Math.PI / 180.0) * INPUT.lowerLeftLatLong.x))) + 1;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
-            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
-            mOptions.placementOptions.snapMapToZero = true;
-            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
-
-            if (!MAP.IsAccessTokenValid)
-            {
-                SIM.LogMessage("ERROR: Mapbox token not valid.");
-                return false;
-            }
-            SIM.LogMessage("LOG: Starting to load Mapbox map.");
-            MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.lowerLeftLatLong.x, INPUT.lowerLeftLatLong.y), INPUT.zoomLevel);
-            SIM.LogMessage("LOG: Map loaded succesfully.");
-            return true;
-        }
+            LogMessage("LOG: Farsite loaded succesfully.");
+        }               
 
         public void SetSampleMode(DataSampleMode sampleMode)
         {
@@ -507,9 +608,7 @@ namespace WUInity
                     int y = (int)(SIM.EvacCellCount.y * yNorm);
                     GetCellInfo(hitPoint, x, y);
                 }
-            }
-
-            UpdateBorders();
+            }           
 
             if(Input.GetKeyDown(KeyCode.Pause) && INPUT.runInRealTime)
             {
@@ -523,7 +622,7 @@ namespace WUInity
 
         void UpdateBorders()
         {
-            if(!INSTANCE.haveInput)
+            if(!internal_dataStatus.haveInput)
             {
                 return;
             }
@@ -543,10 +642,10 @@ namespace WUInity
 
             if (osmBorder != null)
             {
-                osmBorder.SetPosition(0, -Vector3.right * INPUT.itinero.osmBorderSize - Vector3.forward * INPUT.itinero.osmBorderSize + Vector3.up * 10f);
-                osmBorder.SetPosition(1, osmBorder.GetPosition(0) + Vector3.right * ((float)INPUT.size.x + INPUT.itinero.osmBorderSize * 2f));
-                osmBorder.SetPosition(2, osmBorder.GetPosition(1) + Vector3.forward * ((float)INPUT.size.y + INPUT.itinero.osmBorderSize * 2f));
-                osmBorder.SetPosition(3, osmBorder.GetPosition(2) - Vector3.right * ((float)INPUT.size.x + INPUT.itinero.osmBorderSize * 2f));
+                osmBorder.SetPosition(0, -Vector3.right * INPUT.traffic.osmBorderSize - Vector3.forward * INPUT.traffic.osmBorderSize + Vector3.up * 10f);
+                osmBorder.SetPosition(1, osmBorder.GetPosition(0) + Vector3.right * ((float)INPUT.size.x + INPUT.traffic.osmBorderSize * 2f));
+                osmBorder.SetPosition(2, osmBorder.GetPosition(1) + Vector3.forward * ((float)INPUT.size.y + INPUT.traffic.osmBorderSize * 2f));
+                osmBorder.SetPosition(3, osmBorder.GetPosition(2) - Vector3.right * ((float)INPUT.size.x + INPUT.traffic.osmBorderSize * 2f));
                 osmBorder.SetPosition(4, osmBorder.GetPosition(0));
             }
         }
@@ -620,7 +719,7 @@ namespace WUInity
             }          
         }        
 
-        public void SaveTexturesToDisk()
+        /*public void SaveTexturesToDisk()
         {
             // Encode texture into PNG
             byte[] bytes = OUTPUT.evac.rawPopTexture.EncodeToPNG();
@@ -631,7 +730,7 @@ namespace WUInity
             File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "relocatedPopulation.png"), bytes);
             bytes = OUTPUT.evac.popStayingTexture.EncodeToPNG();
             File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "stayingPopulation.png"), bytes);
-        }        
+        }*/        
 
         public bool IsPainterActive()
         {
@@ -643,33 +742,42 @@ namespace WUInity
             return true;
         }
 
-        public void StartPainter(WUInityPainter.PaintMode paintMode)
+        public void StartPainter(Painter.PaintMode paintMode)
         {
             PAINTER.gameObject.SetActive(true);
             PAINTER.SetPainterMode(paintMode);
             bool fireEdit = false;
-            if(paintMode == WUInityPainter.PaintMode.WUIArea)
+            if(paintMode == Painter.PaintMode.WUIArea)
             {
                 fireEdit = true;
                 DisplayWUIAreaMap();                
             }
-            else if (paintMode == WUInityPainter.PaintMode.RandomIgnitionArea)
+            else if (paintMode == Painter.PaintMode.RandomIgnitionArea)
             {
                 fireEdit = true;
                 DisplayRandomIgnitionAreaMap();
             }
-            else if (paintMode == WUInityPainter.PaintMode.InitialIgnition)
+            else if (paintMode == Painter.PaintMode.InitialIgnition)
             {
                 fireEdit = true;
                 DisplayInitialIgnitionMap();
             }
-            else if(paintMode == WUInityPainter.PaintMode.EvacGroup)
+            else if (paintMode == Painter.PaintMode.TriggerBuffer)
+            {
+                fireEdit = true;
+                DisplayTriggerBufferMap();
+            }
+            else if(paintMode == Painter.PaintMode.EvacGroup)
             {
                 DisplayEvacGroupMap();
             }
-            else if (paintMode == WUInityPainter.PaintMode.CustomPopulation)
+            else if (paintMode == Painter.PaintMode.CustomPopulation)
             {
                 DisplayCustomPopulationData();
+            }
+            else
+            {
+                LogMessage("ERROR: Paint mode not set correctly");
             }
             dataSampleMode = DataSampleMode.Paint;
 
@@ -761,6 +869,148 @@ namespace WUInity
                 MeshRenderer mR = goalMarkers[i].GetComponent<MeshRenderer>();
                 mR.material.color = eG.color;
             }            
+        }        
+
+        MeshRenderer evacDataPlaneMeshRenderer;
+        MeshRenderer fireDataPlaneMeshRenderer;
+        TrafficCellData[] currenttrafficDensityData;
+        int[] currentPeopleInCells;
+        public void DisplayClosestDensityData(float time)
+        {
+            if(INPUT.runTrafficSim)
+            {
+                int index = Mathf.Max(0, (int)time / (int)INPUT.traffic.saveInterval);
+                if (index > outputTextures.Count - 1)
+                {
+                    index = outputTextures.Count - 1;
+                }
+                Texture2D tex = outputTextures[index];
+
+                currenttrafficDensityData = trafficDensityData[index];
+                currentPeopleInCells = peopleInCells[index];
+
+                SetDataPlaneTexture(tex);
+            }            
+        }
+
+        public void DisplayPopulation()
+        {
+            SetDataPlaneTexture(POPULATION.GetPopulationTexture());
+        }
+
+        public void DisplayStayingPop()
+        {
+            SetDataPlaneTexture(OUTPUT.evac.popStayingTexture);
+        }
+
+        private void DisplayWUIAreaMap()
+        {
+            SetDataPlaneTexture(PAINTER.GetWUIAreaTexture(), true);
+        }
+
+        public void DisplayRandomIgnitionAreaMap()
+        {
+            SetDataPlaneTexture(PAINTER.GetRandomIgnitionTexture(), true);
+        }
+
+        public void DisplayInitialIgnitionMap()
+        {
+            SetDataPlaneTexture(PAINTER.GetInitialIgnitionTexture(), true);
+        }
+
+        public void DisplayTriggerBufferMap()
+        {
+            SetDataPlaneTexture(PAINTER.GetTriggerBufferTexture(), true);
+        }        
+
+        public void DisplayEvacGroupMap()
+        {
+            SetDataPlaneTexture(PAINTER.GetEvacGroupTexture());
+        }
+
+        public void DisplayCustomPopulationData()
+        {
+            SetDataPlaneTexture(PAINTER.GetCustomPopulationMaskTexture());
+        }
+
+        public  void SetEvacDataPlane(bool setActive)
+        {
+            if (evacDataPlaneMeshRenderer != null)
+            {
+                evacDataPlaneMeshRenderer.gameObject.SetActive(setActive);
+            }
+        }
+
+        public void SetFireDataPlane(bool setActive)
+        {
+            if (fireDataPlaneMeshRenderer != null)
+            {
+                fireDataPlaneMeshRenderer.gameObject.SetActive(setActive);
+            }
+        }
+
+        public bool ToggleEvacDataPlane()
+        {
+            if (evacDataPlaneMeshRenderer != null)
+            {
+                evacDataPlaneMeshRenderer.gameObject.SetActive(!evacDataPlaneMeshRenderer.gameObject.activeSelf);
+                return evacDataPlaneMeshRenderer.gameObject.activeSelf;
+            }
+
+            return false;
+        }
+
+        public bool ToggleFireDataPlane()
+        {
+            if (fireDataPlaneMeshRenderer != null)
+            {
+                fireDataPlaneMeshRenderer.gameObject.SetActive(!fireDataPlaneMeshRenderer.gameObject.activeSelf);
+                return fireDataPlaneMeshRenderer.gameObject.activeSelf;
+            }
+
+            return false;
+        }
+
+        private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
+        {
+            //pick needed data plane
+            MeshRenderer activeMeshRenderer = evacDataPlaneMeshRenderer;
+            Vector2Int cellCount = SIM.EvacCellCount;
+            string name = "Evac Data Plane";
+            if (fireMeshMode)
+            {
+                activeMeshRenderer = fireDataPlaneMeshRenderer;
+                cellCount = SIM.GetFireMesh().cellCount;
+                name = "Fire Data Plane";
+            }
+
+            //make sure it exists, else create
+            if (activeMeshRenderer == null)
+            {
+                activeMeshRenderer = CreateDataPlane(tex, name, cellCount);
+                if(fireMeshMode)
+                {
+                    fireDataPlaneMeshRenderer = activeMeshRenderer;
+                    fireDataPlane = activeMeshRenderer.gameObject;
+                }
+                else
+                {
+                    evacDataPlaneMeshRenderer = activeMeshRenderer;
+                    evacDataPlane = activeMeshRenderer.gameObject;
+                }                
+            }
+            else
+            {
+                activeMeshRenderer.material.mainTexture = tex;                
+            }
+        }
+
+        Color GetTrafficDensityColor(int cars)
+        {
+            float fraction = Mathf.Lerp(0f, 1f, cars / 20f);
+            Color c = Color.HSVToRGB(0.67f - 0.67f * fraction, 1.0f, 1.0f);
+
+            return c;
         }
 
         List<TrafficCellData[]> trafficDensityData;
@@ -861,153 +1111,5 @@ namespace WUInity
                 File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "trafficDens_" + (int)time + "s.png"), bytes);
             }
         }
-
-        MeshRenderer evacDataPlaneMeshRenderer;
-        MeshRenderer fireDataPlaneMeshRenderer;
-        TrafficCellData[] currenttrafficDensityData;
-        int[] currentPeopleInCells;
-        public void DisplayClosestDensityData(float time)
-        {
-            if(INPUT.runTrafficSim)
-            {
-                int index = Mathf.Max(0, (int)time / (int)INPUT.traffic.saveInterval);
-                if (index > outputTextures.Count - 1)
-                {
-                    index = outputTextures.Count - 1;
-                }
-                Texture2D tex = outputTextures[index];
-
-                currenttrafficDensityData = trafficDensityData[index];
-                currentPeopleInCells = peopleInCells[index];
-
-                SetDataPlaneTexture(tex);
-            }            
-        }
-
-        public void DisplayPopulation()
-        {
-            SetDataPlaneTexture(POPULATION.GetPopulationTexture());
-        }
-
-        public void DisplayStayingPop()
-        {
-            SetDataPlaneTexture(OUTPUT.evac.popStayingTexture);
-        }
-
-        public void DisplayRelocatedPop()
-        {
-            SetDataPlaneTexture(OUTPUT.evac.relocatedPopTexture);
-        }
-
-        public void DisplayStuckPop()
-        {
-            SetDataPlaneTexture(OUTPUT.evac.popStuckTexture);
-        }
-
-        private void DisplayWUIAreaMap()
-        {
-            SetDataPlaneTexture(PAINTER.GetWUIAreaTexture(), true);
-        }
-
-        public void DisplayRandomIgnitionAreaMap()
-        {
-            SetDataPlaneTexture(PAINTER.GetRandomIgnitionTexture(), true);
-        }
-
-        public void DisplayInitialIgnitionMap()
-        {
-            SetDataPlaneTexture(PAINTER.GetInitialIgnitionTexture(), true);
-        }
-
-        public void DisplayEvacGroupMap()
-        {
-            SetDataPlaneTexture(PAINTER.GetEvacGroupTexture());
-        }
-
-        public void DisplayCustomPopulationData()
-        {
-            SetDataPlaneTexture(PAINTER.GetCustomPopulationMaskTexture());
-        }
-
-        private void SetEvacDataPlane(bool setActive)
-        {
-            if (evacDataPlaneMeshRenderer != null)
-            {
-                evacDataPlaneMeshRenderer.gameObject.SetActive(setActive);
-            }
-        }
-
-        private void SetFireDataPlane(bool setActive)
-        {
-            if (fireDataPlaneMeshRenderer != null)
-            {
-                fireDataPlaneMeshRenderer.gameObject.SetActive(setActive);
-            }
-        }
-
-        public bool ToggleEvacDataPlane()
-        {
-            if (evacDataPlaneMeshRenderer != null)
-            {
-                evacDataPlaneMeshRenderer.gameObject.SetActive(!evacDataPlaneMeshRenderer.gameObject.activeSelf);
-                return evacDataPlaneMeshRenderer.gameObject.activeSelf;
-            }
-
-            return false;
-        }
-
-        public bool ToggleFireDataPlane()
-        {
-            if (fireDataPlaneMeshRenderer != null)
-            {
-                fireDataPlaneMeshRenderer.gameObject.SetActive(!fireDataPlaneMeshRenderer.gameObject.activeSelf);
-                return fireDataPlaneMeshRenderer.gameObject.activeSelf;
-            }
-
-            return false;
-        }
-
-        private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
-        {
-            //pick needed data plane
-            MeshRenderer activeMeshRenderer = evacDataPlaneMeshRenderer;
-            Vector2Int cellCount = SIM.EvacCellCount;
-            string name = "Evac Data Plane";
-            if (fireMeshMode)
-            {
-                activeMeshRenderer = fireDataPlaneMeshRenderer;
-                cellCount = SIM.GetFireMesh().cellCount;
-                name = "Fire Data Plane";
-            }
-
-            //make sure it exists, else create
-            if (activeMeshRenderer == null)
-            {
-                activeMeshRenderer = CreateDataPlane(tex, name, cellCount);
-                if(fireMeshMode)
-                {
-                    fireDataPlaneMeshRenderer = activeMeshRenderer;
-                    fireDataPlane = activeMeshRenderer.gameObject;
-                }
-                else
-                {
-                    evacDataPlaneMeshRenderer = activeMeshRenderer;
-                    evacDataPlane = activeMeshRenderer.gameObject;
-                }                
-            }
-            else
-            {
-                activeMeshRenderer.material.mainTexture = tex;                
-            }
-        }
-
-        Color GetTrafficDensityColor(int cars)
-        {
-            float fraction = Mathf.Lerp(0f, 1f, cars / 20f);
-            Color c = Color.HSVToRGB(0.67f - 0.67f * fraction, 1.0f, 1.0f);
-
-            return c;
-        }
     }
 }
-

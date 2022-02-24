@@ -5,21 +5,21 @@ using System;
 
 namespace WUInity.Fire
 {
-    [System.Serializable]                                           //Enable parallel processing
-    public class WUInityFireMesh                        
+    [System.Serializable]                                           
+    public class FireMesh                        
     {
         public Vector2Int cellCount;                                //cellCount 2D Vector
         public SpreadMode spreadMode;                               //Enumerable spreadMode (has five choices about which spread model is used)
-        public WUInityFireIgnition[] ignitionPoints;                //array of ignition points based on the WUInityFireIgnition Object
-        WUInityFireCell[] fireCells;                                //firecell array based on WUInityFireCell object
-        public Vector2D cellSize = new Vector2D(30.0, 30.0);        //start the cellSize vector as 30,30 (S-size,Y-size) in meters (Hardcoded as standard)
+        public IgnitionPoint[] ignitionPoints;                //array of ignition points based on the WUInityFireIgnition Object
+        FireCell[] fireCells;                                //firecell array based on WUInityFireCell object
+        public Vector2D cellSize;        //start the cellSize vector as 30,30 (S-size,Y-size) in meters (Hardcoded as standard)
         public Texture2D burnTexture;                               //Texture for burnt cells
         public WindData currentWindData;                            //Wind data object
         public double dt;                                           //time step
         double[] angleOffsets;                                      //declare array to save angle offsets for each cell center from horisontal(?)
-        public HashSet<WUInityFireCell> activeCells;                //active cells hash set
-        public HashSet<WUInityFireCell> cellsToKill;                //cells to be made burnt?
-        public HashSet<WUInityFireCell> cellsToIgnite;              //cells to be ignited?
+        public HashSet<FireCell> activeCells;                //active cells hash set
+        public HashSet<FireCell> cellsToKill;                //cells to be made burnt?
+        public HashSet<FireCell> cellsToIgnite;              //cells to be ignited?
         public Mesh terrainMesh;                                    //instantiate the terrain?
 
         public Vector2Int[] neighborIndices;                        //2D vector array with integers to hold on to the neighbors?
@@ -42,7 +42,7 @@ namespace WUInity.Fire
         private double timeSinceStart = 0.0;                        //keeps track of elapsed simulated time?
 
 
-        public WUInityFireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)         //CONSTRUCTOR if LCP data is to be parsed by file.
+        public FireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, IgnitionPoint[] ignitionPoints)         //CONSTRUCTOR if LCP data is to be parsed by file.
         {
             lcpData = new LCPData(lcpFilename);                 //import LCP data
             //create empry if we cannot read properly
@@ -63,7 +63,7 @@ namespace WUInity.Fire
             this.ignitionPoints = ignitionPoints;
         }
 
-        public WUInityFireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, WUInityFireIgnition[] ignitionPoints)        //CONSTRUCTOR if LCP data is to be parsed from memory
+        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, IgnitionPoint[] ignitionPoints)        //CONSTRUCTOR if LCP data is to be parsed from memory
         {
             this.lcpData = lcpData;
             cellCount = new Vector2Int(lcpData.Header.numeast, lcpData.Header.numnorth);
@@ -137,13 +137,13 @@ namespace WUInity.Fire
             sixteenDist = Math.Sqrt(5.0) * cellSize.x;
             sixteenDistSquared = sixteenDist * sixteenDist;
 
-            fireCells = new WUInityFireCell[cellCount.x * cellCount.y];         //declare WUInityFireCell objects, as many as the cells in the domain
+            fireCells = new FireCell[cellCount.x * cellCount.y];         //declare WUInityFireCell objects, as many as the cells in the domain
             for (int y = 0; y < cellCount.y; ++y)                                       //for all cells in domain
             {
                 for (int x = 0; x < cellCount.x; ++x)
                 {                    
                     LandScapeStruct l = lcpData.GetCellData(x, y);                      //get landscape data for this cell, save in a new struct
-                    fireCells[GetCellIndex(x, y)] = new WUInityFireCell(this, x, y, l); //instantiate objects with linearised indices.
+                    fireCells[GetCellIndex(x, y)] = new FireCell(this, x, y, l); //instantiate objects with linearised indices.
                 }
             }
             //calc distances based on elevation etc
@@ -155,10 +155,9 @@ namespace WUInity.Fire
                     fireCells[GetCellIndex(x, y)].InitCell();                           
                 }
             }
-            activeCells = new HashSet<WUInityFireCell>();                               //declare hashSets for sctive cells, cells to be killed, cells to be ignited
-            cellsToKill = new HashSet<WUInityFireCell>();
-            cellsToIgnite = new HashSet<WUInityFireCell>();
-            
+            activeCells = new HashSet<FireCell>();                               //declare hashSets for sctive cells, cells to be killed, cells to be ignited
+            cellsToKill = new HashSet<FireCell>();
+            cellsToIgnite = new HashSet<FireCell>();            
 
             burnTexture = new Texture2D(cellCount.x, cellCount.y);
             for (int y = 0; y < cellCount.y; y++)
@@ -175,12 +174,9 @@ namespace WUInity.Fire
                     //tex.SetPixel(x, y, Color.white * (float)fireCells[GetCellIndex(x, y)].GetElevation() / (256.0f * (float)cellSize));
                 }
             }
-            burnTexture.filterMode = FilterMode.Point;  
-            
-            if(WUInity.INSTANCE != null)                                                 //I dont really know
-            {
-                WUInity.INSTANCE.fireMaterial.mainTexture = burnTexture;
-            }
+            burnTexture.filterMode = FilterMode.Point;
+
+            WUInity.INSTANCE.fireMaterial.mainTexture = burnTexture;
 
             StartInitialIgnition();
 
@@ -197,7 +193,7 @@ namespace WUInity.Fire
             return fireCells[GetCellIndex(x, y)].GetElevation();
         }
 
-        public void AddCellToIgnite(WUInityFireCell f)              //add current cell to add list
+        public void AddCellToIgnite(FireCell f)              //add current cell to add list
         {
             if(!cellsToIgnite.Contains(f))
             {                
@@ -205,7 +201,7 @@ namespace WUInity.Fire
             }            
         }
 
-        public void RemoveDeadCell(WUInityFireCell f)               //add current cell to remove list
+        public void RemoveDeadCell(FireCell f)               //add current cell to remove list
         {
             cellsToKill.Add(f);            
         }
@@ -218,13 +214,13 @@ namespace WUInity.Fire
         bool initialized = false;
         public bool Simulate()
         {
-            if(!initialized)                                        //Initialise mesh (initialized off as standard)
+            if(!initialized)                                        
             {
                 InitializeMesh();
                 initialized = true;
             }
 
-            if (activeCells.Count == 0)                             //if the fire is not active anywhere, simulation stops
+            if (activeCells.Count == 0)                             
             {
                 return false;
             }            
@@ -232,7 +228,7 @@ namespace WUInity.Fire
             //collect max spread rate
             double maxSpreadRate = -1.0;
             double maxFireLineIntensity = -1.0;
-            foreach (WUInityFireCell f in activeCells)
+            foreach (FireCell f in activeCells)
             {
                 double sR = f.GetMaxSpreadRate();
                 if (sR > maxSpreadRate)
@@ -250,19 +246,19 @@ namespace WUInity.Fire
             dt = cellSize.x / maxSpreadRate;        
 
             //move fire fronts
-            foreach (WUInityFireCell f in activeCells)
+            foreach (FireCell f in activeCells)
             {
                 f.Burn();
             }
 
             //check if spread occurs, tags cells that gets ignited, "add" spill
-            foreach (WUInityFireCell f in activeCells)
+            foreach (FireCell f in activeCells)
             {
                 f.CheckFireSpread();
             }
                         
             //remove dead cells (that has nowhere to spread according to CheckFireSpread)
-            foreach (WUInityFireCell f in cellsToKill)
+            foreach (FireCell f in cellsToKill)
             {
                 activeCells.Remove(f);
                 Color fireLineIntensityColor = GetFireLineIntensityColor(f, maxFireLineIntensity);
@@ -271,7 +267,7 @@ namespace WUInity.Fire
             cellsToKill.Clear();
 
             //add the ones that were ignited to the active list
-            foreach (WUInityFireCell f in cellsToIgnite)
+            foreach (FireCell f in cellsToIgnite)
             {
                 f.Ignite(timeSinceStart);
                 activeCells.Add(f);
@@ -280,13 +276,13 @@ namespace WUInity.Fire
             cellsToIgnite.Clear();
 
             //second round of checking if dead since some neighbors might have changed status after kill & ignite loops
-            foreach (WUInityFireCell f in activeCells)
+            foreach (FireCell f in activeCells)
             {
                 f.CheckIfDead();
             }
 
             //remove dead cells (that has nowhere to spread)
-            foreach (WUInityFireCell f in cellsToKill)
+            foreach (FireCell f in cellsToKill)
             {
                 activeCells.Remove(f);
                 Color fireLineIntensityColor = GetFireLineIntensityColor(f, maxFireLineIntensity);
@@ -306,7 +302,7 @@ namespace WUInity.Fire
 
         void UpdateCellSpreadRates()
         {
-            foreach (WUInityFireCell f in activeCells)
+            foreach (FireCell f in activeCells)
             {
                 f.UpdateSpreadRates();
             }
@@ -321,7 +317,7 @@ namespace WUInity.Fire
                 {
                     int x = ignitionPoints[i].GetX();
                     int y = ignitionPoints[i].GetY();
-                    WUInityFireCell f = fireCells[GetCellIndex(x, y)];
+                    FireCell f = fireCells[GetCellIndex(x, y)];
                     f.Ignite(0.0);
                     activeCells.Add(f);
                     burnTexture.SetPixel(x, y, Color.red);
@@ -334,13 +330,13 @@ namespace WUInity.Fire
         int GetCellIndex(int x, int y)
         {
             //clamp
-            x = Mathf.Clamp(x, 0, cellCount.x - 1);                 //clamp: restrict value between min and max values (this way you can auto check if value is out of bounds)
+            x = Mathf.Clamp(x, 0, cellCount.x - 1);                 
             y = Mathf.Clamp(y, 0, cellCount.y - 1);
             
             return (x + y * cellCount.x);
         }
 
-        public bool IsInsideMesh(int x, int y)                      //Nick: removed intermediate bool
+        public bool IsInsideMesh(int x, int y)                      
         {
             if (x < 0 || x > cellCount.x - 1 || y < 0 || y > cellCount.y - 1)
             {
@@ -349,12 +345,17 @@ namespace WUInity.Fire
             return true;
         }
 
-        public WUInityFireCell GetFireCell(int x, int y)            //simple getter
+        public FireCell GetFireCell(int x, int y)            
         {
             return fireCells[GetCellIndex(x, y)];
         }
 
-        public FireCellState GetFireCellState(Vector2D latLong)     //get cell state based on latlong 
+        /// <summary>
+        /// Returns state of cell on mesh base don lat/long. Returns dead if outside of mesh.
+        /// </summary>
+        /// <param name="latLong"></param>
+        /// <returns></returns>
+        public FireCellState GetFireCellState(Vector2D latLong)     
         {
             Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
@@ -444,7 +445,7 @@ namespace WUInity.Fire
             mesh.RecalculateBounds();
         }
 
-        Color GetFireLineIntensityColor(WUInityFireCell cell, double maxIntensity)
+        Color GetFireLineIntensityColor(FireCell cell, double maxIntensity)
         {
             float f = (float)cell.GetFireLineIntensity(true);
             f = f / 6000f;//(float)maxIntensity;
@@ -472,7 +473,7 @@ namespace WUInity.Fire
                 {
                     //flip on y-axis
                     int yIndex = cellCount.y - 1 - j;
-                    WUInityFireCell f = fireCells[GetCellIndex(i, yIndex)];
+                    FireCell f = fireCells[GetCellIndex(i, yIndex)];
                     for (int k = 0; k < 8; k++)
                     {
                         ros[j + i * cellCount.y, k] = f.GetMaxSpreadrateInDirection(k);

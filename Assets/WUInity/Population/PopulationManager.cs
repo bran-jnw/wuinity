@@ -12,6 +12,7 @@ namespace WUInity.GPW
         private GameObject internal_localGPWDataPlane;
         private Material gpwDataPlaneMaterial;
 
+
         public PopulationManager()
         {
             localGPWData = new LocalGPWData();
@@ -23,9 +24,9 @@ namespace WUInity.GPW
             return populationData.isLoaded;
         }
 
-        public bool IsLocalGPWLoaded()
+        public bool IsPopulationCorrectedForRoutes()
         {
-            return localGPWData.isLoaded;
+            return populationData.correctedForRoutes;
         }
 
         public PopulationData GetPopulationData()
@@ -37,6 +38,31 @@ namespace WUInity.GPW
         {
             return localGPWData;
         }
+
+        public bool[] GetPopulationMask()
+        {
+            return populationData.populationMask;
+        }
+
+        public void PlaceUniformPopulation(int newTotalPopulation)
+        {
+            populationData.PlaceUniformPopulation(newTotalPopulation);
+        }
+
+        public bool IsLocalGPWLoaded()
+        {
+            return localGPWData.isLoaded;
+        }
+
+        /*public PopulationData GetPopulationData()
+        {
+            return populationData;
+        }*/
+
+        /*public LocalGPWData GetLocalGPWData()
+        {
+            return localGPWData;
+        }*/
 
         public Texture2D GetPopulationTexture()
         {
@@ -84,6 +110,16 @@ namespace WUInity.GPW
         public bool CreateLocalGPW()
         {
             return localGPWData.CreateLocalGPWData();
+        }
+
+        public void UpdatePopulationBasedOnRoutes(RouteCollection[] cellRoutes)
+        {
+            populationData.UpdatePopulationBasedOnRoutes(cellRoutes);
+        }
+
+        public void ScaleTotalPopulation(int newTotal)
+        {
+            populationData.ScaleTotalPopulation(newTotal);
         }
 
         public GameObject DATA_PLANE
