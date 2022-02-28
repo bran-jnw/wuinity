@@ -7,14 +7,14 @@ namespace WUInity
     public partial class WUInityGUI
     {
         string totalPop, cellSize, maxCars, maxCarsProb, minHousehold, maxHousehold, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
-        bool evacInputDirty = true;        
+        bool evacMenuDirty = true;        
 
         void EvacMenu()
         {
             EvacInput eO = WUInity.INPUT.evac;
-            if (evacInputDirty)
+            if (evacMenuDirty)
             {
-                evacInputDirty = false;
+                evacMenuDirty = false;
                 cellSize = eO.routeCellSize.ToString();
                 maxCars = eO.maxCars.ToString();
                 maxCarsProb = eO.maxCarsChance.ToString();
@@ -130,7 +130,7 @@ namespace WUInity
 
         void ParseEvacInput()
         {
-            if (evacInputDirty)
+            if (evacMenuDirty)
             {
                 return;
             }

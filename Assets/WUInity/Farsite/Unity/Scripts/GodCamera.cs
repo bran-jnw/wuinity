@@ -48,24 +48,23 @@ namespace WUInity
                 }
                 SetCameraStartPosition(WUInity.INPUT.size);
             }
+
             if (cMode == CameraMode.twoD)
             {
                 float d = Input.mouseScrollDelta.y;
-                if (d != 0.0f)
+                if (d != 0.0f || transform.position.y < 10f)
                 {
                     float mod = transform.position.y * 0.1f;
                     mod = Mathf.Max(1.0f, mod);
                     transform.position -= Vector3.up * Time.deltaTime * zoomSpeed * d * mod;
-                    if (transform.position.y < 1.0f)
+                    if (transform.position.y < 10.0f)
                     {
-                        transform.position = new Vector3(transform.position.x, 1.0f, transform.position.z);
+                        transform.position = new Vector3(transform.position.x, 10.0f, transform.position.z);
                     }
                     //rescale clip planes
                     c.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * c.fieldOfView * 0.5f) + 1.0f;
                     c.nearClipPlane = c.farClipPlane * 0.8f;
                 }
-
-                //add: limit to zoom when we have ground/terrain
 
                 if (Input.GetButtonDown("Fire3"))
                 {

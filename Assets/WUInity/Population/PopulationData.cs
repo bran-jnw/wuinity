@@ -25,7 +25,7 @@ namespace WUInity.GPW
         {
             lowerLeftLatLong = WUInity.INPUT.lowerLeftLatLong;
             size = WUInity.INPUT.size;
-            cells = WUInity.SIM.EvacCellCount;
+            cells = WUInity.SIM_DATA.EvacCellCount;
             cellSize = WUInity.INPUT.evac.routeCellSize;
 
             cellArea = cellSize * cellSize / (1000000d); // people/square km
@@ -52,7 +52,7 @@ namespace WUInity.GPW
         {
             lowerLeftLatLong = WUInity.INPUT.lowerLeftLatLong;
             size = WUInity.INPUT.size;
-            cells = WUInity.SIM.EvacCellCount;
+            cells = WUInity.SIM_DATA.EvacCellCount;
             cellSize = WUInity.INPUT.evac.routeCellSize;
 
             cellPopulation = new int[cells.x * cells.y];
@@ -194,7 +194,7 @@ namespace WUInity.GPW
             }
             else
             {
-                WUInity.LogMessage("LOG: Could not load population, file not found.");
+                WUInity.WUI_LOG("LOG: Could not load population, file not found.");
 
             }
 
@@ -243,11 +243,11 @@ namespace WUInity.GPW
             {
                 CreateTexture();
                 isLoaded = true;                
-                WUInity.LogMessage("LOG: Loaded population from file.");
+                WUInity.WUI_LOG("LOG: Loaded population from file.");
             }
             else
             {
-                WUInity.LogMessage("ERROR: Population data not valid for current map.");
+                WUInity.WUI_LOG("ERROR: Population data not valid for current map.");
             }
 
             return success;
@@ -262,7 +262,7 @@ namespace WUInity.GPW
         {
             if(cellRoutes.Length != cellPopulation.Length)
             {
-                WUInity.LogMessage("ERROR: Route collection and population does not have same size.");
+                WUInity.WUI_LOG("ERROR: Route collection and population does not have same size.");
                 return -1;
             }
 

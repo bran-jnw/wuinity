@@ -17,10 +17,10 @@ namespace WUInity
                 {
                     bw.Write(WUInity.SIM.GetFireMesh().cellCount.x);
                     bw.Write(WUInity.SIM.GetFireMesh().cellCount.y);
-                    bw.Write(GetBytes(WUInity.INPUT.fire.wuiAreaIndices));
-                    bw.Write(GetBytes(WUInity.INPUT.fire.randomIgnitionIndices));
-                    bw.Write(GetBytes(WUInity.INPUT.fire.initialIgnitionIndices));
-                    bw.Write(GetBytes(WUInity.INPUT.fire.triggerBufferIndices));
+                    bw.Write(GetBytes(WUInity.SIM_DATA.wuiAreaIndices));
+                    bw.Write(GetBytes(WUInity.SIM_DATA.randomIgnitionIndices));
+                    bw.Write(GetBytes(WUInity.SIM_DATA.initialIgnitionIndices));
+                    bw.Write(GetBytes(WUInity.SIM_DATA.triggerBufferIndices));
                 }
             }
         }
@@ -68,15 +68,15 @@ namespace WUInity
                             b = br.ReadBytes(dataSize * sizeof(bool));
                             bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                            WUInity.SIM.UpdateWUIArea(wuiAreaIndices);
-                            WUInity.SIM.UpdateRandomIgnitionIndices(randomIgnitionArea);
-                            WUInity.SIM.UpdateInitialIgnitionIndices(initialIgnitionIndices);
-                            WUInity.SIM.UpdateTriggerBufferIndices(triggerBufferIndices);
+                            WUInity.SIM_DATA.UpdateWUIArea(wuiAreaIndices);
+                            WUInity.SIM_DATA.UpdateRandomIgnitionIndices(randomIgnitionArea);
+                            WUInity.SIM_DATA.UpdateInitialIgnitionIndices(initialIgnitionIndices);
+                            WUInity.SIM_DATA.UpdateTriggerBufferIndices(triggerBufferIndices);
                         }
                         else
                         {
                             CreateDefaultInputs();
-                            WUInity.LogMessage("WARNING: Graphical fire input file does not match current mesh, using default.");
+                            WUInity.WUI_LOG("WARNING: Graphical fire input file does not match current mesh, using default.");
                         }
                     }
                 }
@@ -84,16 +84,16 @@ namespace WUInity
             else
             {
                 CreateDefaultInputs();
-                WUInity.LogMessage("WARNING: could not read GFI data, creating empty default.");
+                WUInity.WUI_LOG("WARNING: could not read GFI data, creating empty default.");
             }
         }
 
         private static void CreateDefaultInputs()
         {
-            WUInity.SIM.UpdateWUIArea(null);
-            WUInity.SIM.UpdateRandomIgnitionIndices(null);
-            WUInity.SIM.UpdateInitialIgnitionIndices(null);
-            WUInity.SIM.UpdateTriggerBufferIndices(null);
+            WUInity.SIM_DATA.UpdateWUIArea(null);
+            WUInity.SIM_DATA.UpdateRandomIgnitionIndices(null);
+            WUInity.SIM_DATA.UpdateInitialIgnitionIndices(null);
+            WUInity.SIM_DATA.UpdateTriggerBufferIndices(null);
             SaveGraphicalFireInput();
         }
     }

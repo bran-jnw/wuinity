@@ -186,7 +186,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.LogMessage("ERROR: Desired paint mode not yet implemented.");
+                WUInity.WUI_LOG("ERROR: Desired paint mode not yet implemented.");
             }
         }
 
@@ -256,7 +256,7 @@ namespace WUInity
                 else
                 {
                     //WUInity.SIM.UpdateNeededData();
-                    evacDataCellCount = WUInity.SIM.EvacCellCount;
+                    evacDataCellCount = WUInity.SIM_DATA.EvacCellCount;
                     cellCount = evacDataCellCount;
                     evacDataRealSize = WUInity.INPUT.size;
                 }
@@ -280,23 +280,23 @@ namespace WUInity
                         Color c = Color.white;
                         if (paintMode == PaintMode.WUIArea)
                         {
-                            c = WUInity.INPUT.fire.wuiAreaIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUInity.SIM_DATA.wuiAreaIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.RandomIgnitionArea)
                         {
-                            c = WUInity.INPUT.fire.randomIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUInity.SIM_DATA.randomIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.InitialIgnition)
                         {
-                            c = WUInity.INPUT.fire.initialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUInity.SIM_DATA.initialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.TriggerBuffer)
                         {
-                            c = WUInity.INPUT.fire.triggerBufferIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUInity.SIM_DATA.triggerBufferIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
-                            c = WUInity.SIM.GetEvacGroup(x, y).color;
+                            c = WUInity.SIM_DATA.GetEvacGroup(x, y).color;
                         }
                         else if (paintMode == PaintMode.CustomPopulation)
                         {
@@ -456,23 +456,23 @@ namespace WUInity
 
             if(paintMode == PaintMode.EvacGroup)
             {
-                WUInity.SIM.evacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
+                WUInity.SIM_DATA.evacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
             }
             else if(paintMode == PaintMode.WUIArea)
             {
-                WUInity.INPUT.fire.wuiAreaIndices[x + y * activeCellCount.x] = addingArea;
+                WUInity.SIM_DATA.wuiAreaIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.RandomIgnitionArea)
             {
-                WUInity.INPUT.fire.randomIgnitionIndices[x + y * activeCellCount.x] = addingArea;
+                WUInity.SIM_DATA.randomIgnitionIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.InitialIgnition)
             {
-                WUInity.INPUT.fire.initialIgnitionIndices[x + y * activeCellCount.x] = addingArea;
+                WUInity.SIM_DATA.initialIgnitionIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.TriggerBuffer)
             {
-                WUInity.INPUT.fire.triggerBufferIndices[x + y * activeCellCount.x] = addingArea;
+                WUInity.SIM_DATA.triggerBufferIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.CustomPopulation)
             {

@@ -217,8 +217,8 @@ namespace WUInity.Evac
         /// </summary>
         public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
-            cellsX = WUInity.SIM.EvacCellCount.x;
-            cellsY = WUInity.SIM.EvacCellCount.x;
+            cellsX = WUInity.SIM_DATA.EvacCellCount.x;
+            cellsY = WUInity.SIM_DATA.EvacCellCount.x;
             this.realWorldSize = WUInity.INPUT.size;
             population = new int[cellsX * cellsY];
 
@@ -319,9 +319,9 @@ namespace WUInity.Evac
                 }
             }
 
-            WUInity.LogMessage("LOG: Total households: " + totalHouseholds);
-            WUInity.LogMessage("LOG: Total cars: " +  totalCars);
-            WUInity.LogMessage("LOG: Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            WUInity.WUI_LOG("LOG: Total households: " + totalHouseholds);
+            WUInity.WUI_LOG("LOG: Total cars: " +  totalCars);
+            WUInity.WUI_LOG("LOG: Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>

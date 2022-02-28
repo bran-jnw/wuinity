@@ -81,24 +81,24 @@ namespace WUInity
                 if (maxCars > 0 && cars.Count >= maxCars && !blocked)
                 {
                     blocked = true;
-                    WUInity.LogMessage("Evacuation goal " + name + " has reached cars capacity, re-routing");
+                    WUInity.WUI_LOG("Evacuation goal " + name + " has reached cars capacity, re-routing");
                     WUInity.SIM.GoalBlocked();
                 }
                 else if (maxCars > 0 && cars.Count > maxCars)
                 {
-                    WUInity.LogMessage("Additional car arrived at " + name + ", arrived during same time step.");
+                    WUInity.WUI_LOG("Additional car arrived at " + name + ", arrived during same time step.");
                 }
 
                 //track and respond people
                 if (maxPeople > -1 && currentPeople >= maxPeople && !blocked)
                 {
                     blocked = true;
-                    WUInity.LogMessage("Evacuation goal " + name + " has reached people capacity, re-routing");
+                    WUInity.WUI_LOG("Evacuation goal " + name + " has reached people capacity, re-routing");
                     WUInity.SIM.GoalBlocked();
                 }
                 else if (maxPeople > -1 && currentPeople > maxPeople)
                 {
-                    WUInity.LogMessage("Additional people arrived at " + name + ", arrived during same time step.");
+                    WUInity.WUI_LOG("Additional people arrived at " + name + ", arrived during same time step.");
                 }
             }
         }

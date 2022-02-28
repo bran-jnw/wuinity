@@ -60,7 +60,7 @@ namespace WUInity
                 cellCount = WUInity.SIM.GetFireMesh().GetCellCount();
                 cellSize = WUInity.SIM.GetFireMesh().GetCellSize();
                 compoundBoundary = new int[cellCount.x, cellCount.y];
-                WUIarea = WUInity.SIM.GetWUIarea();
+                WUIarea = GetWUIArea();
                 heatmapMax = 0;
             }
             //get wuiarea from a user defined map painted in wuinity
@@ -91,11 +91,11 @@ namespace WUInity
         {
             //first count how many cells we have to add to array
             int count = 0;
-            for (int i = 0; i < WUInity.INPUT.fire.wuiAreaIndices.Length; i++)
+            for (int i = 0; i < WUInity.SIM_DATA.wuiAreaIndices.Length; i++)
             {
                 int xIndex = i % WUInity.SIM.GetFireMesh().GetCellCount().x;
                 int yIndex = i / WUInity.SIM.GetFireMesh().GetCellCount().x;
-                if(WUInity.INPUT.fire.wuiAreaIndices[i] == true)
+                if(WUInity.SIM_DATA.wuiAreaIndices[i] == true)
                 {
                     ++count;
                 }
@@ -108,7 +108,7 @@ namespace WUInity
             {
                 int xIndex = i % WUInity.SIM.GetFireMesh().GetCellCount().x;
                 int yIndex = i / WUInity.SIM.GetFireMesh().GetCellCount().x;
-                if (WUInity.INPUT.fire.wuiAreaIndices[i] == true)
+                if (WUInity.SIM_DATA.wuiAreaIndices[i] == true)
                 {
                     wuiArea[0, position] = xIndex;
                     wuiArea[1, position] = yIndex; //need to flip Y?

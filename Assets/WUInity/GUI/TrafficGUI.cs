@@ -7,13 +7,13 @@ namespace WUInity
     public partial class WUInityGUI
     {
         string opticalDensity, stallSpeed, borderSize;
-        bool trafficInputDirty = true;
+        bool trafficMenuDirty = true;
         void TrafficMenu()
         {
             TrafficInput tO = WUInity.INPUT.traffic;
-            if (trafficInputDirty)
+            if (trafficMenuDirty)
             {
-                trafficInputDirty = false;
+                trafficMenuDirty = false;
                 stallSpeed = tO.stallSpeed.ToString();
                 opticalDensity = tO.opticalDensity.ToString();
                 borderSize = tO.osmBorderSize.ToString();
@@ -22,11 +22,11 @@ namespace WUInity
             int buttonIndex = 0;
 
             //router db
-            string routerStatus = "STATUS: RouterDb NOT loaded";
+            string routerStatus = "RouterDb NOT loaded";
             string loadRouterText = "Load router database";
             if (WUInity.DATA_STATUS.routerDbLoaded)
             {
-                routerStatus = "STATUS: RouterDb loaded";
+                routerStatus = "RouterDb loaded";
                 loadRouterText = "Re-load router database";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routerStatus);
@@ -35,17 +35,17 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouterText))
             {
                 ParseTrafficInput();
-                WUInity.SIM.LoadItineroDatabase();
+                WUInity.SIM_DATA.LoadRouterDatabase();
             }
             ++buttonIndex;
 
             //route collection
             ++buttonIndex;
-            string routeCollectionStatus = "STATUS: Pre-calc routes NOT loaded";
+            string routeCollectionStatus = "Pre-calc routes NOT loaded";
             string loadRouteCollectionsText = "Load pre-calc routes";
             if (WUInity.DATA_STATUS.routeCollectionLoaded)
             {                
-                routeCollectionStatus = "STATUS: Pre-calc routes loaded";
+                routeCollectionStatus = "Pre-calc routes loaded";
                 loadRouteCollectionsText = "Re-load pre-calc routes";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeCollectionStatus);
@@ -54,16 +54,16 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouteCollectionsText))
             {
                 ParseTrafficInput();
-                WUInity.SIM.LoadItineroDatabase();
+                WUInity.SIM_DATA.LoadRouterDatabase();
             }
             ++buttonIndex;
 
             //OSM
             ++buttonIndex;
-            string osmStatus = "STATUS: OSM file NOT valid";
+            string osmStatus = "OSM file NOT valid";
             if (WUInity.DATA_STATUS.osmFileValid)
             {
-                osmStatus = "STATUS: OSM file valid";
+                osmStatus = "OSM file valid";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), osmStatus);
             ++buttonIndex;
@@ -125,7 +125,7 @@ namespace WUInity
 
         void ParseTrafficInput()
         {
-            if (trafficInputDirty)
+            if (trafficMenuDirty)
             {
                 return;
             }

@@ -416,7 +416,7 @@ namespace WUInity.Traffic
             TrafficInput trafficOptions = WUInity.INPUT.traffic;
             WUInityInput wuinityOptions = WUInity.INPUT;
 
-            WUInity.SIM.LoadItineroDatabase();
+            WUInity.SIM_DATA.LoadRouterDatabase();
 
             RouteCreator routeCreator = new RouteCreator();
             routeCreator.SetValidGoals();
@@ -431,7 +431,7 @@ namespace WUInity.Traffic
                 }
             }            
 
-            Router router = new Router(WUInity.SIM.GetRouterDb());
+            Router router = new Router(WUInity.SIM_DATA.GetRouterDb());
             Itinero.Profiles.Profile p;
             if (trafficOptions.routeChoice == TrafficInput.RouteChoice.Closest)
             {
@@ -491,7 +491,7 @@ namespace WUInity.Traffic
 
                 if(allGoalsBlocked)
                 {
-                    WUInity.LogMessage("All goals blocked, aborting verification simulation " + wuinityOptions.simName);
+                    WUInity.WUI_LOG("All goals blocked, aborting verification simulation " + wuinityOptions.simName);
                     break;
                 }
             }

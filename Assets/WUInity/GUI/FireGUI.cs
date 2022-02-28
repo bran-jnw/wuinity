@@ -6,6 +6,7 @@ namespace WUInity
 {
     public partial class WUInityGUI
     {
+        string fireEditMode;
         void FireMenu()
         {
             FireInput fI = WUInity.INPUT.fire;
@@ -13,10 +14,10 @@ namespace WUInity
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            string lcpExistsStatus = "Status: LCP file NOT found"; 
-            if(WUInity.DATA_STATUS.lcpExists)
+            string lcpExistsStatus = "LCP file NOT found"; 
+            if(WUInity.DATA_STATUS.lcpLoaded)
             {
-                lcpExistsStatus = "Status: LCP file found";
+                lcpExistsStatus = "LCP file found";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), lcpExistsStatus);
             ++buttonIndex;
@@ -27,12 +28,22 @@ namespace WUInity
                 OpenLoadLCP();
             }
             ++buttonIndex;
+            ++buttonIndex;
 
+            //edit maps
             if (!WUInity.INSTANCE.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit WUI area"))
                 {
+                    fireEditMode = "WUI area";
                     WUInity.INSTANCE.StartPainter(Painter.PaintMode.WUIArea);
+                }
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit trigger buffer"))
+                {
+                    fireEditMode = "Trigger buffer";
+                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.TriggerBuffer);
                 }
                 ++buttonIndex;
 
@@ -40,8 +51,10 @@ namespace WUInity
                 ++buttonIndex;
                 if (WUInity.INPUT.fire.useRandomIgnitionMap)
                 {
+                    WUInity.INPUT.fire.useInitialIgnitionMap = false;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit random ignition area"))
                     {
+                        fireEditMode = "Random ignition";
                         WUInity.INSTANCE.StartPainter(Painter.PaintMode.RandomIgnitionArea);
                     }
                     ++buttonIndex;
@@ -51,26 +64,26 @@ namespace WUInity
                 ++buttonIndex;
                 if(WUInity.INPUT.fire.useInitialIgnitionMap)
                 {
+                    WUInity.INPUT.fire.useRandomIgnitionMap = false;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit initial ignition"))
                     {
+                        fireEditMode = "Initial ignition";
                         WUInity.INSTANCE.StartPainter(Painter.PaintMode.InitialIgnition);
                     }
                     ++buttonIndex;
-                }                
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit trigger buffer"))
-                {
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.TriggerBuffer);
-                }
-                ++buttonIndex;
+                }      
             }
             else
-            {                
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), fireEditMode);
+                ++buttonIndex;
+
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cells"))
                 {
                     WUInity.PAINTER.SetWUIAreaColor(true);
                 }
                 ++buttonIndex;
+
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove cells"))
                 {
                     WUInity.PAINTER.SetWUIAreaColor(false);
@@ -82,9 +95,10 @@ namespace WUInity
                     WUInity.INSTANCE.StopPainter();
                     GraphicalFireInput.SaveGraphicalFireInput();
                 }
-                ++buttonIndex;
+                ++buttonIndex;                
             }
 
+            ++buttonIndex;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Farsite import"))
             {
                 menuChoice = ActiveMenu.Farsite;

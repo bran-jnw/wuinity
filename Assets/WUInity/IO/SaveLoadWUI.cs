@@ -17,7 +17,7 @@ namespace WUInity
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
-            WUInity.LogMessage("LOG: Input file " + WUInity.WORKING_FILE + " saved.");
+            WUInity.WUI_LOG("LOG: Input file " + WUInity.WORKING_FILE + " saved.");
         }
 
         public static void LoadInput(string path)
@@ -28,11 +28,11 @@ namespace WUInity
                 WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
                 WUInity.WORKING_FILE = path;
                 WUInity.INSTANCE.SetNewInputData(wui);
-                WUInity.LogMessage("LOG: Input file " + WUInity.WORKING_FILE + " loaded.");
+                WUInity.WUI_LOG("LOG: Input file " + WUInity.WORKING_FILE + " loaded.");
             }
             else
             {
-                WUInity.LogMessage("ERROR: Input file not found.");
+                WUInity.WUI_LOG("ERROR: Input file not found.");
             }
         }
 
@@ -51,7 +51,7 @@ namespace WUInity
         {    
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".rc");
             
-            RouteCollectionWrapper save = new  RouteCollectionWrapper(WUInity.SIM.GetRouteCollection());
+            RouteCollectionWrapper save = new  RouteCollectionWrapper(WUInity.SIM_DATA.GetRouteCollection());
             string json = JsonUtility.ToJson(save, false);
             System.IO.File.WriteAllText(path, json);
 
@@ -61,7 +61,7 @@ namespace WUInity
             bf.Serialize(file, save);
             file.Close();*/
 
-            WUInity.LogMessage("LOG: Saved route collection to " + path);
+            WUInity.WUI_LOG("LOG: Saved route collection to " + path);
         }
 
         /// <summary>
@@ -87,12 +87,12 @@ namespace WUInity
                 rCWS = null;
                 System.GC.Collect();
 
-                WUInity.LogMessage("LOG: Loaded route collection from " + path);
+                WUInity.WUI_LOG("LOG: Loaded route collection from " + path);
                 return collection;
             }
             else
             {
-                WUInity.LogMessage("WARNING: Route collection file not found in " + path + ", will get built (will take some time).");
+                WUInity.WUI_LOG("WARNING: Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
                 return null;
             }            
         }

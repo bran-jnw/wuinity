@@ -6,24 +6,17 @@ namespace WUInity
 {
     public partial class WUInityGUI
     {
-        string dT, nrRuns, Lat, Long, sizeX, sizeY, zoom;
-        bool mainInputDirty = true, creatingNewFile = false;
+        string dT, nrRuns;
+        bool mainMenuDirty = true, creatingNewFile = false;
 
         void MainMenu()
         {
             WUInityInput wO = WUInity.INPUT;
 
             //whenever we load a file we need to set the new data for the GUI
-            if (mainInputDirty)
+            if (mainMenuDirty)
             {
-                mainInputDirty = false;
-                dT = wO.deltaTime.ToString();
-                nrRuns = wO.numberOfRuns.ToString();
-                Lat = wO.lowerLeftLatLong.x.ToString();
-                Long = wO.lowerLeftLatLong.y.ToString();
-                sizeX = wO.size.x.ToString();
-                sizeY = wO.size.y.ToString();
-                zoom = wO.zoomLevel.ToString();
+                CleanMainMenu(wO);
             }
 
             GUI.Box(new Rect(subMenuXOrigin, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -61,13 +54,7 @@ namespace WUInity
                 return;
             }
 
-            //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
-            ++buttonIndex;
-            wO.simName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simName);
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save input file"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save"))
             {
                 if (WUInity.WORKING_FILE == null)
                 {
@@ -85,41 +72,14 @@ namespace WUInity
             {
                 OpenSaveInput();
             }
-            ++buttonIndex;
-
-            //LatLong
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map LL Lat.:");
-            ++buttonIndex;
-            Lat = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Lat);
-            ++buttonIndex;
-
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map LL Long.:");
-            ++buttonIndex;
-            Long = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Long);
-            ++buttonIndex;
-
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map size x [m]:");
-            ++buttonIndex;
-            sizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sizeX);
-            ++buttonIndex;
-
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map size y [m]:");
-            ++buttonIndex;
-            sizeY = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sizeY);
-            ++buttonIndex;
-
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Map zoom level:");
-            ++buttonIndex;
-            zoom = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), zoom);
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
-            {
-                ParseMainData(wO);
-                WUInity.INSTANCE.UpdateMapResourceStatus();
-            }
-
             buttonIndex += 2;
+
+            //name
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
+            ++buttonIndex;
+            wO.simName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simName);
+            ++buttonIndex;   
+            
             //dT
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Time step [s]:");
             ++buttonIndex;
@@ -149,11 +109,11 @@ namespace WUInity
                 ParseMainData(wO);  
                 if (!WUInity.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.LogMessage("ERROR: Could not start simulation, see error log.");
+                    WUInity.WUI_LOG("ERROR: Could not start simulation, see error log.");
                 }
                 else
                 {
-                    WUInity.LogMessage("LOG: Simulation started, please wait.");
+                    WUInity.WUI_LOG("LOG: Simulation started, please wait.");
                     menuChoice = ActiveMenu.Output;
                     WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
                     WUInity.INSTANCE.SetEvacDataPlane(true);
@@ -163,23 +123,25 @@ namespace WUInity
             ++buttonIndex;
         }
 
+        void CleanMainMenu(WUInityInput wO)
+        {
+            mainMenuDirty = false;
+            dT = wO.deltaTime.ToString();
+            nrRuns = wO.numberOfRuns.ToString();
+        }
+
         void ParseMainData(WUInityInput wO)
         {
             ParseEvacInput();
             ParseTrafficInput();
 
-            if (mainInputDirty)
+            if (mainMenuDirty)
             {
                 return;
             }
 
             float.TryParse(dT, out wO.deltaTime);
             int.TryParse(nrRuns, out wO.numberOfRuns);
-            double.TryParse(Lat, out wO.lowerLeftLatLong.x);
-            double.TryParse(Long, out wO.lowerLeftLatLong.y);
-            double.TryParse(sizeX, out wO.size.x);
-            double.TryParse(sizeY, out wO.size.y);
-            int.TryParse(zoom, out wO.zoomLevel);
         }
 
         void OpenSaveInput()
@@ -208,7 +170,7 @@ namespace WUInity
             WUInity.WORKING_FILE = paths[0];
             if (creatingNewFile)
             {
-                mainInputDirty = true;
+                mainMenuDirty = true;
                 WUInity.INSTANCE.CreateNewInputData();
                 wO = WUInity.INPUT; //have to update this since we are creating a new one
             }
@@ -226,7 +188,7 @@ namespace WUInity
         void LoadInput(string[] paths)
         {
             SaveLoadWUI.LoadInput(paths[0]);
-            mainInputDirty = true;
+            mainMenuDirty = true;
         }            
 
         void CancelSaveLoad()

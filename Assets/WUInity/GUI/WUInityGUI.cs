@@ -28,7 +28,7 @@ namespace WUInity
 
         [SerializeField] GUIStyle style;
 
-        public enum ActiveMenu { None, MainMenu, Population, Evac, Traffic, Farsite, Output, Fire }
+        public enum ActiveMenu { None, MainMenu, Map, Population, Evac, Traffic, Farsite, Output, Fire }
         ActiveMenu menuChoice = ActiveMenu.MainMenu;
 
         int menuBarHeight;
@@ -44,15 +44,16 @@ namespace WUInity
         const int consoleHeight = 160;
 
 
-        MenuButton mainMenu = new MenuButton(0, buttonHeight, "Main Menu");        
-        MenuButton populationMenu = new MenuButton(1, buttonHeight, "Population");
+        MenuButton mainMenu = new MenuButton(0, buttonHeight, "Main Menu");
+        MenuButton mapMenu = new MenuButton(1, buttonHeight, "Map");
+        MenuButton populationMenu = new MenuButton(2, buttonHeight, "Population");
         //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
-        MenuButton fireMenu = new MenuButton(2, buttonHeight, "Fire spread");
-        MenuButton evacMenu = new MenuButton(3, buttonHeight, "Evacuation");
-        MenuButton trafficMenu = new MenuButton(4, buttonHeight, "Traffic");
-        MenuButton outputMenu = new MenuButton(5, buttonHeight, "Output");
-        MenuButton hideMenu = new MenuButton(6, buttonHeight, "Hide Menu");
-        MenuButton exitMenu = new MenuButton(7, buttonHeight, "Exit");
+        MenuButton fireMenu = new MenuButton(3, buttonHeight, "Fire spread");
+        MenuButton evacMenu = new MenuButton(4, buttonHeight, "Evacuation");
+        MenuButton trafficMenu = new MenuButton(5, buttonHeight, "Traffic");
+        MenuButton outputMenu = new MenuButton(6, buttonHeight, "Output");
+        MenuButton hideMenu = new MenuButton(7, buttonHeight, "Hide Menu");
+        MenuButton exitMenu = new MenuButton(8, buttonHeight, "Exit");
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp" };
@@ -84,6 +85,11 @@ namespace WUInity
 
             if(WUInity.DATA_STATUS.haveInput)
             {
+                if (GUI.Button(mapMenu.rect, mapMenu.text))
+                {                    
+                    menuChoice = ActiveMenu.Map;
+                }
+
                 if (GUI.Button(populationMenu.rect, populationMenu.text))
                 {
                     if (menuChoice == ActiveMenu.Population)
@@ -161,24 +167,16 @@ namespace WUInity
             if (GUI.Button(exitMenu.rect, exitMenu.text))
             {
                 Application.Quit();
-            }
-
-            //console
-            GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
-            GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
-            List<string> log = WUInity.GetLog();
-            for (int i = log.Count - 1; i >= 0; i--)
-            {                
-                GUILayout.Label(log[i]);
             }            
-            GUILayout.EndScrollView();
-            GUI.EndGroup();
 
             //call correct menu
             if (menuChoice == ActiveMenu.MainMenu)
             {
                 MainMenu();
+            }
+            else if (menuChoice == ActiveMenu.Map)
+            {
+                MapMenu();
             }
             else if (menuChoice == ActiveMenu.Population)
             {
@@ -205,14 +203,38 @@ namespace WUInity
                 OutputMenu();
             }
 
+            UpdateConsole();
             DataSampleWindow();
+        }
+
+        void UpdateConsole()
+        {
+            //console
+            GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
+            GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
+            List<string> log = WUInity.GetLog();
+            for (int i = log.Count - 1; i >= 0; i--)
+            {
+                GUILayout.Label(log[i]);
+            }
+            GUILayout.EndScrollView();
+            GUI.EndGroup();
+        }
+
+        public void SetGUIDirty()
+        {
+            mainMenuDirty = true;
+            mapMenuDirty = true;
+            populationMenuDirty = true;
+            evacMenuDirty = true;
+            trafficMenuDirty = true;
         }
 
         const int dataSampleWindowWidth = 600;
         const int dataSampleWindowHeight = 20;
         private void DataSampleWindow()
-        {
-            
+        {            
             GUI.Box(new Rect(Screen.width - dataSampleWindowWidth, 0, dataSampleWindowWidth, dataSampleWindowHeight), WUInity.INSTANCE.GetDataSampleString());
         }   
     }

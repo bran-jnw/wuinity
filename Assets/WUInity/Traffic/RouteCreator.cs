@@ -25,7 +25,7 @@ namespace WUInity
         {
             if (router == null)
             {
-                router = new Router(WUInity.SIM.GetRouterDb());
+                router = new Router(WUInity.SIM_DATA.GetRouterDb());
             }
             DetermineValidGoalsAndRouterPoints(false);
         }
@@ -35,13 +35,13 @@ namespace WUInity
         /// </summary>
         public RouteCollection[] CalculateCellRoutes()
         {
-            WUInity.LogMessage("Calculating route collection for cells, this will take some time...");
+            WUInity.WUI_LOG("Calculating route collection for cells, this will take some time...");
 
             AbstractMap _map = WUInity.MAP;
             WUInity.INSTANCE.DeleteDrawnRoads();
 
             Vector2D size = WUInity.INPUT.size;
-            Vector2Int cells = WUInity.SIM.EvacCellCount;
+            Vector2Int cells = WUInity.SIM_DATA.EvacCellCount;
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
             //create all waypoints in cells
@@ -57,7 +57,7 @@ namespace WUInity
 
             if (router == null)
             {
-                router = new Router(WUInity.SIM.GetRouterDb());
+                router = new Router(WUInity.SIM_DATA.GetRouterDb());
             }
 
             //initialize some stuff            
@@ -179,14 +179,14 @@ namespace WUInity
                     validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
                     {
-                        WUInity.LogMessage("Evac goal start position valid: " + evacuatonGoals[i].name);
+                        WUInity.WUI_LOG("Evac goal start position valid: " + evacuatonGoals[i].name);
                     }
                 }
                 catch (Itinero.Exceptions.ResolveFailedException)
                 {
                     if (logMessages)
                     {
-                        WUInity.LogMessage("WARNING! Evac goal start position NOT valid: " + evacuatonGoals[i].name);
+                        WUInity.WUI_LOG("WARNING! Evac goal start position NOT valid: " + evacuatonGoals[i].name);
                     }
                 }
             }
@@ -200,7 +200,7 @@ namespace WUInity
             {
                 if (router == null)
                 {
-                    router = new Router(WUInity.SIM.GetRouterDb());
+                    router = new Router(WUInity.SIM_DATA.GetRouterDb());
                 }
                 start = router.Resolve(p, (float)latLong.x, (float)latLong.y, cellSize * 0.70711f); //half cell size * sqrt 2
             }
@@ -281,7 +281,7 @@ namespace WUInity
             {
                 if (router == null)
                 {
-                    router = new Router(WUInity.SIM.GetRouterDb());
+                    router = new Router(WUInity.SIM_DATA.GetRouterDb());
                 }
                 Itinero.Route route = router.Calculate(routerProfile, start, goal);
                 routeData = new RouteData(route, evacGoal);
@@ -380,7 +380,7 @@ namespace WUInity
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
             //this is a quick way of getting a route from an approximate position of the car
             //we just check if cell we are in has a good route and use that
-            RouteCollection rC = WUInity.SIM.GetCellRouteCollection(startPos);
+            RouteCollection rC = WUInity.SIM_DATA.GetCellRouteCollection(startPos);
             if (rC != null && rC.GetSelectedRoute() != null)
             {
                 return rC.GetSelectedRoute();
@@ -465,14 +465,14 @@ namespace WUInity
         public static void SelectCorrectRoute(RouteCollection rC, bool considerForceMap, int cellIndex)
         {
             TrafficInput tO = WUInity.INPUT.traffic;
-            Vector2Int cells = WUInity.SIM.EvacCellCount;
+            Vector2Int cells = WUInity.SIM_DATA.EvacCellCount;
 
             if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
             {
                 if (cellIndex > 0)
                 {
                     //EvacGroup group = WUInity.WUINITY_SIM.GetEvacGroup(cellIndex % cells.x, cellIndex / cells.y);
-                    EvacGroup group = WUInity.SIM.GetEvacGroup(cellIndex);
+                    EvacGroup group = WUInity.SIM_DATA.GetEvacGroup(cellIndex);
                     EvacuationGoal goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }

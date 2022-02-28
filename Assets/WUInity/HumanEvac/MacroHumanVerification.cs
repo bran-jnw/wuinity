@@ -17,7 +17,7 @@ namespace WUInity.Evac
             wuinityOptions.runInRealTime = false;
 
             //WUInity.INSTANCE.LoadGPW(); //TODO: fix this input 
-            WUInity.SIM.LoadItineroDatabase();
+            WUInity.SIM_DATA.LoadRouterDatabase();
 
             //P1
             wuinityOptions.simName = "P1";

@@ -291,11 +291,11 @@ namespace WUInity.Fire
 			}
 		}
 
-		public static bool DoesLCPExist(string path)
+		private static bool DoesLCPExist(string path)
         {
 			if (!File.Exists(path))
 			{
-				WUInity.LogMessage("ERROR: LCP file not found in " + path + ", using default.");
+				WUInity.WUI_LOG("ERROR: LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -418,9 +418,7 @@ namespace WUInity.Fire
 				Header.DensityFile = reader.ReadChars(256);
 				Header.DuffFile = reader.ReadChars(256);
 				Header.WoodyFile = reader.ReadChars(256);
-				Header.Description = reader.ReadChars(512);
-
-				WUInity.LogMessage("LOG: LCP found in " + path + ", read succesfully.");
+				Header.Description = reader.ReadChars(512);				
 			}
 
 			/*// do this in case a version 1.0 file has gotten through
@@ -561,8 +559,17 @@ namespace WUInity.Fire
 					//	long p;
 					//   CellData(Header.loeast, Header.hinorth, &p);
 				}
-
 			}
+
+			if(CantAllocLCP)
+            {
+				WUInity.WUI_LOG("LOG: LCP found in " + path + " but could not properly read it.");
+			}
+			else
+            {
+				WUInity.WUI_LOG("LOG: LCP found in " + path + ", read succesfully.");
+			}
+
 		}
 
 		long HaveCrownFuels()
