@@ -362,6 +362,7 @@ GameObject:
   - component: {fileID: 9009419062416531712}
   - component: {fileID: 5242892331520954218}
   - component: {fileID: 6053256691148872454}
+  - component: {fileID: 5272796193806118269}
   m_Layer: 0
   m_Name: WUInity
   m_TagString: Untagged
@@ -493,6 +494,20 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
+--- !u!114 &5272796193806118269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9009419062416531714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8960399e95a0564097c3b8317e0e850, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: a384f52b735df924f94b77b95863ef76, type: 2}
+  mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &9009419062889027336
 GameObject:
   m_ObjectHideFlags: 0

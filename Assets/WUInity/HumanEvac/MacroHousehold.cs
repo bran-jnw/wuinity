@@ -16,6 +16,9 @@ namespace WUInity.Evac
         public bool isMoving;
         public float walkingDistance;
 
+        Vector3 startPosition;
+        Vector3 goalPosition;
+
         /// <summary>
         /// Creates a household that will move as a unit.
         /// evacuation time is determined based in distance/walking speed and response time
@@ -29,7 +32,9 @@ namespace WUInity.Evac
         {
             EvacInput eO = WUInity.INPUT.evac;
 
-            Vector2D pos = nodeCenter + humanRaster.cellWorldSize * Random.Range(-0.5f, 0.5f);
+            Vector2D startPos = nodeCenter;
+            startPos.x += humanRaster.cellWorldSize.x * Random.Range(-0.5f, 0.5f);
+            startPos.y += humanRaster.cellWorldSize.y * Random.Range(-0.5f, 0.5f);
             this.peopleInHousehold = peopleInHousehold;
             cars = 1;
             if (eO.allowMoreThanOneCar)
@@ -44,7 +49,7 @@ namespace WUInity.Evac
             }
 
             reachedCar = false;
-            walkingDistance = (float)Vector2D.Distance(pos, humanRaster.closestNodeUnitySpace) * eO.walkingDistanceModifier;
+            walkingDistance = (float)Vector2D.Distance(startPos, humanRaster.closestNodeUnitySpace) * eO.walkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;
             this.responseTime = responseTime;
             if (responseTime == float.MaxValue)
@@ -56,6 +61,26 @@ namespace WUInity.Evac
                 evacuationTime = travelTime + responseTime;
             }
             isMoving = false;
+
+            //for tracking progress visually
+            startPosition = new Vector3((float)startPos.x, 0f, (float)startPos.y);
+            goalPosition = new Vector3((float)humanRaster.closestNodeUnitySpace.x, 0f, (float)humanRaster.closestNodeUnitySpace.y);
+        }
+
+        public Vector4 GetPositionAndState(float time)
+        {
+            float state = 0f;
+            if(time >= evacuationTime)
+            {
+                state = 1f;
+            }
+            else if(isMoving)
+            {
+                state = 0.5f;
+            }
+
+            Vector3 position = Vector3.Lerp(startPosition, goalPosition, (time - responseTime) / (evacuationTime - responseTime));
+            return new Vector4(position.x, position.y, position.z, state);
         }
     }
 }

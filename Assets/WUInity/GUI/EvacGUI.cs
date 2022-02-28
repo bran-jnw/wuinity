@@ -90,18 +90,17 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Evacuation order [time after fire]");
             ++buttonIndex;
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
-            ++buttonIndex;
+            ++buttonIndex;            
 
-            if (WUInity.INSTANCE.developerMode)
+            if (!WUInity.INSTANCE.IsPainterActive())
             {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
-                    Evac.MacroHumanVerification.RunVerification();
+                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
                 }
-                ++buttonIndex;
+                ++buttonIndex;                
             }
-
-            if (WUInity.INSTANCE.IsPainterActive())
+            else
             {
                 for (int i = 0; i < WUInity.INPUT.evac.evacGroups.Length; i++)
                 {
@@ -118,11 +117,13 @@ namespace WUInity
                 }
                 ++buttonIndex;
             }
-            else
+
+            ++buttonIndex;
+            if (WUInity.INSTANCE.developerMode)
             {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
                 {
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
+                    Evac.MacroHumanVerification.RunVerification();
                 }
                 ++buttonIndex;
             }

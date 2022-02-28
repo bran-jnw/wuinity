@@ -47,7 +47,6 @@ namespace WUInity.Evac
 
             Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(rasterRoute.GetSelectedRoute().route.Shape[0].Latitude, rasterRoute.GetSelectedRoute().route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
             closestNodeUnitySpace = new Vector2D(v.x, v.y);
-
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
                 int evacGroupIndex = WUInity.SIM_DATA.evacGroupIndices[i];

@@ -29,6 +29,9 @@ namespace WUInity.Evac
         int peopleLeft;
         List<string> output;
 
+        int totalHouseholds;
+        Vector4[] householdPositions;
+
 
         public MacroHumanSim()
         {
@@ -81,6 +84,7 @@ namespace WUInity.Evac
                 int householdsLeft = 0, householdsStartedMoving = 0, householdsReachedCar = 0;
                 float walkingDistance = 0f;
                 int householdsDone = 0;
+                int householdIndex = 0;
 
                 for (int i = 0; i < humanEvacCells.Length; ++i)
                 {
@@ -90,6 +94,11 @@ namespace WUInity.Evac
                         for (int j = 0; j < cell.macroHouseholds.Length; ++j)
                         {
                             MacroHousehold household = cell.macroHouseholds[j];
+
+                            //update position array for visualization
+                            householdPositions[householdIndex] = household.GetPositionAndState(currentTime);
+                            ++householdIndex;
+
                             //if evac time is float.MaxValue they have decided to stay forever
                             if (household.evacuationTime != float.MaxValue)
                             {
@@ -146,6 +155,11 @@ namespace WUInity.Evac
                 //string output = currentTime + "," +  peopleWhoReachedCar";
                 //SaveToFile(output, false);
             }
+        }
+
+        public Vector4[] GetHouseholdPositions()
+        {
+            return householdPositions;
         }
 
         public int GetPeopleLeft()
@@ -213,7 +227,7 @@ namespace WUInity.Evac
         }
 
         /// <summary>
-        /// Populates cells based on loaded GPW data, returns total evacuees placed.
+        /// Populates cells based on loaded data.
         /// </summary>
         public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
@@ -227,7 +241,6 @@ namespace WUInity.Evac
             double cellSizeX = realWorldSize.x / cellsX;
             double cellSizeY = realWorldSize.y / cellsY;
             cellWorldSize = new Vector2D(cellSizeX, cellSizeY);
-            double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
             totalPopulation = populationData.totalPopulation;
             peopleLeft = totalPopulation;
             maxPop = int.MinValue;
@@ -282,7 +295,7 @@ namespace WUInity.Evac
         /// </summary>
         public void PlaceHouseholdsInCells()
         {
-            int totalHouseholds = 0;
+            totalHouseholds = 0;
             humanEvacCells = new HumanEvacCell[population.Length];
             for (int i = 0; i < humanEvacCells.Length; ++i)
             {
@@ -306,18 +319,20 @@ namespace WUInity.Evac
                     HumanEvacCell hR = humanEvacCells[i];
                     for (int j = 0; j < hR.macroHouseholds.Length; j++)
                     {
-                        MacroHousehold rH = hR.macroHouseholds[j];
-                        if (rH.responseTime == float.MaxValue)
+                        MacroHousehold mH  = hR.macroHouseholds[j];
+                        if (mH.responseTime == float.MaxValue)
                         {
-                            totalPeopleWhoWillNotEvacuate += rH.peopleInHousehold;
+                            totalPeopleWhoWillNotEvacuate += mH.peopleInHousehold;
                         }
                         else
                         {
-                            totalCars += rH.cars;
+                            totalCars += mH.cars;
                         }                        
                     }
                 }
             }
+
+            householdPositions = new Vector4[totalHouseholds];
 
             WUInity.WUI_LOG("LOG: Total households: " + totalHouseholds);
             WUInity.WUI_LOG("LOG: Total cars: " +  totalCars);
