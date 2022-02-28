@@ -32,9 +32,11 @@ namespace WUInity.Evac
         {
             EvacInput eO = WUInity.INPUT.evac;
 
-            Vector2D startPos = nodeCenter;
-            startPos.x += humanRaster.cellWorldSize.x * Random.Range(-0.5f, 0.5f);
-            startPos.y += humanRaster.cellWorldSize.y * Random.Range(-0.5f, 0.5f);
+            Vector2 rand = Random.insideUnitCircle;
+            Vector2D randD = new Vector2D(rand.x * humanRaster.cellWorldSize.x, rand.y * humanRaster.cellWorldSize.x);
+            Vector2D startPos = nodeCenter + randD * 0.707070;
+            //startPos.x += humanRaster.cellWorldSize.x * Random.Range(-0.5f, 0.5f); //nicer to be in circle instead of square?
+            //startPos.y += humanRaster.cellWorldSize.y * Random.Range(-0.5f, 0.5f);
             this.peopleInHousehold = peopleInHousehold;
             cars = 1;
             if (eO.allowMoreThanOneCar)
@@ -69,18 +71,18 @@ namespace WUInity.Evac
 
         public Vector4 GetPositionAndState(float time)
         {
-            float state = 0f;
+            float state = 0.125f;
             if(time >= evacuationTime)
             {
-                state = 1f;
+                state = 0.675f;
             }
             else if(isMoving)
             {
-                state = 0.5f;
+                state = 0.375f;
             }
 
             Vector3 position = Vector3.Lerp(startPosition, goalPosition, (time - responseTime) / (evacuationTime - responseTime));
-            return new Vector4(position.x, position.y, position.z, state);
+            return new Vector4(position.x, position.z, peopleInHousehold, state);
         }
     }
 }
