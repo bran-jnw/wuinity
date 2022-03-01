@@ -1,4 +1,4 @@
-Shader "WUInity/Household" {
+Shader "WUInity/Cars" {
 
 	Properties
 	{
@@ -21,20 +21,20 @@ Shader "WUInity/Household" {
 			float _Scale, _GroundOffset;
 			sampler2D _PaletteTex;
 
-			void ConfigureProcedural() 
+			void ConfigureProcedural()
 			{
 				#if defined(UNITY_PROCEDURAL_INSTANCING_ENABLED)
 				float3 position = float3(_PositionsAndState[unity_InstanceID].x, _GroundOffset, _PositionsAndState[unity_InstanceID].y);
 				unity_ObjectToWorld = 0.0;
 				unity_ObjectToWorld._m03_m13_m23_m33 = float4(position, 1.0);
-				unity_ObjectToWorld._m00_m11_m22 = _Scale * _PositionsAndState[unity_InstanceID].z;
+				unity_ObjectToWorld._m00_m11_m22 = _Scale;
 				#endif
 			}
 
-			struct Input 
+			struct Input
 			{
 				float3 worldPos;
-			};	
+			};
 
 			fixed4 LightingNoLighting(SurfaceOutput s, fixed3 lightDir, fixed atten)
 			{
@@ -47,13 +47,13 @@ Shader "WUInity/Household" {
 			void ConfigureSurface(Input input, inout SurfaceOutput surface)
 			{
 				#if defined(UNITY_PROCEDURAL_INSTANCING_ENABLED)
-				float2 uv = float2(_PositionsAndState[unity_InstanceID].w, 0.125);
+				float2 uv = float2(_PositionsAndState[unity_InstanceID].z, 0.125); 
 				float4 col = tex2D(_PaletteTex, uv);
 				surface.Albedo = col;
 				#endif
 			}
 			ENDCG
-	}
+		}
 
-		FallBack "Unlit"
+			FallBack "Unlit"
 }

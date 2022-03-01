@@ -20,6 +20,10 @@ namespace WUInity.Traffic
 
         public int densityHash;
 
+        private Vector2 unityCurrentStartPosition;
+        private Vector2 unityCurrentGoalPosition;        
+        private float latestSpeed;
+
         public MacroCar(RouteData desiredRoute, int numberOfPeopleInCar)
         {
             routeData = desiredRoute;
@@ -39,7 +43,14 @@ namespace WUInity.Traffic
 
             currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance;
 
-            totalDrivingTime = 0f;               
+            totalDrivingTime = 0f;
+
+            //save start coordinate in Unity space
+            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(routeData.route.Shape[0].Latitude, routeData.route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            unityCurrentStartPosition = new Vector2((float)pos.x, (float)pos.y);
+            //save new goal coordinate in Unity space
+            pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(goingToCoord.Latitude, goingToCoord.Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            unityCurrentGoalPosition = new Vector2((float)pos.x, (float)pos.y);
         }
 
         public int CalcHashCode()
@@ -51,40 +62,18 @@ namespace WUInity.Traffic
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
-                hash = hash * 23 + drivingOnStreet.GetHashCode();
+                //hash = hash * 23 + drivingOnStreet.GetHashCode();
                 hash = hash * 23 + goingToCoord.Latitude.GetHashCode();
                 hash = hash * 23 + goingToCoord.Longitude.GetHashCode();
-                hash = hash * 23 + currentShapeLength.GetHashCode(); //needed since we can drive on the same street from to different direction going to the same node in a t-junction
+                hash = hash * 23 + unityCurrentStartPosition.x.GetHashCode();
+                hash = hash * 23 + unityCurrentStartPosition.y.GetHashCode();
+                //hash = hash * 23 + currentShapeLength.GetHashCode(); //needed since we can drive on the same street from to different direction going to the same node in a t-junction
                 return hash;
             }
-            /*int hash = 17;
-            hash = hash * 31 + drivingOnStreet.GetHashCode();
-            hash = hash * 31 + goingToCoord.GetHashCode();
-            hash = hash * 31 + currentShapeLength.GetHashCode();*/
-
-            // Allow arithmetic overflow, numbers will just "wrap around"
-            /*unchecked
-            {
-                int hashcode = 1430287;
-                //hashcode = hashcode * 7302013 ^ drivingOnStreet.GetHashCode();
-                hashcode = hashcode * 7302013 ^ goingToCoord.GetHashCode();
-                hashcode = hashcode * 7302013 ^ currentShapeLength.GetHashCode();
-                return hashcode;
-            }*/
         }
 
         public void ChangeRoute(RouteData desiredNewRoute)
         {
-            /*if (routeData.route.Shape[routeData.route.Shape.Length - 1].Latitude == desiredRoute.Shape[desiredRoute.Shape.Length - 1].Latitude
-                && routeData.route.Shape[routeData.route.Shape.Length - 1].Longitude == desiredRoute.Shape[desiredRoute.Shape.Length - 1].Longitude)
-            {
-                MonoBehaviour.print("same route");
-            }
-            else
-            {
-                MonoBehaviour.print("new route");
-            }*/
-
             routeData = desiredNewRoute;
             currentShapeIndex = 1;
             //add old distance left to the new route piece length to keep somewhat consistent travel distance
@@ -101,6 +90,10 @@ namespace WUInity.Traffic
             currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance;
         }
 
+        /// <summary>
+        /// Returns speed in [m/s] based on highway type if found, if not found default speed is 2.78 m/s (10 km/h).
+        /// </summary>
+        /// <returns></returns>
         private float GetCurrentSpeedLimit()
         {
             //default 10 km/h
@@ -109,7 +102,6 @@ namespace WUInity.Traffic
             if (foundSpeed)
             {
                 speed /= 3.6f;
-                //MonoBehaviour.print("speed found");
             }
             else
             {
@@ -122,7 +114,6 @@ namespace WUInity.Traffic
                 routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("highway", out highwayType);
                 speed = MacroTrafficSim.GetSpeedLimit(highwayType);
             }
-            //MonoBehaviour.print(speed);
             return speed;
         }
 
@@ -131,40 +122,17 @@ namespace WUInity.Traffic
             return routeData.route.ShapeMeta[currentShapeIndex];
         }
 
-        /*public void MoveCarMod(float deltaTime, float speedModifier)
+        public Vector4 GetUnityPositionAndSpeed()
         {
-            currentDistanceLeft -= deltaTime * currentSpeedLimit * speedModifier;
-            totalTravelDistance += deltaTime * currentSpeedLimit * speedModifier;
-            totalDrivingTime += deltaTime;
-            if (currentDistanceLeft <= 0.0f)
-            {
-                ++currentShapeIndex;
-                //check if we have arrived or just going to next shape/node
-                if (currentShapeIndex == routeData.route.ShapeMeta.Length)
-                {
-                    hasArrived = true;
-                    //reduce with overshooting distance
-                    totalTravelDistance += currentDistanceLeft;
-                }
-                else
-                {
-                    //add "old" current distance left since there might be some residual actual travel spent (negative distance left)
-                    currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;// + currentDistanceLeft;
-                    currentSpeedLimit = GetCurrentSpeedLimit();
-
-                    int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
-                    goingToCoord = routeData.route.Shape[sI];
-
-                    routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
-                    streetHash = Animator.StringToHash(drivingOnStreet);
-
-                    currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;
-                }
-            }
-        }*/
+            Vector2 pos = Vector2.Lerp(unityCurrentStartPosition, unityCurrentGoalPosition, 1.0f - (currentDistanceLeft / currentShapeLength));
+            float speed = latestSpeed / currentSpeedLimit;
+            return new Vector4(pos.x, pos.y, speed, 0f);
+        }
 
         public void MoveCarSpeed(float timeStamp, float deltaTime, float speed)
         {
+            latestSpeed = speed; 
+
             currentDistanceLeft -= deltaTime * speed;
             totalTravelDistance += deltaTime * speed;
             totalDrivingTime += deltaTime;
@@ -183,20 +151,30 @@ namespace WUInity.Traffic
                     }     
                     else
                     {          
-                        //keep these numbers the same
+                        //keep these numbers the same and try to arrive next time step
                         currentDistanceLeft += deltaTime * speed;
                         totalTravelDistance -= deltaTime * speed;
                         --currentShapeIndex;
                     }
+
+                    //set start to goal since we are basically at goal, at worst queing
+                    unityCurrentStartPosition = unityCurrentGoalPosition;
                 }
                 else
                 {
                     //add "old" current distance left since there might be some residual actual travel spent (negative distance left)?
                     currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;// + currentDistanceLeft;
-                    currentSpeedLimit = GetCurrentSpeedLimit();
+                    currentSpeedLimit = GetCurrentSpeedLimit();                                       
 
+                    //update new going to coordinates
                     int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
                     goingToCoord = routeData.route.Shape[sI];
+
+                    //save last goal coordinate in Unity space as it is now the start coordinate
+                    unityCurrentStartPosition = unityCurrentGoalPosition;
+                    //save new goal coordinate in Unity space
+                    Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(goingToCoord.Latitude, goingToCoord.Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+                    unityCurrentGoalPosition = new Vector2((float)pos.x, (float)pos.y);
 
                     routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
                     densityHash = CalcHashCode();

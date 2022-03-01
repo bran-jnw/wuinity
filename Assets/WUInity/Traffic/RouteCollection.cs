@@ -85,7 +85,7 @@ namespace WUInity
 
             if (selectedRouteIndex == -1)
             {
-                WUInity.SIM.StopSim("STOPPING: Route selection failed, no routes left that are not blocked");
+                WUInity.SIM.StopSim("STOP: Route selection failed, no routes left that are not blocked");
             }
         }
 

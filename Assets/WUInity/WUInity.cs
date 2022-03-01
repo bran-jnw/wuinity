@@ -479,8 +479,8 @@ namespace WUInity
             mOptions.locationOptions.latitudeLongitude = "" + INPUT.lowerLeftLatLong.x + "," + INPUT.lowerLeftLatLong.y;
             mOptions.locationOptions.zoom = INPUT.zoomLevel;
             mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 1;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 1;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
             //https://wiki.openstreetmap.org/wiki/Zoom_levels
             double tiles = Math.Pow(4.0, mOptions.locationOptions.zoom);
             double degreesPerTile = 360.0 / (Math.Pow(2.0, mOptions.locationOptions.zoom));

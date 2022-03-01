@@ -108,6 +108,11 @@ namespace WUInity
         {
             WUInityInput input = WUInity.INPUT;
 
+            if(routeCreator == null)
+            {
+                routeCreator = new RouteCreator();
+            }
+
             if (input.runFireSim)
             {
                 CreateFireSim();
@@ -134,7 +139,7 @@ namespace WUInity
                 
                 //distribute people
                 macroHumanSim.PlaceHouseholdsInCells();
-                MonoBehaviour.FindObjectOfType<HouseholdRenderer>().CreateBuffer(macroHumanSim.GetHouseholdPositions().Length, WUInity.INPUT.size);
+                MonoBehaviour.FindObjectOfType<EvacuationRenderer>().CreateHouseholdsBuffer(macroHumanSim.GetHouseholdPositions().Length, WUInity.INPUT.size);
             }
 
             if (input.runTrafficSim)
@@ -225,6 +230,11 @@ namespace WUInity
 
         void UpdateSimStatus()
         {
+            if(stopSim)
+            {
+                return;
+            }
+
             WUInityInput input = WUInity.INPUT;
             stopSim = time <= input.maxSimTime ? false : true;
 
@@ -346,8 +356,11 @@ namespace WUInity
 
         public void StopSim(string stopMessage)
         {
-            stopSim = true;
-            WUInity.WUI_LOG(stopMessage);
+            if(!stopSim)
+            {
+                stopSim = true;
+                WUInity.WUI_LOG(stopMessage);
+            }            
         }
 
         public void BlockEvacGoal(int index)
@@ -381,7 +394,7 @@ namespace WUInity
             }
             if(allBlocked)
             {
-                StopSim("Simulation stopped: No evacuation goals available.");
+                StopSim("STOP: No evacuation goals available.");
                 return;
             }
 

@@ -123,6 +123,7 @@ namespace WUInity.Traffic
         List<TrafficEvent> trafficEvents;
         RouteCreator routeCreator;
         Dictionary<int, TrafficDensityData> trafficDensityData;
+        EvacuationRenderer evacuationRenderer;
 
         public MacroTrafficSim(RouteCreator rC)
         {
@@ -147,6 +148,8 @@ namespace WUInity.Traffic
             trafficEvents = new List<TrafficEvent>();
 
             routeCreator = rC;
+
+            evacuationRenderer = MonoBehaviour.FindObjectOfType<EvacuationRenderer>();
         }
 
         public void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
@@ -220,68 +223,6 @@ namespace WUInity.Traffic
                     }
                 }
             }
-
-            //slow as hell, works but freezes WUInity
-            /*for (int i = 0; i < macroCars.Count; i++)
-            {
-                if(macroCars[i].routeData.evacGoal.blocked)
-                {
-                    Vector2D startPos = new Vector2D(macroCars[i].goingToCoord.Latitude, macroCars[i].goingToCoord.Longitude);
-                    RouteData r = routeCreator.CalcTrafficRoute(startPos);
-                    if (r == null)
-                    {
-                        WUInity.WUINITY_SIM.LogMessage("Null re-route returned to car, abort!");
-                    }
-                    //special case where start is almost same as end, don't change route for cars
-                    else if (r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
-                    {
-                        WUInity.WUINITY_SIM.LogMessage("Route messed up, start same as goal? Ignoring.");
-                        //check if our startPos is the same as end evac goal, Itinero returns wonky route then
-                        //if found, just don't re-calc route
-                    }
-                    //everything is as expected
-                    else
-                    {
-                        macroCars[i].ChangeRoute(r);
-                    }
-                }
-            }*/
-
-            //old crap
-            /*List<TrafficDensityData> tDD = CollectDensity();
-
-            for (int i = 0; i < tDD.Count; ++i)
-            {
-                Vector2D startPos = new Vector2D(tDD[i].goalCoord.Latitude, tDD[i].goalCoord.Longitude);
-
-                RouteData r = routeCreator.CalcTrafficRoute(startPos);
-
-                if (r == null)
-                {
-                    MonoBehaviour.print("Null re-oute returned!");
-                }
-                //special case where start is almost same as end, don't change route for cars
-                else if(r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
-                {
-                    MonoBehaviour.print("Route messed up, start same as goal? Ignoring.");
-                    MonoBehaviour.print(tDD[i].goalCoord.Latitude + ", " + tDD[i].goalCoord.Longitude);
-                    //check if our startPos is the same as end evac goal, Itinero returns wonky route then
-                    //if found, just don't re-calc route
-                }
-                //everything is as expected
-                else
-                {
-                    for (int j = 0; j < tDD[i].cars.Count; ++j)
-                    {
-                        MacroCar car = tDD[i].cars[j];
-                        //only update if actual new goal
-                        if (car.routeData.evacGoal != r.evacGoal)
-                        {
-                            car.ChangeRoute(r);
-                        }
-                    }                                      
-                }
-            }*/
         }
 
         public void AdvanceTrafficSimulation(float deltaTime, float currentTime)
@@ -304,19 +245,7 @@ namespace WUInity.Traffic
 
             trafficDensityData = CollectDensity();
             //List<TrafficDensityData> tDD = CollectDensity();
-            List<MacroCar> carsToRemove = new List<MacroCar>(500);
-
-            //old way
-            /*for(int i = 0; i < macroCars.Count; ++i)
-            {
-                MacroCar car = macroCars[i];
-                car.MoveCar(deltaTime);
-                //flag cars that have arrived
-                if(car.hasArrived)
-                {
-                    carsToRemove.Add(car);
-                }
-            }*/
+            List<MacroCar> carsToRemove = new List<MacroCar>();
 
             //new way, loop through traffic density data instead since we know each car on each segment and we need the density data
             float averageSpeed = 0;
@@ -329,22 +258,7 @@ namespace WUInity.Traffic
                 minSpeed = speed < minSpeed ? speed : minSpeed;
                 for (int j = 0; j < t.Value.cars.Count; ++j)
                 {
-                    MacroCar car = t.Value.cars[j];  
-                    
-                    //this stuff does not work anymore since we now have visibility conditions which migth break it, just using simpler stuff below
-                    //first car/cars move faster
-                    /*if(j < tDD[i].laneCount)
-                    {
-                        //car.MoveCarMod(deltaTime, 1.0f);
-                        car.MoveCarSpeed(deltaTime, car.currentSpeedLimit);
-                    }
-                    else
-                    {
-                        //car.MoveCarMod(deltaTime, speedMod);
-                        car.MoveCarSpeed(deltaTime, speed);
-                    }*/
-
-                    //move car, replaces stuff above
+                    MacroCar car = t.Value.cars[j];                      
                     car.MoveCarSpeed(currentTime, deltaTime, speed);
 
                     //flag cars that have arrived
@@ -401,6 +315,16 @@ namespace WUInity.Traffic
             }
 
             WUInity.INSTANCE.SaveTransientDensityData(currentTime, macroCars);
+
+            if(macroCars.Count > 0)
+            {
+                Vector4[] carsRendering = new Vector4[macroCars.Count];
+                for (int i = 0; i < carsRendering.Length; i++)
+                {
+                    carsRendering[i] = macroCars[i].GetUnityPositionAndSpeed();
+                }
+                evacuationRenderer.UpdateCarsToRender(carsRendering);
+            }            
         }
 
         public void SaveToFile(int runNumber)
@@ -519,53 +443,15 @@ namespace WUInity.Traffic
                 TrafficDensityData t;
                 if (tDD.TryGetValue(hash, out t))
                 {
-                    //MonoBehaviour.print("We are going to the same node!");
                     t.AddCar(c);
                 }
                 else
                 {
-                    //MonoBehaviour.print("We are not going to the same node!");
                     tDD.Add(hash, new TrafficDensityData(c, this));
                 }
             }
             return tDD;
         }
-
-        /*private TrafficDensityData TrafficDensityExists(HashSet<TrafficDensityData> data, MacroCar car)
-        {
-            TrafficDensityData tDD = new TrafficDensityData(car, this);
-
-            data.GetOr
-            if(data.Contains(tDD))
-            {
-                return data;
-            }
-            else
-            {
-                return null;
-            }
-            //old
-            int i = 0;
-            foreach(TrafficDensityData tDD in data)
-            {
-                if (car.streetHash == tDD.streetHash && car.goingToCoord.Latitude == tDD.goalCoord.Latitude && car.goingToCoord.Longitude == tDD.goalCoord.Longitude)
-                {
-                    return tDD;
-                }
-                ++i;
-            }*/
-
-            /*for(int i = 0; i < data.Count; ++i)
-            {
-                if (car.streetHash == data[i].streetHash && car.goingToCoord.Latitude == data[i].goalCoord.Latitude && car.goingToCoord.Longitude == data[i].goalCoord.Longitude)
-                {
-                    index = i;
-                    return true;
-                }
-            }
-
-            return null;
-        }*/   
 
         public static float GetMaxCapacity(string highway)
         {

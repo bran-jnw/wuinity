@@ -506,8 +506,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8960399e95a0564097c3b8317e0e850, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: a384f52b735df924f94b77b95863ef76, type: 2}
-  mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  householdsMaterial: {fileID: 2100000, guid: a384f52b735df924f94b77b95863ef76, type: 2}
+  householdMesh: {fileID: -8089699231438940418, guid: 3956b017a08cc8e4aaf642a48758d455,
+    type: 3}
+  carsMaterial: {fileID: 2100000, guid: 76f51a8d109fe9448b6c1096ae0d4459, type: 2}
+  carMesh: {fileID: -8089699231438940418, guid: 3956b017a08cc8e4aaf642a48758d455,
+    type: 3}
 --- !u!1 &9009419062889027336
 GameObject:
   m_ObjectHideFlags: 0
