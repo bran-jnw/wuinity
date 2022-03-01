@@ -196,7 +196,7 @@ namespace WUInity.Traffic
                 RouteData r = routeCreator.CalcTrafficRoute(startPos);
                 if (r == null)
                 {
-                    WUInity.SIM.StopSim("WARNING! Null re-route returned to car, abort!");
+                    WUInity.SIM.StopSim("STOP! Null re-route returned to car, should not happen.");
                 }
                 //special case where start is almost same as end
                 else if (r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
@@ -244,7 +244,6 @@ namespace WUInity.Traffic
             }
 
             trafficDensityData = CollectDensity();
-            //List<TrafficDensityData> tDD = CollectDensity();
             List<MacroCar> carsToRemove = new List<MacroCar>();
 
             //new way, loop through traffic density data instead since we know each car on each segment and we need the density data
@@ -253,7 +252,7 @@ namespace WUInity.Traffic
             int exitingPeople = 0;
             foreach (KeyValuePair<int, TrafficDensityData> t in trafficDensityData)
             {
-                float speed = t.Value.CalculateSpeedBasedOnDensity(); ; // tDD[i].CalculateSpeedModifierBasedOnDensity();
+                float speed = t.Value.CalculateSpeedBasedOnDensity(); 
                 averageSpeed += speed;
                 minSpeed = speed < minSpeed ? speed : minSpeed;
                 for (int j = 0; j < t.Value.cars.Count; ++j)
@@ -298,14 +297,10 @@ namespace WUInity.Traffic
 
             output.Add(newOut);
             oldTotalCars = totalCarsSimulated;
-            //string output = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + macroCars.Count;
-            //SaveToFile(output, false);
 
             //remove cars that has arrived
             for (int i = 0; i < carsToRemove.Count; ++i)
             {
-                //MonoBehaviour.print("Car exited: " + currentTime + ", tot travel dist: " + carsToRemove[i].totalTravelDistance + ". Expected dist: " + carsToRemove[i].route.TotalDistance + ", expected time; " + carsToRemove[i].route.TotalTime);
-                //MonoBehaviour.print("Exit: " + currentTime + ", Expected t: " + carsToRemove[i].route.TotalTime + ", Used t: " + carsToRemove[i].totalDrivingTime);
                 macroCars.Remove(carsToRemove[i]);                
             }
 
@@ -334,17 +329,6 @@ namespace WUInity.Traffic
             System.IO.File.WriteAllLines(path, output);
         }
 
-        //alternate way of saving, neeed to print each loop iteration, saves memory but is way slower. Update: useless? uses more memory?
-        /*public void SaveToFile(string output, bool newFile)
-        {
-            if (newFile)
-            {
-                System.IO.File.Delete(@"C:\WUI-NITY\wui-nity_git\Assets\Resources\traffic_output.csv");
-            }
-            System.IO.File.AppendAllText(@"C:\WUI-NITY\wui-nity_git\Assets\Resources\traffic_output.csv", output + "\n");
-            //System.IO.File.WriteAllLines(@"C:\WUI-NITY\wui-nity_git\Assets\Resources\traffic_output.csv", output);
-        }*/
-
         private class TrafficDensityData
         {
             public Itinero.LocalGeo.Coordinate goalCoord;
@@ -355,6 +339,7 @@ namespace WUInity.Traffic
             string highwayType;
             MacroTrafficSim mCS;
             public float maxCapacity;
+            private int maxCarsOnRoad;
 
             public TrafficDensityData(MacroCar car, MacroTrafficSim mCS)
             {
@@ -364,9 +349,29 @@ namespace WUInity.Traffic
                 laneCount = GetNumberOfLanes(highwayType);
                 maxCapacity = GetMaxCapacity(highwayType);
                 length = car.currentShapeLength;
-                cars = new List<MacroCar>(500);
+                cars = new List<MacroCar>();
                 cars.Add(car);
-                this.mCS = mCS;               
+                this.mCS = mCS;
+
+                maxCarsOnRoad = (int)(length / 4.6f);
+            }
+
+            /// <summary>
+            /// Checks if street is physically filled
+            /// </summary>
+            /// <returns></returns>
+            public bool CanAddCar()
+            {
+                //TODO: implement proper queues onto streets
+                return true;
+
+                bool success = false;
+                if (maxCarsOnRoad < cars.Count)
+                {
+                    success = true;
+                }
+
+                return success;
             }
 
             public void AddCar(MacroCar car)
@@ -433,7 +438,7 @@ namespace WUInity.Traffic
         //add parameter for flow reduction by adding background traffic as a density
         private Dictionary<int, TrafficDensityData> CollectDensity()
         {
-            Dictionary<int, TrafficDensityData> tDD = new Dictionary<int, TrafficDensityData>(200);
+            Dictionary<int, TrafficDensityData> tDD = new Dictionary<int, TrafficDensityData>();
             for (int i = 0; i < macroCars.Count; ++i)
             {
                 MacroCar c = macroCars[i];
@@ -443,7 +448,10 @@ namespace WUInity.Traffic
                 TrafficDensityData t;
                 if (tDD.TryGetValue(hash, out t))
                 {
-                    t.AddCar(c);
+                    if(t.CanAddCar())
+                    {
+                        t.AddCar(c);
+                    }
                 }
                 else
                 {

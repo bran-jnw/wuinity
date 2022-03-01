@@ -177,6 +177,7 @@ namespace WUInity.Traffic
                     unityCurrentGoalPosition = new Vector2((float)pos.x, (float)pos.y);
 
                     routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
+
                     densityHash = CalcHashCode();
 
                     currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;

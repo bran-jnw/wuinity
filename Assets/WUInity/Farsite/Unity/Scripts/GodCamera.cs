@@ -9,11 +9,15 @@ namespace WUInity
         public enum CameraMode { twoD, threeD }
         CameraMode cMode = CameraMode.twoD;
         [SerializeField] float zoomSpeed = 100.0f;
+        [SerializeField] float lowestY = 200f;
         [SerializeField] Camera c;
 
+        float maximumY;
         bool dragging = false;
         Vector3 startDragPos;
         Vector3 startMousePos;
+        Vector2D mapSize;
+        bool refreshClipPlanes = false;
 
         // Use this for initialization
         void OnValidate()
@@ -26,7 +30,9 @@ namespace WUInity
 
         public void SetCameraStartPosition(Vector2D mapSize)
         {
+            this.mapSize = mapSize;
             float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * c.fieldOfView * 0.5f);
+            maximumY = yPos * 1.5f;
 
             transform.position = new Vector3((float)mapSize.x * 0.5f, yPos, (float)mapSize.y * 0.5f);
             //rescale clip planes
@@ -50,21 +56,7 @@ namespace WUInity
             }
 
             if (cMode == CameraMode.twoD)
-            {
-                float d = Input.mouseScrollDelta.y;
-                if (d != 0.0f || transform.position.y < 10f)
-                {
-                    float mod = transform.position.y * 0.1f;
-                    mod = Mathf.Max(1.0f, mod);
-                    transform.position -= Vector3.up * Time.deltaTime * zoomSpeed * d * mod;
-                    if (transform.position.y < 10.0f)
-                    {
-                        transform.position = new Vector3(transform.position.x, 10.0f, transform.position.z);
-                    }
-                    //rescale clip planes
-                    c.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * c.fieldOfView * 0.5f) + 1.0f;
-                    c.nearClipPlane = c.farClipPlane * 0.8f;
-                }
+            {               
 
                 if (Input.GetButtonDown("Fire3"))
                 {
@@ -79,9 +71,38 @@ namespace WUInity
 
                 if (dragging)
                 {
-                    float mapSize = 2.0f * transform.position.y / (Mathf.PI * 0.5f - Mathf.Sin(Mathf.Deg2Rad * c.fieldOfView * 0.5f));
+                    float mapWidth = 2.0f * transform.position.y / (Mathf.PI * 0.5f - Mathf.Sin(Mathf.Deg2Rad * c.fieldOfView * 0.5f));
                     Vector2 res = new Vector2(Screen.width, Screen.height);
-                    transform.position = startDragPos + mapSize * (Vector3.left * (Input.mousePosition.x - startMousePos.x) / res.x + (res.y / res.x) * Vector3.back * (Input.mousePosition.y - startMousePos.y) / res.y);
+                    transform.position = startDragPos + mapWidth * (Vector3.left * (Input.mousePosition.x - startMousePos.x) / res.x + (res.y / res.x) * Vector3.back * (Input.mousePosition.y - startMousePos.y) / res.y);                    
+                }
+                else
+                {
+                    float d = Input.mouseScrollDelta.y;
+                    if (d != 0.0f || transform.position.y < lowestY)
+                    {
+                        float mod = transform.position.y * 0.1f;
+                        mod = Mathf.Max(1.0f, mod);
+                        transform.position -= Vector3.up * zoomSpeed * Time.deltaTime * d * mod;
+                        if (transform.position.y < lowestY)
+                        {
+                            transform.position = new Vector3(transform.position.x, lowestY, transform.position.z);
+                        }
+                        refreshClipPlanes = true;
+                    }
+                }
+
+                Vector3 clampedPos = transform.position;
+                clampedPos.x = Mathf.Clamp(clampedPos.x, 0f, (float)mapSize.x);
+                clampedPos.y = Mathf.Clamp(clampedPos.y, lowestY, maximumY);
+                clampedPos.z = Mathf.Clamp(clampedPos.z, 0f, (float)mapSize.y);
+                transform.position = clampedPos;
+
+                if(refreshClipPlanes)
+                {
+                    refreshClipPlanes = false;
+                    //rescale clip planes
+                    c.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * c.fieldOfView * 0.5f) + 1.0f;
+                    c.nearClipPlane = c.farClipPlane * 0.8f;
                 }
             }
             else
