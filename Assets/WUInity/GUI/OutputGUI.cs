@@ -100,6 +100,13 @@ namespace WUInity
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.SIM.GetFireWindDirection() + " degrees");
                 ++buttonIndex;
             }
+
+            ++buttonIndex;
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
+            {
+                WUInity.SIM.StopSim("STOP: Stopped simulation as requested by user.");
+            }
+            ++buttonIndex;
         }
     }
 }

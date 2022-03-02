@@ -53,23 +53,66 @@ namespace WUInity.Traffic
             unityCurrentGoalPosition = new Vector2((float)pos.x, (float)pos.y);
         }
 
-        public int CalcHashCode()
+        private int CalcHashCode()
         {
-            if(string.IsNullOrWhiteSpace(drivingOnStreet))
+            /*if(string.IsNullOrWhiteSpace(drivingOnStreet))
             {
                 drivingOnStreet = "no street name available";
-            }
+            }*/
+
+            int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
+            Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
+
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
                 //hash = hash * 23 + drivingOnStreet.GetHashCode();
                 hash = hash * 23 + goingToCoord.Latitude.GetHashCode();
                 hash = hash * 23 + goingToCoord.Longitude.GetHashCode();
-                hash = hash * 23 + unityCurrentStartPosition.x.GetHashCode();
-                hash = hash * 23 + unityCurrentStartPosition.y.GetHashCode();
+                hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
+                hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();
                 //hash = hash * 23 + currentShapeLength.GetHashCode(); //needed since we can drive on the same street from to different direction going to the same node in a t-junction
                 return hash;
             }
+        }
+
+        public int GetNextHashCode()
+        {
+            int sI = routeData.route.ShapeMeta[currentShapeIndex + 1].Shape;
+            Itinero.LocalGeo.Coordinate nextGoalCoord = routeData.route.Shape[sI];
+            Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
+
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+                hash = hash * 23 + nextGoalCoord.Latitude.GetHashCode();
+                hash = hash * 23 + nextGoalCoord.Longitude.GetHashCode();
+                hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
+                hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();
+                return hash;
+            }
+        }
+
+        public bool WillChangeRoad(float deltaTime, float speed)
+        {
+            float cDL = currentDistanceLeft;
+            cDL -= deltaTime * speed;
+            if (cDL <= 0.0f)
+            {
+                int cSI = currentShapeIndex;
+                ++cSI;
+                //check if we have arrived or just going to next shape/node
+                if (cSI == routeData.route.ShapeMeta.Length)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void ChangeRoute(RouteData desiredNewRoute)
@@ -127,11 +170,11 @@ namespace WUInity.Traffic
             Vector2 pos = Vector2.Lerp(unityCurrentStartPosition, unityCurrentGoalPosition, 1.0f - (currentDistanceLeft / currentShapeLength));
             float speed = latestSpeed / currentSpeedLimit;
             return new Vector4(pos.x, pos.y, speed, 0f);
-        }
+        }        
 
         public void MoveCarSpeed(float timeStamp, float deltaTime, float speed)
         {
-            latestSpeed = speed; 
+            latestSpeed = speed;
 
             currentDistanceLeft -= deltaTime * speed;
             totalTravelDistance += deltaTime * speed;

@@ -70,91 +70,49 @@ namespace WUInity
         {
             //select menu
             GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
-            if (GUI.Button(mainMenu.rect, mainMenu.text))
+            if (GUI.Button(mainMenu.rect, mainMenu.text) && !WUInity.SIM.isRunning)
             {
-                if (menuChoice == ActiveMenu.MainMenu)
-                {
-                    //menuChoice = ActiveMenu.None;
-                }
-                else
-                {
-                    menuChoice = ActiveMenu.MainMenu;
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                }
+                menuChoice = ActiveMenu.MainMenu;
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
             }
 
             if(WUInity.DATA_STATUS.haveInput)
             {
-                if (GUI.Button(mapMenu.rect, mapMenu.text))
+                if (GUI.Button(mapMenu.rect, mapMenu.text) && !WUInity.SIM.isRunning)
                 {                    
                     menuChoice = ActiveMenu.Map;
                 }
 
-                if (GUI.Button(populationMenu.rect, populationMenu.text))
+                if (GUI.Button(populationMenu.rect, populationMenu.text) && !WUInity.SIM.isRunning)
                 {
-                    if (menuChoice == ActiveMenu.Population)
-                    {
-                        //menuChoice = ActiveMenu.None;
-                    }
-                    else
-                    {
-                        menuChoice = ActiveMenu.Population;
-                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
-                    }
+                    menuChoice = ActiveMenu.Population;
+                    //WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
                 }
 
-                if (GUI.Button(evacMenu.rect, evacMenu.text))
+                if (GUI.Button(evacMenu.rect, evacMenu.text) && !WUInity.SIM.isRunning)
                 {
-                    if (menuChoice == ActiveMenu.Evac)
-                    {
-                        //menuChoice = ActiveMenu.None;
-                    }
-                    else
-                    {
-                        menuChoice = ActiveMenu.Evac;
-                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                    }
+                    menuChoice = ActiveMenu.Evac;
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                 }
 
-                if (GUI.Button(trafficMenu.rect, trafficMenu.text))
+                if (GUI.Button(trafficMenu.rect, trafficMenu.text) && !WUInity.SIM.isRunning)
                 {
-                    if (menuChoice == ActiveMenu.Traffic)
-                    {
-                        //menuChoice = ActiveMenu.None;
-                    }
-                    else
-                    {
-                        menuChoice = ActiveMenu.Traffic;
-                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                    }
+                    menuChoice = ActiveMenu.Traffic;
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                 }
 
-                if (GUI.Button(fireMenu.rect, fireMenu.text))
+                if (GUI.Button(fireMenu.rect, fireMenu.text) && !WUInity.SIM.isRunning)
                 {
-                    if (menuChoice == ActiveMenu.Fire)
-                    {
-                        //menuChoice = ActiveMenu.None;
-                    }
-                    else
-                    {
-                        menuChoice = ActiveMenu.Fire;
-                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                    }
+                    menuChoice = ActiveMenu.Fire;
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                 }
 
-                if (WUInity.SIM.showResults)
+                if (WUInity.SIM.haveResults)
                 {
                     if (GUI.Button(outputMenu.rect, outputMenu.text))
                     {
-                        if (menuChoice == ActiveMenu.Output)
-                        {
-                            //menuChoice = ActiveMenu.None;
-                        }
-                        else
-                        {
-                            menuChoice = ActiveMenu.Output;
-                            WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                        }
+                        menuChoice = ActiveMenu.Output;
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
             }                  

@@ -114,7 +114,8 @@ namespace WUInity.Traffic
             }
         }        
 
-        List<MacroCar> macroCars;
+        List<MacroCar> carsInSystem;
+        List<MacroCar> carsOnHold;
         int totalCarsSimulated;
         int oldTotalCars;
         List<string> output;
@@ -127,7 +128,8 @@ namespace WUInity.Traffic
 
         public MacroTrafficSim(RouteCreator rC)
         {
-            macroCars = new List<MacroCar>(10000);
+            carsInSystem = new List<MacroCar>();
+            carsOnHold = new List<MacroCar>();
             totalCarsSimulated = 0;
             oldTotalCars = 0;
 
@@ -155,7 +157,7 @@ namespace WUInity.Traffic
         public void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
         {
             MacroCar car = new MacroCar(routeData, numberOfPeopleInCar);
-            macroCars.Add(car);
+            carsOnHold.Add(car);
             ++totalCarsSimulated;            
         }
 
@@ -171,12 +173,12 @@ namespace WUInity.Traffic
 
         public bool EvacComplete()
         {
-            return macroCars.Count == 0 ? true : false;
+            return carsInSystem.Count == 0 ? true : false;
         }
 
         public int GetCarsInSystem()
         {
-            return macroCars.Count;
+            return carsInSystem.Count;
         }
 
         bool evacGoalsDirty = false;
@@ -243,22 +245,75 @@ namespace WUInity.Traffic
                 }
             }
 
+            //for each car in the system we sort them by street they are on, this is called traffic density data
             trafficDensityData = CollectDensity();
             List<MacroCar> carsToRemove = new List<MacroCar>();
+            Dictionary<int, TrafficDensityData> newDestinationTDD = new Dictionary<int, TrafficDensityData>();
 
-            //new way, loop through traffic density data instead since we know each car on each segment and we need the density data
             float averageSpeed = 0;
             float minSpeed = 9999f;
             int exitingPeople = 0;
+            //loop through traffic density data since we know each car on each segment and we need the density data to calculate current speed/density relation
             foreach (KeyValuePair<int, TrafficDensityData> t in trafficDensityData)
             {
+                //calculate the new speed based on the local density
                 float speed = t.Value.CalculateSpeedBasedOnDensity(); 
                 averageSpeed += speed;
                 minSpeed = speed < minSpeed ? speed : minSpeed;
+
+                //go through all cars on road segment
                 for (int j = 0; j < t.Value.cars.Count; ++j)
                 {
-                    MacroCar car = t.Value.cars[j];                      
-                    car.MoveCarSpeed(currentTime, deltaTime, speed);
+                    //our traffic density is flagged as stopped upstreams so no car should move
+                    if(t.Value.movementIsBlocked)
+                    {
+                        break;
+                    }
+
+                    MacroCar car = t.Value.cars[j];    
+                    //check if we are going on to a new stretch of road (new traffic density) after this time step
+                    if(car.WillChangeRoad(deltaTime, speed))
+                    {
+                        int newHash = car.GetNextHashCode();
+                        TrafficDensityData tDD;
+                        //if traffic density exists we have to check if we can move over there, if not we stay still and stop the entire movement on the road
+                        if(trafficDensityData.TryGetValue(newHash, out tDD))
+                        {
+                            if(tDD.CanAddCar())
+                            {
+                                car.MoveCarSpeed(currentTime, deltaTime, speed);
+                            }
+                            else
+                            {
+                                //this means that we cannot move upstreams 
+                                t.Value.movementIsBlocked = true;
+                            }
+                        }
+                        //we also have to check if we can move to any place that previous cars have already moved to that did not exists prior
+                        else if (newDestinationTDD.TryGetValue(newHash, out tDD))
+                        {
+                            if (tDD.CanAddCar())
+                            {
+                                car.MoveCarSpeed(currentTime, deltaTime, speed);
+                            }
+                            else
+                            {
+                                //this means that we cannot move upstreams 
+                                t.Value.movementIsBlocked = true;
+                            }
+                        }
+                        else
+                        {
+                            car.MoveCarSpeed(currentTime, deltaTime, speed);
+                            //now we need to add to our temporary dictionary since otherwise we might overfill any new segment
+                            int hash = car.densityHash;
+                            newDestinationTDD.Add(hash, new TrafficDensityData(car, this));
+                        }
+                    }
+                    else
+                    {
+                        car.MoveCarSpeed(currentTime, deltaTime, speed);
+                    }                    
 
                     //flag cars that have arrived
                     if (car.hasArrived)
@@ -267,6 +322,31 @@ namespace WUInity.Traffic
                         exitingPeople += car.numberOfPeopleInCar;
                     }  
                 }                
+            }
+
+            //this fixes cars waiting to get in to the system, but not cars already in the system waiting to get to a new road
+            for (int i = 0; i < carsOnHold.Count; i++)
+            {
+                MacroCar car = carsOnHold[i];
+                int hash = car.densityHash;
+                TrafficDensityData t;
+                if (trafficDensityData.TryGetValue(hash, out t))
+                {
+                    //we test if we can add it to the desired road, if not it stays in the on hold list
+                    if(t.CanAddCar())
+                    {
+                        //next loop will ad in this car
+                        carsOnHold.Remove(car);
+                        carsInSystem.Add(car);
+                    }
+                }
+                else
+                {
+                    //new section of road so can add without issues, create new traffic density in case any other car wants to get in on the same road
+                    trafficDensityData.Add(hash, new TrafficDensityData(car, this));
+                    carsOnHold.Remove(car);
+                    carsInSystem.Add(car);
+                }
             }
             
             if(trafficDensityData.Count == 0)
@@ -288,7 +368,7 @@ namespace WUInity.Traffic
             }            
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
-            string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + macroCars.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
+            string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
             for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; ++i)
             {
                 newOut += "," + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople;
@@ -301,7 +381,7 @@ namespace WUInity.Traffic
             //remove cars that has arrived
             for (int i = 0; i < carsToRemove.Count; ++i)
             {
-                macroCars.Remove(carsToRemove[i]);                
+                carsInSystem.Remove(carsToRemove[i]);                
             }
 
             if(evacGoalsDirty)
@@ -309,14 +389,14 @@ namespace WUInity.Traffic
                 UpdateEvacGoalsInternal();
             }
 
-            WUInity.INSTANCE.SaveTransientDensityData(currentTime, macroCars);
+            WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem);
 
-            if(macroCars.Count > 0)
+            if(carsInSystem.Count > 0)
             {
-                Vector4[] carsRendering = new Vector4[macroCars.Count];
+                Vector4[] carsRendering = new Vector4[carsInSystem.Count];
                 for (int i = 0; i < carsRendering.Length; i++)
                 {
-                    carsRendering[i] = macroCars[i].GetUnityPositionAndSpeed();
+                    carsRendering[i] = carsInSystem[i].GetUnityPositionAndSpeed();
                 }
                 evacuationRenderer.UpdateCarsToRender(carsRendering);
             }            
@@ -327,6 +407,29 @@ namespace WUInity.Traffic
             WUInityInput wuiIn = WUInity.INPUT;
             string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simName + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
+        }
+
+        //add parameter for flow reduction by adding background traffic as a density
+        private Dictionary<int, TrafficDensityData> CollectDensity()
+        {
+            Dictionary<int, TrafficDensityData> tDD = new Dictionary<int, TrafficDensityData>();
+            for (int i = 0; i < carsInSystem.Count; ++i)
+            {
+                MacroCar c = carsInSystem[i];
+
+                int hash = c.densityHash;
+
+                TrafficDensityData t;
+                if (tDD.TryGetValue(hash, out t))
+                {
+                    t.AddCar(c);
+                }
+                else
+                {
+                    tDD.Add(hash, new TrafficDensityData(c, this));
+                }
+            }
+            return tDD;
         }
 
         private class TrafficDensityData
@@ -340,6 +443,7 @@ namespace WUInity.Traffic
             MacroTrafficSim mCS;
             public float maxCapacity;
             private int maxCarsOnRoad;
+            public bool movementIsBlocked;
 
             public TrafficDensityData(MacroCar car, MacroTrafficSim mCS)
             {
@@ -353,7 +457,8 @@ namespace WUInity.Traffic
                 cars.Add(car);
                 this.mCS = mCS;
 
-                maxCarsOnRoad = (int)(length / 4.6f);
+                maxCarsOnRoad = Mathf.Max(1, (int)(length * 0.2f * laneCount)); //each car takes about 5 meters
+                movementIsBlocked = false;
             }
 
             /// <summary>
@@ -362,11 +467,8 @@ namespace WUInity.Traffic
             /// <returns></returns>
             public bool CanAddCar()
             {
-                //TODO: implement proper queues onto streets
-                return true;
-
                 bool success = false;
-                if (maxCarsOnRoad < cars.Count)
+                if (cars.Count < maxCarsOnRoad)
                 {
                     success = true;
                 }
@@ -433,32 +535,6 @@ namespace WUInity.Traffic
 
                 return Mathf.Min(speed, speed_visibilty);                
             }
-        }
-
-        //add parameter for flow reduction by adding background traffic as a density
-        private Dictionary<int, TrafficDensityData> CollectDensity()
-        {
-            Dictionary<int, TrafficDensityData> tDD = new Dictionary<int, TrafficDensityData>();
-            for (int i = 0; i < macroCars.Count; ++i)
-            {
-                MacroCar c = macroCars[i];
-
-                int hash = c.densityHash;
-
-                TrafficDensityData t;
-                if (tDD.TryGetValue(hash, out t))
-                {
-                    if(t.CanAddCar())
-                    {
-                        t.AddCar(c);
-                    }
-                }
-                else
-                {
-                    tDD.Add(hash, new TrafficDensityData(c, this));
-                }
-            }
-            return tDD;
         }
 
         public static float GetMaxCapacity(string highway)

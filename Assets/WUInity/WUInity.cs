@@ -511,7 +511,7 @@ namespace WUInity
         /// <param name="message"></param>
         public static void WUI_LOG(string message)
         {
-            if (SIM.simRunning)
+            if (SIM.isRunning)
             {
                 message = "[" + (int)SIM.time + "s] " + message;
             }
@@ -628,7 +628,7 @@ namespace WUInity
             {
                 pauseSim = !pauseSim;
             }
-            if(!pauseSim && INPUT.runInRealTime && SIM.simRunning)
+            if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
             {
                 SIM.UpdateRealtimeSim();
             }

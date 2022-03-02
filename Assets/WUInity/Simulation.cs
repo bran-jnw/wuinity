@@ -9,8 +9,8 @@ namespace WUInity
     [System.Serializable]
     public class Simulation
     {    
-        public bool showResults = false;
-        public bool simRunning = false;
+        public bool haveResults = false;
+        public bool isRunning = false;
 
         private bool stopSim;
 
@@ -98,8 +98,8 @@ namespace WUInity
                     System.GC.Collect();
                 }
                 WUInity.OUTPUT.totalEvacTime = time;
-                simRunning = false;
-                showResults = true;
+                isRunning = false;
+                haveResults = true;
                 WUInity.WUI_LOG("LOG: Simulation done.");
             }
         }  
@@ -189,7 +189,7 @@ namespace WUInity
             }            
 
             stopSim = false;
-            simRunning = true;
+            isRunning = true;
             nextFireUpdate = 0f;  
             if(!input.runInRealTime)
             {        
@@ -208,7 +208,7 @@ namespace WUInity
             }
             else
             {
-                showResults = true;
+                haveResults = true;
             }
         }
 
@@ -260,7 +260,7 @@ namespace WUInity
 
         public void UpdateRealtimeSim()
         {
-            if(!simRunning)
+            if(!isRunning)
             {
                 return;
             }
@@ -272,9 +272,9 @@ namespace WUInity
                 WUInity.OUTPUT.totalEvacTime = time;
                 UpdateSimLoop();
             }
-            else if(simRunning)
+            else if(isRunning)
             {
-                simRunning = false;
+                isRunning = false;
                 SaveOutput(0);
                 WUInity.WUI_LOG("LOG: Simulation done.");
             }

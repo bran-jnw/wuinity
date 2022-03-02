@@ -510,7 +510,7 @@ MonoBehaviour:
   householdMesh: {fileID: -8089699231438940418, guid: 3956b017a08cc8e4aaf642a48758d455,
     type: 3}
   carsMaterial: {fileID: 2100000, guid: 76f51a8d109fe9448b6c1096ae0d4459, type: 2}
-  carMesh: {fileID: -8089699231438940418, guid: 3956b017a08cc8e4aaf642a48758d455,
+  carMesh: {fileID: -4317298856758795638, guid: 4b060c8883a0c2e4997d87e588cca804,
     type: 3}
 --- !u!1 &9009419062889027336
 GameObject:
@@ -704,6 +704,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zoomSpeed: 300
+  lowestY: 200
   c: {fileID: 9009419062933292159}
 --- !u!1 &9009419063402271061
 GameObject:
