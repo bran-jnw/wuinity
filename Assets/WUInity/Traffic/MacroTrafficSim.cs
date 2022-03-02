@@ -295,6 +295,7 @@ namespace WUInity.Traffic
                             if (tDD.CanAddCar())
                             {
                                 car.MoveCarSpeed(currentTime, deltaTime, speed);
+                                tDD.AddCar(car);
                             }
                             else
                             {
@@ -307,7 +308,9 @@ namespace WUInity.Traffic
                             car.MoveCarSpeed(currentTime, deltaTime, speed);
                             //now we need to add to our temporary dictionary since otherwise we might overfill any new segment
                             int hash = car.densityHash;
-                            newDestinationTDD.Add(hash, new TrafficDensityData(car, this));
+                            tDD = new TrafficDensityData(car, this);
+                            newDestinationTDD.Add(hash, tDD);
+                            tDD.AddCar(car);
                         }
                     }
                     else
@@ -335,7 +338,7 @@ namespace WUInity.Traffic
                     //we test if we can add it to the desired road, if not it stays in the on hold list
                     if(t.CanAddCar())
                     {
-                        //next loop will ad in this car
+                        //next loop will this car will show in density
                         carsOnHold.Remove(car);
                         carsInSystem.Add(car);
                     }
