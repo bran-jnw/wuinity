@@ -58,15 +58,18 @@ namespace WUInity.Traffic
             /*if(string.IsNullOrWhiteSpace(drivingOnStreet))
             {
                 drivingOnStreet = "no street name available";
-            }*/
+            }*/           
 
             int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
             Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
+
+            //int wayId = (int)RouteCreator.GetWayId(goingToCoord.Latitude, goingToCoord.Longitude);
 
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
                 //hash = hash * 23 + drivingOnStreet.GetHashCode();
+                //hash = hash * 23 + wayId.GetHashCode();
                 hash = hash * 23 + goingToCoord.Latitude.GetHashCode();
                 hash = hash * 23 + goingToCoord.Longitude.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
@@ -78,19 +81,30 @@ namespace WUInity.Traffic
 
         public int GetNextHashCode()
         {
+            /*string nextStreetName;
+            routeData.route.ShapeMeta[currentShapeIndex + 1].Attributes.TryGetValue("name", out nextStreetName);
+            if (string.IsNullOrWhiteSpace(nextStreetName))
+            {
+                nextStreetName = "no street name available";
+            }*/           
+
             int sI = routeData.route.ShapeMeta[currentShapeIndex + 1].Shape;
             Itinero.LocalGeo.Coordinate nextGoalCoord = routeData.route.Shape[sI];
             Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
 
+            //int nextWayId = (int)RouteCreator.GetWayId(nextGoalCoord.Latitude, nextGoalCoord.Longitude);
+
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
+                //hash = hash * 23 + nextStreetName.GetHashCode();
+                //hash = hash * 23 + nextWayId.GetHashCode();
                 hash = hash * 23 + nextGoalCoord.Latitude.GetHashCode();
                 hash = hash * 23 + nextGoalCoord.Longitude.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();
                 return hash;
-            }
+            }            
         }
 
         public bool WillChangeRoad(float deltaTime, float speed)

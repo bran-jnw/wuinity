@@ -14,6 +14,23 @@ namespace WUInity
     [System.Serializable]
     public class RouteCreator
     {
+        /*private static RouteCreator _instance;
+        public static long GetWayId(float latitude, float longitude)
+        {
+            if (_instance == null)
+            {
+                _instance = new RouteCreator();
+            }
+            if(_instance.router == null)
+            {
+                _instance.router = new Router(WUInity.SIM_DATA.GetRouterDb());
+            }
+
+            RouterPoint rP = _instance.router.Resolve(_instance.GetRouterProfile(), latitude, longitude, 1f);
+            var way_ids = WUInity.SIM_DATA.GetRouterDb().EdgeData.Get("way_id");
+            return (long)way_ids.GetRaw(rP.EdgeId);
+        }*/
+
         private Router router;
         List<RouterPoint> validEvacuationGoalRouterPoints;
         List<EvacuationGoal> validEvacuationGoals;
@@ -297,74 +314,6 @@ namespace WUInity
 
             return routeData;
         }
-
-        /*/// <summary>
-        /// Called when a general route to any avialable evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long
-        /// Used mainly by traffic simulator.
-        /// </summary>
-        /// <param name="startPos"></param>
-        /// <returns></returns>
-        public RouteData CalculateRoute(Vector2D startPos)
-        {
-            if (router == null)
-            {
-                router = new Router(WUInity.WUINITY_SIM.GetRouterDb());
-            }
-
-            TrafficInput tO = WUInity.WUINITY_IN.traffic;
-
-            RouteData finalRoute = null;
-            for (int i = 0; i < evacuatonGoals.Length; i++)
-            {
-                //if goal is not accessible we try the next one
-                if (evacuatonGoals[i].blocked)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    Itinero.Profiles.Profile p = null;
-                    if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
-                    {
-                        p = Vehicle.Car.Shortest();
-                    }
-                    else if (tO.routeChoice == TrafficInput.RouteChoice.Fastest)
-                    {
-                        p = Vehicle.Car.Fastest();
-                    }
-                    else if (tO.routeChoice == TrafficInput.RouteChoice.ForceMap)
-                    {
-                        p = Vehicle.Car.Fastest();
-                    }
-
-                    RouterPoint start = router.Resolve(p, (float)startPos.x, (float)startPos.y, 50f);
-                    RouterPoint end = router.Resolve(p, (float)evacuatonGoals[i].latLong.x, (float)evacuatonGoals[i].latLong.y, 300f);
-
-                    Route route = router.Calculate(p, start.Latitude, start.Longitude, end.Latitude, end.Longitude);
-
-                    if (finalRoute == null)
-                    {
-                        finalRoute = new RouteData(route, evacuatonGoals[i]);
-                    }
-                    else if (route.TotalDistance < finalRoute.route.TotalDistance)
-                    {
-                        finalRoute.evacGoal = evacuatonGoals[i];
-                        finalRoute.route = route;
-                    }
-                }
-                catch (Itinero.Exceptions.ResolveFailedException)
-                {
-                    //print("resolve failed");
-                    //break;
-                }
-                catch (Itinero.Exceptions.RouteNotFoundException)
-                {
-                    //print("no route found");
-                }
-            }
-            return finalRoute;
-        }*/
 
         /// <summary>
         /// Called when a general route to any avialable evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long

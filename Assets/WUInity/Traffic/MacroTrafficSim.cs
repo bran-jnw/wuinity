@@ -338,7 +338,8 @@ namespace WUInity.Traffic
                     //we test if we can add it to the desired road, if not it stays in the on hold list
                     if(t.CanAddCar())
                     {
-                        //next loop will this car will show in density
+                        //next loop will this car will be used in traffic density fro real, but we add now as we need to stop other form entering if we are physically full
+                        t.AddCar(car);
                         carsOnHold.Remove(car);
                         carsInSystem.Add(car);
                     }

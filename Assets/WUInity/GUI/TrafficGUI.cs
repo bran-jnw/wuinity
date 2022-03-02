@@ -35,7 +35,8 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouterText))
             {
                 ParseTrafficInput();
-                WUInity.SIM_DATA.LoadRouterDatabase();
+                //WUInity.SIM_DATA.LoadRouterDatabase();
+                WUInity.INSTANCE.UpdateRoutingResourceStatus();
             }
             ++buttonIndex;
 
@@ -88,7 +89,8 @@ namespace WUInity
                 }
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), buildRouterText))
                 {
-                    
+                    File.Delete(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".routerdb"));
+                    WUInity.SIM_DATA.LoadRouterDatabase();
                 }
                 ++buttonIndex;
             }

@@ -15,10 +15,9 @@ namespace WUInity
         public bool[] wuiAreaIndices;
         public bool[] randomIgnitionIndices;
         public bool[] initialIgnitionIndices;
-
+        public bool[] triggerBufferIndices;
         LCPData lcpData;
-
-        [System.NonSerialized] public bool[] triggerBufferIndices;
+        
         private RouterDb routerDb;
         public RouterDb GetRouterDb()
         {
@@ -117,7 +116,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: Router database could not be loaded or built.");
+                WUInity.WUI_LOG("ERROR: Router database could not be loaded nor built.");
             }
 
             return success;

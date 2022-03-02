@@ -83,14 +83,14 @@ namespace WUInity
 
             if(input.runInRealTime)
             {
-                CreateSims(0);
+                CreateSubSims(0);
                 RunSimulation(0);
             }
             else
             {
                 for (int i = 0; i < input.numberOfRuns; i++)
                 {
-                    CreateSims(i);
+                    CreateSubSims(i);
                     //do actual simulation
                     RunSimulation(i);
                     //force garbage collection
@@ -104,7 +104,7 @@ namespace WUInity
             }
         }  
         
-        private void CreateSims(int i)
+        private void CreateSubSims(int i)
         {
             WUInityInput input = WUInity.INPUT;
 
