@@ -12,10 +12,10 @@ namespace WUInity.Evac
     [System.Serializable]
     public class MacroHumanSim
     {
-        [SerializeField] int[] population;
-        [SerializeField] int cellsX;
-        [SerializeField] int cellsY;
-        [SerializeField] int maxPop = -1;
+        int[] population;
+        int cellsX;
+        int cellsY;
+        int maxPop = -1;
 
         Vector2D realWorldSize;
         public Vector2D cellWorldSize;
@@ -67,6 +67,38 @@ namespace WUInity.Evac
                 }
             }
             return count;
+        }
+
+        public int GetPeopleLeftInCellIntendingToLeave(int index)
+        {
+            int count = 0;
+
+            if (humanEvacCells[index] != null)
+            {
+                HumanEvacCell hR = humanEvacCells[index];
+                for (int j = 0; j < hR.macroHouseholds.Length; ++j)
+                {
+                    if (hR.macroHouseholds[j] != null)
+                    {
+                        MacroHousehold rH = hR.macroHouseholds[j];
+                        if (!rH.reachedCar && rH.evacuationTime < float.MaxValue)
+                        {
+                            count += rH.peopleInHousehold;
+                        }
+                    }
+                }
+            }
+
+            if(count == 0)
+            {
+                humanEvacCells[index].cellIsEvacuated = true;
+            }
+            return count;
+        }
+        
+        public bool IsCellEvacuated(int index)
+        {
+            return humanEvacCells[index].cellIsEvacuated;
         }
 
         /// <summary>

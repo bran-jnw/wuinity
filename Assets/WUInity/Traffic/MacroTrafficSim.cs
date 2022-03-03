@@ -227,6 +227,27 @@ namespace WUInity.Traffic
             }
         }
 
+        public bool IsAnyoneGoingHere(EvacuationGoal goal)
+        {
+            for (int i = 0; i < carsInSystem.Count; i++)
+            {
+                if(carsInSystem[i].routeData.evacGoal == goal)
+                {
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < carsOnHold.Count; i++)
+            {
+                if (carsOnHold[i].routeData.evacGoal == goal)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void AdvanceTrafficSimulation(float deltaTime, float currentTime)
         {
             //first resolve traffic events

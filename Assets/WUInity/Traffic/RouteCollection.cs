@@ -60,11 +60,11 @@ namespace WUInity
                 SelectFastestNonBlocked();
             }
         }
-
-        //TODO: check if blocked goal is actually the goal of anyone, if not we do not care if it is gone or not (we will give message though)
+                
         public void SelectClosestNonBlocked()
         {
             routePriority = RoutePriority.Closest;
+            int oldSelectedRouteIndex = selectedRouteIndex;
             selectedRouteIndex = -1;
             if (routes != null)
             {

@@ -15,6 +15,7 @@ namespace WUInity.Evac
         public Vector2D cellWorldSize;
         public double cellDensity; //persons / km2
         public Vector2D closestNodeUnitySpace;
+        public bool cellIsEvacuated;
 
         /// <summary>
         /// Creates human evac cell ythat keeps track of households in the cell and the routes they can use after reaching their car.

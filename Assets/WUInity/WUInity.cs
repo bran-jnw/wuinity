@@ -603,6 +603,16 @@ namespace WUInity
         }
 
         bool pauseSim = false;
+        public void TogglePause()
+        {
+            pauseSim = !pauseSim;
+        }
+
+        public bool IsPaused()
+        {
+            return pauseSim;
+        }
+        
         void Update()
         {
             if (Input.GetMouseButtonDown(0) && dataSampleMode != DataSampleMode.None)
@@ -626,7 +636,7 @@ namespace WUInity
 
             if(Input.GetKeyDown(KeyCode.Pause) && INPUT.runInRealTime)
             {
-                pauseSim = !pauseSim;
+                TogglePause();
             }
             if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
             {

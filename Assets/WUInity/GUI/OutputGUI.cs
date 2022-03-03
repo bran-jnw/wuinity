@@ -101,12 +101,33 @@ namespace WUInity
                 ++buttonIndex;
             }
 
-            ++buttonIndex;
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
+            if(WUInity.SIM.isRunning)
             {
-                WUInity.SIM.StopSim("STOP: Stopped simulation as requested by user.");
-            }
-            ++buttonIndex;
+                ++buttonIndex;
+
+                string pauseState = "Simulation running";
+                string pauseButton = "Pause simulation";
+                if (WUInity.INSTANCE.IsPaused())
+                {
+                    pauseState = "Simulation paused";
+                    pauseButton = "Cont. simulation";
+                }
+
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), pauseState);
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), pauseButton))
+                {
+                    WUInity.INSTANCE.TogglePause();
+                }
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
+                {
+                    WUInity.SIM.StopSim("STOP: Stopped simulation as requested by user.");
+                }
+                ++buttonIndex;
+            }            
         }
     }
 }
