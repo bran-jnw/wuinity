@@ -399,16 +399,28 @@ namespace WUInity
             }
 
             //update raster evac routes first as traffic might use some of the updated choices
+            int cellsWithoutRouteButNoonePlansToLeave = 0;
             if(WUInity.SIM_DATA.routes != null)
             {
                 for (int i = 0; i < WUInity.SIM_DATA.routes.Length; i++)
                 {
-                    if (WUInity.SIM_DATA.routes[i] != null)
+                    if (WUInity.SIM_DATA.routes[i] != null && !macroHumanSim.IsCellEvacuated(i))
                     {
-                        WUInity.SIM_DATA.routes[i].CheckAndUpdateRoute();
+                        if(macroHumanSim.GetPeopleLeftInCellIntendingToLeave(i) > 0)
+                        {
+                            WUInity.SIM_DATA.routes[i].CheckAndUpdateRoute();
+                        }
+                        else
+                        {
+                            ++cellsWithoutRouteButNoonePlansToLeave;
+                        }
                     }
                 }
-            }            
+            }          
+            if(cellsWithoutRouteButNoonePlansToLeave > 0)
+            {
+                WUInity.WUI_LOG("LOG: " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
+            }
             //update cars already in traffic
             macroTrafficSim.UpdateEvacuationGoals();              
         }                 
