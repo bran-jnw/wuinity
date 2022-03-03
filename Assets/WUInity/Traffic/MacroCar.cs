@@ -31,6 +31,7 @@ namespace WUInity.Traffic
             //go directly to shape 1 since shape 0 is just meta data telling that we are a car
             currentShapeIndex = 1;
             currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance;
+            currentShapeLength = currentDistanceLeft;
             currentSpeedLimit = GetCurrentSpeedLimit();
             hasArrived = false;
             totalTravelDistance = 0.0f;
@@ -40,8 +41,6 @@ namespace WUInity.Traffic
 
             routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
             densityHash = CalcHashCode();
-
-            currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance;
 
             totalDrivingTime = 0f;
 
@@ -121,8 +120,7 @@ namespace WUInity.Traffic
             cDL -= deltaTime * speed;
             if (cDL <= 0.0f)
             {
-                int cSI = currentShapeIndex;
-                ++cSI;
+                int cSI = currentShapeIndex + 1;
                 //check if we have arrived or just going to next shape/node
                 if (cSI == routeData.route.ShapeMeta.Length)
                 {
@@ -187,11 +185,17 @@ namespace WUInity.Traffic
             return routeData.route.ShapeMeta[currentShapeIndex];
         }
 
-        public Vector4 GetUnityPositionAndSpeed()
+        Vector4 positionAndSpeed;
+        public Vector4 GetUnityPositionAndSpeed(bool updateData)
         {
-            Vector2 pos = Vector2.Lerp(unityCurrentStartPosition, unityCurrentGoalPosition, 1.0f - (currentDistanceLeft / currentShapeLength));
-            float speed = latestSpeed / currentSpeedLimit;
-            return new Vector4(pos.x, pos.y, speed, 0f);
+            if (updateData)
+            {
+                Vector2 pos = Vector2.Lerp(unityCurrentStartPosition, unityCurrentGoalPosition, 1.0f - (currentDistanceLeft / currentShapeLength));
+                float speed = latestSpeed / currentSpeedLimit;
+                positionAndSpeed = new Vector4(pos.x, pos.y, speed, 0f);
+            }
+
+            return positionAndSpeed;
         }        
 
         public void MoveCarSpeed(float timeStamp, float deltaTime, float speed)
@@ -211,7 +215,7 @@ namespace WUInity.Traffic
                     if (routeData.evacGoal.CarArrives(this, timeStamp, deltaTime))
                     {
                         hasArrived = true;
-                        //reduce with overshooting distance
+                        //reduce anyovershooting distance
                         totalTravelDistance += currentDistanceLeft;
                     }     
                     else
@@ -227,8 +231,11 @@ namespace WUInity.Traffic
                 }
                 else
                 {
+                    //remove any potential overshoot of distance
+                    totalTravelDistance += currentDistanceLeft;
                     //add "old" current distance left since there might be some residual actual travel spent (negative distance left)?
                     currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;// + currentDistanceLeft;
+                    currentShapeLength = currentDistanceLeft;
                     currentSpeedLimit = GetCurrentSpeedLimit();                                       
 
                     //update new going to coordinates
@@ -244,8 +251,6 @@ namespace WUInity.Traffic
                     routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
 
                     densityHash = CalcHashCode();
-
-                    currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;
                 }
             }
         }

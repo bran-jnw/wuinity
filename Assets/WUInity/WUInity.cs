@@ -646,7 +646,7 @@ namespace WUInity
 
         void UpdateBorders()
         {
-            if(!internal_dataStatus.haveInput)
+            if(!DATA_STATUS.haveInput)
             {
                 return;
             }
@@ -741,20 +741,7 @@ namespace WUInity
             {
                 dataSampleString = "Data not visible, toggle on to sample data.";
             }          
-        }        
-
-        /*public void SaveTexturesToDisk()
-        {
-            // Encode texture into PNG
-            byte[] bytes = OUTPUT.evac.rawPopTexture.EncodeToPNG();
-            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "rawPopulation.png"), bytes);
-            bytes = OUTPUT.evac.popStuckTexture.EncodeToPNG();
-            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "stuckPopulation.png"), bytes);
-            bytes = OUTPUT.evac.relocatedPopTexture.EncodeToPNG();
-            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "relocatedPopulation.png"), bytes);
-            bytes = OUTPUT.evac.popStayingTexture.EncodeToPNG();
-            File.WriteAllBytes(Path.Combine(WUInity.OUTPUT_FOLDER, "stayingPopulation.png"), bytes);
-        }*/        
+        }          
 
         public bool IsPainterActive()
         {
@@ -1038,7 +1025,7 @@ namespace WUInity
         List<TrafficCellData[]> trafficDensityData;
         List<int[]> peopleInCells;
         public List<Texture2D> outputTextures;
-        public void SaveTransientDensityData(float time, List<MacroCar> cars)
+        public void SaveTransientDensityData(float time, List<MacroCar> carsInSystem, List<MacroCar> carsOnHold)
         {
             //first time
             if (trafficDensityData == null)
@@ -1053,15 +1040,12 @@ namespace WUInity
             {
                 trafficDensityData.Add(new TrafficCellData[SIM_DATA.EvacCellCount.x * SIM_DATA.EvacCellCount.y]);
 
-                for (int i = 0; i < cars.Count; i++)
+                for (int i = 0; i < carsInSystem.Count; i++)
                 {
-                    float lati = cars[i].goingToCoord.Latitude;
-                    float longi = cars[i].goingToCoord.Longitude;
+                    Vector4 posAndSpeed = carsInSystem[i].GetUnityPositionAndSpeed(false);
 
-                    Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(lati, longi, MAP.CenterMercator, MAP.WorldRelativeScale);
-
-                    int x = (int)(pos.x / INPUT.evac.routeCellSize);
-                    int y = (int)(pos.y / INPUT.evac.routeCellSize);
+                    int x = (int)(posAndSpeed.x / INPUT.evac.routeCellSize);
+                    int y = (int)(posAndSpeed.y / INPUT.evac.routeCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > SIM_DATA.EvacCellCount.x - 1 || y < 0 || y > SIM_DATA.EvacCellCount.y - 1)
@@ -1074,12 +1058,39 @@ namespace WUInity
                     {
                         trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].peopleCount = cars[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].peopleCount = carsInSystem[i].numberOfPeopleInCar;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].peopleCount += cars[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].peopleCount += carsInSystem[i].numberOfPeopleInCar;
+                    }
+                }
+
+                for (int i = 0; i < carsOnHold.Count; i++)
+                {
+                    Vector4 posAndSpeed = carsOnHold[i].GetUnityPositionAndSpeed(false);
+
+                    int x = (int)(posAndSpeed.x / INPUT.evac.routeCellSize);
+                    int y = (int)(posAndSpeed.y / INPUT.evac.routeCellSize);
+
+                    //outside of mapped data
+                    if (x < 0 || x > SIM_DATA.EvacCellCount.x - 1 || y < 0 || y > SIM_DATA.EvacCellCount.y - 1)
+                    {
+                        continue;
+                    }
+
+                    //add or update data
+                    if (trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x] == null)
+                    {
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x] = new TrafficCellData();
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].carCount = 1;
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].peopleCount = carsOnHold[i].numberOfPeopleInCar;
+                    }
+                    else
+                    {
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].carCount += 1;
+                        trafficDensityData[outputIndex][x + y * SIM_DATA.EvacCellCount.x].peopleCount += carsOnHold[i].numberOfPeopleInCar;
                     }
                 }
 

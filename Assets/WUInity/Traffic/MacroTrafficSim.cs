@@ -417,14 +417,14 @@ namespace WUInity.Traffic
                 UpdateEvacGoalsInternal();
             }
 
-            WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem);
+            WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
 
             if(carsInSystem.Count > 0)
             {
                 Vector4[] carsRendering = new Vector4[carsInSystem.Count];
                 for (int i = 0; i < carsRendering.Length; i++)
                 {
-                    carsRendering[i] = carsInSystem[i].GetUnityPositionAndSpeed();
+                    carsRendering[i] = carsInSystem[i].GetUnityPositionAndSpeed(true);
                 }
                 evacuationRenderer.UpdateCarsToRender(carsRendering);
             }            
