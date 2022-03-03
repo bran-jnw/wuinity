@@ -219,7 +219,8 @@ namespace WUInity
         void LoadPopulation(string[] paths)
         {
             WUInity.INPUT.population.populationFile = paths[0];
-            WUInity.POPULATION.LoadPopulationFromFile();
+            //WUInity.POPULATION.LoadPopulationFromFile();
+            WUInity.INSTANCE.UpdatePopulationResourceStatus();
             populationMenuDirty = true;
         }
 

@@ -282,6 +282,9 @@ namespace WUInity.Traffic
                 averageSpeed += speed;
                 minSpeed = speed < minSpeed ? speed : minSpeed;
 
+                //sort the cars in distance left, shortest distance goes first https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object
+                t.Value.cars.Sort((x, y) => x.currentDistanceLeft.CompareTo(y.currentDistanceLeft));
+
                 //go through all cars on road segment
                 for (int j = 0; j < t.Value.cars.Count; ++j)
                 {

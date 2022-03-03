@@ -63,6 +63,8 @@ namespace WUInity.Traffic
             int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
             Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
 
+            //Vector2D directionVector = new Vector2D(goingToCoord.Latitude - secondToLastCoord.Latitude, goingToCoord.Longitude - secondToLastCoord.Longitude).normalized;
+
             //int wayId = (int)RouteCreator.GetWayId(goingToCoord.Latitude, goingToCoord.Longitude);
 
             unchecked // Overflow is fine, just wrap
@@ -72,6 +74,8 @@ namespace WUInity.Traffic
                 //hash = hash * 23 + wayId.GetHashCode();
                 hash = hash * 23 + goingToCoord.Latitude.GetHashCode();
                 hash = hash * 23 + goingToCoord.Longitude.GetHashCode();
+                //hash = hash * 23 + directionVector.x.GetHashCode();
+                //hash = hash * 23 + directionVector.y.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();
                 //hash = hash * 23 + currentShapeLength.GetHashCode(); //needed since we can drive on the same street from to different direction going to the same node in a t-junction
@@ -92,6 +96,8 @@ namespace WUInity.Traffic
             Itinero.LocalGeo.Coordinate nextGoalCoord = routeData.route.Shape[sI];
             Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
 
+            //Vector2D directionVector = new Vector2D(nextGoalCoord.Latitude - secondToLastCoord.Latitude, nextGoalCoord.Longitude - secondToLastCoord.Longitude).normalized;
+
             //int nextWayId = (int)RouteCreator.GetWayId(nextGoalCoord.Latitude, nextGoalCoord.Longitude);
 
             unchecked // Overflow is fine, just wrap
@@ -101,8 +107,10 @@ namespace WUInity.Traffic
                 //hash = hash * 23 + nextWayId.GetHashCode();
                 hash = hash * 23 + nextGoalCoord.Latitude.GetHashCode();
                 hash = hash * 23 + nextGoalCoord.Longitude.GetHashCode();
+                //hash = hash * 23 + directionVector.x.GetHashCode();
+                //hash = hash * 23 + directionVector.y.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
-                hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();
+                hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();                
                 return hash;
             }            
         }
