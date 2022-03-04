@@ -18,10 +18,8 @@ namespace WUInity.Traffic
         public float totalDrivingTime;
         public bool hasArrived;
 
-        public int densityHash;
-
-        private Vector2 unityCurrentStartPosition;
-        private Vector2 unityCurrentGoalPosition;        
+        public int roadSegmentHash;
+      
         private float latestSpeed;
 
         public MacroCar(RouteData desiredRoute, int numberOfPeopleInCar)
@@ -40,78 +38,41 @@ namespace WUInity.Traffic
             goingToCoord = routeData.route.Shape[sI];
 
             routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
-            densityHash = CalcHashCode();
+            UpdateHash();
 
             totalDrivingTime = 0f;
-
-            //save start coordinate in Unity space
-            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(routeData.route.Shape[0].Latitude, routeData.route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
-            unityCurrentStartPosition = new Vector2((float)pos.x, (float)pos.y);
-            //save new goal coordinate in Unity space
-            pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(goingToCoord.Latitude, goingToCoord.Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
-            unityCurrentGoalPosition = new Vector2((float)pos.x, (float)pos.y);
+            latestSpeed = 0;
         }
 
-        private int CalcHashCode()
-        {
-            /*if(string.IsNullOrWhiteSpace(drivingOnStreet))
-            {
-                drivingOnStreet = "no street name available";
-            }*/           
-
+        private void UpdateHash()
+        {      
             int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
             Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
 
-            //Vector2D directionVector = new Vector2D(goingToCoord.Latitude - secondToLastCoord.Latitude, goingToCoord.Longitude - secondToLastCoord.Longitude).normalized;
+            roadSegmentHash = CalcHash(goingToCoord, secondToLastCoord);
+        }
 
-            //int wayId = (int)RouteCreator.GetWayId(goingToCoord.Latitude, goingToCoord.Longitude);
-
+        private int CalcHash(Itinero.LocalGeo.Coordinate goalCoord, Itinero.LocalGeo.Coordinate secondToLastCoord)
+        {
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
-                //hash = hash * 23 + drivingOnStreet.GetHashCode();
-                //hash = hash * 23 + wayId.GetHashCode();
-                hash = hash * 23 + goingToCoord.Latitude.GetHashCode();
-                hash = hash * 23 + goingToCoord.Longitude.GetHashCode();
-                //hash = hash * 23 + directionVector.x.GetHashCode();
-                //hash = hash * 23 + directionVector.y.GetHashCode();
+                hash = hash * 23 + goalCoord.Latitude.GetHashCode();
+                hash = hash * 23 + goalCoord.Longitude.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
                 hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();
-                //hash = hash * 23 + currentShapeLength.GetHashCode(); //needed since we can drive on the same street from to different direction going to the same node in a t-junction
                 return hash;
             }
         }
 
         public int GetNextHashCode()
-        {
-            /*string nextStreetName;
-            routeData.route.ShapeMeta[currentShapeIndex + 1].Attributes.TryGetValue("name", out nextStreetName);
-            if (string.IsNullOrWhiteSpace(nextStreetName))
-            {
-                nextStreetName = "no street name available";
-            }*/           
+        {       
 
             int sI = routeData.route.ShapeMeta[currentShapeIndex + 1].Shape;
             Itinero.LocalGeo.Coordinate nextGoalCoord = routeData.route.Shape[sI];
             Itinero.LocalGeo.Coordinate secondToLastCoord = routeData.route.Shape[sI - 1];
 
-            //Vector2D directionVector = new Vector2D(nextGoalCoord.Latitude - secondToLastCoord.Latitude, nextGoalCoord.Longitude - secondToLastCoord.Longitude).normalized;
-
-            //int nextWayId = (int)RouteCreator.GetWayId(nextGoalCoord.Latitude, nextGoalCoord.Longitude);
-
-            unchecked // Overflow is fine, just wrap
-            {
-                int hash = 17;
-                //hash = hash * 23 + nextStreetName.GetHashCode();
-                //hash = hash * 23 + nextWayId.GetHashCode();
-                hash = hash * 23 + nextGoalCoord.Latitude.GetHashCode();
-                hash = hash * 23 + nextGoalCoord.Longitude.GetHashCode();
-                //hash = hash * 23 + directionVector.x.GetHashCode();
-                //hash = hash * 23 + directionVector.y.GetHashCode();
-                hash = hash * 23 + secondToLastCoord.Latitude.GetHashCode();
-                hash = hash * 23 + secondToLastCoord.Longitude.GetHashCode();                
-                return hash;
-            }            
+            return CalcHash(nextGoalCoord, secondToLastCoord);          
         }
 
         public bool WillChangeRoad(float deltaTime, float speed)
@@ -148,7 +109,7 @@ namespace WUInity.Traffic
             goingToCoord = routeData.route.Shape[sI];
 
             routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
-            densityHash = CalcHashCode();
+            UpdateHash();
 
             currentShapeLength = routeData.route.ShapeMeta[currentShapeIndex].Distance;
         }
@@ -183,14 +144,21 @@ namespace WUInity.Traffic
         public Itinero.Route.Meta GetCurrentMetaData()
         {
             return routeData.route.ShapeMeta[currentShapeIndex];
+        }        
+
+        public void SetSpline(LinearSpline2D newSpline)
+        {
+            spline = newSpline; 
         }
 
         Vector4 positionAndSpeed;
+        //CatmullRomSpline2D spline;
+        LinearSpline2D spline;
         public Vector4 GetUnityPositionAndSpeed(bool updateData)
         {
             if (updateData)
             {
-                Vector2 pos = Vector2.Lerp(unityCurrentStartPosition, unityCurrentGoalPosition, 1.0f - (currentDistanceLeft / currentShapeLength));
+                Vector2 pos = spline.GetYZValue(currentShapeLength - currentDistanceLeft);
                 float speed = latestSpeed / currentSpeedLimit;
                 positionAndSpeed = new Vector4(pos.x, pos.y, speed, 0f);
             }
@@ -198,10 +166,9 @@ namespace WUInity.Traffic
             return positionAndSpeed;
         }        
 
-        public void MoveCarSpeed(float timeStamp, float deltaTime, float speed)
+        public void MoveCar(float timeStamp, float deltaTime, float speed)
         {
             latestSpeed = speed;
-
             currentDistanceLeft -= deltaTime * speed;
             totalTravelDistance += deltaTime * speed;
             totalDrivingTime += deltaTime;
@@ -225,9 +192,6 @@ namespace WUInity.Traffic
                         totalTravelDistance -= deltaTime * speed;
                         --currentShapeIndex;
                     }
-
-                    //set start to goal since we are basically at goal, at worst queing
-                    unityCurrentStartPosition = unityCurrentGoalPosition;
                 }
                 else
                 {
@@ -240,17 +204,14 @@ namespace WUInity.Traffic
 
                     //update new going to coordinates
                     int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
-                    goingToCoord = routeData.route.Shape[sI];
-
-                    //save last goal coordinate in Unity space as it is now the start coordinate
-                    unityCurrentStartPosition = unityCurrentGoalPosition;
-                    //save new goal coordinate in Unity space
-                    Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(goingToCoord.Latitude, goingToCoord.Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
-                    unityCurrentGoalPosition = new Vector2((float)pos.x, (float)pos.y);
+                    goingToCoord = routeData.route.Shape[sI];              
 
                     routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
 
-                    densityHash = CalcHashCode();
+                    UpdateHash();
+
+                    //CalculateSpline();
+                    latestSpeed = 0;
                 }
             }
         }

@@ -704,7 +704,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zoomSpeed: 300
-  lowestY: 200
+  lowestY: 500
   c: {fileID: 9009419062933292159}
 --- !u!1 &9009419063402271061
 GameObject:

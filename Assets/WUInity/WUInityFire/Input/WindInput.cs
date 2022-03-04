@@ -25,9 +25,9 @@ namespace WUInity.Fire
     {
         [SerializeField] private WindData[] dataPoints;         //declare datapoints array of winddata structs
 
-        private CatmullRomSpline directionSpline;               //declare three spline variables (unity)
-        private CatmullRomSpline speedSpline;
-        private CatmullRomSpline cloudSpline;
+        private CatmullRomSpline1D directionSpline;               //declare three spline variables (unity)
+        private CatmullRomSpline1D speedSpline;
+        private CatmullRomSpline1D cloudSpline;
 
         public WindInput(WindData[] dataPoints)                 //CONSTRUCTOR
         {
@@ -60,21 +60,21 @@ namespace WUInity.Fire
             {
                 dir[i] = new Vector2(dataPoints[i].time, dataPoints[i].direction);
             }
-            directionSpline = new CatmullRomSpline(dir);                                //this function uses a super special unity method to make a continuous curve based on some points
+            directionSpline = new CatmullRomSpline1D(dir);                                //this function uses a super special unity method to make a continuous curve based on some points
 
             Vector2[] speed = new Vector2[dataPoints.Length];                           //Create 2D Vector arrays to store the time and windspeed of each node
             for (int i = 0; i < speed.Length; i++)
             {
                 speed[i] = new Vector2(dataPoints[i].time, dataPoints[i].speed);
             }
-            speedSpline = new CatmullRomSpline(speed);
+            speedSpline = new CatmullRomSpline1D(speed);
 
             Vector2[] cloud = new Vector2[dataPoints.Length];                           //Create 2D Vector arrays to store the time and cloud cover of each node
             for (int i = 0; i < cloud.Length; i++)
             {
                 cloud[i] = new Vector2(dataPoints[i].time, dataPoints[i].cloudCover);
             }
-            cloudSpline = new CatmullRomSpline(cloud);
+            cloudSpline = new CatmullRomSpline1D(cloud);
         }
 
         public static WindInput GetTemplate()                                           //get some standard input values (guessing it is for testing purposes)
