@@ -23,9 +23,7 @@ namespace WUInity
         public int stayingPeople;
 
         [System.NonSerialized] public int[] rawPopulation;
-        [System.NonSerialized] public int[] stayingPopulation;
 
-        [System.NonSerialized] public Texture2D popStayingTexture;
         [System.NonSerialized] public Texture2D relocatedPopTexture;
         [System.NonSerialized] public Texture2D popStuckTexture;
     }

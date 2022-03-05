@@ -2,15 +2,18 @@ Shader "WUInity/BoxDispersionUnlit"
 {
     Properties
     {
+        _Transparency("Transparency", float) = 0.8
         _MinValue("MinValue", float) = 0.6 //5 meters at C = 3
         _MaxValue("MaxValue", float) = 1.0 // 30 meters at C = 3
         _ScaleGradient("ScaleGradient", 2D) = "green" {}
     }
     SubShader
     {
-        Tags {"Queue" = "AlphaTest" "IgnoreProjector" = "True" "RenderType" = "TransparentCutout"}
+        Tags {"Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
         LOD 100
         Lighting Off
+        ZWrite Off
+        Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {
@@ -28,7 +31,7 @@ Shader "WUInity/BoxDispersionUnlit"
 
             uniform sampler2D _ScaleGradient;
             float4 _ScaleGradient_ST;
-            uniform float _MinValue, _MaxValue;
+            uniform float _MinValue, _MaxValue, _Transparency;
             uniform int _CellsX, _CellsY;
             uniform StructuredBuffer<float> _Data;
 
@@ -47,11 +50,12 @@ Shader "WUInity/BoxDispersionUnlit"
                 int index = xIndex + yIndex * _CellsX;
                 float value = _Data[index];
 
+                //clip exits shader here if below 0
                 clip(value - _MinValue);
 
                 float valueNorm = saturate((value - _MinValue) / (_MaxValue - _MinValue));
                 float4 color = tex2D(_ScaleGradient, float2(valueNorm, 0.125));
-                color.a = 1.0;              
+                color.a = _Transparency;
 
                 return color;
             }

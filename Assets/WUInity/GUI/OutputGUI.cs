@@ -34,14 +34,8 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Smoke dispersion"))
             {
                 WUInity.INSTANCE.DisplaySmokeDispersion();
+                WUInity.INSTANCE.ToggleSmokeDataPlane();
                 WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-            }
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Staying population"))
-            {
-                WUInity.INSTANCE.DisplayStayingPop();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Staying);
             }
             ++buttonIndex;
 
@@ -50,6 +44,7 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
                 WUInity.INSTANCE.DisplayClosestDensityData(time);
+                WUInity.INSTANCE.ToggleEvacDataPlane();
                 WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             }
             ++buttonIndex;
@@ -64,9 +59,10 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/Hide data"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Hide visual data"))
             {
-                WUInity.INSTANCE.ToggleEvacDataPlane();
+                WUInity.INSTANCE.SetEvacDataPlane(false);
+                WUInity.INSTANCE.SetFireDataPlane(false);
             }
             ++buttonIndex;
 

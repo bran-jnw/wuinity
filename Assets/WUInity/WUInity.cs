@@ -286,7 +286,7 @@ namespace WUInity
         [SerializeField] private LineRenderer osmBorder;
         [SerializeField] private Material boxDispersionMaterial;
 
-        public enum DataSampleMode { None, GPW, Population, Relocated, Staying, TrafficDens, Paint, Farsite }
+        public enum DataSampleMode { None, GPW, Population, Relocated, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;
 
         //never directly call these, always use singletons (except once when setting input)
@@ -303,6 +303,7 @@ namespace WUInity
 
         MeshRenderer evacDataPlaneMeshRenderer;
         MeshRenderer fireDataPlaneMeshRenderer;
+        MeshRenderer smokePlaneMeshRenderer;
         List<GameObject> drawnRoads;
         GameObject[] goalMarkers;
         private GameObject evacDataPlane;
@@ -642,7 +643,10 @@ namespace WUInity
             if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
             {
                 SIM.UpdateRealtimeSim();
-                SIM.GetSmokeDispersion().UpdateVisualization(boxDispersionMaterial);
+                if(renderSmokeDispersion)
+                {
+                    SIM.GetSmokeDispersion().UpdateVisualization(boxDispersionMaterial);
+                }                
             }
         }
 
@@ -721,10 +725,6 @@ namespace WUInity
                     {
                         dataSampleString = "Rescaled and relocated people count: " + SIM.GetMacroHumanSim().GetPopulation(x, y);
                     }
-                }
-                else if (dataSampleMode == DataSampleMode.Staying)
-                {
-                    dataSampleString = "Staying people count: " + OUTPUT.evac.stayingPopulation[x + y * SIM_DATA.EvacCellCount.x];
                 }
                 else if (dataSampleMode == DataSampleMode.TrafficDens)
                 {
@@ -909,11 +909,6 @@ namespace WUInity
             SetDataPlaneTexture(POPULATION.GetPopulationTexture());
         }
 
-        public void DisplayStayingPop()
-        {
-            SetDataPlaneTexture(OUTPUT.evac.popStayingTexture);
-        }
-
         private void DisplayWUIAreaMap()
         {
             SetDataPlaneTexture(PAINTER.GetWUIAreaTexture(), true);
@@ -934,9 +929,39 @@ namespace WUInity
             SetDataPlaneTexture(PAINTER.GetTriggerBufferTexture(), true);
         }
 
+        bool renderSmokeDispersion = false;
         public void DisplaySmokeDispersion()
         {
-            SetDataPlaneTexture(SIM.GetSmokeDispersion().GetConcentrationTexture(), true);
+            renderSmokeDispersion = true;
+            //just to make sure that the plane exists
+            if(smokePlaneMeshRenderer == null)
+            {
+                GameObject gO = new GameObject(name);
+                gO.transform.parent = this.transform;
+                gO.isStatic = true;
+                // You can change that line to provide another MeshFilter
+                MeshFilter filter = gO.AddComponent<MeshFilter>();
+                Mesh mesh = new Mesh(); // filter.mesh;
+                filter.mesh = mesh;
+                MeshRenderer mR = gO.AddComponent<MeshRenderer>();
+                mR.receiveShadows = false;
+                mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                mesh.Clear();
+
+                float width = (float)INPUT.size.x;
+                float length = (float)INPUT.size.y;
+                Vector3 offset = Vector3.zero;
+                Vector2 maxUV = Vector2.one;
+
+                PopulationManager.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+
+                mR.material = boxDispersionMaterial;
+                //move up one meter
+                gO.transform.position += Vector3.up;
+                //gO.SetActive(false);
+                smokePlaneMeshRenderer = mR;
+                smokePlaneMeshRenderer.material = boxDispersionMaterial;
+            }            
         }
 
         public void DisplayEvacGroupMap()
@@ -982,6 +1007,17 @@ namespace WUInity
             {
                 fireDataPlaneMeshRenderer.gameObject.SetActive(!fireDataPlaneMeshRenderer.gameObject.activeSelf);
                 return fireDataPlaneMeshRenderer.gameObject.activeSelf;
+            }
+
+            return false;
+        }
+
+        public bool ToggleSmokeDataPlane()
+        {
+            if (smokePlaneMeshRenderer != null)
+            {
+                smokePlaneMeshRenderer.gameObject.SetActive(!smokePlaneMeshRenderer.gameObject.activeSelf);
+                return smokePlaneMeshRenderer.gameObject.activeSelf;
             }
 
             return false;
