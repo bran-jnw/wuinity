@@ -146,6 +146,7 @@ namespace WUInity.Fire
                     fireCells[GetCellIndex(x, y)] = new FireCell(this, x, y, l); 
                 }
             }
+
             //calc distances based on elevation etc
             for (int y = 0; y < cellCount.y; ++y)
             {

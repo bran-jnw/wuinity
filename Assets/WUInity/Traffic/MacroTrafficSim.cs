@@ -472,6 +472,7 @@ namespace WUInity.Traffic
             private int maxCarsOnRoad;
             public bool upstreamMovementBlocked;
             LinearSpline2D spline;
+            public float speedLimit;
 
             public RoadSegment(MacroCar car, MacroTrafficSim mCS)
             {
@@ -489,6 +490,7 @@ namespace WUInity.Traffic
                 upstreamMovementBlocked = false;
 
                 CalculateSpline(car);
+                speedLimit = car.GetAndSetCurrentSpeedLimit();
                 car.SetSpline(spline);
             }
 
@@ -535,6 +537,7 @@ namespace WUInity.Traffic
 
             public void AddCar(MacroCar car)
             {
+                car.SetCurrentSpeedLimit(speedLimit);
                 car.SetSpline(spline);
                 cars.Add(car);
             }

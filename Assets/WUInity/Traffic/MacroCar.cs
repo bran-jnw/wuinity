@@ -30,7 +30,7 @@ namespace WUInity.Traffic
             currentShapeIndex = 1;
             currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance;
             currentShapeLength = currentDistanceLeft;
-            currentSpeedLimit = GetCurrentSpeedLimit();
+            //currentSpeedLimit = GetAndSetCurrentSpeedLimit();
             hasArrived = false;
             totalTravelDistance = 0.0f;
 
@@ -102,7 +102,7 @@ namespace WUInity.Traffic
             currentShapeIndex = 1;
             //add old distance left to the new route piece length to keep somewhat consistent travel distance
             currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance + currentDistanceLeft;
-            currentSpeedLimit = GetCurrentSpeedLimit();
+            //currentSpeedLimit = GetAndSetCurrentSpeedLimit();
             hasArrived = false;
 
             int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
@@ -118,7 +118,7 @@ namespace WUInity.Traffic
         /// Returns speed in [m/s] based on highway type if found, if not found default speed is 2.78 m/s (10 km/h).
         /// </summary>
         /// <returns></returns>
-        private float GetCurrentSpeedLimit()
+        public float GetAndSetCurrentSpeedLimit()
         {
             //default 10 km/h
             float speed = 2.78f;
@@ -138,7 +138,14 @@ namespace WUInity.Traffic
                 routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("highway", out highwayType);
                 speed = MacroTrafficSim.GetSpeedLimit(highwayType);
             }
+
+            currentSpeedLimit = speed;
             return speed;
+        }
+
+        public void SetCurrentSpeedLimit(float speedLimit)
+        {
+            currentSpeedLimit = speedLimit;
         }
 
         public Itinero.Route.Meta GetCurrentMetaData()
@@ -199,18 +206,13 @@ namespace WUInity.Traffic
                     //add "old" current distance left since there might be some residual actual travel spent (negative distance left)?
                     currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;// + currentDistanceLeft;
                     currentShapeLength = currentDistanceLeft;
-                    currentSpeedLimit = GetCurrentSpeedLimit();                                       
+                    //currentSpeedLimit = GetAndSetCurrentSpeedLimit();                                       
 
                     //update new going to coordinates
                     int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
                     goingToCoord = routeData.route.Shape[sI];              
-
-                    routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
-
+                    //routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
                     UpdateHash();
-
-                    //CalculateSpline();
-                    //latestSpeed = 0;
                 }
             }
         }

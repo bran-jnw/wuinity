@@ -14,12 +14,12 @@ namespace WUInity.Smoke
         float cellSizeX, cellSizeY;
         float cellArea, cellVolume, invertedCellVolume, cellHeight;
         Fire.FireMesh fireMesh;
-        float[,] concentration;
-        float[,] concentrationChange;
-        float[] linearArray; //for use in shaders
+        float[] concentration;
+        float[] concentrationBuffer;
         Texture2D concentrationTexture;
-        Fire.FireCell[,] fireCellReferences;
+        Fire.FireCell[] fireCellReferences;
         float xFaceArea, yFaceArea;
+        int bigXSize, cellCount;
 
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
@@ -34,24 +34,24 @@ namespace WUInity.Smoke
             cellArea = cellSizeX * cellSizeY;
             cellVolume = cellSizeX * cellSizeY * height;
             invertedCellVolume = 1f / cellVolume;
-            concentration = new float[cellCountX + 2 , cellCountY + 2]; //added padding around to get outside range faster
-            concentrationChange = new float[cellCountX, cellCountY];
-            linearArray = new float[cellCountX * cellCountY];
+            cellCount = cellCountX * cellCountY;
+            concentration = new float[(cellCountX + 2) * (cellCountY + 2)]; //added padding around to get outside range faster
+            concentrationBuffer = new float[cellCount];
             concentrationTexture = new Texture2D(cellCountX, cellCountY);
             xFaceArea = cellSizeY * cellHeight;
             yFaceArea = cellSizeX * cellHeight;
+
+            bigXSize = cellCountX + 2;
+            computeBuffer = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));            
         }       
         
         void CacheFireCells()
         {
             //need to cache the postions as it is really slow to get them...
-            fireCellReferences = new Fire.FireCell[cellCountX, cellCountY];
-            for (int y = 0; y < cellCountY; y++)
+            fireCellReferences = new Fire.FireCell[cellCount];
+            for (int i = 0; i < cellCount; i++)
             {
-                for (int x = 0; x < cellCountX; x++)
-                {
-                    fireCellReferences[x, y] = fireMesh.GetFireCell(x, y);
-                }
+                fireCellReferences[i] = fireMesh.GetFireCell(i);
             }
         }
 
@@ -81,7 +81,7 @@ namespace WUInity.Smoke
                 {
                     for (int x = 0; x < cellCountX; x++)
                     {
-                        Fire.FireCell fireCell = fireCellReferences[x, y];
+                        Fire.FireCell fireCell = fireCellReferences[x + y * cellCountX];
                         float QA = 0.0f;
 
                         if (fireCell.cellState == Fire.FireCellState.Burning || fireCell.cellState == Fire.FireCellState.Dead)
@@ -91,12 +91,12 @@ namespace WUInity.Smoke
                         }
 
                         //padded around with zeroes
-                        float center = concentration[x + 1, y + 1];
+                        float center = concentration[(x + 1) + (y + 1) * bigXSize];
                         //this is safe since padding around the array is added (containg zeroes)
-                        float left = concentration[x, y + 1];
-                        float right = concentration[x + 2, y + 1];
-                        float down = concentration[x + 1, y];
-                        float up = concentration[x + 1, y + 2];
+                        float left = concentration[x + (y + 1) * bigXSize];
+                        float right = concentration[(x + 2) + (y + 1) * bigXSize];
+                        float down = concentration[(x + 1) + y * bigXSize];
+                        float up = concentration[(x + 1) + (y + 2) * bigXSize];
 
                         float incomingX = windX >= 0f ? left : right;
                         float incomingY = windY >= 0f ? down : up;
@@ -106,7 +106,7 @@ namespace WUInity.Smoke
                         float yDelta = absoluteWindY * xFaceArea * (incomingY - center);
                         float C_delta = QA + xDelta + yDelta;
                         C_delta *= internalDeltaTime * invertedCellVolume;
-                        concentrationChange[x, y] = C_delta;
+                        concentrationBuffer[x + y * cellCountX] = C_delta;
                     }
                 }
                 
@@ -115,14 +115,16 @@ namespace WUInity.Smoke
                 {
                     for (int x = 0; x < cellCountX; x++)
                     {
-                        concentration[x + 1, y + 1] = concentration[x + 1, y + 1] + concentrationChange[x, y]; //Mathf.Max(0, 
-                        int index = x + y * cellCountX;
-                        //used in shaders
-                        linearArray[index] = 1.2f * 8700f * concentration[x + 1, y + 1];
+                        int index = (x + 1) + (y + 1) * bigXSize;
+                        int smallIndex = x + y * cellCountX;
+                        concentration[index] += concentrationBuffer[smallIndex];
 
-                        if (concentration[x + 1, y + 1] > maxConcentration)
+                        //we use this for tmeporary storage when giving to GPU
+                        concentrationBuffer[smallIndex] = 1.2f * 8700f * concentration[index];
+
+                        if (concentration[index] > maxConcentration)
                         {
-                            maxConcentration = concentration[x, y];
+                            maxConcentration = concentration[index];
                         }
                     }
                 }
@@ -137,7 +139,8 @@ namespace WUInity.Smoke
             {
                 for (int x = 0; x < cellCountX; x++)
                 {
-                    float lightExtinction = 1.2f * 8700f * concentration[x + 1, y + 1];
+                    int index = (x + 1) + (y + 1) * bigXSize;
+                    float lightExtinction = 1.2f * 8700f * concentration[index];
                     Color c = new Color(lightExtinction, 0f, 0f, 0.5f);
                     concentrationTexture.SetPixel(x, y, c);
                 }
@@ -150,30 +153,19 @@ namespace WUInity.Smoke
             return concentrationTexture;
         }
 
-        public float[] GetConcentrationData()
-        {
-            return linearArray;
-        }
-
-        ComputeBuffer buffer;
+        ComputeBuffer computeBuffer;
         public void UpdateVisualization(Material boxDispersionMaterial)
-        {
-            if(buffer != null)
-            {
-                buffer.Release();
-                buffer = null;
-            }
-            buffer = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
-            buffer.SetData(linearArray);
-            boxDispersionMaterial.SetBuffer("_Data", buffer);
+        {            
+            computeBuffer.SetData(concentrationBuffer);
+            boxDispersionMaterial.SetBuffer("_Data", computeBuffer);
             boxDispersionMaterial.SetInteger("_CellsX", cellCountX);
             boxDispersionMaterial.SetInteger("_CellsY", cellCountY);
         }
 
         ~BoxDispersionModel()  // finalizer
         {
-            buffer.Release();
-            buffer = null;
+            computeBuffer.Release();
+            computeBuffer = null;
         }
     }
 }

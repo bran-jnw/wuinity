@@ -121,8 +121,17 @@ namespace WUInity
 
             if (input.runFireSim)
             {
-                CreateFireSim();
+                CreateFireSim();                
+            }
+
+            //can only run together
+            if(input.runSmokeSim && input.runFireSim)
+            {
                 smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
+            }
+            else
+            {
+                input.runSmokeSim = false;
             }
 
             if (input.runEvacSim)
@@ -320,8 +329,12 @@ namespace WUInity
                     {
                         return;
                     }
-                }
+                }               
+            }
 
+            //sync with fire
+            if(time >= 0.0f && input.runSmokeSim)
+            {
                 smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
             }
 

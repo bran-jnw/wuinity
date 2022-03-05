@@ -101,6 +101,9 @@ namespace WUInity
             WUInity.INPUT.runFireSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runFireSim, "Simulate fire spread");
             ++buttonIndex;
 
+            WUInity.INPUT.runSmokeSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runSmokeSim, "Simulate smoke spread");
+            ++buttonIndex;
+
             WUInity.INPUT.runInRealTime = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runInRealTime, "Update sim in GUI");
             ++buttonIndex;
 

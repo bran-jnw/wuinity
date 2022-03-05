@@ -385,16 +385,15 @@ namespace WUInity
             
             validInput = new ValidCriticalData(internal_input);
 
-            UpdateMapResourceStatus();
-
-            //if they can't be found we get empty ones
-            EvacGroup.LoadEvacGroupIndices();
-            GraphicalFireInput.LoadGraphicalFireInput();
-
+            UpdateMapResourceStatus(); 
             UpdateFireResourceStatus();
             UpdatePopulationResourceStatus();
             UpdateRoutingResourceStatus();
             UpdateOSMResourceStatus();
+
+            //if they can't be found we get empty ones
+            EvacGroup.LoadEvacGroupIndices();
+            GraphicalFireInput.LoadGraphicalFireInput();
 
             GUI.SetGUIDirty();
         }
