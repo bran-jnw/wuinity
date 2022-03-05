@@ -322,7 +322,7 @@ namespace Mapbox.Unity.Map
 			SetUpMap();
 		}
 
-		protected virtual void Update()
+		/*protected virtual void Update()
 		{
 			if (Application.isEditor && !Application.isPlaying && IsEditorPreviewEnabled == false)
 			{
@@ -332,7 +332,7 @@ namespace Mapbox.Unity.Map
 			{
 				TileProvider.UpdateTileProvider();
 			}
-		}
+		}*/
 
 		public virtual void UpdateMap()
 		{

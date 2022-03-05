@@ -152,7 +152,6 @@ namespace WUInity.Traffic
         }
 
         Vector4 positionAndSpeed;
-        //CatmullRomSpline2D spline;
         LinearSpline2D spline;
         public Vector4 GetUnityPositionAndSpeed(bool updateData)
         {
@@ -211,7 +210,7 @@ namespace WUInity.Traffic
                     UpdateHash();
 
                     //CalculateSpline();
-                    latestSpeed = 0;
+                    //latestSpeed = 0;
                 }
             }
         }

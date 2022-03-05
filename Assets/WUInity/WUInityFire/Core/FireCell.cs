@@ -23,7 +23,8 @@ namespace WUInity.Fire
         LandScapeStruct lcp;
         double maxSpreadRate;
         double maxSpreadRateDirection;
-        double[] maxSpreadRates; 
+        double[] maxSpreadRates;
+        double reactionIntensity;
         double fireLineIntensity;
         double maxFireLineIntensity;
         double timeOfArrival;
@@ -205,6 +206,11 @@ namespace WUInity.Fire
             }            
         }
 
+        public double GetReactionIntensity()
+        {
+            return reactionIntensity;
+        }
+
         public FireMesh GetMesh()
         {
             return fireMesh;
@@ -311,6 +317,8 @@ namespace WUInity.Fire
             }
 
             double eccentricity_ = fireMesh.surfaceFire.getFireEccentricity();
+
+            reactionIntensity = fireMesh.surfaceFire.getReactionIntensity(BehaveUnits.HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter);
 
             fireLineIntensity = fireMesh.surfaceFire.getFirelineIntensity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerSecond);
             if(fireLineIntensity > maxFireLineIntensity)
@@ -436,6 +444,8 @@ namespace WUInity.Fire
                 maxSpreadRate = currentMaxSpreadRate;
                 maxSpreadRateDirection = directionOfMaxSpread;
             }
+
+            reactionIntensity = fireMesh.surfaceFire.getReactionIntensity(BehaveUnits.HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter);
 
             fireLineIntensity = fireMesh.crownFire.getFinalFirelineIntesity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerSecond);
             if (fireLineIntensity > maxFireLineIntensity)

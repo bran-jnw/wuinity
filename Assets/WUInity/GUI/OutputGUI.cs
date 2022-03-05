@@ -31,6 +31,13 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.GetMacroHumanSim().GetTotalCars());
             ++buttonIndex;
 
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Smoke dispersion"))
+            {
+                WUInity.INSTANCE.DisplaySmokeDispersion();
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+            }
+            ++buttonIndex;
+
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Staying population"))
             {
                 WUInity.INSTANCE.DisplayStayingPop();

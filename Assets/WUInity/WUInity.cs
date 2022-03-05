@@ -284,6 +284,7 @@ namespace WUInity
         [SerializeField] private GodCamera godCamera;
         [SerializeField] private LineRenderer simBorder;
         [SerializeField] private LineRenderer osmBorder;
+        [SerializeField] private Material boxDispersionMaterial;
 
         public enum DataSampleMode { None, GPW, Population, Relocated, Staying, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;
@@ -641,6 +642,7 @@ namespace WUInity
             if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
             {
                 SIM.UpdateRealtimeSim();
+                SIM.GetSmokeDispersion().UpdateVisualization(boxDispersionMaterial);
             }
         }
 
@@ -930,7 +932,12 @@ namespace WUInity
         public void DisplayTriggerBufferMap()
         {
             SetDataPlaneTexture(PAINTER.GetTriggerBufferTexture(), true);
-        }        
+        }
+
+        public void DisplaySmokeDispersion()
+        {
+            SetDataPlaneTexture(SIM.GetSmokeDispersion().GetConcentrationTexture(), true);
+        }
 
         public void DisplayEvacGroupMap()
         {

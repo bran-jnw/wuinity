@@ -16,8 +16,8 @@ namespace WUInity.Evac
         public bool isMoving;
         public float walkingDistance;
 
-        Vector3 startPosition;
-        Vector3 goalPosition;
+        Vector2 startPosition;
+        Vector2 goalPosition;
 
         /// <summary>
         /// Creates a household that will move as a unit.
@@ -65,24 +65,28 @@ namespace WUInity.Evac
             isMoving = false;
 
             //for tracking progress visually
-            startPosition = new Vector3((float)startPos.x, 0f, (float)startPos.y);
-            goalPosition = new Vector3((float)humanRaster.closestNodeUnitySpace.x, 0f, (float)humanRaster.closestNodeUnitySpace.y);
+            startPosition = new Vector2((float)startPos.x, (float)startPos.y);
+            goalPosition = new Vector2((float)humanRaster.closestNodeUnitySpace.x, (float)humanRaster.closestNodeUnitySpace.y);
         }
 
         public Vector4 GetPositionAndState(float time)
         {
-            float state = 0.125f;
-            if(time >= evacuationTime)
+            float state = 0.375f;
+            if(evacuationTime == float.MaxValue)
             {
-                state = 0.675f;
+                state = 0.125f;
+            }
+            else if(time >= evacuationTime)
+            {
+                state = 0.875f;
             }
             else if(isMoving)
             {
-                state = 0.375f;
+                state = 0.625f;
             }
 
-            Vector3 position = Vector3.Lerp(startPosition, goalPosition, (time - responseTime) / (evacuationTime - responseTime));
-            return new Vector4(position.x, position.z, peopleInHousehold, state);
+            Vector2 position = Vector2.Lerp(startPosition, goalPosition, (time - responseTime) / (evacuationTime - responseTime));
+            return new Vector4(position.x, position.y, peopleInHousehold, state);
         }
     }
 }

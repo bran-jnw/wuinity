@@ -276,9 +276,9 @@ namespace WUInity.Traffic
             foreach (KeyValuePair<int, RoadSegment> roadSegment in roadSegments)
             {
                 //calculate the new speed based on the local density
-                float speed = roadSegment.Value.CalculateSpeedBasedOnDensity(); 
-                averageSpeed += speed;
-                minSpeed = speed < minSpeed ? speed : minSpeed;
+                float densitySpeed = roadSegment.Value.CalculateSpeedBasedOnDensity(); 
+                averageSpeed += densitySpeed;
+                minSpeed = densitySpeed < minSpeed ? densitySpeed : minSpeed;
 
                 //sort the cars in distance left, shortest distance goes first https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object
                 roadSegment.Value.cars.Sort((x, y) => x.currentDistanceLeft.CompareTo(y.currentDistanceLeft));
@@ -287,12 +287,18 @@ namespace WUInity.Traffic
                 for (int j = 0; j < roadSegment.Value.cars.Count; ++j)
                 {
                     //our traffic density is flagged as stopped upstreams so no car should move
-                    if(roadSegment.Value.movementIsBlocked)
+                    if(roadSegment.Value.upstreamMovementBlocked)
                     {
                         break;
                     }
 
-                    MacroCar car = roadSegment.Value.cars[j];    
+                    MacroCar car = roadSegment.Value.cars[j];
+                    float speed = densitySpeed;
+                    /*if(j == 0)
+                    {
+                        speed = car.currentSpeedLimit;
+                    }*/
+                    
                     //check if we are going on to a new stretch of road (new traffic density) after this time step
                     if(car.WillChangeRoad(deltaTime, speed))
                     {
@@ -304,32 +310,34 @@ namespace WUInity.Traffic
                             if(nextSegment.CanAddCar())
                             {
                                 car.MoveCar(currentTime, deltaTime, speed);
+                                //we also need to add it to the next segment as otherwise we might overlad this next road
                                 nextSegment.AddCar(car);
                             }
                             else
                             {
                                 //this means that we cannot move upstreams 
-                                roadSegment.Value.movementIsBlocked = true;
+                                roadSegment.Value.upstreamMovementBlocked = true;
                             }
                         }
-                        //we also have to check if we can move to any place that previous cars have already moved to that did not exists prior
+                        //we also have to check if we move to any place that previous cars have already moved to that did not exists prior
                         else if (newRoadSegments.TryGetValue(newHash, out nextSegment))
                         {
                             if (nextSegment.CanAddCar())
                             {
                                 car.MoveCar(currentTime, deltaTime, speed);
+                                //we also need to add it to the next segment as otherwise we might overlad this next road
                                 nextSegment.AddCar(car);
                             }
                             else
                             {
                                 //this means that we cannot move upstreams 
-                                roadSegment.Value.movementIsBlocked = true;
+                                roadSegment.Value.upstreamMovementBlocked = true;
                             }
                         }
                         else
                         {
                             car.MoveCar(currentTime, deltaTime, speed);
-                            //now we need to add to our temporary dictionary since otherwise we might overfill any new segment
+                            //now we need to add to our temporary road segment dictionary since otherwise we might overfill any new segment
                             int hash = car.roadSegmentHash;
                             nextSegment = new RoadSegment(car, this);
                             newRoadSegments.Add(hash, nextSegment);
@@ -462,7 +470,7 @@ namespace WUInity.Traffic
             MacroTrafficSim mCS;
             public float maxCapacity;
             private int maxCarsOnRoad;
-            public bool movementIsBlocked;
+            public bool upstreamMovementBlocked;
             LinearSpline2D spline;
 
             public RoadSegment(MacroCar car, MacroTrafficSim mCS)
@@ -478,7 +486,7 @@ namespace WUInity.Traffic
                 this.mCS = mCS;
 
                 maxCarsOnRoad = Mathf.Max(1, (int)(length * 0.2f * laneCount)); //each car takes about 5 meters
-                movementIsBlocked = false;
+                upstreamMovementBlocked = false;
 
                 CalculateSpline(car);
                 car.SetSpline(spline);

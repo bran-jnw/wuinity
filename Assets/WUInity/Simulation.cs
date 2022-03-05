@@ -18,7 +18,8 @@ namespace WUInity
         private MacroTrafficSim macroTrafficSim;
         private MacroHumanSim macroHumanSim;
         private FireMesh fireMesh;
-        
+        private Smoke.BoxDispersionModel smokeBoxDispersionModel;
+
 
         private float startTime;
         public float StartTime 
@@ -69,7 +70,12 @@ namespace WUInity
         public float GetFireWindDirection()
         {
             return fireMesh.currentWindData.direction;
-        }        
+        }
+
+        public Smoke.BoxDispersionModel GetSmokeDispersion()
+        {            
+            return smokeBoxDispersionModel;
+        }
 
         public RouteCreator GetRouteCreator()
         {
@@ -102,7 +108,7 @@ namespace WUInity
                 haveResults = true;
                 WUInity.WUI_LOG("LOG: Simulation done.");
             }
-        }  
+        }
         
         private void CreateSubSims(int i)
         {
@@ -116,6 +122,7 @@ namespace WUInity
             if (input.runFireSim)
             {
                 CreateFireSim();
+                smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
             }
 
             if (input.runEvacSim)
@@ -314,6 +321,8 @@ namespace WUInity
                         return;
                     }
                 }
+
+                smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
             }
 
             //advance evac
