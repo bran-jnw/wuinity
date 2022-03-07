@@ -12,15 +12,15 @@ namespace WUInity.Fire
         public SpreadMode spreadMode;                               
         public IgnitionPoint[] ignitionPoints;                
         FireCell[] fireCells;                                
-        public Vector2D cellSize;        
-        public Texture2D burnTexture;                               
+        public Vector2D cellSize;                                   
         public WindData currentWindData;                            
         public double dt;                                           
         double[] angleOffsets;                                      
         public HashSet<FireCell> activeCells;                
         public HashSet<FireCell> cellsToKill;                
-        public HashSet<FireCell> cellsToIgnite;              
-        public Mesh terrainMesh;                                    
+        public HashSet<FireCell> cellsToIgnite; 
+
+        float[] fireLineIntensityData;
 
         public Vector2Int[] neighborIndices;                        
         public double cellSizeDiagonal;                             
@@ -160,28 +160,20 @@ namespace WUInity.Fire
             cellsToKill = new HashSet<FireCell>();
             cellsToIgnite = new HashSet<FireCell>();            
 
-            burnTexture = new Texture2D(cellCount.x, cellCount.y);
             for (int y = 0; y < cellCount.y; y++)
             {
                 for (int x = 0; x < cellCount.x; x++)
                 {
                     float tint = fireCells[GetCellIndex(x, y)].GetFuelModelNumber() / 13.0f;
                     Color c = Color.green * tint;
-                    c.a = 0.4f;
-                    burnTexture.SetPixel(x, y, c);                                      //set the color of the cell depending on its fuel model
-
-                    //tex.SetPixel(x, y, Color.white * (float)fireCells[GetCellIndex(x, y)].GetAspect() / 360.0f);
-                    //tex.SetPixel(x, y, Color.white * (float)fireCells[GetCellIndex(x, y)].GetSlope() / 1000.0f);
-                    //tex.SetPixel(x, y, Color.white * (float)fireCells[GetCellIndex(x, y)].GetElevation() / (256.0f * (float)cellSize));
+                    c.a = 0.4f;                  
                 }
             }
-            burnTexture.filterMode = FilterMode.Point;
 
-            WUInity.INSTANCE.fireMaterial.mainTexture = burnTexture;
+            //data arrays for visualization
+            fireLineIntensityData = new float[fireCells.Length];
 
             StartInitialIgnition();
-
-            CreateTerrainPlane();
         }
 
         double GetCorrectedElevation(int x, int y)                  //getter  with corrected elevation (somehow)
@@ -262,8 +254,6 @@ namespace WUInity.Fire
             foreach (FireCell f in cellsToKill)
             {
                 activeCells.Remove(f);
-                Color fireLineIntensityColor = GetFireLineIntensityColor(f, maxFireLineIntensity);
-                burnTexture.SetPixel(f.cellIndex.x, f.cellIndex.y, fireLineIntensityColor);
             }
             cellsToKill.Clear();
 
@@ -272,7 +262,6 @@ namespace WUInity.Fire
             {
                 f.Ignite(timeSinceStart);
                 activeCells.Add(f);
-                burnTexture.SetPixel(f.cellIndex.x, f.cellIndex.y, Color.red);
             }
             cellsToIgnite.Clear();
 
@@ -286,11 +275,14 @@ namespace WUInity.Fire
             foreach (FireCell f in cellsToKill)
             {
                 activeCells.Remove(f);
-                Color fireLineIntensityColor = GetFireLineIntensityColor(f, maxFireLineIntensity);
-                burnTexture.SetPixel(f.cellIndex.x, f.cellIndex.y, fireLineIntensityColor);
             }
 
-            burnTexture.Apply();            
+            //update data arrays for visualization            
+            for (int i = 0; i < fireCells.Length; i++)
+            {
+                fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
+            }
+
 
             //update time and wind for next time step. TODO: spread out the update over several frames
             timeSinceStart += dt;
@@ -321,11 +313,8 @@ namespace WUInity.Fire
                     FireCell f = fireCells[GetCellIndex(x, y)];
                     f.Ignite(0.0);
                     activeCells.Add(f);
-                    burnTexture.SetPixel(x, y, Color.red);
                 }
             }
-
-            burnTexture.Apply();
         }
 
         public int GetCellIndex(int x, int y)
@@ -377,15 +366,11 @@ namespace WUInity.Fire
             {
                 return fireCells[GetCellIndex(x, y)].cellState;
             }            
-        }        
-
-        Color GetFireLineIntensityColor(FireCell cell, double maxIntensity)
-        {
-            float f = (float)cell.GetFireLineIntensity(true);
-            f = f / 6000f;//(float)maxIntensity;
-            Color color = Color.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
-            color.a = 1f;
-            return color;
+        }     
+                
+        public float[] GetFireLineIntensityData()
+        {     
+            return fireLineIntensityData;
         }
 
         public int GetCellSize()
@@ -417,12 +402,12 @@ namespace WUInity.Fire
             return ros;
         }
 
-        void CreateTerrainPlane()
+        /*void CreateTerrainPlane()
         {
             terrainMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             terrainMesh.Clear();
             CreatePlane(terrainMesh, cellCount.x, cellCount.y, (float)(cellCount.x * cellSize.x), (float)(cellCount.y * cellSize.y), 0.0f, Vector2.one, true);
-        }
+        }*/
 
         private void CreatePlane(Mesh mesh, int cellsX, int cellsZ, float sizeX, float sizeZ, float yPos, Vector2 maxUV, bool getElevation)
         {
@@ -430,11 +415,12 @@ namespace WUInity.Fire
             cellsX += 1;
             cellsZ += 1;
 
+            // ignore resolution for now
             cellsX = 2;
-            cellsZ = 2;                         //CONFUSEMENT why are these here if we had the previous two operations above?
+            cellsZ = 2;                         
             getElevation = false;
 
-            Vector3[] vertices = new Vector3[cellsX * cellsZ];              //create new 3D vector array
+            Vector3[] vertices = new Vector3[cellsX * cellsZ];              
             for (int z = 0; z < cellsZ; z++)
             {
                 float zPos = ((float)z / (cellsZ - 1)) * sizeZ;

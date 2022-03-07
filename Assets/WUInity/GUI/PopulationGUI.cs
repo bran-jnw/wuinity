@@ -247,7 +247,7 @@ namespace WUInity
         void SetGPWFolder(string[] paths)
         {
             WUInity.INPUT.population.gpwDataFolder = paths[0];
-            WUInity.DATA_STATUS.globalGPWAvailable = GPW.LocalGPWData.IsGPWAvailable();
+            WUInity.DATA_STATUS.globalGPWAvailable = Population.LocalGPWData.IsGPWAvailable();
         }
     }
 }

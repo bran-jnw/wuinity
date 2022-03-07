@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using WUInity.Evac;
 using WUInity.Traffic;
-using WUInity.GPW;
+using WUInity.Population;
 
 namespace WUInity
 {

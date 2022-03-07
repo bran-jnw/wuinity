@@ -1,8 +1,9 @@
-Shader "WUInity/BoxDispersionUnlit"
+Shader "WUInity/GeneralDataDisplay"
 {
     Properties
     {
         _Transparency("Transparency", float) = 0.8
+        _LowerCutOff("Lower cut-off", float) = 0.0
         _MinValue("MinValue", float) = 0.6 //5 meters at C = 3
         _MaxValue("MaxValue", float) = 1.0 // 30 meters at C = 3
         _ScaleGradient("ScaleGradient", 2D) = "green" {}
@@ -31,7 +32,7 @@ Shader "WUInity/BoxDispersionUnlit"
 
             uniform sampler2D _ScaleGradient;
             float4 _ScaleGradient_ST;
-            uniform float _MinValue, _MaxValue, _Transparency;
+            uniform float _MinValue, _MaxValue, _Transparency, _LowerCutOff;
             uniform int _CellsX, _CellsY;
             uniform StructuredBuffer<float> _Data;
 
@@ -48,12 +49,12 @@ Shader "WUInity/BoxDispersionUnlit"
                 int xIndex = i.texcoord.x * _CellsX;
                 int yIndex = i.texcoord.y * _CellsY;
                 int index = xIndex + yIndex * _CellsX;
-                float value = 10440.0 * _Data[index]; // 1.2 * 8700.0 = 10440.0
+                float value = _Data[index];
 
                 //clip exits shader here if below 0
-                clip(value - _MinValue);
+                clip(value - _LowerCutOff);
 
-                float valueNorm = saturate((value - _MinValue) / (_MaxValue - _MinValue));
+                float valueNorm = (value - _MinValue) / (_MaxValue - _MinValue);// saturate((value - _MinValue) / (_MaxValue - _MinValue));
                 float4 color = tex2D(_ScaleGradient, float2(valueNorm, 0.125));
                 color.a = _Transparency;
 

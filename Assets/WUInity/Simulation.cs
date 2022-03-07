@@ -155,7 +155,6 @@ namespace WUInity
                 
                 //distribute people
                 macroHumanSim.PlaceHouseholdsInCells();
-                MonoBehaviour.FindObjectOfType<EvacuationRenderer>().CreateHouseholdsBuffer(macroHumanSim.GetHouseholdPositions().Length, WUInity.INPUT.size);
             }
 
             if (input.runTrafficSim)
@@ -167,9 +166,7 @@ namespace WUInity
         private void CreateFireSim()
         {            
             fireMesh = new FireMesh(WUInity.INPUT.fire.lcpFile, WUInity.INPUT.fire.weather, WUInity.INPUT.fire.wind, WUInity.INPUT.fire.initialFuelMoisture, WUInity.INPUT.fire.ignitionPoints);
-            fireMesh.terrainMesh = WUInity.INSTANCE.terrainMeshFilter.mesh;
-            fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;
-            //WUInity.WUINITY.terrainMeshFilter.gameObject.GetComponent<MeshRenderer>().material = WUInity.WUINITY.fireMaterial;            
+            fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;           
         }
 
         private void RunSimulation(int runNumber)

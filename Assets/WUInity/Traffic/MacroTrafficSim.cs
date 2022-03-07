@@ -124,7 +124,7 @@ namespace WUInity.Traffic
         List<TrafficEvent> trafficEvents;
         RouteCreator routeCreator;
         Dictionary<int, RoadSegment> roadSegments;
-        EvacuationRenderer evacuationRenderer;
+        Visualization.EvacuationRenderer evacuationRenderer;
 
         public MacroTrafficSim(RouteCreator rC)
         {
@@ -151,7 +151,7 @@ namespace WUInity.Traffic
 
             routeCreator = rC;
 
-            evacuationRenderer = MonoBehaviour.FindObjectOfType<EvacuationRenderer>();
+            evacuationRenderer = MonoBehaviour.FindObjectOfType<Visualization.EvacuationRenderer>();
         }
 
         public void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
@@ -424,17 +424,18 @@ namespace WUInity.Traffic
             }
 
             WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
-
-            if(carsInSystem.Count > 0)
+                      
+        }     
+        
+        public Vector4[] GetCarPositionsAndStates()
+        {
+            Vector4[] carsRendering = new Vector4[carsInSystem.Count];
+            for (int i = 0; i < carsRendering.Length; i++)
             {
-                Vector4[] carsRendering = new Vector4[carsInSystem.Count];
-                for (int i = 0; i < carsRendering.Length; i++)
-                {
-                    carsRendering[i] = carsInSystem[i].GetUnityPositionAndSpeed(true);
-                }
-                evacuationRenderer.UpdateCarsToRender(carsRendering);
-            }            
-        }        
+                carsRendering[i] = carsInSystem[i].GetUnityPositionAndSpeed(true);
+            }
+            return carsRendering;
+        }
 
         //add parameter for flow reduction by adding background traffic as a density
         private Dictionary<int, RoadSegment> CollectRoadSegments()

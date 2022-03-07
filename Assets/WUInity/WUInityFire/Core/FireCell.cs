@@ -320,13 +320,12 @@ namespace WUInity.Fire
 
             reactionIntensity = fireMesh.surfaceFire.getReactionIntensity(BehaveUnits.HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter);
 
-            fireLineIntensity = fireMesh.surfaceFire.getFirelineIntensity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerSecond);
+            fireLineIntensity = fireMesh.surfaceFire.getFirelineIntensity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter);
             if(fireLineIntensity > maxFireLineIntensity)
             {
                 maxFireLineIntensity = fireLineIntensity;
             }
             heatPerUnitArea = fireMesh.surfaceFire.getHeatPerUnitArea() * 11.356538527057; //comes in btu/sq.feet, now in kJ/m2
-            //MonoBehaviour.print(heatPerUnitArea * 11.356538527057 + " kJ/m2");
 
             //we have the max spread rate, but need in all directions       
             for (int i = 0; i < spreadRates.Length; i++)
@@ -447,7 +446,7 @@ namespace WUInity.Fire
 
             reactionIntensity = fireMesh.surfaceFire.getReactionIntensity(BehaveUnits.HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter);
 
-            fireLineIntensity = fireMesh.crownFire.getFinalFirelineIntesity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerSecond);
+            fireLineIntensity = fireMesh.crownFire.getFinalFirelineIntesity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter);
             if (fireLineIntensity > maxFireLineIntensity)
             {
                 maxFireLineIntensity = fireLineIntensity;

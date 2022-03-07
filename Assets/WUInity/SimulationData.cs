@@ -4,7 +4,7 @@ using Itinero;
 using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
-using WUInity.GPW;
+using WUInity.Population;
 using WUInity.Fire;
 
 namespace WUInity

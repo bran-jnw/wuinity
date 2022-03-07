@@ -31,10 +31,32 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.GetMacroHumanSim().GetTotalCars());
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Smoke dispersion"))
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Display options");
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Households"))
             {
-                WUInity.INSTANCE.DisplaySmokeDispersion();
-                WUInity.INSTANCE.ToggleSmokeDataPlane();
+                WUInity.INSTANCE.ToggleHouseholdRendering();
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic"))
+            {
+                WUInity.INSTANCE.ToggleTrafficRendering();
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fire spread"))
+            {
+                WUInity.INSTANCE.ToggleFireSpreadRendering();
+                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+            }
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density"))
+            {
+                WUInity.INSTANCE.ToggleSootRendering();
                 WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
             }
             ++buttonIndex;
@@ -127,7 +149,7 @@ namespace WUInity
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
                 {
-                    WUInity.SIM.StopSim("STOP: Stopped simulation as requested by user.");
+                    WUInity.INSTANCE.StopSimulation();
                 }
                 ++buttonIndex;
             }            

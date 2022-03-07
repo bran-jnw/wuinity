@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WUInity.GPW
+namespace WUInity.Population
 {
-
     public class PopulationManager
     {
         private LocalGPWData localGPWData;

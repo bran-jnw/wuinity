@@ -116,11 +116,8 @@ namespace WUInity
                 }
                 else
                 {
-                    WUInity.WUI_LOG("LOG: Simulation started, please wait.");
                     menuChoice = ActiveMenu.Output;
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
-                    WUInity.INSTANCE.SetEvacDataPlane(true);
-                    WUInity.SIM.StartSimulation();                    
+                    WUInity.INSTANCE.StartSimulation();                   
                 }
             }
             ++buttonIndex;

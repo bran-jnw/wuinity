@@ -16,14 +16,13 @@ namespace WUInity.Smoke
         Fire.FireMesh fireMesh;
         float[] concentration;
         float[] concentrationBuffer;
-        Texture2D concentrationTexture;
         Fire.FireCell[] fireCellReferences;
         float xFaceArea, yFaceArea;
         int paddedCellCountX, paddedCellCountY, cellCount;
 
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
-        public BoxDispersionModel(Fire.FireMesh fireMesh, float height = 100.0f)
+        public BoxDispersionModel(Fire.FireMesh fireMesh, float height = 250.0f)
         {
             this.fireMesh = fireMesh;
             cellCountX = fireMesh.cellCount.x;
@@ -37,13 +36,11 @@ namespace WUInity.Smoke
             cellCount = cellCountX * cellCountY;
             concentration = new float[(cellCountX + 2) * (cellCountY + 2)]; //added padding around to get outside range faster
             concentrationBuffer = new float[cellCount];
-            concentrationTexture = new Texture2D(cellCountX, cellCountY);
             xFaceArea = cellSizeY * cellHeight;
             yFaceArea = cellSizeX * cellHeight;
 
             paddedCellCountX = cellCountX + 2;
-            paddedCellCountY = cellCountY + 2;
-            computeBuffer = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
+            paddedCellCountY = cellCountY + 2;            
         }       
         
         void CacheFireCells()
@@ -56,6 +53,21 @@ namespace WUInity.Smoke
             }
         }
 
+        public int GetCellsX()
+        {
+            return cellCountX;
+        }
+
+        public int GetCellsY()
+        {
+            return cellCountY;
+        }
+
+        public float[] GetData()
+        {
+            return concentrationBuffer;
+        }
+
         public void Update(float deltaTime, float windDirection, float windSpeed)
         {
             if(fireCellReferences == null)
@@ -66,12 +78,14 @@ namespace WUInity.Smoke
             windDirection -= 180f;
             float windX = Mathf.Sin(windDirection * Mathf.Deg2Rad) * windSpeed;
             float windY = Mathf.Cos(windDirection * Mathf.Deg2Rad) * windSpeed;
+            float windXFraction = windX / windSpeed;
+            float windYFraction = windY / windSpeed;
             float absoluteWindX = Mathf.Abs(windX);
             float absoluteWindY = Mathf.Abs(windY); 
             float maxConcentration = float.MinValue;
 
             //to keep it stable we use a CFL number of 0.5 and use internal partial time steps
-            float CFL = 0.5f;
+            float CFL = 0.4f;
             int internalTimeSteps = Mathf.CeilToInt(deltaTime / Mathf.Min(CFL * cellSizeX / absoluteWindX, CFL * cellSizeY / absoluteWindY));
             float internalDeltaTime = deltaTime / internalTimeSteps;
 
@@ -87,7 +101,7 @@ namespace WUInity.Smoke
                         if (fireCell.cellState == Fire.FireCellState.Burning) // || fireCell.cellState == Fire.FireCellState.Dead)
                         {
                             //when done testing, move this calc to the fire cell itself, more effective sine less frequent updates
-                            QA = 0.1f * cellArea * (float)fireCell.GetReactionIntensity() / 21500.0f; //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.1
+                            QA = 0.015f * cellArea * (float)fireCell.GetReactionIntensity() / 21500.0f; //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood founf for FDS
                         }
 
                         //padded around with zeroes so we need to fix index
@@ -99,14 +113,7 @@ namespace WUInity.Smoke
                         float down = concentration[paddedX + (yInside - 1) * paddedCellCountX];
                         float up = concentration[paddedX + (yInside + 1) * paddedCellCountX];
 
-                        float incomingX = windX >= 0f ? left : right;
-                        float incomingY = windY >= 0f ? down : up;
-                        //float outgoingX = wind.x < 0f ? left : right;
-                        //float outgoingY = wind.y < 0f ? down : up;                        
-                        float xDelta = absoluteWindX * yFaceArea * (incomingX - center);
-                        float yDelta = absoluteWindY * xFaceArea * (incomingY - center);
-
-                        /*//advection
+                        //advection up-wind scheme
                         float advectionX = windX * (center - left) / (cellSizeX);
                         if(windX < 0)
                         {
@@ -117,17 +124,21 @@ namespace WUInity.Smoke
                         {
                             advectionY = windY * (up - center) / (cellSizeY);
                         }
+                        //central difference blows up
+                        //advectionX = windX * (right - left) / (2 * cellSizeX);
+                        //advectionY = windY * (up - down) / (2 * cellSizeY);
                         float advection = advectionX + advectionY;
 
                         //diffusion
-                        float eddyDiffusionCoefficient = 10f;
+                        float eddyDiffusionCoefficientAlong = 2f;
+                        float eddyDiffusionCoefficientAcross = 10f;
                         float diffusionX = (right - 2 * center + left) / (cellSizeX * cellSizeX);
                         float diffusionY = (up - 2 * center + down) / (cellSizeY * cellSizeY);
-                        float diffusion = eddyDiffusionCoefficient * (diffusionX + diffusionY);*/
+                        diffusionX *= (eddyDiffusionCoefficientAlong * windXFraction + eddyDiffusionCoefficientAcross * (1.0f - windXFraction));
+                        diffusionY *= (eddyDiffusionCoefficientAlong * windYFraction + eddyDiffusionCoefficientAcross * (1.0f - windYFraction));
+                        float diffusion = diffusionX + diffusionY;
 
-                        float C_delta = QA + xDelta + yDelta;
-                        C_delta *= internalDeltaTime * invertedCellVolume;
-                        //C_delta = internalDeltaTime * (-advection + diffusion + QA);
+                        float C_delta = internalDeltaTime * (-advection + diffusion + QA * invertedCellVolume);
                         concentrationBuffer[x + y * cellCountX] = center + C_delta;
                     }
                 }
@@ -142,7 +153,7 @@ namespace WUInity.Smoke
                         concentration[bigIndex] = concentrationBuffer[smallIndex];
 
                         //we use this for tmeporary storage when giving to GPU
-                        concentrationBuffer[smallIndex] = concentration[bigIndex];
+                        concentrationBuffer[smallIndex] = 4539.13f * concentration[bigIndex]; //// 1.2 * 8700.0 / 2.3 = optical density
 
                         if (concentration[bigIndex] > maxConcentration)
                         {
@@ -151,43 +162,6 @@ namespace WUInity.Smoke
                     }
                 }
             }
-
-            //UpdateTexture(maxConcentration);
-        }
-
-        private void UpdateTexture(float maxConcentration)
-        {
-            for (int y = 0; y < cellCountY; y++)
-            {
-                for (int x = 0; x < cellCountX; x++)
-                {
-                    int index = (x + 1) + (y + 1) * paddedCellCountX;
-                    float lightExtinction = 1.2f * 8700f * concentration[index];
-                    Color c = new Color(lightExtinction, 0f, 0f, 0.5f);
-                    concentrationTexture.SetPixel(x, y, c);
-                }
-            }
-            concentrationTexture.Apply();
-        }
-
-        public Texture2D GetConcentrationTexture()
-        {
-            return concentrationTexture;
-        }
-
-        ComputeBuffer computeBuffer;
-        public void UpdateVisualization(Material boxDispersionMaterial)
-        {            
-            computeBuffer.SetData(concentrationBuffer);
-            boxDispersionMaterial.SetBuffer("_Data", computeBuffer);
-            boxDispersionMaterial.SetInteger("_CellsX", cellCountX);
-            boxDispersionMaterial.SetInteger("_CellsY", cellCountY);
-        }
-
-        ~BoxDispersionModel()  // finalizer
-        {
-            computeBuffer.Release();
-            computeBuffer = null;
         }
     }
 }

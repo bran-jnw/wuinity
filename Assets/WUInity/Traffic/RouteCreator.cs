@@ -7,7 +7,7 @@ using Mapbox.Unity.Utilities;
 
 using Itinero;
 using Itinero.Osm.Vehicles;
-using WUInity.GPW;
+using WUInity.Population;
 
 namespace WUInity
 {

@@ -4,7 +4,7 @@ using UnityEngine;
 using OsmSharp.Streams;                 
 using WUInity.Evac;                     
 using WUInity.Traffic;                 
-using WUInity.GPW;                     
+using WUInity.Population;                     
 using System;                           
 using System.IO;                        
 using Mapbox.Utils;                    
@@ -13,7 +13,9 @@ using Mapbox.Unity.Utilities;
 
 namespace WUInity
 {    
-    [RequireComponent(typeof(WUInityGUI))]                          
+    [RequireComponent(typeof(WUInityGUI))]
+    [RequireComponent(typeof(Visualization.EvacuationRenderer))]
+    [RequireComponent(typeof(Visualization.FireRenderer))]
     public class WUInity : MonoBehaviour                     
     {                           
         public static WUInity INSTANCE
@@ -42,6 +44,38 @@ namespace WUInity
                     INSTANCE.internal_dataStatus = new DataStatus();
                 }
                 return INSTANCE.internal_dataStatus;
+            }
+        }
+
+        public static Visualization.EvacuationRenderer EVAC_VISUALS
+        {
+            get
+            {
+                if (INSTANCE.internal_evacuationRenderer == null)
+                {
+                    INSTANCE.internal_evacuationRenderer = INSTANCE.GetComponent<Visualization.EvacuationRenderer>();
+                    if(INSTANCE.internal_evacuationRenderer == null)
+                    {
+                        INSTANCE.internal_evacuationRenderer = INSTANCE.gameObject.AddComponent<Visualization.EvacuationRenderer>();
+                    }
+                }
+                return INSTANCE.internal_evacuationRenderer;
+            }
+        }
+
+        public static Visualization.FireRenderer FIRE_VISUALS
+        {
+            get
+            {
+                if (INSTANCE.internal_fireRenderer == null)
+                {
+                    INSTANCE.internal_fireRenderer = INSTANCE.GetComponent<Visualization.FireRenderer>();
+                    if (INSTANCE.internal_fireRenderer == null)
+                    {
+                        INSTANCE.internal_fireRenderer = INSTANCE.gameObject.AddComponent<Visualization.FireRenderer>();
+                    }
+                }
+                return INSTANCE.internal_fireRenderer;
             }
         }
 
@@ -125,11 +159,11 @@ namespace WUInity
         {
             get
             {
-                if (INSTANCE.internal_gpwViewer == null)
+                if (INSTANCE.internal_population_manager == null)
                 {
-                    INSTANCE.internal_gpwViewer = new PopulationManager();
+                    INSTANCE.internal_population_manager = new PopulationManager();
                 }
-                return INSTANCE.internal_gpwViewer;
+                return INSTANCE.internal_population_manager;
             }
         }
 
@@ -277,15 +311,11 @@ namespace WUInity
 
         [Header("Prefabs")]
         [SerializeField] GameObject markerPrefab;
-        [SerializeField] Material dataPlaneMaterial;
 
-        [Header("References")]        
-        [SerializeField] public MeshFilter terrainMeshFilter;
-        [SerializeField] public Material fireMaterial;        
+        [Header("References")]              
         [SerializeField] private GodCamera godCamera;
         [SerializeField] private LineRenderer simBorder;
         [SerializeField] private LineRenderer osmBorder;
-        [SerializeField] private Material boxDispersionMaterial;
 
         public enum DataSampleMode { None, GPW, Population, Relocated, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;
@@ -297,19 +327,25 @@ namespace WUInity
         private Simulation internal_sim;
         SimulationData internal_sim_data;
         private Farsite.FarsiteViewer internal_farsiteViewer;
-        private PopulationManager internal_gpwViewer;
+        private PopulationManager internal_population_manager;
         private WUInityGUI internal_wuiGUI;
         private Painter internal_painter;
         private Mapbox.Unity.Map.AbstractMap internal_mapboxMap;
+        private Visualization.FireRenderer internal_fireRenderer;
+        private Visualization.EvacuationRenderer internal_evacuationRenderer;
 
         MeshRenderer evacDataPlaneMeshRenderer;
         MeshRenderer fireDataPlaneMeshRenderer;
-        MeshRenderer smokePlaneMeshRenderer;
         List<GameObject> drawnRoads;
         GameObject[] goalMarkers;
         private GameObject evacDataPlane;
         private GameObject fireDataPlane;
         GameObject directionsGO;
+
+        bool renderHouseholds = false;
+        bool renderTraffic = false;
+        bool renderSmokeDispersion = false;
+        bool renderFireSpread = false;
 
         string internal_workingFilePath;  
         private DataStatus internal_dataStatus;
@@ -652,11 +688,33 @@ namespace WUInity
             if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
             {
                 SIM.UpdateRealtimeSim();
-                if(renderSmokeDispersion)
-                {
-                    SIM.GetSmokeDispersion().UpdateVisualization(boxDispersionMaterial);
-                }                
+                EVAC_VISUALS.UpdateEvacuationRenderer(renderHouseholds, renderTraffic);
+                FIRE_VISUALS.UpdateFireRenderer(renderFireSpread, renderSmokeDispersion);
             }
+        }
+
+        public void StartSimulation()
+        {
+            WUI_LOG("LOG: Simulation started, please wait.");            
+            SetSampleMode(WUInity.DataSampleMode.TrafficDens);
+            SetEvacDataPlane(true);
+            SIM.StartSimulation();
+
+            //this needs to be done AFTER simulation has started since we need some data from the sim
+            //fix everything for evac rendering
+            EVAC_VISUALS.CreateBuffers(INPUT.runEvacSim, INPUT.runTrafficSim);
+            renderHouseholds = INPUT.runEvacSim;
+            renderTraffic = INPUT.runTrafficSim;
+
+            //and then for fire rendering
+            FIRE_VISUALS.CreateBuffers(INPUT.runFireSim, INPUT.runSmokeSim);
+            renderFireSpread = INPUT.runFireSim;
+            renderSmokeDispersion = INPUT.runSmokeSim;
+        }
+
+        public void StopSimulation()
+        {
+            SIM.StopSim("STOP: Stopped simulation as requested by user.");
         }
 
         void UpdateBorders()
@@ -938,41 +996,6 @@ namespace WUInity
             SetDataPlaneTexture(PAINTER.GetTriggerBufferTexture(), true);
         }
 
-        bool renderSmokeDispersion = false;
-        public void DisplaySmokeDispersion()
-        {
-            renderSmokeDispersion = true;
-            //just to make sure that the plane exists
-            if(smokePlaneMeshRenderer == null)
-            {
-                GameObject gO = new GameObject(name);
-                gO.transform.parent = this.transform;
-                gO.isStatic = true;
-                // You can change that line to provide another MeshFilter
-                MeshFilter filter = gO.AddComponent<MeshFilter>();
-                Mesh mesh = new Mesh(); // filter.mesh;
-                filter.mesh = mesh;
-                MeshRenderer mR = gO.AddComponent<MeshRenderer>();
-                mR.receiveShadows = false;
-                mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                mesh.Clear();
-
-                float width = (float)INPUT.size.x;
-                float length = (float)INPUT.size.y;
-                Vector3 offset = Vector3.zero;
-                Vector2 maxUV = Vector2.one;
-
-                PopulationManager.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
-
-                mR.material = boxDispersionMaterial;
-                //move up one meter
-                gO.transform.position += Vector3.up;
-                //gO.SetActive(false);
-                smokePlaneMeshRenderer = mR;
-                smokePlaneMeshRenderer.material = boxDispersionMaterial;
-            }            
-        }
-
         public void DisplayEvacGroupMap()
         {
             SetDataPlaneTexture(PAINTER.GetEvacGroupTexture());
@@ -1010,26 +1033,28 @@ namespace WUInity
             return false;
         }
 
-        public bool ToggleFireDataPlane()
+        public bool ToggleHouseholdRendering()
         {
-            if (fireDataPlaneMeshRenderer != null)
-            {
-                fireDataPlaneMeshRenderer.gameObject.SetActive(!fireDataPlaneMeshRenderer.gameObject.activeSelf);
-                return fireDataPlaneMeshRenderer.gameObject.activeSelf;
-            }
-
-            return false;
+            renderHouseholds = !renderHouseholds;
+            return renderHouseholds;
         }
 
-        public bool ToggleSmokeDataPlane()
+        public bool ToggleTrafficRendering()
         {
-            if (smokePlaneMeshRenderer != null)
-            {
-                smokePlaneMeshRenderer.gameObject.SetActive(!smokePlaneMeshRenderer.gameObject.activeSelf);
-                return smokePlaneMeshRenderer.gameObject.activeSelf;
-            }
+            renderTraffic = !renderTraffic;
+            return renderTraffic;
+        }
 
-            return false;
+        public bool ToggleSootRendering()
+        {
+            renderSmokeDispersion = FIRE_VISUALS.ToggleSoot();
+            return renderSmokeDispersion;
+        }
+
+        public bool ToggleFireSpreadRendering()
+        {
+            renderFireSpread = FIRE_VISUALS.ToggleFire();
+            return renderFireSpread;
         }
 
         private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)

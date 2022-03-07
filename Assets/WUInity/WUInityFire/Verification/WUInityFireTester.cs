@@ -29,43 +29,41 @@ namespace WUInity.Fire
         float time = 0f;
         bool simulate = false;
 
-        void Start()                //standard unity method that runs every time on startup.
+        void Start()                
         {
-            northElevation = (float)(slope * cellCount.y * cellSize.y);                 //set maximum elevation??
+            northElevation = (float)(slope * cellCount.y * cellSize.y);                 
             CreateLCPData();                    
 
-            ignitionPoints = new IgnitionPoint[1];                                    //create one ignition point
-            ignitionPoints[0] = new IgnitionPoint(cellCount.x / 2, cellCount.y / 2);  //at the center of the domain
+            ignitionPoints = new IgnitionPoint[1];                                    
+            ignitionPoints[0] = new IgnitionPoint(cellCount.x / 2, cellCount.y / 2); 
             /*ignitionPoints = new WUInityFireIgnition[randomIgnPoints];
             for (int i = 0; i < ignitionPoints.Length; i++)
             {
                 ignitionPoints[i] = new WUInityFireIgnition(UnityEngine.Random.Range(0, xCells), UnityEngine.Random.Range(0, yCells));
             }*/
 
-            mesh = new FireMesh(lcpData, weather, wind, initialMoisture, ignitionPoints);        //create the fire mesh from constructor
-            mesh.terrainMesh = terrainMeshFilter.mesh;                                                  //guessing this is for rendering?
-            mesh.spreadMode = spreadMode;                                                               //set spread mode
+            mesh = new FireMesh(lcpData, weather, wind, initialMoisture, ignitionPoints);                                                  
+            mesh.spreadMode = spreadMode;                                                              
             //start simulation and do the init
-            mesh.Simulate();                                                                            //run simulation one, do initiation
-            fireMaterial.mainTexture = mesh.burnTexture;                                                //also for rendering
+            mesh.Simulate();                                           
 
         }
 
-        void CreateLCPData()                                                                    //method to create artificial landscape
+        void CreateLCPData()                                                                    
         {
-            lcpData = new LCPData();                                                            //create lcpData
-            lcpData.RasterCellResolutionX = cellSize.x;                                         //sets its straightforward values
+            lcpData = new LCPData();                                                            
+            lcpData.RasterCellResolutionX = cellSize.x;                                         
             lcpData.RasterCellResolutionY = cellSize.y;
             lcpData.Header.numnorth = cellCount.y;
             lcpData.Header.numeast = cellCount.x;
-            lcpData.NumVals = 10;                                                               //dont really know, why are we saving ten values of each?
-            lcpData.Header.loelev = 0;                                                          //lowest elevation set
+            lcpData.NumVals = 10;                                                               
+            lcpData.Header.loelev = 0;                                                          
 
             //always save ten values per cell, so all of them
             int NumVals = 10;            
             short[] landscape = new short[cellCount.x * cellCount.y * NumVals];
 
-            for (int i = 0; i < cellCount.y; i++)                                               //for all the cells, set the landscape var (what does each cell contain?)
+            for (int i = 0; i < cellCount.y; i++)                                               
             {
                 for (int j = 0; j < cellCount.x; j++)
                 {
@@ -92,7 +90,7 @@ namespace WUInity.Fire
                 }
             }
 
-            lcpData.landscape = landscape;                                                      //parse landscape to lcpdata
+            lcpData.landscape = landscape;                                                      
         }
 
         float GetElevation(int yPos)
@@ -101,16 +99,16 @@ namespace WUInity.Fire
             return Mathf.Lerp(southElevation, northElevation, (cellCount.y - 1 - yPos) / (float)(cellCount.y - 1));
         }
 
-        void Update()                                                                           //standard unity method that runs every frame(ish)
+        void Update()                                                                           
         {
-            if (Input.GetKeyDown(KeyCode.Space))                                                //so spacebar is pause?
+            if (Input.GetKeyDown(KeyCode.Space))                                                
             {
                 simulate = !simulate;
             }
 
             if (simulate)
             {
-                simulate = mesh.Simulate();                                                     //run the simulation for every time step.
+                simulate = mesh.Simulate();                                                     
                 if (simulate)
                 {
                     time += (float)mesh.dt;
@@ -119,7 +117,7 @@ namespace WUInity.Fire
             }
         }
 
-        void OnGUI()                                                                            //method to pass things to the GUI
+        void OnGUI()                                                                           
         {
             GUI.Label(new Rect(10, 10, 500, 20), "Elapsed time: " + time / 3600.0f + " hours");
             if (mesh != null)
