@@ -19,7 +19,7 @@ namespace WUInity.Smoke
         Texture2D concentrationTexture;
         Fire.FireCell[] fireCellReferences;
         float xFaceArea, yFaceArea;
-        int bigXSize, cellCount;
+        int paddedCellCountX, paddedCellCountY, cellCount;
 
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
@@ -41,8 +41,9 @@ namespace WUInity.Smoke
             xFaceArea = cellSizeY * cellHeight;
             yFaceArea = cellSizeX * cellHeight;
 
-            bigXSize = cellCountX + 2;
-            computeBuffer = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));            
+            paddedCellCountX = cellCountX + 2;
+            paddedCellCountY = cellCountY + 2;
+            computeBuffer = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
         }       
         
         void CacheFireCells()
@@ -83,20 +84,20 @@ namespace WUInity.Smoke
                     {
                         Fire.FireCell fireCell = fireCellReferences[x + y * cellCountX];
                         float QA = 0.0f;
-
-                        if (fireCell.cellState == Fire.FireCellState.Burning || fireCell.cellState == Fire.FireCellState.Dead)
+                        if (fireCell.cellState == Fire.FireCellState.Burning) // || fireCell.cellState == Fire.FireCellState.Dead)
                         {
                             //when done testing, move this calc to the fire cell itself, more effective sine less frequent updates
-                            QA = 0.05f * cellArea * (float)fireCell.GetReactionIntensity() / 21500.0f; //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.05
+                            QA = 0.1f * cellArea * (float)fireCell.GetReactionIntensity() / 21500.0f; //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.1
                         }
 
-                        //padded around with zeroes
-                        float center = concentration[(x + 1) + (y + 1) * bigXSize];
-                        //this is safe since padding around the array is added (containg zeroes)
-                        float left = concentration[x + (y + 1) * bigXSize];
-                        float right = concentration[(x + 2) + (y + 1) * bigXSize];
-                        float down = concentration[(x + 1) + y * bigXSize];
-                        float up = concentration[(x + 1) + (y + 2) * bigXSize];
+                        //padded around with zeroes so we need to fix index
+                        int paddedX = x + 1;
+                        int yInside = y + 1;
+                        float center = concentration[paddedX + yInside * paddedCellCountX];
+                        float left = concentration[paddedX - 1 + yInside * paddedCellCountX];
+                        float right = concentration[paddedX + 1 + yInside * paddedCellCountX];
+                        float down = concentration[paddedX + (yInside - 1) * paddedCellCountX];
+                        float up = concentration[paddedX + (yInside + 1) * paddedCellCountX];
 
                         float incomingX = windX >= 0f ? left : right;
                         float incomingY = windY >= 0f ? down : up;
@@ -104,9 +105,30 @@ namespace WUInity.Smoke
                         //float outgoingY = wind.y < 0f ? down : up;                        
                         float xDelta = absoluteWindX * yFaceArea * (incomingX - center);
                         float yDelta = absoluteWindY * xFaceArea * (incomingY - center);
+
+                        /*//advection
+                        float advectionX = windX * (center - left) / (cellSizeX);
+                        if(windX < 0)
+                        {
+                            advectionX = windX * (right - center) / (cellSizeX);
+                        }
+                        float advectionY = windY * (center - down) / (cellSizeY);
+                        if(windY < 0)
+                        {
+                            advectionY = windY * (up - center) / (cellSizeY);
+                        }
+                        float advection = advectionX + advectionY;
+
+                        //diffusion
+                        float eddyDiffusionCoefficient = 10f;
+                        float diffusionX = (right - 2 * center + left) / (cellSizeX * cellSizeX);
+                        float diffusionY = (up - 2 * center + down) / (cellSizeY * cellSizeY);
+                        float diffusion = eddyDiffusionCoefficient * (diffusionX + diffusionY);*/
+
                         float C_delta = QA + xDelta + yDelta;
                         C_delta *= internalDeltaTime * invertedCellVolume;
-                        concentrationBuffer[x + y * cellCountX] = C_delta;
+                        //C_delta = internalDeltaTime * (-advection + diffusion + QA);
+                        concentrationBuffer[x + y * cellCountX] = center + C_delta;
                     }
                 }
                 
@@ -115,16 +137,16 @@ namespace WUInity.Smoke
                 {
                     for (int x = 0; x < cellCountX; x++)
                     {
-                        int index = (x + 1) + (y + 1) * bigXSize;
+                        int bigIndex = (x + 1) + (y + 1) * paddedCellCountX;
                         int smallIndex = x + y * cellCountX;
-                        concentration[index] += concentrationBuffer[smallIndex];
+                        concentration[bigIndex] = concentrationBuffer[smallIndex];
 
                         //we use this for tmeporary storage when giving to GPU
-                        concentrationBuffer[smallIndex] = 1.2f * 8700f * concentration[index];
+                        concentrationBuffer[smallIndex] = concentration[bigIndex];
 
-                        if (concentration[index] > maxConcentration)
+                        if (concentration[bigIndex] > maxConcentration)
                         {
-                            maxConcentration = concentration[index];
+                            maxConcentration = concentration[bigIndex];
                         }
                     }
                 }
@@ -139,7 +161,7 @@ namespace WUInity.Smoke
             {
                 for (int x = 0; x < cellCountX; x++)
                 {
-                    int index = (x + 1) + (y + 1) * bigXSize;
+                    int index = (x + 1) + (y + 1) * paddedCellCountX;
                     float lightExtinction = 1.2f * 8700f * concentration[index];
                     Color c = new Color(lightExtinction, 0f, 0f, 0.5f);
                     concentrationTexture.SetPixel(x, y, c);

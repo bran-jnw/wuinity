@@ -272,8 +272,9 @@ namespace WUInity
         }
 
         [Header("Options")]
-        public bool developerMode = false;        
-        
+        public bool developerMode = false;
+        public bool autoLoadExample = true;
+
         [Header("Prefabs")]
         [SerializeField] GameObject markerPrefab;
         [SerializeField] Material dataPlaneMaterial;
@@ -346,6 +347,15 @@ namespace WUInity
             {
                 developerMode = false;
             }  
+
+            if(autoLoadExample && developerMode)
+            {
+                string path = "D:\\UNITY\\_PROJECTS\\WUI-NITY\\wui-nity\\external_data\\example\\example.wui";
+                if (File.Exists(path))
+                {
+                    SaveLoadWUI.LoadInput(path);
+                }                
+            }
 
             if (godCamera == null)
             {

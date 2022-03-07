@@ -48,7 +48,7 @@ Shader "WUInity/BoxDispersionUnlit"
                 int xIndex = i.texcoord.x * _CellsX;
                 int yIndex = i.texcoord.y * _CellsY;
                 int index = xIndex + yIndex * _CellsX;
-                float value = _Data[index];
+                float value = 10440.0 * _Data[index]; // 1.2 * 8700.0 = 10440.0
 
                 //clip exits shader here if below 0
                 clip(value - _MinValue);
