@@ -88,15 +88,21 @@ namespace WUInity.Visualization
             if (renderFire)
             {
                 float[] fireData = WUInity.SIM.GetFireMesh().GetFireLineIntensityData();
-                fireBuffer.SetData(fireData);
-                fireMaterial.SetBuffer("_Data", fireBuffer);
+                if(fireData != null)
+                {
+                    fireBuffer.SetData(fireData);
+                    fireMaterial.SetBuffer("_Data", fireBuffer);
+                }                
             }
 
             if (renderSoot)
             {
                 float[] sootData = WUInity.SIM.GetSmokeDispersion().GetData();
-                sootBuffer.SetData(sootData);
-                sootMaterial.SetBuffer("_Data", sootBuffer);                
+                if (sootData != null)
+                {
+                    sootBuffer.SetData(sootData);
+                    sootMaterial.SetBuffer("_Data", sootBuffer);
+                }               
             }
         }
 

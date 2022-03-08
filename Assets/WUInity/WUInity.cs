@@ -386,11 +386,15 @@ namespace WUInity
 
             if(autoLoadExample && developerMode)
             {
-                string path = "D:\\UNITY\\_PROJECTS\\WUI-NITY\\wui-nity\\external_data\\example\\example.wui";
+                string path = Path.Combine(DATA_FOLDER, "example\\example.wui");
                 if (File.Exists(path))
                 {
                     SaveLoadWUI.LoadInput(path);
-                }                
+                }     
+                else
+                {
+                    print("Could not find input file for auto load in path " + path);
+                }
             }
 
             if (godCamera == null)
@@ -685,6 +689,7 @@ namespace WUInity
             {
                 TogglePause();
             }
+
             if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
             {
                 SIM.UpdateRealtimeSim();
