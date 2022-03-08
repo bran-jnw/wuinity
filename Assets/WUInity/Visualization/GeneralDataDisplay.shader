@@ -54,7 +54,7 @@ Shader "WUInity/GeneralDataDisplay"
                 //clip exits shader here if below 0
                 clip(value - _LowerCutOff);
 
-                float valueNorm = (value - _MinValue) / (_MaxValue - _MinValue);// saturate((value - _MinValue) / (_MaxValue - _MinValue));
+                float valueNorm = saturate((value - _MinValue) / (_MaxValue - _MinValue)); //(value - _MinValue) / (_MaxValue - _MinValue);
                 float4 color = tex2D(_ScaleGradient, float2(valueNorm, 0.125));
                 color.a = _Transparency;
 

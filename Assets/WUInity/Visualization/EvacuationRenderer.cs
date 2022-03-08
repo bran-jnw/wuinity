@@ -19,7 +19,9 @@ namespace WUInity.Visualization
 
         public void CreateBuffers(bool renderHouseholds, bool renderTraffic)
         {
-            if(renderHouseholds)
+            Release();
+
+            if (renderHouseholds)
             {
                 CreateHouseholdsBuffer(WUInity.SIM.GetMacroHumanSim().GetHouseholdPositions().Length, WUInity.INPUT.size);
             }            

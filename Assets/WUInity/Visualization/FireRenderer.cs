@@ -38,7 +38,9 @@ namespace WUInity.Visualization
 
         public void CreateBuffers(bool renderFire, bool renderSmoke)
         {
-            if(renderFire)
+            Release();
+
+            if (renderFire)
             {
                 CreateFireBuffer();
             }
@@ -50,7 +52,7 @@ namespace WUInity.Visualization
         }
 
         void CreateFireBuffer()
-        {
+        {            
             fireCellCountX = WUInity.SIM.GetFireMesh().cellCount.x;
             fireCellCountY = WUInity.SIM.GetFireMesh().cellCount.y;
             fireBuffer = new ComputeBuffer(fireCellCountX * fireCellCountY, sizeof(float));

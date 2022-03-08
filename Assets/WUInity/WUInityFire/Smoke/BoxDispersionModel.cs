@@ -17,8 +17,7 @@ namespace WUInity.Smoke
         float[] concentration;
         float[] concentrationBuffer;
         Fire.FireCell[] fireCellReferences;
-        float xFaceArea, yFaceArea;
-        int paddedCellCountX, paddedCellCountY, cellCount;
+        int paddedCellCountX, cellCount;
 
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
@@ -34,13 +33,9 @@ namespace WUInity.Smoke
             cellVolume = cellSizeX * cellSizeY * height;
             invertedCellVolume = 1f / cellVolume;
             cellCount = cellCountX * cellCountY;
-            concentration = new float[(cellCountX + 2) * (cellCountY + 2)]; //added padding around to get outside range faster
-            concentrationBuffer = new float[cellCount];
-            xFaceArea = cellSizeY * cellHeight;
-            yFaceArea = cellSizeX * cellHeight;
-
             paddedCellCountX = cellCountX + 2;
-            paddedCellCountY = cellCountY + 2;            
+            concentration = new float[paddedCellCountX * (cellCountY + 2)]; //added padding around to get outside range faster
+            concentrationBuffer = new float[cellCount];                     
         }       
         
         void CacheFireCells()
@@ -98,7 +93,7 @@ namespace WUInity.Smoke
                     {
                         Fire.FireCell fireCell = fireCellReferences[x + y * cellCountX];
                         float QA = 0.0f;
-                        if (fireCell.cellState == Fire.FireCellState.Burning) // || fireCell.cellState == Fire.FireCellState.Dead)
+                        if (fireCell.cellState == Fire.FireCellState.Burning) //|| fireCell.cellState == Fire.FireCellState.Dead)
                         {
                             //when done testing, move this calc to the fire cell itself, more effective sine less frequent updates
                             QA = 0.015f * cellArea * (float)fireCell.GetReactionIntensity() / 21500.0f; //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood founf for FDS
@@ -106,12 +101,12 @@ namespace WUInity.Smoke
 
                         //padded around with zeroes so we need to fix index
                         int paddedX = x + 1;
-                        int yInside = y + 1;
-                        float center = concentration[paddedX + yInside * paddedCellCountX];
-                        float left = concentration[paddedX - 1 + yInside * paddedCellCountX];
-                        float right = concentration[paddedX + 1 + yInside * paddedCellCountX];
-                        float down = concentration[paddedX + (yInside - 1) * paddedCellCountX];
-                        float up = concentration[paddedX + (yInside + 1) * paddedCellCountX];
+                        int paddedY = y + 1;
+                        float center = concentration[paddedX + paddedY * paddedCellCountX];
+                        float left = concentration[paddedX - 1 + paddedY * paddedCellCountX];
+                        float right = concentration[paddedX + 1 + paddedY * paddedCellCountX];
+                        float down = concentration[paddedX + (paddedY - 1) * paddedCellCountX];
+                        float up = concentration[paddedX + (paddedY + 1) * paddedCellCountX];
 
                         //advection up-wind scheme
                         float advectionX = windX * (center - left) / (cellSizeX);
@@ -124,7 +119,7 @@ namespace WUInity.Smoke
                         {
                             advectionY = windY * (up - center) / (cellSizeY);
                         }
-                        //central difference blows up
+                        //TODO: central difference blows up
                         //advectionX = windX * (right - left) / (2 * cellSizeX);
                         //advectionY = windY * (up - down) / (2 * cellSizeY);
                         float advection = advectionX + advectionY;
@@ -152,7 +147,7 @@ namespace WUInity.Smoke
                         int smallIndex = x + y * cellCountX;
                         concentration[bigIndex] = concentrationBuffer[smallIndex];
 
-                        //we use this for tmeporary storage when giving to GPU
+                        //we use this for temporary storage when giving to GPU
                         concentrationBuffer[smallIndex] = 4539.13f * concentration[bigIndex]; //// 1.2 * 8700.0 / 2.3 = optical density
 
                         if (concentration[bigIndex] > maxConcentration)
