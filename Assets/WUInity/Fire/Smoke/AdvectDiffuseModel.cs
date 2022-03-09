@@ -18,6 +18,7 @@ namespace WUInity.Smoke
         ComputeShader advectDiffuseCompute;
         ComputeBuffer[] sootConcentration;
         ComputeBuffer sootInjection;
+        int solutionMode;
 
         const int READ = 0;
         const int WRITE = 1;
@@ -36,7 +37,7 @@ namespace WUInity.Smoke
         }
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
-        public AdvectDiffuseModel(Fire.FireMesh fireMesh, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex)
+        public AdvectDiffuseModel(Fire.FireMesh fireMesh, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, int solutionMode = 0)
         {
             this.fireMesh = fireMesh;
             //set all parameters
@@ -60,6 +61,7 @@ namespace WUInity.Smoke
             sootConcentration[1] = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
             sootInjection = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
 
+            this.solutionMode = 1;//solutionMode;
             //set constants in compute buffer
             advectDiffuseCompute.SetInt("_CellsX", cellCountX);
             advectDiffuseCompute.SetInt("_CellsY", cellCountY);
@@ -68,7 +70,7 @@ namespace WUInity.Smoke
             advectDiffuseCompute.SetFloat("_CellsPerMeterY", invertedCellSizeY);
             advectDiffuseCompute.SetFloat("_CellsPerMeterXSq", invertedCellSizeXSq);
             advectDiffuseCompute.SetFloat("_CellsPerMeterYSq", invertedCellSizeYSq);
-            advectDiffuseCompute.SetTexture(0, "_NoiseTex", noiseTex, 0);
+            advectDiffuseCompute.SetTexture(solutionMode, "_NoiseTex", noiseTex, 0);
         }
 
         public void Update(float deltaTime, float windDirection, float windSpeed, bool fireHasUpdated)
@@ -89,9 +91,8 @@ namespace WUInity.Smoke
             float maxDiffusion = 22f;
             //TODO: this is not correct, blows up with too high diffusion terms
             float courantDiffusion = 2 * maxDiffusion * deltaTime * (invertedCellSizeXSq + invertedCellSizeYSq);
-            int internalTimeSteps = Mathf.CeilToInt(Mathf.Max(courantAdvection, courantDiffusion) / maxCFL);
+            float internalTimeSteps = Mathf.CeilToInt(Mathf.Max(courantAdvection, courantDiffusion) / maxCFL);
             float internalDeltaTime = deltaTime / internalTimeSteps;
-
             //MonoBehaviour.print("Courant Adv.: " + courantAdvection + ", Courant Diff.: " + courantDiffusion + ", intenal timesteps; " + internalTimeSteps + ", internal delta time: " + internalDeltaTime);
 
             //Set all of the data in compute shader
@@ -99,23 +100,23 @@ namespace WUInity.Smoke
             advectDiffuseCompute.SetFloat("_WindX", windX);
             advectDiffuseCompute.SetFloat("_WindY", windY);
             advectDiffuseCompute.SetFloat("_WindXFraction", windXFraction);
-            advectDiffuseCompute.SetFloat("_WindYFraction", windYFraction);            
+            advectDiffuseCompute.SetFloat("_WindYFraction", windYFraction);
 
             //if fire has been updated we need to update the injection buffer
             if (fireHasUpdated)
             {
                 float[] sootInjectionCPU = fireMesh.GetSootProduction();
                 sootInjection.SetData(sootInjectionCPU);
-                advectDiffuseCompute.SetBuffer(0, "_SootInjection", sootInjection);
-            }            
-
+                advectDiffuseCompute.SetBuffer(solutionMode, "_SootInjection", sootInjection);
+            }
+            
             //go through time steps and update soot concetration in compute shader
             for (int i = 0; i < internalTimeSteps; i++)
             {
                 //as we swap these they have to be set every time
-                advectDiffuseCompute.SetBuffer(0, "_Read", sootConcentration[READ]);
-                advectDiffuseCompute.SetBuffer(0, "_Write", sootConcentration[WRITE]);
-                advectDiffuseCompute.Dispatch(0, Mathf.CeilToInt(cellCountX / (float)NUM_THREADS_X), Mathf.CeilToInt(cellCountY / (float)NUM_THREADS_Y), NUM_THREADS_Z);
+                advectDiffuseCompute.SetBuffer(solutionMode, "_Read", sootConcentration[READ]);
+                advectDiffuseCompute.SetBuffer(solutionMode, "_Write", sootConcentration[WRITE]);
+                advectDiffuseCompute.Dispatch(solutionMode, Mathf.CeilToInt(cellCountX / (float)NUM_THREADS_X), Mathf.CeilToInt(cellCountY / (float)NUM_THREADS_Y), NUM_THREADS_Z);
                 //after calculation we need to swap read/write to save new values
                 Swap(sootConcentration);
             }

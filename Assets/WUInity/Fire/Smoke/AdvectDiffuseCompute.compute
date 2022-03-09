@@ -10,8 +10,6 @@ uniform Texture2D<float4> _NoiseTex;
 RWStructuredBuffer<float> _Write;
 
 
-
-
 #pragma kernel AdvectDiffuseExplicit
 [numthreads(8, 8, 1)]
 void AdvectDiffuseExplicit(uint3 id : SV_DispatchThreadID)
@@ -90,3 +88,109 @@ void AdvectDiffuseExplicit(uint3 id : SV_DispatchThreadID)
 	float c_delta = _DeltaTime * (-advection + diffusion + conc_dot);
 	_Write[idx] = C + c_delta;
 }
+
+float2 GetAdvectedPos(float2 pos)
+{
+	float2 step = _DeltaTime * float2(_WindX * _CellsPerMeterX, _WindY * _CellsPerMeterY);
+	pos -= step;
+
+	return pos;
+}
+
+float SampleBilinear(float2 uv)
+{
+	//save the down-clamped position and the up-clamped position
+	//floor is needed since we might have negative values and casting does not work then properly
+	int x = floor(uv.x); 
+	int y = floor(uv.y);
+	int xp1 = x + 1;
+	int yp1 = y + 1;
+
+	//using remainder as fraction of actual position and integer snapped position
+	float fx = uv.x - x; 
+	float fy = uv.y - y;
+
+	float c00 = 0, c10 = 0, c01 = 0, c11 = 0;
+	if (x >= 0 && x < _CellsX && y >= 0 && y < _CellsY)
+	{
+		int idxC = x + y * _CellsX;
+		c00 = _Read[idxC];
+	}
+	if (xp1 >= 0 && xp1 < _CellsX && y >= 0 && y < _CellsY)
+	{
+		int idxR = xp1 + y * _CellsX;
+		c10 = _Read[idxR];
+	}
+	if (x >= 0 && x < _CellsX && yp1 >= 0 && yp1 < _CellsY)
+	{
+		int idxU = x + yp1 * _CellsX;
+		c01 = _Read[idxU];
+	}
+	if (xp1 >= 0 && xp1 < _CellsX && yp1 >= 0 && yp1 < _CellsY)
+	{
+		int idxRU = xp1 + yp1 * _CellsX;
+		c11 = _Read[idxRU];
+	}
+
+	float a = c00 * (1.0 - fx) + c10 * fx;
+	float b = c01 * (1.0 - fx) + c11 * fx;
+
+	return a * (1.0 - fy) + b * fy;
+}
+
+#pragma kernel AdvectDiffuseSemiLagrangian
+[numthreads(8, 8, 1)]
+void AdvectDiffuseSemiLagrangian(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+	float C = _Read[idx];
+	float L = 0, R = 0, D = 0, U = 0;
+	if (id.x > 0)
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}
+
+	//advection 
+	float2 pos = float2(id.x, id.y);
+	float2 uv = GetAdvectedPos(pos);
+	float newC = SampleBilinear(uv);
+	
+	//diffusion
+	float eddyDiffusionCoefficientAlong = 2.0;
+	float eddyDiffusionCoefficientAcross = 10.0;
+	float diffusionX = (R - 2 * C + L) * _CellsPerMeterXSq;
+	float diffusionY = (U - 2 * C + D) * _CellsPerMeterYSq;
+	diffusionX *= (eddyDiffusionCoefficientAlong * _WindXFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindXFraction));
+	diffusionY *= (eddyDiffusionCoefficientAlong * _WindYFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindYFraction));
+	float diffusion = diffusionX + diffusionY;
+
+	//injection
+	float conc_dot = _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+
+	//calculate new concentration (kg/m3)
+	float c_delta = _DeltaTime * (diffusion + conc_dot);
+	_Write[idx] = newC + c_delta;
+}
+
