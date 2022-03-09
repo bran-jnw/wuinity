@@ -325,11 +325,12 @@ MonoBehaviour:
   autoLoadExample: 1
   markerPrefab: {fileID: 2598817330613097118, guid: 9a4214ef857ec764cafe974156c124ea,
     type: 3}
-  dataPlaneMaterial: {fileID: 0}
-  terrainMeshFilter: {fileID: 0}
   godCamera: {fileID: 9009419062933292157}
   simBorder: {fileID: 5507650468005286544}
   osmBorder: {fileID: 8912109063249177183}
+  advectDiffuseCompute: {fileID: 7200000, guid: 3895e23dacb4085448e97c23118c2160,
+    type: 3}
+  noiseTex: {fileID: 2800000, guid: 9868d8aa602a4734c8bc3a0af3f483d7, type: 3}
   dataSampleMode: 0
   outputTextures: []
 --- !u!114 &6053256691148872454

@@ -1,0 +1,92 @@
+uniform int _CellsX, _CellsY;
+uniform float _DeltaTime, _WindX, _WindY, _WindXFraction, _WindYFraction, _InvertedCellVolume;
+uniform float _CellsPerMeterX, _CellsPerMeterXSq, _CellsPerMeterY, _CellsPerMeterYSq;
+
+uniform StructuredBuffer<float> _Read, _SootInjection;
+
+SamplerState LinearClampSampler;
+uniform Texture2D<float4> _NoiseTex;
+
+RWStructuredBuffer<float> _Write;
+
+
+
+
+#pragma kernel AdvectDiffuseExplicit
+[numthreads(8, 8, 1)]
+void AdvectDiffuseExplicit(uint3 id : SV_DispatchThreadID)
+{
+	//cjeck if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+	float C = _Read[idx];
+	float L = 0, R = 0, D = 0, U = 0;
+	if (id.x > 0 )
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}
+
+	//add some noise based on perlin texture
+	/*float2 uvX = float2(id.x / (float)_CellsX, id.y / (float)_CellsY);
+	float2 uvY = float2(id.y / (float)_CellsY, id.x / (float)_CellsX);
+	float modX = 1.0 -0.4 * (1.0 - 2.0 * _NoiseTex.SampleLevel(LinearClampSampler, uvX, 0));
+	float modY = 1.0 -0.4 * (1.0 - 2.0 * _NoiseTex.SampleLevel(LinearClampSampler, uvY, 0));*/
+
+	//TODO: test central difference, make sure it is stable
+	//advection up-wind scheme
+	float advectionX = _WindX * _CellsPerMeterX;// *modX;
+	float advectionY = _WindY * _CellsPerMeterY;// *modY;
+	if (_WindX < 0)
+	{
+		advectionX *= (R - C);
+	}
+	else
+	{
+		advectionX *= (C - L);
+	}
+	if (_WindY < 0)
+	{
+		advectionY *= (U - C);
+	}
+	else
+	{
+		advectionY *= (C - D);
+	}
+	float advection = advectionX + advectionY;
+
+	//diffusion
+	float eddyDiffusionCoefficientAlong = 2.0;
+	float eddyDiffusionCoefficientAcross = 10.0;
+	float diffusionX = (R - 2 * C + L) * _CellsPerMeterXSq;
+	float diffusionY = (U - 2 * C + D) * _CellsPerMeterYSq;
+	diffusionX *= (eddyDiffusionCoefficientAlong * _WindXFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindXFraction));
+	diffusionY *= (eddyDiffusionCoefficientAlong * _WindYFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindYFraction));
+	float diffusion = diffusionX + diffusionY;
+
+	//injection
+	float conc_dot = _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+
+	//calculate new concentration (kg/m3)
+	float c_delta = _DeltaTime * (-advection + diffusion + conc_dot);
+	_Write[idx] = C + c_delta;
+}

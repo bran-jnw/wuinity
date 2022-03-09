@@ -32,7 +32,7 @@ Shader "WUInity/GeneralDataDisplay"
 
             uniform sampler2D _ScaleGradient;
             float4 _ScaleGradient_ST;
-            uniform float _MinValue, _MaxValue, _Transparency, _LowerCutOff;
+            uniform float _MinValue, _MaxValue, _Transparency, _LowerCutOff, _DataMultiplier;
             uniform int _CellsX, _CellsY;
             uniform StructuredBuffer<float> _Data;
 
@@ -49,7 +49,7 @@ Shader "WUInity/GeneralDataDisplay"
                 int xIndex = i.texcoord.x * _CellsX;
                 int yIndex = i.texcoord.y * _CellsY;
                 int index = xIndex + yIndex * _CellsX;
-                float value = _Data[index];
+                float value = _Data[index] * _DataMultiplier;
 
                 //clip exits shader here if below 0
                 clip(value - _LowerCutOff);

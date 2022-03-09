@@ -316,6 +316,8 @@ namespace WUInity
         [SerializeField] private GodCamera godCamera;
         [SerializeField] private LineRenderer simBorder;
         [SerializeField] private LineRenderer osmBorder;
+        [SerializeField] public ComputeShader advectDiffuseCompute;
+        [SerializeField] public Texture2D noiseTex;
 
         public enum DataSampleMode { None, GPW, Population, Relocated, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;

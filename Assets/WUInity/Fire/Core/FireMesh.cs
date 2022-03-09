@@ -12,7 +12,8 @@ namespace WUInity.Fire
         public SpreadMode spreadMode;                               
         public IgnitionPoint[] ignitionPoints;                
         FireCell[] fireCells;                                
-        public Vector2D cellSize;                                   
+        public Vector2D cellSize;
+        float cellArea;
         public WindData currentWindData;                            
         public double dt;                                           
         double[] angleOffsets;                                      
@@ -21,6 +22,7 @@ namespace WUInity.Fire
         public HashSet<FireCell> cellsToIgnite; 
 
         float[] fireLineIntensityData;
+        float[] sootProduction;
 
         public Vector2Int[] neighborIndices;                        
         public double cellSizeDiagonal;                             
@@ -172,7 +174,8 @@ namespace WUInity.Fire
 
             //data arrays for visualization
             fireLineIntensityData = new float[fireCells.Length];
-
+            sootProduction = new float[fireCells.Length];
+            cellArea = (float)(cellSize.x * cellSize.y);
             StartInitialIgnition();
         }
 
@@ -281,8 +284,13 @@ namespace WUInity.Fire
             for (int i = 0; i < fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
+                sootProduction[i] = 0.0f;
+                if (fireCells[i].cellState == FireCellState.Burning) //|| fireCells[i].cellState == FireCellState.Dead)
+                {
+                    //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood founf for FDS
+                    sootProduction[i] = 0.015f * cellArea * (float)fireCells[i].GetReactionIntensity() / 21500.0f; 
+                }
             }
-
 
             //update time and wind for next time step. TODO: spread out the update over several frames
             timeSinceStart += dt;
@@ -344,6 +352,11 @@ namespace WUInity.Fire
         public FireCell GetFireCell(int x, int y)            
         {
             return fireCells[GetCellIndex(x, y)];
+        }
+
+        public float[] GetSootProduction()
+        {
+            return sootProduction;
         }
 
         /// <summary>

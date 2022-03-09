@@ -38,7 +38,7 @@ namespace WUInity.Visualization
 
         public void CreateBuffers(bool renderFire, bool renderSmoke)
         {
-            Release();
+            Release(true);
 
             if (renderFire)
             {
@@ -61,7 +61,8 @@ namespace WUInity.Visualization
             fireMaterial.SetFloat("_LowerCutOff", 0.01f);
             fireMaterial.SetFloat("_MinValue", 0.0f);
             fireMaterial.SetFloat("_MaxValue", 6000.0f);
-            if(fireMeshRenderer == null)
+            fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+            if (fireMeshRenderer == null)
             {
                 fireMeshRenderer = CreateDataPlane(fireMaterial, "FireSpread", true);
             }            
@@ -69,18 +70,21 @@ namespace WUInity.Visualization
 
         void CreateSootBuffer()
         {
-            sootCellCountX = WUInity.SIM.GetSmokeDispersion().GetCellsX();
-            sootCellCountY = WUInity.SIM.GetSmokeDispersion().GetCellsY();
-            sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
+            //sootCellCountX = WUInity.SIM.GetSmokeDispersion().GetCellsX();
+            //sootCellCountY = WUInity.SIM.GetSmokeDispersion().GetCellsY();
+            sootCellCountX = WUInity.SIM.GetAdvectDiffuseSim().GetCellsX();
+            sootCellCountY = WUInity.SIM.GetAdvectDiffuseSim().GetCellsY();
+            //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
             sootMaterial.SetInteger("_CellsX", sootCellCountX);
             sootMaterial.SetInteger("_CellsY", sootCellCountY);
             sootMaterial.SetFloat("_LowerCutOff", 0.0f);
             sootMaterial.SetFloat("_MinValue", 0.002608695f); //500 meters with C = 3
             sootMaterial.SetFloat("_MaxValue", 0.260869565f); //5 meters with C = 3
-            if(sootMeshRenderer == null)
+            sootMaterial.SetFloat("_DataMultiplier", 4539.13f); // 1.2 * 8700.0 / 2.3 = 4539.13 for optical density
+            if (sootMeshRenderer == null)
             {
                 sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true);
-            }
+            }            
         }        
 
         public void UpdateFireRenderer(bool renderFire, bool renderSoot)
@@ -97,12 +101,14 @@ namespace WUInity.Visualization
 
             if (renderSoot)
             {
-                float[] sootData = WUInity.SIM.GetSmokeDispersion().GetData();
+                /*float[] sootData = WUInity.SIM.GetSmokeDispersion().GetData();
                 if (sootData != null)
                 {
                     sootBuffer.SetData(sootData);
                     sootMaterial.SetBuffer("_Data", sootBuffer);
-                }               
+                }  */
+                ComputeBuffer buffer = WUInity.SIM.GetAdvectDiffuseSim().GetComputeBuffer();
+                sootMaterial.SetBuffer("_Data", buffer);
             }
         }
 
@@ -144,7 +150,7 @@ namespace WUInity.Visualization
             Release();
         }
 
-        void Release()
+        void Release(bool creationCall = false)
         {
             if (fireBuffer != null)
             {
@@ -157,6 +163,12 @@ namespace WUInity.Visualization
                 sootBuffer.Release();
                 sootBuffer = null;
             }
+
+            if(!creationCall && WUInity.SIM.GetAdvectDiffuseSim() != null)
+            {
+                WUInity.SIM.GetAdvectDiffuseSim().Release();
+            }
+            
         }
     }    
 }

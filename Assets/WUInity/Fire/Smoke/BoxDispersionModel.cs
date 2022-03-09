@@ -147,9 +147,6 @@ namespace WUInity.Smoke
                         int smallIndex = x + y * cellCountX;
                         concentration[bigIndex] = concentrationBuffer[smallIndex];
 
-                        //we use this for temporary storage when giving to GPU
-                        concentrationBuffer[smallIndex] = 4539.13f * concentration[bigIndex]; //// 1.2 * 8700.0 / 2.3 = optical density
-
                         if (concentration[bigIndex] > maxConcentration)
                         {
                             maxConcentration = concentration[bigIndex];

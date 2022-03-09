@@ -19,6 +19,7 @@ namespace WUInity
         private MacroHumanSim macroHumanSim;
         private FireMesh fireMesh;
         private Smoke.BoxDispersionModel smokeBoxDispersionModel;
+        private Smoke.AdvectDiffuseModel advectDiffuseSim;
 
 
         private float startTime;
@@ -77,6 +78,11 @@ namespace WUInity
             return smokeBoxDispersionModel;
         }
 
+        public Smoke.AdvectDiffuseModel GetAdvectDiffuseSim()
+        {
+            return advectDiffuseSim;
+        }
+
         public RouteCreator GetRouteCreator()
         {
             return routeCreator;
@@ -127,7 +133,8 @@ namespace WUInity
             //can only run together
             if(input.runSmokeSim && input.runFireSim)
             {
-                smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
+                //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
+                advectDiffuseSim = new Smoke.AdvectDiffuseModel(fireMesh, 250f, WUInity.INSTANCE.advectDiffuseCompute, WUInity.INSTANCE.noiseTex);
             }
             else
             {
@@ -205,8 +212,7 @@ namespace WUInity
             isRunning = true;
             nextFireUpdate = 0f;  
             if(!input.runInRealTime)
-            {        
-                
+            {   
                 while (!stopSim)
                 {
                     //checks if we are done
@@ -223,23 +229,7 @@ namespace WUInity
             {
                 haveResults = true;
             }
-        }
-
-        void SaveOutput(int runNumber)
-        {
-            WUInityInput input = WUInity.INPUT;
-            if (input.runTrafficSim)
-            {
-                WUInity.WUI_LOG("LOG: Total cars in simulation: " + macroTrafficSim.GetTotalCarsSimulated());
-                macroTrafficSim.SaveToFile(runNumber);
-            }
-            if(input.runEvacSim)
-            {
-                macroHumanSim.SaveToFile(runNumber);
-            }            
-            
-            SaveLoadWUI.SaveOutput(WUInity.INPUT.simName + "_" + runNumber);
-        }
+        }        
 
         void UpdateSimStatus()
         {
@@ -311,12 +301,14 @@ namespace WUInity
                     }
                 }
             }
-            
+
             //update fire mesh if needed
+            bool fireUpdated = false;
             if (input.runFireSim)
             {   
                 if (time >= 0.0f && time >= nextFireUpdate)
                 {
+                    fireUpdated = true;
                     fireMesh.Simulate();
                     nextFireUpdate += (float)fireMesh.dt;
                     //check if any goal has been blocked by fire
@@ -332,7 +324,8 @@ namespace WUInity
             //sync with fire
             if(time >= 0.0f && input.runSmokeSim)
             {
-                smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
+                //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
+                advectDiffuseSim.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed, fireUpdated);
             }
 
             //advance evac
@@ -442,6 +435,22 @@ namespace WUInity
             }
             //update cars already in traffic
             macroTrafficSim.UpdateEvacuationGoals();              
-        }                 
+        }
+
+        void SaveOutput(int runNumber)
+        {
+            WUInityInput input = WUInity.INPUT;
+            if (input.runTrafficSim)
+            {
+                WUInity.WUI_LOG("LOG: Total cars in simulation: " + macroTrafficSim.GetTotalCarsSimulated());
+                macroTrafficSim.SaveToFile(runNumber);
+            }
+            if (input.runEvacSim)
+            {
+                macroHumanSim.SaveToFile(runNumber);
+            }
+
+            SaveLoadWUI.SaveOutput(WUInity.INPUT.simName + "_" + runNumber);
+        }
     }    
 }
