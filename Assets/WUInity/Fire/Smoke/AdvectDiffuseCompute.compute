@@ -1,6 +1,7 @@
 uniform int _CellsX, _CellsY;
 uniform float _DeltaTime, _WindX, _WindY, _WindXFraction, _WindYFraction, _InvertedCellVolume;
-uniform float _CellsPerMeterX, _CellsPerMeterXSq, _CellsPerMeterY, _CellsPerMeterYSq;
+uniform float _CellSizeX, _CellsPerMeterX, _CellsPerMeterXSq;
+uniform float _CellSizeY, _CellsPerMeterY, _CellsPerMeterYSq;
 
 uniform StructuredBuffer<float> _Read, _SootInjection;
 
@@ -149,8 +150,34 @@ void AdvectDiffuseSemiLagrangian(uint3 id : SV_DispatchThreadID)
 	}
 
 	int idx = id.x + id.y * _CellsX;
+
+	//advection 
+	float2 pos = float2(id.x, id.y);
+	float2 uv = GetAdvectedPos(pos);
+	float newC = SampleBilinear(uv);	
+
+	//injection
+	float conc_dot = _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+
+	//calculate new concentration (kg/m3)
+	float c_delta = _DeltaTime * conc_dot;
+	_Write[idx] = newC + c_delta;
+}
+
+#pragma kernel DiffuseImplicit
+[numthreads(8, 8, 1)]
+void DiffuseImplicit(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
 	float C = _Read[idx];
-	float L = 0, R = 0, D = 0, U = 0;
+	//float L = 0, R = 0, D = 0, U = 0;
+	float L = C, R = C, D = C, U = C; //never "lose" diffusion to ouside?
 	if (id.x > 0)
 	{
 		int idxL = id.x - 1 + id.y * _CellsX;
@@ -172,25 +199,24 @@ void AdvectDiffuseSemiLagrangian(uint3 id : SV_DispatchThreadID)
 		U = _Read[idxU];
 	}
 
-	//advection 
-	float2 pos = float2(id.x, id.y);
-	float2 uv = GetAdvectedPos(pos);
-	float newC = SampleBilinear(uv);
-	
-	//diffusion
+	float eddyDiffusionCoefficient = 10;
+
+	//dx^2 * v * dt
+	float alpha = _CellSizeX * _CellSizeY / (eddyDiffusionCoefficient * _DeltaTime);
+	float rBeta = 1.0f / (4.0f + alpha);
+
+	//TODO: do more reading to investigate if diffusion is different in each realtive direction to the wind
+	/*
 	float eddyDiffusionCoefficientAlong = 2.0;
-	float eddyDiffusionCoefficientAcross = 10.0;
-	float diffusionX = (R - 2 * C + L) * _CellsPerMeterXSq;
-	float diffusionY = (U - 2 * C + D) * _CellsPerMeterYSq;
-	diffusionX *= (eddyDiffusionCoefficientAlong * _WindXFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindXFraction));
-	diffusionY *= (eddyDiffusionCoefficientAlong * _WindYFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindYFraction));
-	float diffusion = diffusionX + diffusionY;
+	float eddyDiffusionCoefficientAcross = 1;
+	float diffusionX = (eddyDiffusionCoefficientAlong * _WindXFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindXFraction));
+	float diffusionY = (eddyDiffusionCoefficientAlong * _WindYFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindYFraction));
+	//dx^2 * v * dt
+	float alphaX = _CellSizeX * _CellSizeX / (diffusionX * _DeltaTime);
+	float rBetaX = 1.0f / (2.0f + alphaX);
+	float alphaY = _CellSizeY * _CellSizeY / (diffusionY * _DeltaTime);
+	float rBetaY = 1.0f / (2.0f + alphaY);
+	_Write[idx] = (C * alphaX + L + R) * rBetaX + (C * alphaY + D + U) * rBetaY;*/
 
-	//injection
-	float conc_dot = _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
-
-	//calculate new concentration (kg/m3)
-	float c_delta = _DeltaTime * (diffusion + conc_dot);
-	_Write[idx] = newC + c_delta;
+	_Write[idx] = (C * alpha + L + R + D + U) * rBeta;
 }
-
