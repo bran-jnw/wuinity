@@ -287,7 +287,7 @@ namespace WUInity.Fire
                 sootProduction[i] = 0.0f;
                 if (fireCells[i].cellState == FireCellState.Burning) //|| fireCells[i].cellState == FireCellState.Dead)
                 {
-                    //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood founf for FDS
+                    //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood found for FDS
                     sootProduction[i] = 0.015f * cellArea * (float)fireCells[i].GetReactionIntensity() / 21500.0f; 
                 }
             }
