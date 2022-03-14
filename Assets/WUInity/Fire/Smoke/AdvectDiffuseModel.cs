@@ -25,6 +25,11 @@ namespace WUInity.Smoke
         const int NUM_THREADS_Y = 8;
         const int NUM_THREADS_Z = 1;
 
+        ~AdvectDiffuseModel()
+        {
+            Release();
+        }
+
         public int GetCellsX()
         {
             return cellCountX;
