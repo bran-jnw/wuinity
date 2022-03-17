@@ -29,10 +29,11 @@ namespace WUInity.Fire
         double maxFireLineIntensity;
         double timeOfArrival;
         double heatPerUnitArea;
+        double fuelMassGround;
+        bool doneSpreading;
 
-        //calls BEHAVE DLL
-        [DllImport("BEHAVEDLL", EntryPoint = "CalcFireMaxSpreadRate")]          //Import BEHAVE dll, but only the specified method (??)
-        public static extern double CalcFireMaxSpreadRate(int fuelModelNumber,  //Declare the method from the above DLL. 
+        [DllImport("BEHAVEDLL", EntryPoint = "CalcFireMaxSpreadRate")]          
+        public static extern double CalcFireMaxSpreadRate(int fuelModelNumber, 
             double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody,
             double windSpeed, double windDirection,
             double slope, double aspect,
@@ -40,11 +41,11 @@ namespace WUInity.Fire
             double canopyCover, double canopyHeight, double crownRatio);
         
 
-        public FireCell(FireMesh fireMesh, int xIndex, int yIndex, LandScapeStruct lcp) //CONSTRUCTOR
+        public FireCell(FireMesh fireMesh, int xIndex, int yIndex, LandScapeStruct lcp)
         {
             this.fireMesh = fireMesh;
             cellIndex = new Vector2Int(xIndex, yIndex);
-            cellState = FireCellState.CanBurn;                                  //save the cellState as CanBurn (based on the enumerable called FireCellState) 
+            cellState = FireCellState.CanBurn;                                  
 
             fireFront = new double[fireMesh.indexSize];
             distances = new double[fireMesh.indexSize];
@@ -63,17 +64,17 @@ namespace WUInity.Fire
             //calc distance to next cell center in current direction
             for (int i = 0; i < distances.Length; i++)                                  
             {
-                int xI = cellIndex.x + fireMesh.neighborIndices[i].x;               //save the x dimension of the neighbor cell
-                int yI = cellIndex.y + fireMesh.neighborIndices[i].y;               //save the y dimension of the neighbor cell
-                if (fireMesh.IsInsideMesh(xI, yI) && fireMesh.GetFireCell(xI, yI).cellState == FireCellState.CanBurn)               //if the neighbor is inside the mesh AND it has a CanBurn cellState
+                int xI = cellIndex.x + fireMesh.neighborIndices[i].x;               
+                int yI = cellIndex.y + fireMesh.neighborIndices[i].y;              
+                if (fireMesh.IsInsideMesh(xI, yI) && fireMesh.GetFireCell(xI, yI).cellState == FireCellState.CanBurn)              
                 {
-                    FireCell f = fireMesh.GetFireCell(xI, yI);               //create fire cell f
+                    FireCell neighborCell= fireMesh.GetFireCell(xI, yI);             
                     //set neighbor since it exists
-                    neighbors[i] = f;                                               //save neighbor
+                    neighbors[i] = neighborCell;                                               
                     
                     //caclulate actual distance
                     double dist;
-                    if(i < 4)                                                       //save cartesian distance based on the neighbor orientation (i am guessing there is a standard pattern for this)
+                    if(i < 4)                                                       
                     {
                         dist = fireMesh.cellSizeSquared;
                     }
@@ -86,23 +87,34 @@ namespace WUInity.Fire
                         dist = fireMesh.sixteenDistSquared;
                     }
                     //assumes x = y cell size
-                    distances[i] = sqrt(2 * dist + pow2(lcp.elevation- f.lcp.elevation));           //account for elevation changes
+                    distances[i] = sqrt(2 * dist + pow2(lcp.elevation- neighborCell.lcp.elevation));           
                 }
-                else                                                            //if the cell cannot be burned for whatever reason
+                else                                                           
                 {
                     fireFront[i] = -1.0;
                     distances[i] = -1.0;  
                 }
                 maxSpreadRates[i] = 0.0;
             }
-            if(lcp.slope == -1 && lcp.aspect == -1)                                                 //if slope and aspect are not given from the lcp
+
+            //in case we are missing slope and aspect data for some reason we calculate them (e.g. if using heightmaps and not LCP)
+            if(lcp.slope == -1 && lcp.aspect == -1)                                                 
             {
                 CalculateSlopeAndAspect();
             }                      
-            maxSpreadRate = -1.0;                 
+            maxSpreadRate = -1.0;
+
+            int fuel = lcp.fuel_model;
+            double bulkDensity = fireMesh.fuelModelSet.getFuelLoadOneHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
+            bulkDensity += fireMesh.fuelModelSet.getFuelLoadTenHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
+            bulkDensity += fireMesh.fuelModelSet.getFuelLoadHundredHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
+            bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveHerbaceous(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
+            bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveWoody(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
+            fuelMassGround = bulkDensity * fireMesh.cellSize.x * fireMesh.cellSize.y;// * fireMesh.fuelModelSet.getFuelbedDepth(fuel, BehaveUnits.LengthUnits.LengthUnitsEnum.Meters);
+            doneSpreading = false;
         }
 
-        public void Ignite(double timeOfArrival)            //change the state of a cell to burning
+        public void Ignite(double timeOfArrival)            
         {
             this.timeOfArrival = timeOfArrival;
             if (cellState == FireCellState.CanBurn)
@@ -117,7 +129,7 @@ namespace WUInity.Fire
             }
         }
 
-        public void QueueIgnition(int directionIndex, double firefrontSpill)            //I do not really understand what this is.
+        public void QueueIgnition(int directionIndex, double firefrontSpill)            
         {
             if (cellState == FireCellState.CanBurn)
             {
@@ -133,13 +145,13 @@ namespace WUInity.Fire
             double[] neighborElevations = new double[4];
             for (int i = 0; i < 4; ++i)
             {
-                neighborElevations[i] = lcp.elevation;                      //set all the neighbor elevations as the same elevation as the target cell
-                if (neighbors[i] != null)                                   //for all the neighbors that do exist
+                neighborElevations[i] = lcp.elevation;                      
+                if (neighbors[i] != null)                                   
                 {
-                    neighborElevations[i] = neighbors[i].lcp.elevation;     //update/overwrite their elevation value (clever!)
+                    neighborElevations[i] = neighbors[i].lcp.elevation;     
                 }
             }
-            double e1 = neighborElevations[3];                              //From here on below various math ensues
+            double e1 = neighborElevations[3];                           
             double e2 = neighborElevations[0];
             double e3 = neighborElevations[1];
             double e4 = neighborElevations[2];
@@ -171,10 +183,9 @@ namespace WUInity.Fire
             {
                 lcp.aspect = (short)(0.5 + 270.0 - 57.296 * atan(n.y / n.x));
             }
-            //MonoBehaviour.print("Slope: " + slope + ", Aspect: " + aspect);
         }
         
-        public int GetFuelModelNumber()                             //A bunch of getter functions below.
+        public int GetFuelModelNumber()                             
         {
             return lcp.fuel_model;
         }
@@ -221,20 +232,6 @@ namespace WUInity.Fire
             return lcp.canopy_cover;
         }
 
-        public void Burn()
-        {
-            if(cellState != FireCellState.Burning)
-            {
-                return;
-            }  
-            UpdateFireFront();
-        }
-
-        public double GetMaxSpreadRate()
-        {
-            return maxSpreadRate;
-        }
-
         /// <summary>
         /// Direction zero is North, then goes clockwise, only 0-7 is valid.
         /// </summary>
@@ -243,16 +240,16 @@ namespace WUInity.Fire
         public int GetMaxSpreadrateInDirection(int direction)
         {
             int rate = 0;
-            if(fireMesh.spreadMode == SpreadMode.FourDirections)
+            if (fireMesh.spreadMode == SpreadMode.FourDirections)
             {
                 //interpolate?
             }
             else
             {
                 //north, east, south, west
-                if(direction == 0 || direction % 2 != 0)                    //@Jonathan, this if condition returns true for direction = [0,1,3,5,7], did you mean mode2 == 0?
+                if (direction == 0 || direction % 2 != 0)                    //@Jonathan, this if condition returns true for direction = [0,1,3,5,7], did you mean mode2 == 0?
                 {
-                    direction = direction / 2;                              //I can only guess this is because BEHAVE and WUINITY have different schemes for the neighbor nodes
+                    direction = direction / 2;
                 }
                 //NE, SE, SW, NW
                 else
@@ -264,14 +261,133 @@ namespace WUInity.Fire
             return rate;
         }
 
+        public void Burn()
+        {
+            if(cellState != FireCellState.Burning)
+            {
+                return;
+            }  
+            UpdateFireFront();
+
+            //consume mass, check is done in check fire spread
+            double deltaMass = fireMesh.dt * fireMesh.cellSize.x * fireMesh.cellSize.y * reactionIntensity / 18608.0;
+            fuelMassGround -= deltaMass;            
+        }
+
+        public double GetMaxSpreadRate()
+        {
+            return maxSpreadRate;
+        }        
+
+        private void UpdateFireFront()
+        {   
+            for (int i = 0; i < fireFront.Length; i++)
+            {
+                //not spreading in this direction
+                if (fireFront[i] < 0.0)
+                {
+                    continue;
+                }  
+                fireFront[i] += spreadRates[i] * fireMesh.dt;
+            }        
+        }
+
+        public void CheckFireSpread()
+        {
+            if(cellState != FireCellState.Burning)
+            {
+                return;
+            }
+
+            if(!doneSpreading)
+            {
+                int notDoneCount = 0;
+                for (int i = 0; i < fireFront.Length; i++)
+                {
+                    if (neighbors[i] == null)
+                    {
+                        continue;
+                    }
+
+                    FireCell neighborCell = neighbors[i];
+                    if (neighborCell.cellState == FireCellState.CanBurn)
+                    {
+                        if (fireFront[i] >= distances[i])
+                        {
+                            double spill = fireFront[i] - distances[i];
+                            neighborCell.QueueIgnition(i, spill);
+                            fireFront[i] = -1.0;
+                        }
+                    }
+                    else
+                    {
+                        fireFront[i] = -1.0;
+                    }
+
+                    if (fireFront[i] >= 0.0)
+                    {
+                        ++notDoneCount;
+                    }
+                }
+
+                //we got nowhere to spread
+                if (notDoneCount == 0)
+                {
+                    doneSpreading = true;
+                }
+            }            
+
+            if (fuelMassGround <= 0.0 && doneSpreading)
+            {
+                cellState = FireCellState.Dead;
+                fireMesh.RemoveDeadCell(this);
+            }
+        }
+
+        public void CheckIfDead()
+        {
+            if (cellState != FireCellState.Burning)
+            {
+                return;
+            }
+
+            int notDoneCount = 0;
+            for (int i = 0; i < fireFront.Length; i++)
+            {
+                if (neighbors[i] == null) //fireFront[i] < 0.0
+                {
+                    continue;
+                }
+
+                FireCell f = neighbors[i];
+                if (f.cellState != FireCellState.CanBurn)
+                {
+                    fireFront[i] = -1.0;
+                }
+
+                if (fireFront[i] >= 0.0)
+                {
+                    ++notDoneCount;
+                }
+            }
+            if (notDoneCount == 0)
+            {
+                doneSpreading = true;
+                //this should only happen in one place, done in fire spread for now
+                //cellState = FireCellState.Dead;
+                //fireMesh.RemoveDeadCell(this);
+            }
+        }
+
+
         public void UpdateSpreadRates()
         {
             //replaces code below as it calls surface calc too
             /*UpdateCrownFireSpreadRates();
             return;*/
 
-            
-            FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);        //extract moisture data from lcp and split it into other variables
+
+            FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
             double moistureOneHour = moisture.OneHour;// 6.0;
             double moistureTenHour = moisture.TenHour; //7.0;
             double moistureHundredHour = moisture.HundredHour; //8.0;
@@ -286,10 +402,9 @@ namespace WUInity.Fire
             double windDirection = fireMesh.currentWindData.direction;
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
-            double canopyHeight = lcp.canopy_height;
-            double crownRatio = lcp.bulk_density; //TODO: is this correct?
+            double canopyHeight = lcp.crown_canopy_height;
+            double crownRatio = lcp.crown_bulk_density; //TODO: is this correct?
 
-            //C# (What is even going on here? What is being called?)
             TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
             BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
             WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
@@ -309,7 +424,7 @@ namespace WUInity.Fire
             //do new calc
             fireMesh.surfaceFire.doSurfaceRunInDirectionOfMaxSpread();
             double currentMaxSpreadRate = fireMesh.surfaceFire.getSpreadRate(speedUnits);
-            double directionOfMaxSpread = fireMesh.surfaceFire.getDirectionOfMaxSpread();            
+            double directionOfMaxSpread = fireMesh.surfaceFire.getDirectionOfMaxSpread();
             if (currentMaxSpreadRate > maxSpreadRate)
             {
                 maxSpreadRate = currentMaxSpreadRate;
@@ -321,7 +436,7 @@ namespace WUInity.Fire
             reactionIntensity = fireMesh.surfaceFire.getReactionIntensity(BehaveUnits.HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter);
 
             fireLineIntensity = fireMesh.surfaceFire.getFirelineIntensity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter);
-            if(fireLineIntensity > maxFireLineIntensity)
+            if (fireLineIntensity > maxFireLineIntensity)
             {
                 maxFireLineIntensity = fireLineIntensity;
             }
@@ -392,16 +507,16 @@ namespace WUInity.Fire
             int fuelModelNumber = lcp.fuel_model;
             int slope = lcp.slope;
             int aspect = lcp.aspect;
-            double canopyBaseHeight = lcp.canopy_height;
-            double canopyBulkDensity = lcp.bulk_density;
+            double canopyBaseHeight = lcp.crown_canopy_height;
+            double canopyBulkDensity = lcp.crown_bulk_density;
 
 
             double windSpeed = fireMesh.currentWindData.speed;
             double windDirection = fireMesh.currentWindData.direction;
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
-            double canopyHeight = lcp.canopy_height;
-            double crownRatio = lcp.bulk_density; //TODO: is this correct?
+            double canopyHeight = lcp.crown_canopy_height;
+            double crownRatio = lcp.crown_bulk_density; //TODO: is this correct?
 
             //C#, i guess this sets up a lot of enumerators that set the units?
             TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
@@ -490,172 +605,6 @@ namespace WUInity.Fire
                 {
                     maxSpreadRates[i] = spreadRates[i];
                 }
-            }
-        }
-
-        //old, using BEHAVE instead, did not calculate corredt angle due to slope anyway
-        /*public void UpdateSpreadRates()
-        {
-            //TODO: get values from BEHHAVE instead
-
-            //the same as found in paper and fsxwmech.cpp, Meachanix::ellipse
-            //length to breadth ratio
-            double LB = 0.936 * exp(0.2566 * fireMesh.windSpeed) + 0.461 * exp(-0.1548 * fireMesh.windSpeed) - 0.397;
-            // maximum "eccentricity"
-            if (LB > 8.0)
-            {
-                LB = 8.0;
-            }
-            //head to back ratio
-            double HB = (LB + sqrt(pow2(LB) - 1)) / (LB - sqrt(pow2(LB) - 1));
-            double R = maxSpreadRate;
-            double a = 0.5 * (R + R / HB) / LB;
-            double b = 0.5 * (R + R / HB);
-            //double c = b - R / HB;
-
-            double f2 = pow2(a);
-            double h2 = pow2(b);
-
-            //http://mathworld.wolfram.com/Ellipse.html, https://en.wikipedia.org/wiki/Ellipse
-            //use polar form relative to focus, find radius for each of the direction (N, NE, E...) which is the intersection with the ellipse along that direction
-            //note: a and b are swapped compared to Farsite naming
-            double e = sqrt(1 - f2 / h2);
-            for (int i = 0; i < fireFront.Length; i++)
-            {
-                //not spreading in this direction
-                if (fireFront[i] < 0)
-                {
-                    continue;
-                }
-                double o = fireMesh.GetAngleOffset(i);
-                double r = b * (1 - pow2(e)) / (1 + e * cos(fireMesh.phi - o));
-                spreadRates[i] = r;
-            }
-        }*/
-
-        private void UpdateFireFront()
-        {   
-            for (int i = 0; i < fireFront.Length; i++)
-            {
-                //not spreading in this direction
-                if (fireFront[i] < 0.0)
-                {
-                    continue;
-                }  
-                fireFront[i] += spreadRates[i] * fireMesh.dt;
-            }        
-        }
-
-        public void CheckFireSpread()
-        {
-            if(cellState != FireCellState.Burning)
-            {
-                return;
-            }
-
-            int notDoneCount = 0;
-            for (int i = 0; i < fireFront.Length; i++)
-            {
-                if(neighbors[i] == null) //fireFront[i] < 0.0
-                {
-                    continue;
-                }
-                //int xI = cellIndex.x + fireMesh.neighborIndices[i].x;
-                //int yI = cellIndex.y + fireMesh.neighborIndices[i].y;
-
-                FireCell f = neighbors[i];
-                if (f.cellState == FireCellState.CanBurn)
-                {
-                    if (fireFront[i] >= distances[i])
-                    {
-                        double spill = fireFront[i] - distances[i];
-                        f.QueueIgnition(i, spill);
-                        fireFront[i] = -1.0;
-                    }
-                }
-                else
-                {
-                    fireFront[i] = -1.0;
-                }
-
-                /*if (fireMesh.IsInsideMesh(xI, yI))
-                {
-                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);
-                    if (f.cellState == FireCellState.CanBurn)
-                    {                       
-                        if (fireFront[i] >= distances[i])
-                        {
-                            double spill = fireFront[i] - distances[i];
-                            f.QueueIgnition(i, spill);
-                            fireFront[i] = -1;
-                        }
-                    }
-                    else
-                    {
-                        fireFront[i] = -1;
-                    }
-                }
-                else
-                {
-                    fireFront[i] = -1;
-                }*/
-
-                if (fireFront[i] >= 0.0)
-                {
-                    ++notDoneCount;
-                }
-            }
-            if (notDoneCount == 0)
-            {
-                cellState = FireCellState.Dead;
-                fireMesh.RemoveDeadCell(this);
-            }            
-        }
-
-        public void CheckIfDead()
-        {
-            if (cellState != FireCellState.Burning)
-            {
-                return;
-            }
-
-            int notDoneCount = 0;
-            for (int i = 0; i < fireFront.Length; i++)
-            {
-                if (neighbors[i] == null) //fireFront[i] < 0.0
-                {
-                    continue;
-                }
-
-                FireCell f = neighbors[i];
-                if (f.cellState != FireCellState.CanBurn)
-                {
-                    fireFront[i] = -1.0;
-                }
-                /*int xI = cellIndex.x + fireMesh.neighborIndices[i].x;
-                int yI = cellIndex.y + fireMesh.neighborIndices[i].y;
-                if (fireMesh.IsInsideMesh(xI, yI))
-                {
-                    WUInityFireCell f = fireMesh.GetFireCell(xI, yI);
-                    if (f.cellState != FireCellState.CanBurn)
-                    {
-                        fireFront[i] = -1.0;
-                    }
-                }
-                else
-                {
-                    fireFront[i] = -1.0;
-                }*/
-
-                if (fireFront[i] >= 0.0)
-                {
-                    ++notDoneCount;
-                }
-            }
-            if (notDoneCount == 0)
-            {
-                cellState = FireCellState.Dead;
-                fireMesh.RemoveDeadCell(this);
             }
         }
     }

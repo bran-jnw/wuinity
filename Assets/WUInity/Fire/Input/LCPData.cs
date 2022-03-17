@@ -13,11 +13,11 @@ namespace WUInity.Fire
 		public short fuel_model;
 		public short canopy_cover;               // READ OR DERIVED FROM LANDSCAPE DATA
 		public double aspectf;
-		public double canopy_height;
-		public double crown_base;  //bran-jnw: added _crown as base is taken by C#
-		public double bulk_density;
-		public double duff_model;
-		public long coarse_woody_model;
+		public double crown_canopy_height;
+		public double crown_base;  //bran-jnw: added crown_ as base is taken by C#
+		public double crown_bulk_density;
+		public double ground_duff_model;
+		public long ground_coarse_woody_model;
 	}
 
 	// structure for holding basic cell information (is there a reason to have short variable names here?)
@@ -145,12 +145,12 @@ namespace WUInity.Fire
 		public short[] landscape;
 		static readonly int headsize = 7316; //header size taken from farsite source code
 
-		public LCPData()								//blank constructor does nothing
+		public LCPData()								
 		{
 			
 		}
 
-		public LCPData(string path)					//constructor with file string reads file
+		public LCPData(string path)					
 		{
 			ReadLCP(path);
 		}
@@ -179,27 +179,27 @@ namespace WUInity.Fire
 			l.fuel_model = cell.f;
 			l.canopy_cover = cell.c;
 
-			switch (NumVals)									//So the number of values can be used to find what kind of vegetation is used??
+			switch (NumVals)									
 			{
 				case 7:
 					// 5 basic and duff and woody
-					l.bulk_density = gfuel.d;
-					l.coarse_woody_model = gfuel.w;
+					l.ground_duff_model = gfuel.d;
+					l.ground_coarse_woody_model = gfuel.w;
 					break;
 				case 8:
 					// 5 basic and crown fuels
-					l.canopy_height = cfuel.h;
+					l.crown_canopy_height = cfuel.h;
 					l.crown_base = cfuel.b;
-					l.bulk_density = cfuel.p;
+					l.crown_bulk_density = cfuel.p;
 					break;
 				case 10:
 					// 5 basic, crown fuels, and duff and woody
-					l.canopy_height = cfuel.h;
+					l.crown_canopy_height = cfuel.h;
 					l.crown_base = cfuel.b;
-					l.bulk_density = cfuel.p;
+					l.crown_bulk_density = cfuel.p;
 
-					l.duff_model = gfuel.d;
-					l.coarse_woody_model = gfuel.w;
+					l.ground_duff_model = gfuel.d;
+					l.ground_coarse_woody_model = gfuel.w;
 					break;
 			}
 
@@ -214,7 +214,7 @@ namespace WUInity.Fire
 			return cell;
 		}
 
-		long GetCellPosition(double east, double north)								//Is there not another method to do this in another class?
+		long GetCellPosition(double east, double north)								
 		{
 			double xpt = (east - Header.loeast) / GetCellResolutionX();
 			double ypt = (north - Header.lonorth) / GetCellResolutionY();
@@ -252,8 +252,9 @@ namespace WUInity.Fire
 
 		void GetCellDataFromMemory(long posit, ref celldata cell, ref crowndata cfuel, ref grounddata gfuel)
 		{
-			short[] ldata = new short[10], zero = null;
+			short[] ldata = new short[10];
 
+			//read all data from position onwards
             for (int i = 0; i < NumVals; i++)
             {
 				ldata[i] = landscape[posit * NumVals + i];
@@ -511,7 +512,7 @@ namespace WUInity.Fire
 						//fseek(landfile, headsize, SEEK_SET);
 						//if((landscape=(short *) calloc(Header.numnorth*Header.numeast, NumVals*sizeof(short)))!=NULL)
 						NumAlloc = (double)(Header.numnorth * Header.numeast * NumVals * sizeof(short));
-						if (NumAlloc > 2147483647)	//if that number above is not above max (i think int.max), but why is it phrased like this?
+						if (NumAlloc > 2147483647)	
 						{
 							CantAllocLCP = true;
 							return;
@@ -534,7 +535,7 @@ namespace WUInity.Fire
 							//bran-jnw: original 
 							/*for (i = 0; i < Header.numnorth; i++)
 								fread(&landscape[i * NumVals * Header.numeast], sizeeof(short), NumVals * Header.numeast, landfile);*/
-							reader.ReadBytes(headsize);
+							reader.ReadBytes(headsize); //jump ahead to data
 							for (int i = 0; i < Header.numnorth; i++)
 							{
                                 for (int j = 0; j < Header.numeast; j++)

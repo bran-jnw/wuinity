@@ -176,20 +176,21 @@ namespace WUInity.Fire
             fireLineIntensityData = new float[fireCells.Length];
             sootProduction = new float[fireCells.Length];
             cellArea = (float)(cellSize.x * cellSize.y);
+
             StartInitialIgnition();
         }
 
-        double GetCorrectedElevation(int x, int y)                  //getter  with corrected elevation (somehow)
+        double GetCorrectedElevation(int x, int y)                  
         {            
             return fireCells[GetCellIndex(x, y)].GetElevation() - lcpData.Header.loelev;           
         }
 
-        double GetRawElevation(int x, int y)                        //getter
+        double GetRawElevation(int x, int y)                        
         {
             return fireCells[GetCellIndex(x, y)].GetElevation();
         }
 
-        public void AddCellToIgnite(FireCell f)              //add current cell to add list
+        public void AddCellToIgnite(FireCell f)              
         {
             if(!cellsToIgnite.Contains(f))
             {                
@@ -197,12 +198,12 @@ namespace WUInity.Fire
             }            
         }
 
-        public void RemoveDeadCell(FireCell f)               //add current cell to remove list
+        public void RemoveDeadCell(FireCell f)               
         {
             cellsToKill.Add(f);            
         }
 
-        public double GetAngleOffset(int i)                         //simple getter
+        public double GetAngleOffset(int i)                        
         {
             return angleOffsets[i];
         }
@@ -280,15 +281,15 @@ namespace WUInity.Fire
                 activeCells.Remove(f);
             }
 
-            //update data arrays for visualization            
+            //update data arrays for visualization and input for smoke spread          
             for (int i = 0; i < fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
                 sootProduction[i] = 0.0f;
                 if (fireCells[i].cellState == FireCellState.Burning) //|| fireCells[i].cellState == FireCellState.Dead)
                 {
-                    //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood found for FDS
-                    sootProduction[i] = 0.015f * cellArea * (float)fireCells[i].GetReactionIntensity() / 21500.0f; 
+                    //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
+                    sootProduction[i] = 0.015f * cellArea * (float)fireCells[i].GetReactionIntensity() / 18608.0f;
                 }
             }
 
@@ -360,7 +361,7 @@ namespace WUInity.Fire
         }
 
         /// <summary>
-        /// Returns state of cell on mesh base don lat/long. Returns dead if outside of mesh.
+        /// Returns state of cell on mesh based on lat/long. Returns dead if outside of mesh.
         /// </summary>
         /// <param name="latLong"></param>
         /// <returns></returns>
