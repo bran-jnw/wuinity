@@ -282,14 +282,15 @@ namespace WUInity.Fire
             }
 
             //update data arrays for visualization and input for smoke spread          
+            float dtInversed = 1.0f / (float)dt;
             for (int i = 0; i < fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
                 sootProduction[i] = 0.0f;
-                if (fireCells[i].cellState == FireCellState.Burning) //|| fireCells[i].cellState == FireCellState.Dead)
+                if (fireCells[i].cellState == FireCellState.Burning)
                 {
                     //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
-                    sootProduction[i] = 0.015f * cellArea * (float)fireCells[i].GetReactionIntensity() / 18608.0f;
+                    sootProduction[i] = 0.015f * (float)fireCells[i].GetTimestepBurntMass() * dtInversed;
                 }
             }
 

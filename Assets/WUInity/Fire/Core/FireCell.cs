@@ -29,6 +29,8 @@ namespace WUInity.Fire
         double maxFireLineIntensity;
         double timeOfArrival;
         double heatPerUnitArea;
+        double currentBurnArea;
+        double timestepBurntMass;
         double fuelMassGround;
         bool doneSpreading;
 
@@ -91,7 +93,8 @@ namespace WUInity.Fire
                 }
                 else                                                           
                 {
-                    fireFront[i] = -1.0;
+                    //UPDATE: set to 0 instead of -1 since we need spread to calculate current burn area
+                    fireFront[i] = 0.0;
                     distances[i] = -1.0;  
                 }
                 maxSpreadRates[i] = 0.0;
@@ -112,6 +115,8 @@ namespace WUInity.Fire
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveWoody(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             fuelMassGround = bulkDensity * fireMesh.cellSize.x * fireMesh.cellSize.y;// * fireMesh.fuelModelSet.getFuelbedDepth(fuel, BehaveUnits.LengthUnits.LengthUnitsEnum.Meters);
             doneSpreading = false;
+            currentBurnArea = 0.0;
+            timestepBurntMass = 0.0;
         }
 
         public void Ignite(double timeOfArrival)            
@@ -232,6 +237,16 @@ namespace WUInity.Fire
             return lcp.canopy_cover;
         }
 
+        public double GetCurrentBurnArea()
+        {
+            return currentBurnArea;
+        }
+
+        public double GetTimestepBurntMass()
+        {
+            return timestepBurntMass;
+        }
+
         /// <summary>
         /// Direction zero is North, then goes clockwise, only 0-7 is valid.
         /// </summary>
@@ -266,12 +281,21 @@ namespace WUInity.Fire
             if(cellState != FireCellState.Burning)
             {
                 return;
-            }  
+            }
+
             UpdateFireFront();
 
             //consume mass, check is done in check fire spread
-            double deltaMass = fireMesh.dt * fireMesh.cellSize.x * fireMesh.cellSize.y * reactionIntensity / 18608.0;
-            fuelMassGround -= deltaMass;            
+            double oldBurnArea = currentBurnArea;
+            //the 0.5 factor comes from the prism that is created by the four cardinal fire fronts, as these will fully cover 2x2 cells when having spread fully we reduce the area by a factor of 0.5 to normalize to actual cell area
+            currentBurnArea = 0.5 * (fireFront[0] + fireFront[2]) * (fireFront[1] + fireFront[3]);
+            //TODO: limit area based on actual distance (slope correction)
+            currentBurnArea = System.Math.Min(currentBurnArea, fireMesh.cellSize.x * fireMesh.cellSize.y);
+
+            //burnt mass is based on integral from old area and new area
+            timestepBurntMass = fireMesh.dt * ((currentBurnArea - oldBurnArea) * 0.5 + oldBurnArea) * reactionIntensity / 18608.0;            
+            fuelMassGround -= timestepBurntMass;
+            //MonoBehaviour.print("Burn area: " + currentBurnArea + ", delta mass: " + timestepBurntMass + ", fuel mass left: " + fuelMassGround);                                 
         }
 
         public double GetMaxSpreadRate()
@@ -284,10 +308,11 @@ namespace WUInity.Fire
             for (int i = 0; i < fireFront.Length; i++)
             {
                 //not spreading in this direction
-                if (fireFront[i] < 0.0)
+                //UPDATE: spread in all direction for current burn area calculation
+                /*if (fireFront[i] < 0.0)
                 {
                     continue;
-                }  
+                }*/
                 fireFront[i] += spreadRates[i] * fireMesh.dt;
             }        
         }
@@ -316,17 +341,11 @@ namespace WUInity.Fire
                         {
                             double spill = fireFront[i] - distances[i];
                             neighborCell.QueueIgnition(i, spill);
-                            fireFront[i] = -1.0;
                         }
-                    }
-                    else
-                    {
-                        fireFront[i] = -1.0;
-                    }
-
-                    if (fireFront[i] >= 0.0)
-                    {
-                        ++notDoneCount;
+                        else
+                        {
+                            ++notDoneCount;
+                        }
                     }
                 }
 
@@ -346,7 +365,7 @@ namespace WUInity.Fire
 
         public void CheckIfDead()
         {
-            if (cellState != FireCellState.Burning)
+            if (cellState != FireCellState.Burning || doneSpreading)
             {
                 return;
             }
@@ -354,22 +373,18 @@ namespace WUInity.Fire
             int notDoneCount = 0;
             for (int i = 0; i < fireFront.Length; i++)
             {
-                if (neighbors[i] == null) //fireFront[i] < 0.0
+                if (neighbors[i] == null)
                 {
                     continue;
                 }
 
-                FireCell f = neighbors[i];
-                if (f.cellState != FireCellState.CanBurn)
-                {
-                    fireFront[i] = -1.0;
-                }
-
-                if (fireFront[i] >= 0.0)
+                FireCell neighborCell = neighbors[i];
+                if (neighborCell.cellState == FireCellState.CanBurn)
                 {
                     ++notDoneCount;
                 }
             }
+
             if (notDoneCount == 0)
             {
                 doneSpreading = true;
@@ -446,10 +461,12 @@ namespace WUInity.Fire
             for (int i = 0; i < spreadRates.Length; i++)
             {
                 //not spreading in this direction
-                if (neighbors[i] == null)
+                //UPDATE: now we are doing all directions to keep track of current cell burn area
+                /*if (neighbors[i] == null)
                 {
                     continue;
-                }
+                }*/
+
                 //set default
                 spreadRates[i] = currentMaxSpreadRate;
 
