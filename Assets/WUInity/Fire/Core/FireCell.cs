@@ -460,12 +460,11 @@ namespace WUInity.Fire
             //we have the max spread rate, but need in all directions       
             for (int i = 0; i < spreadRates.Length; i++)
             {
-                //not spreading in this direction
-                //UPDATE: now we are doing all directions to keep track of current cell burn area
-                /*if (neighbors[i] == null)
+                //not spreading in this direction, but we are always calculate the cardinal directions since we need to keep track of current cell burn area
+                if (neighbors[i] == null && i > 3)
                 {
                     continue;
-                }*/
+                }
 
                 //set default
                 spreadRates[i] = currentMaxSpreadRate;
