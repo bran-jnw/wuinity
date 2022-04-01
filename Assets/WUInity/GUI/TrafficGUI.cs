@@ -35,7 +35,6 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouterText))
             {
                 ParseTrafficInput();
-                //WUInity.SIM_DATA.LoadRouterDatabase();
                 WUInity.INSTANCE.UpdateRoutingResourceStatus();
             }
             ++buttonIndex;

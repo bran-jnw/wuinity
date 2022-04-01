@@ -78,6 +78,19 @@ namespace WUInity.Population
             return populationData.cellPopulation[x + y * populationData.cells.x];
         }
 
+        /// <summary>
+        /// Get number of people in cell based on "world space" coordinates. Clamps to dimensions of defined area.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public int GetPopulationUnitySpace(double x, double y)
+        {
+            int xInt = (int)((x / WUInity.INPUT.size.x) * populationData.cells.x);
+            int yInt = (int)((y / WUInity.INPUT.size.y) * populationData.cells.y);
+            return GetPopulation(xInt, yInt);
+        }
+
         public int GetLocalGPWTotalPopulation()
         {
             return localGPWData.totalPopulation;

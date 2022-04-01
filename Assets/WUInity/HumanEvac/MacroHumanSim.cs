@@ -51,6 +51,11 @@ namespace WUInity.Evac
         {
             int count = 0;
 
+            if(x < 0 || x > cellsX - 1 || y < 0 || y > cellsY - 1)
+            {
+                return 0;
+            }
+
             if (humanEvacCells[x + y * cellsX] != null)
             {
                 HumanEvacCell hR = humanEvacCells[x + y * cellsX];
@@ -387,20 +392,7 @@ namespace WUInity.Evac
             //x = Mathf.Clamp(x, 0, xSize - 1);
             //y = Mathf.Clamp(y, 0, ySize - 1);
             return population[x + y * cellsX];
-        }
-
-        /// <summary>
-        /// Get number of people in cell base don "world space" coordinates. Clamps to dimensions of defined area.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public int GetPopulationUnitySpace(double x, double y)
-        {
-            int xInt = (int)((x / realWorldSize.x) * cellsX);
-            int yInt = (int)((y / realWorldSize.y) * cellsY);
-            return GetPopulation(xInt, yInt);
-        }     
+        }          
 
         /// <summary>
         /// Creates texture that shown cells where people have decided to stay forever.

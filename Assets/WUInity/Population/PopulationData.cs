@@ -67,7 +67,7 @@ namespace WUInity.Population
                 {
                     double xPos = (x + 0.5) * cellSize;
                     double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2D(xPos, yPos));
-                    int pop = System.Convert.ToInt32(cellArea * density);
+                    int pop = Mathf.CeilToInt((float)(cellArea *density));
                     pop = Mathf.Clamp(pop, 0, pop);
                     cellPopulation[x + y * cells.x] = pop;
                     totalPopulation += pop;

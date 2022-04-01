@@ -84,10 +84,11 @@ namespace WUInity
 
             DetermineValidGoalsAndRouterPoints(true);
 
+            int cellsWithGoalsCount = 0;
             for (int i = 0; i < startPoints.Length; i++)
             {
                 //check that the cell has actual people, else no need for calculating routes
-                int populationInCell = WUInity.SIM.GetMacroHumanSim().GetPopulationUnitySpace(startPoints[i].x, startPoints[i].z);
+                int populationInCell = WUInity.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].z);
                 if (populationInCell > 0)
                 {
                     Vector2d start = startPoints[i].GetGeoPosition(_map.CenterMercator, _map.WorldRelativeScale);
@@ -145,9 +146,15 @@ namespace WUInity
                             {
                                 WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
                             }
+
+                            ++cellsWithGoalsCount;
                         }
                     }
                 }
+            }
+            if(cellsWithGoalsCount == 0)
+            {
+                WUInity.SIM.StopSim("ERROR: Not a single route was found, make sure OSM network is valid.");
             }
             return cellRoutes;
         }

@@ -47,6 +47,12 @@ namespace WUInity
             
         }
 
+        public void BuildAndSaveRouteCollection()
+        {
+            WUInity.SIM_DATA.routes = WUInity.SIM.GetRouteCreator().CalculateCellRoutes();
+            SaveLoadWUI.SaveRouteCollections();
+        }
+
         public bool LoadLCPFile()
         {
             lcpData = new LCPData(WUInity.INPUT.fire.lcpFile);
@@ -67,8 +73,7 @@ namespace WUInity
                 {
                     routerDb = RouterDb.Deserialize(stream);
                     success = true;
-                }
-                //routerDb.AddContracted(routerDb.GetSupportedProfile("car"));
+                }                
             }
             else if(WUInity.DATA_STATUS.osmFileValid)
             {
@@ -112,6 +117,8 @@ namespace WUInity
 
             if (success)
             {
+                //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
+                routerDb.AddContracted(routerDb.GetSupportedProfile("car"));
                 WUInity.WUI_LOG("LOG: Router database loaded succesfully.");
             }
             else
@@ -143,7 +150,7 @@ namespace WUInity
             else
             {
                 success = false;
-            }
+            }            
 
             return success;
         }

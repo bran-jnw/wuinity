@@ -333,7 +333,7 @@ namespace WUInity.Population
                 for (int x = 0; x < dataSize.x; ++x)
                 {
                     double density = GetDensity(x, y);
-                    int pop = System.Convert.ToInt32(cellArea * density);
+                    int pop = Mathf.CeilToInt((float)(cellArea * density));
                     pop = Mathf.Clamp(pop, 0, pop);
                     totalPopulation += pop;
                 }

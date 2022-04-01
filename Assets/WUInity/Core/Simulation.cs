@@ -144,22 +144,21 @@ namespace WUInity
             if (input.runEvacSim)
             {
                 if (i == 0)
-                {
-                    if(!WUInity.DATA_STATUS.routeCollectionLoaded)
+                {     
+                    if (!WUInity.DATA_STATUS.routeCollectionLoaded)
                     {
                         WUInity.SIM_DATA.LoadRouteCollections();
                     }                      
                     //we could not load from disk, so have to build all routes
                     if (WUInity.SIM_DATA.routes == null)
                     {
-                        WUInity.SIM_DATA.routes = routeCreator.CalculateCellRoutes();
-                        SaveLoadWUI.SaveRouteCollections();
+                        WUInity.SIM_DATA.BuildAndSaveRouteCollection();
                     }
                 }
+
                 macroHumanSim = new MacroHumanSim();
                 //place people
-                macroHumanSim.PopulateCells(WUInity.SIM_DATA.routes, WUInity.POPULATION.GetPopulationData());
-                
+                macroHumanSim.PopulateCells(WUInity.SIM_DATA.routes, WUInity.POPULATION.GetPopulationData());                
                 //distribute people
                 macroHumanSim.PlaceHouseholdsInCells();
             }
