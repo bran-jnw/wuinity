@@ -154,6 +154,8 @@ namespace WUInity
                     {
                         WUInity.SIM_DATA.BuildAndSaveRouteCollection();
                     }
+
+                    WUInity.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUInity.SIM_DATA.routes);
                 }
 
                 macroHumanSim = new MacroHumanSim();
@@ -189,7 +191,7 @@ namespace WUInity
             time = 0f;
             for (int i = 0; i < input.evac.responseCurves.Length; i++)
             {
-                float t = input.evac.responseCurves[i].dataPoints[0].timeMinMax.x;
+                float t = input.evac.responseCurves[i].dataPoints[0].timeMinMax.x + input.evac.evacuationOrderStart;
                 time = Mathf.Min(time, t);
             }
             startTime = time;

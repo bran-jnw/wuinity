@@ -232,10 +232,6 @@ namespace WUInity
             {
                 //print("resolve failed");
             }
-            /*catch (Itinero.Exceptions.RouteNotFoundException)
-            {
-                //print("no route found");
-            }*/
 
             return start;
         }

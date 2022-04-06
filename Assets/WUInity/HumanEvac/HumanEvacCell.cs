@@ -13,7 +13,7 @@ namespace WUInity.Evac
         public MacroHousehold[] macroHouseholds;
         public RouteCollection rasterRoute;
         public Vector2D cellWorldSize;
-        public double cellDensity; //persons / km2
+        //public double cellDensity; //persons / km2
         public Vector2D closestNodeUnitySpace;
         public bool cellIsEvacuated;
 

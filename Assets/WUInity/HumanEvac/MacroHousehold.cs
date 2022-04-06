@@ -71,6 +71,7 @@ namespace WUInity.Evac
 
         public Vector4 GetPositionAndState(float time)
         {
+            //states are use din shader to apply color
             float state = 0.375f;
             if(evacuationTime == float.MaxValue)
             {

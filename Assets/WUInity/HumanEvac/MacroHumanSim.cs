@@ -137,10 +137,10 @@ namespace WUInity.Evac
                             ++householdIndex;
 
                             //if evac time is float.MaxValue they have decided to stay forever
-                            if (household.evacuationTime != float.MaxValue)
+                            if (household.evacuationTime < float.MaxValue)
                             {
                                 if(!household.reachedCar)
-                                {
+                                {                                                                      
                                     //see if the household has reacted yet, if so, set them in motion
                                     if (!household.isMoving && household.responseTime <= currentTime)
                                     {
@@ -169,7 +169,7 @@ namespace WUInity.Evac
                             }
                             else
                             {
-                                householdsLeft++;
+                                householdsLeft++;                                
                             }
                         }
                     }
@@ -227,11 +227,11 @@ namespace WUInity.Evac
                 {
                     int peopleLeftInHousehold = household.peopleInHousehold;
                     int carIndex = 0;
-                    int[] cars = new int[household.cars];
+                    int[] peopleInCar = new int[household.cars];
 
                     while(peopleLeftInHousehold > 0)
                     {
-                        ++cars[carIndex];
+                        ++peopleInCar[carIndex];
                         ++carIndex;
                         if(carIndex > household.cars - 1)
                         {
@@ -242,7 +242,7 @@ namespace WUInity.Evac
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        WUInity.SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), cars[i]);
+                        WUInity.SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), peopleInCar[i]);
                     }
                 }
                 else
@@ -269,7 +269,7 @@ namespace WUInity.Evac
         public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
             cellsX = WUInity.SIM_DATA.EvacCellCount.x;
-            cellsY = WUInity.SIM_DATA.EvacCellCount.x;
+            cellsY = WUInity.SIM_DATA.EvacCellCount.y;
             this.realWorldSize = WUInity.INPUT.size;
             population = new int[cellsX * cellsY];
 
@@ -288,7 +288,7 @@ namespace WUInity.Evac
                 {
                     maxPop = populationData.cellPopulation[i];
                 }
-            }            
+            }
         }
 
         /// <summary>
@@ -309,7 +309,7 @@ namespace WUInity.Evac
             {
                 if (r <= eO.responseCurves[curveIndex].dataPoints[i].probability)
                 {
-                    responseTime = Random.Range(eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.x, eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.y);
+                    responseTime = Random.Range(eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.x, eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.y) + eO.evacuationOrderStart;
                     break;
                 }
             }
@@ -357,13 +357,13 @@ namespace WUInity.Evac
                     for (int j = 0; j < hR.macroHouseholds.Length; j++)
                     {
                         MacroHousehold mH  = hR.macroHouseholds[j];
-                        if (mH.responseTime == float.MaxValue)
-                        {
-                            totalPeopleWhoWillNotEvacuate += mH.peopleInHousehold;
-                        }
-                        else
+                        if (mH.responseTime < float.MaxValue)
                         {
                             totalCars += mH.cars;
+                        }
+                        else
+                        {                            
+                            totalPeopleWhoWillNotEvacuate += mH.peopleInHousehold;
                         }                        
                     }
                 }

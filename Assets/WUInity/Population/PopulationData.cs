@@ -67,8 +67,8 @@ namespace WUInity.Population
                 {
                     double xPos = (x + 0.5) * cellSize;
                     double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2D(xPos, yPos));
-                    int pop = Mathf.CeilToInt((float)(cellArea *density));
-                    pop = Mathf.Clamp(pop, 0, pop);
+                    int pop = Mathf.CeilToInt((float)(cellArea * density));
+                    pop = Mathf.Max(0, pop);
                     cellPopulation[x + y * cells.x] = pop;
                     totalPopulation += pop;
 
@@ -119,16 +119,14 @@ namespace WUInity.Population
         public void UpdatePopulationBasedOnRoutes(RouteCollection[] cellRoutes)
         {
             int stuckPeople = CollectStuckPeople(cellRoutes);
-            if (stuckPeople >= 0)
-            {
-                correctedForRoutes = true;
-            }
             if (stuckPeople > 0)
             {
                 RelocateStuckPeople(stuckPeople);
                 CreateTexture();
                 SavePopulation();
             }
+
+            correctedForRoutes = true;
         }
 
         /// <summary>
@@ -284,12 +282,12 @@ namespace WUInity.Population
         /// Relocates stuck people (no route in cell), relocation based on ratio between people in cell / total people, so relative density is conserved
         /// </summary>
         /// <param name="stuckPeople"></param>
-        public void RelocateStuckPeople(int stuckPeople)
+        private void RelocateStuckPeople(int stuckPeople)
         {
             if (stuckPeople > 0)
             {
                 int remainingPop = totalPopulation - stuckPeople;
-                int addedPop = 0;
+                totalPopulation = 0;
                 for (int i = 0; i < cellPopulation.Length; ++i)
                 {
                     if (cellPopulation[i] > 0)
@@ -297,10 +295,9 @@ namespace WUInity.Population
                         float weight = cellPopulation[i] / (float)remainingPop;
                         int extraPersonsToCell = Mathf.CeilToInt(weight * stuckPeople);
                         cellPopulation[i] += extraPersonsToCell;
-                        addedPop += extraPersonsToCell;
+                        totalPopulation += cellPopulation[i];
                     }
-                }
-                totalPopulation = remainingPop + addedPop;
+                }                
             }
         }
 
