@@ -26,7 +26,13 @@ namespace WUInity
             {
                 OpenLoadLCP();
             }
+            ++buttonIndex;
 
+            if(WUInity.DATA_STATUS.fuelModelsLoaded)
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Custom fuel model set loaded");
+                ++buttonIndex;
+            }
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load fuel models"))
             {
                 OpenLoadFuelsModelFile();

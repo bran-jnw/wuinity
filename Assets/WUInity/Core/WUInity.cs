@@ -302,6 +302,7 @@ namespace WUInity
                 osmFileValid = false;
 
                 lcpLoaded = false;
+                fuelModelsLoaded = false;
             }
         }
 

@@ -68,7 +68,7 @@ namespace WUInity
         public bool LoadFuelModelsFile()
         {
             fuelModelsData = new FuelModelInput();
-            return fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
+            return WUInity.DATA_STATUS.fuelModelsLoaded = fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
         }
 
         //create or lead itinero database needed for pathfinding
