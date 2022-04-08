@@ -255,7 +255,7 @@ namespace WUInity
 
             public bool osmFileValid;
 
-            public bool lcpLoaded;
+            public bool lcpLoaded, fuelModelsLoaded;
 
             public bool CanRunSimulation()
             {
@@ -513,6 +513,7 @@ namespace WUInity
         public void UpdateFireResourceStatus()
         {
             DATA_STATUS.lcpLoaded = SIM_DATA.LoadLCPFile();
+            DATA_STATUS.fuelModelsLoaded = SIM_DATA.LoadFuelModelsFile();
         }
 
         public void UpdateRoutingResourceStatus()

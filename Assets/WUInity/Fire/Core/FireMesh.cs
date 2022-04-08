@@ -80,7 +80,15 @@ namespace WUInity.Fire
 
         void InitializeMesh()                                                       
         {
-            fuelModelSet = new FuelModelSet();                  
+            fuelModelSet = new FuelModelSet();
+            //set custom fuel models if present
+            if(WUInity.DATA_STATUS.fuelModelsLoaded)
+            {
+                for (int i = 0; i < WUInity.SIM_DATA.GetFuelModelsData().fuels.Count; i++)
+                {
+                    fuelModelSet.setFuelModelRecord(WUInity.SIM_DATA.GetFuelModelsData().fuels[i]);
+                }
+            }            
             surfaceFire = new Surface(fuelModelSet);            
             crownFire = new Crown(fuelModelSet);                         
 

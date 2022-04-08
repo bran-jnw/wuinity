@@ -57,6 +57,7 @@ namespace WUInity
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp" };
+        string[] fuelModelsFilter = new string[] { ".fuel" };
         string[] osmFilter = new string[] { ".pbf" };
         string[] populationFilter = new string[] { ".pop" };
         string[] gpwFilter = new string[] { ".gpw" };

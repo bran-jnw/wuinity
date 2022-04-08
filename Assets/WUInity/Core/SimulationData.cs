@@ -17,6 +17,12 @@ namespace WUInity
         public bool[] initialIgnitionIndices;
         public bool[] triggerBufferIndices;
         LCPData lcpData;
+
+        FuelModelInput fuelModelsData;
+        public FuelModelInput GetFuelModelsData()
+        {
+            return fuelModelsData;
+        }
         
         private RouterDb routerDb;
         public RouterDb GetRouterDb()
@@ -57,6 +63,12 @@ namespace WUInity
         {
             lcpData = new LCPData(WUInity.INPUT.fire.lcpFile);
             return !lcpData.CantAllocLCP;
+        }
+
+        public bool LoadFuelModelsFile()
+        {
+            fuelModelsData = new FuelModelInput();
+            return fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
         }
 
         //create or lead itinero database needed for pathfinding

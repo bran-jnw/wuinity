@@ -22,10 +22,14 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), lcpExistsStatus);
             ++buttonIndex;
 
-            //name
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load LCP file"))
             {
                 OpenLoadLCP();
+            }
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load fuel models"))
+            {
+                OpenLoadFuelsModelFile();
             }
             ++buttonIndex;
             ++buttonIndex;
@@ -118,7 +122,21 @@ namespace WUInity
         {
             WUInityInput wO = WUInity.INPUT;
             wO.fire.lcpFile = paths[0];
-            WUInity.INSTANCE.UpdateFireResourceStatus();
+            WUInity.SIM_DATA.LoadLCPFile();
+        }
+
+        void OpenLoadFuelsModelFile()
+        {
+            FileBrowser.SetFilters(false, fuelModelsFilter);
+            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            FileBrowser.ShowLoadDialog(LoadFuelModelsFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load fuel models", "Load");
+        }
+
+        void LoadFuelModelsFile(string[] paths)
+        {
+            WUInityInput wO = WUInity.INPUT;
+            wO.fire.fuelModelsFile = paths[0];
+            WUInity.SIM_DATA.LoadFuelModelsFile();
         }
     }
 }

@@ -167,6 +167,30 @@ namespace WUInity.Fire
             FuelModelArray_[fuelModelNumber].isDefined_ = true;
         }
 
+        //bran-jnw
+        public void setFuelModelRecord(FuelModelInput.FuelModel fuelModel)
+        {
+            int fuelModelNumber = fuelModel.fuelModelNumber;
+            FuelModelArray_[fuelModelNumber].fuelModelNumber_ = fuelModelNumber;
+            FuelModelArray_[fuelModelNumber].code_ = fuelModel.code;
+            FuelModelArray_[fuelModelNumber].name_ = fuelModel.name;
+            FuelModelArray_[fuelModelNumber].fuelbedDepth_ = fuelModel.fuelBedDepth;
+            FuelModelArray_[fuelModelNumber].moistureOfExtinctionDead_ = fuelModel.moistureOfExtinctionDead;
+            FuelModelArray_[fuelModelNumber].heatOfCombustionDead_ = fuelModel.heatOfCombustionDead;
+            FuelModelArray_[fuelModelNumber].heatOfCombustionLive_ = fuelModel.heatOfCombustionLive;
+            FuelModelArray_[fuelModelNumber].fuelLoadOneHour_ = fuelModel.fuelLoadOneHour;
+            FuelModelArray_[fuelModelNumber].fuelLoadTenHour_ = fuelModel.fuelLoadTenHour;
+            FuelModelArray_[fuelModelNumber].fuelLoadHundredHour_ = fuelModel.fuelLoadHundredHour;
+            FuelModelArray_[fuelModelNumber].fuelLoadLiveHerbaceous_ = fuelModel.fuelLoadLiveHerbaceous;
+            FuelModelArray_[fuelModelNumber].fuelLoadLiveWoody_ = fuelModel.fuelLoadLiveWoody;
+            FuelModelArray_[fuelModelNumber].savrOneHour_ = fuelModel.savrOneHour;
+            FuelModelArray_[fuelModelNumber].savrLiveHerbaceous_ = fuelModel.savrLiveHerbaceous;
+            FuelModelArray_[fuelModelNumber].savrLiveWoody_ = fuelModel.savrLiveWoody;
+            FuelModelArray_[fuelModelNumber].isDynamic_ = fuelModel.isDynamic;
+            FuelModelArray_[fuelModelNumber].isReserved_ = fuelModel.isReserved;
+            FuelModelArray_[fuelModelNumber].isDefined_ = true;
+        }
+
         // PopulateFuelModels() fills FuelModelArray[] with the standard fuel model parameters
         // as well as earmarking which models are available for use as custom models
         void populateFuelModels()

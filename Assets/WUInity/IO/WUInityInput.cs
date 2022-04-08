@@ -128,7 +128,7 @@ namespace WUInity
     [System.Serializable]
     public class FireInput
     {
-        public string lcpFile;
+        public string lcpFile, fuelModelsFile;
         public Fire.IgnitionPoint[] ignitionPoints = Fire.IgnitionPoint.GetDefault();
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
         public Fire.WeatherInput weather = Fire.WeatherInput.GetTemplate();

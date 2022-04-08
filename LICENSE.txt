@@ -1,17 +1,4 @@
-WUI-NITY is a tool for simulating wildfire fire spread and evacuation in the WUI (wildland-urban interface).
-Copyright (C) 2022  Jonathan Wahlqvist
-
-The work has been supported financially by MSB Sweden, NIST and Lund University. 
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+The WUI-NITY modelling tool (the “Modelling Tool”) was developed under financial assistance award 60NANB18D255 from United Stated Department of Commerce, National Institute of Standards and Technology to the Fire Protection Research Foundation as well as MSB – The Swedish Civil Contingencies Agency grant number 2018-11145.
+Copyright © 2022 Fire Protection Research Foundation, the Imperial College of Science Technology and Medicine, National Research Council of Canada (NRC), Movement Strategies (incorporated and registered as Gutteridge, Haskins & Davey) and Jonathan Wahlqvist of Lund University 
+The Modelling Tool and any related documentation is licensed under the GNU Public license version 3: https://www.gnu.org/licenses/gpl-3.0.en.html and subject to the following conditions:
+The Modelling Tool simulates human and fire behavior during a wildfire evacuation at the wildland-urban interface (WUI) and represents a way to enhancing situational awareness of Authorities Having Jurisdiction (“AHJs”) as they plan and train for a potential WUI scenario.  This tool and any related suggestions for mitigation measures are not designed to replace or substitute an AHJ’s decision about evacuation during a wildfire.  USE OF THIS TOOL IS AT THE USER’S OWN RISK; IT IS PROVIDED AS IS AND AS AVAILABLE WITHOUT GUARANTEE OR WARRANTY OF ANY KIND, EXPRESS OR IMPLIED (INCLUDING THE WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE) AND WITHOUT REPRESENTATION OR WARRANTY REGARDING ITS ACCURACY, COMPLETENESS, USEFULNESS, TIMELINESS, RELIABILITY OR APPROPRIATENESS. NFPA ASSUMES NO RESPONSIBILITY OR LIABILITY IN CONNECTION WITH THE INFORMATION OR OPINIONS CONTAINED IN OR EXPRESSED BY THIS TOOL, ITS USE OR OUTPUT.
