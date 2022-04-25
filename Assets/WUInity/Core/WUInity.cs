@@ -248,7 +248,9 @@ namespace WUInity
             public bool populationLoaded;
             public bool populationCorrectedForRoutes;
             public bool globalGPWAvailable;
-            public bool localGPWLoaded;            
+            public bool localGPWLoaded;
+
+            public bool opticalDensityLoaded;
 
             public bool routeCollectionLoaded;
             public bool routerDbLoaded;

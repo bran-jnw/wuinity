@@ -101,6 +101,7 @@ namespace WUInity
         public float stallSpeed = 5f;
         public Vector2 backGroundDensityMinMax = Vector2.zero;
         public bool visibilityAffectsSpeed = false;
+        public string opticalDensityFile;
         public float opticalDensity = 0.05f;
         public RoadTypes roadTypes;
         public float saveInterval = 600f;

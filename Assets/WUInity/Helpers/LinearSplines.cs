@@ -13,7 +13,7 @@ namespace WUInity
         public float range;
 
         /// <summary>
-        /// Create Catmull-Rom spline based on at least two points. Y-value of ends are assumed to be the same value as first/last value while X-value is +- 1 (to approximate clamping).
+        /// Create linear spline based on at least two points. Y-value of ends are assumed to be the same value as first/last value while X-value is +- 1 (to approximate clamping).
         /// When alpha = 0.5 the curve is a centripetal variant and when alpha = 1, the result is a chordal variant.
         /// </summary>
         /// <param name="points">X value is the time/distance variation in absolute value, Y is the 1D coordinate</param>
@@ -25,6 +25,26 @@ namespace WUInity
 
             minX = points[0].x;
             maxX = points[points.Length - 1].x;
+            range = maxX - minX;
+        }
+
+        /// <summary>
+        /// Create Catmull-Rom spline based on at least two points. Y-value of ends are assumed to be the same value as first/last value while X-value is +- 1 (to approximate clamping).
+        /// When alpha = 0.5 the curve is a centripetal variant and when alpha = 1, the result is a chordal variant.
+        /// </summary>
+        /// <param name="points">X value is the time/distance variation in absolute value, Y is the 1D coordinate</param>
+        /// <param name="alpha"></param>
+        /// <param name="tension"></param>
+        public LinearSpline1D(List<Vector2> points)
+        {
+            this.points = new Vector2[points.Count];
+            for (int i = 0; i < points.Count; i++)
+            {
+                this.points[i] = points[i];
+            }
+
+            minX = points[0].x;
+            maxX = points[this.points.Length - 1].x;
             range = maxX - minX;
         }
 

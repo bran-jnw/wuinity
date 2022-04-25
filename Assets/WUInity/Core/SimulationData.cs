@@ -23,7 +23,13 @@ namespace WUInity
         {
             return fuelModelsData;
         }
-        
+
+        Traffic.OpticalDensityRamp opticalDensity;
+        public Traffic.OpticalDensityRamp GetOpticalDensity()
+        {
+            return opticalDensity;
+        }
+
         private RouterDb routerDb;
         public RouterDb GetRouterDb()
         {
@@ -69,6 +75,12 @@ namespace WUInity
         {
             fuelModelsData = new FuelModelInput();
             return WUInity.DATA_STATUS.fuelModelsLoaded = fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
+        }
+
+        public bool LoadOpticalDensityFile()
+        {
+            opticalDensity = new Traffic.OpticalDensityRamp();
+            return WUInity.DATA_STATUS.opticalDensityLoaded = opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.traffic.opticalDensityFile);
         }
 
         //create or lead itinero database needed for pathfinding

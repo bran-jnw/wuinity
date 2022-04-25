@@ -8,6 +8,8 @@ namespace WUInity
     {
         string opticalDensity, stallSpeed, borderSize;
         bool trafficMenuDirty = true;
+        string[] opticalDensityFilter = new string[] { ".odr" };
+
         void TrafficMenu()
         {
             TrafficInput tO = WUInity.INPUT.traffic;
@@ -111,7 +113,18 @@ namespace WUInity
                 ++buttonIndex;
                 opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
                 ++buttonIndex;
-            }            
+
+                if (WUInity.DATA_STATUS.opticalDensityLoaded)
+                {
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density ramp loaded");
+                    ++buttonIndex;
+                }
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load optical density"))
+                {
+                    OpenLoadOpticalDensityFile();
+                }
+                ++buttonIndex;
+            } 
 
             if (WUInity.INSTANCE.developerMode)
             {
@@ -150,6 +163,20 @@ namespace WUInity
         {
             WUInity.INPUT.traffic.osmFile = paths[0];
             WUInity.INSTANCE.UpdateOSMResourceStatus();
+        }
+
+        void OpenLoadOpticalDensityFile()
+        {
+            FileBrowser.SetFilters(false, opticalDensityFilter);
+            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            FileBrowser.ShowLoadDialog(LoadOpticalDensityFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load optical density ramp file", "Load");
+        }
+
+        void LoadOpticalDensityFile(string[] paths)
+        {
+            WUInityInput wO = WUInity.INPUT;
+            wO.traffic.opticalDensityFile = paths[0];
+            WUInity.SIM_DATA.LoadOpticalDensityFile();
         }
     }
 }
