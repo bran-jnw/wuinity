@@ -100,14 +100,53 @@ namespace WUInity
             }
             else
             {
+                float averageTotalEvacTime = 0.0f;
+                int actualRuns = 0;
+                int convergedInSequence = 0;
                 for (int i = 0; i < input.numberOfRuns; i++)
                 {
                     CreateSubSims(i);
                     //do actual simulation
                     RunSimulation(i);
+
+                    ++actualRuns;                    
+                    if (i > 0)
+                    {
+                        float pastAverage = (averageTotalEvacTime / i);
+                        averageTotalEvacTime += time;
+                        float currentAverage = (averageTotalEvacTime / (i + 1));
+                        float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
+                        //if convergence met we can stop
+                        if (convergenceCriteria < WUInity.INPUT.convergenceCriteria)
+                        {
+                            ++convergedInSequence;
+                            //we are done
+                            if(WUInity.INPUT.stopAfterConverging && convergedInSequence >= 10)
+                            {
+                                i = input.numberOfRuns;
+                            }                            
+                        }
+                        else
+                        {
+                            convergedInSequence = 0;
+                        }
+                    }     
+                    else
+                    {
+                        averageTotalEvacTime += time;
+                    }
                     //force garbage collection
                     //Resources.UnloadUnusedAssets();                    
                     System.GC.Collect();
+                }
+
+                if(convergedInSequence >= 10)
+                {
+                    WUInity.WUI_LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                }
+                else
+                {
+                    WUInity.WUI_LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations.");
                 }
                 WUInity.OUTPUT.totalEvacTime = time;
                 isRunning = false;
@@ -134,7 +173,7 @@ namespace WUInity
             if(input.runSmokeSim && input.runFireSim)
             {
                 //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
-                advectDiffuseSim = new Smoke.AdvectDiffuseModel(fireMesh, 250f, WUInity.INSTANCE.advectDiffuseCompute, WUInity.INSTANCE.noiseTex);
+                advectDiffuseSim = new Smoke.AdvectDiffuseModel(fireMesh, 250f, WUInity.INSTANCE.advectDiffuseCompute, WUInity.INSTANCE.noiseTex, WUInity.INSTANCE.windTex);
             }
             else
             {
@@ -213,7 +252,7 @@ namespace WUInity
             isRunning = true;
             nextFireUpdate = 0f;  
             if(!input.runInRealTime)
-            {   
+            {
                 while (!stopSim)
                 {
                     //checks if we are done

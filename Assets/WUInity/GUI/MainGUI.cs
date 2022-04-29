@@ -6,7 +6,7 @@ namespace WUInity
 {
     public partial class WUInityGUI
     {
-        string dT, nrRuns;
+        string dT, nrRuns, convergenceCriteria;
         bool mainMenuDirty = true, creatingNewFile = false;
 
         void MainMenu()
@@ -86,11 +86,27 @@ namespace WUInity
             dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
             ++buttonIndex;
 
-            //number of runs
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
+            WUInity.INPUT.runInRealTime = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runInRealTime, "Update sim in GUI");
             ++buttonIndex;
-            nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
-            ++buttonIndex;
+            if (!WUInity.INPUT.runInRealTime)
+            {
+                //number of runs
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
+                ++buttonIndex;
+                nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
+                ++buttonIndex;
+
+                WUInity.INPUT.stopAfterConverging = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.stopAfterConverging, "Stop after converging");
+                ++buttonIndex;
+
+                if(WUInity.INPUT.stopAfterConverging)
+                {
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Convergence criteria:");
+                    ++buttonIndex;
+                    convergenceCriteria = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), convergenceCriteria);
+                    ++buttonIndex;
+                }
+            }
 
             WUInity.INPUT.runEvacSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runEvacSim, "Simulate pedestrians");
             ++buttonIndex;
@@ -102,10 +118,7 @@ namespace WUInity
             ++buttonIndex;
 
             WUInity.INPUT.runSmokeSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runSmokeSim, "Simulate smoke spread");
-            ++buttonIndex;
-
-            WUInity.INPUT.runInRealTime = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runInRealTime, "Update sim in GUI");
-            ++buttonIndex;
+            ++buttonIndex;            
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
             {
@@ -128,6 +141,7 @@ namespace WUInity
             mainMenuDirty = false;
             dT = wO.deltaTime.ToString();
             nrRuns = wO.numberOfRuns.ToString();
+            convergenceCriteria = wO.convergenceCriteria.ToString();
         }
 
         void ParseMainData(WUInityInput wO)
@@ -142,6 +156,7 @@ namespace WUInity
 
             float.TryParse(dT, out wO.deltaTime);
             int.TryParse(nrRuns, out wO.numberOfRuns);
+            float.TryParse(convergenceCriteria, out wO.convergenceCriteria);
         }
 
         void OpenSaveInput()

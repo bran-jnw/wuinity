@@ -15,6 +15,8 @@ namespace WUInity
         public float maxSimTime = 864000f; //10 days
         public bool stopWhenEvacuated = true;
         public int numberOfRuns = 1;
+        public bool stopAfterConverging = true;
+        public float convergenceCriteria = 0.02f;
         public Vector2D lowerLeftLatLong = new Vector2D(55.697354, 13.173808);
         public Vector2D size = new Vector2D(3000, 3000);
         public int zoomLevel = 13;

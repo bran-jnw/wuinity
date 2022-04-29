@@ -331,6 +331,7 @@ MonoBehaviour:
   advectDiffuseCompute: {fileID: 7200000, guid: 3895e23dacb4085448e97c23118c2160,
     type: 3}
   noiseTex: {fileID: 2800000, guid: 9868d8aa602a4734c8bc3a0af3f483d7, type: 3}
+  windTex: {fileID: 2800000, guid: 3d26706c557a2bf458d06a6c94a41410, type: 3}
   dataSampleMode: 0
   outputTextures: []
 --- !u!114 &6053256691148872454

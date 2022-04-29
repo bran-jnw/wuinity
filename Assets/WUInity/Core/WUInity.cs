@@ -321,6 +321,7 @@ namespace WUInity
         [SerializeField] private LineRenderer osmBorder;
         [SerializeField] public ComputeShader advectDiffuseCompute;
         [SerializeField] public Texture2D noiseTex;
+        [SerializeField] public Texture2D windTex;
 
         public enum DataSampleMode { None, GPW, Population, Relocated, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;

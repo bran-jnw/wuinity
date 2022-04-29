@@ -17,6 +17,7 @@ namespace WUInity.Smoke
         ComputeShader advectDiffuseCompute;
         ComputeBuffer[] sootConcentration;
         ComputeBuffer sootInjection;
+        ComputeBuffer wind;
         int solutionMode;
 
         const int READ = 0;
@@ -41,7 +42,7 @@ namespace WUInity.Smoke
         }
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
-        public AdvectDiffuseModel(Fire.FireMesh fireMesh, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, int solutionMode = 0)
+        public AdvectDiffuseModel(Fire.FireMesh fireMesh, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, Texture2D windTex, int solutionMode = 0)
         {
             this.fireMesh = fireMesh;
             //set all parameters
@@ -64,8 +65,9 @@ namespace WUInity.Smoke
             sootConcentration[0] = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
             sootConcentration[1] = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
             sootInjection = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
+            wind = new ComputeBuffer(cellCountX * cellCountY, sizeof(float) * 2);
 
-            this.solutionMode = 1;//solutionMode;
+            this.solutionMode = 1;//solutionMode, 0 = explicit, 1 = semi-lagrangian
             //set constants in compute buffer
             advectDiffuseCompute.SetInt("_CellsX", cellCountX);
             advectDiffuseCompute.SetInt("_CellsY", cellCountY);
@@ -77,6 +79,13 @@ namespace WUInity.Smoke
             advectDiffuseCompute.SetFloat("_CellsPerMeterXSq", invertedCellSizeXSq);
             advectDiffuseCompute.SetFloat("_CellsPerMeterYSq", invertedCellSizeYSq);
             advectDiffuseCompute.SetTexture(solutionMode, "_NoiseTex", noiseTex, 0);
+
+            CreateWind(windTex);            
+        }
+
+        void CreateWind(Texture2D windTex)
+        {
+            advectDiffuseCompute.SetTexture(solutionMode, "_Wind", windTex);
         }
 
         public void Update(float deltaTime, float windDirection, float windSpeed, bool fireHasUpdated)

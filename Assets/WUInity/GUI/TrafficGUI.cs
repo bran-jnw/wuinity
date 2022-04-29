@@ -56,7 +56,7 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouteCollectionsText))
             {
                 ParseTrafficInput();
-                WUInity.SIM_DATA.LoadRouterDatabase();
+                WUInity.DATA_STATUS.routeCollectionLoaded =  WUInity.SIM_DATA.LoadRouteCollections();
             }
             ++buttonIndex;
 
