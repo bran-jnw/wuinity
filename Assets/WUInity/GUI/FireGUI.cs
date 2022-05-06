@@ -15,7 +15,7 @@ namespace WUInity
             int buttonIndex = 0;
 
             string lcpExistsStatus = "LCP file NOT found"; 
-            if(WUInity.DATA_STATUS.lcpLoaded)
+            if(WUInity.DATA_STATUS.LcpLoaded)
             {
                 lcpExistsStatus = "LCP file found";
             }
@@ -28,7 +28,7 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if(WUInity.DATA_STATUS.fuelModelsLoaded)
+            if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Custom fuel model set loaded");
                 ++buttonIndex;

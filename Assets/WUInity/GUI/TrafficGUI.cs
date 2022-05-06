@@ -26,7 +26,7 @@ namespace WUInity
             //router db
             string routerStatus = "RouterDb NOT loaded";
             string loadRouterText = "Load router database";
-            if (WUInity.DATA_STATUS.routerDbLoaded)
+            if (WUInity.DATA_STATUS.RouterDbLoaded)
             {
                 routerStatus = "RouterDb loaded";
                 loadRouterText = "Re-load router database";
@@ -45,7 +45,7 @@ namespace WUInity
             ++buttonIndex;
             string routeCollectionStatus = "Pre-calc routes NOT loaded";
             string loadRouteCollectionsText = "Load pre-calc routes";
-            if (WUInity.DATA_STATUS.routeCollectionLoaded)
+            if (WUInity.DATA_STATUS.RouteCollectionLoaded)
             {                
                 routeCollectionStatus = "Pre-calc routes loaded";
                 loadRouteCollectionsText = "Re-load pre-calc routes";
@@ -56,14 +56,14 @@ namespace WUInity
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouteCollectionsText))
             {
                 ParseTrafficInput();
-                WUInity.DATA_STATUS.routeCollectionLoaded =  WUInity.SIM_DATA.LoadRouteCollections();
+                WUInity.DATA_STATUS.RouteCollectionLoaded =  WUInity.SIM_DATA.LoadRouteCollections();
             }
             ++buttonIndex;
 
             //OSM
             ++buttonIndex;
             string osmStatus = "OSM file NOT valid";
-            if (WUInity.DATA_STATUS.osmFileValid)
+            if (WUInity.DATA_STATUS.OsmFileValid)
             {
                 osmStatus = "OSM file valid";
             }
@@ -76,7 +76,7 @@ namespace WUInity
             }
             ++buttonIndex;            
             
-            if(WUInity.DATA_STATUS.osmFileValid)
+            if(WUInity.DATA_STATUS.OsmFileValid)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM border size [m]");
                 ++buttonIndex;
@@ -84,7 +84,7 @@ namespace WUInity
                 ++buttonIndex;
 
                 string buildRouterText = "Build router database";
-                if(WUInity.DATA_STATUS.routerDbLoaded)
+                if(WUInity.DATA_STATUS.RouterDbLoaded)
                 {
                     buildRouterText = "Re-build router database";
                 }
@@ -114,7 +114,7 @@ namespace WUInity
                 opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
                 ++buttonIndex;
 
-                if (WUInity.DATA_STATUS.opticalDensityLoaded)
+                if (WUInity.DATA_STATUS.OpticalDensityLoaded)
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density ramp loaded");
                     ++buttonIndex;
@@ -126,7 +126,7 @@ namespace WUInity
                 ++buttonIndex;
             } 
 
-            if (WUInity.INSTANCE.developerMode)
+            if (WUInity.INSTANCE.DeveloperMode)
             {
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))

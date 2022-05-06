@@ -23,12 +23,12 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            dummy = WUInity.SIM.GetMacroHumanSim().GetPeopleStaying();
+            dummy = WUInity.SIM.MacroHumanSim().GetPeopleStaying();
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
             ++buttonIndex;
 
             //toatl cars
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.GetMacroHumanSim().GetTotalCars());
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.MacroHumanSim().GetTotalCars());
             ++buttonIndex;
 
             ++buttonIndex;
@@ -88,21 +88,21 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (WUInity.INPUT.runEvacSim && WUInity.SIM.GetMacroHumanSim() != null)
+            if (WUInity.INPUT.runEvacSim && WUInity.SIM.MacroHumanSim() != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.GetMacroHumanSim().GetPeopleLeft() + " / " + WUInity.POPULATION.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.MacroHumanSim().GetPeopleLeft() + " / " + WUInity.POPULATION.GetTotalPopulation());
                 ++buttonIndex;
 
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUInity.SIM.GetMacroHumanSim().GetCarsReached());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUInity.SIM.MacroHumanSim().GetCarsReached());
                 ++buttonIndex;
             }
 
             //cars still left
-            if (WUInity.INPUT.runTrafficSim && WUInity.SIM.GetMacroTrafficSim() != null)
+            if (WUInity.INPUT.runTrafficSim && WUInity.SIM.MacroTrafficSim() != null)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.GetMacroTrafficSim().GetCarsInSystem() + " / " + WUInity.SIM.GetMacroTrafficSim().GetTotalCarsSimulated());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.MacroTrafficSim().GetCarsInSystem() + " / " + WUInity.SIM.MacroTrafficSim().GetTotalCarsSimulated());
                 ++buttonIndex;
             }
 
@@ -114,7 +114,7 @@ namespace WUInity
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople + " (" + WUInity.INPUT.traffic.evacuationGoals[i].cars.Count + ")");
                 ++buttonIndex;
             }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.GetMacroHumanSim().GetPeopleStaying()));
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.MacroHumanSim().GetPeopleStaying()));
             ++buttonIndex;
 
             //fire output stuff
@@ -126,7 +126,7 @@ namespace WUInity
                 ++buttonIndex;
             }
 
-            if(WUInity.SIM.isRunning)
+            if(WUInity.SIM.IsRunning)
             {
                 ++buttonIndex;
 

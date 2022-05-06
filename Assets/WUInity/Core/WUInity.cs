@@ -241,46 +241,46 @@ namespace WUInity
 
         public class DataStatus
         {
-            public bool haveInput;
+            public bool HaveInput;
 
-            public bool mapLoaded;
+            public bool MapLoaded;
 
-            public bool populationLoaded;
-            public bool populationCorrectedForRoutes;
-            public bool globalGPWAvailable;
-            public bool localGPWLoaded;
+            public bool PopulationLoaded;
+            public bool PopulationCorrectedForRoutes;
+            public bool GlobalGPWAvailable;
+            public bool LocalGPWLoaded;
 
-            public bool opticalDensityLoaded;
+            public bool OpticalDensityLoaded;
 
-            public bool routeCollectionLoaded;
-            public bool routerDbLoaded;
+            public bool RouteCollectionLoaded;
+            public bool RouterDbLoaded;
 
-            public bool osmFileValid;
+            public bool OsmFileValid;
 
-            public bool lcpLoaded, fuelModelsLoaded;
+            public bool LcpLoaded, FuelModelsLoaded;
 
             public bool CanRunSimulation()
             {
                 bool canRun = true;
-                if(!mapLoaded)
+                if(!MapLoaded)
                 {
                     canRun = false;
                     WUI_LOG("ERROR: Map is not loaded.");
                 }
 
-                if(!populationLoaded && (!localGPWLoaded || !globalGPWAvailable))
+                if(!PopulationLoaded && (!LocalGPWLoaded || !GlobalGPWAvailable))
                 {
                     canRun = false;  
                     WUI_LOG("ERROR: Population is not loaded and no local nor global GPW file is found to build it from.");                  
                 }
 
-                if(!routerDbLoaded && !osmFileValid)
+                if(!RouterDbLoaded && !OsmFileValid)
                 {
                     canRun = false;
                     WUI_LOG("ERROR: No router database loaded and no valid OSM file was found to build it from.");
                 }
 
-                if(INPUT.runFireSim && !lcpLoaded)
+                if(INPUT.runFireSim && !LcpLoaded)
                 {
                     WUI_LOG("ERROR: No LCP file loaded but fire spread is activated.");
                 }
@@ -292,36 +292,36 @@ namespace WUInity
             public void Reset()
             {
                 //haveInput = false; //can never lose input after getting it once
-                mapLoaded = false;
+                MapLoaded = false;
 
-                populationLoaded = false;
-                populationCorrectedForRoutes = false;
-                globalGPWAvailable = false;
-                localGPWLoaded = false;
+                PopulationLoaded = false;
+                PopulationCorrectedForRoutes = false;
+                GlobalGPWAvailable = false;
+                LocalGPWLoaded = false;
 
-                routeCollectionLoaded = false;
-                routerDbLoaded = false;
-                osmFileValid = false;
+                RouteCollectionLoaded = false;
+                RouterDbLoaded = false;
+                OsmFileValid = false;
 
-                lcpLoaded = false;
-                fuelModelsLoaded = false;
+                LcpLoaded = false;
+                FuelModelsLoaded = false;
             }
         }
 
         [Header("Options")]
-        public bool developerMode = false;
-        public bool autoLoadExample = true;
+        public bool DeveloperMode = false;
+        public bool AutoLoadExample = true;
 
         [Header("Prefabs")]
-        [SerializeField] GameObject markerPrefab;
+        [SerializeField] private GameObject _markerPrefab;
 
         [Header("References")]              
-        [SerializeField] private GodCamera godCamera;
-        [SerializeField] private LineRenderer simBorder;
-        [SerializeField] private LineRenderer osmBorder;
-        [SerializeField] public ComputeShader advectDiffuseCompute;
-        [SerializeField] public Texture2D noiseTex;
-        [SerializeField] public Texture2D windTex;
+        [SerializeField] private GodCamera _godCamera;
+        [SerializeField] private LineRenderer _simBorder;
+        [SerializeField] private LineRenderer _osmBorder;
+        [SerializeField] public  ComputeShader AdvectDiffuseCompute;
+        [SerializeField] public Texture2D NoiseTex;
+        [SerializeField] public Texture2D WindTex;
 
         public enum DataSampleMode { None, GPW, Population, Relocated, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;
@@ -383,14 +383,14 @@ namespace WUInity
         {
             if (Application.isEditor)
             {
-                developerMode = true;
+                DeveloperMode = true;
             }
             else
             {
-                developerMode = false;
+                DeveloperMode = false;
             }  
 
-            if(autoLoadExample && developerMode)
+            if(AutoLoadExample && DeveloperMode)
             {
                 string path = Path.Combine(DATA_FOLDER, "example\\example.wui");
                 if (File.Exists(path))
@@ -403,13 +403,13 @@ namespace WUInity
                 }
             }
 
-            if (godCamera == null)
+            if (_godCamera == null)
             {
-                godCamera = FindObjectOfType<GodCamera>();
+                _godCamera = FindObjectOfType<GodCamera>();
             }            
 
-            simBorder.gameObject.SetActive(false);
-            osmBorder.gameObject.SetActive(false);
+            _simBorder.gameObject.SetActive(false);
+            _osmBorder.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace WUInity
         public void SetNewInputData(WUInityInput input)
         {
             DATA_STATUS.Reset();
-            DATA_STATUS.haveInput = true;
+            DATA_STATUS.HaveInput = true;
             if(input == null)
             {
                 internal_input = new WUInityInput();
@@ -456,10 +456,10 @@ namespace WUInity
 
         public void UpdateMapResourceStatus()
         {
-            DATA_STATUS.mapLoaded = LoadMapbox();
+            DATA_STATUS.MapLoaded = LoadMapbox();
             UpdateBorders();
             SpawnMarkers();
-            godCamera.SetCameraStartPosition(INPUT.size);
+            _godCamera.SetCameraStartPosition(INPUT.size);
 
             bool coordinatesAreDirty = true;
             bool sizeIsDirty = true;
@@ -481,7 +481,7 @@ namespace WUInity
             {
                 //basically mark all data as not valid anymore
                 DATA_STATUS.Reset();
-                DATA_STATUS.mapLoaded = true;
+                DATA_STATUS.MapLoaded = true;
             }
 
             //set cached data to be current data
@@ -507,27 +507,27 @@ namespace WUInity
 
         public void UpdatePopulationResourceStatus()
         {
-            DATA_STATUS.routeCollectionLoaded = SIM_DATA.LoadRouteCollections();
-            DATA_STATUS.populationLoaded = POPULATION.LoadPopulationFromFile();
-            DATA_STATUS.populationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
-            DATA_STATUS.localGPWLoaded = POPULATION.LoadLocalGPWFromFile();
-            DATA_STATUS.globalGPWAvailable = LocalGPWData.IsGPWAvailable();
+            DATA_STATUS.RouteCollectionLoaded = SIM_DATA.LoadRouteCollections();
+            DATA_STATUS.PopulationLoaded = POPULATION.LoadPopulationFromFile();
+            DATA_STATUS.PopulationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
+            DATA_STATUS.LocalGPWLoaded = POPULATION.LoadLocalGPWFromFile();
+            DATA_STATUS.GlobalGPWAvailable = LocalGPWData.IsGPWAvailable();
         }
 
         public void UpdateFireResourceStatus()
         {
-            DATA_STATUS.lcpLoaded = SIM_DATA.LoadLCPFile();
-            DATA_STATUS.fuelModelsLoaded = SIM_DATA.LoadFuelModelsFile();
+            DATA_STATUS.LcpLoaded = SIM_DATA.LoadLCPFile();
+            DATA_STATUS.FuelModelsLoaded = SIM_DATA.LoadFuelModelsFile();
         }
 
         public void UpdateRoutingResourceStatus()
         {
-            DATA_STATUS.routerDbLoaded = SIM_DATA.LoadRouterDatabase();
+            DATA_STATUS.RouterDbLoaded = SIM_DATA.LoadRouterDatabase();
         }   
 
         public void UpdateOSMResourceStatus()
         {
-            DATA_STATUS.osmFileValid = File.Exists(INPUT.traffic.osmFile);
+            DATA_STATUS.OsmFileValid = File.Exists(INPUT.traffic.osmFile);
         }
 
         private bool LoadMapbox()
@@ -569,9 +569,9 @@ namespace WUInity
         /// <param name="message"></param>
         public static void WUI_LOG(string message)
         {
-            if (SIM.isRunning)
+            if (SIM.IsRunning)
             {
-                message = "[" + (int)SIM.time + "s] " + message;
+                message = "[" + (int)SIM.Time + "s] " + message;
             }
 
             INSTANCE.simLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
@@ -697,9 +697,13 @@ namespace WUInity
                 TogglePause();
             }
 
-            if(!pauseSim && INPUT.runInRealTime && SIM.isRunning)
+            if(!pauseSim && INPUT.runInRealTime && SIM.IsRunning)
             {
                 SIM.UpdateRealtimeSim();
+            }
+            //always updatre visuals, even when paused
+            if (INPUT.runInRealTime && SIM.IsRunning)
+            {
                 EVAC_VISUALS.UpdateEvacuationRenderer(renderHouseholds, renderTraffic);
                 FIRE_VISUALS.UpdateFireRenderer(renderFireSpread, renderSmokeDispersion);
             }
@@ -731,31 +735,31 @@ namespace WUInity
 
         void UpdateBorders()
         {
-            if(!DATA_STATUS.haveInput)
+            if(!DATA_STATUS.HaveInput)
             {
                 return;
             }
 
-            simBorder.gameObject.SetActive(true);
-            osmBorder.gameObject.SetActive(true);
+            _simBorder.gameObject.SetActive(true);
+            _osmBorder.gameObject.SetActive(true);
 
             Vector3 upOffset = Vector3.up * 50f;
-            if (simBorder != null)
+            if (_simBorder != null)
             {
-                simBorder.SetPosition(0, Vector3.zero + upOffset);
-                simBorder.SetPosition(1, simBorder.GetPosition(0) + Vector3.right * (float)INPUT.size.x);
-                simBorder.SetPosition(2, simBorder.GetPosition(1) + Vector3.forward * (float)INPUT.size.y);
-                simBorder.SetPosition(3, simBorder.GetPosition(2) - Vector3.right * (float)INPUT.size.x);
-                simBorder.SetPosition(4, simBorder.GetPosition(0));
+                _simBorder.SetPosition(0, Vector3.zero + upOffset);
+                _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)INPUT.size.x);
+                _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)INPUT.size.y);
+                _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)INPUT.size.x);
+                _simBorder.SetPosition(4, _simBorder.GetPosition(0));
             }
 
-            if (osmBorder != null)
+            if (_osmBorder != null)
             {
-                osmBorder.SetPosition(0, -Vector3.right * INPUT.traffic.osmBorderSize - Vector3.forward * INPUT.traffic.osmBorderSize + Vector3.up * 10f);
-                osmBorder.SetPosition(1, osmBorder.GetPosition(0) + Vector3.right * ((float)INPUT.size.x + INPUT.traffic.osmBorderSize * 2f));
-                osmBorder.SetPosition(2, osmBorder.GetPosition(1) + Vector3.forward * ((float)INPUT.size.y + INPUT.traffic.osmBorderSize * 2f));
-                osmBorder.SetPosition(3, osmBorder.GetPosition(2) - Vector3.right * ((float)INPUT.size.x + INPUT.traffic.osmBorderSize * 2f));
-                osmBorder.SetPosition(4, osmBorder.GetPosition(0));
+                _osmBorder.SetPosition(0, -Vector3.right * INPUT.traffic.osmBorderSize - Vector3.forward * INPUT.traffic.osmBorderSize + Vector3.up * 10f);
+                _osmBorder.SetPosition(1, _osmBorder.GetPosition(0) + Vector3.right * ((float)INPUT.size.x + INPUT.traffic.osmBorderSize * 2f));
+                _osmBorder.SetPosition(2, _osmBorder.GetPosition(1) + Vector3.forward * ((float)INPUT.size.y + INPUT.traffic.osmBorderSize * 2f));
+                _osmBorder.SetPosition(3, _osmBorder.GetPosition(2) - Vector3.right * ((float)INPUT.size.x + INPUT.traffic.osmBorderSize * 2f));
+                _osmBorder.SetPosition(4, _osmBorder.GetPosition(0));
             }
         }
 
@@ -800,9 +804,9 @@ namespace WUInity
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
-                    if (SIM.GetMacroHumanSim() != null)
+                    if (SIM.MacroHumanSim() != null)
                     {
-                        dataSampleString = "Rescaled and relocated people count: " + SIM.GetMacroHumanSim().GetPopulation(x, y);
+                        dataSampleString = "Rescaled and relocated people count: " + SIM.MacroHumanSim().GetPopulation(x, y);
                     }
                 }
                 else if (dataSampleMode == DataSampleMode.TrafficDens)
@@ -952,7 +956,7 @@ namespace WUInity
             for (int i = 0; i < INPUT.traffic.evacuationGoals.Length; i++)
             {
                 EvacuationGoal eG = INPUT.traffic.evacuationGoals[i];
-                goalMarkers[i] = Instantiate<GameObject>(markerPrefab);
+                goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
                 Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, MAP.CenterMercator, MAP.WorldRelativeScale);
 
                 float scale = 0.01f * (float)INPUT.size.y;
@@ -1078,7 +1082,7 @@ namespace WUInity
             if (fireMeshMode)
             {
                 activeMeshRenderer = fireDataPlaneMeshRenderer;
-                cellCount = SIM.GetFireMesh().cellCount;
+                cellCount = SIM.FireMesh().cellCount;
                 name = "Fire Data Plane";
             }
 
@@ -1189,7 +1193,7 @@ namespace WUInity
                 {
                     for (int x = 0; x < SIM_DATA.EvacCellCount.x; x++)
                     {
-                        peopleInCells[outputIndex][x + y * SIM_DATA.EvacCellCount.x] = SIM.GetMacroHumanSim().GetPeopleLeftInCell(x, y);
+                        peopleInCells[outputIndex][x + y * SIM_DATA.EvacCellCount.x] = SIM.MacroHumanSim().GetPeopleLeftInCell(x, y);
                     }
                 }
 

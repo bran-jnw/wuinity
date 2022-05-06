@@ -82,7 +82,7 @@ namespace WUInity.Fire
         {
             fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if(WUInity.DATA_STATUS.fuelModelsLoaded)
+            if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
                 for (int i = 0; i < WUInity.SIM_DATA.GetFuelModelsData().fuels.Count; i++)
                 {

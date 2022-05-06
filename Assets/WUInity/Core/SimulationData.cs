@@ -61,7 +61,7 @@ namespace WUInity
 
         public void BuildAndSaveRouteCollection()
         {
-            WUInity.SIM_DATA.routes = WUInity.SIM.GetRouteCreator().CalculateCellRoutes();
+            WUInity.SIM_DATA.routes = WUInity.SIM.RouteCreator.CalculateCellRoutes();
             SaveLoadWUI.SaveRouteCollections();
         }
 
@@ -74,13 +74,13 @@ namespace WUInity
         public bool LoadFuelModelsFile()
         {
             fuelModelsData = new FuelModelInput();
-            return WUInity.DATA_STATUS.fuelModelsLoaded = fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
+            return WUInity.DATA_STATUS.FuelModelsLoaded = fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
         }
 
         public bool LoadOpticalDensityFile()
         {
             opticalDensity = new Traffic.OpticalDensityRamp();
-            return WUInity.DATA_STATUS.opticalDensityLoaded = opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.traffic.opticalDensityFile);
+            return WUInity.DATA_STATUS.OpticalDensityLoaded = opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.traffic.opticalDensityFile);
         }
 
         //create or lead itinero database needed for pathfinding
@@ -99,7 +99,7 @@ namespace WUInity
                     success = true;
                 }                
             }
-            else if(WUInity.DATA_STATUS.osmFileValid)
+            else if(WUInity.DATA_STATUS.OsmFileValid)
             {
                 // load some routing data and build a routing network.
                 routerDb = new RouterDb();
@@ -204,7 +204,7 @@ namespace WUInity
         {
             if (wuiAreaIndices == null)
             {
-                wuiAreaIndices = new bool[WUInity.SIM.GetFireMesh().cellCount.x * WUInity.SIM.GetFireMesh().cellCount.y];
+                wuiAreaIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
             }
             WUInity.SIM_DATA.wuiAreaIndices = wuiAreaIndices;
         }
@@ -213,7 +213,7 @@ namespace WUInity
         {
             if (randomIgnitionIndices == null)
             {
-                randomIgnitionIndices = new bool[WUInity.SIM.GetFireMesh().cellCount.x * WUInity.SIM.GetFireMesh().cellCount.y];
+                randomIgnitionIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
             }
             WUInity.SIM_DATA.randomIgnitionIndices = randomIgnitionIndices;
         }
@@ -222,7 +222,7 @@ namespace WUInity
         {
             if (initialIgnitionIndices == null)
             {
-                initialIgnitionIndices = new bool[WUInity.SIM.GetFireMesh().cellCount.x * WUInity.SIM.GetFireMesh().cellCount.y];
+                initialIgnitionIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
             }
             WUInity.SIM_DATA.initialIgnitionIndices = initialIgnitionIndices;
         }
@@ -231,7 +231,7 @@ namespace WUInity
         {
             if (triggerBufferIndices == null)
             {
-                triggerBufferIndices = new bool[WUInity.SIM.GetFireMesh().cellCount.x * WUInity.SIM.GetFireMesh().cellCount.y];
+                triggerBufferIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
             }
             WUInity.SIM_DATA.triggerBufferIndices = triggerBufferIndices;
         }

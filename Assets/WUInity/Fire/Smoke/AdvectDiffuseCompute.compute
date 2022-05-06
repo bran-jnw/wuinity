@@ -96,15 +96,18 @@ void AdvectDiffuseExplicit(uint3 id : SV_DispatchThreadID)
 float2 GetAdvectedPos(float2 pos)
 {
 	//when only using global wind value
-	//float2 step = _DeltaTime * float2(_WindX * _CellsPerMeterX, _WindY * _CellsPerMeterY);
+	/*float2 step = _DeltaTime * float2(_WindX * _CellsPerMeterX, _WindY * _CellsPerMeterY);
+	pos -= step;
+	return pos;*/
 
 	//wind map from texture
-	//Remember that textures have to be in linear space, not gamm!!!
+	//Remember that textures have to be in linear space, not gamma!!!
 	float2 uv = float2(pos.x / _CellsX, pos.y / _CellsY);
 	float4 windData = _Wind.SampleLevel(sampler_Wind, uv, 0);
 	float2 windDir = normalize(float2(windData.r - 0.5, windData.g - 0.5));
 	float2 wind = 5.0 * windDir;
 	float2 step = _DeltaTime * float2(wind.x * _CellsPerMeterX, wind.y * _CellsPerMeterY);
+
 	pos -= step;
 
 	return pos;
@@ -176,9 +179,100 @@ void AdvectSemiLagrangian(uint3 id : SV_DispatchThreadID)
 	_Write[idx] = newC + c_delta;
 }
 
-#pragma kernel DiffuseImplicit
+//static const float a[6] = { -0.0875, -0.03849, -0.00807, 0.0, 0.00807, 0.03849 };
+//static const float b[6] = { -0.1029, -0.1714, -0.3049, 0.0, -0.3049, 0.1714 };
+
+//calculated from https://www.ready.noaa.gov/READYpgclass.php and from "Point source atmospheric diffusion model with variable wind and diffusivity profiles" which describes relation between K_z and K_y
+static const float eddy_diffusivity[7] = { 260.0, 215.0, 125.0, 125.0, 39.0, 10.5, 3.0 };
+//Diffusion only taken into account across wind direction
+float2 GetDiffusionCoefficient(float2 pos)
+{
+	float2 uv = float2(pos.x / _CellsX, pos.y / _CellsY);
+	float4 windData = _Wind.SampleLevel(sampler_Wind, uv, 0);
+	float2 windDir = normalize(float2(windData.r - 0.5, windData.g - 0.5));
+
+	//swap x and y since we want cross-wind, not along wind
+	float2 K_y = float2(abs(windDir.y), abs(windDir.x)); //can't have negative values... 
+	int stability = 3; //0-6 represents stability class A-G
+	float K = eddy_diffusivity[stability];
+	K_y = float2(K_y.x * K + 0.001, K_y.y * K + 0.001); // to avoid divison by zero	
+
+	//if we ever need better calculation this is pieces of it...
+	/*float z_ref = 10.0;
+	float z_0 = 0.25;
+	float u_star = 0.41 * wind.length / (log(z_ref / z_0));
+
+	//unstable
+	if (stability < 3)
+	{		
+		K_z = 
+		K = 5 * K_z;
+	}
+	//neutral
+	else if (stability == 3)
+	{
+		int stability = 1; //0-6 represents A-G
+		z_0 = 1.0;
+		float L = 1.0 / (a[stability] * pow(z_0, b[stability]);
+		K_z = 0.4 * wind * L;
+	}
+	//stable
+	else
+	{
+
+	}*/
+
+	return K_y;
+}
+
+#pragma kernel DiffuseImplicitIsotropic
 [numthreads(8, 8, 1)]
-void DiffuseImplicit(uint3 id : SV_DispatchThreadID)
+void DiffuseImplicitIsotropic(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+	float C = _Read[idx];
+	//float L = 0, R = 0, D = 0, U = 0;
+	float L = C, R = C, D = C, U = C; //never diffuse to outside?
+	if (id.x > 0)
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}	
+
+	//uniform diffusion
+	int stability = 5; //0-6 represents stability class A-G
+	float K = eddy_diffusivity[stability];
+	//dx^2 / v * dt
+	float alpha = _CellSizeX * _CellSizeY / (K * _DeltaTime);
+	float rBeta = 1.0f / (4.0f + alpha);
+	_Write[idx] = (C * alpha + L + R + D + U) * rBeta;
+	return;
+}
+
+#pragma kernel DiffuseImplicitAnisotropic
+[numthreads(8, 8, 1)]
+void DiffuseImplicitAnisotropic(uint3 id : SV_DispatchThreadID)
 {
 	//check if we are outside of mesh due to non-integer fit to kernel threads
 	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
@@ -211,24 +305,11 @@ void DiffuseImplicit(uint3 id : SV_DispatchThreadID)
 		U = _Read[idxU];
 	}
 
-	float eddyDiffusionCoefficient = 10;
-
-	//dx^2 * v * dt
-	float alpha = _CellSizeX * _CellSizeY / (eddyDiffusionCoefficient * _DeltaTime);
+	//Diffusion cross-wind
+	float2 pos = float2(id.x, id.y);
+	float2 K_y = GetDiffusionCoefficient(pos);
+	//dx^2 / v * dt
+	float alpha = _CellSizeX * _CellSizeX / (K_y.x * _DeltaTime) + _CellSizeY * _CellSizeY / (K_y.y * _DeltaTime);
 	float rBeta = 1.0f / (4.0f + alpha);
-
-	//TODO: do more reading to investigate if diffusion is different in each realtive direction to the wind
-	/*
-	float eddyDiffusionCoefficientAlong = 2.0;
-	float eddyDiffusionCoefficientAcross = 1;
-	float diffusionX = (eddyDiffusionCoefficientAlong * _WindXFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindXFraction));
-	float diffusionY = (eddyDiffusionCoefficientAlong * _WindYFraction + eddyDiffusionCoefficientAcross * (1.0 - _WindYFraction));
-	//dx^2 * v * dt
-	float alphaX = _CellSizeX * _CellSizeX / (diffusionX * _DeltaTime);
-	float rBetaX = 1.0f / (2.0f + alphaX);
-	float alphaY = _CellSizeY * _CellSizeY / (diffusionY * _DeltaTime);
-	float rBetaY = 1.0f / (2.0f + alphaY);
-	_Write[idx] = (C * alphaX + L + R) * rBetaX + (C * alphaY + D + U) * rBetaY;*/
-
 	_Write[idx] = (C * alpha + L + R + D + U) * rBeta;
 }

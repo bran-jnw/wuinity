@@ -53,8 +53,8 @@ namespace WUInity.Visualization
 
         void CreateFireBuffer()
         {            
-            fireCellCountX = WUInity.SIM.GetFireMesh().cellCount.x;
-            fireCellCountY = WUInity.SIM.GetFireMesh().cellCount.y;
+            fireCellCountX = WUInity.SIM.FireMesh().cellCount.x;
+            fireCellCountY = WUInity.SIM.FireMesh().cellCount.y;
             fireBuffer = new ComputeBuffer(fireCellCountX * fireCellCountY, sizeof(float));
             fireMaterial.SetInteger("_CellsX", fireCellCountX);
             fireMaterial.SetInteger("_CellsY", fireCellCountY);
@@ -72,8 +72,8 @@ namespace WUInity.Visualization
         {
             //sootCellCountX = WUInity.SIM.GetSmokeDispersion().GetCellsX();
             //sootCellCountY = WUInity.SIM.GetSmokeDispersion().GetCellsY();
-            sootCellCountX = WUInity.SIM.GetAdvectDiffuseSim().GetCellsX();
-            sootCellCountY = WUInity.SIM.GetAdvectDiffuseSim().GetCellsY();
+            sootCellCountX = WUInity.SIM.AdvectDiffuseSim().GetCellsX();
+            sootCellCountY = WUInity.SIM.AdvectDiffuseSim().GetCellsY();
             //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
             sootMaterial.SetInteger("_CellsX", sootCellCountX);
             sootMaterial.SetInteger("_CellsY", sootCellCountY);
@@ -91,7 +91,7 @@ namespace WUInity.Visualization
         {
             if (renderFire)
             {
-                float[] fireData = WUInity.SIM.GetFireMesh().GetFireLineIntensityData();
+                float[] fireData = WUInity.SIM.FireMesh().GetFireLineIntensityData();
                 if(fireData != null)
                 {
                     fireBuffer.SetData(fireData);
@@ -107,7 +107,7 @@ namespace WUInity.Visualization
                     sootBuffer.SetData(sootData);
                     sootMaterial.SetBuffer("_Data", sootBuffer);
                 }  */
-                ComputeBuffer buffer = WUInity.SIM.GetAdvectDiffuseSim().GetComputeBuffer();
+                ComputeBuffer buffer = WUInity.SIM.AdvectDiffuseSim().GetComputeBuffer();
                 sootMaterial.SetBuffer("_Data", buffer);
             }
         }
@@ -164,9 +164,9 @@ namespace WUInity.Visualization
                 sootBuffer = null;
             }
 
-            if(!creationCall && WUInity.SIM.GetAdvectDiffuseSim() != null)
+            if(!creationCall && WUInity.SIM.AdvectDiffuseSim() != null)
             {
-                WUInity.SIM.GetAdvectDiffuseSim().Release();
+                WUInity.SIM.AdvectDiffuseSim().Release();
             }
             
         }

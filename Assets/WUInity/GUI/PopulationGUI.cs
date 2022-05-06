@@ -37,7 +37,7 @@ namespace WUInity
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), popRouteStatus);
             ++buttonIndex;
 
-            if(WUInity.DATA_STATUS.populationLoaded)
+            if(WUInity.DATA_STATUS.PopulationLoaded)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + WUInity.POPULATION.GetTotalPopulation());
                 ++buttonIndex;
@@ -166,7 +166,7 @@ namespace WUInity
             //GPW stuff
             ++buttonIndex;
             string localGPWStatus = "Local GPW data NOT loaded";
-            if (WUInity.DATA_STATUS.localGPWLoaded)
+            if (WUInity.DATA_STATUS.LocalGPWLoaded)
             {
                 localGPWStatus = "Local GPW data loaded";
             }
@@ -174,14 +174,14 @@ namespace WUInity
             ++buttonIndex;
 
             string globalGPWStatus = "Global GPW data NOT found";
-            if (WUInity.DATA_STATUS.globalGPWAvailable)
+            if (WUInity.DATA_STATUS.GlobalGPWAvailable)
             {
                 globalGPWStatus = "Global GPW data found";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), globalGPWStatus);
             ++buttonIndex;
 
-            if (WUInity.DATA_STATUS.localGPWLoaded)
+            if (WUInity.DATA_STATUS.LocalGPWLoaded)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW total population: " + WUInity.POPULATION.GetLocalGPWTotalPopulation());
                 ++buttonIndex;
@@ -193,7 +193,7 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (WUInity.DATA_STATUS.globalGPWAvailable)
+            if (WUInity.DATA_STATUS.GlobalGPWAvailable)
             {
                 string buildGPWstring = "Build local GPW file";
                 if (WUInity.POPULATION.IsLocalGPWLoaded())
@@ -207,7 +207,7 @@ namespace WUInity
                 ++buttonIndex;
             }            
 
-            if (WUInity.DATA_STATUS.localGPWLoaded)
+            if (WUInity.DATA_STATUS.LocalGPWLoaded)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
                 {
@@ -255,7 +255,7 @@ namespace WUInity
         void SetGPWFolder(string[] paths)
         {
             WUInity.INPUT.population.gpwDataFolder = paths[0];
-            WUInity.DATA_STATUS.globalGPWAvailable = Population.LocalGPWData.IsGPWAvailable();
+            WUInity.DATA_STATUS.GlobalGPWAvailable = Population.LocalGPWData.IsGPWAvailable();
         }
     }
 }

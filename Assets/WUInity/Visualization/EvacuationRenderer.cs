@@ -23,7 +23,7 @@ namespace WUInity.Visualization
 
             if (renderHouseholds)
             {
-                CreateHouseholdsBuffer(WUInity.SIM.GetMacroHumanSim().GetHouseholdPositions().Length, WUInity.INPUT.size);
+                CreateHouseholdsBuffer(WUInity.SIM.MacroHumanSim().GetHouseholdPositions().Length, WUInity.INPUT.size);
             }            
         }
 
@@ -39,7 +39,7 @@ namespace WUInity.Visualization
         {
             if (renderHouseholds)
             {
-                Vector4[] newPositions = WUInity.SIM.GetMacroHumanSim().GetHouseholdPositions();
+                Vector4[] newPositions = WUInity.SIM.MacroHumanSim().GetHouseholdPositions();
                 householdPositionsBuffer.SetData(newPositions);
                 householdsMaterial.SetBuffer("_PositionsAndState", householdPositionsBuffer);
                 Graphics.DrawMeshInstancedProcedural(householdMesh, 0, householdsMaterial, bounds, householdPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
@@ -52,9 +52,9 @@ namespace WUInity.Visualization
                     carPositionsBuffer.Release();
                     carPositionsBuffer = null;
                 }
-                if(WUInity.SIM.GetMacroTrafficSim().GetCarsInSystem() > 0)
+                if(WUInity.SIM.MacroTrafficSim().GetCarsInSystem() > 0)
                 {
-                    carPositionsArray = WUInity.SIM.GetMacroTrafficSim().GetCarPositionsAndStates();
+                    carPositionsArray = WUInity.SIM.MacroTrafficSim().GetCarPositionsAndStates();
                     carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));
                     carPositionsBuffer.SetData(carPositionsArray);
                     carsMaterial.SetBuffer("_PositionsAndState", carPositionsBuffer);

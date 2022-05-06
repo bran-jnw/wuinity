@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using WUInity.Population;
 
@@ -242,12 +241,12 @@ namespace WUInity.Evac
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        WUInity.SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), peopleInCar[i]);
+                        WUInity.SIM.MacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    WUInity.SIM.GetMacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
+                    WUInity.SIM.MacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
                 }
             }
             

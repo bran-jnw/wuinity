@@ -49,7 +49,7 @@ namespace WUInity
             }
             ++buttonIndex;*/
 
-            if (!WUInity.DATA_STATUS.haveInput)
+            if (!WUInity.DATA_STATUS.HaveInput)
             {
                 return;
             }
@@ -171,7 +171,7 @@ namespace WUInity
         {
             FileBrowser.SetFilters(false, wuiFilter);
             string initialPath = WUInity.DATA_FOLDER;
-            if (WUInity.DATA_STATUS.haveInput)
+            if (WUInity.DATA_STATUS.HaveInput)
             {
                 initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
             }            

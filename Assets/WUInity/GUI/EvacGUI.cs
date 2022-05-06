@@ -119,7 +119,7 @@ namespace WUInity
             }
 
             ++buttonIndex;
-            if (WUInity.INSTANCE.developerMode)
+            if (WUInity.INSTANCE.DeveloperMode)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
                 {

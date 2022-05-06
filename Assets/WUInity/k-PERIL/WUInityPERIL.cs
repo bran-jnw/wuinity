@@ -57,8 +57,8 @@ namespace WUInity
             if (peril == null)
             {
                 peril = new k_PERIL_DLL.PERIL();
-                cellCount = WUInity.SIM.GetFireMesh().GetCellCount();
-                cellSize = WUInity.SIM.GetFireMesh().GetCellSize();
+                cellCount = WUInity.SIM.FireMesh().GetCellCount();
+                cellSize = WUInity.SIM.FireMesh().GetCellSize();
                 compoundBoundary = new int[cellCount.x, cellCount.y];
                 WUIarea = GetWUIArea();
                 heatmapMax = 0;
@@ -67,7 +67,7 @@ namespace WUInity
 
             int tBuffer = (int)WUInity.OUTPUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file
             //collect ROS, how to send ROS data is ROStheta[X*Y,8], y first, x second, start in north and then clockwise
-            int[,] maxROS = WUInity.SIM.GetFireMesh().GetMaxROS();
+            int[,] maxROS = WUInity.SIM.FireMesh().GetMaxROS();
             int[,] wuiArea = GetWUIArea();
 
             //calc new boundary
@@ -93,8 +93,8 @@ namespace WUInity
             int count = 0;
             for (int i = 0; i < WUInity.SIM_DATA.wuiAreaIndices.Length; i++)
             {
-                int xIndex = i % WUInity.SIM.GetFireMesh().GetCellCount().x;
-                int yIndex = i / WUInity.SIM.GetFireMesh().GetCellCount().x;
+                int xIndex = i % WUInity.SIM.FireMesh().GetCellCount().x;
+                int yIndex = i / WUInity.SIM.FireMesh().GetCellCount().x;
                 if(WUInity.SIM_DATA.wuiAreaIndices[i] == true)
                 {
                     ++count;
@@ -106,8 +106,8 @@ namespace WUInity
             int position = 0;
             for (int i = 0; i < count; i++)
             {
-                int xIndex = i % WUInity.SIM.GetFireMesh().GetCellCount().x;
-                int yIndex = i / WUInity.SIM.GetFireMesh().GetCellCount().x;
+                int xIndex = i % WUInity.SIM.FireMesh().GetCellCount().x;
+                int yIndex = i / WUInity.SIM.FireMesh().GetCellCount().x;
                 if (WUInity.SIM_DATA.wuiAreaIndices[i] == true)
                 {
                     wuiArea[0, position] = xIndex;

@@ -22,6 +22,7 @@ namespace WUInity.Smoke
 
         const int READ = 0;
         const int WRITE = 1;
+        //if these are ever changed they also have to be changed in compute shaders
         const int NUM_THREADS_X = 8;
         const int NUM_THREADS_Y = 8;
         const int NUM_THREADS_Z = 1;
@@ -86,6 +87,13 @@ namespace WUInity.Smoke
         void CreateWind(Texture2D windTex)
         {
             advectDiffuseCompute.SetTexture(solutionMode, "_Wind", windTex);
+            //we also need it in diffusion kernel if running semi-lagrangian mode
+            if(solutionMode == 1)
+            {
+                advectDiffuseCompute.SetTexture(2, "_Wind", windTex);
+                advectDiffuseCompute.SetTexture(3, "_Wind", windTex);
+            }
+            
         }
 
         public void Update(float deltaTime, float windDirection, float windSpeed, bool fireHasUpdated)
@@ -129,7 +137,8 @@ namespace WUInity.Smoke
                 sootInjection.SetData(sootInjectionCPU);
                 advectDiffuseCompute.SetBuffer(solutionMode, "_SootInjection", sootInjection);
             }
-            
+
+            int diffuseKernel = 3; // 2 IS ISOTROPIC, 3 IS ANISOTROPIC
             //go through time steps and update soot concetration in compute shader
             for (int i = 0; i < internalTimeSteps; i++)
             {
@@ -146,9 +155,9 @@ namespace WUInity.Smoke
                     //implicit jacobian iterations
                     for (int j = 0; j < 20; j++)
                     {
-                        advectDiffuseCompute.SetBuffer(2, "_Read", sootConcentration[READ]);
-                        advectDiffuseCompute.SetBuffer(2, "_Write", sootConcentration[WRITE]);
-                        advectDiffuseCompute.Dispatch(2, Mathf.CeilToInt(cellCountX / (float)NUM_THREADS_X), Mathf.CeilToInt(cellCountY / (float)NUM_THREADS_Y), NUM_THREADS_Z);
+                        advectDiffuseCompute.SetBuffer(diffuseKernel, "_Read", sootConcentration[READ]);
+                        advectDiffuseCompute.SetBuffer(diffuseKernel, "_Write", sootConcentration[WRITE]);
+                        advectDiffuseCompute.Dispatch(diffuseKernel, Mathf.CeilToInt(cellCountX / (float)NUM_THREADS_X), Mathf.CeilToInt(cellCountY / (float)NUM_THREADS_Y), NUM_THREADS_Z);
                         Swap(sootConcentration);
                     }
                 }  

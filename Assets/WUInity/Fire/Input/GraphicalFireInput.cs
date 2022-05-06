@@ -15,8 +15,8 @@ namespace WUInity
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    bw.Write(WUInity.SIM.GetFireMesh().cellCount.x);
-                    bw.Write(WUInity.SIM.GetFireMesh().cellCount.y);
+                    bw.Write(WUInity.SIM.FireMesh().cellCount.x);
+                    bw.Write(WUInity.SIM.FireMesh().cellCount.y);
                     bw.Write(GetBytes(WUInity.SIM_DATA.wuiAreaIndices));
                     bw.Write(GetBytes(WUInity.SIM_DATA.randomIgnitionIndices));
                     bw.Write(GetBytes(WUInity.SIM_DATA.initialIgnitionIndices));
@@ -52,7 +52,7 @@ namespace WUInity
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
 
-                        if (ncols == WUInity.SIM.GetFireMesh().cellCount.x && nrows == WUInity.SIM.GetFireMesh().cellCount.y)
+                        if (ncols == WUInity.SIM.FireMesh().cellCount.x && nrows == WUInity.SIM.FireMesh().cellCount.y)
                         {
                             int dataSize = ncols * nrows;
 
