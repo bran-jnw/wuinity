@@ -259,6 +259,8 @@ namespace WUInity
 
             public bool LcpLoaded, FuelModelsLoaded;
 
+            public bool ResponseCurvesValid;
+
             public bool CanRunSimulation()
             {
                 bool canRun = true;
@@ -283,6 +285,12 @@ namespace WUInity
                 if(INPUT.runFireSim && !LcpLoaded)
                 {
                     WUI_LOG("ERROR: No LCP file loaded but fire spread is activated.");
+                }
+
+                if(SIM_DATA.ResponseCurves == null)
+                {
+                    WUI_LOG("ERROR: No valid response curves have been loaded.");
+                    canRun = false;
                 }
 
                 return canRun;
@@ -443,13 +451,16 @@ namespace WUInity
 
             UpdateMapResourceStatus(); 
             UpdateFireResourceStatus();
+            //if they can't be found we get empty ones
+            ResponseCurve.LoadResponseCurves();
+            EvacGroup.LoadEvacGroupIndices();
+            GraphicalFireInput.LoadGraphicalFireInput();            
+
             UpdatePopulationResourceStatus();
             UpdateRoutingResourceStatus();
             UpdateOSMResourceStatus();
 
-            //if they can't be found we get empty ones
-            EvacGroup.LoadEvacGroupIndices();
-            GraphicalFireInput.LoadGraphicalFireInput();
+            
 
             GUI.SetGUIDirty();
         }
@@ -726,6 +737,19 @@ namespace WUInity
             FIRE_VISUALS.CreateBuffers(INPUT.runFireSim, INPUT.runSmokeSim);
             renderFireSpread = INPUT.runFireSim;
             renderSmokeDispersion = INPUT.runSmokeSim;
+        }
+
+        public void RunAllCasesInFolder(string folder)
+        {
+            string[] inputFiles = Directory.GetFiles(folder, "*.wui");
+            for (int i = 0; i < inputFiles.Length; i++)
+            {
+                SaveLoadWUI.LoadInput(inputFiles[i]);
+                INPUT.simName = Path.GetFileNameWithoutExtension(inputFiles[i]);
+                INPUT.runInRealTime = false;
+                INPUT.numberOfRuns = 100;
+                StartSimulation();
+            }
         }
 
         public void StopSimulation()

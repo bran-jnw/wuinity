@@ -564,7 +564,7 @@ PrefabInstance:
         type: 3}
       propertyPath: WindTex
       value: 
-      objectReference: {fileID: 2800000, guid: 983c533d0807bf14c9ca5e4bf50deeee, type: 3}
+      objectReference: {fileID: 2800000, guid: 3d26706c557a2bf458d06a6c94a41410, type: 3}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: windTex
@@ -574,6 +574,11 @@ PrefabInstance:
         type: 3}
       propertyPath: DeveloperMode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: AutoLoadExample
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}

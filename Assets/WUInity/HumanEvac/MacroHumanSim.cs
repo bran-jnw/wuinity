@@ -304,11 +304,13 @@ namespace WUInity.Evac
             //get curve index from evac group
             int curveIndex = WUInity.INPUT.evac.evacGroups[evacGroupIndex].responseCurveIndex;
 
-            for (int i = 0; i < eO.responseCurves[curveIndex].dataPoints.Length; i++)
+            //skip first as that is always zero probability
+            for (int i = 1; i < WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= eO.responseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
-                    responseTime = Random.Range(eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.x, eO.responseCurves[curveIndex].dataPoints[i].timeMinMax.y) + eO.evacuationOrderStart;
+                    //offset with evacuation order time
+                    responseTime = Random.Range(WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.evacuationOrderStart, WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints[i].time) + eO.evacuationOrderStart;
                     break;
                 }
             }

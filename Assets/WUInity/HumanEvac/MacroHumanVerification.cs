@@ -48,7 +48,8 @@ namespace WUInity.Evac
             //evacOptions.totalPopulation = 1000;
             WUInity.SIM.StartSimulation();
 
-            wuinityOptions.simName = "P3_2";
+            //TODO_broken after chnage of response curve input
+            /*wuinityOptions.simName = "P3_2";
             evacOptions.responseCurves[0].dataPoints[0].timeMinMax.y = 500f;
             WUInity.SIM.StartSimulation();
 
@@ -67,7 +68,7 @@ namespace WUInity.Evac
                 wuinityOptions.simName = "PT1_mod" + (i + 1);
                 evacOptions.walkingDistanceModifier = (i + 1);
                 WUInity.SIM.StartSimulation();
-            }            
+            }        */    
         }
     }
 }

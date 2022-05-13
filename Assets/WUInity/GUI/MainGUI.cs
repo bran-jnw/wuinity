@@ -51,6 +51,12 @@ namespace WUInity
 
             if (!WUInity.DATA_STATUS.HaveInput)
             {
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run folder"))
+                {
+                    OpenRunFolder();
+                }
+                ++buttonIndex;
+
                 return;
             }
 
@@ -133,7 +139,7 @@ namespace WUInity
                     WUInity.INSTANCE.StartSimulation();                   
                 }
             }
-            ++buttonIndex;
+            ++buttonIndex;            
         }
 
         void CleanMainMenu(WUInityInput wO)
@@ -165,18 +171,7 @@ namespace WUInity
             WUInityInput wO = WUInity.INPUT;
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
             FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.simName + ".wui", "Save file", "Save");
-        }
-
-        void OpenLoadInput()
-        {
-            FileBrowser.SetFilters(false, wuiFilter);
-            string initialPath = WUInity.DATA_FOLDER;
-            if (WUInity.DATA_STATUS.HaveInput)
-            {
-                initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
-            }            
-            FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
-        }             
+        }                  
 
         void SaveInput(string[] paths)
         {
@@ -200,6 +195,17 @@ namespace WUInity
             SaveLoadWUI.SaveInput();
         }
 
+        void OpenLoadInput()
+        {
+            FileBrowser.SetFilters(false, wuiFilter);
+            string initialPath = WUInity.DATA_FOLDER;
+            if (WUInity.DATA_STATUS.HaveInput)
+            {
+                initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+            }
+            FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
+        }
+
         void LoadInput(string[] paths)
         {
             SaveLoadWUI.LoadInput(paths[0]);
@@ -210,6 +216,24 @@ namespace WUInity
         {
             creatingNewFile = false;
         }
+
+        void OpenRunFolder()
+        {
+            FileBrowser.SetFilters(true);
+            string initialPath = WUInity.DATA_FOLDER;
+            if (WUInity.DATA_STATUS.HaveInput)
+            {
+                initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+            }
+            FileBrowser.ShowLoadDialog(RunFolder, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Run all files in folder", "Run");
+        }
+
+        void RunFolder(string[] paths)
+        {
+            WUInity.INSTANCE.RunAllCasesInFolder(paths[0]);
+        }
+
+        
     }
 }
 

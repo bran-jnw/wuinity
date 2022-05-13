@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using WUInity.Evac;
 using WUInity.Traffic;
@@ -128,13 +128,16 @@ namespace WUInity
                 float averageTotalEvacTime = 0.0f;
                 int actualRuns = 0;
                 int convergedInSequence = 0;
+                List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
                 for (int i = 0; i < input.numberOfRuns; i++)
                 {
                     CreateSubSims(i);
                     //do actual simulation
                     RunSimulation(i);
 
-                    ++actualRuns;                    
+                    trafficArrivalDataCollection.Add(_macroTrafficSim.GetArrivalData());
+                    ++actualRuns;    
+                    //need at least 2 simulation sto have valid average
                     if (i > 0)
                     {
                         float pastAverage = (averageTotalEvacTime / i);
@@ -146,7 +149,7 @@ namespace WUInity
                         {
                             ++convergedInSequence;
                             //we are done
-                            if(WUInity.INPUT.stopAfterConverging && convergedInSequence >= 10)
+                            if(WUInity.INPUT.stopAfterConverging && convergedInSequence > 10)
                             {
                                 i = input.numberOfRuns;
                             }                            
@@ -164,6 +167,9 @@ namespace WUInity
                     //Resources.UnloadUnusedAssets();                    
                     System.GC.Collect();
                 }
+                //save functional analysis
+                float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
+                SaveAverageCurve(averageCurve);
 
                 if(convergedInSequence >= 10)
                 {
@@ -178,6 +184,20 @@ namespace WUInity
                 HaveResults = true;
                 WUInity.WUI_LOG("LOG: Simulation done.");
             }
+        }
+
+        private void SaveAverageCurve(float[] data)
+        {
+            string[] output = new string[data.Length + 2];
+            output[0] = "Time [s],ArrivalIndex [-]";
+            output[1] = "0.0, 0";
+            for (int i = 0; i < data.Length; i++)
+            {
+                output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
+            }
+            WUInityInput wuiIn = WUInity.INPUT;
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simName + "_traffic_average.csv");
+            System.IO.File.WriteAllLines(path, output);
         }
         
         private void CreateSubSims(int i)
@@ -248,9 +268,9 @@ namespace WUInity
 
             //pick start time based on curve or 0 (fire start)
             _time = 0f;
-            for (int i = 0; i < input.evac.responseCurves.Length; i++)
+            for (int i = 0; i < WUInity.SIM_DATA.ResponseCurves.Length; i++)
             {
-                float t = input.evac.responseCurves[i].dataPoints[0].timeMinMax.x + input.evac.evacuationOrderStart;
+                float t = WUInity.SIM_DATA.ResponseCurves[i].dataPoints[0].time + input.evac.evacuationOrderStart;
                 _time = Mathf.Min(Time, t);
             }
             _startTime = Time;

@@ -5,8 +5,8 @@ using UnityEngine;
 namespace WUInity.Smoke
 {
     /// <summary>
-    /// Advects and diffuses (eddy diffusion) on a 2d plane with height set to assumed mixing height (which gives volume).
-    /// Within each volume a uniform soot dsitribution is assumed (perfectly mixed).
+    /// Advects and diffuses (eddy diffusion, turbulent viscosity) on a 2d plane with height set to assumed mixing height (which gives volume).
+    /// Within each volume a uniform soot distribution is assumed (perfectly mixed).
     /// </summary>
     public class AdvectDiffuseModel
     {
@@ -75,6 +75,8 @@ namespace WUInity.Smoke
             advectDiffuseCompute.SetFloat("_InvertedCellVolume", invertedCellVolume);
             advectDiffuseCompute.SetFloat("_CellSizeX", cellSizeX);
             advectDiffuseCompute.SetFloat("_CellSizeY", cellSizeY);
+            advectDiffuseCompute.SetFloat("_CellSizeXSq", cellSizeX * cellSizeX);
+            advectDiffuseCompute.SetFloat("_CellSizeYSq", cellSizeY * cellSizeY);
             advectDiffuseCompute.SetFloat("_CellsPerMeterX", invertedCellSizeX);
             advectDiffuseCompute.SetFloat("_CellsPerMeterY", invertedCellSizeY);
             advectDiffuseCompute.SetFloat("_CellsPerMeterXSq", invertedCellSizeXSq);
@@ -93,7 +95,20 @@ namespace WUInity.Smoke
                 advectDiffuseCompute.SetTexture(2, "_Wind", windTex);
                 advectDiffuseCompute.SetTexture(3, "_Wind", windTex);
             }
-            
+
+            ComputeShader cs;
+            string shaderName = "name_of_shader";
+            ComputeShader[] compShaders = (ComputeShader[])Resources.FindObjectsOfTypeAll(typeof(ComputeShader));
+            for (int i = 0; i < compShaders.Length; i++)
+            {
+                if (compShaders[i].name == shaderName)
+                {
+                    cs = compShaders[i];
+                    break;
+                }
+            }
+
+            //advectDiffuseCompute.SetBuffer(, "_Wind", wind);
         }
 
         public void Update(float deltaTime, float windDirection, float windSpeed, bool fireHasUpdated)

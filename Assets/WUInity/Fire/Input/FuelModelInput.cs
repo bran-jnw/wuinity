@@ -51,7 +51,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.WUI_LOG("Fuel model file " + file + " not found." );
+                WUInity.WUI_LOG("WARNING: Fuel model file " + file + " not found." );
                 return false;
             }
 

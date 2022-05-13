@@ -125,6 +125,7 @@ namespace WUInity.Traffic
         RouteCreator routeCreator;
         Dictionary<int, RoadSegment> roadSegments;
         Visualization.EvacuationRenderer evacuationRenderer;
+        List<float> arrivalData;
 
         public MacroTrafficSim(RouteCreator rC)
         {
@@ -152,6 +153,8 @@ namespace WUInity.Traffic
             routeCreator = rC;
 
             evacuationRenderer = MonoBehaviour.FindObjectOfType<Visualization.EvacuationRenderer>();
+
+            arrivalData = new List<float>();
         }
 
         public void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
@@ -179,6 +182,11 @@ namespace WUInity.Traffic
         public int GetCarsInSystem()
         {
             return carsInSystem.Count;
+        }
+
+        public List<float> GetArrivalData()
+        {
+            return arrivalData;
         }
 
         bool evacGoalsDirty = false;
@@ -383,6 +391,7 @@ namespace WUInity.Traffic
                 }
             }
             
+            //output stuff
             if(roadSegments.Count == 0)
             {
                 averageSpeed = 0f;
@@ -399,7 +408,7 @@ namespace WUInity.Traffic
             else 
             {
                 minSpeed *= 3.6f;
-            }            
+            }   
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
@@ -415,7 +424,10 @@ namespace WUInity.Traffic
             //remove cars that has arrived
             for (int i = 0; i < carsToRemove.Count; ++i)
             {
-                carsInSystem.Remove(carsToRemove[i]);                
+                carsInSystem.Remove(carsToRemove[i]);
+
+                //save output data for funtional analysis
+                arrivalData.Add(currentTime);                            
             }
 
             if(evacGoalsDirty)

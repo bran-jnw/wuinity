@@ -18,22 +18,22 @@ namespace WUInity
         public bool[] triggerBufferIndices;
         LCPData lcpData;
 
-        FuelModelInput fuelModelsData;
+        FuelModelInput _fuelModelsData;
         public FuelModelInput GetFuelModelsData()
         {
-            return fuelModelsData;
+            return _fuelModelsData;
         }
 
-        Traffic.OpticalDensityRamp opticalDensity;
+        Traffic.OpticalDensityRamp _opticalDensity;
         public Traffic.OpticalDensityRamp GetOpticalDensity()
         {
-            return opticalDensity;
+            return _opticalDensity;
         }
 
-        private RouterDb routerDb;
+        private RouterDb _routerDb;
         public RouterDb GetRouterDb()
         {
-            return routerDb;
+            return _routerDb;
         }
 
         public  RouteCollection[] routes;
@@ -42,15 +42,28 @@ namespace WUInity
             return routes;
         }
         
-        private Vector2Int cellCount;
+        private Vector2Int _cellCount;
         public Vector2Int EvacCellCount
         {
             get
             {
                 WUInityInput input = WUInity.INPUT;
-                cellCount.x = Mathf.CeilToInt((float)input.size.x / input.evac.routeCellSize);
-                cellCount.y = Mathf.CeilToInt((float)input.size.y / input.evac.routeCellSize);
-                return cellCount;
+                _cellCount.x = Mathf.CeilToInt((float)input.size.x / input.evac.routeCellSize);
+                _cellCount.y = Mathf.CeilToInt((float)input.size.y / input.evac.routeCellSize);
+                return _cellCount;
+            }
+        }
+
+        private ResponseCurve[] _responseCurves;
+        public ResponseCurve[] ResponseCurves
+        {
+            get
+            {
+                if(_responseCurves == null)
+                {
+                    _responseCurves = ResponseCurve.LoadResponseCurves();
+                }
+                return _responseCurves;
             }
         }
 
@@ -73,14 +86,14 @@ namespace WUInity
 
         public bool LoadFuelModelsFile()
         {
-            fuelModelsData = new FuelModelInput();
-            return WUInity.DATA_STATUS.FuelModelsLoaded = fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
+            _fuelModelsData = new FuelModelInput();
+            return WUInity.DATA_STATUS.FuelModelsLoaded = _fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
         }
 
         public bool LoadOpticalDensityFile()
         {
-            opticalDensity = new Traffic.OpticalDensityRamp();
-            return WUInity.DATA_STATUS.OpticalDensityLoaded = opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.traffic.opticalDensityFile);
+            _opticalDensity = new Traffic.OpticalDensityRamp();
+            return WUInity.DATA_STATUS.OpticalDensityLoaded = _opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.traffic.opticalDensityFile);
         }
 
         //create or lead itinero database needed for pathfinding
@@ -95,14 +108,14 @@ namespace WUInity
             {
                 using (FileStream stream = new FileInfo(path).OpenRead())
                 {
-                    routerDb = RouterDb.Deserialize(stream);
+                    _routerDb = RouterDb.Deserialize(stream);
                     success = true;
                 }                
             }
             else if(WUInity.DATA_STATUS.OsmFileValid)
             {
                 // load some routing data and build a routing network.
-                routerDb = new RouterDb();
+                _routerDb = new RouterDb();
                 using (FileStream stream = new FileInfo(input.traffic.osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
@@ -126,7 +139,7 @@ namespace WUInity
                     settings.KeepNodeIds = true; //use to enable measure flow at nodes
                     settings.KeepWayIds = true; //can be used to calc density easier?
                     settings.OptimizeNetwork = true;
-                    routerDb.LoadOsmData(filtered, settings, Vehicle.Car);
+                    _routerDb.LoadOsmData(filtered, settings, Vehicle.Car);
 
                     success = true;
                 }
@@ -135,14 +148,14 @@ namespace WUInity
                 path = Path.Combine(WUInity.WORKING_FOLDER, internalRouterName);
                 using (FileStream stream = new FileInfo(path).Open(FileMode.Create))
                 {
-                    routerDb.Serialize(stream);
+                    _routerDb.Serialize(stream);
                 }
             }
 
             if (success)
             {
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
-                routerDb.AddContracted(routerDb.GetSupportedProfile("car"));
+                _routerDb.AddContracted(_routerDb.GetSupportedProfile("car"));
                 WUInity.WUI_LOG("LOG: Router database loaded succesfully.");
             }
             else

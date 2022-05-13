@@ -50,7 +50,7 @@ namespace WUInity
             float randomChoice = Random.value;
             for (int i = 0; i < goalsCumulativeWeights.Length; i++)
             {
-                if (randomChoice < goalsCumulativeWeights[i])
+                if (randomChoice <= goalsCumulativeWeights[i])
                 {
                     return WUInity.INPUT.traffic.evacuationGoals[goalIndices[i]];
                 }

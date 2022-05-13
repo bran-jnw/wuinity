@@ -13,6 +13,7 @@ namespace WUInity.Population
         public Vector2Int cells;
         public float cellSize;
         public int totalPopulation;
+        public int totalActiveCells;
         public int[] cellPopulation;        
         double cellArea;
         public bool[] populationMask;
@@ -60,6 +61,7 @@ namespace WUInity.Population
 
             cellArea = cellSize * cellSize / (1000000d); // people/square km
             totalPopulation = 0;
+            totalActiveCells = 0;
             for (int y = 0; y < cells.y; ++y)
             {
                 double yPos = (y + 0.5) * cellSize;
@@ -67,10 +69,15 @@ namespace WUInity.Population
                 {
                     double xPos = (x + 0.5) * cellSize;
                     double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2D(xPos, yPos));
-                    int pop = Mathf.CeilToInt((float)(cellArea * density));
+                    int pop = Mathf.Max(1, Mathf.RoundToInt((float)(cellArea * density)));
+                    //if data has negative values (NO_DATA) we might get negative numbers
                     pop = Mathf.Max(0, pop);
                     cellPopulation[x + y * cells.x] = pop;
                     totalPopulation += pop;
+                    if(pop > 0)
+                    {
+                        ++totalActiveCells;
+                    }
 
                     //WUInity.OUTPUT.evac.rawPopulation[x + y * cells.x] = pop;
                 }
@@ -89,16 +96,16 @@ namespace WUInity.Population
         /// <param name="newTotalPopulation"></param>
         public void PlaceUniformPopulation(int newTotalPopulation)
         {
-            int activeCells = 0;
+            totalActiveCells = 0;
             for (int i = 0; i < populationMask.Length; i++)
             {
                 if(populationMask[i] == true)
                 {
-                    ++activeCells;
+                    ++totalActiveCells;
                 }
             }
 
-            int peoplePerCell = Mathf.CeilToInt((float)newTotalPopulation / activeCells);
+            int peoplePerCell = Mathf.Max(1, Mathf.RoundToInt((float)newTotalPopulation / totalActiveCells));
             totalPopulation = 0;
             for (int i = 0; i < populationMask.Length; i++)
             {
@@ -108,6 +115,11 @@ namespace WUInity.Population
                     cellPopulation[i] = peoplePerCell;
                     totalPopulation += peoplePerCell;
                 }
+            }
+
+            if(newTotalPopulation != totalPopulation)
+            {
+                ScaleTotalPopulation(newTotalPopulation);
             }
 
             CreateTexture();
@@ -137,17 +149,33 @@ namespace WUInity.Population
         public void ScaleTotalPopulation(int desiredPopulation)
         {
             int newTotalPop = 0;
+            List<int> activeCellIndices = new List<int>();
             for (int i = 0; i < cellPopulation.Length; ++i)
             {
                 if (cellPopulation[i] > 0)
                 {
                     float weight = cellPopulation[i] / (float)totalPopulation;
-                    int newPop = Mathf.CeilToInt(weight * desiredPopulation);
+                    int newPop = Mathf.Max(1, (int)(weight * desiredPopulation));
                     cellPopulation[i] = newPop;
                     newTotalPop += newPop;
+
+                    //save all of the indices for later random distribution
+                    activeCellIndices.Add(i);
                 }
             }
             totalPopulation = newTotalPop;
+
+            //make sure we hit our target, should always be lower if not matching since we are flooring the int
+            if(desiredPopulation != totalPopulation)
+            {
+                int loopCount = desiredPopulation - totalPopulation;
+                for (int i = 0; i < loopCount; i++)
+                {
+                    int randomIndex = UnityEngine.Random.Range(0, activeCellIndices.Count);
+                    ++cellPopulation[activeCellIndices[randomIndex]];
+                    ++totalPopulation;
+                }
+            }
 
             CreateTexture();
             SavePopulation();
@@ -206,6 +234,7 @@ namespace WUInity.Population
             bool success = true; // IsDataValid(d[0]);
             if (success && d.Length > 9)
             {
+                totalActiveCells = 0;
                 double.TryParse(d[0], out lowerLeftLatLong.x);
                 double.TryParse(d[1], out lowerLeftLatLong.y);
                 double.TryParse(d[2], out size.x);
@@ -229,6 +258,7 @@ namespace WUInity.Population
                     if(cellPopulation[i] > 0)
                     {
                         populationMask[i] = true;
+                        ++totalActiveCells;
                     }
                 }                
             }
@@ -286,19 +316,27 @@ namespace WUInity.Population
         {
             if (stuckPeople > 0)
             {
+                int oldTotalPopulation = totalPopulation;
                 int remainingPop = totalPopulation - stuckPeople;
                 totalPopulation = 0;
+                totalActiveCells = 0;
                 for (int i = 0; i < cellPopulation.Length; ++i)
                 {
                     if (cellPopulation[i] > 0)
                     {
                         float weight = cellPopulation[i] / (float)remainingPop;
-                        int extraPersonsToCell = Mathf.CeilToInt(weight * stuckPeople);
+                        int extraPersonsToCell = Mathf.Max(1, Mathf.RoundToInt(weight * stuckPeople));
                         cellPopulation[i] += extraPersonsToCell;
                         totalPopulation += cellPopulation[i];
+                        ++totalActiveCells;
                     }
-                }                
-            }
+                }
+
+                if (totalPopulation != oldTotalPopulation)
+                {
+                    ScaleTotalPopulation(oldTotalPopulation);
+                }
+            }            
         }
 
         private void CreateTexture()

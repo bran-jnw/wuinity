@@ -1,7 +1,7 @@
 uniform int _CellsX, _CellsY;
 uniform float _DeltaTime, _WindX, _WindY, _WindXFraction, _WindYFraction, _InvertedCellVolume;
-uniform float _CellSizeX, _CellsPerMeterX, _CellsPerMeterXSq;
-uniform float _CellSizeY, _CellsPerMeterY, _CellsPerMeterYSq;
+uniform float _CellSizeX, _CellSizeXSq, _CellsPerMeterX, _CellsPerMeterXSq;
+uniform float _CellSizeY, _CellSizeYSq, _CellsPerMeterY, _CellsPerMeterYSq;
 
 uniform StructuredBuffer<float> _Read, _SootInjection;
 
@@ -105,7 +105,7 @@ float2 GetAdvectedPos(float2 pos)
 	float2 uv = float2(pos.x / _CellsX, pos.y / _CellsY);
 	float4 windData = _Wind.SampleLevel(sampler_Wind, uv, 0);
 	float2 windDir = normalize(float2(windData.r - 0.5, windData.g - 0.5));
-	float2 wind = 5.0 * windDir;
+	float2 wind = 5 * windDir;
 	float2 step = _DeltaTime * float2(wind.x * _CellsPerMeterX, wind.y * _CellsPerMeterY);
 
 	pos -= step;
@@ -309,7 +309,7 @@ void DiffuseImplicitAnisotropic(uint3 id : SV_DispatchThreadID)
 	float2 pos = float2(id.x, id.y);
 	float2 K_y = GetDiffusionCoefficient(pos);
 	//dx^2 / v * dt
-	float alpha = _CellSizeX * _CellSizeX / (K_y.x * _DeltaTime) + _CellSizeY * _CellSizeY / (K_y.y * _DeltaTime);
-	float rBeta = 1.0f / (4.0f + alpha);
-	_Write[idx] = (C * alpha + L + R + D + U) * rBeta;
+	float alpha = _CellSizeXSq / (K_y.x * _DeltaTime) + _CellSizeYSq / (K_y.y * _DeltaTime);
+	float rBeta = 4.0f + alpha;
+	_Write[idx] = (C * alpha + L + R + D + U) / rBeta;
 }

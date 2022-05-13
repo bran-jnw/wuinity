@@ -73,6 +73,11 @@ namespace WUInity.Population
             return populationData.totalPopulation;
         }
 
+        public int GetTotalActiveCells()
+        {
+            return populationData.totalActiveCells;
+        }
+
         public int GetPopulation(int x, int y)
         {
             return populationData.cellPopulation[x + y * populationData.cells.x];

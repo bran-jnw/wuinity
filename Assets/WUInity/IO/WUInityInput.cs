@@ -72,8 +72,8 @@ namespace WUInity
         public Vector2 walkingSpeedMinMax = new Vector2(0.7f, 1.0f);
         public float walkingSpeedModifier = 1.0f;
 
-        public float evacuationOrderStart = 420.0f;
-        public ResponseCurve[] responseCurves = ResponseCurve.GetStandardCurve();
+        public float evacuationOrderStart = 0.0f;
+        public string[] responseCurveFiles;
 
         public BlockGoalEvent[] blockGoalEvents = BlockGoalEvent.GetDummy();
 
