@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static WUInity.InterpolationLibrary;
+using System.IO;
 
 namespace WUInity.Fire
 {
@@ -16,10 +17,10 @@ namespace WUInity.Fire
     [System.Serializable]    
     public struct WeatherData
     {
-        public int Month, Day, Precip, Hour1, Hour2, Temp1, Temp2, Humid1, Humid2, Elevation;                                                   //declare all needed variables
+        public int Month, Day, Precip, Hour1, Hour2, Temp1, Temp2, Humid1, Humid2, Elevation;                                                   
 
 
-        public WeatherData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)   //constructor
+        public WeatherData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)   
         {
             this.Month = Month;
             this.Day = Day;
@@ -33,7 +34,7 @@ namespace WUInity.Fire
             this.Elevation = Elevation;
         }
 
-        public void UpdateData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)       //updater of sorts
+        public void UpdateData(int Month, int Day, int Precip, int Hour1, int Hour2, int Temp1, int Temp2, int Humid1, int Humid2, int Elevation)      
         {
             this.Month = Month;
             this.Day = Day;
@@ -47,7 +48,7 @@ namespace WUInity.Fire
             this.Elevation = Elevation;
         }
 
-        public void GetMinHourData(out int minHour, out int minTemp, out int minHumid)          //getter with multiple outputs
+        public void GetMinHourData(out int minHour, out int minTemp, out int minHumid)         
         {
             minHour = Mathf.Max(Hour1, Hour2);
             if (minHour == Hour1)
@@ -79,7 +80,13 @@ namespace WUInity.Fire
     }
 
     [System.Serializable]
-    public struct WeatherInput
+    public struct WeatherPoint
+    {
+        public int Elevation, Temperature, Humidity, Precipitation;
+    }
+
+    [System.Serializable]
+    public class WeatherInput
     {
         [SerializeField] private WeatherData[] weatherInputs;
 
@@ -167,11 +174,61 @@ namespace WUInity.Fire
 
             return currentWeather;
         }
-    }
 
-    [System.Serializable]
-    public struct WeatherPoint
-    {
-        public int Elevation, Temperature, Humidity, Precipitation;
-    }
+        public static WeatherInput LoadWeatherInputFile()
+        {
+            WeatherInput result = null;
+            List<WeatherData> weatherData = new List<WeatherData>();
+
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.weatherFile + ".wtr");
+            bool fileExists = File.Exists(path);
+            if (fileExists)
+            {
+                string[] dataLines = File.ReadAllLines(path);
+                //skip first line (header)
+                for (int j = 1; j < dataLines.Length; j++)
+                {
+                    string[] data = dataLines[j].Split(',');
+                    if (data.Length >= 10)
+                    {
+                        
+                        int month, day, precip, hour1, hour2, temp1, temp2, humid1, humid2, elevation;
+
+                        bool b1 = int.TryParse(data[0], out month);
+                        bool b2 = int.TryParse(data[1], out day);
+                        bool b3 = int.TryParse(data[2], out precip);
+                        bool b4 = int.TryParse(data[3], out hour1);
+                        bool b5 = int.TryParse(data[4], out hour2);
+                        bool b6 = int.TryParse(data[5], out temp1);
+                        bool b7 = int.TryParse(data[6], out temp2);
+                        bool b8 = int.TryParse(data[7], out humid1);
+                        bool b9 = int.TryParse(data[8], out humid2);
+                        bool b10 = int.TryParse(data[9], out elevation);
+
+                        if (b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8 && b9 && b10)
+                        {
+                            WeatherData wD = new WeatherData(month, day, precip, hour1, hour2, temp1, temp2, humid1, humid2, elevation);
+                            weatherData.Add(wD);
+                        }
+                    }                    
+                }
+            }
+            else
+            {
+                WUInity.WUI_LOG("WARNING: Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+            }
+
+            if (weatherData.Count > 0)
+            {
+                result = new WeatherInput(weatherData.ToArray());
+                WUInity.WUI_LOG("LOG: Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
+            }
+            else if (fileExists)
+            {
+                WUInity.WUI_LOG("WARNING: Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+            }
+
+            return result;
+        }
+    }    
 }

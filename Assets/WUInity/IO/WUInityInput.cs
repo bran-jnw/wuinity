@@ -112,8 +112,6 @@ namespace WUInity
         public MacroTrafficSim.ReverseLanes[] reverseLanes = MacroTrafficSim.ReverseLanes.GetDummy();
         public TrafficInjection[] trafficInjections = TrafficInjection.GetTemplate();
         public TrafficProbe[] trafficProbes = TrafficProbe.GetTemplate();
-
-        //public string precalcRoutesName = "roxborough";
     }
 
     [System.Serializable]
@@ -131,12 +129,14 @@ namespace WUInity
     [System.Serializable]
     public class FireInput
     {
-        public string lcpFile, fuelModelsFile;
+        public string lcpFile;
+        public string fuelModelsFile = "default";
+        public string initialFuelMoistureFile = "default";
+        public string weatherFile;
+        public string windFile;
         public Fire.IgnitionPoint[] ignitionPoints = Fire.IgnitionPoint.GetDefault();
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
-        public Fire.WeatherInput weather = Fire.WeatherInput.GetTemplate();
-        public Fire.WindInput wind = Fire.WindInput.GetTemplate();
-        public Fire.InitialFuelMoistureData initialFuelMoisture = Fire.InitialFuelMoistureData.GetDefaults();
+              
         public float windMultiplier = 1f;
 
         public bool useRandomIgnitionMap;

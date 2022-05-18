@@ -282,15 +282,23 @@ namespace WUInity
                     WUI_LOG("ERROR: No router database loaded and no valid OSM file was found to build it from.");
                 }
 
-                if(INPUT.runFireSim && !LcpLoaded)
+                if(INPUT.runFireSim)
                 {
-                    WUI_LOG("ERROR: No LCP file loaded but fire spread is activated.");
+                    if (!LcpLoaded)
+                    {
+                        canRun = false;
+                        WUI_LOG("ERROR: No LCP file loaded but fire spread is activated.");
+                    }
                 }
 
-                if(SIM_DATA.ResponseCurves == null)
+                if(INPUT.runEvacSim)
                 {
-                    WUI_LOG("ERROR: No valid response curves have been loaded.");
-                    canRun = false;
+                    if(SIM_DATA.ResponseCurves == null)
+                    {
+                        canRun = false;
+                        WUI_LOG("ERROR: No valid response curves have been loaded.");                        
+                    }
+                    
                 }
 
                 return canRun;
@@ -396,9 +404,12 @@ namespace WUInity
             else
             {
                 DeveloperMode = false;
-            }  
+            }
 
-            if(AutoLoadExample && DeveloperMode)
+            _simBorder.gameObject.SetActive(false);
+            _osmBorder.gameObject.SetActive(false);
+
+            if (AutoLoadExample && DeveloperMode)
             {
                 string path = Path.Combine(DATA_FOLDER, "example\\example.wui");
                 if (File.Exists(path))
@@ -414,10 +425,7 @@ namespace WUInity
             if (_godCamera == null)
             {
                 _godCamera = FindObjectOfType<GodCamera>();
-            }            
-
-            _simBorder.gameObject.SetActive(false);
-            _osmBorder.gameObject.SetActive(false);
+            }    
         }
 
         /// <summary>
@@ -451,16 +459,14 @@ namespace WUInity
 
             UpdateMapResourceStatus(); 
             UpdateFireResourceStatus();
-            //if they can't be found we get empty ones
-            ResponseCurve.LoadResponseCurves();
+            
+            SIM_DATA.ResponseCurves = ResponseCurve.LoadResponseCurves(); //if they can't be found we get empty ones 
             EvacGroup.LoadEvacGroupIndices();
             GraphicalFireInput.LoadGraphicalFireInput();            
 
             UpdatePopulationResourceStatus();
             UpdateRoutingResourceStatus();
-            UpdateOSMResourceStatus();
-
-            
+            UpdateOSMResourceStatus();            
 
             GUI.SetGUIDirty();
         }
@@ -527,8 +533,12 @@ namespace WUInity
 
         public void UpdateFireResourceStatus()
         {
+            SIM_DATA.InitialFuelMoistureData = Fire.InitialFuelMoistureList.LoadInitialFuelMoistureDataFile();
+            SIM_DATA.WeatherInput = Fire.WeatherInput.LoadWeatherInputFile();
+            SIM_DATA.WindInput = Fire.WindInput.LoadWindInputFile();
+
             DATA_STATUS.LcpLoaded = SIM_DATA.LoadLCPFile();
-            DATA_STATUS.FuelModelsLoaded = SIM_DATA.LoadFuelModelsFile();
+            DATA_STATUS.FuelModelsLoaded = SIM_DATA.LoadFuelModelsFile();            
         }
 
         public void UpdateRoutingResourceStatus()

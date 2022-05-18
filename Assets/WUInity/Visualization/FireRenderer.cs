@@ -107,7 +107,7 @@ namespace WUInity.Visualization
                     sootBuffer.SetData(sootData);
                     sootMaterial.SetBuffer("_Data", sootBuffer);
                 }  */
-                ComputeBuffer buffer = WUInity.SIM.AdvectDiffuseSim().GetComputeBuffer();
+                ComputeBuffer buffer = WUInity.SIM.AdvectDiffuseSim().GetSootBuffer();
                 sootMaterial.SetBuffer("_Data", buffer);
             }
         }

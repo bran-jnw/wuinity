@@ -421,7 +421,7 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: GPW path does exist.");
+                WUInity.WUI_LOG("WARNING: GPW path does NOT exist.");
             }
 
             return isAvailable;

@@ -402,7 +402,7 @@ namespace WUInity.Fire
             return;*/
 
 
-            FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
+            InitialFuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
             double moistureOneHour = moisture.OneHour;// 6.0;
             double moistureTenHour = moisture.TenHour; //7.0;
             double moistureHundredHour = moisture.HundredHour; //8.0;
@@ -510,7 +510,7 @@ namespace WUInity.Fire
         /// </summary>
         void UpdateCrownFireSpreadRates()
         {
-            FuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
+            InitialFuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
             double moistureOneHour = moisture.OneHour;// 6.0;
             double moistureTenHour = moisture.TenHour; //7.0;
             double moistureHundredHour = moisture.HundredHour; //8.0;

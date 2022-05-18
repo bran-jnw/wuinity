@@ -213,7 +213,15 @@ namespace WUInity
             if(input.runSmokeSim && input.runFireSim)
             {
                 //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
-                _advectDiffuseSim = new Smoke.AdvectDiffuseModel(_fireMesh, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
+                if(_fireMesh == null)
+                {
+                    WUInity.WUI_LOG("WARNING: No fire mesh has been created, disabling smoke spread simulation.");
+                    input.runSmokeSim = false;
+                }
+                else
+                {    
+                    _advectDiffuseSim = new Smoke.AdvectDiffuseModel(_fireMesh, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
+                }                
             }
             else
             {
@@ -252,7 +260,7 @@ namespace WUInity
 
         private void CreateFireSim()
         {            
-            _fireMesh = new FireMesh(WUInity.INPUT.fire.lcpFile, WUInity.INPUT.fire.weather, WUInity.INPUT.fire.wind, WUInity.INPUT.fire.initialFuelMoisture, WUInity.INPUT.fire.ignitionPoints);
+            _fireMesh = new FireMesh(WUInity.INPUT.fire.lcpFile, WUInity.SIM_DATA.WeatherInput, WUInity.SIM_DATA.WindInput, WUInity.SIM_DATA.InitialFuelMoistureData, WUInity.INPUT.fire.ignitionPoints);
             _fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;           
         }
 

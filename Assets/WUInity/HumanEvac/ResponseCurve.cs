@@ -50,23 +50,25 @@ namespace WUInity
                 string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.evac.responseCurveFiles[i] + ".rsp");
                 if (System.IO.File.Exists(path))
                 {
-                    string[] dataLine = System.IO.File.ReadAllLines(path);
+                    string[] dataLines = System.IO.File.ReadAllLines(path);
                     List<ResponseDataPoint> dataPoints = new List<ResponseDataPoint>();
                     //skip first line (header)
-                    for (int j = 1; j < dataLine.Length; j++)
+                    for (int j = 1; j < dataLines.Length; j++)
                     {
-                        string[] data = dataLine[j].Split(',');
-                        if(data.Length == 2)
+                        string[] data = dataLines[j].Split(',');
+
+                        if(data.Length >= 2)
                         {
                             float time, probability;
+
                             bool timeRead = float.TryParse(data[0], out time);
                             bool probabilityRead = float.TryParse(data[1], out probability);
-                            if(timeRead && probabilityRead)
+                            if (timeRead && probabilityRead)
                             {
                                 ResponseDataPoint dataPoint = new ResponseDataPoint(time, probability);
                                 dataPoints.Add(dataPoint);
                             }
-                        }                        
+                        }                                            
                     }
 
                     //need at least two to make a curve

@@ -321,7 +321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e223e624547f06742bfb558974cef823, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DeveloperMode: 0
+  DeveloperMode: 1
   AutoLoadExample: 1
   _markerPrefab: {fileID: 2598817330613097118, guid: 9a4214ef857ec764cafe974156c124ea,
     type: 3}

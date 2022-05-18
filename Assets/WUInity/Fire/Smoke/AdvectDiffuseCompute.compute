@@ -12,8 +12,9 @@ uniform Texture2D<float4> _Wind;
 uniform SamplerState sampler_Wind;
 
 RWStructuredBuffer<float> _Write;
+RWStructuredBuffer<float3> _Sigma3D;
 
-
+//0
 #pragma kernel AdvectDiffuseExplicit
 [numthreads(8, 8, 1)]
 void AdvectDiffuseExplicit(uint3 id : SV_DispatchThreadID)
@@ -154,6 +155,7 @@ float SampleBilinear(float2 advectedPos)
 	return a * (1.0 - fy) + b * fy;
 }
 
+//1
 #pragma kernel AdvectSemiLagrangian
 [numthreads(8, 8, 1)]
 void AdvectSemiLagrangian(uint3 id : SV_DispatchThreadID)
@@ -225,6 +227,7 @@ float2 GetDiffusionCoefficient(float2 pos)
 	return K_y;
 }
 
+//2
 #pragma kernel DiffuseImplicitIsotropic
 [numthreads(8, 8, 1)]
 void DiffuseImplicitIsotropic(uint3 id : SV_DispatchThreadID)
@@ -270,6 +273,7 @@ void DiffuseImplicitIsotropic(uint3 id : SV_DispatchThreadID)
 	return;
 }
 
+//3
 #pragma kernel DiffuseImplicitAnisotropic
 [numthreads(8, 8, 1)]
 void DiffuseImplicitAnisotropic(uint3 id : SV_DispatchThreadID)
@@ -312,4 +316,228 @@ void DiffuseImplicitAnisotropic(uint3 id : SV_DispatchThreadID)
 	float alpha = _CellSizeXSq / (K_y.x * _DeltaTime) + _CellSizeYSq / (K_y.y * _DeltaTime);
 	float rBeta = 4.0f + alpha;
 	_Write[idx] = (C * alpha + L + R + D + U) / rBeta;
+}
+
+//https://www.earth-prints.org/bitstream/2122/11735/1/cosmac2006.pdf, doi:10.1016/j.epsl.2005.11.019
+//4
+#pragma kernel AdvectDiffuseExplicitNew
+[numthreads(8, 8, 1)]
+void AdvectDiffuseExplicitNew(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+	float C = _Read[idx];
+	float L = 0, R = 0, D = 0, U = 0;
+	if (id.x > 0)
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}
+
+	//advection, eq. 21
+	float CrX = _WindX * _DeltaTime * _CellsPerMeterX;	
+	float CrY = _WindY * _DeltaTime * _CellsPerMeterY;
+	float advectionX = -0.5 * CrX * (R - L) + 0.5 * CrX * CrX * (R - 2 * C + L);
+	float advectionY = -0.5 * CrY * (U - D) + 0.5 * CrY * CrY * (U - 2 * C + D);
+	float advection = advectionX + advectionY;
+
+	//diffusion, eq. 24
+	float K_H = 50.0;
+	float diffusionX = 0.5 * _CellsPerMeterXSq * ((K_H + K_H) * L - (K_H + 2 * K_H + K_H) * C + (K_H + K_H) * R);
+	float diffusionY = 0.5 * _CellsPerMeterYSq * ((K_H + K_H) * D - (K_H + 2 * K_H + K_H) * C + (K_H + K_H) * U);
+	float diffusion = _DeltaTime * (diffusionX + diffusionY);
+
+	//injection
+	float conc_delta = _DeltaTime * _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+
+	//calculate new concentration (kg/m3)
+	float c_delta = advection + diffusion + conc_delta;
+	_Write[idx] = C + c_delta;
+}
+
+//https://www.earth-prints.org/bitstream/2122/11735/1/cosmac2006.pdf, doi:10.1016/j.epsl.2005.11.019
+//5
+#pragma kernel AdvectDiffuseExplicitFluxLimited
+[numthreads(8, 8, 1)]
+void AdvectDiffuseExplicitFluxLimited(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+	float C = _Read[idx];
+	float3 sigmaC = _Sigma3D[idx];
+	float L = 0, R = 0, D = 0, U = 0;
+	float3 sigmaL = 0, sigmaD = 0;
+	if (id.x > 0)
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+		sigmaL = _Sigma3D[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+		sigmaD = _Sigma3D[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}
+
+	//Advection, eq. 22
+	//assume Cr is the same for all cells as long as we have uniform velocity
+	float CrX = _WindX * _DeltaTime * _CellsPerMeterX;
+	float CrY = _WindY * _DeltaTime * _CellsPerMeterY;
+	//Eq. 22
+	float advectionX = -_DeltaTime * _CellsPerMeterX * (_WindX * C - _WindX * L) - 0.5 * _CellSizeX * (CrX * (1.0 - CrX) * sigmaC.x - CrX * (1.0 - CrX) * sigmaL.x);
+	float advectionY = -_DeltaTime * _CellsPerMeterY * (_WindY * C - _WindY * D) - 0.5 * _CellSizeY * (CrY * (1.0 - CrY) * sigmaC.y - CrY * (1.0 - CrY) * sigmaD.y);
+	float advection = advectionX + advectionY;
+
+	//diffusion, eq. 24
+	float K_H = 50.0;
+	float diffusionX = 0.5 * _CellsPerMeterXSq * ((K_H + K_H) * L - (K_H + 2 * K_H + K_H) * C + (K_H + K_H) * R);
+	float diffusionY = 0.5 * _CellsPerMeterYSq * ((K_H + K_H) * D - (K_H + 2 * K_H + K_H) * C + (K_H + K_H) * U);
+	float diffusion = _DeltaTime * (diffusionX + diffusionY);
+
+	//injection
+	float conc_delta = _DeltaTime * _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+
+	//calculate new concentration (kg/m3)
+	float c_delta = advection + diffusion + conc_delta;
+	_Write[idx] = C + c_delta;
+}
+
+float MinMod(float a, float b)
+{
+	return 0.5 * (sign(a) + sign(b)) * min(abs(a), abs(b));
+}
+
+//6
+#pragma kernel Sigma2D
+[numthreads(8, 8, 1)]
+void Sigma2D(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+
+	//Read should be soot concentration in this case
+	float C = _Read[idx];
+	float L = 0, R = 0, D = 0, U = 0;
+	if (id.x > 0)
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}
+
+	float sigmaX = _CellsPerMeterX * MinMod((R - C), (C - L));
+	float sigmaY = _CellsPerMeterY * MinMod((U - C), (C - D));
+
+	//write to sigma buffer
+	_Sigma3D[idx] = float3(sigmaX, sigmaY, 0.0);
+}
+
+//7
+#pragma kernel AdvectSemiLagrangianExplcitiDiffusion
+[numthreads(8, 8, 1)]
+void AdvectSemiLagrangianExplcitiDiffusion(uint3 id : SV_DispatchThreadID)
+{
+	//check if we are outside of mesh due to non-integer fit to kernel threads
+	if (id.x >= (uint)_CellsX || id.y >= (uint)_CellsY)
+	{
+		return;
+	}
+
+	int idx = id.x + id.y * _CellsX;
+
+	//advection 
+	float2 pos = float2(id.x, id.y);
+	float2 advectedPos = GetAdvectedPos(pos);
+	float newC = SampleBilinear(advectedPos);
+
+	//injection
+	float conc_dot = _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+
+	//diffuse, make sure time step is short enough
+	float C = _Read[idx];
+	float L = 0, R = 0, D = 0, U = 0;
+	if (id.x > 0)
+	{
+		int idxL = id.x - 1 + id.y * _CellsX;
+		L = _Read[idxL];
+	}
+	if (id.x < (uint)_CellsX - 1)
+	{
+		int idxR = id.x + 1 + id.y * _CellsX;
+		R = _Read[idxR];
+	}
+	if (id.y > 0)
+	{
+		int idxD = id.x + (id.y - 1) * _CellsX;
+		D = _Read[idxD];
+	}
+	if (id.y < (uint)_CellsY - 1)
+	{
+		int idxU = id.x + (id.y + 1) * _CellsX;
+		U = _Read[idxU];
+	}
+
+	float K_H = 100.0;
+	float diffusionX = K_H * (R - 2 * C + L) * _CellsPerMeterXSq;
+	float diffusionY = K_H * (U - 2 * C + D) * _CellsPerMeterYSq;
+	float diffusion = diffusionX + diffusionY;
+
+	//calculate new concentration (kg/m3)
+	float c_delta = _DeltaTime * (conc_dot + diffusion);
+	_Write[idx] = newC + c_delta;
 }

@@ -35,7 +35,7 @@ namespace WUInity.Fire
             double stickSurfHumidity = startAirHumidity;
 
 
-            FuelMoisture startFuelMoisture = cell.GetMesh().initialFuelMoisture.GetInitialFuelMoisture(cell.GetFuelModelNumber());
+            InitialFuelMoisture startFuelMoisture = cell.GetMesh().initialFuelMoisture.GetInitialFuelMoisture(cell.GetFuelModelNumber());
             double stickMoisture1 = startFuelMoisture.OneHour;
             double stickMoisture10 = startFuelMoisture.TenHour;
             double stickMoisture100 = startFuelMoisture.HundredHour;

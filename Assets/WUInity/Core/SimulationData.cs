@@ -65,7 +65,80 @@ namespace WUInity
                 }
                 return _responseCurves;
             }
+
+            set
+            {
+                if (value != null)
+                {
+                    _responseCurves = value;
+                }
+            }
         }
+
+        private InitialFuelMoistureList _initialFuelMoistureData;
+        public InitialFuelMoistureList InitialFuelMoistureData
+        {
+            get
+            {
+                if (_initialFuelMoistureData == null)
+                {
+                    _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile();
+                }
+                return _initialFuelMoistureData;
+            }
+
+            set
+            {
+                if(value != null)
+                {
+                    _initialFuelMoistureData = value;
+                }
+            }
+        }
+
+        private WeatherInput _weatherInput;
+        public WeatherInput WeatherInput
+        {
+            get
+            {
+                if (_weatherInput == null)
+                {
+                    _weatherInput = WeatherInput.LoadWeatherInputFile();
+                }
+                return _weatherInput;
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    _weatherInput = value;
+                }
+            }
+        }
+
+        private WindInput _windInput;
+        public WindInput WindInput
+        {
+            get
+            {
+                if (_windInput == null)
+                {
+                    _windInput = WindInput.LoadWindInputFile();
+                }
+                return _windInput;
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    _windInput = value;
+                }
+            }
+        }
+
+
 
         public SimulationData()
         {           

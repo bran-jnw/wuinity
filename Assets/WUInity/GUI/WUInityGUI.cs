@@ -69,6 +69,9 @@ namespace WUInity
 
         void OnGUI()
         {
+            //keep track if menu state has changed to kill things like the painter
+            ActiveMenu lastMenu = menuChoice;
+
             //select menu
             GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
             if (GUI.Button(mainMenu.rect, mainMenu.text) && !WUInity.SIM.IsRunning)
@@ -116,12 +119,13 @@ namespace WUInity
                         WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
-            }                  
-
-            /*if (GUI.Button(hideMenu.rect, hideMenu.text))
+            }      
+            
+            //if menu has changed we might have to kill a few things
+            if(lastMenu != menuChoice)
             {
-                menuChoice = ActiveMenu.None;
-            }*/
+                WUInity.INSTANCE.StopPainter();
+            }
 
             if (GUI.Button(exitMenu.rect, exitMenu.text))
             {

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 namespace WUInity.Fire
 {
@@ -12,38 +13,68 @@ namespace WUInity.Fire
         public float speed;
         public float cloudCover;
 
+        bool dataIsInSeconds;
+
+        int month, day, hour;
+
         public WindData(float time, float direction, float speed, float cloudCover)     //wind data struct constructor
         {
             this.time = time;
             this.direction = direction;
             this.speed = speed;
             this.cloudCover = cloudCover;
+
+            dataIsInSeconds = true;
+
+            month = 0;
+            day = 0;
+            hour = 0;
+        }
+
+        public WindData(int month, int day, int hour, float direction, float speed, float cloudCover)     //wind data struct constructor
+        {
+            this.month = month;
+            this.day = day;
+            this.hour = hour;
+            this.direction = direction;
+            this.speed = speed;
+            this.cloudCover = cloudCover;
+
+            dataIsInSeconds = false;
+            
+            time = 0.0f;
+        }
+
+        //TODO: implement
+        public void ConvertToSeconds(float fireStartTime)
+        {
+
         }
     }
     [System.Serializable]
     public class WindInput
     {
-        [SerializeField] private WindData[] dataPoints;         //declare datapoints array of winddata structs
+        [SerializeField] private WindData[] dataPoints;         
 
-        private CatmullRomSpline1D directionSpline;               //declare three spline variables (unity)
+        private CatmullRomSpline1D directionSpline;              
         private CatmullRomSpline1D speedSpline;
         private CatmullRomSpline1D cloudSpline;
 
-        public WindInput(WindData[] dataPoints)                 //CONSTRUCTOR
+        public WindInput(WindData[] dataPoints)                 
         {
             this.dataPoints = dataPoints;
         }
 
-        public WindData GetWindDataAtTime(float time)           //Get data at specified time
+        public WindData GetWindDataAtTime(float time)           
         {
             if(dataPoints.Length > 1 && (directionSpline == null || speedSpline == null || cloudSpline == null))
             {
-                CreateSplines();    //if there is at least one data point and any of the spline values are empty, initiate them.
+                CreateSplines();    
             }
 
-            WindData w = dataPoints[0];     //get first weather point
-            w.time = time;                  //overwrite the first weather point time data as the target time (Maybe it is being left empty??)
-            if(dataPoints.Length > 1)       //if there are more than 1 data points, get the rest of the data of the specified time and rewrite them as the first point data.
+            WindData w = dataPoints[0];     
+            w.time = time;                  
+            if(dataPoints.Length > 1)       
             {
                 w.direction = directionSpline.GetYValue(time);
                 w.speed = speedSpline.GetYValue(time) * WUInity.INPUT.fire.windMultiplier;
@@ -53,23 +84,23 @@ namespace WUInity.Fire
             return w;
         }
 
-        private void CreateSplines()                                                    //Interpolate weather data
+        private void CreateSplines()                                                    
         {
-            Vector2[] dir = new Vector2[dataPoints.Length];                             //Create 2D Vector arrays to store the time and wind direction of each node
+            Vector2[] dir = new Vector2[dataPoints.Length];                             
             for (int i = 0; i < dir.Length; i++)
             {
                 dir[i] = new Vector2(dataPoints[i].time, dataPoints[i].direction);
             }
-            directionSpline = new CatmullRomSpline1D(dir);                                //this function uses a super special unity method to make a continuous curve based on some points
+            directionSpline = new CatmullRomSpline1D(dir);                                
 
-            Vector2[] speed = new Vector2[dataPoints.Length];                           //Create 2D Vector arrays to store the time and windspeed of each node
+            Vector2[] speed = new Vector2[dataPoints.Length];                           
             for (int i = 0; i < speed.Length; i++)
             {
                 speed[i] = new Vector2(dataPoints[i].time, dataPoints[i].speed);
             }
             speedSpline = new CatmullRomSpline1D(speed);
 
-            Vector2[] cloud = new Vector2[dataPoints.Length];                           //Create 2D Vector arrays to store the time and cloud cover of each node
+            Vector2[] cloud = new Vector2[dataPoints.Length];                           
             for (int i = 0; i < cloud.Length; i++)
             {
                 cloud[i] = new Vector2(dataPoints[i].time, dataPoints[i].cloudCover);
@@ -77,7 +108,7 @@ namespace WUInity.Fire
             cloudSpline = new CatmullRomSpline1D(cloud);
         }
 
-        public static WindInput GetTemplate()                                           //get some standard input values (guessing it is for testing purposes)
+        public static WindInput GetTemplate()                                           
         {
             WindData[] w = new WindData[2];
             w[0] = new WindData(0f, 0f, 2f, 0f);
@@ -85,5 +116,89 @@ namespace WUInity.Fire
             WindInput wI = new WindInput(w);
             return wI;
         }
-    }
+
+        public static WindInput LoadWindInputFile()
+        {
+            WindInput result = null;
+            List<WindData> windData = new List<WindData>();
+
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.windFile + ".wnd");
+            bool fileExists = File.Exists(path);
+            if (fileExists)
+            {
+                string[] dataLines = File.ReadAllLines(path);
+
+                string[] header = dataLines[0].Split(',');
+                header[0].Trim(' ');
+
+                //header defined in Months, days, hour
+                if(header[0] == "Month")
+                {
+                    //skip first line (header)
+                    for (int j = 1; j < dataLines.Length; j++)
+                    {
+                        string[] data = dataLines[j].Split(',');                        
+
+                        if(data.Length >= 6)
+                        {
+                            int month, day, hour, speed, direction, cloudCover;
+                            bool b1 = int.TryParse(data[0], out month);
+                            bool b2 = int.TryParse(data[1], out day);
+                            bool b3 = int.TryParse(data[2], out hour);
+                            bool b4 = int.TryParse(data[3], out speed);
+                            bool b5 = int.TryParse(data[4], out direction);
+                            bool b6 = int.TryParse(data[5], out cloudCover);
+
+                            if (b1 && b2 && b3 && b4 && b5 && b6)
+                            {
+                                WindData wD = new WindData(month, day, hour, direction, speed, cloudCover);
+                                windData.Add(wD);
+                            }
+                        }
+                    }
+                }
+                //Header defined in seconds
+                else if (header[0] == "Seconds")
+                {
+                    //skip first line (header)
+                    for (int j = 1; j < dataLines.Length; j++)
+                    {
+                        string[] data = dataLines[j].Split(',');                        
+
+                        if(data.Length >= 4)
+                        {
+                            int seconds, speed, direction, cloudCover;
+                            bool b1 = int.TryParse(data[0], out seconds);
+                            bool b2 = int.TryParse(data[1], out speed);
+                            bool b3 = int.TryParse(data[2], out direction);
+                            bool b4 = int.TryParse(data[3], out cloudCover);
+
+                            if (b1 && b2 && b3 && b4)
+                            {
+                                WindData wD = new WindData(seconds, direction, speed, cloudCover);
+                                windData.Add(wD);
+                            }
+                        }  
+                    }
+                }
+                
+            }
+            else
+            {
+                WUInity.WUI_LOG("WARNING: Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+            }
+
+            if (windData.Count > 0)
+            {
+                result = new WindInput(windData.ToArray());
+                WUInity.WUI_LOG("LOG: Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
+            }
+            else if (fileExists)
+            {
+                WUInity.WUI_LOG("WARNING: Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+            }
+
+            return result;
+        }
+    }    
 }

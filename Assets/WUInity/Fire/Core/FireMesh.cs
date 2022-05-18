@@ -34,7 +34,7 @@ namespace WUInity.Fire
 
         private WeatherInput weather;                               
         private WindInput wind;                                     
-        public InitialFuelMoistureData initialFuelMoisture;         
+        public InitialFuelMoistureList initialFuelMoisture;         
         
         public LCPData lcpData;                                     
         public FuelModelSet fuelModelSet;                           
@@ -44,7 +44,7 @@ namespace WUInity.Fire
         private double timeSinceStart = 0.0;                        //keeps track of elapsed simulated time?
 
 
-        public FireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, IgnitionPoint[] ignitionPoints)         //CONSTRUCTOR if LCP data is to be parsed by file.
+        public FireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)         //CONSTRUCTOR if LCP data is to be parsed by file.
         {
             lcpData = new LCPData(lcpFilename);                 //import LCP data
             //create empry if we cannot read properly
@@ -65,7 +65,7 @@ namespace WUInity.Fire
             this.ignitionPoints = ignitionPoints;
         }
 
-        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureData initialFuelMoisture, IgnitionPoint[] ignitionPoints)        //CONSTRUCTOR if LCP data is to be parsed from memory
+        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)        //CONSTRUCTOR if LCP data is to be parsed from memory
         {
             this.lcpData = lcpData;
             cellCount = new Vector2Int(lcpData.Header.numeast, lcpData.Header.numnorth);
