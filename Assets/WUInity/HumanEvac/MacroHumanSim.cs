@@ -300,9 +300,18 @@ namespace WUInity.Evac
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
-
             //get curve index from evac group
-            int curveIndex = WUInity.INPUT.evac.evacGroups[evacGroupIndex].responseCurveIndex;
+            int randomResponseCurveIndex = 0;
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
+            {
+                if(r <= WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                {
+                    randomResponseCurveIndex = i;
+                    break;
+                }
+            }
+            int curveIndex = WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
+
 
             //skip first as that is always zero probability
             for (int i = 1; i < WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints.Length; i++)

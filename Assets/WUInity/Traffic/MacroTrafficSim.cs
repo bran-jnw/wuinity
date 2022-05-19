@@ -137,10 +137,10 @@ namespace WUInity.Traffic
             output = new List<string>();
             
             string start = "Time(s),Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; ++i)
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; ++i)
             {
-                start += ", Goal: " + WUInity.INPUT.traffic.evacuationGoals[i].name;
-                start += ", " + WUInity.INPUT.traffic.evacuationGoals[i].name + " flow";
+                start += ", Goal: " + WUInity.SIM_DATA.EvacuationGoals[i].name;
+                start += ", " + WUInity.SIM_DATA.EvacuationGoals[i].name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -412,10 +412,10 @@ namespace WUInity.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; ++i)
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; ++i)
             {
-                newOut += "," + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople;
-                newOut += "," + WUInity.INPUT.traffic.evacuationGoals[i].currentFlow;
+                newOut += "," + WUInity.SIM_DATA.EvacuationGoals[i].currentPeople;
+                newOut += "," + WUInity.SIM_DATA.EvacuationGoals[i].currentFlow;
             }
 
             output.Add(newOut);

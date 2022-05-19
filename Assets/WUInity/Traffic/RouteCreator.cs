@@ -187,7 +187,7 @@ namespace WUInity
 
         void DetermineValidGoalsAndRouterPoints(bool logMessages)
         {
-            EvacuationGoal[] evacuatonGoals = WUInity.INPUT.traffic.evacuationGoals;
+            EvacuationGoal[] evacuatonGoals = WUInity.SIM_DATA.EvacuationGoals;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //check that evac goals are valid
@@ -435,8 +435,8 @@ namespace WUInity
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Random)
             {
-                int randomChoice = Random.Range(0, tO.evacuationGoals.Length);
-                rC.SelectForcedNonBlocked(tO.evacuationGoals[randomChoice]);
+                int randomChoice = Random.Range(0, WUInity.SIM_DATA.EvacuationGoals.Length);
+                rC.SelectForcedNonBlocked(WUInity.SIM_DATA.EvacuationGoals[randomChoice]);
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
             {

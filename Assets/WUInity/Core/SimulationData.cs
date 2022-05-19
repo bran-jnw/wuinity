@@ -138,11 +138,112 @@ namespace WUInity
             }
         }
 
+        private IgnitionPoint[] _ignitionPoints;
+        public IgnitionPoint[] IgnitionPoints
+        {
+            get
+            {
+                if (_ignitionPoints == null)
+                {
+                    _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile();
+                }
+                return _ignitionPoints;
+            }
 
+            set
+            {
+                if (value != null)
+                {
+                    _ignitionPoints = value;
+                }
+            }
+        }
+
+        private EvacuationGoal[] _evacuationGoals;
+        public EvacuationGoal[] EvacuationGoals
+        {
+            get
+            {
+                if (_evacuationGoals == null)
+                {
+                    _evacuationGoals = EvacuationGoal.LoadEvacuationGoalFiles();
+                }
+                return _evacuationGoals;
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    _evacuationGoals = value;
+                }
+            }
+        }
+
+        private EvacGroup[] _evacuationGroups;
+        public EvacGroup[] EvacuationGroups
+        {
+            get
+            {
+                if (_evacuationGroups == null)
+                {
+                    _evacuationGroups = EvacGroup.LoadEvacGroupFiles();
+                }
+                return _evacuationGroups;
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    _evacuationGroups = value;
+                }
+            }
+        }
 
         public SimulationData()
         {           
             
+        }
+
+        public int GetEvacGoalIndexFromName(string name)
+        {
+            int index = -1;
+            for (int i = 0; i < EvacuationGoals.Length; i++)
+            {
+                if(name == EvacuationGoals[i].name)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if(index < 0)
+            {
+                WUInity.WUI_LOG("ERROR: User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+            }
+
+            return index;
+        }
+
+        public int GetResponseCurveIndexFromName(string name)
+        {
+            int index = -1;
+            for (int i = 0; i < ResponseCurves.Length; i++)
+            {
+                if (name == ResponseCurves[i].name)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index < 0)
+            {
+                WUInity.WUI_LOG("ERROR: User has specified a response curve named " + name + " but no such response curve has been defined.");
+            }
+
+            return index;
         }
 
         public void BuildAndSaveRouteCollection()
@@ -359,7 +460,7 @@ namespace WUInity
             }
 
             index = WUInity.SIM_DATA.evacGroupIndices[index];
-            return WUInity.INPUT.evac.evacGroups[index];
+            return WUInity.SIM_DATA.EvacuationGroups[index];
         }
 
         public EvacGroup GetEvacGroup(int x, int y)
@@ -372,7 +473,7 @@ namespace WUInity
 
             int index = x + y * WUInity.SIM_DATA.EvacCellCount.x;
             index = WUInity.SIM_DATA.evacGroupIndices[index];
-            return WUInity.INPUT.evac.evacGroups[index];
+            return WUInity.SIM_DATA.EvacuationGroups[index];
         }
     }
 }

@@ -260,7 +260,7 @@ namespace WUInity
 
         private void CreateFireSim()
         {            
-            _fireMesh = new FireMesh(WUInity.INPUT.fire.lcpFile, WUInity.SIM_DATA.WeatherInput, WUInity.SIM_DATA.WindInput, WUInity.SIM_DATA.InitialFuelMoistureData, WUInity.INPUT.fire.ignitionPoints);
+            _fireMesh = new FireMesh(WUInity.INPUT.fire.lcpFile, WUInity.SIM_DATA.WeatherInput, WUInity.SIM_DATA.WindInput, WUInity.SIM_DATA.InitialFuelMoistureData, WUInity.SIM_DATA.IgnitionPoints);
             _fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;           
         }
 
@@ -269,9 +269,9 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
 
             //if we do multiple runs the goals have to be reset
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
             {
-                WUInity.INPUT.traffic.evacuationGoals[i].ResetPeopleAndCars();
+                WUInity.SIM_DATA.EvacuationGoals[i].ResetPeopleAndCars();
             }
 
             //pick start time based on curve or 0 (fire start)
@@ -439,9 +439,9 @@ namespace WUInity
 
         void CheckEvacuationGoalStatus()
         {
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
             {
-                EvacuationGoal eG = WUInity.INPUT.traffic.evacuationGoals[i];
+                EvacuationGoal eG = WUInity.SIM_DATA.EvacuationGoals[i];
                 if(!eG.blocked)
                 {
                     Fire.FireCellState cellState = _fireMesh.GetFireCellState(eG.latLong);
@@ -465,9 +465,9 @@ namespace WUInity
 
         public void BlockEvacGoal(int index)
         {
-            if (!WUInity.INPUT.traffic.evacuationGoals[index].blocked)
+            if (!WUInity.SIM_DATA.EvacuationGoals[index].blocked)
             {
-                WUInity.INPUT.traffic.evacuationGoals[index].blocked = true;
+                WUInity.SIM_DATA.EvacuationGoals[index].blocked = true;
                 UpdateRoutes();
             }
         }        
@@ -484,9 +484,9 @@ namespace WUInity
         {
             //check that we have at least one goal left
             bool allBlocked = true;
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
             {
-                if(!WUInity.INPUT.traffic.evacuationGoals[i].blocked)
+                if(!WUInity.SIM_DATA.EvacuationGoals[i].blocked)
                 {
                     allBlocked = false;
                     break;

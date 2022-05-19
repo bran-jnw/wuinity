@@ -35,7 +35,7 @@ namespace WUInity.Fire
             CreateLCPData();                    
 
             ignitionPoints = new IgnitionPoint[1];                                    
-            ignitionPoints[0] = new IgnitionPoint(cellCount.x / 2, cellCount.y / 2); 
+            ignitionPoints[0] = new IgnitionPoint(cellCount.x / 2, cellCount.y / 2, 0.0f); 
             /*ignitionPoints = new WUInityFireIgnition[randomIgnPoints];
             for (int i = 0; i < ignitionPoints.Length; i++)
             {

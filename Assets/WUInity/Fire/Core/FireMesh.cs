@@ -224,6 +224,10 @@ namespace WUInity.Fire
                 InitializeMesh();
                 initialized = true;
             }
+            else
+            {
+                UpdateIgnitionPoints((float)timeSinceStart);
+            }
 
             if (activeCells.Count == 0)                             
             {
@@ -320,18 +324,66 @@ namespace WUInity.Fire
         }
 
         public void StartInitialIgnition()
+        {          
+            if(_ignitionDone)
+            {
+                return;
+            }
+
+            for (int i = 0; i < ignitionPoints.Length; ++i)
+            {                
+                if(ignitionPoints[i].IgnitionTime == 0.0f)
+                {
+                    ignitionPoints[i].CalculateMeshIndex(this);
+                    if (ignitionPoints[i].IsInsideFire(cellCount))
+                    {
+                        int x = ignitionPoints[i].GetX();
+                        int y = ignitionPoints[i].GetY();
+                        FireCell f = fireCells[GetCellIndex(x, y)];
+                        f.Ignite(0.0);
+                        activeCells.Add(f);
+                        ignitionPoints[i].MarkAsIgnited();
+                    }
+                    ++activatedIgnitions;
+                }                
+            }
+
+            if(activatedIgnitions == ignitionPoints.Length)
+            {
+                _ignitionDone = true;
+            }
+        }
+
+        int activatedIgnitions = 0;
+        bool _ignitionDone = false;
+        public void UpdateIgnitionPoints(float currentTime)
         {
+            if (_ignitionDone)
+            {
+                return;
+            }
+
             for (int i = 0; i < ignitionPoints.Length; ++i)
             {
-                ignitionPoints[i].CalculateMeshIndex(this);
-                if (ignitionPoints[i].IsInsideFire(cellCount))
+                if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
                 {
-                    int x = ignitionPoints[i].GetX();
-                    int y = ignitionPoints[i].GetY();
-                    FireCell f = fireCells[GetCellIndex(x, y)];
-                    f.Ignite(0.0);
-                    activeCells.Add(f);
+                    ignitionPoints[i].CalculateMeshIndex(this);
+                    if (ignitionPoints[i].IsInsideFire(cellCount))
+                    {
+                        int x = ignitionPoints[i].GetX();
+                        int y = ignitionPoints[i].GetY();
+                        FireCell f = fireCells[GetCellIndex(x, y)];
+                        f.Ignite(currentTime);
+                        activeCells.Add(f);
+                        ignitionPoints[i].MarkAsIgnited();
+                    }
+                    ++activatedIgnitions;
                 }
+            }
+
+            if (activatedIgnitions == ignitionPoints.Length)
+            {
+                _ignitionDone = true;
             }
         }
 

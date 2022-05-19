@@ -28,7 +28,7 @@ namespace WUInity
             if(!triggered)
             {
                 triggered = true;
-                WUInity.WUI_LOG("EVENT: Goal blocked: " + WUInity.INPUT.traffic.evacuationGoals[goalIndex].name);
+                WUInity.WUI_LOG("EVENT: Goal blocked: " + WUInity.SIM_DATA.EvacuationGoals[goalIndex].name);
                 WUInity.SIM.BlockEvacGoal(goalIndex);
             }            
         }

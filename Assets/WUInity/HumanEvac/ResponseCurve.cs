@@ -48,9 +48,9 @@ namespace WUInity
             for (int i = 0; i < WUInity.INPUT.evac.responseCurveFiles.Length; i++)
             {
                 string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.evac.responseCurveFiles[i] + ".rsp");
-                if (System.IO.File.Exists(path))
+                if (File.Exists(path))
                 {
-                    string[] dataLines = System.IO.File.ReadAllLines(path);
+                    string[] dataLines = File.ReadAllLines(path);
                     List<ResponseDataPoint> dataPoints = new List<ResponseDataPoint>();
                     //skip first line (header)
                     for (int j = 1; j < dataLines.Length; j++)
@@ -77,7 +77,7 @@ namespace WUInity
                         responseCurves.Add(new ResponseCurve(dataPoints, WUInity.INPUT.evac.responseCurveFiles[i]));
                     }
 
-                    WUInity.WUI_LOG("LOG: Loaded response curve from " + path);
+                    WUInity.WUI_LOG("LOG: Loaded response curve from " + path + " named " + responseCurves[i].name);
                 }
                 else
                 {

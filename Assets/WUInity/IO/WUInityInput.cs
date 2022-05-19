@@ -77,7 +77,7 @@ namespace WUInity
 
         public BlockGoalEvent[] blockGoalEvents = BlockGoalEvent.GetDummy();
 
-        public EvacGroup[] evacGroups = EvacGroup.GetDefault();        
+        public string[] evacGroupFiles;      
 
         //TODO: fix saving these?
         [System.NonSerialized] public Texture2D evacuationForceTex;
@@ -97,7 +97,7 @@ namespace WUInity
         public float osmBorderSize = 1000f;
 
         public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
-        public EvacuationGoal[] evacuationGoals = EvacuationGoal.GetRoxburoughGoals();
+        public string[] evacuationGoalFiles;
         public RouteChoice routeChoice = RouteChoice.Closest;
                 
         public float stallSpeed = 5f;
@@ -134,7 +134,7 @@ namespace WUInity
         public string initialFuelMoistureFile = "default";
         public string weatherFile;
         public string windFile;
-        public Fire.IgnitionPoint[] ignitionPoints = Fire.IgnitionPoint.GetDefault();
+        public string ignitionPointsFile;
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
               
         public float windMultiplier = 1f;

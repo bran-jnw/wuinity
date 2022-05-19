@@ -107,11 +107,11 @@ namespace WUInity
             }
 
             int totalEvacuated = 0;
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
             {
-                totalEvacuated += WUInity.INPUT.traffic.evacuationGoals[i].currentPeople;
-                string name = WUInity.INPUT.traffic.evacuationGoals[i].name;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.INPUT.traffic.evacuationGoals[i].currentPeople + " (" + WUInity.INPUT.traffic.evacuationGoals[i].cars.Count + ")");
+                totalEvacuated += WUInity.SIM_DATA.EvacuationGoals[i].currentPeople;
+                string name = WUInity.SIM_DATA.EvacuationGoals[i].name;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.SIM_DATA.EvacuationGoals[i].currentPeople + " (" + WUInity.SIM_DATA.EvacuationGoals[i].cars.Count + ")");
                 ++buttonIndex;
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.MacroHumanSim().GetPeopleStaying()));

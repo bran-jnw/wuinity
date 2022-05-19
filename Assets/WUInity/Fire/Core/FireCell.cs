@@ -117,11 +117,17 @@ namespace WUInity.Fire
             doneSpreading = false;
             currentBurnArea = 0.0;
             timestepBurntMass = 0.0;
+            timeOfArrival = -9999.0;
         }
 
         public void Ignite(double timeOfArrival)            
         {
-            this.timeOfArrival = timeOfArrival;
+            //since this might get called by both ignition point AND from spreading from neighbors we have to check so we do not update it twice
+            if(this.timeOfArrival < 0.0)
+            {
+                this.timeOfArrival = timeOfArrival;
+            }   
+            
             if (cellState == FireCellState.CanBurn)
             {
                 cellState = FireCellState.Burning;

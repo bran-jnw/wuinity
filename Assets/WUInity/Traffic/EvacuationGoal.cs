@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using WUInity.Traffic;
+using System.IO;
 
 namespace WUInity
 {
@@ -166,6 +167,112 @@ namespace WUInity
             eGs[2].latLong = new Vector2D(39.466157, -105.082197);
             eGs[2].color = Color.blue;
             return eGs;
+        }
+
+        public static EvacuationGoal[] LoadEvacuationGoalFiles()
+        {
+            EvacuationGoal[] result = null;
+            List<EvacuationGoal> evacuationGoals = new List<EvacuationGoal>();
+
+            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoalFiles.Length; i++)
+            {
+                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.traffic.evacuationGoalFiles[i] + ".ed");
+                bool fileExists = File.Exists(path);
+                if (fileExists)
+                {
+                    string[] dataLines = File.ReadAllLines(path);
+
+                    string name, exitType, blocked;
+                    double lati, longi;
+                    float maxFlow, r, g, b;
+                    int maxCars, maxPeople;
+                    bool initiallyBlocked;
+                    EvacGoalType evacGoalType;
+                    Color color = Color.white;
+
+                    //name
+                    string[] data = dataLines[0].Split(':');
+                    name = data[1].Trim();
+                    name = name.Trim('"');
+
+                    //lat, long
+                    data = dataLines[1].Split(':');
+                    double.TryParse(data[1], out lati);
+
+                    data = dataLines[2].Split(':');
+                    double.TryParse(data[1], out longi);
+
+                    //goal type
+                    data = dataLines[3].Split(':');
+                    exitType = data[1].Trim();
+                    exitType = exitType.Trim('"');
+                    if (exitType == "Refugee")
+                    {
+                        evacGoalType = EvacGoalType.Refugee;
+                    }
+                    else
+                    {
+                        evacGoalType = EvacGoalType.Exit;
+                    }
+
+                    //max flow
+                    data = dataLines[4].Split(':');
+                    float.TryParse(data[1], out maxFlow);
+
+                    //car capacity
+                    data = dataLines[5].Split(':');
+                    int.TryParse(data[1], out maxCars);
+
+                    //max people
+                    data = dataLines[6].Split(':');
+                    int.TryParse(data[1], out maxPeople);
+
+                    //blocked initially?
+                    data = dataLines[7].Split(':');
+                    blocked = data[1].Trim();
+                    blocked = blocked.Trim('"');
+                    if (blocked == "false")
+                    {
+                        initiallyBlocked = false;
+                    }
+                    else
+                    {
+                        initiallyBlocked = true;
+                    }
+
+                    //color on marker
+                    data = dataLines[8].Split(':');
+                    data = data[1].Split(',');
+                    if (data.Length >= 3)
+                    {
+                        float.TryParse(data[0], out r);
+                        float.TryParse(data[1], out g);
+                        float.TryParse(data[2], out b);
+                        color = new Color(r, g, b);
+                    }
+
+                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2D(lati, longi), color);
+                    eG.goalType = evacGoalType;
+                    eG.maxFlow = maxFlow;
+                    eG.maxCars = maxCars;
+                    eG.maxPeople = maxPeople;
+                    eG.blocked = initiallyBlocked;
+
+                    evacuationGoals.Add(eG);
+                }
+                else
+                {
+                    WUInity.WUI_LOG("WARNING: Evacuation goal data file " + path + " not found and could not be loaded.");
+                }
+            }            
+
+            if (evacuationGoals.Count > 0)
+            {
+                result = evacuationGoals.ToArray();
+                WUInity.WUI_LOG("LOG: " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");
+            }
+
+            return result;
         }
     }
 }

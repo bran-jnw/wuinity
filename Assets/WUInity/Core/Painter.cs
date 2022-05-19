@@ -153,7 +153,7 @@ namespace WUInity
             else if(paintMode == PaintMode.EvacGroup)
             {
                 evacGroupIndex = arrayIndex;
-                activeColor = WUInity.INPUT.evac.evacGroups[evacGroupIndex].color;
+                activeColor = WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].Color;
                 activeColor.a = 0.5f;
             }
         }
@@ -196,7 +196,7 @@ namespace WUInity
             CheckDataResources(evacGroupTex, evacGroupColorArray, evacDataUV);
             //select first zone
             evacGroupIndex = 0;
-            activeColor = WUInity.INPUT.evac.evacGroups[evacGroupIndex].color;
+            activeColor = WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].Color;
             activeColor.a = 0.5f;
             brushSize = 1;
         }
@@ -296,7 +296,7 @@ namespace WUInity
                         }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
-                            c = WUInity.SIM_DATA.GetEvacGroup(x, y).color;
+                            c = WUInity.SIM_DATA.GetEvacGroup(x, y).Color;
                         }
                         else if (paintMode == PaintMode.CustomPopulation)
                         {

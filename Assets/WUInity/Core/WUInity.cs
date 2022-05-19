@@ -459,9 +459,12 @@ namespace WUInity
 
             UpdateMapResourceStatus(); 
             UpdateFireResourceStatus();
-            
-            SIM_DATA.ResponseCurves = ResponseCurve.LoadResponseCurves(); //if they can't be found we get empty ones 
-            EvacGroup.LoadEvacGroupIndices();
+
+            //need goals and curves before can load groups
+            SIM_DATA.ResponseCurves = ResponseCurve.LoadResponseCurves(); //if they can't be found we get empty ones             
+            SIM_DATA.EvacuationGoals = EvacuationGoal.LoadEvacuationGoalFiles();
+            SIM_DATA.EvacuationGroups = EvacGroup.LoadEvacGroupFiles();
+            EvacGroup.LoadEvacGroupIndices(); //needs correct amount of evac groups to load
             GraphicalFireInput.LoadGraphicalFireInput();            
 
             UpdatePopulationResourceStatus();
@@ -469,13 +472,15 @@ namespace WUInity
             UpdateOSMResourceStatus();            
 
             GUI.SetGUIDirty();
+
+            //this needs map and evac goals
+            SpawnMarkers();
         }
 
         public void UpdateMapResourceStatus()
         {
             DATA_STATUS.MapLoaded = LoadMapbox();
-            UpdateBorders();
-            SpawnMarkers();
+            UpdateBorders();            
             _godCamera.SetCameraStartPosition(INPUT.size);
 
             bool coordinatesAreDirty = true;
@@ -536,6 +541,7 @@ namespace WUInity
             SIM_DATA.InitialFuelMoistureData = Fire.InitialFuelMoistureList.LoadInitialFuelMoistureDataFile();
             SIM_DATA.WeatherInput = Fire.WeatherInput.LoadWeatherInputFile();
             SIM_DATA.WindInput = Fire.WindInput.LoadWindInputFile();
+            SIM_DATA.IgnitionPoints = Fire.IgnitionPoint.LoadIgnitionPointsFile();
 
             DATA_STATUS.LcpLoaded = SIM_DATA.LoadLCPFile();
             DATA_STATUS.FuelModelsLoaded = SIM_DATA.LoadFuelModelsFile();            
@@ -986,10 +992,10 @@ namespace WUInity
                 }
             }
 
-            goalMarkers = new GameObject[INPUT.traffic.evacuationGoals.Length];
-            for (int i = 0; i < INPUT.traffic.evacuationGoals.Length; i++)
+            goalMarkers = new GameObject[SIM_DATA.EvacuationGoals.Length];
+            for (int i = 0; i < SIM_DATA.EvacuationGoals.Length; i++)
             {
-                EvacuationGoal eG = INPUT.traffic.evacuationGoals[i];
+                EvacuationGoal eG = SIM_DATA.EvacuationGoals[i];
                 goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
                 Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, MAP.CenterMercator, MAP.WorldRelativeScale);
 

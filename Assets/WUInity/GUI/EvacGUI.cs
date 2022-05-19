@@ -102,7 +102,7 @@ namespace WUInity
             }
             else
             {
-                for (int i = 0; i < WUInity.INPUT.evac.evacGroups.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.evac.evacGroupFiles.Length; i++)
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Define group " + (i + 1)))
                     {
