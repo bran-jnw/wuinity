@@ -26,14 +26,28 @@ namespace WUInity.Visualization
 
         public bool ToggleFire()
         {
-            fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
-            return fireMeshRenderer.gameObject.activeSelf;
+            if(WUInity.INPUT.runFireSim)
+            {
+                fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
+                return fireMeshRenderer.gameObject.activeSelf;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public bool ToggleSoot()
         {
-            sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
-            return sootMeshRenderer.gameObject.activeSelf;
+            if(WUInity.INPUT.runSmokeSim)
+            {
+                sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
+                return sootMeshRenderer.gameObject.activeSelf;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void CreateBuffers(bool renderFire, bool renderSmoke)

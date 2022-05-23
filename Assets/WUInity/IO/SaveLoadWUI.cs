@@ -87,7 +87,15 @@ namespace WUInity
                 rCWS = null;
                 System.GC.Collect();
 
-                WUInity.WUI_LOG("LOG: Loaded route collection from " + path);
+                if(collection == null)
+                {
+                    WUInity.WUI_LOG("ERROR: Tried loading route collection from " + path + " but route collection is not valid for current input.");
+                }
+                else
+                {
+                    WUInity.WUI_LOG("LOG: Loaded route collection from " + path);
+                }
+                
                 return collection;
             }
             else

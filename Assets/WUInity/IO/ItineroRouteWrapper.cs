@@ -29,15 +29,21 @@ namespace WUInity
 
         public static EvacuationGoal GetRealEvacGoal(string name)
         {
+            EvacuationGoal result = null;
             for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
             {
                 if (WUInity.SIM_DATA.EvacuationGoals[i].name == name)
                 {
-                    return WUInity.SIM_DATA.EvacuationGoals[i];
+                    result = WUInity.SIM_DATA.EvacuationGoals[i];
                 }
             }
 
-            return null;
+            if(result == null)
+            {
+                WUInity.WUI_LOG("ERROR: While loading the route collection the evacuation goal named " + name + " did not match any of the specified evacuation goals, the route collection is therefore not valid.");
+            }
+
+            return result;
         }
     }
 
@@ -67,6 +73,12 @@ namespace WUInity
             for (int i = 0; i < rC.routes.Length; i++)
             {
                 rC.routes[i] = routes[i].Convert();
+
+                if(rC.routes[i].evacGoal == null)
+                {
+                    rC = null;
+                    break;
+                }
             }
 
             return rC;
