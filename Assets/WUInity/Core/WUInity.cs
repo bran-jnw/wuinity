@@ -465,7 +465,9 @@ namespace WUInity
             SIM_DATA.EvacuationGoals = EvacuationGoal.LoadEvacuationGoalFiles();
             SIM_DATA.EvacuationGroups = EvacGroup.LoadEvacGroupFiles();
             EvacGroup.LoadEvacGroupIndices(); //needs correct amount of evac groups to load
-            GraphicalFireInput.LoadGraphicalFireInput();            
+            GraphicalFireInput.LoadGraphicalFireInput();     
+            
+            SIM_DATA.RoadTypeData = RoadTypeData.LoadRoadTypeData();
 
             UpdatePopulationResourceStatus();
             UpdateRoutingResourceStatus();

@@ -201,6 +201,27 @@ namespace WUInity
             }
         }
 
+        private Traffic.RoadTypeData _roadTypeData;
+        public Traffic.RoadTypeData RoadTypeData
+        {
+            get
+            {
+                if (_roadTypeData == null)
+                {
+                    _roadTypeData = Traffic.RoadTypeData.LoadRoadTypeData();
+                }
+                return _roadTypeData;
+            }
+
+            set
+            {
+                if (value != null)
+                {
+                    _roadTypeData = value;
+                }
+            }
+        }
+
         public SimulationData()
         {           
             

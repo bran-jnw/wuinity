@@ -614,7 +614,7 @@ namespace WUInity.Traffic
         public static float GetMaxCapacity(string highway)
         {
             float capacity = 50.0f;
-            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
+            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -629,8 +629,8 @@ namespace WUInity.Traffic
         //based on https://github.com/itinero/routing/blob/1764afc75db43a1459789592de175283f642123f/test/Itinero.Test/test-data/profiles/osm/car.lua
         public static float GetSpeedLimit(string highway)
         {
-            float speed = RoadTypes.default_value.speedLimit;
-            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
+            float speed = RoadTypeData.default_value.speedLimit;
+            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -645,8 +645,8 @@ namespace WUInity.Traffic
         //https://wiki.openstreetmap.org/wiki/Key:lanes#Assumptions
         public static int GetNumberOfLanes(string highway)
         {
-            int lanes = RoadTypes.default_value.lanes;
-            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
+            int lanes = RoadTypeData.default_value.lanes;
+            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -660,8 +660,8 @@ namespace WUInity.Traffic
 
         static bool CanReverseLanes(string highway)
         {
-            bool canReverseLanes = RoadTypes.default_value.canBeReversed;
-            RoadData[] r = WUInity.INPUT.traffic.roadTypes.roadData;
+            bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
+            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
