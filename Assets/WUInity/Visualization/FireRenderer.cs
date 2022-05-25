@@ -12,6 +12,10 @@ namespace WUInity.Visualization
 
         ComputeBuffer fireBuffer, sootBuffer;
         MeshRenderer fireMeshRenderer, sootMeshRenderer;
+        float lowerSootValue = 0.002608695f; //500 meters with C = 3
+        float upperSootValue = 0.260869565f; //5 meters with C = 3
+        float lowerFirelineIntensityValue = 0.0f;
+        float upperFirelineIntensityValue = 6000.0f;
 
 
         public Material GetFireMaterial()
@@ -73,8 +77,8 @@ namespace WUInity.Visualization
             fireMaterial.SetInteger("_CellsX", fireCellCountX);
             fireMaterial.SetInteger("_CellsY", fireCellCountY);
             fireMaterial.SetFloat("_LowerCutOff", 0.01f);
-            fireMaterial.SetFloat("_MinValue", 0.0f);
-            fireMaterial.SetFloat("_MaxValue", 6000.0f);
+            fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+            fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
             fireMaterial.SetFloat("_DataMultiplier", 1.0f);
             if (fireMeshRenderer == null)
             {
@@ -92,8 +96,8 @@ namespace WUInity.Visualization
             sootMaterial.SetInteger("_CellsX", sootCellCountX);
             sootMaterial.SetInteger("_CellsY", sootCellCountY);
             sootMaterial.SetFloat("_LowerCutOff", 0.0f);
-            sootMaterial.SetFloat("_MinValue", 0.002608695f); //500 meters with C = 3
-            sootMaterial.SetFloat("_MaxValue", 0.260869565f); //5 meters with C = 3
+            sootMaterial.SetFloat("_MinValue", lowerSootValue); //500 meters with C = 3
+            sootMaterial.SetFloat("_MaxValue", upperSootValue); //5 meters with C = 3
             sootMaterial.SetFloat("_DataMultiplier", 4539.13f); // 1.2 * 8700.0 / 2.3 = 4539.13 for optical density
             if (sootMeshRenderer == null)
             {
@@ -152,6 +156,46 @@ namespace WUInity.Visualization
             gO.transform.position += Vector3.up;
             gO.SetActive(setActive);
             return mR;
+        }
+
+        public float GetUpperFirelineIntensityLimit()
+        {
+            return upperFirelineIntensityValue;
+        }
+
+        public void SetUpperFirelineIntensityLimit(float value)
+        {
+            fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+        }
+
+        public float GetLowerFirelineIntensityLimit()
+        {
+            return lowerFirelineIntensityValue;
+        }
+
+        public void SetLowerFirelineIntensityLimit(float value)
+        {
+            fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+        }
+
+        public float GetUpperOpticalDensityLimit()
+        {
+            return upperSootValue;
+        }
+
+        public void SetUpperOpticalDensityLimit(float value)
+        {
+            sootMaterial.SetFloat("_MaxValue", value); //5 meters with C = 3
+        }
+
+        public float GetLowerOpticalDensityLimit()
+        {
+            return lowerSootValue;
+        }
+
+        public void SetLowerOpticalDensityLimit(float value)
+        {
+            sootMaterial.SetFloat("_MinValue", value); //5 meters with C = 3
         }
 
         void OnDisable()

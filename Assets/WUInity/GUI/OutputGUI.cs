@@ -148,10 +148,43 @@ namespace WUInity
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
-                {
+                {                    
                     WUInity.INSTANCE.StopSimulation();
                 }
                 ++buttonIndex;
+
+                LegendGUI();
+            }            
+        }
+
+        void LegendGUI()
+        {
+            if (WUInity.INPUT.runFireSim)
+            {
+                GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f - 305, 120, 300));
+
+                GUI.Box(new Rect(0, 0, 120, 300), "Fireline int.");
+                GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
+                string upperLimit = WUInity.FIRE_VISUALS.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
+                string lowerLimit = WUInity.FIRE_VISUALS.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
+
+                GUI.EndGroup();
+            }
+
+            if (WUInity.INPUT.runSmokeSim)
+            {
+                GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f + 5, 120, 300));
+
+                GUI.Box(new Rect(0, 0, 120, 300), "Optical dens.");
+                GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
+                string upperLimit = WUInity.FIRE_VISUALS.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
+                GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
+                string lowerLimit = WUInity.FIRE_VISUALS.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
+                GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
+
+                GUI.EndGroup();
             }            
         }
     }

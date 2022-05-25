@@ -219,7 +219,10 @@ namespace WUInity
                     input.runSmokeSim = false;
                 }
                 else
-                {    
+                {    if(_advectDiffuseSim != null)
+                    {
+                        _advectDiffuseSim.Release();
+                    }
                     _advectDiffuseSim = new Smoke.AdvectDiffuseModel(_fireMesh, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
                 }                
             }

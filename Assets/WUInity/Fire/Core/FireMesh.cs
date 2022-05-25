@@ -302,7 +302,7 @@ namespace WUInity.Fire
                 if (fireCells[i].cellState == FireCellState.Burning)
                 {
                     //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
-                    sootProduction[i] = 0.015f * (float)fireCells[i].GetTimestepBurntMass() * dtInversed;
+                    sootProduction[i] = Mathf.Max(0.0f, 0.015f * (float)fireCells[i].GetTimestepBurntMass() * dtInversed);
                 }
             }
 

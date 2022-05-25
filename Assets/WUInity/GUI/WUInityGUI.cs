@@ -26,7 +26,9 @@ namespace WUInity
             }
         }
 
-        [SerializeField] GUIStyle style;
+        [SerializeField] Texture2D verticalColorGradient;
+        [SerializeField] GUIStyle styleAlignedRight; 
+        [SerializeField] GUIStyle styleAlignedCenter;
 
         public enum ActiveMenu { None, MainMenu, Map, Population, Evac, Traffic, Farsite, Output, Fire }
         ActiveMenu menuChoice = ActiveMenu.MainMenu;

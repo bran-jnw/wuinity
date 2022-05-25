@@ -298,8 +298,10 @@ namespace WUInity.Fire
             //TODO: limit area based on actual distance (slope correction)
             currentBurnArea = System.Math.Min(currentBurnArea, fireMesh.cellSize.x * fireMesh.cellSize.y);
 
-            //burnt mass is based on integral from old area and new area
-            timestepBurntMass = fireMesh.dt * ((currentBurnArea - oldBurnArea) * 0.5 + oldBurnArea) * reactionIntensity / 18608.0;            
+            //burnt mass is based on half-point integral from old area and new area
+            //timestepBurntMass = fireMesh.dt * (currentBurnArea - oldBurnArea) * 0.5 * reactionIntensity / 18608.0;
+            //old way assumes everything keeps burning, not just flame front, this does not make sense however, instead add old area as smouldering as long as fuel mass is present
+            timestepBurntMass = fireMesh.dt * ((currentBurnArea - oldBurnArea) * 0.5 + oldBurnArea) * reactionIntensity / 18608.0;  
             fuelMassGround -= timestepBurntMass;
             //MonoBehaviour.print("Burn area: " + currentBurnArea + ", delta mass: " + timestepBurntMass + ", fuel mass left: " + fuelMassGround);                                 
         }

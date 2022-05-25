@@ -742,7 +742,7 @@ namespace WUInity
         {
             WUI_LOG("LOG: Simulation started, please wait.");            
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
-            SetEvacDataPlane(true);
+            SetEvacDataPlane(true);            
             SIM.StartSimulation();
 
             //this needs to be done AFTER simulation has started since we need some data from the sim
@@ -755,6 +755,8 @@ namespace WUInity
             FIRE_VISUALS.CreateBuffers(INPUT.runFireSim, INPUT.runSmokeSim);
             renderFireSpread = INPUT.runFireSim;
             renderSmokeDispersion = INPUT.runSmokeSim;
+
+            ShowAllRuntimeVisuals();
         }
 
         public void RunAllCasesInFolder(string folder)
@@ -772,6 +774,7 @@ namespace WUInity
 
         public void StopSimulation()
         {
+            HideAllRuntimeVisuals();
             SIM.StopSim("STOP: Stopped simulation as requested by user.");
         }
 
@@ -1029,6 +1032,22 @@ namespace WUInity
             }            
         }
 
+        public void ShowAllRuntimeVisuals()
+        {
+            SetHouseholdRendering(true);
+            SetTrafficRendering(true);
+            SetFireSpreadRendering(true);
+            SetSootRendering(true);
+        }
+
+        public void HideAllRuntimeVisuals()
+        {
+            SetHouseholdRendering(false);
+            SetTrafficRendering(false);
+            SetFireSpreadRendering(false);
+            SetSootRendering(false);
+        }
+
         public void DisplayPopulation()
         {
             SetDataPlaneTexture(POPULATION.GetPopulationTexture());
@@ -1091,10 +1110,26 @@ namespace WUInity
             return false;
         }
 
+        public void SetHouseholdRendering(bool enable)
+        {
+            if (renderHouseholds != enable)
+            {
+                ToggleHouseholdRendering();
+            }
+        }
+
         public bool ToggleHouseholdRendering()
         {
             renderHouseholds = !renderHouseholds;
             return renderHouseholds;
+        }
+
+        public void SetTrafficRendering(bool enable)
+        {
+            if(renderTraffic != enable)
+            {
+                ToggleTrafficRendering();
+            }
         }
 
         public bool ToggleTrafficRendering()
@@ -1103,10 +1138,26 @@ namespace WUInity
             return renderTraffic;
         }
 
+        public void SetSootRendering(bool enable)
+        {
+            if(enable != renderSmokeDispersion)
+            {
+                ToggleSootRendering();
+            }
+        }
+
         public bool ToggleSootRendering()
         {
             renderSmokeDispersion = FIRE_VISUALS.ToggleSoot();
             return renderSmokeDispersion;
+        }
+
+        public void SetFireSpreadRendering(bool enable)
+        {
+            if(enable != renderFireSpread)
+            {
+                ToggleFireSpreadRendering();
+            }
         }
 
         public bool ToggleFireSpreadRendering()

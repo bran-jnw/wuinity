@@ -94,7 +94,7 @@ namespace WUInity.Traffic
 
         private static void SaveRoadTypeData(RoadTypeData rTD)
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".roads");
+            string path = Path.Combine("default.roads");
             string json = JsonUtility.ToJson(rTD, true);
             File.WriteAllText(path, json);            
         }
@@ -114,7 +114,7 @@ namespace WUInity.Traffic
             {
                 results = new RoadTypeData();
                 SaveRoadTypeData(results);
-                WUInity.INPUT.traffic.roadTypesFile = WUInity.INPUT.simName;
+                WUInity.INPUT.traffic.roadTypesFile = "default";
             }
 
             return results;
