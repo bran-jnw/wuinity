@@ -14,8 +14,13 @@ namespace WUInity
             public string text;
             public Rect rect;
 
-            public MenuButton(int buttonIndex, int buttonHeight, string text)
+            static int MENU_COUNT;
+
+            public MenuButton(int buttonHeight, string text)
             {
+                int buttonIndex = MENU_COUNT;
+                ++MENU_COUNT;
+
                 rect = new Rect();
                 this.text = text;
 
@@ -24,13 +29,18 @@ namespace WUInity
                 this.rect.height = buttonHeight;
                 this.rect.width = 100;// text.Length * 8;
             }
+
+            public bool Pressed()
+            {
+                return GUI.Button(rect, text);
+            }
         }
 
         [SerializeField] Texture2D verticalColorGradient;
         [SerializeField] GUIStyle styleAlignedRight; 
         [SerializeField] GUIStyle styleAlignedCenter;
 
-        public enum ActiveMenu { None, MainMenu, Map, Population, Evac, Traffic, Farsite, Output, Fire }
+        public enum ActiveMenu { None, MainMenu, Map, Population, Evac, Traffic, Farsite, Output, Fire, Routing }
         ActiveMenu menuChoice = ActiveMenu.MainMenu;
 
         int menuBarHeight;
@@ -46,27 +56,42 @@ namespace WUInity
         const int consoleHeight = 160;
 
 
-        MenuButton mainMenu = new MenuButton(0, buttonHeight, "Main Menu");
-        MenuButton mapMenu = new MenuButton(1, buttonHeight, "Map");
-        MenuButton populationMenu = new MenuButton(2, buttonHeight, "Population");
+        MenuButton mainMenu;
+        MenuButton mapMenu;
+        MenuButton populationMenu;
         //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
-        MenuButton fireMenu = new MenuButton(3, buttonHeight, "Fire spread");
-        MenuButton evacMenu = new MenuButton(4, buttonHeight, "Evacuation");
-        MenuButton trafficMenu = new MenuButton(5, buttonHeight, "Traffic");
-        MenuButton outputMenu = new MenuButton(6, buttonHeight, "Output");
-        MenuButton hideMenu = new MenuButton(7, buttonHeight, "Hide Menu");
-        MenuButton exitMenu = new MenuButton(8, buttonHeight, "Exit");
+        MenuButton fireMenu;
+        MenuButton evacMenu;
+        MenuButton routingMenu;
+        MenuButton trafficMenu;
+        MenuButton outputMenu;
+        MenuButton hideMenu;
+        MenuButton exitMenu;
+        MenuButton swapGUI;
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp" };
         string[] fuelModelsFilter = new string[] { ".fuel" };
-        string[] osmFilter = new string[] { ".pbf" };
+        
         string[] populationFilter = new string[] { ".pop" };
         string[] gpwFilter = new string[] { ".gpw" };
 
         private void Start()
         {
             menuBarHeight = Screen.height - consoleHeight;
+
+            mainMenu = new MenuButton(buttonHeight, "Main Menu");
+            mapMenu = new MenuButton(buttonHeight, "Map");
+            populationMenu = new MenuButton(buttonHeight, "Population");
+            //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
+            fireMenu = new MenuButton(buttonHeight, "Fire spread");
+            evacMenu = new MenuButton(buttonHeight, "Evacuation");
+            routingMenu = new MenuButton(buttonHeight, "Routing");
+            trafficMenu = new MenuButton(buttonHeight, "Traffic");
+            outputMenu = new MenuButton(buttonHeight, "Output");
+            hideMenu = new MenuButton(buttonHeight, "Hide Menu");
+            exitMenu = new MenuButton(buttonHeight, "Exit");
+            swapGUI = new MenuButton(buttonHeight, "New GUI");
         }
 
         void OnGUI()
@@ -84,7 +109,7 @@ namespace WUInity
 
             if(WUInity.DATA_STATUS.HaveInput)
             {
-                if (GUI.Button(mapMenu.rect, mapMenu.text) && !WUInity.SIM.IsRunning)
+                if (mapMenu.Pressed() && !WUInity.SIM.IsRunning)
                 {                    
                     menuChoice = ActiveMenu.Map;
                 }
@@ -98,6 +123,12 @@ namespace WUInity
                 if (GUI.Button(evacMenu.rect, evacMenu.text) && !WUInity.SIM.IsRunning)
                 {
                     menuChoice = ActiveMenu.Evac;
+                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                }
+
+                if (GUI.Button(routingMenu.rect, routingMenu.text) && !WUInity.SIM.IsRunning)
+                {
+                    menuChoice = ActiveMenu.Routing;
                     WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                 }
 
@@ -121,7 +152,7 @@ namespace WUInity
                         WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
                     }
                 }
-            }      
+            }    
             
             //if menu has changed we might have to kill a few things
             if(lastMenu != menuChoice)
@@ -132,7 +163,12 @@ namespace WUInity
             if (GUI.Button(exitMenu.rect, exitMenu.text))
             {
                 Application.Quit();
-            }            
+            }
+
+            if (GUI.Button(swapGUI.rect, swapGUI.text))
+            {
+                this.enabled = false;
+            }
 
             //call correct menu
             if (menuChoice == ActiveMenu.MainMenu)
@@ -150,6 +186,10 @@ namespace WUInity
             else if (menuChoice == ActiveMenu.Evac)
             {
                 EvacMenu();
+            }
+            else if (menuChoice == ActiveMenu.Routing)
+            {
+                RoutingMenu();
             }
             else if (menuChoice == ActiveMenu.Traffic)
             {

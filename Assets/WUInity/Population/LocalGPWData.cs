@@ -79,14 +79,14 @@ namespace WUInity.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gpw");
             System.IO.File.WriteAllLines(path, data);
         }
 
         public bool LoadLocalGPWDataFromFile()
         {
             //first try if local filtered file exists
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gpw");
             bool success = false;
             if (File.Exists(path))
             {                
@@ -146,7 +146,7 @@ namespace WUInity.Population
         private bool LoadLocalGPWData()
         {
             //string[] d = new string[13];
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gpw");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gpw");
 
             //StreamReader sr = new StreamReader(path);
 

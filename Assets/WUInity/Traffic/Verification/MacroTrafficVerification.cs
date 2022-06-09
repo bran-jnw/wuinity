@@ -10,7 +10,7 @@ namespace WUInity.Traffic
     {
         public static void RunTrafficVerificationTests()
         {
-            SaveLoadWUI.LoadInput("traffic_verification");
+            WUInityInput.LoadInput("traffic_verification");
             TrafficInput trafficOptions = WUInity.INPUT.traffic;
             WUInityInput wuinityOptions = WUInity.INPUT;
 
@@ -38,36 +38,36 @@ namespace WUInity.Traffic
             trafficOptions.stallSpeed = 1f;
             trafficOptions.backGroundDensityMinMax = Vector2.zero;
 
-            WUInity.SIM_DATA.EvacuationGoals= new EvacuationGoal[1];
+            WUInity.RUNTIME_DATA.EvacuationGoals= new EvacuationGoal[1];
             SimpleTrafficInjection[] trafficInjections = new SimpleTrafficInjection[1];            
 
             //test 1a
-            wuinityOptions.simName = "T1a";                        
+            wuinityOptions.simDataName = "T1a";                        
             trafficInjections[0] = new SimpleTrafficInjection(1, node2.latLong, node4);
-            WUInity.SIM_DATA.EvacuationGoals[0] = node4;
-            float oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node4;
+            float oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
             for (int i = 0; i < 5; i++)
             {
-                WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = 30f + i * 20f;
-                wuinityOptions.simName = "T1a_" +(int)WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
+                WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = 30f + i * 20f;
+                wuinityOptions.simDataName = "T1a_" +(int)WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
                 RunTrafficVerificationSimulation(trafficInjections);
                 //reset
                 ResetNodes(nodes);
             }
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
 
             //test 1b
-            wuinityOptions.simName = "T1b";
+            wuinityOptions.simDataName = "T1b";
             trafficInjections[0] = new SimpleTrafficInjection(1, node2.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
             ResetNodes(nodes);
 
             //test 2
-            wuinityOptions.simName= "T2";
+            wuinityOptions.simDataName= "T2";
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
             Vector2 oldDens = trafficOptions.backGroundDensityMinMax;
             trafficOptions.backGroundDensityMinMax = new Vector2(37.5f, 37.5f); //50% load 75/2 = 37.5            
             RunTrafficVerificationSimulation(trafficInjections);
@@ -77,14 +77,14 @@ namespace WUInity.Traffic
 
             //test 3
             trafficInjections[0] = new SimpleTrafficInjection(1, node2.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
             //save for later
-            int oldLanes = WUInity.SIM_DATA.RoadTypeData.roadData[4].lanes;
+            int oldLanes = WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].lanes;
             //residential higher speed
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
             //more lanes
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].lanes = 2;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].lanes = 2;
             for (int i = 0; i < 5; i++)
             {
                 float carDensity = (i * 12.5f); //residential has capacity of 50 cars/lane/km
@@ -93,18 +93,18 @@ namespace WUInity.Traffic
                 {
                     cars = 1;
                 }
-                wuinityOptions.simName= "T3_dens_" + carDensity;
+                wuinityOptions.simDataName= "T3_dens_" + carDensity;
                 trafficInjections[0].cars = cars;                
                 RunTrafficVerificationSimulation(trafficInjections);
                 ResetNodes(nodes);
             }
             //reset back to old lanes
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].lanes = oldLanes;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].lanes = oldLanes;
             ResetNodes(nodes);
 
             //test 4, speed/density
-            WUInity.SIM_DATA.EvacuationGoals[0] = node7;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node7;
             trafficInjections = new SimpleTrafficInjection[3];
             //point 1
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node7);
@@ -113,9 +113,9 @@ namespace WUInity.Traffic
             //point 3
             trafficInjections[2] = new SimpleTrafficInjection(1, node6.latLong, node7);
             //save for later
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit;
             //more lanes
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit = 70f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit = 70f;
 
             for (int i = 0; i < 5; i++)
             {
@@ -127,13 +127,13 @@ namespace WUInity.Traffic
                 trafficInjections[0].cars = cars;
                 trafficInjections[1].cars = cars;
                 trafficInjections[2].cars = cars;
-                wuinityOptions.simName= "T4_dens_" + cars;
+                wuinityOptions.simDataName= "T4_dens_" + cars;
                 //run
                 RunTrafficVerificationSimulation(trafficInjections);
                 ResetNodes(nodes);
             }
             //reset
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit = oldSpeedLimit;
             ResetNodes(nodes);
 
             //test 5, driving in smoke
@@ -141,12 +141,12 @@ namespace WUInity.Traffic
 
             //T6
             //car density change
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
             trafficInjections = new SimpleTrafficInjection[1];
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node5);
             //save for later
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit = 70f;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit = 70f;
             for (int i = 0; i < 5; i++)
             {
                 int cars = Mathf.RoundToInt(i * 18.75f); //1 lane, 1000 m road
@@ -155,30 +155,30 @@ namespace WUInity.Traffic
                     cars = 1;
                 }
                 trafficInjections[0].cars = cars;
-                wuinityOptions.simName= "T6_dens_" + cars;
+                wuinityOptions.simDataName= "T6_dens_" + cars;
                 //run
                 RunTrafficVerificationSimulation(trafficInjections);
                 ResetNodes(nodes);
             }
             //reset
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit = oldSpeedLimit;
             ResetNodes(nodes);
 
             //T7, change residential settings 
-            wuinityOptions.simName = "T7";
+            wuinityOptions.simDataName = "T7";
             trafficInjections = new SimpleTrafficInjection[1];
             trafficInjections[0] = new SimpleTrafficInjection(2, node4.latLong, node9);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[2];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node8;
-            WUInity.SIM_DATA.EvacuationGoals[1] = node9;
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
-            WUInity.SIM_DATA.RoadTypeData.roadData[20].speedLimit = 90f;
-            WUInity.SIM_DATA.RoadTypeData.roadData[21].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[2];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node8;
+            WUInity.RUNTIME_DATA.EvacuationGoals[1] = node9;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[20].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[21].speedLimit = 90f;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.EvacGroup;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Fastest;
             ResetNodes(nodes);
 
@@ -187,10 +187,10 @@ namespace WUInity.Traffic
             //T9 - acceleration, "not possible" (not implemented)
 
             //T10 - road accident
-            wuinityOptions.simName = "T10_stall_speed_1";
+            wuinityOptions.simDataName = "T10_stall_speed_1";
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[1];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[1];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
             Traffic.MacroTrafficSim.TrafficAccident accident = new Traffic.MacroTrafficSim.TrafficAccident(10f, 1000000f);
             Traffic.MacroTrafficSim.TrafficEvent[] events = new Traffic.MacroTrafficSim.TrafficEvent[1];
             events[0] = accident;
@@ -202,7 +202,7 @@ namespace WUInity.Traffic
             float oldStallSpeed = wuinityOptions.traffic.stallSpeed;
             float oldMaxSimTime = wuinityOptions.maxSimTime;
             wuinityOptions.traffic.stallSpeed = 0f;
-            wuinityOptions.simName = "T10_stall_speed_0";
+            wuinityOptions.simDataName = "T10_stall_speed_0";
             wuinityOptions.maxSimTime = 3600.0f;
             RunTrafficVerificationSimulation(trafficInjections, events);
             ResetNodes(nodes);
@@ -210,23 +210,23 @@ namespace WUInity.Traffic
             wuinityOptions.maxSimTime = oldMaxSimTime;
 
             //T11 - intersection
-            wuinityOptions.simName = "T11";
+            wuinityOptions.simDataName = "T11";
             trafficInjections[0] = new SimpleTrafficInjection(1, node2.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
             ResetNodes(nodes);
 
             //T12 - forced destination
-            wuinityOptions.simName = "T12";
+            wuinityOptions.simDataName = "T12";
             trafficInjections[0] = new SimpleTrafficInjection(1, node5.latLong, node7);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[2];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node4;
-            WUInity.SIM_DATA.EvacuationGoals[1] = node7;
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[2];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node4;
+            WUInity.RUNTIME_DATA.EvacuationGoals[1] = node7;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.EvacGroup;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
@@ -234,14 +234,14 @@ namespace WUInity.Traffic
             ResetNodes(nodes);
 
             //T13 - destination choice in traffic
-            wuinityOptions.simName = "T13_fastest";
+            wuinityOptions.simDataName = "T13_fastest";
             trafficInjections[0] = new SimpleTrafficInjection(1, node7.latLong, node10);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[2];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node10;
-            WUInity.SIM_DATA.EvacuationGoals[1] = node13;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[2];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node10;
+            WUInity.RUNTIME_DATA.EvacuationGoals[1] = node13;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Fastest;
             RunTrafficVerificationSimulation(trafficInjections);
-            wuinityOptions.simName = "T13_closest";
+            wuinityOptions.simDataName = "T13_closest";
             ResetNodes(nodes);
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Closest;            
             RunTrafficVerificationSimulation(trafficInjections);
@@ -250,13 +250,13 @@ namespace WUInity.Traffic
             ResetNodes(nodes);
 
             //T14 - route choice in traffic
-            wuinityOptions.simName = "T14_fastest";
+            wuinityOptions.simDataName = "T14_fastest";
             trafficInjections[0] = new SimpleTrafficInjection(1, node7.latLong, node11);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[1];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node11;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[1];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node11;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Fastest;
             RunTrafficVerificationSimulation(trafficInjections);
-            wuinityOptions.simName = "T14_closest";
+            wuinityOptions.simDataName = "T14_closest";
             ResetNodes(nodes);
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Closest;
             RunTrafficVerificationSimulation(trafficInjections);
@@ -265,16 +265,16 @@ namespace WUInity.Traffic
             ResetNodes(nodes);
 
             //T15
-            wuinityOptions.simName = "T15a";
+            wuinityOptions.simDataName = "T15a";
             trafficInjections[0] = new SimpleTrafficInjection(2, node4.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[1];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;            
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[1];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;            
             RunTrafficVerificationSimulation(trafficInjections);
-            wuinityOptions.simName = "T15b";
+            wuinityOptions.simDataName = "T15b";
             ResetNodes(nodes);
             trafficInjections[0] = new SimpleTrafficInjection(50, node4.latLong, node5);
             RunTrafficVerificationSimulation(trafficInjections);
-            wuinityOptions.simName = "T15c";
+            wuinityOptions.simDataName = "T15c";
             ResetNodes(nodes);
             trafficInjections[0] = new SimpleTrafficInjection(100, node4.latLong, node5);
             RunTrafficVerificationSimulation(trafficInjections);
@@ -285,8 +285,8 @@ namespace WUInity.Traffic
 
             //WT 2, lane reversal
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node5);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[1];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[1];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
             Traffic.MacroTrafficSim.ReverseLanes reverse = new Traffic.MacroTrafficSim.ReverseLanes(30f, 1000000f);
             events = new Traffic.MacroTrafficSim.TrafficEvent[1];
             events[0] = reverse;
@@ -298,7 +298,7 @@ namespace WUInity.Traffic
                     cars = 1;
                 }
                 trafficInjections[0].cars = cars;
-                wuinityOptions.simName = "WT2_dens_" + cars;
+                wuinityOptions.simDataName = "WT2_dens_" + cars;
                 //run
                 RunTrafficVerificationSimulation(trafficInjections, events);
                 ResetNodes(nodes);
@@ -306,40 +306,40 @@ namespace WUInity.Traffic
             }
 
             //WT3 - destination loss
-            wuinityOptions.simName = "WT3";
+            wuinityOptions.simDataName = "WT3";
             trafficInjections[0] = new SimpleTrafficInjection(1, node2.latLong, node8);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[2];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node8;
-            WUInity.SIM_DATA.EvacuationGoals[1] = node9;
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
-            WUInity.SIM_DATA.RoadTypeData.roadData[20].speedLimit = 90f;
-            WUInity.SIM_DATA.RoadTypeData.roadData[21].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[2];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node8;
+            WUInity.RUNTIME_DATA.EvacuationGoals[1] = node9;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[20].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[21].speedLimit = 90f;
             BlockGoalEvent destLoss = new BlockGoalEvent(60f, 0);
             BlockGoalEvent[] bGEs = new BlockGoalEvent[1];
             bGEs[0] = destLoss;
             events[0] = accident;
             RunTrafficVerificationSimulation(trafficInjections, null, bGEs);
             //reset
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
             ResetNodes(nodes);
 
             //WT4 - full refuge
-            wuinityOptions.simName = "WT4";
+            wuinityOptions.simDataName = "WT4";
             trafficOptions.routeChoice = TrafficInput.RouteChoice.EvacGroup;
             trafficInjections[0] = new SimpleTrafficInjection(2, node2.latLong, node8);
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[2];
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[2];
             node8.maxCars = 1;            
             node8.goalType = EvacGoalType.Refugee;
-            WUInity.SIM_DATA.EvacuationGoals[0] = node8;
-            WUInity.SIM_DATA.EvacuationGoals[1] = node9;
-            oldSpeedLimit = WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
-            WUInity.SIM_DATA.RoadTypeData.roadData[20].speedLimit = 90f;
-            WUInity.SIM_DATA.RoadTypeData.roadData[21].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node8;
+            WUInity.RUNTIME_DATA.EvacuationGoals[1] = node9;
+            oldSpeedLimit = WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[20].speedLimit = 90f;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[21].speedLimit = 90f;
             RunTrafficVerificationSimulation(trafficInjections);
             //reset
-            WUInity.SIM_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[11].speedLimit = oldSpeedLimit;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Fastest;
             node8.maxCars = -1;
             node8.goalType = EvacGoalType.Exit;
@@ -355,12 +355,12 @@ namespace WUInity.Traffic
             EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2D(0.0, 0.0090009), Color.white);
 
             //modify speedlimit on primary since we are using the same osm data as the other ones that use 90 km/h
-            float tempValue = WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit;
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit = 70.0f;
+            float tempValue = WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit = 70.0f;
 
             Vector2D startPos = node4.latLong;//.0045, 0.0009 is on the far end with small road
-            WUInity.SIM_DATA.EvacuationGoals = new EvacuationGoal[1];
-            WUInity.SIM_DATA.EvacuationGoals[0] = node5;
+            WUInity.RUNTIME_DATA.EvacuationGoals = new EvacuationGoal[1];
+            WUInity.RUNTIME_DATA.EvacuationGoals[0] = node5;
 
             SimpleTrafficInjection[] trafficInjections = new SimpleTrafficInjection[1];
             trafficInjections[0] = new SimpleTrafficInjection(1, startPos, node5);
@@ -389,7 +389,7 @@ namespace WUInity.Traffic
                     }
                     trafficOptions.opticalDensity = D_L;
 
-                    wuinityOptions.simName= "T5_dens_" + carDensity + "_D_L_" + D_L.ToString("0.00");
+                    wuinityOptions.simDataName= "T5_dens_" + carDensity + "_D_L_" + D_L.ToString("0.00");
 
                     RunTrafficVerificationSimulation(trafficInjections);
                     node5.ResetPeopleAndCars();
@@ -398,7 +398,7 @@ namespace WUInity.Traffic
             }
 
             //reset changes
-            WUInity.SIM_DATA.RoadTypeData.roadData[4].speedLimit = tempValue;
+            WUInity.RUNTIME_DATA.RoadTypeData.roadData[4].speedLimit = tempValue;
             trafficOptions.opticalDensity = 0f;
             trafficOptions.visibilityAffectsSpeed = false;
         }
@@ -416,7 +416,7 @@ namespace WUInity.Traffic
             TrafficInput trafficOptions = WUInity.INPUT.traffic;
             WUInityInput wuinityOptions = WUInity.INPUT;
 
-            WUInity.SIM_DATA.LoadRouterDatabase();
+            //WUInity.SIM_DATA.LoadRouterDatabase();
 
             RouteCreator routeCreator = new RouteCreator();
             routeCreator.SetValidGoals();
@@ -431,7 +431,7 @@ namespace WUInity.Traffic
                 }
             }            
 
-            Router router = new Router(WUInity.SIM_DATA.GetRouterDb());
+            Router router = new Router(WUInity.RUNTIME_DATA.GetRouterDb());
             Itinero.Profiles.Profile p;
             if (trafficOptions.routeChoice == TrafficInput.RouteChoice.Closest)
             {
@@ -480,9 +480,9 @@ namespace WUInity.Traffic
                 time += wuinityOptions.deltaTime;
 
                 bool allGoalsBlocked = true;
-                for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
                 {
-                    if(!WUInity.SIM_DATA.EvacuationGoals[i].blocked)
+                    if(!WUInity.RUNTIME_DATA.EvacuationGoals[i].blocked)
                     {
                         allGoalsBlocked = false;
                         break;
@@ -491,7 +491,7 @@ namespace WUInity.Traffic
 
                 if(allGoalsBlocked)
                 {
-                    WUInity.WUI_LOG("All goals blocked, aborting verification simulation " + wuinityOptions.simName);
+                    WUInity.WUI_LOG("All goals blocked, aborting verification simulation " + wuinityOptions.simDataName);
                     break;
                 }
             }
@@ -504,16 +504,16 @@ namespace WUInity.Traffic
         static RouteData GetRoute(Vector2D startPos, Router router, Itinero.Profiles.Profile p, EvacuationGoal desiredGoal)
         {
             TrafficInput trafficOptions = WUInity.INPUT.traffic;
-            RouteCollection rC = new RouteCollection(WUInity.SIM_DATA.EvacuationGoals.Length);
-            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
+            RouteCollection rC = new RouteCollection(WUInity.RUNTIME_DATA.EvacuationGoals.Length);
+            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
             {
-                Vector2D endPos = WUInity.SIM_DATA.EvacuationGoals[i].latLong;
+                Vector2D endPos = WUInity.RUNTIME_DATA.EvacuationGoals[i].latLong;
 
                 RouterPoint start = router.Resolve(p, (float)startPos.x, (float)startPos.y, 100f);
                 RouterPoint end = router.Resolve(p, (float)endPos.x, (float)endPos.y, 100f);
 
                 Route route = router.Calculate(p, start.Latitude, start.Longitude, end.Latitude, end.Longitude);
-                RouteData routeData = new RouteData(route, WUInity.SIM_DATA.EvacuationGoals[i]);
+                RouteData routeData = new RouteData(route, WUInity.RUNTIME_DATA.EvacuationGoals[i]);
                 rC.routes[i] = routeData;
             }
 

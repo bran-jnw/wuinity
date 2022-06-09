@@ -9,7 +9,7 @@ namespace WUInity
     {
         public static void SaveGraphicalFireInput()
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gfi");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gfi");
 
             using (FileStream fs = new FileStream(path, FileMode.Create))
             {
@@ -17,10 +17,10 @@ namespace WUInity
                 {
                     bw.Write(WUInity.SIM.FireMesh().cellCount.x);
                     bw.Write(WUInity.SIM.FireMesh().cellCount.y);
-                    bw.Write(GetBytes(WUInity.SIM_DATA.wuiAreaIndices));
-                    bw.Write(GetBytes(WUInity.SIM_DATA.randomIgnitionIndices));
-                    bw.Write(GetBytes(WUInity.SIM_DATA.initialIgnitionIndices));
-                    bw.Write(GetBytes(WUInity.SIM_DATA.triggerBufferIndices));
+                    bw.Write(GetBytes(WUInity.RUNTIME_DATA.wuiAreaIndices));
+                    bw.Write(GetBytes(WUInity.RUNTIME_DATA.randomIgnitionIndices));
+                    bw.Write(GetBytes(WUInity.RUNTIME_DATA.initialIgnitionIndices));
+                    bw.Write(GetBytes(WUInity.RUNTIME_DATA.triggerBufferIndices));
                 }
             }
         }
@@ -41,7 +41,7 @@ namespace WUInity
 
         public static void LoadGraphicalFireInput()
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".gfi"); //graphical fire input
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gfi"); //graphical fire input
 
             if(File.Exists(path))
             {
@@ -68,10 +68,10 @@ namespace WUInity
                             b = br.ReadBytes(dataSize * sizeof(bool));
                             bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                            WUInity.SIM_DATA.UpdateWUIArea(wuiAreaIndices);
-                            WUInity.SIM_DATA.UpdateRandomIgnitionIndices(randomIgnitionArea);
-                            WUInity.SIM_DATA.UpdateInitialIgnitionIndices(initialIgnitionIndices);
-                            WUInity.SIM_DATA.UpdateTriggerBufferIndices(triggerBufferIndices);
+                            WUInity.RUNTIME_DATA.UpdateWUIArea(wuiAreaIndices);
+                            WUInity.RUNTIME_DATA.UpdateRandomIgnitionIndices(randomIgnitionArea);
+                            WUInity.RUNTIME_DATA.UpdateInitialIgnitionIndices(initialIgnitionIndices);
+                            WUInity.RUNTIME_DATA.UpdateTriggerBufferIndices(triggerBufferIndices);
                         }
                         else
                         {
@@ -90,10 +90,10 @@ namespace WUInity
 
         private static void CreateDefaultInputs()
         {
-            WUInity.SIM_DATA.UpdateWUIArea(null);
-            WUInity.SIM_DATA.UpdateRandomIgnitionIndices(null);
-            WUInity.SIM_DATA.UpdateInitialIgnitionIndices(null);
-            WUInity.SIM_DATA.UpdateTriggerBufferIndices(null);
+            WUInity.RUNTIME_DATA.UpdateWUIArea(null);
+            WUInity.RUNTIME_DATA.UpdateRandomIgnitionIndices(null);
+            WUInity.RUNTIME_DATA.UpdateInitialIgnitionIndices(null);
+            WUInity.RUNTIME_DATA.UpdateTriggerBufferIndices(null);
             SaveGraphicalFireInput();
         }
     }

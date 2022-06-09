@@ -102,9 +102,9 @@ namespace WUInity
             }
             else
             {
-                for (int i = 0; i < WUInity.INPUT.evac.evacGroupFiles.Length; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGroups.Length; i++)
                 {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Define group " + (i + 1)))
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.EvacuationGroups[i].Name))
                     {
                         WUInity.PAINTER.SetEvacGroupColor(i);
                     }

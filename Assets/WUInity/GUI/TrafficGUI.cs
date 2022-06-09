@@ -6,9 +6,10 @@ namespace WUInity
 {
     public partial class WUInityGUI
     {
-        string opticalDensity, stallSpeed, borderSize;
+        string opticalDensity, stallSpeed;
         bool trafficMenuDirty = true;
-        string[] opticalDensityFilter = new string[] { ".odr" };
+        string[] opticalDensityFilter = new string[] { ".odr" };        
+
 
         void TrafficMenu()
         {
@@ -18,86 +19,11 @@ namespace WUInity
                 trafficMenuDirty = false;
                 stallSpeed = tO.stallSpeed.ToString();
                 opticalDensity = tO.opticalDensity.ToString();
-                borderSize = tO.osmBorderSize.ToString();
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
-
-            //router db
-            string routerStatus = "RouterDb NOT loaded";
-            string loadRouterText = "Load router database";
-            if (WUInity.DATA_STATUS.RouterDbLoaded)
-            {
-                routerStatus = "RouterDb loaded";
-                loadRouterText = "Re-load router database";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routerStatus);
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouterText))
-            {
-                ParseTrafficInput();
-                WUInity.INSTANCE.UpdateRoutingResourceStatus();
-            }
-            ++buttonIndex;
-
-            //route collection
-            ++buttonIndex;
-            string routeCollectionStatus = "Pre-calc routes NOT loaded";
-            string loadRouteCollectionsText = "Load pre-calc routes";
-            if (WUInity.DATA_STATUS.RouteCollectionLoaded)
-            {                
-                routeCollectionStatus = "Pre-calc routes loaded";
-                loadRouteCollectionsText = "Re-load pre-calc routes";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeCollectionStatus);
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), loadRouteCollectionsText))
-            {
-                ParseTrafficInput();
-                WUInity.DATA_STATUS.RouteCollectionLoaded =  WUInity.SIM_DATA.LoadRouteCollections();
-            }
-            ++buttonIndex;
-
-            //OSM
-            ++buttonIndex;
-            string osmStatus = "OSM file NOT valid";
-            if (WUInity.DATA_STATUS.OsmFileValid)
-            {
-                osmStatus = "OSM file valid";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), osmStatus);
-            ++buttonIndex;
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM source file"))
-            {
-                OpenSetOSMFile();
-            }
-            ++buttonIndex;            
             
-            if(WUInity.DATA_STATUS.OsmFileValid)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM border size [m]");
-                ++buttonIndex;
-                borderSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), borderSize);
-                ++buttonIndex;
-
-                string buildRouterText = "Build router database";
-                if(WUInity.DATA_STATUS.RouterDbLoaded)
-                {
-                    buildRouterText = "Re-build router database";
-                }
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), buildRouterText))
-                {
-                    File.Delete(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simName + ".routerdb"));
-                    WUInity.SIM_DATA.LoadRouterDatabase();
-                }
-                ++buttonIndex;
-            }
-
             //settings
-            ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Capacity speed");
             ++buttonIndex;
             stallSpeed = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), stallSpeed);
@@ -145,25 +71,10 @@ namespace WUInity
             }
 
             TrafficInput tO = WUInity.INPUT.traffic;
-            ItineroInput iO = WUInity.INPUT.itinero;
 
             float.TryParse(stallSpeed, out tO.stallSpeed);
             float.TryParse(opticalDensity, out tO.opticalDensity);
-            float.TryParse(borderSize, out tO.osmBorderSize);
-        }
-
-        void OpenSetOSMFile()
-        {
-            FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(SetOSMFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Set OSM file", "Set");
-        }
-
-        void SetOSMFile(string[] paths)
-        {
-            WUInity.INPUT.traffic.osmFile = paths[0];
-            WUInity.INSTANCE.UpdateOSMResourceStatus();
-        }
+        }        
 
         void OpenLoadOpticalDensityFile()
         {
@@ -176,7 +87,7 @@ namespace WUInity
         {
             WUInityInput wO = WUInity.INPUT;
             wO.traffic.opticalDensityFile = paths[0];
-            WUInity.SIM_DATA.LoadOpticalDensityFile();
+            WUInity.RUNTIME_DATA.LoadOpticalDensityFile();
         }
     }
 }

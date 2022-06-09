@@ -137,10 +137,10 @@ namespace WUInity.Traffic
             output = new List<string>();
             
             string start = "Time(s),Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
-            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; ++i)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; ++i)
             {
-                start += ", Goal: " + WUInity.SIM_DATA.EvacuationGoals[i].name;
-                start += ", " + WUInity.SIM_DATA.EvacuationGoals[i].name + " flow";
+                start += ", Goal: " + WUInity.RUNTIME_DATA.EvacuationGoals[i].name;
+                start += ", " + WUInity.RUNTIME_DATA.EvacuationGoals[i].name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -297,6 +297,7 @@ namespace WUInity.Traffic
                     //our traffic density is flagged as stopped upstreams so no car should move
                     if(roadSegment.Value.upstreamMovementBlocked)
                     {
+                        //densitySpeed = WUInity.INPUT.traffic.stallSpeed / 3.6f;
                         break;
                     }
 
@@ -412,10 +413,10 @@ namespace WUInity.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; ++i)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; ++i)
             {
-                newOut += "," + WUInity.SIM_DATA.EvacuationGoals[i].currentPeople;
-                newOut += "," + WUInity.SIM_DATA.EvacuationGoals[i].currentFlow;
+                newOut += "," + WUInity.RUNTIME_DATA.EvacuationGoals[i].currentPeople;
+                newOut += "," + WUInity.RUNTIME_DATA.EvacuationGoals[i].currentFlow;
             }
 
             output.Add(newOut);
@@ -614,7 +615,7 @@ namespace WUInity.Traffic
         public static float GetMaxCapacity(string highway)
         {
             float capacity = 50.0f;
-            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
+            RoadData[] r = WUInity.RUNTIME_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -630,7 +631,7 @@ namespace WUInity.Traffic
         public static float GetSpeedLimit(string highway)
         {
             float speed = RoadTypeData.default_value.speedLimit;
-            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
+            RoadData[] r = WUInity.RUNTIME_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -646,7 +647,7 @@ namespace WUInity.Traffic
         public static int GetNumberOfLanes(string highway)
         {
             int lanes = RoadTypeData.default_value.lanes;
-            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
+            RoadData[] r = WUInity.RUNTIME_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -661,7 +662,7 @@ namespace WUInity.Traffic
         static bool CanReverseLanes(string highway)
         {
             bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
-            RoadData[] r = WUInity.SIM_DATA.RoadTypeData.roadData;
+            RoadData[] r = WUInity.RUNTIME_DATA.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -676,7 +677,7 @@ namespace WUInity.Traffic
         public void SaveToFile(int runNumber)
         {
             WUInityInput wuiIn = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simName + "_traffic_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simDataName + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
     }

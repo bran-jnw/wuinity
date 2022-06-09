@@ -84,9 +84,9 @@ namespace WUInity.Fire
             //set custom fuel models if present
             if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
-                for (int i = 0; i < WUInity.SIM_DATA.GetFuelModelsData().fuels.Count; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.GetFuelModelsData().fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(WUInity.SIM_DATA.GetFuelModelsData().fuels[i]);
+                    fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.GetFuelModelsData().fuels[i]);
                 }
             }            
             surfaceFire = new Surface(fuelModelSet);            
@@ -170,7 +170,7 @@ namespace WUInity.Fire
             cellsToKill = new HashSet<FireCell>();
             cellsToIgnite = new HashSet<FireCell>();            
 
-            for (int y = 0; y < cellCount.y; y++)
+            /*for (int y = 0; y < cellCount.y; y++)
             {
                 for (int x = 0; x < cellCount.x; x++)
                 {
@@ -178,7 +178,7 @@ namespace WUInity.Fire
                     Color c = Color.green * tint;
                     c.a = 0.4f;                  
                 }
-            }
+            }*/
 
             //data arrays for visualization
             fireLineIntensityData = new float[fireCells.Length];

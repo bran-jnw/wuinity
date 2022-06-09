@@ -11,11 +11,12 @@ namespace WUInity.Evac
     public class HumanEvacCell
     {
         public MacroHousehold[] macroHouseholds;
-        public RouteCollection rasterRoute;
+        public RouteCollection routeCollection;
         public Vector2D cellWorldSize;
         //public double cellDensity; //persons / km2
         public Vector2D closestNodeUnitySpace;
         public bool cellIsEvacuated;
+        int cellIndex;
 
         /// <summary>
         /// Creates human evac cell ythat keeps track of households in the cell and the routes they can use after reaching their car.
@@ -24,12 +25,13 @@ namespace WUInity.Evac
         /// <param name="cellWorldSize"></param>
         /// <param name="route"></param>
         /// <param name="personsInCell"></param>
-        public HumanEvacCell(Vector2D nodeCenter, Vector2D cellWorldSize, RouteCollection route, int personsInCell)
+        public HumanEvacCell(Vector2D nodeCenter, Vector2D cellWorldSize, RouteCollection route, int personsInCell, int cellIndex)
         {
             EvacInput eO = WUInity.INPUT.evac;
 
             this.cellWorldSize = cellWorldSize;
-            this.rasterRoute = route;
+            this.routeCollection = route;
+            this.cellIndex = cellIndex;
 
             int peopleWithoutHouseHold = personsInCell;
             List<int> personsPerHousehold = new List<int>();
@@ -46,13 +48,18 @@ namespace WUInity.Evac
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(rasterRoute.GetSelectedRoute().route.Shape[0].Latitude, rasterRoute.GetSelectedRoute().route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(routeCollection.GetSelectedRoute().route.Shape[0].Latitude, routeCollection.GetSelectedRoute().route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
             closestNodeUnitySpace = new Vector2D(v.x, v.y);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
-                int evacGroupIndex = WUInity.SIM_DATA.evacGroupIndices[i];
+                int evacGroupIndex = WUInity.RUNTIME_DATA.evacGroupIndices[i];
                 macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHumanSim.GetRandomWalkingSpeed(), MacroHumanSim.GetRandomResponseTime(evacGroupIndex));
             }
+        }
+
+        public int GetCellIndex()
+        {
+            return cellIndex;
         }
     }
 }

@@ -14,6 +14,13 @@ namespace WUInity
         {
             evac = new EvacOutput();
         }
+
+        public static void SaveOutput(string filename)
+        {
+            List<string> log = WUInity.GetLog();
+            string path = System.IO.Path.Combine(WUInity.WORKING_FOLDER, filename + ".wuiout");
+            //System.IO.File.WriteAllText(path, log);
+        }
     }
 
     [System.Serializable]

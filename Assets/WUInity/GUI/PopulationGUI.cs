@@ -106,19 +106,11 @@ namespace WUInity
 
             if (WUInity.POPULATION.IsPopulationLoaded())
             {
-                if (WUInity.SIM_DATA.GetRouteCollection() == null)
-                {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Build route collection"))
-                    {
-                        WUInity.SIM_DATA.BuildAndSaveRouteCollection();
-                    }
-                    ++buttonIndex;
-                }
-                else if (!WUInity.POPULATION.GetPopulationData().correctedForRoutes && WUInity.SIM_DATA.GetRouteCollection() != null)
+                if (!WUInity.POPULATION.GetPopulationData().correctedForRoutes && WUInity.RUNTIME_DATA.Routes != null)
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Correct for route access"))
                     {
-                        WUInity.POPULATION.UpdatePopulationBasedOnRoutes(WUInity.SIM_DATA.GetRouteCollection());
+                        WUInity.POPULATION.UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routes);
                         WUInity.INSTANCE.DisplayPopulation();
                     }
                     ++buttonIndex;

@@ -128,7 +128,7 @@ namespace WUInity
         {
             WUInityInput wO = WUInity.INPUT;
             wO.fire.lcpFile = paths[0];
-            WUInity.SIM_DATA.LoadLCPFile();
+            WUInity.RUNTIME_DATA.LoadLCPFile();
         }
 
         void OpenLoadFuelsModelFile()
@@ -142,7 +142,7 @@ namespace WUInity
         {
             WUInityInput wO = WUInity.INPUT;
             wO.fire.fuelModelsFile = paths[0];
-            WUInity.SIM_DATA.LoadFuelModelsFile();
+            WUInity.RUNTIME_DATA.LoadFuelModelsFile();
         }
     }
 }

@@ -221,7 +221,11 @@ namespace WUInity.Evac
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
             if(WUInity.INPUT.runTrafficSim)
-            {
+            {                
+                //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
+                RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
+
+                //assume all cars in household takes the same route, else we have to make a new call to select route for every car
                 if (household.cars > 1)
                 {
                     int peopleLeftInHousehold = household.peopleInHousehold;
@@ -241,12 +245,12 @@ namespace WUInity.Evac
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        WUInity.SIM.MacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), peopleInCar[i]);
+                        WUInity.SIM.MacroTrafficSim().InsertNewCar(cell.routeCollection.GetSelectedRoute(), peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    WUInity.SIM.MacroTrafficSim().InsertNewCar(cell.rasterRoute.GetSelectedRoute(), household.peopleInHousehold);
+                    WUInity.SIM.MacroTrafficSim().InsertNewCar(cell.routeCollection.GetSelectedRoute(), household.peopleInHousehold);
                 }
             }
             
@@ -258,7 +262,7 @@ namespace WUInity.Evac
         public void SaveToFile(int runNumber)
         {
             WUInityInput wO = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.simName + "_pedestrian_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.simDataName + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -267,8 +271,8 @@ namespace WUInity.Evac
         /// </summary>
         public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
-            cellsX = WUInity.SIM_DATA.EvacCellCount.x;
-            cellsY = WUInity.SIM_DATA.EvacCellCount.y;
+            cellsX = WUInity.RUNTIME_DATA.EvacCellCount.x;
+            cellsY = WUInity.RUNTIME_DATA.EvacCellCount.y;
             this.realWorldSize = WUInity.INPUT.size;
             population = new int[cellsX * cellsY];
 
@@ -302,24 +306,24 @@ namespace WUInity.Evac
             float r = Random.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
-            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= WUInity.RUNTIME_DATA.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
                 {
                     randomResponseCurveIndex = i;
                     break;
                 }
             }
-            int curveIndex = WUInity.SIM_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
+            int curveIndex = WUInity.RUNTIME_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
 
             //skip first as that is always zero probability
-            for (int i = 1; i < WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints.Length; i++)
+            for (int i = 1; i < WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.evacuationOrderStart, WUInity.SIM_DATA.ResponseCurves[curveIndex].dataPoints[i].time) + eO.evacuationOrderStart;
+                    responseTime = Random.Range(WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.evacuationOrderStart, WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].time) + eO.evacuationOrderStart;
                     break;
                 }
             }
@@ -351,7 +355,7 @@ namespace WUInity.Evac
                     int y = i / cellsX;
                     int x = i - y * cellsX;
                     Vector2D worldPos = new Vector2D((x + 0.5) * cellWorldSize.x, (y + 0.5) * cellWorldSize.y);
-                    humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, cellRoutes[i], population[i]);
+                    humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, cellRoutes[i], population[i], i);
                     totalHouseholds += humanEvacCells[i].macroHouseholds.Length;
                 }
             }

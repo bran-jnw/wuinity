@@ -174,7 +174,7 @@ void AdvectSemiLagrangian(uint3 id : SV_DispatchThreadID)
 	float newC = SampleBilinear(advectedPos);	
 
 	//injection
-	float conc_dot = _SootInjection[idx] * _InvertedCellVolume; // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+	float conc_dot = max(0.0, _SootInjection[idx] * _InvertedCellVolume); // kg * s / m3, kg/s soot injection controlled/taken from firemesh
 
 	//calculate new concentration (kg/m3)
 	float c_delta = _DeltaTime * conc_dot;

@@ -10,17 +10,15 @@ namespace WUInity
     [System.Serializable]
     public class WUInityInput
     {
-        public string simName = "New file";
+        public string simDataName = "New_sim";
         public float deltaTime = 1f;
         public float maxSimTime = 864000f; //10 days
         public bool stopWhenEvacuated = true;
-        public int numberOfRuns = 1;
-        public bool stopAfterConverging = true;
-        public float convergenceCriteria = 0.02f;
+        //public int numberOfRuns = 1;
+        public bool stopAfterConverging = true;        
         public Vector2D lowerLeftLatLong = new Vector2D(55.697354, 13.173808);
         public Vector2D size = new Vector2D(3000, 3000);
         public int zoomLevel = 13;
-        public bool runInRealTime = true;
         public bool runEvacSim = true;
         public bool runTrafficSim = true;
         public bool runFireSim = true;
@@ -43,6 +41,32 @@ namespace WUInity
             farsite = new FarsiteInput();
             visuals = new VisualizationOptions();
             fire = new FireInput();
+        }
+
+        public static void SaveInput()
+        {
+            string json = JsonUtility.ToJson(WUInity.INPUT, true);
+            System.IO.File.WriteAllText(WUInity.WORKING_FILE, json);
+            EvacGroup.SaveEvacGroupIndices();
+            GraphicalFireInput.SaveGraphicalFireInput();
+
+            WUInity.WUI_LOG("LOG: Input file " + WUInity.WORKING_FILE + " saved.");
+        }
+
+        public static void LoadInput(string path)
+        {
+            string input = System.IO.File.ReadAllText(path);
+            if (input != null)
+            {
+                WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
+                WUInity.WORKING_FILE = path;
+                WUInity.INSTANCE.SetNewInputData(wui);
+                WUInity.WUI_LOG("LOG: Input file " + WUInity.WORKING_FILE + " loaded.");
+            }
+            else
+            {
+                WUInity.WUI_LOG("ERROR: Input file " + path + " not found.");
+            }
         }
     }
 
@@ -92,10 +116,7 @@ namespace WUInity
 
     [System.Serializable]
     public class TrafficInput
-    {
-        public string osmFile = "";
-        public float osmBorderSize = 1000f;
-
+    {     
         public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
         public string[] evacuationGoalFiles;
         public RouteChoice routeChoice = RouteChoice.Closest;
@@ -142,6 +163,6 @@ namespace WUInity
         public bool useRandomIgnitionMap;
         public int randomIgnitionPoints;
         public bool useInitialIgnitionMap;
-    }
+    }    
 }
 

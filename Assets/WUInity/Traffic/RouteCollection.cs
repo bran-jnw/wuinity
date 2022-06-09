@@ -114,7 +114,7 @@ namespace WUInity
 
             if(selectedRouteIndex == -1)
             {
-                WUInity.SIM.StopSim("no routes left to take");
+                WUInity.SIM.StopSim("No routes left to take");
             }
         }
 

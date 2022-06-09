@@ -8,19 +8,19 @@ namespace WUInity.Evac
     {
         public static void RunVerification()
         {
-            SaveLoadWUI.LoadInput("evac_verification");
+            WUInityInput.LoadInput("evac_verification");
             EvacInput evacOptions = WUInity.INPUT.evac;
             WUInityInput wuinityOptions = WUInity.INPUT;
             WUInity.INPUT.runEvacSim = true;
             WUInity.INPUT.runTrafficSim = false;
             WUInity.INPUT.runFireSim = false;
-            wuinityOptions.runInRealTime = false;
+            WUInity.RUNTIME_DATA.MultipleSimulations = true;
 
             //WUInity.INSTANCE.LoadGPW(); //TODO: fix this input 
-            WUInity.SIM_DATA.LoadRouterDatabase();
+            //WUInity.SIM_DATA.LoadRouterDatabase();
 
             //P1
-            wuinityOptions.simName = "P1";
+            wuinityOptions.simDataName = "P1";
             //evacOptions.overrideTotalPopulation = true;
             //evacOptions.totalPopulation = 1000;
             WUInity.SIM.StartSimulation();
@@ -34,16 +34,16 @@ namespace WUInity.Evac
                 evacOptions.maxHouseholdSize = i;
                 evacOptions.maxCars = i;
                 evacOptions.maxCarsChance = 1f;
-                wuinityOptions.simName = "P2_" + i;
+                wuinityOptions.simDataName = "P2_" + i;
                 WUInity.SIM.StartSimulation();
             }
 
             //P3, need more curves
-            SaveLoadWUI.LoadInput("evac_verification");
+            WUInityInput.LoadInput("evac_verification");
             wuinityOptions = WUInity.INPUT;
             evacOptions = WUInity.INPUT.evac;
 
-            wuinityOptions.simName = "P3_1";
+            wuinityOptions.simDataName = "P3_1";
             //evacOptions.overrideTotalPopulation = true;
             //evacOptions.totalPopulation = 1000;
             WUInity.SIM.StartSimulation();

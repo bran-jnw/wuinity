@@ -107,11 +107,11 @@ namespace WUInity
             }
 
             int totalEvacuated = 0;
-            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
             {
-                totalEvacuated += WUInity.SIM_DATA.EvacuationGoals[i].currentPeople;
-                string name = WUInity.SIM_DATA.EvacuationGoals[i].name;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.SIM_DATA.EvacuationGoals[i].currentPeople + " (" + WUInity.SIM_DATA.EvacuationGoals[i].cars.Count + ")");
+                totalEvacuated += WUInity.RUNTIME_DATA.EvacuationGoals[i].currentPeople;
+                string name = WUInity.RUNTIME_DATA.EvacuationGoals[i].name;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.RUNTIME_DATA.EvacuationGoals[i].currentPeople + " (" + WUInity.RUNTIME_DATA.EvacuationGoals[i].cars.Count + ")");
                 ++buttonIndex;
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.MacroHumanSim().GetPeopleStaying()));
@@ -153,8 +153,32 @@ namespace WUInity
                 }
                 ++buttonIndex;
 
-                LegendGUI();
-            }            
+                LegendGUI();                
+            }
+
+            if (plotPresent)
+            {
+                ShowPlot();
+            }
+        }
+
+        void ShowPlot()
+        {
+            GUI.BeginGroup(new Rect(Screen.width * 0.5f - 512, Screen.height * 0.5f - 256, 1024, 512));
+
+            GUI.DrawTexture(new Rect(0, 0, 512, 512), plot);
+
+            GUI.DrawTexture(new Rect(512, 0, 512, 512), plot);
+
+            GUI.EndGroup();
+        }
+
+        Texture2D plot;
+        bool plotPresent;
+        public void SetPlotTexture(Texture2D plot)
+        {
+            this.plot = plot;
+            plotPresent = true;
         }
 
         void LegendGUI()

@@ -91,11 +91,11 @@ namespace WUInity
         {
             //first count how many cells we have to add to array
             int count = 0;
-            for (int i = 0; i < WUInity.SIM_DATA.wuiAreaIndices.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.wuiAreaIndices.Length; i++)
             {
                 int xIndex = i % WUInity.SIM.FireMesh().GetCellCount().x;
                 int yIndex = i / WUInity.SIM.FireMesh().GetCellCount().x;
-                if(WUInity.SIM_DATA.wuiAreaIndices[i] == true)
+                if(WUInity.RUNTIME_DATA.wuiAreaIndices[i] == true)
                 {
                     ++count;
                 }
@@ -108,7 +108,7 @@ namespace WUInity
             {
                 int xIndex = i % WUInity.SIM.FireMesh().GetCellCount().x;
                 int yIndex = i / WUInity.SIM.FireMesh().GetCellCount().x;
-                if (WUInity.SIM_DATA.wuiAreaIndices[i] == true)
+                if (WUInity.RUNTIME_DATA.wuiAreaIndices[i] == true)
                 {
                     wuiArea[0, position] = xIndex;
                     wuiArea[1, position] = yIndex; //need to flip Y?

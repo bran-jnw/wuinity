@@ -62,7 +62,20 @@ namespace WUInity.Fire
         /// Sets neightbors, calculates distance to neighbor cell centers and calculates slope and aspect
         /// </summary>
         public void InitCell()
-        {            
+        {
+            currentBurnArea = 0.0;
+            timestepBurntMass = 0.0;
+            timeOfArrival = -9999.0;
+            doneSpreading = false;
+
+            int fuel = lcp.fuel_model;
+            if (fuel >= 90 || fuel <= 99)
+            {
+                doneSpreading = true;
+                cellState = FireCellState.Dead;
+                return;
+            }
+
             //calc distance to next cell center in current direction
             for (int i = 0; i < distances.Length; i++)                                  
             {
@@ -106,18 +119,13 @@ namespace WUInity.Fire
                 CalculateSlopeAndAspect();
             }                      
             maxSpreadRate = -1.0;
-
-            int fuel = lcp.fuel_model;
+            
             double bulkDensity = fireMesh.fuelModelSet.getFuelLoadOneHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadTenHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadHundredHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveHerbaceous(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveWoody(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
-            fuelMassGround = bulkDensity * fireMesh.cellSize.x * fireMesh.cellSize.y;// * fireMesh.fuelModelSet.getFuelbedDepth(fuel, BehaveUnits.LengthUnits.LengthUnitsEnum.Meters);
-            doneSpreading = false;
-            currentBurnArea = 0.0;
-            timestepBurntMass = 0.0;
-            timeOfArrival = -9999.0;
+            fuelMassGround = bulkDensity * fireMesh.cellSize.x * fireMesh.cellSize.y;// * fireMesh.fuelModelSet.getFuelbedDepth(fuel, BehaveUnits.LengthUnits.LengthUnitsEnum.Meters);                     
         }
 
         public void Ignite(double timeOfArrival)            

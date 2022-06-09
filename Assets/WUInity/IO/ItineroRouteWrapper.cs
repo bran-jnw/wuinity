@@ -30,11 +30,11 @@ namespace WUInity
         public static EvacuationGoal GetRealEvacGoal(string name)
         {
             EvacuationGoal result = null;
-            for (int i = 0; i < WUInity.SIM_DATA.EvacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
             {
-                if (WUInity.SIM_DATA.EvacuationGoals[i].name == name)
+                if (WUInity.RUNTIME_DATA.EvacuationGoals[i].name == name)
                 {
-                    result = WUInity.SIM_DATA.EvacuationGoals[i];
+                    result = WUInity.RUNTIME_DATA.EvacuationGoals[i];
                 }
             }
 

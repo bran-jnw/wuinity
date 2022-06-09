@@ -6,7 +6,7 @@ namespace WUInity
 {
     public partial class WUInityGUI
     {
-        string dT, nrRuns, convergenceCriteria;
+        string dT, nrRuns, convergenceMaxDifference, convergenceMinSequence;
         bool mainMenuDirty = true, creatingNewFile = false;
 
         void MainMenu()
@@ -69,7 +69,7 @@ namespace WUInity
                 else
                 {
                     ParseMainData(wO);
-                    SaveLoadWUI.SaveInput();
+                    WUInityInput.SaveInput();
                 }
             }
             ++buttonIndex;
@@ -83,7 +83,7 @@ namespace WUInity
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
             ++buttonIndex;
-            wO.simName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simName);
+            wO.simDataName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simDataName);
             ++buttonIndex;   
             
             //dT
@@ -92,9 +92,9 @@ namespace WUInity
             dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
             ++buttonIndex;
 
-            WUInity.INPUT.runInRealTime = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runInRealTime, "Update sim in GUI");
+            WUInity.RUNTIME_DATA.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.MultipleSimulations, "Multiple runs");
             ++buttonIndex;
-            if (!WUInity.INPUT.runInRealTime)
+            if (WUInity.RUNTIME_DATA.MultipleSimulations)
             {
                 //number of runs
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
@@ -109,7 +109,7 @@ namespace WUInity
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Convergence criteria:");
                     ++buttonIndex;
-                    convergenceCriteria = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), convergenceCriteria);
+                    convergenceMaxDifference = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), convergenceMaxDifference);
                     ++buttonIndex;
                 }
             }
@@ -146,8 +146,9 @@ namespace WUInity
         {
             mainMenuDirty = false;
             dT = wO.deltaTime.ToString();
-            nrRuns = wO.numberOfRuns.ToString();
-            convergenceCriteria = wO.convergenceCriteria.ToString();
+            nrRuns = WUInity.RUNTIME_DATA.General.NumberOfRuns.ToString();
+            convergenceMaxDifference = WUInity.RUNTIME_DATA.convergenceMaxDifference.ToString();
+            convergenceMinSequence = WUInity.RUNTIME_DATA.convergenceMinSequence.ToString();
         }
 
         void ParseMainData(WUInityInput wO)
@@ -161,8 +162,9 @@ namespace WUInity
             }
 
             float.TryParse(dT, out wO.deltaTime);
-            int.TryParse(nrRuns, out wO.numberOfRuns);
-            float.TryParse(convergenceCriteria, out wO.convergenceCriteria);
+            int.TryParse(nrRuns, out WUInity.RUNTIME_DATA.General.NumberOfRuns);
+            float.TryParse(convergenceMaxDifference, out WUInity.RUNTIME_DATA.convergenceMaxDifference);
+            int.TryParse(convergenceMinSequence, out WUInity.RUNTIME_DATA.convergenceMinSequence);
         }
 
         void OpenSaveInput()
@@ -170,7 +172,7 @@ namespace WUInity
             FileBrowser.SetFilters(false, wuiFilter);
             WUInityInput wO = WUInity.INPUT;
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.simName + ".wui", "Save file", "Save");
+            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.simDataName + ".wui", "Save file", "Save");
         }                  
 
         void SaveInput(string[] paths)
@@ -190,9 +192,9 @@ namespace WUInity
             }
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            wO.simName = name;
+            wO.simDataName = name;
 
-            SaveLoadWUI.SaveInput();
+            WUInityInput.SaveInput();
         }
 
         void OpenLoadInput()
@@ -208,7 +210,7 @@ namespace WUInity
 
         void LoadInput(string[] paths)
         {
-            SaveLoadWUI.LoadInput(paths[0]);
+            WUInityInput.LoadInput(paths[0]);
             mainMenuDirty = true;
         }            
 
