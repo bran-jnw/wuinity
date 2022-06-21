@@ -97,13 +97,13 @@ void AdvectDiffuseExplicit(uint3 id : SV_DispatchThreadID)
 float2 GetAdvectedPos(float2 pos)
 {
 	//when only using global wind value
-	/*float2 step = _DeltaTime * float2(_WindX * _CellsPerMeterX, _WindY * _CellsPerMeterY);
+	float2 step = _DeltaTime * float2(_WindX * _CellsPerMeterX, _WindY * _CellsPerMeterY);
 	pos -= step;
-	return pos;*/
+	return pos;
 
 	//wind map from texture
 	//Remember that textures have to be in linear space, not gamma!!!
-	float2 uv = float2(pos.x / _CellsX, pos.y / _CellsY);
+	/*float2 uv = float2(pos.x / _CellsX, pos.y / _CellsY);
 	float4 windData = _Wind.SampleLevel(sampler_Wind, uv, 0);
 	float2 windDir = normalize(float2(windData.r - 0.5, windData.g - 0.5));
 	float2 wind = 5 * windDir;
@@ -111,7 +111,7 @@ float2 GetAdvectedPos(float2 pos)
 
 	pos -= step;
 
-	return pos;
+	return pos;*/
 }
 
 float SampleBilinear(float2 advectedPos)

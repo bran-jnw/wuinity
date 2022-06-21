@@ -82,24 +82,24 @@ namespace WUInity
                 if (maxCars > 0 && cars.Count >= maxCars && !blocked)
                 {
                     blocked = true;
-                    WUInity.WUI_LOG("Evacuation goal " + name + " has reached cars capacity, re-routing");
+                    WUInity.LOG("Evacuation goal " + name + " has reached cars capacity, re-routing");
                     WUInity.SIM.GoalBlocked();
                 }
                 else if (maxCars > 0 && cars.Count > maxCars)
                 {
-                    WUInity.WUI_LOG("Additional car arrived at " + name + ", arrived during same time step.");
+                    WUInity.LOG("Additional car arrived at " + name + ", arrived during same time step.");
                 }
 
                 //track and respond people
                 if (maxPeople > -1 && currentPeople >= maxPeople && !blocked)
                 {
                     blocked = true;
-                    WUInity.WUI_LOG("Evacuation goal " + name + " has reached people capacity, re-routing");
+                    WUInity.LOG("Evacuation goal " + name + " has reached people capacity, re-routing");
                     WUInity.SIM.GoalBlocked();
                 }
                 else if (maxPeople > -1 && currentPeople > maxPeople)
                 {
-                    WUInity.WUI_LOG("Additional people arrived at " + name + ", arrived during same time step.");
+                    WUInity.LOG("Additional people arrived at " + name + ", arrived during same time step.");
                 }
             }
         }
@@ -262,14 +262,14 @@ namespace WUInity
                 }
                 else
                 {
-                    WUInity.WUI_LOG("WARNING: Evacuation goal data file " + path + " not found and could not be loaded.");
+                    WUInity.LOG("WARNING: Evacuation goal data file " + path + " not found and could not be loaded.");
                 }
             }            
 
             if (evacuationGoals.Count > 0)
             {
                 result = evacuationGoals.ToArray();
-                WUInity.WUI_LOG("LOG: " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");
+                WUInity.LOG("LOG: " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");
             }
 
             return result;

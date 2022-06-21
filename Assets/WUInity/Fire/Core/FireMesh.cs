@@ -23,6 +23,7 @@ namespace WUInity.Fire
 
         float[] fireLineIntensityData;
         float[] sootProduction;
+        float[] fuelModelNumberData;
 
         public Vector2Int[] neighborIndices;                        
         public double cellSizeDiagonal;                             
@@ -84,6 +85,7 @@ namespace WUInity.Fire
             //set custom fuel models if present
             if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
+                WUInity.LOG("LOG: Adding custom fuel model specifications.");
                 for (int i = 0; i < WUInity.RUNTIME_DATA.GetFuelModelsData().fuels.Count; i++)
                 {
                     fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.GetFuelModelsData().fuels[i]);
@@ -182,10 +184,16 @@ namespace WUInity.Fire
 
             //data arrays for visualization
             fireLineIntensityData = new float[fireCells.Length];
+            fuelModelNumberData = new float[fireCells.Length];
+            for (int i = 0; i < fireCells.Length; i++)
+            {
+                fuelModelNumberData[i] = fireCells[i].GetFuelModelNumber();
+            }
             sootProduction = new float[fireCells.Length];
             cellArea = (float)(cellSize.x * cellSize.y);
 
-            StartInitialIgnition();
+            UpdateIgnitionPoints(0.0f);
+            UpdateCellSpreadRates();
         }
 
         double GetCorrectedElevation(int x, int y)                  
@@ -315,42 +323,16 @@ namespace WUInity.Fire
             return true;
         }     
 
+        public int GetActiveCellCount()
+        {
+            return activeCells.Count;
+        }
+
         void UpdateCellSpreadRates()
         {
             foreach (FireCell f in activeCells)
-            {
-                f.UpdateSpreadRates();
-            }
-        }
-
-        public void StartInitialIgnition()
-        {          
-            if(_ignitionDone)
-            {
-                return;
-            }
-
-            for (int i = 0; i < ignitionPoints.Length; ++i)
             {                
-                if(ignitionPoints[i].IgnitionTime == 0.0f)
-                {
-                    ignitionPoints[i].CalculateMeshIndex(this);
-                    if (ignitionPoints[i].IsInsideFire(cellCount))
-                    {
-                        int x = ignitionPoints[i].GetX();
-                        int y = ignitionPoints[i].GetY();
-                        FireCell f = fireCells[GetCellIndex(x, y)];
-                        f.Ignite(0.0);
-                        activeCells.Add(f);
-                        ignitionPoints[i].MarkAsIgnited();
-                    }
-                    ++activatedIgnitions;
-                }                
-            }
-
-            if(activatedIgnitions == ignitionPoints.Length)
-            {
-                _ignitionDone = true;
+                f.UpdateSpreadRates();
             }
         }
 
@@ -376,6 +358,8 @@ namespace WUInity.Fire
                         f.Ignite(currentTime);
                         activeCells.Add(f);
                         ignitionPoints[i].MarkAsIgnited();
+
+                        WUInity.LOG("LOG: Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                     }
                     ++activatedIgnitions;
                 }
@@ -446,6 +430,11 @@ namespace WUInity.Fire
         public float[] GetFireLineIntensityData()
         {     
             return fireLineIntensityData;
+        }
+
+        public float[] GetFuelModelNumberData()
+        {
+            return fuelModelNumberData;
         }
 
         public int GetCellSize()

@@ -75,7 +75,7 @@ namespace WUInity.Fire
         {
             if (fuelModelNumber < 1 && fuelModelNumber > 255)
             {
-                WUInity.WUI_LOG("ERROR: Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
+                WUInity.LOG("ERROR: Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
                 return null;
             }
 
@@ -126,17 +126,17 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.WUI_LOG("WARNING: Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
+                WUInity.LOG("WARNING: Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
             }
 
             if (initialFuelMoistures.Count > 0)
             {
                 result = new InitialFuelMoistureList(initialFuelMoistures);
-                WUInity.WUI_LOG("LOG: Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
+                WUInity.LOG("LOG: Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
             }
             else if(fileExists)
             {
-                WUInity.WUI_LOG("WARNING: Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
+                WUInity.LOG("WARNING: Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
             }
 
             return result;

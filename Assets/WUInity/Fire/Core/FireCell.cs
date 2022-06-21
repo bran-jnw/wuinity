@@ -69,7 +69,7 @@ namespace WUInity.Fire
             doneSpreading = false;
 
             int fuel = lcp.fuel_model;
-            if (fuel >= 90 || fuel <= 99)
+            if (fireMesh.surfaceFire.isAllFuelLoadZero(fuel))
             {
                 doneSpreading = true;
                 cellState = FireCellState.Dead;

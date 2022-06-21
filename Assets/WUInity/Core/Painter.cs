@@ -186,7 +186,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: Desired paint mode not yet implemented.");
+                WUInity.LOG("ERROR: Desired paint mode not yet implemented.");
             }
         }
 

@@ -76,7 +76,7 @@ namespace WUInity
                         else
                         {
                             CreateDefaultInputs();
-                            WUInity.WUI_LOG("WARNING: Graphical fire input file does not match current mesh, using default.");
+                            WUInity.LOG("WARNING: Graphical fire input file does not match current mesh, using default.");
                         }
                     }
                 }
@@ -84,7 +84,7 @@ namespace WUInity
             else
             {
                 CreateDefaultInputs();
-                WUInity.WUI_LOG("WARNING: could not read GFI data, creating empty default.");
+                WUInity.LOG("WARNING: could not read GFI data, creating empty default.");
             }
         }
 

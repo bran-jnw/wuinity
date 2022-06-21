@@ -172,18 +172,18 @@ namespace WUInity
         {
             get
             {
-                if(INSTANCE.internal_mapboxMap == null)
+                if(INSTANCE._mapboxMap == null)
                 {
-                    INSTANCE.internal_mapboxMap = FindObjectOfType<Mapbox.Unity.Map.AbstractMap>();
-                    if(INSTANCE.internal_mapboxMap == null)
+                    INSTANCE._mapboxMap = FindObjectOfType<Mapbox.Unity.Map.AbstractMap>();
+                    if(INSTANCE._mapboxMap == null)
                     {
                         GameObject g = new GameObject();
                         g.name = "Mapbox Map";
                         g.transform.parent = INSTANCE.transform;
-                        INSTANCE.internal_mapboxMap = g.AddComponent<Mapbox.Unity.Map.AbstractMap>();
+                        INSTANCE._mapboxMap = g.AddComponent<Mapbox.Unity.Map.AbstractMap>();
                     }
                 }
-                return INSTANCE.internal_mapboxMap;
+                return INSTANCE._mapboxMap;
             }
         }
 
@@ -268,19 +268,19 @@ namespace WUInity
                 if(!MapLoaded)
                 {
                     canRun = false;
-                    WUI_LOG("ERROR: Map is not loaded.");
+                    LOG("ERROR: Map is not loaded.");
                 }
 
                 if(!PopulationLoaded && (!LocalGPWLoaded || !GlobalGPWAvailable))
                 {
                     canRun = false;  
-                    WUI_LOG("ERROR: Population is not loaded and no local nor global GPW file is found to build it from.");                  
+                    LOG("ERROR: Population is not loaded and no local nor global GPW file is found to build it from.");                  
                 }
 
                 if(!RouterDbLoaded && !OsmFileValid)
                 {
                     canRun = false;
-                    WUI_LOG("ERROR: No router database loaded and no valid OSM file was found to build it from.");
+                    LOG("ERROR: No router database loaded and no valid OSM file was found to build it from.");
                 }
 
                 if(INPUT.runFireSim)
@@ -288,7 +288,7 @@ namespace WUInity
                     if (!LcpLoaded)
                     {
                         canRun = false;
-                        WUI_LOG("ERROR: No LCP file loaded but fire spread is activated.");
+                        LOG("ERROR: No LCP file loaded but fire spread is activated.");
                     }
                 }
 
@@ -297,7 +297,7 @@ namespace WUInity
                     if(RUNTIME_DATA.ResponseCurves == null)
                     {
                         canRun = false;
-                        WUI_LOG("ERROR: No valid response curves have been loaded.");                        
+                        LOG("ERROR: No valid response curves have been loaded.");                        
                     }
                     
                 }
@@ -353,7 +353,7 @@ namespace WUInity
         private PopulationManager internal_population_manager;
         private WUInityGUI internal_wuiGUI;
         private Painter internal_painter;
-        private Mapbox.Unity.Map.AbstractMap internal_mapboxMap;
+        private Mapbox.Unity.Map.AbstractMap _mapboxMap;
         private Visualization.FireRenderer internal_fireRenderer;
         private Visualization.EvacuationRenderer internal_evacuationRenderer;
 
@@ -407,24 +407,28 @@ namespace WUInity
 
             _simBorder.gameObject.SetActive(false);
             _osmBorder.gameObject.SetActive(false);
+            
 
+            if (_godCamera == null)
+            {
+                _godCamera = FindObjectOfType<GodCamera>();
+            }    
+        }
+
+        private void Start()
+        {
             if (AutoLoadExample && DeveloperMode)
             {
                 string path = Path.Combine(DATA_FOLDER, "example\\example.wui");
                 if (File.Exists(path))
                 {
                     WUInityInput.LoadInput(path);
-                }     
+                }
                 else
                 {
                     print("Could not find input file for auto load in path " + path);
                 }
             }
-
-            if (_godCamera == null)
-            {
-                _godCamera = FindObjectOfType<GodCamera>();
-            }    
         }
 
         /// <summary>
@@ -566,12 +570,12 @@ namespace WUInity
 
             if (!MAP.IsAccessTokenValid)
             {
-                WUI_LOG("ERROR: Mapbox token not valid.");
+                LOG("ERROR: Mapbox token not valid.");
                 return false;
             }
-            WUI_LOG("LOG: Starting to load Mapbox map.");
+            LOG("LOG: Starting to load Mapbox map.");
             MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.lowerLeftLatLong.x, INPUT.lowerLeftLatLong.y), INPUT.zoomLevel);
-            WUI_LOG("LOG: Map loaded succesfully.");
+            LOG("LOG: Map loaded succesfully.");
             return true;
         }
 
@@ -580,7 +584,7 @@ namespace WUInity
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
         /// <param name="message"></param>
-        public static void WUI_LOG(string message)
+        public static void LOG(string message)
         {
             if (SIM.IsRunning)
             {
@@ -614,7 +618,7 @@ namespace WUInity
             }
 
             gO.transform.parent = directionsGO.transform;
-        }
+        }        
 
         GameObject DrawRoute(RouteCollection rC, int index)
         {
@@ -658,14 +662,19 @@ namespace WUInity
                 }
                 drawnRoads.Clear();
             }
-        }        
+        }
+
+        public void DrawOSMNetwork()
+        {
+
+        }
 
         public void LoadFarsite()
         {
             FARSITE_VIEWER.ImportFarsite();
             FARSITE_VIEWER.TransformCoordinates();
 
-            WUI_LOG("LOG: Farsite loaded succesfully.");
+            LOG("LOG: Farsite loaded succesfully.");
         }               
 
         public void SetSampleMode(DataSampleMode sampleMode)
@@ -729,7 +738,7 @@ namespace WUInity
 
         public void StartSimulation()
         {
-            WUI_LOG("LOG: Simulation started, please wait.");            
+            LOG("LOG: Simulation started, please wait.");            
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             SetEvacDataPlane(true);            
             SIM.StartSimulation();
@@ -922,7 +931,7 @@ namespace WUInity
             }
             else
             {
-                WUI_LOG("ERROR: Paint mode not set correctly");
+                LOG("ERROR: Paint mode not set correctly");
             }
             dataSampleMode = DataSampleMode.Paint;
 

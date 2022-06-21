@@ -77,11 +77,11 @@ namespace WUInity
                         responseCurves.Add(new ResponseCurve(dataPoints, WUInity.INPUT.evac.responseCurveFiles[i]));
                     }
 
-                    WUInity.WUI_LOG("LOG: Loaded response curve from " + path + " named " + responseCurves[i].name);
+                    WUInity.LOG("LOG: Loaded response curve from " + path + " named " + responseCurves[i].name);
                 }
                 else
                 {
-                    WUInity.WUI_LOG("WARNING: Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
+                    WUInity.LOG("WARNING: Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
                 }
             }
 
@@ -92,7 +92,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: No response curves could be loaded, simulation will stall.");
+                WUInity.LOG("ERROR: No response curves could be loaded, simulation will stall.");
                 return null;
             }   
         }

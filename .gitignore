@@ -72,4 +72,7 @@ crashlytics-build.properties
 
 #WUInity stuff
 /[Ee]xternal_data/
+/[Ee]xample/[Oo]utput/
+*.rc
+*.routerdb
 /[As]ssets/[Rr]esources/Mapbox/

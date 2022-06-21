@@ -220,10 +220,11 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.WUI_LOG("LOG: Could not load population, file not found.");
+                WUInity.LOG("LOG: Could not load population, file not found.");
 
             }
 
+            WUInity.DATA_STATUS.PopulationCorrectedForRoutes = correctedForRoutes;
             WUInity.DATA_STATUS.PopulationLoaded = success;
 
             return success;
@@ -273,11 +274,11 @@ namespace WUInity.Population
             {
                 CreateTexture();
                 isLoaded = true;                
-                WUInity.WUI_LOG("LOG: Loaded population from file.");
+                WUInity.LOG("LOG: Loaded population from file.");
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: Population data not valid for current map.");
+                WUInity.LOG("ERROR: Population data not valid for current map.");
             }
 
             return success;
@@ -292,7 +293,7 @@ namespace WUInity.Population
         {
             if(cellRoutes.Length != cellPopulation.Length)
             {
-                WUInity.WUI_LOG("ERROR: Route collection and population does not have same size.");
+                WUInity.LOG("ERROR: Route collection and population does not have same size.");
                 return -1;
             }
 

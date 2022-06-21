@@ -174,16 +174,16 @@ namespace WUInity
 
                 if (convergedInSequence >= 10)
                 {
-                    WUInity.WUI_LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                    WUInity.LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
                 }
                 else
                 {
-                    WUInity.WUI_LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations.");
+                    WUInity.LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations.");
                 }
                 WUInity.OUTPUT.totalEvacTime = Time;
                 IsRunning = false;
                 HaveResults = true;
-                WUInity.WUI_LOG("LOG: Simulation done.");
+                WUInity.LOG("LOG: Simulation done.");
 
                 //plot results
                 double[] xData = new double[averageCurve.Length];
@@ -241,7 +241,7 @@ namespace WUInity
                 //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                 if(_fireMesh == null)
                 {
-                    WUInity.WUI_LOG("WARNING: No fire mesh has been created, disabling smoke spread simulation.");
+                    WUInity.LOG("WARNING: No fire mesh has been created, disabling smoke spread simulation.");
                     input.runSmokeSim = false;
                 }
                 else
@@ -392,7 +392,7 @@ namespace WUInity
             {
                 IsRunning = false;
                 SaveOutput(0);
-                WUInity.WUI_LOG("LOG: Simulation done.");
+                WUInity.LOG("LOG: Simulation done.");
 
                 //plot results
                 List<float> arrivalData = _macroTrafficSim.GetArrivalData();
@@ -483,7 +483,7 @@ namespace WUInity
                     Fire.FireCellState cellState = _fireMesh.GetFireCellState(eG.latLong);
                     if (cellState == Fire.FireCellState.Burning)
                     {
-                        WUInity.WUI_LOG("LOG: Goal blocked by fire: " + eG.name);
+                        WUInity.LOG("LOG: Goal blocked by fire: " + eG.name);
                         BlockEvacGoal(i);
                     }
                 }                
@@ -495,7 +495,7 @@ namespace WUInity
             if(!_stopSim)
             {
                 _stopSim = true;
-                WUInity.WUI_LOG(stopMessage);
+                WUInity.LOG(stopMessage);
             }            
         }
 
@@ -555,7 +555,7 @@ namespace WUInity
             }          
             if(cellsWithoutRouteButNoonePlansToLeave > 0)
             {
-                WUInity.WUI_LOG("LOG: " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
+                WUInity.LOG("LOG: " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
             }
             //update cars already in traffic
             _macroTrafficSim.UpdateEvacuationGoals();              
@@ -566,7 +566,7 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
             if (input.runTrafficSim)
             {
-                WUInity.WUI_LOG("LOG: Total cars in simulation: " + _macroTrafficSim.GetTotalCarsSimulated());
+                WUInity.LOG("LOG: Total cars in simulation: " + _macroTrafficSim.GetTotalCarsSimulated());
                 _macroTrafficSim.SaveToFile(runNumber);
             }
             if (input.runEvacSim)

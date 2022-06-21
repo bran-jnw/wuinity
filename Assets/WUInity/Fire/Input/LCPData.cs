@@ -206,6 +206,41 @@ namespace WUInity.Fire
 			return l;
 		}
 
+		public int[] GetExisitingFuelModelNumbers()
+        {
+			int[] indexMap = new int[256];
+			int cells = landscape.Length / (int)NumVals;
+			int invalidFuelNumberCount = 0;
+			for (int i = 0; i < cells; i++)
+            {
+				int fuelModelNumber = landscape[i * NumVals + 3];
+				if (fuelModelNumber > 0 && fuelModelNumber <= 256)
+                {
+					indexMap[fuelModelNumber - 1] += 1;
+                }
+				else
+                {
+					++invalidFuelNumberCount;
+                }
+            }
+
+			if(invalidFuelNumberCount > 0)
+            {
+				WUInity.LOG("ERROR: Landscape data contains " + invalidFuelNumberCount + " cells with fuel model numbers outside of the valid range 1-256.");
+			}
+
+			List<int> presentFuelModelNumbers= new List<int>();
+			for (int i = 0; i < indexMap.Length; i++)
+			{
+				if(indexMap[i] > 0)
+                {
+					presentFuelModelNumbers.Add(i + 1);
+                }
+			}
+
+			return presentFuelModelNumbers.ToArray();
+		}
+
 		celldata CellData(double east, double north, ref celldata cell, ref crowndata cfuel, ref grounddata gfuel)
 		{
 			long Position = GetCellPosition(east, north);
@@ -296,7 +331,7 @@ namespace WUInity.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUInity.WUI_LOG("ERROR: LCP file not found in " + path + ".");
+				WUInity.LOG("ERROR: LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -543,8 +578,7 @@ namespace WUInity.Fire
                                     for (int k = 0; k < NumVals; k++)
                                     {
 										landscape[i * Header.numeast * NumVals + j * NumVals + k] = reader.ReadInt16();
-									}
-									
+									}									
 								}								
 							}
 
@@ -564,11 +598,11 @@ namespace WUInity.Fire
 
 			if(CantAllocLCP)
             {
-				WUInity.WUI_LOG("LOG: LCP found in " + path + " but could not properly read it.");
+				WUInity.LOG("LOG: LCP found in " + path + " but could not properly read it.");
 			}
 			else
             {
-				WUInity.WUI_LOG("LOG: LCP found in " + path + ", read succesfully.");
+				WUInity.LOG("LOG: LCP found in " + path + ", read succesfully.");
 			}
 
 		}

@@ -131,7 +131,7 @@ namespace WUInity
                 ParseMainData(wO);  
                 if (!WUInity.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.WUI_LOG("ERROR: Could not start simulation, see error log.");
+                    WUInity.LOG("ERROR: Could not start simulation, see error log.");
                 }
                 else
                 {

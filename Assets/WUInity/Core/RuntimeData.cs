@@ -36,7 +36,7 @@ namespace WUInity
         LCPData lcpData;
         public bool MultipleSimulations;
         public int convergenceMinSequence = 10;
-        public float convergenceMaxDifference = 0.02f;
+        public float convergenceMaxDifference = 0.02f;        
 
         FuelModelInput _fuelModelsData;
         public FuelModelInput GetFuelModelsData()
@@ -269,7 +269,7 @@ namespace WUInity
 
             if(index < 0)
             {
-                WUInity.WUI_LOG("ERROR: User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                WUInity.LOG("ERROR: User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -289,7 +289,7 @@ namespace WUInity
 
             if (index < 0)
             {
-                WUInity.WUI_LOG("ERROR: User has specified a response curve named " + name + " but no such response curve has been defined.");
+                WUInity.LOG("ERROR: User has specified a response curve named " + name + " but no such response curve has been defined.");
             }
 
             return index;
@@ -320,12 +320,34 @@ namespace WUInity
             bf.Serialize(file, save);
             file.Close();*/
 
-            WUInity.WUI_LOG("LOG: Saved route collection to " + path);
+            WUInity.LOG("LOG: Saved route collection to " + path);
         }
 
         public bool LoadLCPFile()
         {
             lcpData = new LCPData(WUInity.INPUT.fire.lcpFile);
+            WUInity.DATA_STATUS.LcpLoaded = !lcpData.CantAllocLCP;
+
+            if(WUInity.DATA_STATUS.LcpLoaded)
+            {
+                int[] fuelNrs = lcpData.GetExisitingFuelModelNumbers();
+                string message = "LOG: Present fuel model numbers are ";
+                for (int i = 0; i < fuelNrs.Length; i++)
+                {
+                    message += fuelNrs[i].ToString();
+                    if (i < fuelNrs.Length - 1)
+                    {
+                        message += ", ";
+                    }
+                    else
+                    {
+                        message += ".";
+                    }
+                }
+                
+                WUInity.LOG(message);
+            }
+
             return !lcpData.CantAllocLCP;
         }
 
@@ -372,11 +394,11 @@ namespace WUInity
 
             if(success)
             {
-                WUInity.WUI_LOG("LOG: Succesfully filtered OSM data to user selected boundary. Use this filtered data to build router database.");
+                WUInity.LOG("LOG: Succesfully filtered OSM data to user selected boundary. Use this filtered data to build router database.");
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: Could not filter the selected OSM file.");
+                WUInity.LOG("ERROR: Could not filter the selected OSM file.");
             }
             
             return success;
@@ -399,7 +421,7 @@ namespace WUInity
                 _routerDb = new RouterDb();
                 _routerDb.LoadOsmData(source, settings, Vehicle.Car);
 
-                WUInity.WUI_LOG("LOG: Router database created from OSM file.");
+                WUInity.LOG("LOG: Router database created from OSM file.");
 
                 // write the routerdb to disk.
                 string internalRouterName = WUInity.INPUT.simDataName + ".routerdb";
@@ -407,7 +429,7 @@ namespace WUInity
                 using (FileStream outputStream = new FileInfo(path).Open(FileMode.Create))
                 {
                     _routerDb.Serialize(outputStream);
-                    WUInity.WUI_LOG("LOG: Router database saved to file " + path);
+                    WUInity.LOG("LOG: Router database saved to file " + path);
                 }
             }            
         }
@@ -436,11 +458,11 @@ namespace WUInity
             {
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
                 _routerDb.AddContracted(_routerDb.GetSupportedProfile("Car"));
-                WUInity.WUI_LOG("LOG: Router database loaded succesfully.");                
+                WUInity.LOG("LOG: Router database loaded succesfully.");                
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: Router database could not be found.");
+                WUInity.LOG("ERROR: Router database could not be found.");
             }
 
             WUInity.DATA_STATUS.RouterDbLoaded = success;
@@ -475,16 +497,16 @@ namespace WUInity
 
                 if (newRouteCollection == null)
                 {
-                    WUInity.WUI_LOG("ERROR: Tried loading route collection from " + path + " but route collection is not valid for current input.");
+                    WUInity.LOG("ERROR: Tried loading route collection from " + path + " but route collection is not valid for current input.");
                 }
                 else
                 {
-                    WUInity.WUI_LOG("LOG: Loaded route collection from " + path);
+                    WUInity.LOG("LOG: Loaded route collection from " + path);
                 }
             }
             else
             {
-                WUInity.WUI_LOG("WARNING: Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
+                WUInity.LOG("WARNING: Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
             }
 
             if (newRouteCollection != null)

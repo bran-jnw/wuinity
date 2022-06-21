@@ -1,0 +1,150 @@
+{
+    "simDataName": "example",
+    "deltaTime": 10.0,
+    "maxSimTime": 864000.0,
+    "stopWhenEvacuated": true,
+    "stopAfterConverging": true,
+    "lowerLeftLatLong": {
+        "x": 39.409924,
+        "y": -105.104505
+    },
+    "size": {
+        "x": 10000.0,
+        "y": 10000.0
+    },
+    "zoomLevel": 13,
+    "runEvacSim": true,
+    "runTrafficSim": true,
+    "runFireSim": true,
+    "runSmokeSim": true,
+    "evac": {
+        "routeCellSize": 200.0,
+        "allowMoreThanOneCar": true,
+        "maxCars": 2,
+        "maxCarsChance": 0.30000001192092898,
+        "minHouseholdSize": 1,
+        "maxHouseholdSize": 5,
+        "walkingDistanceModifier": 1.0,
+        "walkingSpeedMinMax": {
+            "x": 0.699999988079071,
+            "y": 1.0
+        },
+        "walkingSpeedModifier": 1.0,
+        "evacuationOrderStart": 420.0,
+        "responseCurveFiles": [
+            "Observed_average",
+            "Reported_average"
+        ],
+        "blockGoalEvents": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "goalIndex": 0
+            }
+        ],
+        "evacGroupFiles": [
+            "group1",
+            "group2",
+            "group3"
+        ]
+    },
+    "traffic": {
+        "evacuationGoalFiles": [
+            "goalE",
+            "goalR",
+            "goalF"
+        ],
+        "routeChoice": 3,
+        "stallSpeed": 1.0,
+        "backGroundDensityMinMax": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "visibilityAffectsSpeed": false,
+        "opticalDensityFile": "",
+        "opticalDensity": 0.05000000074505806,
+        "roadTypesFile": "default",
+        "saveInterval": 600.0,
+        "trafficAccidents": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "endTime": 3.4028234663852887e38,
+                "isActive": false
+            }
+        ],
+        "reverseLanes": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "endTime": 3.4028234663852887e38,
+                "isActive": false
+            }
+        ],
+        "trafficInjections": [
+            {
+                "cars": 1,
+                "latLong": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "desiredGoal": {
+                    "name": "New goal",
+                    "latLong": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "color": {
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    },
+                    "blocked": false,
+                    "maxFlow": 3600.0,
+                    "goalType": 1,
+                    "maxCars": -1,
+                    "maxPeople": -1
+                },
+                "pickGoalFromMap": false,
+                "timeFlow": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    }
+                ]
+            }
+        ],
+        "trafficProbes": [
+            {
+                "nodeID": 0
+            }
+        ]
+    },
+    "population": {
+        "gpwDataFolder": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\gpw-v4-population-density-rev10_2015_30_sec_asc",
+        "localGPWFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\example.gpw",
+        "populationFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\example.pop"
+    },
+    "itinero": {},
+    "farsite": {
+        "outputPrefix": "rox"
+    },
+    "visuals": {
+        "drawRoads": false
+    },
+    "fire": {
+        "lcpFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\roxborough.lcp",
+        "fuelModelsFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\default.fuel",
+        "initialFuelMoistureFile": "default",
+        "weatherFile": "example",
+        "windFile": "example_seconds",
+        "ignitionPointsFile": "example",
+        "spreadMode": 1,
+        "windMultiplier": 1.0,
+        "useRandomIgnitionMap": false,
+        "randomIgnitionPoints": 0,
+        "useInitialIgnitionMap": false
+    }
+}

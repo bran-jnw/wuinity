@@ -50,7 +50,7 @@ namespace WUInity
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
-            WUInity.WUI_LOG("LOG: Input file " + WUInity.WORKING_FILE + " saved.");
+            WUInity.LOG("LOG: Input file " + WUInity.WORKING_FILE + " saved.");
         }
 
         public static void LoadInput(string path)
@@ -61,11 +61,11 @@ namespace WUInity
                 WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
                 WUInity.WORKING_FILE = path;
                 WUInity.INSTANCE.SetNewInputData(wui);
-                WUInity.WUI_LOG("LOG: Input file " + WUInity.WORKING_FILE + " loaded.");
+                WUInity.LOG("LOG: Input file " + WUInity.WORKING_FILE + " loaded.");
             }
             else
             {
-                WUInity.WUI_LOG("ERROR: Input file " + path + " not found.");
+                WUInity.LOG("ERROR: Input file " + path + " not found.");
             }
         }
     }

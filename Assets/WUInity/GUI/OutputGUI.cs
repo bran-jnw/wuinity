@@ -8,6 +8,8 @@ namespace WUInity
     {
         string outputTime;
         float sliderVtraffic = 1f;
+        bool displayArrivalPlot = false;
+
         void OutputMenu()
         {
             int buttonColumnStart = 140;
@@ -124,6 +126,22 @@ namespace WUInity
                 ++buttonIndex;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.SIM.GetFireWindDirection() + " degrees");
                 ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells: " + WUInity.SIM.FireMesh().GetActiveCellCount());
+                ++buttonIndex;
+
+                //fire visual mode
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fire display mode");
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fireline intensity"))
+                {
+                    WUInity.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
+                {
+                    WUInity.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
+                }
+                ++buttonIndex;
             }
 
             if(WUInity.SIM.IsRunning)
@@ -156,29 +174,63 @@ namespace WUInity
                 LegendGUI();                
             }
 
-            if (plotPresent)
+            if (plotHasArrived)
             {
-                ShowPlot();
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle arrival output"))
+                {
+                    displayArrivalPlot = !displayArrivalPlot;
+                }
+                ++buttonIndex;
+
+                if (displayArrivalPlot)
+                {
+                    plotWindowRect = GUI.Window(0, plotWindowRect, ShowPlot, "Arrival output");
+                }                
             }
         }
 
-        void ShowPlot()
+        static int headerHeight;
+        static Vector2Int plotWindowSize = new Vector2Int(532, 512);
+        Rect plotWindowRect = new Rect(0.5f * (Screen.width - plotWindowSize.x), 0.5f * (Screen.height - plotWindowSize.y), plotWindowSize.x, plotWindowSize.y);
+        Rect plotWindowGroup = new Rect(headerHeight, 0, plotWindowSize.x, plotWindowSize.y);
+        static Rect dragWindowRect = new Rect(0, 0, 10000, headerHeight);
+        Vector2 scrollPlot;
+        Rect closeWindowRect = new Rect(plotWindowSize.x - 20, 0, 20, 20);
+
+
+        void ShowPlot(int windowID)
         {
-            GUI.BeginGroup(new Rect(Screen.width * 0.5f - 512, Screen.height * 0.5f - 256, 1024, 512));
+            if (GUI.Button(closeWindowRect, "X", styleAlignedCenter))
+            {
+                displayArrivalPlot = false;
+            }
 
-            GUI.DrawTexture(new Rect(0, 0, 512, 512), plot);
+            GUI.BeginGroup(plotWindowGroup);
+            scrollPlot = GUI.BeginScrollView(plotWindowGroup, scrollPlot, new Rect(0, 0, 532, 1024));
+            
 
-            GUI.DrawTexture(new Rect(512, 0, 512, 512), plot);
+            GUI.DrawTexture(new Rect(0, 20, 512, 512), plot);
 
+
+            GUI.EndScrollView();
             GUI.EndGroup();
+
+            GUI.DragWindow(dragWindowRect);
         }
 
         Texture2D plot;
-        bool plotPresent;
+        bool plotHasArrived;
         public void SetPlotTexture(Texture2D plot)
         {
             this.plot = plot;
-            plotPresent = true;
+            displayArrivalPlot = true;
+            plotHasArrived = true;
+        }
+
+        void ResetOutputGUI()
+        {
+            displayArrivalPlot = false;
+            plotHasArrived = false;
         }
 
         void LegendGUI()

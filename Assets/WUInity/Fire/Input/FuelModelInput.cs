@@ -44,6 +44,9 @@ namespace WUInity.Fire
 
         public bool LoadFuelModelInputFile(string file)
         {
+            WUInity.LOG("LOG: Attempting to load fuel model file.");
+            bool success = false;
+
             string[] fuelLines;
             if (File.Exists(file))
             {
@@ -51,7 +54,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.WUI_LOG("WARNING: Fuel model file " + file + " not found." );
+                WUInity.LOG("WARNING: Fuel model file " + file + " not found." );
                 return false;
             }
 
@@ -103,16 +106,23 @@ namespace WUInity.Fire
                     isDynamic, isReserved);
 
                     fuels.Add(newFuel);
+                    WUInity.LOG("LOG: Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
                 }
             }
 
             if(fuels.Count == 0)
             {
+                WUInity.DATA_STATUS.FuelModelsLoaded = false;
                 fuels = null;
-                return false;
+                success = false;
+            }
+            else
+            {
+                WUInity.DATA_STATUS.FuelModelsLoaded = true;
+                success = true;
             }
 
-            return true;
+            return success;
         }
     }
 }

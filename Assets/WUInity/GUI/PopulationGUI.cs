@@ -91,7 +91,7 @@ namespace WUInity
                     bool success = int.TryParse(desiredPopulation, out totalPop);
                     if (!success)
                     {
-                        WUInity.WUI_LOG("ERROR: Total population not a number, ignoring changes.");
+                        WUInity.LOG("ERROR: Total population not a number, ignoring changes.");
                     }
                     else
                     {
@@ -141,7 +141,7 @@ namespace WUInity
                         }
                         else
                         {
-                            WUInity.WUI_LOG("ERROR: New population count not a number.");
+                            WUInity.LOG("ERROR: New population count not a number.");
                         }
                         reScaling = false;
                     }
@@ -221,9 +221,8 @@ namespace WUInity
 
         void LoadPopulation(string[] paths)
         {
-            WUInity.INPUT.population.populationFile = paths[0];
-            //WUInity.POPULATION.LoadPopulationFromFile();
-            WUInity.INSTANCE.UpdatePopulationResourceStatus();
+            WUInity.INPUT.population.populationFile = paths[0];            
+            WUInity.POPULATION.LoadPopulationFromFile();
             populationMenuDirty = true;
         }
 

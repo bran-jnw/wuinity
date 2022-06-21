@@ -40,7 +40,7 @@ namespace WUInity
 
             if(result == null)
             {
-                WUInity.WUI_LOG("ERROR: While loading the route collection the evacuation goal named " + name + " did not match any of the specified evacuation goals, the route collection is therefore not valid.");
+                WUInity.LOG("ERROR: While loading the route collection the evacuation goal named " + name + " did not match any of the specified evacuation goals, the route collection is therefore not valid.");
             }
 
             return result;

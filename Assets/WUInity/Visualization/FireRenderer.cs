@@ -76,10 +76,7 @@ namespace WUInity.Visualization
             fireBuffer = new ComputeBuffer(fireCellCountX * fireCellCountY, sizeof(float));
             fireMaterial.SetInteger("_CellsX", fireCellCountX);
             fireMaterial.SetInteger("_CellsY", fireCellCountY);
-            fireMaterial.SetFloat("_LowerCutOff", 0.01f);
-            fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
-            fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
-            fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+            SetFireDisplayMode(FireDisplayMode.FirelineIntensity);
             if (fireMeshRenderer == null)
             {
                 fireMeshRenderer = CreateDataPlane(fireMaterial, "FireSpread", true);
@@ -103,14 +100,52 @@ namespace WUInity.Visualization
             {
                 sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true);
             }            
-        }        
+        }       
+        
+        public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival }
+        FireDisplayMode _fireDisplayMode = FireDisplayMode.FirelineIntensity;
+
+        public void SetFireDisplayMode(FireDisplayMode mode)
+        {
+            _fireDisplayMode = mode;
+            if(_fireDisplayMode == FireDisplayMode.FirelineIntensity)
+            {
+                fireMaterial.SetFloat("_LowerCutOff", 0.01f);
+                fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+                fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+                fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+            }
+            else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
+            {
+                fireMaterial.SetFloat("_LowerCutOff", 0.0f);
+                fireMaterial.SetFloat("_MinValue", 0);
+                fireMaterial.SetFloat("_MaxValue", 256);
+                fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+            }
+            else if(_fireDisplayMode == FireDisplayMode.TimeOfArrival)
+            {
+                fireMaterial.SetFloat("_LowerCutOff", 0.01f);
+                fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+                fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+                fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+            }
+        }
 
         public void UpdateFireRenderer(bool renderFire, bool renderSoot)
         {
             if (renderFire)
             {
-                float[] fireData = WUInity.SIM.FireMesh().GetFireLineIntensityData();
-                if(fireData != null)
+                float[] fireData = null;
+                if (_fireDisplayMode == FireDisplayMode.FirelineIntensity)
+                {
+                    fireData = WUInity.SIM.FireMesh().GetFireLineIntensityData();
+                }
+                else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
+                {
+                    fireData = WUInity.SIM.FireMesh().GetFuelModelNumberData();
+                }
+                
+                if (fireData != null)
                 {
                     fireBuffer.SetData(fireData);
                     fireMaterial.SetBuffer("_Data", fireBuffer);
@@ -119,14 +154,11 @@ namespace WUInity.Visualization
 
             if (renderSoot)
             {
-                /*float[] sootData = WUInity.SIM.GetSmokeDispersion().GetData();
-                if (sootData != null)
-                {
-                    sootBuffer.SetData(sootData);
-                    sootMaterial.SetBuffer("_Data", sootBuffer);
-                }  */
                 ComputeBuffer buffer = WUInity.SIM.AdvectDiffuseSim().GetSootBuffer();
-                sootMaterial.SetBuffer("_Data", buffer);
+                if(buffer != null)
+                {
+                    sootMaterial.SetBuffer("_Data", buffer);
+                }                
             }
         }
 
