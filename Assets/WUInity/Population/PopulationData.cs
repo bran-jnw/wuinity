@@ -212,7 +212,7 @@ namespace WUInity.Population
         public bool LoadPopulationFromFile()
         {
             //first try if local filtered file exists
-            string path = WUInity.INPUT.population.populationFile;
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.population.populationFile);
             bool success = false;
             if (File.Exists(path))
             {
@@ -274,7 +274,7 @@ namespace WUInity.Population
             {
                 CreateTexture();
                 isLoaded = true;                
-                WUInity.LOG("LOG: Loaded population from file.");
+                WUInity.LOG("LOG: Loaded population from file " + path + ".");
             }
             else
             {

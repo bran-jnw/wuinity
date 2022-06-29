@@ -27,7 +27,7 @@ namespace WUInity
         public EvacInput evac;
         public TrafficInput traffic;
         public PopulationInput population;
-        public ItineroInput itinero;
+        public RoutingInput routing;
         public FarsiteInput farsite;
         public VisualizationOptions visuals;
         public FireInput fire;
@@ -37,7 +37,7 @@ namespace WUInity
             evac = new EvacInput();
             traffic = new TrafficInput();
             population = new PopulationInput();
-            itinero = new ItineroInput();
+            routing = new RoutingInput();
             farsite = new FarsiteInput();
             visuals = new VisualizationOptions();
             fire = new FireInput();
@@ -109,9 +109,10 @@ namespace WUInity
     }    
 
     [System.Serializable]
-    public class ItineroInput
+    public class RoutingInput
     {
-        
+        public string routerDbFile = "example.routerdb";
+        public string routeCollectionFile = "example.rc";
     }
 
     [System.Serializable]
@@ -156,6 +157,7 @@ namespace WUInity
         public string weatherFile;
         public string windFile;
         public string ignitionPointsFile;
+        public string graphicalFireInputFile;
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
               
         public float windMultiplier = 1f;

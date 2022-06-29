@@ -288,7 +288,7 @@ namespace WUInity
 
         private void CreateFireSim()
         {            
-            _fireMesh = new FireMesh(WUInity.INPUT.fire.lcpFile, WUInity.RUNTIME_DATA.WeatherInput, WUInity.RUNTIME_DATA.WindInput, WUInity.RUNTIME_DATA.InitialFuelMoistureData, WUInity.RUNTIME_DATA.IgnitionPoints);
+            _fireMesh = new FireMesh(System.IO.Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.lcpFile), WUInity.RUNTIME_DATA.WeatherInput, WUInity.RUNTIME_DATA.WindInput, WUInity.RUNTIME_DATA.InitialFuelMoistureData, WUInity.RUNTIME_DATA.IgnitionPoints);
             _fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;           
         }
 

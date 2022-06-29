@@ -325,7 +325,7 @@ namespace WUInity
 
         public bool LoadLCPFile()
         {
-            lcpData = new LCPData(WUInity.INPUT.fire.lcpFile);
+            lcpData = new LCPData(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.lcpFile));
             WUInity.DATA_STATUS.LcpLoaded = !lcpData.CantAllocLCP;
 
             if(WUInity.DATA_STATUS.LcpLoaded)
@@ -354,7 +354,7 @@ namespace WUInity
         public bool LoadFuelModelsFile()
         {
             _fuelModelsData = new FuelModelInput();
-            return WUInity.DATA_STATUS.FuelModelsLoaded = _fuelModelsData.LoadFuelModelInputFile(WUInity.INPUT.fire.fuelModelsFile);
+            return WUInity.DATA_STATUS.FuelModelsLoaded = _fuelModelsData.LoadFuelModelInputFile(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.fuelModelsFile));
         }
 
         public bool LoadOpticalDensityFile()
@@ -438,12 +438,6 @@ namespace WUInity
         public bool LoadRouterDb(string path)
         {
             bool success = false;
-
-            //try to load default
-            if (path == null)
-            {
-                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".routerdb");
-            }
 
             if (File.Exists(path))
             {

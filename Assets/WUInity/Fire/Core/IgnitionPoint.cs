@@ -123,7 +123,7 @@ namespace WUInity.Fire
             IgnitionPoint[] result = null;
             List<IgnitionPoint> ignitionPoints= new List<IgnitionPoint>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.ignitionPointsFile + ".ign");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.ignitionPointsFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

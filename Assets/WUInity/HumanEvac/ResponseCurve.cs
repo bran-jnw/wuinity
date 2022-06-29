@@ -75,9 +75,8 @@ namespace WUInity
                     if(dataPoints.Count >= 2)
                     {
                         responseCurves.Add(new ResponseCurve(dataPoints, WUInity.INPUT.evac.responseCurveFiles[i]));
-                    }
-
-                    WUInity.LOG("LOG: Loaded response curve from " + path + " named " + responseCurves[i].name);
+                        WUInity.LOG("LOG: Loaded response curve from " + path + " named " + responseCurves[i].name);
+                    }                    
                 }
                 else
                 {

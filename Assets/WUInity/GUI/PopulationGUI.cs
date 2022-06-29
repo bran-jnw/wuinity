@@ -235,8 +235,7 @@ namespace WUInity
 
         void CreatePopulationFromLocalGPW(string[] paths)
         {
-            WUInity.INPUT.population.localGPWFile = paths[0];
-            WUInity.POPULATION.CreatePopulationFromLocalGPW();
+            WUInity.POPULATION.CreatePopulationFromLocalGPW(paths[0]);
             populationMenuDirty = true;
         }
 

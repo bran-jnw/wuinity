@@ -417,6 +417,9 @@ namespace WUInity
 
         private void Start()
         {
+            //needed for proper reading of input files
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
             if (AutoLoadExample && DeveloperMode)
             {
                 string path = Path.Combine(DATA_FOLDER, "example\\example.wui");
@@ -469,8 +472,8 @@ namespace WUInity
             RUNTIME_DATA.EvacuationGroups = EvacGroup.LoadEvacGroupFiles();
             EvacGroup.LoadEvacGroupIndices(); //needs correct amount of evac groups to load
 
-            RUNTIME_DATA.LoadRouterDb(null);
-            RUNTIME_DATA.LoadRouteCollection(null);
+            RUNTIME_DATA.LoadRouterDb(Path.Combine(WORKING_FOLDER, INPUT.routing.routerDbFile));
+            RUNTIME_DATA.LoadRouteCollection(Path.Combine(WORKING_FOLDER, INPUT.routing.routeCollectionFile));
 
             GraphicalFireInput.LoadGraphicalFireInput();     
             
@@ -532,7 +535,7 @@ namespace WUInity
         {
             POPULATION.LoadPopulationFromFile();
             DATA_STATUS.PopulationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
-            DATA_STATUS.LocalGPWLoaded = POPULATION.LoadLocalGPWFromFile();
+            POPULATION.LoadLocalGPWFromFile(Path.Combine(WORKING_FOLDER, INPUT.population.localGPWFile));
             DATA_STATUS.GlobalGPWAvailable = LocalGPWData.IsGPWAvailable();
         }
 

@@ -122,7 +122,7 @@ namespace WUInity.Fire
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.windFile + ".wnd");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.windFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

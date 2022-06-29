@@ -1,6 +1,6 @@
 {
     "simDataName": "example",
-    "deltaTime": 10.0,
+    "deltaTime": 1.0,
     "maxSimTime": 864000.0,
     "stopWhenEvacuated": true,
     "stopAfterConverging": true,
@@ -16,7 +16,7 @@
     "runEvacSim": true,
     "runTrafficSim": true,
     "runFireSim": true,
-    "runSmokeSim": false,
+    "runSmokeSim": true,
     "evac": {
         "routeCellSize": 200.0,
         "allowMoreThanOneCar": true,
@@ -124,10 +124,13 @@
     },
     "population": {
         "gpwDataFolder": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\gpw-v4-population-density-rev10_2015_30_sec_asc",
-        "localGPWFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\example.gpw",
+        "localGPWFile": "example.gpw",
         "populationFile": "E:\\_UNITY\\WUInity\\wui-nity\\example\\example.pop"
     },
-    "itinero": {},
+    "routing": {
+        "routerDbFile": "example.routerdb",
+        "routeCollectionFile": "example.rc"
+    },
     "farsite": {
         "outputPrefix": "rox"
     },
@@ -135,12 +138,13 @@
         "drawRoads": false
     },
     "fire": {
-        "lcpFile": "E:\\_UNITY\\WUInity\\wui-nity\\example\\roxborough.lcp",
-        "fuelModelsFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\default.fuel",
-        "initialFuelMoistureFile": "default",
-        "weatherFile": "example",
-        "windFile": "example_seconds",
-        "ignitionPointsFile": "example",
+        "lcpFile": "roxborough.lcp",
+        "fuelModelsFile": "default.fuel",
+        "initialFuelMoistureFile": "default.fmc",
+        "weatherFile": "example.wtr",
+        "windFile": "example_seconds.wnd",
+        "ignitionPointsFile": "example.ign",
+        "graphicalFireInputFile": "example.gfi",
         "spreadMode": 1,
         "windMultiplier": 1.0,
         "useRandomIgnitionMap": false,

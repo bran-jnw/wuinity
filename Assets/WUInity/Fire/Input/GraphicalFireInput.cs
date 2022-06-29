@@ -10,6 +10,7 @@ namespace WUInity
         public static void SaveGraphicalFireInput()
         {
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gfi");
+            WUInity.INPUT.fire.graphicalFireInputFile = WUInity.INPUT.simDataName + ".gfi";
 
             using (FileStream fs = new FileStream(path, FileMode.Create))
             {
@@ -41,7 +42,7 @@ namespace WUInity
 
         public static void LoadGraphicalFireInput()
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gfi"); //graphical fire input
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.graphicalFireInputFile); //graphical fire input
 
             if(File.Exists(path))
             {

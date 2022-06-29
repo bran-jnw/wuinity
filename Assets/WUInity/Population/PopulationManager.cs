@@ -106,14 +106,14 @@ namespace WUInity.Population
             return populationData.LoadPopulationFromFile();
         }
 
-        public bool LoadLocalGPWFromFile()
+        public bool LoadLocalGPWFromFile(string file)
         {
-            return localGPWData.LoadLocalGPWDataFromFile();
+            return localGPWData.LoadLocalGPWDataFromFile(file);
         }
 
-        public bool CreatePopulationFromLocalGPW()
+        public bool CreatePopulationFromLocalGPW(string file)
         {            
-            bool success = localGPWData.LoadLocalGPWDataFromFile();
+            bool success = localGPWData.LoadLocalGPWDataFromFile(file);
 
             if(success)
             {
