@@ -17,6 +17,9 @@ namespace WUInity.Visualization
         float lowerFirelineIntensityValue = 0.0f;
         float upperFirelineIntensityValue = 6000.0f;
 
+        Texture2D horizontalRandomLegend;
+        Texture2D fuelModelLegendTexture;
+
 
         public Material GetFireMaterial()
         {
@@ -114,6 +117,12 @@ namespace WUInity.Visualization
                 fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
                 fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
                 fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+
+                if(horizontalRandomLegend == null)
+                {
+                    horizontalRandomLegend = (Texture2D)fireMaterial.GetTexture("_ScaleGradient");
+                }
+                fireMaterial.SetTexture("_ScaleGradient", horizontalRandomLegend);
             }
             else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
             {
@@ -121,6 +130,12 @@ namespace WUInity.Visualization
                 fireMaterial.SetFloat("_MinValue", 0);
                 fireMaterial.SetFloat("_MaxValue", 256);
                 fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+
+                if(fuelModelLegendTexture == null)
+                {
+                    CreateRandomFuelModelLegend();
+                }
+                fireMaterial.SetTexture("_ScaleGradient", fuelModelLegendTexture);
             }
             else if(_fireDisplayMode == FireDisplayMode.TimeOfArrival)
             {
@@ -190,6 +205,21 @@ namespace WUInity.Visualization
             return mR;
         }
 
+
+        void CreateRandomFuelModelLegend()
+        {
+            fuelModelLegendTexture = new Texture2D(256, 2);
+            fuelModelLegendTexture.filterMode = FilterMode.Point;
+            for (int i = 0; i < 256; i++)
+            {
+                Color randomColor = Random.ColorHSV();
+                randomColor.a = 1f;
+                fuelModelLegendTexture.SetPixel(i, 0, randomColor);
+                fuelModelLegendTexture.SetPixel(i, 1, randomColor);
+            }
+            fuelModelLegendTexture.Apply();
+        }
+
         public float GetUpperFirelineIntensityLimit()
         {
             return upperFirelineIntensityValue;
@@ -232,6 +262,7 @@ namespace WUInity.Visualization
 
         void OnDisable()
         {
+            SetFireDisplayMode(FireDisplayMode.FirelineIntensity);
             Release();          
         }
 

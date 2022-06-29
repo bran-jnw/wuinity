@@ -199,21 +199,21 @@ namespace WUInity
 
 
         void ShowPlot(int windowID)
-        {
+        {   
             if (GUI.Button(closeWindowRect, "X", styleAlignedCenter))
             {
                 displayArrivalPlot = false;
             }
 
-            GUI.BeginGroup(plotWindowGroup);
-            scrollPlot = GUI.BeginScrollView(plotWindowGroup, scrollPlot, new Rect(0, 0, 532, 1024));
+            //GUI.BeginGroup(plotWindowGroup);
+            //scrollPlot = GUI.BeginScrollView(plotWindowGroup, scrollPlot, new Rect(0, 0, 532, 1024));
             
 
             GUI.DrawTexture(new Rect(0, 20, 512, 512), plot);
 
 
-            GUI.EndScrollView();
-            GUI.EndGroup();
+            //GUI.EndScrollView();
+            //GUI.EndGroup();
 
             GUI.DragWindow(dragWindowRect);
         }

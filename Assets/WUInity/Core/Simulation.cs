@@ -199,17 +199,20 @@ namespace WUInity
 
         void PlotResults(double[] xData, double[] yData)
         {
-            ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
-            timeTraffic.AddScatterLines(xData, yData);
-            timeTraffic.Title("Average cumulative arrival of cars");
-            timeTraffic.YLabel("Number of cars [-]");
-            timeTraffic.XLabel("Time [h]");
-            //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, "traffic_avg.png"));
-            byte[] byteData = timeTraffic.GetImageBytes();
+            if(xData.Length > 0 && yData.Length > 0)
+            {
+                ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
+                timeTraffic.AddScatterLines(xData, yData);
+                timeTraffic.Title("Average cumulative arrival of cars");
+                timeTraffic.YLabel("Number of cars [-]");
+                timeTraffic.XLabel("Time [h]");
+                //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, "traffic_avg.png"));
+                byte[] byteData = timeTraffic.GetImageBytes();
 
-            Texture2D plotFig = new Texture2D(2, 2);
-            ImageConversion.LoadImage(plotFig, byteData);
-            WUInity.GUI.SetPlotTexture(plotFig);
+                Texture2D plotFig = new Texture2D(2, 2);
+                ImageConversion.LoadImage(plotFig, byteData);
+                WUInity.GUI.SetPlotTexture(plotFig);
+            }            
         }
 
         private void SaveAverageCurve(float[] data)

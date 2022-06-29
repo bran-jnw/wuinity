@@ -16,7 +16,7 @@
     "runEvacSim": true,
     "runTrafficSim": true,
     "runFireSim": true,
-    "runSmokeSim": true,
+    "runSmokeSim": false,
     "evac": {
         "routeCellSize": 200.0,
         "allowMoreThanOneCar": true,
@@ -125,7 +125,7 @@
     "population": {
         "gpwDataFolder": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\gpw-v4-population-density-rev10_2015_30_sec_asc",
         "localGPWFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\example.gpw",
-        "populationFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\example.pop"
+        "populationFile": "E:\\_UNITY\\WUInity\\wui-nity\\example\\example.pop"
     },
     "itinero": {},
     "farsite": {
@@ -135,7 +135,7 @@
         "drawRoads": false
     },
     "fire": {
-        "lcpFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\roxborough.lcp",
+        "lcpFile": "E:\\_UNITY\\WUInity\\wui-nity\\example\\roxborough.lcp",
         "fuelModelsFile": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\example\\default.fuel",
         "initialFuelMoistureFile": "default",
         "weatherFile": "example",
