@@ -11,7 +11,7 @@ namespace WUInity
 
         void EvacMenu()
         {
-            EvacInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = WUInity.INPUT.Evacuation;
             if (evacMenuDirty)
             {
                 evacMenuDirty = false;
@@ -24,7 +24,7 @@ namespace WUInity
                 walkSpeedMax = eO.walkingSpeedMinMax.y.ToString();
                 walkSpeedMod = eO.walkingSpeedModifier.ToString();
                 walkingDistMod = eO.walkingDistanceModifier.ToString();
-                evacOrderTime = eO.evacuationOrderStart.ToString();
+                evacOrderTime = eO.EvacuationOrderStart.ToString();
 
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -136,7 +136,7 @@ namespace WUInity
                 return;
             }
 
-            EvacInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = WUInity.INPUT.Evacuation;
 
             float.TryParse(cellSize, out eO.RouteCellSize);
             int.TryParse(maxCars, out eO.maxCars);
@@ -147,7 +147,7 @@ namespace WUInity
             float.TryParse(walkSpeedMax, out eO.walkingSpeedMinMax.y);
             float.TryParse(walkSpeedMod, out eO.walkingSpeedModifier);
             float.TryParse(walkingDistMod, out eO.walkingDistanceModifier);
-            float.TryParse(evacOrderTime, out eO.evacuationOrderStart);
+            float.TryParse(evacOrderTime, out eO.EvacuationOrderStart);
         }
     }
 }

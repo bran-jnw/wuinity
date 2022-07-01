@@ -9,7 +9,7 @@ namespace WUInity.Evac
         public static void RunVerification()
         {
             WUInityInput.LoadInput("evac_verification");
-            EvacInput evacOptions = WUInity.INPUT.Evacuation;
+            EvacuationInput evacOptions = WUInity.INPUT.Evacuation;
             WUInityInput wuinityOptions = WUInity.INPUT;
             WUInity.INPUT.Simulation.RunEvacSim = true;
             WUInity.INPUT.Simulation.RunTrafficSim = false;

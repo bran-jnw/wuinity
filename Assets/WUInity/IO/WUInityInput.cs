@@ -15,7 +15,7 @@ namespace WUInity
         public VisualizationOptions Visualization;
         public PopulationInput Population;
         public RoutingInput Routing; 
-        public EvacInput Evacuation;
+        public EvacuationInput Evacuation;
         public TrafficInput Traffic;    
         public FireInput Fire;
         public SmokeInput Smoke;
@@ -27,7 +27,7 @@ namespace WUInity
             Visualization = new VisualizationOptions();
             Population = new PopulationInput();
             Routing = new RoutingInput();
-            Evacuation = new EvacInput();
+            Evacuation = new EvacuationInput();
             Traffic = new TrafficInput();    
             Fire = new FireInput();
             Smoke = new SmokeInput();
@@ -86,11 +86,11 @@ namespace WUInity
     }
 
     [System.Serializable]
-    public class EvacInput
+    public class EvacuationInput
     {
         public float RouteCellSize = 200f;
-        public float evacuationOrderStart = 0.0f;
-        public string[] responseCurveFiles;
+        public float EvacuationOrderStart = 0.0f;
+        public string[] ResponseCurveFiles;
         public string[] EvacGroupFiles;
 
         public int minHouseholdSize = 1;
@@ -103,7 +103,7 @@ namespace WUInity
         public Vector2 walkingSpeedMinMax = new Vector2(0.7f, 1.0f);
         public float walkingSpeedModifier = 1.0f;
 
-        public string[] GoalEventFiles;            
+        public string[] BlockGoalEventFiles;            
 
         //TODO: fix saving these?
         //[System.NonSerialized] public Texture2D evacuationForceTex;

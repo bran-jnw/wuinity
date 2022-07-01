@@ -35,34 +35,29 @@
         "routeCollectionFile": "example.rc"
     },
     "Evacuation": {
-        "routeCellSize": 200.0,
+        "RouteCellSize": 200.0,
+        "EvacuationOrderStart": 420.0,
+        "ResponseCurveFiles": [
+            "Observed_average",
+            "Reported_average"
+        ],
+        "EvacGroupFiles": [
+            "group1",
+            "group2",
+            "group3"
+        ],
+        "minHouseholdSize": 1,
+        "maxHouseholdSize": 5,
         "allowMoreThanOneCar": true,
         "maxCars": 2,
         "maxCarsChance": 0.30000001192092898,
-        "minHouseholdSize": 1,
-        "maxHouseholdSize": 5,
         "walkingDistanceModifier": 1.0,
         "walkingSpeedMinMax": {
             "x": 0.699999988079071,
             "y": 1.0
         },
         "walkingSpeedModifier": 1.0,
-        "evacuationOrderStart": 420.0,
-        "responseCurveFiles": [
-            "Observed_average",
-            "Reported_average"
-        ],
-        "blockGoalEvents": [
-            {
-                "startTime": 3.4028234663852887e38,
-                "goalIndex": 0
-            }
-        ],
-        "evacGroupFiles": [
-            "group1",
-            "group2",
-            "group3"
-        ]
+        "BlockGoalEventFiles": []
     },
     "Traffic": {
         "evacuationGoalFiles": [

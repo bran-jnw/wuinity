@@ -471,6 +471,7 @@ namespace WUInity
             RUNTIME_DATA.EvacuationGoals = EvacuationGoal.LoadEvacuationGoalFiles();
             RUNTIME_DATA.EvacuationGroups = EvacGroup.LoadEvacGroupFiles();
             EvacGroup.LoadEvacGroupIndices(); //needs correct amount of evac groups to load
+            RUNTIME_DATA.Evacuation.Init();
 
             RUNTIME_DATA.LoadRouterDb(Path.Combine(WORKING_FOLDER, INPUT.Routing.routerDbFile));
             RUNTIME_DATA.LoadRouteCollection(Path.Combine(WORKING_FOLDER, INPUT.Routing.routeCollectionFile));

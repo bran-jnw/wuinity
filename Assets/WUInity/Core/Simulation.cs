@@ -306,7 +306,7 @@ namespace WUInity
             _time = 0f;
             for (int i = 0; i < WUInity.RUNTIME_DATA.ResponseCurves.Length; i++)
             {
-                float t = WUInity.RUNTIME_DATA.ResponseCurves[i].dataPoints[0].time + input.Evacuation.evacuationOrderStart;
+                float t = WUInity.RUNTIME_DATA.ResponseCurves[i].dataPoints[0].time + input.Evacuation.EvacuationOrderStart;
                 _time = Mathf.Min(Time, t);
             }
             _startTime = Time;

@@ -300,7 +300,7 @@ namespace WUInity.Evac
         /// <returns></returns>
         static public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = WUInity.INPUT.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
@@ -323,7 +323,7 @@ namespace WUInity.Evac
                 if (r <= WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.evacuationOrderStart, WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].time) + eO.evacuationOrderStart;
+                    responseTime = Random.Range(WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
                     break;
                 }
             }
@@ -337,7 +337,7 @@ namespace WUInity.Evac
         /// <returns></returns>
         static public float GetRandomWalkingSpeed()
         {
-            EvacInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = WUInity.INPUT.Evacuation;
             return Random.Range(eO.walkingSpeedMinMax.x, eO.walkingSpeedMinMax.y) * eO.walkingSpeedModifier;
         }
 

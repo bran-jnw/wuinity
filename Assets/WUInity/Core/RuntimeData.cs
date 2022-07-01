@@ -270,7 +270,7 @@ namespace WUInity
 
         public RuntimeData()
         {
-            Evacuation.Init();
+            
         }
 
         public int GetEvacGoalIndexFromName(string name)

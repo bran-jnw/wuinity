@@ -44,9 +44,9 @@ namespace WUInity
         public static BlockGoalEvent[] LoadBlockGoalEvents()
         {
             List<BlockGoalEvent> blockGoalEvents = new List<BlockGoalEvent>();
-            for (int i = 0; i < WUInity.INPUT.Evacuation.GoalEventFiles.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.Evacuation.BlockGoalEventFiles.Length; i++)
             {
-                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Evacuation.GoalEventFiles[i] + ".bge");
+                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Evacuation.BlockGoalEventFiles[i] + ".bge");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
