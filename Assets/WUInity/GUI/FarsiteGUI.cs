@@ -10,7 +10,7 @@ namespace WUInity
         Farsite.FarsiteViewer fV;
         void FarsiteMenu()
         {
-            FarsiteInput fI = WUInity.INPUT.farsite;
+            FarsiteInput fI = WUInity.INPUT.fire.farsite;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;

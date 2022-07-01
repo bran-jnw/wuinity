@@ -28,8 +28,7 @@ namespace WUInity
         public TrafficInput traffic;
         public PopulationInput population;
         public RoutingInput routing;
-        public FarsiteInput farsite;
-        public VisualizationOptions visuals;
+        public VisualizationOptions visualization;
         public FireInput fire;
 
         public WUInityInput()
@@ -38,8 +37,7 @@ namespace WUInity
             traffic = new TrafficInput();
             population = new PopulationInput();
             routing = new RoutingInput();
-            farsite = new FarsiteInput();
-            visuals = new VisualizationOptions();
+            visualization = new VisualizationOptions();
             fire = new FireInput();
         }
 
@@ -165,6 +163,8 @@ namespace WUInity
         public bool useRandomIgnitionMap;
         public int randomIgnitionPoints;
         public bool useInitialIgnitionMap;
+
+        public FarsiteInput farsite;
     }    
 }
 

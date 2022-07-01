@@ -101,9 +101,9 @@ namespace WUInity.Population
             return localGPWData.totalPopulation;
         }        
 
-        public bool LoadPopulationFromFile()
+        public bool LoadPopulationFromFile(string file)
         {
-            return populationData.LoadPopulationFromFile();
+            return populationData.LoadPopulationFromFile(file);
         }
 
         public bool LoadLocalGPWFromFile(string file)

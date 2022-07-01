@@ -533,7 +533,8 @@ namespace WUInity
 
         public void UpdatePopulationResourceStatus()
         {
-            POPULATION.LoadPopulationFromFile();
+            string file = Path.Combine(WORKING_FOLDER, INPUT.population.populationFile);
+            POPULATION.LoadPopulationFromFile(file);
             DATA_STATUS.PopulationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
             POPULATION.LoadLocalGPWFromFile(Path.Combine(WORKING_FOLDER, INPUT.population.localGPWFile));
             DATA_STATUS.GlobalGPWAvailable = LocalGPWData.IsGPWAvailable();

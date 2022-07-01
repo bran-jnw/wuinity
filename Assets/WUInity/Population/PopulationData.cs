@@ -209,14 +209,12 @@ namespace WUInity.Population
             System.IO.File.WriteAllLines(path, data);
         }
 
-        public bool LoadPopulationFromFile()
+        public bool LoadPopulationFromFile(string file)
         {
-            //first try if local filtered file exists
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.population.populationFile);
             bool success = false;
-            if (File.Exists(path))
+            if (File.Exists(file))
             {
-                success = LoadPopulation(path);
+                success = LoadPopulation(file);
             }
             else
             {

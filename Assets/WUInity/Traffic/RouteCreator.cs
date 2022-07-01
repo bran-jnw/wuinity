@@ -142,7 +142,7 @@ namespace WUInity
                             SelectCorrectRoute(cellRoutes[i], i);
 
                             //this never draws duplicates as we continue on the loop (as in skip this part) if we copy route collection
-                            if (WUInity.INPUT.visuals.drawRoads)
+                            if (WUInity.INPUT.visualization.drawRoads)
                             {
                                 WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
                             }
