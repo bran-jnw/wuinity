@@ -57,7 +57,7 @@ namespace WUInity.Fire
             {
                 cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);          //Set cellSize properly, overwrite hardcoded value      
             }
-            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.INPUT.size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.INPUT.size.y / cellSize.x)));         //get raster cell size by dividing the total length of each edge by the length of an individual cell.
+            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.y / cellSize.x)));         //get raster cell size by dividing the total length of each edge by the length of an individual cell.
 
             this.weather = weather;
             this.wind = wind;

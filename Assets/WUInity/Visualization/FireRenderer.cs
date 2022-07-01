@@ -33,7 +33,7 @@ namespace WUInity.Visualization
 
         public bool ToggleFire()
         {
-            if(WUInity.INPUT.runFireSim)
+            if(WUInity.INPUT.Simulation.RunFireSim)
             {
                 fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
                 return fireMeshRenderer.gameObject.activeSelf;
@@ -46,7 +46,7 @@ namespace WUInity.Visualization
 
         public bool ToggleSoot()
         {
-            if(WUInity.INPUT.runSmokeSim)
+            if(WUInity.INPUT.Simulation.RunSmokeSim)
             {
                 sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
                 return sootMeshRenderer.gameObject.activeSelf;
@@ -191,8 +191,8 @@ namespace WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)WUInity.INPUT.size.x;
-            float length = (float)WUInity.INPUT.size.y;
+            float width = (float)WUInity.INPUT.Simulation.Size.x;
+            float length = (float)WUInity.INPUT.Simulation.Size.y;
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 

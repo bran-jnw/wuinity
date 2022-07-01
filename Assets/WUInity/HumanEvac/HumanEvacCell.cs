@@ -27,7 +27,7 @@ namespace WUInity.Evac
         /// <param name="personsInCell"></param>
         public HumanEvacCell(Vector2D nodeCenter, Vector2D cellWorldSize, RouteCollection route, int personsInCell, int cellIndex)
         {
-            EvacInput eO = WUInity.INPUT.evac;
+            EvacInput eO = WUInity.INPUT.Evacuation;
 
             this.cellWorldSize = cellWorldSize;
             this.routeCollection = route;

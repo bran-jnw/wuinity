@@ -1,23 +1,40 @@
 {
-    "simDataName": "example",
-    "deltaTime": 1.0,
-    "maxSimTime": 864000.0,
-    "stopWhenEvacuated": true,
-    "stopAfterConverging": true,
-    "lowerLeftLatLong": {
-        "x": 39.409924,
-        "y": -105.104505
+    "Simulation": {
+        "SimDataName": "example",
+        "DeltaTime": 1.0,
+        "MaxSimTime": 864000.0,
+        "StopWhenEvacuated": true,
+        "StopAfterConverging": true,
+        "LowerLeftLatLong": {
+            "x": 39.409924,
+            "y": -105.104505
+        },
+        "Size": {
+            "x": 10000.0,
+            "y": 10000.0
+        },
+        "RunEvacSim": true,
+        "RunTrafficSim": true,
+        "RunFireSim": true,
+        "RunSmokeSim": true
     },
-    "size": {
-        "x": 10000.0,
-        "y": 10000.0
+    "Map": {
+        "MapProvider": 0,
+        "ZoomLevel": 13
     },
-    "zoomLevel": 13,
-    "runEvacSim": true,
-    "runTrafficSim": true,
-    "runFireSim": true,
-    "runSmokeSim": true,
-    "evac": {
+    "Visualization": {
+        "drawRoads": false
+    },
+    "Population": {
+        "gpwDataFolder": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\gpw-v4-population-density-rev10_2015_30_sec_asc",
+        "localGPWFile": "example.gpw",
+        "populationFile": "example.pop"
+    },
+    "Routing": {
+        "routerDbFile": "example.routerdb",
+        "routeCollectionFile": "example.rc"
+    },
+    "Evacuation": {
         "routeCellSize": 200.0,
         "allowMoreThanOneCar": true,
         "maxCars": 2,
@@ -47,7 +64,7 @@
             "group3"
         ]
     },
-    "traffic": {
+    "Traffic": {
         "evacuationGoalFiles": [
             "goalE",
             "goalR",
@@ -62,7 +79,7 @@
         "visibilityAffectsSpeed": false,
         "opticalDensityFile": "",
         "opticalDensity": 0.05000000074505806,
-        "roadTypesFile": "default",
+        "roadTypesFile": "default.roads",
         "saveInterval": 600.0,
         "trafficAccidents": [
             {
@@ -122,22 +139,7 @@
             }
         ]
     },
-    "population": {
-        "gpwDataFolder": "E:\\_UNITY\\WUInity\\wui-nity\\external_data\\gpw-v4-population-density-rev10_2015_30_sec_asc",
-        "localGPWFile": "example.gpw",
-        "populationFile": "example.pop"
-    },
-    "routing": {
-        "routerDbFile": "example.routerdb",
-        "routeCollectionFile": "example.rc"
-    },
-    "farsite": {
-        "outputPrefix": "rox"
-    },
-    "visuals": {
-        "drawRoads": false
-    },
-    "fire": {
+    "Fire": {
         "lcpFile": "roxborough.lcp",
         "fuelModelsFile": "default.fuel",
         "initialFuelMoistureFile": "default.fmc",
@@ -149,6 +151,12 @@
         "windMultiplier": 1.0,
         "useRandomIgnitionMap": false,
         "randomIgnitionPoints": 0,
-        "useInitialIgnitionMap": false
+        "useInitialIgnitionMap": false,
+        "FarsiteData": {
+            "outputPrefix": "rox"
+        }
+    },
+    "Smoke": {
+        "MixingLayerHeight": 250.0
     }
 }

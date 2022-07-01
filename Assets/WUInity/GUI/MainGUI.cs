@@ -83,7 +83,7 @@ namespace WUInity
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
             ++buttonIndex;
-            wO.simDataName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.simDataName);
+            wO.Simulation.SimDataName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.Simulation.SimDataName);
             ++buttonIndex;   
             
             //dT
@@ -102,10 +102,10 @@ namespace WUInity
                 nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
                 ++buttonIndex;
 
-                WUInity.INPUT.stopAfterConverging = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.stopAfterConverging, "Stop after converging");
+                WUInity.INPUT.Simulation.StopAfterConverging = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.StopAfterConverging, "Stop after converging");
                 ++buttonIndex;
 
-                if(WUInity.INPUT.stopAfterConverging)
+                if(WUInity.INPUT.Simulation.StopAfterConverging)
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Convergence criteria:");
                     ++buttonIndex;
@@ -114,16 +114,16 @@ namespace WUInity
                 }
             }
 
-            WUInity.INPUT.runEvacSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runEvacSim, "Simulate pedestrians");
+            WUInity.INPUT.Simulation.RunEvacSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunEvacSim, "Simulate pedestrians");
             ++buttonIndex;
 
-            WUInity.INPUT.runTrafficSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runTrafficSim, "Simulate traffic");
+            WUInity.INPUT.Simulation.RunTrafficSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunTrafficSim, "Simulate traffic");
             ++buttonIndex;
 
-            WUInity.INPUT.runFireSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runFireSim, "Simulate fire spread");
+            WUInity.INPUT.Simulation.RunFireSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunFireSim, "Simulate fire spread");
             ++buttonIndex;
 
-            WUInity.INPUT.runSmokeSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.runSmokeSim, "Simulate smoke spread");
+            WUInity.INPUT.Simulation.RunSmokeSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunSmokeSim, "Simulate smoke spread");
             ++buttonIndex;            
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
@@ -145,7 +145,7 @@ namespace WUInity
         void CleanMainMenu(WUInityInput wO)
         {
             mainMenuDirty = false;
-            dT = wO.deltaTime.ToString();
+            dT = wO.Simulation.DeltaTime.ToString();
             nrRuns = WUInity.RUNTIME_DATA.General.NumberOfRuns.ToString();
             convergenceMaxDifference = WUInity.RUNTIME_DATA.convergenceMaxDifference.ToString();
             convergenceMinSequence = WUInity.RUNTIME_DATA.convergenceMinSequence.ToString();
@@ -161,7 +161,7 @@ namespace WUInity
                 return;
             }
 
-            float.TryParse(dT, out wO.deltaTime);
+            float.TryParse(dT, out wO.Simulation.DeltaTime);
             int.TryParse(nrRuns, out WUInity.RUNTIME_DATA.General.NumberOfRuns);
             float.TryParse(convergenceMaxDifference, out WUInity.RUNTIME_DATA.convergenceMaxDifference);
             int.TryParse(convergenceMinSequence, out WUInity.RUNTIME_DATA.convergenceMinSequence);
@@ -172,7 +172,7 @@ namespace WUInity
             FileBrowser.SetFilters(false, wuiFilter);
             WUInityInput wO = WUInity.INPUT;
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.simDataName + ".wui", "Save file", "Save");
+            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimDataName + ".wui", "Save file", "Save");
         }                  
 
         void SaveInput(string[] paths)
@@ -192,7 +192,7 @@ namespace WUInity
             }
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            wO.simDataName = name;
+            wO.Simulation.SimDataName = name;
 
             WUInityInput.SaveInput();
         }

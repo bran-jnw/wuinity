@@ -11,11 +11,11 @@ namespace WUInity
 
         void EvacMenu()
         {
-            EvacInput eO = WUInity.INPUT.evac;
+            EvacInput eO = WUInity.INPUT.Evacuation;
             if (evacMenuDirty)
             {
                 evacMenuDirty = false;
-                cellSize = eO.routeCellSize.ToString();
+                cellSize = eO.RouteCellSize.ToString();
                 maxCars = eO.maxCars.ToString();
                 maxCarsProb = eO.maxCarsChance.ToString();
                 minHousehold = eO.minHouseholdSize.ToString();
@@ -136,9 +136,9 @@ namespace WUInity
                 return;
             }
 
-            EvacInput eO = WUInity.INPUT.evac;
+            EvacInput eO = WUInity.INPUT.Evacuation;
 
-            float.TryParse(cellSize, out eO.routeCellSize);
+            float.TryParse(cellSize, out eO.RouteCellSize);
             int.TryParse(maxCars, out eO.maxCars);
             float.TryParse(maxCarsProb, out eO.maxCarsChance);
             int.TryParse(minHousehold, out eO.minHouseholdSize);

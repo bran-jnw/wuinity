@@ -180,7 +180,7 @@ namespace WUInity.Fire
             WeatherInput result = null;
             List<WeatherData> weatherData = new List<WeatherData>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.weatherFile);
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.weatherFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

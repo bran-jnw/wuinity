@@ -24,10 +24,10 @@ namespace WUInity.Population
 
         public PopulationData()
         {
-            lowerLeftLatLong = WUInity.INPUT.lowerLeftLatLong;
-            size = WUInity.INPUT.size;
+            lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
+            size = WUInity.INPUT.Simulation.Size;
             cells = WUInity.RUNTIME_DATA.EvacCellCount;
-            cellSize = WUInity.INPUT.evac.routeCellSize;
+            cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
 
             cellArea = cellSize * cellSize / (1000000d); // people/square km
             totalPopulation = 0;
@@ -51,10 +51,10 @@ namespace WUInity.Population
 
         public void CreatePopulationFromLocalGPW(LocalGPWData localGPW)
         {
-            lowerLeftLatLong = WUInity.INPUT.lowerLeftLatLong;
-            size = WUInity.INPUT.size;
+            lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
+            size = WUInity.INPUT.Simulation.Size;
             cells = WUInity.RUNTIME_DATA.EvacCellCount;
-            cellSize = WUInity.INPUT.evac.routeCellSize;
+            cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
 
             cellPopulation = new int[cells.x * cells.y];
             populationMask = new bool[cells.x * cells.y];
@@ -200,12 +200,12 @@ namespace WUInity.Population
                 data[9] += cellPopulation[i] + " ";
             }
 
-            string path = WUInity.INPUT.population.populationFile;
+            string path = WUInity.INPUT.Population.populationFile;
             if(!File.Exists(path))
             {
-                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".pop");
+                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimDataName + ".pop");
             }
-            WUInity.INPUT.population.populationFile = path;
+            WUInity.INPUT.Population.populationFile = path;
             System.IO.File.WriteAllLines(path, data);
         }
 

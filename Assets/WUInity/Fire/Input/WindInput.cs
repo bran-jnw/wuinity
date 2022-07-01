@@ -77,7 +77,7 @@ namespace WUInity.Fire
             if(dataPoints.Length > 1)       
             {
                 w.direction = directionSpline.GetYValue(time);
-                w.speed = speedSpline.GetYValue(time) * WUInity.INPUT.fire.windMultiplier;
+                w.speed = speedSpline.GetYValue(time) * WUInity.INPUT.Fire.windMultiplier;
                 w.cloudCover = cloudSpline.GetYValue(time);
             }
 
@@ -122,7 +122,7 @@ namespace WUInity.Fire
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.windFile);
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.windFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

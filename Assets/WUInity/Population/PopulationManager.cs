@@ -91,8 +91,8 @@ namespace WUInity.Population
         /// <returns></returns>
         public int GetPopulationUnitySpace(double x, double y)
         {
-            int xInt = (int)((x / WUInity.INPUT.size.x) * populationData.cells.x);
-            int yInt = (int)((y / WUInity.INPUT.size.y) * populationData.cells.y);
+            int xInt = (int)((x / WUInity.INPUT.Simulation.Size.x) * populationData.cells.x);
+            int yInt = (int)((y / WUInity.INPUT.Simulation.Size.y) * populationData.cells.y);
             return GetPopulation(xInt, yInt);
         }
 

@@ -58,11 +58,11 @@ namespace WUInity
         void CleanMapMenu(WUInityInput wO)
         {
             mapMenuDirty = false;
-            Lat = wO.lowerLeftLatLong.x.ToString();
-            Long = wO.lowerLeftLatLong.y.ToString();
-            sizeX = wO.size.x.ToString();
-            sizeY = wO.size.y.ToString();
-            zoom = wO.zoomLevel.ToString();
+            Lat = wO.Simulation.LowerLeftLatLong.x.ToString();
+            Long = wO.Simulation.LowerLeftLatLong.y.ToString();
+            sizeX = wO.Simulation.Size.x.ToString();
+            sizeY = wO.Simulation.Size.y.ToString();
+            zoom = wO.Map.ZoomLevel.ToString();
         }
 
         void ParseMapData(WUInityInput wO)
@@ -72,11 +72,11 @@ namespace WUInity
                 return;
             }
 
-            double.TryParse(Lat, out wO.lowerLeftLatLong.x);
-            double.TryParse(Long, out wO.lowerLeftLatLong.y);
-            double.TryParse(sizeX, out wO.size.x);
-            double.TryParse(sizeY, out wO.size.y);
-            int.TryParse(zoom, out wO.zoomLevel);
+            double.TryParse(Lat, out wO.Simulation.LowerLeftLatLong.x);
+            double.TryParse(Long, out wO.Simulation.LowerLeftLatLong.y);
+            double.TryParse(sizeX, out wO.Simulation.Size.x);
+            double.TryParse(sizeY, out wO.Simulation.Size.y);
+            int.TryParse(zoom, out wO.Map.ZoomLevel);
         }
     }
 }

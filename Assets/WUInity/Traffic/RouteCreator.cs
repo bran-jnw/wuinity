@@ -57,7 +57,7 @@ namespace WUInity
             AbstractMap _map = WUInity.MAP;
             WUInity.INSTANCE.DeleteDrawnRoads();
 
-            Vector2D size = WUInity.INPUT.size;
+            Vector2D size = WUInity.INPUT.Simulation.Size;
             Vector2Int cells = WUInity.RUNTIME_DATA.EvacCellCount;
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
@@ -80,7 +80,7 @@ namespace WUInity
             //initialize some stuff            
             RouteCollection[] cellRoutes = new RouteCollection[cells.x * cells.y];
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
-            float cellSize = WUInity.INPUT.evac.routeCellSize;
+            float cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
 
             DetermineValidGoalsAndRouterPoints(true);
 
@@ -142,7 +142,7 @@ namespace WUInity
                             SelectCorrectRoute(cellRoutes[i], i);
 
                             //this never draws duplicates as we continue on the loop (as in skip this part) if we copy route collection
-                            if (WUInity.INPUT.visualization.drawRoads)
+                            if (WUInity.INPUT.Visualization.drawRoads)
                             {
                                 WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
                             }
@@ -161,7 +161,7 @@ namespace WUInity
 
         Itinero.Profiles.Profile GetRouterProfile()
         {
-            TrafficInput tO = WUInity.INPUT.traffic;
+            TrafficInput tO = WUInity.INPUT.Traffic;
 
             Itinero.Profiles.Profile p;
 
@@ -286,7 +286,7 @@ namespace WUInity
                 return null;
             }*/
 
-            TrafficInput tO = WUInity.INPUT.traffic;
+            TrafficInput tO = WUInity.INPUT.Traffic;
             RouteData routeData = null;
 
             try
@@ -318,7 +318,7 @@ namespace WUInity
         /// <returns></returns>
         public RouteData CalcTrafficRoute(Vector2D startPos)
         {
-            float cellSize = WUInity.INPUT.evac.routeCellSize;
+            float cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
@@ -406,7 +406,7 @@ namespace WUInity
 
         public static void UpdateRouteCollectionBasedOnRouteChoice(RouteCollection rC, int cellIndex)
         {
-            if(WUInity.INPUT.traffic.routeChoice == TrafficInput.RouteChoice.EvacGroup || WUInity.INPUT.traffic.routeChoice == TrafficInput.RouteChoice.Random)
+            if(WUInity.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.EvacGroup || WUInity.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.Random)
             {
                 SelectCorrectRoute(rC, cellIndex);
             }
@@ -421,7 +421,7 @@ namespace WUInity
         /// <param name="cellIndex"></param>
         public static void SelectCorrectRoute(RouteCollection rC, int cellIndex)
         {
-            TrafficInput tO = WUInity.INPUT.traffic;
+            TrafficInput tO = WUInity.INPUT.Traffic;
             Vector2Int cells = WUInity.RUNTIME_DATA.EvacCellCount;
 
             if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)

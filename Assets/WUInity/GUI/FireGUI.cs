@@ -9,7 +9,7 @@ namespace WUInity
         string fireEditMode;
         void FireMenu()
         {
-            FireInput fI = WUInity.INPUT.fire;
+            FireInput fI = WUInity.INPUT.Fire;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
@@ -57,11 +57,11 @@ namespace WUInity
                 }
                 ++buttonIndex;
 
-                WUInity.INPUT.fire.useRandomIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.fire.useRandomIgnitionMap, "Use random ignition");
+                WUInity.INPUT.Fire.useRandomIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Fire.useRandomIgnitionMap, "Use random ignition");
                 ++buttonIndex;
-                if (WUInity.INPUT.fire.useRandomIgnitionMap)
+                if (WUInity.INPUT.Fire.useRandomIgnitionMap)
                 {
-                    WUInity.INPUT.fire.useInitialIgnitionMap = false;
+                    WUInity.INPUT.Fire.useInitialIgnitionMap = false;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit random ignition area"))
                     {
                         fireEditMode = "Random ignition";
@@ -70,11 +70,11 @@ namespace WUInity
                     ++buttonIndex;
                 }
 
-                WUInity.INPUT.fire.useInitialIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.fire.useInitialIgnitionMap, "Use initial ignition");
+                WUInity.INPUT.Fire.useInitialIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Fire.useInitialIgnitionMap, "Use initial ignition");
                 ++buttonIndex;
-                if(WUInity.INPUT.fire.useInitialIgnitionMap)
+                if(WUInity.INPUT.Fire.useInitialIgnitionMap)
                 {
-                    WUInity.INPUT.fire.useRandomIgnitionMap = false;
+                    WUInity.INPUT.Fire.useRandomIgnitionMap = false;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit initial ignition"))
                     {
                         fireEditMode = "Initial ignition";
@@ -127,7 +127,7 @@ namespace WUInity
         void LoadLCP(string[] paths)
         {
             WUInityInput wO = WUInity.INPUT;
-            wO.fire.lcpFile = paths[0];
+            wO.Fire.lcpFile = paths[0];
             WUInity.RUNTIME_DATA.LoadLCPFile();
         }
 
@@ -141,7 +141,7 @@ namespace WUInity
         void LoadFuelModelsFile(string[] paths)
         {
             WUInityInput wO = WUInity.INPUT;
-            wO.fire.fuelModelsFile = paths[0];
+            wO.Fire.fuelModelsFile = paths[0];
             WUInity.RUNTIME_DATA.LoadFuelModelsFile();
         }
     }

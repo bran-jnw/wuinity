@@ -30,7 +30,7 @@ namespace WUInity.Evac
         /// <param name="responseTime"></param>
         public MacroHousehold(HumanEvacCell humanRaster, Vector2D nodeCenter, int peopleInHousehold, float walkingSpeed, float responseTime)
         {
-            EvacInput eO = WUInity.INPUT.evac;
+            EvacInput eO = WUInity.INPUT.Evacuation;
 
             Vector2 rand = Random.insideUnitCircle;
             Vector2D randD = new Vector2D(rand.x * humanRaster.cellWorldSize.x, rand.y * humanRaster.cellWorldSize.x);

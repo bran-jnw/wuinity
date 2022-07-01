@@ -103,7 +103,7 @@ namespace WUInity.Traffic
         {
             RoadTypeData results = null;
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.traffic.roadTypesFile + ".roads");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.roadTypesFile);
             if (File.Exists(path))
             {
                 string input = File.ReadAllText(path);
@@ -114,7 +114,7 @@ namespace WUInity.Traffic
             {
                 results = new RoadTypeData();
                 SaveRoadTypeData(results);
-                WUInity.INPUT.traffic.roadTypesFile = "default";
+                WUInity.INPUT.Traffic.roadTypesFile = "default";
             }
 
             return results;

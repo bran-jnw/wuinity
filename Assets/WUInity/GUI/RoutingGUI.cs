@@ -21,7 +21,7 @@ namespace WUInity
         {
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
-            TrafficInput tO = WUInity.INPUT.traffic;
+            TrafficInput tO = WUInity.INPUT.Traffic;
             if (routingMenuDirty)
             {
                 routingMenuDirty = false;

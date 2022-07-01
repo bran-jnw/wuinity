@@ -90,7 +90,7 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if (WUInity.INPUT.runEvacSim && WUInity.SIM.MacroHumanSim() != null)
+            if (WUInity.INPUT.Simulation.RunEvacSim && WUInity.SIM.MacroHumanSim() != null)
             {
                 //pedestrians still left
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.MacroHumanSim().GetPeopleLeft() + " / " + WUInity.POPULATION.GetTotalPopulation());
@@ -102,7 +102,7 @@ namespace WUInity
             }
 
             //cars still left
-            if (WUInity.INPUT.runTrafficSim && WUInity.SIM.MacroTrafficSim() != null)
+            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.MacroTrafficSim() != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.MacroTrafficSim().GetCarsInSystem() + " / " + WUInity.SIM.MacroTrafficSim().GetTotalCarsSimulated());
                 ++buttonIndex;
@@ -120,7 +120,7 @@ namespace WUInity
             ++buttonIndex;
 
             //fire output stuff
-            if (WUInity.INPUT.runFireSim)
+            if (WUInity.INPUT.Simulation.RunFireSim)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUInity.SIM.GetFireWindSpeed() + " m/s");
                 ++buttonIndex;
@@ -235,7 +235,7 @@ namespace WUInity
 
         void LegendGUI()
         {
-            if (WUInity.INPUT.runFireSim)
+            if (WUInity.INPUT.Simulation.RunFireSim)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f - 305, 120, 300));
 
@@ -249,7 +249,7 @@ namespace WUInity
                 GUI.EndGroup();
             }
 
-            if (WUInity.INPUT.runSmokeSim)
+            if (WUInity.INPUT.Simulation.RunSmokeSim)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f + 5, 120, 300));
 

@@ -75,4 +75,4 @@ crashlytics-build.properties
 /[Ee]xample/[Oo]utput/
 *.rc
 *.routerdb
-/[As]ssets/[Rr]esources/Mapbox/
+[Mm]apbox[Cc]onfiguration.txt

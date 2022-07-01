@@ -220,7 +220,7 @@ namespace WUInity.Evac
 
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
-            if(WUInity.INPUT.runTrafficSim)
+            if(WUInity.INPUT.Simulation.RunTrafficSim)
             {                
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
@@ -262,7 +262,7 @@ namespace WUInity.Evac
         public void SaveToFile(int runNumber)
         {
             WUInityInput wO = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.simDataName + "_pedestrian_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimDataName + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -273,7 +273,7 @@ namespace WUInity.Evac
         {          
             cellsX = WUInity.RUNTIME_DATA.EvacCellCount.x;
             cellsY = WUInity.RUNTIME_DATA.EvacCellCount.y;
-            this.realWorldSize = WUInity.INPUT.size;
+            this.realWorldSize = WUInity.INPUT.Simulation.Size;
             population = new int[cellsX * cellsY];
 
             cellRoutes = routeCollection;
@@ -300,7 +300,7 @@ namespace WUInity.Evac
         /// <returns></returns>
         static public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacInput eO = WUInity.INPUT.evac;
+            EvacInput eO = WUInity.INPUT.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
@@ -337,7 +337,7 @@ namespace WUInity.Evac
         /// <returns></returns>
         static public float GetRandomWalkingSpeed()
         {
-            EvacInput eO = WUInity.INPUT.evac;
+            EvacInput eO = WUInity.INPUT.Evacuation;
             return Random.Range(eO.walkingSpeedMinMax.x, eO.walkingSpeedMinMax.y) * eO.walkingSpeedModifier;
         }
 

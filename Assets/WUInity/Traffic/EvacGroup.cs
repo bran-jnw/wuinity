@@ -68,9 +68,9 @@ namespace WUInity
             EvacGroup[] result = null;
             List<EvacGroup> evacGroups = new List<EvacGroup>();
 
-            for (int i = 0; i < WUInity.INPUT.evac.evacGroupFiles.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.Evacuation.EvacGroupFiles.Length; i++)
             {
-                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.evac.evacGroupFiles[i] + ".eg");
+                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Evacuation.EvacGroupFiles[i] + ".eg");
                 bool fileExists = File.Exists(path);
                 EvacGroup eG = null;
                 if (fileExists)
@@ -194,7 +194,7 @@ namespace WUInity
 
         public static void SaveEvacGroupIndices()
         {
-            string filename = WUInity.INPUT.simDataName;
+            string filename = WUInity.INPUT.Simulation.SimDataName;
 
             string[] data = new string[4];
             //nrows
@@ -202,7 +202,7 @@ namespace WUInity
             //ncols
             data[1] = WUInity.RUNTIME_DATA.EvacCellCount.y.ToString();
             //how many evac groups
-            data[2] = WUInity.INPUT.evac.evacGroupFiles.Length.ToString();
+            data[2] = WUInity.INPUT.Evacuation.EvacGroupFiles.Length.ToString();
             //actual data
             data[3] = "";
             for (int i = 0; i < WUInity.RUNTIME_DATA.evacGroupIndices.Length; ++i)
@@ -215,7 +215,7 @@ namespace WUInity
 
         public static void LoadEvacGroupIndices()
         {
-            string filename = WUInity.INPUT.simDataName;
+            string filename = WUInity.INPUT.Simulation.SimDataName;
             string path = WUInity.WORKING_FOLDER + "/" + filename + ".egs";
 
             try
@@ -233,7 +233,7 @@ namespace WUInity
                     int.TryParse(header[1], out nrows);
                     int.TryParse(header[2], out evacGroupCount);
                     //make sure we have the correct size
-                    if (ncols == WUInity.RUNTIME_DATA.EvacCellCount.x && nrows == WUInity.RUNTIME_DATA.EvacCellCount.y && evacGroupCount <= WUInity.INPUT.evac.evacGroupFiles.Length)
+                    if (ncols == WUInity.RUNTIME_DATA.EvacCellCount.x && nrows == WUInity.RUNTIME_DATA.EvacCellCount.y && evacGroupCount <= WUInity.INPUT.Evacuation.EvacGroupFiles.Length)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];

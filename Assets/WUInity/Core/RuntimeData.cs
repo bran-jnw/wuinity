@@ -21,6 +21,23 @@ namespace WUInity
 
         public GeneralData General;
 
+        public struct EvacuationData
+        {
+            public BlockGoalEvent[] BlockGoalEvents;
+
+            public void Init()
+            {
+                LoadBlockGoalEvents();
+            }
+
+            void LoadBlockGoalEvents()
+            {
+                BlockGoalEvent.LoadBlockGoalEvents();
+            }
+        }
+
+        public EvacuationData Evacuation;
+
         public struct OSMData
         {
             public float BorderSize;
@@ -76,11 +93,12 @@ namespace WUInity
             get
             {
                 WUInityInput input = WUInity.INPUT;
-                _cellCount.x = Mathf.CeilToInt((float)input.size.x / input.evac.routeCellSize);
-                _cellCount.y = Mathf.CeilToInt((float)input.size.y / input.evac.routeCellSize);
+                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.Size.x / input.Evacuation.RouteCellSize);
+                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.Size.y / input.Evacuation.RouteCellSize);
                 return _cellCount;
             }
         }
+
 
         private ResponseCurve[] _responseCurves;
         public ResponseCurve[] ResponseCurves
@@ -251,8 +269,8 @@ namespace WUInity
         }
 
         public RuntimeData()
-        {           
-            
+        {
+            Evacuation.Init();
         }
 
         public int GetEvacGoalIndexFromName(string name)
@@ -308,7 +326,7 @@ namespace WUInity
         /// <param name="filename"></param>
         public static void SaveRouteCollections()
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".rc");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimDataName + ".rc");
 
             RouteCollectionWrapper save = new RouteCollectionWrapper(WUInity.RUNTIME_DATA.Routes);
             string json = JsonUtility.ToJson(save, false);
@@ -325,7 +343,7 @@ namespace WUInity
 
         public bool LoadLCPFile()
         {
-            lcpData = new LCPData(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.lcpFile));
+            lcpData = new LCPData(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.lcpFile));
             WUInity.DATA_STATUS.LcpLoaded = !lcpData.CantAllocLCP;
 
             if(WUInity.DATA_STATUS.LcpLoaded)
@@ -354,13 +372,13 @@ namespace WUInity
         public bool LoadFuelModelsFile()
         {
             _fuelModelsData = new FuelModelInput();
-            return WUInity.DATA_STATUS.FuelModelsLoaded = _fuelModelsData.LoadFuelModelInputFile(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.fuelModelsFile));
+            return WUInity.DATA_STATUS.FuelModelsLoaded = _fuelModelsData.LoadFuelModelInputFile(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.fuelModelsFile));
         }
 
         public bool LoadOpticalDensityFile()
         {
             _opticalDensity = new Traffic.OpticalDensityRamp();
-            return WUInity.DATA_STATUS.OpticalDensityLoaded = _opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.traffic.opticalDensityFile);
+            return WUInity.DATA_STATUS.OpticalDensityLoaded = _opticalDensity.LoadOpticalDensityRampFile(WUInity.INPUT.Traffic.opticalDensityFile);
         }
 
         public bool FilterOSMData(string osmFile)
@@ -372,12 +390,12 @@ namespace WUInity
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-                    Vector2D border = LocalGPWData.SizeToDegrees(WUInity.INPUT.lowerLeftLatLong, new Vector2D(WUInity.RUNTIME_DATA.OSM.BorderSize, WUInity.RUNTIME_DATA.OSM.BorderSize));
-                    float left = (float)(WUInity.INPUT.lowerLeftLatLong.y - border.x);
-                    float bottom = (float)(WUInity.INPUT.lowerLeftLatLong.x - border.y);
-                    Vector2D size = LocalGPWData.SizeToDegrees(WUInity.INPUT.lowerLeftLatLong, WUInity.INPUT.size);
-                    float right = (float)(WUInity.INPUT.lowerLeftLatLong.y + size.x + border.x);
-                    float top = (float)(WUInity.INPUT.lowerLeftLatLong.x + size.y + border.y);
+                    Vector2D border = LocalGPWData.SizeToDegrees(WUInity.INPUT.Simulation.LowerLeftLatLong, new Vector2D(WUInity.RUNTIME_DATA.OSM.BorderSize, WUInity.RUNTIME_DATA.OSM.BorderSize));
+                    float left = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.y - border.x);
+                    float bottom = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.x - border.y);
+                    Vector2D size = LocalGPWData.SizeToDegrees(WUInity.INPUT.Simulation.LowerLeftLatLong, WUInity.INPUT.Simulation.Size);
+                    float right = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.y + size.x + border.x);
+                    float top = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.x + size.y + border.y);
                     OsmStreamSource filtered = source.FilterBox(left, top, right, bottom, true);
                     //create a new filtered file
                     string path = Path.Combine(WUInity.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(osmFile) + ".osm.pbf");
@@ -424,7 +442,7 @@ namespace WUInity
                 WUInity.LOG("LOG: Router database created from OSM file.");
 
                 // write the routerdb to disk.
-                string internalRouterName = WUInity.INPUT.simDataName + ".routerdb";
+                string internalRouterName = WUInity.INPUT.Simulation.SimDataName + ".routerdb";
                 string path = Path.Combine(WUInity.WORKING_FOLDER, internalRouterName);
                 using (FileStream outputStream = new FileInfo(path).Open(FileMode.Create))
                 {
@@ -477,7 +495,7 @@ namespace WUInity
             //try to load default
             if(path == null)
             {
-                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".rc");
+                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimDataName + ".rc");
             }
 
             if (File.Exists(path))
@@ -589,8 +607,8 @@ namespace WUInity
             if(WUInity.RUNTIME_DATA._routes != null)
             {
                 Mapbox.Utils.Vector2d p = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(pos.x, pos.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
-                int x = (int)(p.x / WUInity.INPUT.evac.routeCellSize);
-                int y = (int)(p.y / WUInity.INPUT.evac.routeCellSize);
+                int x = (int)(p.x / WUInity.INPUT.Evacuation.RouteCellSize);
+                int y = (int)(p.y / WUInity.INPUT.Evacuation.RouteCellSize);
                 int index = x + y * WUInity.RUNTIME_DATA.EvacCellCount.x;
                 if (index >= 0 && index < WUInity.RUNTIME_DATA._routes.Length && WUInity.RUNTIME_DATA._routes[index] != null)
                 {
@@ -601,16 +619,16 @@ namespace WUInity
             return null;
         }
 
-        public EvacuationGoal GetForcedGoal(int x, int y)
+        /*public EvacuationGoal GetForcedGoal(int x, int y)
         {
             WUInityInput input = WUInity.INPUT;
 
-            if (input.evac.paintedForcedGoals.Length < WUInity.RUNTIME_DATA.EvacCellCount.x * WUInity.RUNTIME_DATA.EvacCellCount.y)
+            if (input.Evacuation.paintedForcedGoals.Length < WUInity.RUNTIME_DATA.EvacCellCount.x * WUInity.RUNTIME_DATA.EvacCellCount.y)
             {
                 return null;
             }
-            return input.evac.paintedForcedGoals[x + y * WUInity.RUNTIME_DATA.EvacCellCount.x];
-        }
+            return input.Evacuation.paintedForcedGoals[x + y * WUInity.RUNTIME_DATA.EvacCellCount.x];
+        }*/
 
         public EvacGroup GetEvacGroup(int index)
         {

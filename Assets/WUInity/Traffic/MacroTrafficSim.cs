@@ -558,7 +558,7 @@ namespace WUInity.Traffic
 
             public float CalculateSpeedBasedOnDensity()
             {
-                TrafficInput tO = WUInity.INPUT.traffic;
+                TrafficInput tO = WUInity.INPUT.Traffic;
                 //reasonable? not for now
                 /*if(cars.Count == 1)
                 {
@@ -677,7 +677,7 @@ namespace WUInity.Traffic
         public void SaveToFile(int runNumber)
         {
             WUInityInput wuiIn = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simDataName + "_traffic_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.Simulation.SimDataName + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
     }

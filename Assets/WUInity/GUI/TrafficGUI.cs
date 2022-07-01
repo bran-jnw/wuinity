@@ -13,7 +13,7 @@ namespace WUInity
 
         void TrafficMenu()
         {
-            TrafficInput tO = WUInity.INPUT.traffic;
+            TrafficInput tO = WUInity.INPUT.Traffic;
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
@@ -70,7 +70,7 @@ namespace WUInity
                 return;
             }
 
-            TrafficInput tO = WUInity.INPUT.traffic;
+            TrafficInput tO = WUInity.INPUT.Traffic;
 
             float.TryParse(stallSpeed, out tO.stallSpeed);
             float.TryParse(opticalDensity, out tO.opticalDensity);
@@ -86,7 +86,7 @@ namespace WUInity
         void LoadOpticalDensityFile(string[] paths)
         {
             WUInityInput wO = WUInity.INPUT;
-            wO.traffic.opticalDensityFile = paths[0];
+            wO.Traffic.opticalDensityFile = paths[0];
             WUInity.RUNTIME_DATA.LoadOpticalDensityFile();
         }
     }

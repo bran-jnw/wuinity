@@ -251,14 +251,14 @@ namespace WUInity
                 {
                     fireDataCellCount = new Vector2Int(WUInity.SIM.FireMesh().cellCount.x, WUInity.SIM.FireMesh().cellCount.y);                    
                     cellCount = fireDataCellCount;
-                    fireDataRealSize = WUInity.INPUT.size;
+                    fireDataRealSize = WUInity.INPUT.Simulation.Size;
                 }
                 else
                 {
                     //WUInity.SIM.UpdateNeededData();
                     evacDataCellCount = WUInity.RUNTIME_DATA.EvacCellCount;
                     cellCount = evacDataCellCount;
-                    evacDataRealSize = WUInity.INPUT.size;
+                    evacDataRealSize = WUInity.INPUT.Simulation.Size;
                 }
                 //painter
                 Vector2Int res = new Vector2Int(2, 2);

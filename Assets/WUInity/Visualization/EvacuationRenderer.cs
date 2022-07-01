@@ -23,7 +23,7 @@ namespace WUInity.Visualization
 
             if (renderHouseholds)
             {
-                CreateHouseholdsBuffer(WUInity.SIM.MacroHumanSim().GetHouseholdPositions().Length, WUInity.INPUT.size);
+                CreateHouseholdsBuffer(WUInity.SIM.MacroHumanSim().GetHouseholdPositions().Length, WUInity.INPUT.Simulation.Size);
             }            
         }
 

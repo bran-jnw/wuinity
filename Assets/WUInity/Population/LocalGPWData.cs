@@ -56,8 +56,8 @@ namespace WUInity.Population
 
             //save data stamp to make sure data fits input
             WUInityInput input = WUInity.INPUT;
-            string dataStamp = input.lowerLeftLatLong.x.ToString() + " " + input.lowerLeftLatLong.y.ToString()
-                    + " " + input.size.x.ToString() + " " + input.size.y.ToString();
+            string dataStamp = input.Simulation.LowerLeftLatLong.x.ToString() + " " + input.Simulation.LowerLeftLatLong.y.ToString()
+                    + " " + input.Simulation.Size.x.ToString() + " " + input.Simulation.Size.y.ToString();
             data[0] = dataStamp;
 
             data[1] = ncols.ToString();
@@ -79,7 +79,7 @@ namespace WUInity.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.simDataName + ".gpw");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimDataName + ".gpw");
             File.WriteAllLines(path, data);
         }
 
@@ -135,7 +135,7 @@ namespace WUInity.Population
                 double.TryParse(dummy[3], out ySize);
 
                 WUInityInput input = WUInity.INPUT;
-                success =  lati == input.lowerLeftLatLong.x && input.lowerLeftLatLong.y == longi && xSize == input.size.x && ySize == input.size.y;
+                success =  lati == input.Simulation.LowerLeftLatLong.x && input.Simulation.LowerLeftLatLong.y == longi && xSize == input.Simulation.Size.x && ySize == input.Simulation.Size.y;
             }
             else 
             {
@@ -387,7 +387,7 @@ namespace WUInity.Population
 
         public static bool IsGPWAvailable()
         {
-            string path = WUInity.INPUT.population.gpwDataFolder;
+            string path = WUInity.INPUT.Population.gpwDataFolder;
             bool isAvailable = false;
 
             if (Directory.Exists(path))
@@ -428,13 +428,13 @@ namespace WUInity.Population
         /// </summary>
         public bool LoadRelevantGPWData()
         {
-            Vector2D latLong = WUInity.INPUT.lowerLeftLatLong;
-            Vector2D size = WUInity.INPUT.size;
+            Vector2D latLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
+            Vector2D size = WUInity.INPUT.Simulation.Size;
 
             bool success = false;
             if(IsGPWAvailable())
             {
-                string path = WUInity.INPUT.population.gpwDataFolder;
+                string path = WUInity.INPUT.Population.gpwDataFolder;
                 if (latLong.x >= -3.4106051316485e-012)
                 {
                     if (latLong.y < -90.000000000005)

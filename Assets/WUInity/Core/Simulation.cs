@@ -150,7 +150,7 @@ namespace WUInity
                         {
                             ++convergedInSequence;
                             //we are done
-                            if(WUInity.INPUT.stopAfterConverging && convergedInSequence > WUInity.RUNTIME_DATA.convergenceMinSequence)
+                            if(WUInity.INPUT.Simulation.StopAfterConverging && convergedInSequence > WUInity.RUNTIME_DATA.convergenceMinSequence)
                             {
                                 i = WUInity.RUNTIME_DATA.General.NumberOfRuns;
                             }                            
@@ -225,7 +225,7 @@ namespace WUInity
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
             WUInityInput wuiIn = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.simDataName + "_traffic_average.csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.Simulation.SimDataName + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }
         
@@ -233,19 +233,19 @@ namespace WUInity
         {
             WUInityInput input = WUInity.INPUT;
 
-            if (input.runFireSim)
+            if (input.Simulation.RunFireSim)
             {
                 CreateFireSim();                
             }
 
             //can only run together
-            if(input.runSmokeSim && input.runFireSim)
+            if(input.Simulation.RunSmokeSim && input.Simulation.RunFireSim)
             {
                 //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                 if(_fireMesh == null)
                 {
                     WUInity.LOG("WARNING: No fire mesh has been created, disabling smoke spread simulation.");
-                    input.runSmokeSim = false;
+                    input.Simulation.RunSmokeSim = false;
                 }
                 else
                 {    if(_advectDiffuseSim != null)
@@ -257,10 +257,10 @@ namespace WUInity
             }
             else
             {
-                input.runSmokeSim = false;
+                input.Simulation.RunSmokeSim = false;
             }
 
-            if (input.runEvacSim)
+            if (input.Simulation.RunEvacSim)
             {
                 if (i == 0)
                 {                     
@@ -280,7 +280,7 @@ namespace WUInity
                 _macroHumanSim.PlaceHouseholdsInCells();
             }
 
-            if (input.runTrafficSim)
+            if (input.Simulation.RunTrafficSim)
             {
                 _macroTrafficSim = new MacroTrafficSim(RouteCreator);
             }
@@ -288,8 +288,8 @@ namespace WUInity
 
         private void CreateFireSim()
         {            
-            _fireMesh = new FireMesh(System.IO.Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.fire.lcpFile), WUInity.RUNTIME_DATA.WeatherInput, WUInity.RUNTIME_DATA.WindInput, WUInity.RUNTIME_DATA.InitialFuelMoistureData, WUInity.RUNTIME_DATA.IgnitionPoints);
-            _fireMesh.spreadMode = WUInity.INPUT.fire.spreadMode;           
+            _fireMesh = new FireMesh(System.IO.Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.lcpFile), WUInity.RUNTIME_DATA.WeatherInput, WUInity.RUNTIME_DATA.WindInput, WUInity.RUNTIME_DATA.InitialFuelMoistureData, WUInity.RUNTIME_DATA.IgnitionPoints);
+            _fireMesh.spreadMode = WUInity.INPUT.Fire.spreadMode;           
         }
 
         private void RunSimulation(int runNumber)
@@ -306,21 +306,21 @@ namespace WUInity
             _time = 0f;
             for (int i = 0; i < WUInity.RUNTIME_DATA.ResponseCurves.Length; i++)
             {
-                float t = WUInity.RUNTIME_DATA.ResponseCurves[i].dataPoints[0].time + input.evac.evacuationOrderStart;
+                float t = WUInity.RUNTIME_DATA.ResponseCurves[i].dataPoints[0].time + input.Evacuation.evacuationOrderStart;
                 _time = Mathf.Min(Time, t);
             }
             _startTime = Time;
 
-            if(input.runTrafficSim)
+            if(input.Simulation.RunTrafficSim)
             {
-                for (int i = 0; i < WUInity.INPUT.traffic.trafficAccidents.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.Traffic.trafficAccidents.Length; i++)
                 {
-                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.traffic.trafficAccidents[i]);
+                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
                 }
 
-                for (int i = 0; i < WUInity.INPUT.traffic.reverseLanes.Length; i++)
+                for (int i = 0; i < WUInity.INPUT.Traffic.reverseLanes.Length; i++)
                 {
-                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.traffic.trafficAccidents[i]);
+                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
                 }
             }            
 
@@ -355,17 +355,17 @@ namespace WUInity
             }
 
             WUInityInput input = WUInity.INPUT;
-            _stopSim = Time <= input.maxSimTime ? false : true;
+            _stopSim = Time <= input.Simulation.MaxSimTime ? false : true;
 
-            if (input.stopWhenEvacuated)
+            if (input.Simulation.StopWhenEvacuated)
             {
                 bool evacDone = true;
-                if (input.runEvacSim)
+                if (input.Simulation.RunEvacSim)
                 {
                     evacDone = _macroHumanSim.evacuationDone;
                 }
                 bool trafficDone = true;
-                if (input.runTrafficSim)
+                if (input.Simulation.RunTrafficSim)
                 {
                     trafficDone = _macroTrafficSim.EvacComplete();
                 }
@@ -416,12 +416,12 @@ namespace WUInity
         {
             WUInityInput input = WUInity.INPUT;
             
-            if(input.runTrafficSim)
+            if(input.Simulation.RunTrafficSim)
             {
                 //check for global events
-                for (int i = 0; i < WUInity.INPUT.evac.blockGoalEvents.Length; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents.Length; i++)
                 {
-                    BlockGoalEvent bGE = WUInity.INPUT.evac.blockGoalEvents[i];
+                    BlockGoalEvent bGE = WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents[i];
                     if (Time >= bGE.startTime && !bGE.triggered)
                     {
                         bGE.ApplyEffects();
@@ -431,7 +431,7 @@ namespace WUInity
 
             //update fire mesh if needed
             bool fireUpdated = false;
-            if (input.runFireSim)
+            if (input.Simulation.RunFireSim)
             {   
                 if (Time >= 0.0f && Time >= nextFireUpdate)
                 {
@@ -449,27 +449,27 @@ namespace WUInity
             }
 
             //sync with fire
-            if(Time >= 0.0f && input.runSmokeSim)
+            if(Time >= 0.0f && input.Simulation.RunSmokeSim)
             {
                 //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
-                _advectDiffuseSim.Update(input.deltaTime, _fireMesh.currentWindData.direction, _fireMesh.currentWindData.speed, fireUpdated);
+                _advectDiffuseSim.Update(input.Simulation.DeltaTime, _fireMesh.currentWindData.direction, _fireMesh.currentWindData.speed, fireUpdated);
             }
 
             //advance evac
-            if (input.runEvacSim)
+            if (input.Simulation.RunEvacSim)
             {
-                _macroHumanSim.Update(input.deltaTime, Time);
+                _macroHumanSim.Update(input.Simulation.DeltaTime, Time);
             }
 
             //advance traffic
-            if (input.runTrafficSim)
+            if (input.Simulation.RunTrafficSim)
             {
-                _macroTrafficSim.AdvanceTrafficSimulation(input.deltaTime, Time);
+                _macroTrafficSim.AdvanceTrafficSimulation(input.Simulation.DeltaTime, Time);
             }
 
             //increase time
-            float deltaTime = input.deltaTime;
-            if (input.runFireSim && !input.runEvacSim && !input.runTrafficSim)
+            float deltaTime = input.Simulation.DeltaTime;
+            if (input.Simulation.RunFireSim && !input.Simulation.RunEvacSim && !input.Simulation.RunTrafficSim)
             {
                 deltaTime = (float)_fireMesh.dt;
             }
@@ -567,17 +567,17 @@ namespace WUInity
         void SaveOutput(int runNumber)
         {
             WUInityInput input = WUInity.INPUT;
-            if (input.runTrafficSim)
+            if (input.Simulation.RunTrafficSim)
             {
                 WUInity.LOG("LOG: Total cars in simulation: " + _macroTrafficSim.GetTotalCarsSimulated());
                 _macroTrafficSim.SaveToFile(runNumber);
             }
-            if (input.runEvacSim)
+            if (input.Simulation.RunEvacSim)
             {
                 _macroHumanSim.SaveToFile(runNumber);
             }
 
-            WUInityOutput.SaveOutput(WUInity.INPUT.simDataName + "_" + runNumber);            
+            WUInityOutput.SaveOutput(WUInity.INPUT.Simulation.SimDataName + "_" + runNumber);            
         }
     }    
 }

@@ -9,36 +9,28 @@ namespace WUInity
 {
     [System.Serializable]
     public class WUInityInput
-    {
-        public string simDataName = "New_sim";
-        public float deltaTime = 1f;
-        public float maxSimTime = 864000f; //10 days
-        public bool stopWhenEvacuated = true;
-        //public int numberOfRuns = 1;
-        public bool stopAfterConverging = true;        
-        public Vector2D lowerLeftLatLong = new Vector2D(55.697354, 13.173808);
-        public Vector2D size = new Vector2D(3000, 3000);
-        public int zoomLevel = 13;
-        public bool runEvacSim = true;
-        public bool runTrafficSim = true;
-        public bool runFireSim = true;
-        public bool runSmokeSim = true;
-
-        public EvacInput evac;
-        public TrafficInput traffic;
-        public PopulationInput population;
-        public RoutingInput routing;
-        public VisualizationOptions visualization;
-        public FireInput fire;
+    {    
+        public SimulationInput Simulation;
+        public MapInput Map;
+        public VisualizationOptions Visualization;
+        public PopulationInput Population;
+        public RoutingInput Routing; 
+        public EvacInput Evacuation;
+        public TrafficInput Traffic;    
+        public FireInput Fire;
+        public SmokeInput Smoke;
 
         public WUInityInput()
         {
-            evac = new EvacInput();
-            traffic = new TrafficInput();
-            population = new PopulationInput();
-            routing = new RoutingInput();
-            visualization = new VisualizationOptions();
-            fire = new FireInput();
+            Simulation = new SimulationInput();
+            Map = new MapInput();
+            Visualization = new VisualizationOptions();
+            Population = new PopulationInput();
+            Routing = new RoutingInput();
+            Evacuation = new EvacInput();
+            Traffic = new TrafficInput();    
+            Fire = new FireInput();
+            Smoke = new SmokeInput();
         }
 
         public static void SaveInput()
@@ -69,6 +61,23 @@ namespace WUInity
     }
 
     [System.Serializable]
+    public class SimulationInput
+    {
+        public string SimDataName = "New_sim";
+        public float DeltaTime = 1f;
+        public float MaxSimTime = 864000f; //10 days
+        public bool StopWhenEvacuated = true;
+        //public int numberOfRuns = 1;
+        public bool StopAfterConverging = true;
+        public Vector2D LowerLeftLatLong = new Vector2D(55.697354, 13.173808);
+        public Vector2D Size = new Vector2D(3000, 3000);        
+        public bool RunEvacSim = true;
+        public bool RunTrafficSim = true;
+        public bool RunFireSim = true;
+        public bool RunSmokeSim = true;
+    }
+
+    [System.Serializable]
     public class PopulationInput
     {
         public string gpwDataFolder = "gpw-v4-population-density-rev10_2015_30_sec_asc";
@@ -79,31 +88,26 @@ namespace WUInity
     [System.Serializable]
     public class EvacInput
     {
-        public float routeCellSize = 200f;
-
-        //public Vector2Int routeCellCount;
-
-        public bool allowMoreThanOneCar = true;
-        public int maxCars = 2;
-        public float maxCarsChance = 0.3f;
+        public float RouteCellSize = 200f;
+        public float evacuationOrderStart = 0.0f;
+        public string[] responseCurveFiles;
+        public string[] EvacGroupFiles;
 
         public int minHouseholdSize = 1;
         public int maxHouseholdSize = 5;
+        public bool allowMoreThanOneCar = true;
+        public int maxCars = 2;
+        public float maxCarsChance = 0.3f;               
 
         public float walkingDistanceModifier = 1.0f;
         public Vector2 walkingSpeedMinMax = new Vector2(0.7f, 1.0f);
         public float walkingSpeedModifier = 1.0f;
 
-        public float evacuationOrderStart = 0.0f;
-        public string[] responseCurveFiles;
-
-        public BlockGoalEvent[] blockGoalEvents = BlockGoalEvent.GetDummy();
-
-        public string[] evacGroupFiles;      
+        public string[] GoalEventFiles;            
 
         //TODO: fix saving these?
-        [System.NonSerialized] public Texture2D evacuationForceTex;
-        [System.NonSerialized] public EvacuationGoal[] paintedForcedGoals; //contains all the forced goals per cell        
+        //[System.NonSerialized] public Texture2D evacuationForceTex;
+        //[System.NonSerialized] public EvacuationGoal[] paintedForcedGoals; //contains all the forced goals per cell        
     }    
 
     [System.Serializable]
@@ -150,21 +154,36 @@ namespace WUInity
     public class FireInput
     {
         public string lcpFile;
-        public string fuelModelsFile = "default";
-        public string initialFuelMoistureFile = "default";
-        public string weatherFile;
-        public string windFile;
-        public string ignitionPointsFile;
-        public string graphicalFireInputFile;
+        public string fuelModelsFile = "default.fuel";
+        public string initialFuelMoistureFile = "default.fmc";
+        public string weatherFile = "default.wtr";
+        public string windFile = "default.wnd";
+        public string ignitionPointsFile = "default.ign";
+        public string graphicalFireInputFile = "default.gfi";
         public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
               
         public float windMultiplier = 1f;
 
-        public bool useRandomIgnitionMap;
-        public int randomIgnitionPoints;
-        public bool useInitialIgnitionMap;
+        public bool useRandomIgnitionMap = false;
+        public int randomIgnitionPoints = 0;
+        public bool useInitialIgnitionMap = false;
 
-        public FarsiteInput farsite;
-    }    
+        public FarsiteInput FarsiteData;
+    }
+
+    [System.Serializable]
+    public class SmokeInput
+    {
+        public float MixingLayerHeight = 250.0f;
+    }
+
+    [System.Serializable]
+    public class MapInput
+    {
+        public enum MapServiceProvider { Mapbox, Bing, OSM };
+        
+        public MapServiceProvider MapProvider = MapServiceProvider.Mapbox;
+        public int ZoomLevel = 13;
+    }
 }
 

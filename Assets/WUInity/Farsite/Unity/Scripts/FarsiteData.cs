@@ -180,7 +180,7 @@ namespace WUInity.Farsite
                 mainPath +=  "/";
             }
             string input = mainPath;// + inputPrefix;
-            string output = mainPath + "output/" + WUInity.INPUT.fire.farsite.outputPrefix;// + outputPrefix;
+            string output = mainPath + "output/" + WUInity.INPUT.Fire.FarsiteData.outputPrefix;// + outputPrefix;
 
             //first read input
             ReadElevation(input);

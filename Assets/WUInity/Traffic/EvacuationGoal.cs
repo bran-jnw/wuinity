@@ -174,9 +174,9 @@ namespace WUInity
             EvacuationGoal[] result = null;
             List<EvacuationGoal> evacuationGoals = new List<EvacuationGoal>();
 
-            for (int i = 0; i < WUInity.INPUT.traffic.evacuationGoalFiles.Length; i++)
+            for (int i = 0; i < WUInity.INPUT.Traffic.evacuationGoalFiles.Length; i++)
             {
-                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.traffic.evacuationGoalFiles[i] + ".ed");
+                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.evacuationGoalFiles[i] + ".ed");
                 bool fileExists = File.Exists(path);
                 if (fileExists)
                 {
