@@ -102,9 +102,9 @@ namespace WUInity
             }
             else
             {
-                for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGroups.Length; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups.Length; i++)
                 {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.EvacuationGroups[i].Name))
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[i].Name))
                     {
                         WUInity.PAINTER.SetEvacGroupColor(i);
                     }

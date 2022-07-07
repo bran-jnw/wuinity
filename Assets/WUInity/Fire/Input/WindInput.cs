@@ -117,8 +117,9 @@ namespace WUInity.Fire
             return wI;
         }
 
-        public static WindInput LoadWindInputFile()
+        public static WindInput LoadWindInputFile(out bool success)
         {
+            success = false;
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
@@ -191,6 +192,7 @@ namespace WUInity.Fire
             if (windData.Count > 0)
             {
                 result = new WindInput(windData.ToArray());
+                success = true;
                 WUInity.LOG("LOG: Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)

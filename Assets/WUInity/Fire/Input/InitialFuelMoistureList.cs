@@ -90,8 +90,9 @@ namespace WUInity.Fire
             return result;
         }        
 
-        public static InitialFuelMoistureList LoadInitialFuelMoistureDataFile()
+        public static InitialFuelMoistureList LoadInitialFuelMoistureDataFile(out bool success)
         {
+            success = false;
             InitialFuelMoistureList result = null;
             List<InitialFuelMoisture> initialFuelMoistures = new List<InitialFuelMoisture>();
 
@@ -132,6 +133,7 @@ namespace WUInity.Fire
             if (initialFuelMoistures.Count > 0)
             {
                 result = new InitialFuelMoistureList(initialFuelMoistures);
+                success = true; 
                 WUInity.LOG("LOG: Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
             }
             else if(fileExists)

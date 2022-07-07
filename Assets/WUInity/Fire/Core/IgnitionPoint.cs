@@ -118,12 +118,12 @@ namespace WUInity.Fire
         /// Sends message to the WUI_LOG to inform the user.
         /// </summary>
         /// <returns></returns>
-        public static IgnitionPoint[] LoadIgnitionPointsFile()
+        public static IgnitionPoint[] LoadIgnitionPointsFile(string path, out bool success)
         {
+            success = false;
             IgnitionPoint[] result = null;
             List<IgnitionPoint> ignitionPoints= new List<IgnitionPoint>();
-
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.ignitionPointsFile);
+            
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
@@ -158,6 +158,7 @@ namespace WUInity.Fire
             {
                 result = ignitionPoints.ToArray();
                 WUInity.LOG("LOG: Ignition points data file " + path + " was found, " + ignitionPoints.Count + " valid data points were succesfully loaded.");
+                success = true;
             }
             else if (fileExists)
             {

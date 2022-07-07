@@ -169,9 +169,9 @@ namespace WUInity
             return eGs;
         }
 
-        public static EvacuationGoal[] LoadEvacuationGoalFiles()
+        public static List<EvacuationGoal> LoadEvacuationGoalFiles(out bool success)
         {
-            EvacuationGoal[] result = null;
+            success = false;
             List<EvacuationGoal> evacuationGoals = new List<EvacuationGoal>();
 
             for (int i = 0; i < WUInity.INPUT.Traffic.evacuationGoalFiles.Length; i++)
@@ -268,11 +268,11 @@ namespace WUInity
 
             if (evacuationGoals.Count > 0)
             {
-                result = evacuationGoals.ToArray();
-                WUInity.LOG("LOG: " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");
+                success = true;
+                WUInity.LOG("LOG: " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");               
             }
 
-            return result;
+            return evacuationGoals;
         }
     }
 }

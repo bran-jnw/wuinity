@@ -85,9 +85,7 @@ namespace WUInity
 
         void LoadOpticalDensityFile(string[] paths)
         {
-            WUInityInput wO = WUInity.INPUT;
-            wO.Traffic.opticalDensityFile = paths[0];
-            WUInity.RUNTIME_DATA.LoadOpticalDensityFile();
+            WUInity.RUNTIME_DATA.Traffic.LoadOpticalDensityFile(paths[0], true);
         }
     }
 }

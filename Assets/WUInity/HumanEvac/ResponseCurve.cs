@@ -42,8 +42,9 @@ namespace WUInity
             this.dataPoints = dataPoints.ToArray();
         }
 
-        public static ResponseCurve[] LoadResponseCurves()
+        public static ResponseCurve[] LoadResponseCurves(out bool success)
         {
+            success = false;
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
             for (int i = 0; i < WUInity.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
             {
@@ -87,6 +88,7 @@ namespace WUInity
             if(responseCurves.Count > 0)
             {
                 ResponseCurve[] rCurves = responseCurves.ToArray();
+                success = true;
                 return rCurves;
             }
             else

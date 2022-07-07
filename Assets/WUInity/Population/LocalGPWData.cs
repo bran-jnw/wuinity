@@ -79,7 +79,7 @@ namespace WUInity.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimDataName + ".gpw");
+            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimulationID + ".gpw");
             File.WriteAllLines(path, data);
         }
 
@@ -385,9 +385,8 @@ namespace WUInity.Population
             return h;
         }
 
-        public static bool IsGPWAvailable()
-        {
-            string path = WUInity.INPUT.Population.gpwDataFolder;
+        public static bool IsGPWAvailable(string path)
+        {            
             bool isAvailable = false;
 
             if (Directory.Exists(path))
@@ -432,9 +431,10 @@ namespace WUInity.Population
             Vector2D size = WUInity.INPUT.Simulation.Size;
 
             bool success = false;
-            if(IsGPWAvailable())
+            string path = WUInity.INPUT.Population.gpwDataFolder;
+            if (IsGPWAvailable(path))
             {
-                string path = WUInity.INPUT.Population.gpwDataFolder;
+                
                 if (latLong.x >= -3.4106051316485e-012)
                 {
                     if (latLong.y < -90.000000000005)

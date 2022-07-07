@@ -106,11 +106,11 @@ namespace WUInity
 
             if (WUInity.POPULATION.IsPopulationLoaded())
             {
-                if (!WUInity.POPULATION.GetPopulationData().correctedForRoutes && WUInity.RUNTIME_DATA.Routes != null)
+                if (!WUInity.POPULATION.GetPopulationData().correctedForRoutes && WUInity.RUNTIME_DATA.Routing.RouteCollections != null)
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Correct for route access"))
                     {
-                        WUInity.POPULATION.UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routes);
+                        WUInity.POPULATION.UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routing.RouteCollections);
                         WUInity.INSTANCE.DisplayPopulation();
                     }
                     ++buttonIndex;
@@ -247,8 +247,7 @@ namespace WUInity
 
         void SetGPWFolder(string[] paths)
         {
-            WUInity.INPUT.Population.gpwDataFolder = paths[0];
-            WUInity.DATA_STATUS.GlobalGPWAvailable = Population.LocalGPWData.IsGPWAvailable();
+            WUInity.RUNTIME_DATA.Population.LoadGlobalGPWFolder(paths[0], true);
         }
     }
 }

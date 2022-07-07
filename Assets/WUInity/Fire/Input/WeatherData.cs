@@ -175,8 +175,9 @@ namespace WUInity.Fire
             return currentWeather;
         }
 
-        public static WeatherInput LoadWeatherInputFile()
+        public static WeatherInput LoadWeatherInputFile(out bool success)
         {
+            success = false;
             WeatherInput result = null;
             List<WeatherData> weatherData = new List<WeatherData>();
 
@@ -221,6 +222,7 @@ namespace WUInity.Fire
             if (weatherData.Count > 0)
             {
                 result = new WeatherInput(weatherData.ToArray());
+                success = true;
                 WUInity.LOG("LOG: Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)

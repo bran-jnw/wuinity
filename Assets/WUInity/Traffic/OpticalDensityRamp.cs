@@ -5,20 +5,20 @@ using UnityEngine;
 
 namespace WUInity.Traffic
 {
-    public struct OpticalDensityRamp
+    public class OpticalDensityRamp
     {
         LinearSpline1D rampData;
 
-        public bool LoadOpticalDensityRampFile(string file)
+        public bool LoadOpticalDensityRampFile(string path)
         {
             string[] rampLines;
-            if (File.Exists(file))
+            if (File.Exists(path))
             {
-                rampLines = File.ReadAllLines(file);
+                rampLines = File.ReadAllLines(path);
             }
             else
             {
-                WUInity.LOG("Optical density ramp file " + file + " not found.");
+                WUInity.LOG("WARNING: Optical density ramp file " + path + " not found.");
                 return false;
             }
 

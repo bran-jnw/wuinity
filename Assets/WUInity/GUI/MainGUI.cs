@@ -81,9 +81,9 @@ namespace WUInity
             buttonIndex += 2;
 
             //name
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation name:");
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation ID:");
             ++buttonIndex;
-            wO.Simulation.SimDataName = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.Simulation.SimDataName);
+            wO.Simulation.SimulationID = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.Simulation.SimulationID);
             ++buttonIndex;   
             
             //dT
@@ -92,9 +92,9 @@ namespace WUInity
             dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
             ++buttonIndex;
 
-            WUInity.RUNTIME_DATA.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.MultipleSimulations, "Multiple runs");
+            WUInity.RUNTIME_DATA.Simulation.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.Simulation.MultipleSimulations, "Multiple runs");
             ++buttonIndex;
-            if (WUInity.RUNTIME_DATA.MultipleSimulations)
+            if (WUInity.RUNTIME_DATA.Simulation.MultipleSimulations)
             {
                 //number of runs
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
@@ -146,9 +146,9 @@ namespace WUInity
         {
             mainMenuDirty = false;
             dT = wO.Simulation.DeltaTime.ToString();
-            nrRuns = WUInity.RUNTIME_DATA.General.NumberOfRuns.ToString();
-            convergenceMaxDifference = WUInity.RUNTIME_DATA.convergenceMaxDifference.ToString();
-            convergenceMinSequence = WUInity.RUNTIME_DATA.convergenceMinSequence.ToString();
+            nrRuns = WUInity.RUNTIME_DATA.Simulation.NumberOfRuns.ToString();
+            convergenceMaxDifference = WUInity.RUNTIME_DATA.Simulation.ConvergenceMaxDifference.ToString();
+            convergenceMinSequence = WUInity.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
         }
 
         void ParseMainData(WUInityInput wO)
@@ -162,9 +162,9 @@ namespace WUInity
             }
 
             float.TryParse(dT, out wO.Simulation.DeltaTime);
-            int.TryParse(nrRuns, out WUInity.RUNTIME_DATA.General.NumberOfRuns);
-            float.TryParse(convergenceMaxDifference, out WUInity.RUNTIME_DATA.convergenceMaxDifference);
-            int.TryParse(convergenceMinSequence, out WUInity.RUNTIME_DATA.convergenceMinSequence);
+            int.TryParse(nrRuns, out WUInity.RUNTIME_DATA.Simulation.NumberOfRuns);
+            float.TryParse(convergenceMaxDifference, out WUInity.RUNTIME_DATA.Simulation.ConvergenceMaxDifference);
+            int.TryParse(convergenceMinSequence, out WUInity.RUNTIME_DATA.Simulation.ConvergenceMinSequence);
         }
 
         void OpenSaveInput()
@@ -172,7 +172,7 @@ namespace WUInity
             FileBrowser.SetFilters(false, wuiFilter);
             WUInityInput wO = WUInity.INPUT;
             string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
-            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimDataName + ".wui", "Save file", "Save");
+            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
         }                  
 
         void SaveInput(string[] paths)
@@ -192,7 +192,7 @@ namespace WUInity
             }
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            wO.Simulation.SimDataName = name;
+            wO.Simulation.SimulationID = name;
 
             WUInityInput.SaveInput();
         }

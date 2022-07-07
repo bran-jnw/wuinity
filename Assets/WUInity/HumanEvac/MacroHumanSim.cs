@@ -262,7 +262,7 @@ namespace WUInity.Evac
         public void SaveToFile(int runNumber)
         {
             WUInityInput wO = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimDataName + "_pedestrian_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -271,8 +271,8 @@ namespace WUInity.Evac
         /// </summary>
         public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
-            cellsX = WUInity.RUNTIME_DATA.EvacCellCount.x;
-            cellsY = WUInity.RUNTIME_DATA.EvacCellCount.y;
+            cellsX = WUInity.RUNTIME_DATA.Evacuation.CellCount.x;
+            cellsY = WUInity.RUNTIME_DATA.Evacuation.CellCount.y;
             this.realWorldSize = WUInity.INPUT.Simulation.Size;
             population = new int[cellsX * cellsY];
 
@@ -306,24 +306,24 @@ namespace WUInity.Evac
             float r = Random.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
-            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= WUInity.RUNTIME_DATA.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
                 {
                     randomResponseCurveIndex = i;
                     break;
                 }
             }
-            int curveIndex = WUInity.RUNTIME_DATA.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
+            int curveIndex = WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
 
             //skip first as that is always zero probability
-            for (int i = 1; i < WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints.Length; i++)
+            for (int i = 1; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUInity.RUNTIME_DATA.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    responseTime = Random.Range(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
                     break;
                 }
             }

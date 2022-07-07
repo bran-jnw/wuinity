@@ -99,23 +99,25 @@ namespace WUInity.Traffic
             File.WriteAllText(path, json);            
         }
 
-        public static RoadTypeData LoadRoadTypeData()
+        public static RoadTypeData LoadRoadTypeData(string path, out bool loadedDefaults)
         {
             RoadTypeData results = null;
-
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.roadTypesFile);
+            loadedDefaults = true;
+            
             if (File.Exists(path))
             {
                 string input = File.ReadAllText(path);
                 results = JsonUtility.FromJson<RoadTypeData>(input);
+                loadedDefaults = false;
             }
 
             if(results == null)
             {
+                //creates default values
                 results = new RoadTypeData();
                 SaveRoadTypeData(results);
-                WUInity.INPUT.Traffic.roadTypesFile = "default";
-            }
+                WUInity.INPUT.Traffic.roadTypesFile = "default";               
+            }            
 
             return results;
         }

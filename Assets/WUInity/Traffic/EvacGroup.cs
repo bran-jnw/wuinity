@@ -56,15 +56,16 @@ namespace WUInity
             {
                 if (randomChoice <= GoalsCumulativeWeights[i])
                 {
-                    return WUInity.RUNTIME_DATA.EvacuationGoals[GoalIndices[i]];
+                    return WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[GoalIndices[i]];
                 }
             }
 
             return null;
         }
 
-        public static EvacGroup[] LoadEvacGroupFiles()
+        public static EvacGroup[] LoadEvacGroupFiles(out bool success)
         {
+            success = false;
             EvacGroup[] result = null;
             List<EvacGroup> evacGroups = new List<EvacGroup>();
 
@@ -151,13 +152,13 @@ namespace WUInity
                         int[] goalIndices = new int[destinationNames.Count];
                         for (int j = 0; j < destinationNames.Count; j++)
                         {
-                            goalIndices[j] = WUInity.RUNTIME_DATA.GetEvacGoalIndexFromName(destinationNames[j]);
+                            goalIndices[j] = WUInity.RUNTIME_DATA.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
                         }
 
                         int[] responseCurveIndices = new int[responseCurveNames.Count];
                         for (int j = 0; j < responseCurveNames.Count; j++)
                         {
-                            responseCurveIndices[j] =  WUInity.RUNTIME_DATA.GetResponseCurveIndexFromName(responseCurveNames[j]);
+                            responseCurveIndices[j] =  WUInity.RUNTIME_DATA.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
                         }
 
                         //TODO: check if input count and probabilities match
@@ -182,6 +183,7 @@ namespace WUInity
             if (evacGroups.Count > 0)
             {
                 result = evacGroups.ToArray();
+                success = true;
                 WUInity.LOG("LOG: Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
             }
             else
@@ -194,28 +196,29 @@ namespace WUInity
 
         public static void SaveEvacGroupIndices()
         {
-            string filename = WUInity.INPUT.Simulation.SimDataName;
+            string filename = WUInity.INPUT.Simulation.SimulationID;
 
             string[] data = new string[4];
             //nrows
-            data[0] = WUInity.RUNTIME_DATA.EvacCellCount.x.ToString();
+            data[0] = WUInity.RUNTIME_DATA.Evacuation.CellCount.x.ToString();
             //ncols
-            data[1] = WUInity.RUNTIME_DATA.EvacCellCount.y.ToString();
+            data[1] = WUInity.RUNTIME_DATA.Evacuation.CellCount.y.ToString();
             //how many evac groups
             data[2] = WUInity.INPUT.Evacuation.EvacGroupFiles.Length.ToString();
             //actual data
             data[3] = "";
-            for (int i = 0; i < WUInity.RUNTIME_DATA.evacGroupIndices.Length; ++i)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length; ++i)
             {
-                data[3] += WUInity.RUNTIME_DATA.evacGroupIndices[i] + " ";
+                data[3] += WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[i] + " ";
             }
 
             File.WriteAllLines(WUInity.WORKING_FOLDER + "/" + filename + ".egs", data);
         }
 
-        public static void LoadEvacGroupIndices()
+        public static void LoadEvacGroupIndices(out bool success)
         {
-            string filename = WUInity.INPUT.Simulation.SimDataName;
+            success = false;
+            string filename = WUInity.INPUT.Simulation.SimulationID;
             string path = WUInity.WORKING_FOLDER + "/" + filename + ".egs";
 
             try
@@ -233,7 +236,7 @@ namespace WUInity
                     int.TryParse(header[1], out nrows);
                     int.TryParse(header[2], out evacGroupCount);
                     //make sure we have the correct size
-                    if (ncols == WUInity.RUNTIME_DATA.EvacCellCount.x && nrows == WUInity.RUNTIME_DATA.EvacCellCount.y && evacGroupCount <= WUInity.INPUT.Evacuation.EvacGroupFiles.Length)
+                    if (ncols == WUInity.RUNTIME_DATA.Evacuation.CellCount.x && nrows == WUInity.RUNTIME_DATA.Evacuation.CellCount.y && evacGroupCount <= WUInity.INPUT.Evacuation.EvacGroupFiles.Length)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];
@@ -241,19 +244,20 @@ namespace WUInity
                         {
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
-                        WUInity.RUNTIME_DATA.UpdateEvacGroups(eGsIndices);
+                        WUInity.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(eGsIndices);
                         WUInity.LOG("LOG: Evac groups loaded from file, cells: " + ncols + ", " + nrows);
+                        success = true;
                     }
                     else
                     {
-                        WUInity.RUNTIME_DATA.UpdateEvacGroups(null);
+                        WUInity.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(null);
                         WUInity.LOG("WARNING: Evac groups file does not match current mesh, using default.");
                     }
                 }
             }
             catch (System.Exception e)
             {
-                WUInity.RUNTIME_DATA.UpdateEvacGroups(null);
+                WUInity.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(null);
                 WUInity.LOG("WARNING: Evac groups file " + path + " not found, using default.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }

@@ -1,6 +1,6 @@
 {
     "Simulation": {
-        "SimDataName": "example",
+        "SimulationID": "example",
         "DeltaTime": 1.0,
         "MaxSimTime": 864000.0,
         "StopWhenEvacuated": true,
@@ -36,7 +36,7 @@
     },
     "Evacuation": {
         "RouteCellSize": 200.0,
-        "EvacuationOrderStart": 420.0,
+        "EvacuationOrderStart": 0.0,
         "ResponseCurveFiles": [
             "Observed_average",
             "Reported_average"
@@ -72,7 +72,7 @@
             "y": 0.0
         },
         "visibilityAffectsSpeed": false,
-        "opticalDensityFile": "",
+        "opticalDensityFile": "opticalDensity.odr",
         "opticalDensity": 0.05000000074505806,
         "roadTypesFile": "default.roads",
         "saveInterval": 600.0,
@@ -142,7 +142,7 @@
         "windFile": "example_seconds.wnd",
         "ignitionPointsFile": "example.ign",
         "graphicalFireInputFile": "example.gfi",
-        "spreadMode": 1,
+        "spreadMode": 2,
         "windMultiplier": 1.0,
         "useRandomIgnitionMap": false,
         "randomIgnitionPoints": 0,

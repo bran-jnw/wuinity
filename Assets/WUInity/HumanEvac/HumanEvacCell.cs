@@ -52,7 +52,7 @@ namespace WUInity.Evac
             closestNodeUnitySpace = new Vector2D(v.x, v.y);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
-                int evacGroupIndex = WUInity.RUNTIME_DATA.evacGroupIndices[i];
+                int evacGroupIndex = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];
                 macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHumanSim.GetRandomWalkingSpeed(), MacroHumanSim.GetRandomResponseTime(evacGroupIndex));
             }
         }

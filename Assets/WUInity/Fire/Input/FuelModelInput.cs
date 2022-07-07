@@ -40,25 +40,25 @@ namespace WUInity.Fire
             }
         }
 
-        public List<FuelModel> fuels;
+        public List<FuelModel> Fuels;
 
-        public bool LoadFuelModelInputFile(string file)
+        public bool LoadFuelModelInputFile(string path)
         {
             WUInity.LOG("LOG: Attempting to load fuel model file.");
             bool success = false;
 
             string[] fuelLines;
-            if (File.Exists(file))
+            if (File.Exists(path))
             {
-                fuelLines = File.ReadAllLines(file);
+                fuelLines = File.ReadAllLines(path);
             }
             else
             {
-                WUInity.LOG("WARNING: Fuel model file " + file + " not found." );
+                WUInity.LOG("WARNING: Fuel model file " + path + " not found." );
                 return false;
             }
 
-            fuels = new List<FuelModel>();
+            Fuels = new List<FuelModel>();
 
             //skip first line as that is just the header
             for (int i = 1; i < fuelLines.Length; i++)
@@ -105,22 +105,20 @@ namespace WUInity.Fire
                     fuelLoadLiveWoody, savrOneHour, savrLiveHerbaceous, savrLiveWoody,
                     isDynamic, isReserved);
 
-                    fuels.Add(newFuel);
+                    Fuels.Add(newFuel);
                     WUInity.LOG("LOG: Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
                 }
             }
 
-            if(fuels.Count == 0)
+            if(Fuels.Count == 0)
             {
-                WUInity.DATA_STATUS.FuelModelsLoaded = false;
-                fuels = null;
+                Fuels = null;
                 success = false;
             }
             else
             {
-                WUInity.DATA_STATUS.FuelModelsLoaded = true;
                 success = true;
-            }
+            }            
 
             return success;
         }

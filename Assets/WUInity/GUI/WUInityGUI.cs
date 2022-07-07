@@ -227,7 +227,7 @@ namespace WUInity
             GUI.EndGroup();
         }
 
-        public void SetGUIDirty()
+        public void SetDirty()
         {
             mainMenuDirty = true;
             mapMenuDirty = true;

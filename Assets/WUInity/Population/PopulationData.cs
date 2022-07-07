@@ -26,7 +26,7 @@ namespace WUInity.Population
         {
             lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
             size = WUInity.INPUT.Simulation.Size;
-            cells = WUInity.RUNTIME_DATA.EvacCellCount;
+            cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
             cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
 
             cellArea = cellSize * cellSize / (1000000d); // people/square km
@@ -53,7 +53,7 @@ namespace WUInity.Population
         {
             lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
             size = WUInity.INPUT.Simulation.Size;
-            cells = WUInity.RUNTIME_DATA.EvacCellCount;
+            cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
             cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
 
             cellPopulation = new int[cells.x * cells.y];
@@ -203,7 +203,7 @@ namespace WUInity.Population
             string path = WUInity.INPUT.Population.populationFile;
             if(!File.Exists(path))
             {
-                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimDataName + ".pop");
+                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimulationID + ".pop");
             }
             WUInity.INPUT.Population.populationFile = path;
             System.IO.File.WriteAllLines(path, data);
@@ -221,9 +221,6 @@ namespace WUInity.Population
                 WUInity.LOG("LOG: Could not load population, file not found.");
 
             }
-
-            WUInity.DATA_STATUS.PopulationCorrectedForRoutes = correctedForRoutes;
-            WUInity.DATA_STATUS.PopulationLoaded = success;
 
             return success;
         }

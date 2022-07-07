@@ -63,7 +63,7 @@ namespace WUInity
     [System.Serializable]
     public class SimulationInput
     {
-        public string SimDataName = "New_sim";
+        public string SimulationID = "New_sim";
         public float DeltaTime = 1f;
         public float MaxSimTime = 864000f; //10 days
         public bool StopWhenEvacuated = true;

@@ -119,7 +119,7 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;            
 
             //run in real time with gui updates
-            if(!WUInity.RUNTIME_DATA.MultipleSimulations)
+            if(!WUInity.RUNTIME_DATA.Simulation.MultipleSimulations)
             {
                 CreateSubSims(0);
                 RunSimulation(0);
@@ -130,7 +130,7 @@ namespace WUInity
                 int actualRuns = 0;
                 int convergedInSequence = 0;
                 List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
-                for (int i = 0; i < WUInity.RUNTIME_DATA.General.NumberOfRuns; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.Simulation.NumberOfRuns; i++)
                 {
                     CreateSubSims(i);
                     //do actual simulation
@@ -146,13 +146,13 @@ namespace WUInity
                         float currentAverage = (averageTotalEvacTime / (i + 1));
                         float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
                         //if convergence met we can stop
-                        if (convergenceCriteria < WUInity.RUNTIME_DATA.convergenceMaxDifference)
+                        if (convergenceCriteria < WUInity.RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
                         {
                             ++convergedInSequence;
                             //we are done
-                            if(WUInity.INPUT.Simulation.StopAfterConverging && convergedInSequence > WUInity.RUNTIME_DATA.convergenceMinSequence)
+                            if(WUInity.INPUT.Simulation.StopAfterConverging && convergedInSequence > WUInity.RUNTIME_DATA.Simulation.ConvergenceMinSequence)
                             {
-                                i = WUInity.RUNTIME_DATA.General.NumberOfRuns;
+                                i = WUInity.RUNTIME_DATA.Simulation.NumberOfRuns;
                             }                            
                         }
                         else
@@ -225,7 +225,7 @@ namespace WUInity
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
             WUInityInput wuiIn = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.Simulation.SimDataName + "_traffic_average.csv");
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.Simulation.SimulationID + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }
         
@@ -265,17 +265,17 @@ namespace WUInity
                 if (i == 0)
                 {                     
                     //we could not load from disk, so have to build all routes
-                    if (WUInity.RUNTIME_DATA.Routes == null)
+                    if (WUInity.RUNTIME_DATA.Routing.RouteCollections == null)
                     {
-                        WUInity.RUNTIME_DATA.BuildAndSaveRouteCollection();
+                        WUInity.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
                     }
 
-                    WUInity.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routes);
+                    WUInity.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routing.RouteCollections);
                 }
 
                 _macroHumanSim = new MacroHumanSim();
                 //place people
-                _macroHumanSim.PopulateCells(WUInity.RUNTIME_DATA.Routes, WUInity.POPULATION.GetPopulationData());                
+                _macroHumanSim.PopulateCells(WUInity.RUNTIME_DATA.Routing.RouteCollections, WUInity.POPULATION.GetPopulationData());                
                 //distribute people
                 _macroHumanSim.PlaceHouseholdsInCells();
             }
@@ -288,7 +288,7 @@ namespace WUInity
 
         private void CreateFireSim()
         {            
-            _fireMesh = new FireMesh(System.IO.Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.lcpFile), WUInity.RUNTIME_DATA.WeatherInput, WUInity.RUNTIME_DATA.WindInput, WUInity.RUNTIME_DATA.InitialFuelMoistureData, WUInity.RUNTIME_DATA.IgnitionPoints);
+            _fireMesh = new FireMesh(WUInity.RUNTIME_DATA.Fire.LCPData, WUInity.RUNTIME_DATA.Fire.WeatherInput, WUInity.RUNTIME_DATA.Fire.WindInput, WUInity.RUNTIME_DATA.Fire.InitialFuelMoistureData, WUInity.RUNTIME_DATA.Fire.IgnitionPoints);
             _fireMesh.spreadMode = WUInity.INPUT.Fire.spreadMode;           
         }
 
@@ -297,16 +297,16 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
 
             //if we do multiple runs the goals have to be reset
-            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                WUInity.RUNTIME_DATA.EvacuationGoals[i].ResetPeopleAndCars();
+                WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].ResetPeopleAndCars();
             }
 
             //pick start time based on curve or 0 (fire start)
             _time = 0f;
-            for (int i = 0; i < WUInity.RUNTIME_DATA.ResponseCurves.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.Length; i++)
             {
-                float t = WUInity.RUNTIME_DATA.ResponseCurves[i].dataPoints[0].time + input.Evacuation.EvacuationOrderStart;
+                float t = WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + input.Evacuation.EvacuationOrderStart;
                 _time = Mathf.Min(Time, t);
             }
             _startTime = Time;
@@ -327,7 +327,7 @@ namespace WUInity
             _stopSim = false;
             IsRunning = true;
             nextFireUpdate = 0f;  
-            if(WUInity.RUNTIME_DATA.MultipleSimulations)
+            if(WUInity.RUNTIME_DATA.Simulation.MultipleSimulations)
             {
                 while (!_stopSim)
                 {
@@ -419,14 +419,17 @@ namespace WUInity
             if(input.Simulation.RunTrafficSim)
             {
                 //check for global events
-                for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents.Length; i++)
+                if(WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents != null)
                 {
-                    BlockGoalEvent bGE = WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents[i];
-                    if (Time >= bGE.startTime && !bGE.triggered)
+                    for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents.Length; i++)
                     {
-                        bGE.ApplyEffects();
+                        BlockGoalEvent bGE = WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents[i];
+                        if (Time >= bGE.startTime && !bGE.triggered)
+                        {
+                            bGE.ApplyEffects();
+                        }
                     }
-                }
+                }                
             }
 
             //update fire mesh if needed
@@ -478,9 +481,9 @@ namespace WUInity
 
         void CheckEvacuationGoalStatus()
         {
-            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                EvacuationGoal eG = WUInity.RUNTIME_DATA.EvacuationGoals[i];
+                EvacuationGoal eG = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 if(!eG.blocked)
                 {
                     Fire.FireCellState cellState = _fireMesh.GetFireCellState(eG.latLong);
@@ -504,9 +507,9 @@ namespace WUInity
 
         public void BlockEvacGoal(int index)
         {
-            if (!WUInity.RUNTIME_DATA.EvacuationGoals[index].blocked)
+            if (!WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[index].blocked)
             {
-                WUInity.RUNTIME_DATA.EvacuationGoals[index].blocked = true;
+                WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[index].blocked = true;
                 UpdateRoutes();
             }
         }        
@@ -523,9 +526,9 @@ namespace WUInity
         {
             //check that we have at least one goal left
             bool allBlocked = true;
-            for (int i = 0; i < WUInity.RUNTIME_DATA.EvacuationGoals.Length; i++)
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                if(!WUInity.RUNTIME_DATA.EvacuationGoals[i].blocked)
+                if(!WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].blocked)
                 {
                     allBlocked = false;
                     break;
@@ -539,15 +542,15 @@ namespace WUInity
 
             //update raster evac routes first as traffic might use some of the updated choices
             int cellsWithoutRouteButNoonePlansToLeave = 0;
-            if(WUInity.RUNTIME_DATA.Routes != null)
+            if(WUInity.RUNTIME_DATA.Routing.RouteCollections != null)
             {
-                for (int i = 0; i < WUInity.RUNTIME_DATA.Routes.Length; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.Routing.RouteCollections.Length; i++)
                 {
-                    if (WUInity.RUNTIME_DATA.Routes[i] != null && !_macroHumanSim.IsCellEvacuated(i))
+                    if (WUInity.RUNTIME_DATA.Routing.RouteCollections[i] != null && !_macroHumanSim.IsCellEvacuated(i))
                     {
                         if(_macroHumanSim.GetPeopleLeftInCellIntendingToLeave(i) > 0)
                         {
-                            WUInity.RUNTIME_DATA.Routes[i].CheckAndUpdateRoute();
+                            WUInity.RUNTIME_DATA.Routing.RouteCollections[i].CheckAndUpdateRoute();
                         }
                         else
                         {
@@ -577,7 +580,7 @@ namespace WUInity
                 _macroHumanSim.SaveToFile(runNumber);
             }
 
-            WUInityOutput.SaveOutput(WUInity.INPUT.Simulation.SimDataName + "_" + runNumber);            
+            WUInityOutput.SaveOutput(WUInity.INPUT.Simulation.SimulationID + "_" + runNumber);            
         }
     }    
 }

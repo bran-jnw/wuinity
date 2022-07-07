@@ -42,10 +42,10 @@ namespace WUInity.Fire
         public Surface surfaceFire;                                 
         public Crown crownFire;
 
-        private double timeSinceStart = 0.0;                        //keeps track of elapsed simulated time?
+        private double timeSinceStart = 0.0;                        
 
 
-        public FireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)         //CONSTRUCTOR if LCP data is to be parsed by file.
+        /*public FireMesh(string lcpFilename, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)         
         {
             lcpData = new LCPData(lcpFilename);                 //import LCP data
             //create empry if we cannot read properly
@@ -55,18 +55,18 @@ namespace WUInity.Fire
             }
             else
             {
-                cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);          //Set cellSize properly, overwrite hardcoded value      
+                cellSize = new Vector2D(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);            
             }
-            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.y / cellSize.x)));         //get raster cell size by dividing the total length of each edge by the length of an individual cell.
+            cellCount = new Vector2Int(Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.y / cellSize.x)));        
 
             this.weather = weather;
             this.wind = wind;
             this.initialFuelMoisture = initialFuelMoisture;
 
             this.ignitionPoints = ignitionPoints;
-        }
+        }*/
 
-        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)        //CONSTRUCTOR if LCP data is to be parsed from memory
+        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)        
         {
             this.lcpData = lcpData;
             cellCount = new Vector2Int(lcpData.Header.numeast, lcpData.Header.numnorth);
@@ -86,9 +86,9 @@ namespace WUInity.Fire
             if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
                 WUInity.LOG("LOG: Adding custom fuel model specifications.");
-                for (int i = 0; i < WUInity.RUNTIME_DATA.GetFuelModelsData().fuels.Count; i++)
+                for (int i = 0; i < WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.GetFuelModelsData().fuels[i]);
+                    fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
                 }
             }            
             surfaceFire = new Surface(fuelModelSet);            

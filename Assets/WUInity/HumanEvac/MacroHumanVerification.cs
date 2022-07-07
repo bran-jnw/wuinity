@@ -14,13 +14,13 @@ namespace WUInity.Evac
             WUInity.INPUT.Simulation.RunEvacSim = true;
             WUInity.INPUT.Simulation.RunTrafficSim = false;
             WUInity.INPUT.Simulation.RunFireSim = false;
-            WUInity.RUNTIME_DATA.MultipleSimulations = true;
+            WUInity.RUNTIME_DATA.Simulation.MultipleSimulations = true;
 
             //WUInity.INSTANCE.LoadGPW(); //TODO: fix this input 
             //WUInity.SIM_DATA.LoadRouterDatabase();
 
             //P1
-            wuinityOptions.Simulation.SimDataName = "P1";
+            wuinityOptions.Simulation.SimulationID = "P1";
             //evacOptions.overrideTotalPopulation = true;
             //evacOptions.totalPopulation = 1000;
             WUInity.SIM.StartSimulation();
@@ -34,7 +34,7 @@ namespace WUInity.Evac
                 evacOptions.maxHouseholdSize = i;
                 evacOptions.maxCars = i;
                 evacOptions.maxCarsChance = 1f;
-                wuinityOptions.Simulation.SimDataName = "P2_" + i;
+                wuinityOptions.Simulation.SimulationID = "P2_" + i;
                 WUInity.SIM.StartSimulation();
             }
 
@@ -43,7 +43,7 @@ namespace WUInity.Evac
             wuinityOptions = WUInity.INPUT;
             evacOptions = WUInity.INPUT.Evacuation;
 
-            wuinityOptions.Simulation.SimDataName = "P3_1";
+            wuinityOptions.Simulation.SimulationID = "P3_1";
             //evacOptions.overrideTotalPopulation = true;
             //evacOptions.totalPopulation = 1000;
             WUInity.SIM.StartSimulation();

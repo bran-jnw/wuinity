@@ -42,7 +42,7 @@ namespace WUInity
         {
             if (router == null)
             {
-                router = new Router(WUInity.RUNTIME_DATA.GetRouterDb());
+                router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
             }
             DetermineValidGoalsAndRouterPoints(false);
         }
@@ -58,7 +58,7 @@ namespace WUInity
             WUInity.INSTANCE.DeleteDrawnRoads();
 
             Vector2D size = WUInity.INPUT.Simulation.Size;
-            Vector2Int cells = WUInity.RUNTIME_DATA.EvacCellCount;
+            Vector2Int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
             //create all waypoints in cells
@@ -74,7 +74,7 @@ namespace WUInity
 
             if (router == null)
             {
-                router = new Router(WUInity.RUNTIME_DATA.GetRouterDb());
+                router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
             }
 
             //initialize some stuff            
@@ -179,13 +179,13 @@ namespace WUInity
 
         void DetermineValidGoalsAndRouterPoints(bool logMessages)
         {
-            EvacuationGoal[] evacuatonGoals = WUInity.RUNTIME_DATA.EvacuationGoals;
+            List<EvacuationGoal> evacuatonGoals = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //check that evac goals are valid
             validEvacuationGoalRouterPoints = new List<RouterPoint>();
             validEvacuationGoals = new List<EvacuationGoal>();
-            for (int i = 0; i < evacuatonGoals.Length; i++)
+            for (int i = 0; i < evacuatonGoals.Count; i++)
             {
                 try
                 {
@@ -216,7 +216,7 @@ namespace WUInity
             {
                 if (router == null)
                 {
-                    router = new Router(WUInity.RUNTIME_DATA.GetRouterDb());
+                    router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
                 }
                 start = router.Resolve(p, (float)latLong.x, (float)latLong.y, cellSize * 0.70711f); //half cell size * sqrt 2
             }
@@ -293,7 +293,7 @@ namespace WUInity
             {
                 if (router == null)
                 {
-                    router = new Router(WUInity.RUNTIME_DATA.GetRouterDb());
+                    router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
                 }
                 Itinero.Route route = router.Calculate(routerProfile, start, goal);
                 routeData = new RouteData(route, evacGoal);
@@ -324,7 +324,7 @@ namespace WUInity
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
             //this is a quick way of getting a route from an approximate position of the car
             //we just check if cell we are in has a good route and use that
-            RouteCollection rC = WUInity.RUNTIME_DATA.GetCellRouteCollection(startPos);
+            RouteCollection rC = WUInity.RUNTIME_DATA.Routing.GetCellRouteCollection(startPos);
             if (rC != null && rC.GetSelectedRoute() != null)
             {
                 return rC.GetSelectedRoute();
@@ -422,13 +422,13 @@ namespace WUInity
         public static void SelectCorrectRoute(RouteCollection rC, int cellIndex)
         {
             TrafficInput tO = WUInity.INPUT.Traffic;
-            Vector2Int cells = WUInity.RUNTIME_DATA.EvacCellCount;
+            Vector2Int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
 
             if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
             {
                 if (cellIndex >= 0)
                 {
-                    EvacGroup group = WUInity.RUNTIME_DATA.GetEvacGroup(cellIndex);
+                    EvacGroup group = WUInity.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
                     EvacuationGoal goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }
@@ -439,8 +439,8 @@ namespace WUInity
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Random)
             {
-                int randomChoice = Random.Range(0, WUInity.RUNTIME_DATA.EvacuationGoals.Length);
-                rC.SelectForcedNonBlocked(WUInity.RUNTIME_DATA.EvacuationGoals[randomChoice]);
+                int randomChoice = Random.Range(0, WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count);
+                rC.SelectForcedNonBlocked(WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice]);
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
             {
