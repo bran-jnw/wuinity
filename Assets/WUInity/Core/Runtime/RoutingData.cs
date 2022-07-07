@@ -213,17 +213,17 @@ namespace WUInity.Runtime
 
                 //build db from OSM betwork
                 _routerDb = new RouterDb();
-                RouterDb.LoadOsmData(source, settings, Vehicle.Car);
+                _routerDb.LoadOsmData(source, settings, Vehicle.Car);
+                DATA_STATUS.RouterDbLoaded = true;
+                LOG("LOG: Router database created from OSM file.");
 
-                WUInity.LOG("LOG: Router database created from OSM file.");
-
-                // write the routerdb to disk.
+                // write the new routerdb to disk.
                 string internalRouterName = WUInity.INPUT.Simulation.SimulationID + ".routerdb";
                 string path = Path.Combine(WUInity.WORKING_FOLDER, internalRouterName);
                 using (FileStream outputStream = new FileInfo(path).Open(FileMode.Create))
                 {
                     RouterDb.Serialize(outputStream);
-                    WUInity.LOG("LOG: Router database saved to file " + path);
+                    LOG("LOG: Router database saved to file " + path);
                 }
             }
         }
