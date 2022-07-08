@@ -318,7 +318,7 @@ namespace WUInity.Fire
             timeSinceStart += dt;
             currentWindData = wind.GetWindDataAtTime((float)timeSinceStart);
             //TODO: only update if any input has changed, re-calculate spread rates
-            UpdateCellSpreadRates();            
+            UpdateCellSpreadRates();
 
             return true;
         }     
