@@ -8,7 +8,7 @@ namespace WUInity.Population
     {
         private LocalGPWData localGPWData;
         private PopulationData populationData;
-        private GameObject internal_localGPWDataPlane;
+        private GameObject m_LocalGPWDataPlane;
         private Material gpwDataPlaneMaterial;
 
 
@@ -117,7 +117,7 @@ namespace WUInity.Population
 
             if(success)
             {
-                DATA_PLANE.SetActive(false);
+                DataPlane.SetActive(false);
                 populationData.CreatePopulationFromLocalGPW(localGPWData);
             }            
 
@@ -139,48 +139,50 @@ namespace WUInity.Population
             populationData.ScaleTotalPopulation(newTotal);
         }
 
-        public GameObject DATA_PLANE
+        public GameObject DataPlane
         {
             get
             {
-                if (internal_localGPWDataPlane == null)
+                if (m_LocalGPWDataPlane == null)
                 {
                     CreateLocalGPWDataPlane();
                 }
 
-                return internal_localGPWDataPlane;
+                return m_LocalGPWDataPlane;
             }
         }
 
         public bool ToggleLocalGPWVisibility()
         {
-            DATA_PLANE.SetActive(!internal_localGPWDataPlane.activeSelf);
+            DataPlane.SetActive(!m_LocalGPWDataPlane.activeSelf);
 
-            return DATA_PLANE.activeSelf;
+            return DataPlane.activeSelf;
         }  
 
         private void CreateLocalGPWDataPlane()
         {
             Mesh mesh;
             MeshRenderer mR;
+            MeshFilter filter;
 
-            if(internal_localGPWDataPlane == null)
+            if (m_LocalGPWDataPlane == null)
             {
-                internal_localGPWDataPlane = new GameObject("GPWDensityMap");
-                internal_localGPWDataPlane.transform.parent = WUInity.INSTANCE.transform;
-                internal_localGPWDataPlane.isStatic = true;
+                m_LocalGPWDataPlane = new GameObject("GPWDensityMap");
+                m_LocalGPWDataPlane.transform.parent = WUInity.INSTANCE.transform;
+                m_LocalGPWDataPlane.isStatic = true;
                 // You can change that line to provide another MeshFilter
-                MeshFilter filter = internal_localGPWDataPlane.AddComponent<MeshFilter>();
+                filter = m_LocalGPWDataPlane.AddComponent<MeshFilter>();
                 mesh = new Mesh(); // filter.mesh;
                 filter.mesh = mesh;
-                mR = internal_localGPWDataPlane.AddComponent<MeshRenderer>();
+                mR = m_LocalGPWDataPlane.AddComponent<MeshRenderer>();
                 mR.receiveShadows = false;
                 mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
             else
             {
-                mR = internal_localGPWDataPlane.GetComponent<MeshRenderer>();
-                mesh = internal_localGPWDataPlane.GetComponent<MeshFilter>().mesh;
+                mR = m_LocalGPWDataPlane.GetComponent<MeshRenderer>();
+                mesh = m_LocalGPWDataPlane.GetComponent<MeshFilter>().mesh;
+                filter = m_LocalGPWDataPlane.GetComponent<MeshFilter>();
             }
             
             mesh.Clear();
@@ -200,10 +202,11 @@ namespace WUInity.Population
             gpwDataPlaneMaterial.mainTexture = localGPWData.densityTexture;
 
             mR.material = gpwDataPlaneMaterial;
+            //filter.mesh = mesh;
 
             //move up one meter
-            internal_localGPWDataPlane.transform.position = Vector3.up;
-            internal_localGPWDataPlane.SetActive(false);
+            m_LocalGPWDataPlane.transform.position = Vector3.up;
+            m_LocalGPWDataPlane.SetActive(false);
         }        
 
         public static void CreateSimplePlane(Mesh mesh, float sizeX, float sizeZ, float yPos, Vector3 offset, Vector2 maxUV)

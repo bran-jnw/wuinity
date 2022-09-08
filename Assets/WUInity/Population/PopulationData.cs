@@ -69,9 +69,13 @@ namespace WUInity.Population
                 {
                     double xPos = (x + 0.5) * cellSize;
                     double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2D(xPos, yPos));
-                    int pop = Mathf.Max(1, Mathf.RoundToInt((float)(cellArea * density)));
-                    //if data has negative values (NO_DATA) we might get negative numbers
-                    pop = Mathf.Max(0, pop);
+                    int pop = 0;
+                    //if data has negative values (NO_DATA) it should be zero
+                    //else force at least one person if there is some density
+                    if (density > 0.0)
+                    {                        
+                        pop = Mathf.Max(1, Mathf.RoundToInt((float)(cellArea * density)));
+                    }
                     cellPopulation[x + y * cells.x] = pop;
                     totalPopulation += pop;
                     if(pop > 0)

@@ -253,16 +253,15 @@ namespace WUInity.Population
             Vector2D degreesToRead = SizeToDegrees(latLong, size);
             //number of columns and rows
             dataSize = new Vector2Int(MathD.CeilToInt(degreesToRead.x / cellsize), MathD.CeilToInt(degreesToRead.y / cellsize));
-            //start point to read data
+            //start index to read data
             int xSI = (int)((latLong.y - xllcorner) / cellsize);
             int ySI = (int)((latLong.x - yllcorner) / cellsize);
-            //end point to read data
+            //end index to read data
             int xEI = xSI + (int)(degreesToRead.x / cellsize);
             int yEI = ySI + (int)(degreesToRead.y / cellsize);            
 
-            //handle negative stuff when recalculating origin and consequently offset
-            actualOriginDegrees = new Vector2D(ySI * cellsize - Math.Abs(yllcorner), xSI * cellsize - Math.Abs(xllcorner));
-            //actualOrigin = new Vector2D(xSI * cellsize - xllcorner, ySI * cellsize - yllcorner);
+            //how far are we into the data set? 
+            actualOriginDegrees = new Vector2D(ySI * cellsize + yllcorner, xSI * cellsize + xllcorner);
 
             //calculate how many units we have to move the data in Unity when drawing quad
             Vector2D dOffset = actualOriginDegrees - latLong;

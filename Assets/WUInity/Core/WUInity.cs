@@ -688,7 +688,7 @@ namespace WUInity
             {
                 if (POPULATION.GetLocalGPWData() != null && POPULATION.GetLocalGPWData().density != null && POPULATION.GetLocalGPWData().density.Length > 0)
                 {
-                    if (POPULATION.DATA_PLANE.activeSelf)
+                    if (POPULATION.DataPlane.activeSelf)
                     {
                         float xCellSize = (float)(POPULATION.GetLocalGPWData().realWorldSize.x / POPULATION.GetLocalGPWData().dataSize.x);
                         float yCellSize = (float)(POPULATION.GetLocalGPWData().realWorldSize.y / POPULATION.GetLocalGPWData().dataSize.y);
