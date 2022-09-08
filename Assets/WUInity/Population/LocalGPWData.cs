@@ -470,7 +470,7 @@ namespace WUInity.Population
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
                         WUInity.LOG("Loading GPW from sector 6");
                     }
-                    else if (latLong.x < 89.999999999985)
+                    else if (latLong.y < 89.999999999985)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
                         WUInity.LOG("Loading GPW from sector 7");
