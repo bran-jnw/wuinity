@@ -94,6 +94,12 @@ namespace WUInity.Fire
 
         public bool isAllFuelLoadZero(int fuelModelNumber)
         {
+            //bran-jnw: added fix for LCP files that contains -9999 and similar non-defined behavior.
+            if(!fuelModelSet_.isFuelModelDefined(fuelModelNumber))
+            {
+                return true;
+            }
+
             // if  all loads are zero, skip calculations
             /*bool isNonZeroLoad = fuelModelSet_.getFuelLoadOneHour(fuelModelNumber, LoadingUnits.LoadingUnitsEnum.PoundsPerSquareFoot)
                     || fuelModelSet_.getFuelLoadTenHour(fuelModelNumber, LoadingUnits.LoadingUnitsEnum.PoundsPerSquareFoot)

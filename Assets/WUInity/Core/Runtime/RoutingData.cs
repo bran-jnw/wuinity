@@ -65,7 +65,7 @@ namespace WUInity.Runtime
             WUInity.DATA_STATUS.RouterDbLoaded = success;
             if (success && updateInputFile)
             {
-                INPUT.Routing.routerDbFile = path;
+                INPUT.Routing.routerDbFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 

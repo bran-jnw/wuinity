@@ -1,5 +1,5 @@
 fuelModelNumber, code, name, fuelBedDepth, moistureOfExtinctionDead, heatOfCombustionDead, heatOfCombustionLive, fuelLoadOneHour, fuelLoadTenHour, fuelLoadHundredHour, fuelLoadliveHerbaceous, fuelLoadliveWoody, savrOneHour, savrLiveHerbaceous, savrLiveWoody, isDynamic, isReserved
-1, "FM1", "Short grass [1]", 1.0, 0.12, 8000, 8000, 0.034, 0, 0, 0, 0, 3500, 1500, 1500
+1, "FM1", "Short grass [1]", 1.0, 0.12, 8000, 8000, 0.034, 0, 0, 0, 0, 3500, 1500, 1500, false, true
 2, "FM2", "Timber grass and understory [2]", 1.0, 0.15, 8000, 8000, 0.092, 0.046, 0.023, 0.023, 0, 3000, 1500, 1500, false, true
 3, "FM3", "Tall grass [3]", 2.5, 0.25, 8000, 8000, 0.138, 0, 0, 0, 0, 1500, 1500, 1500, false, true
 4, "FM4", "Chaparral [4]", 6.0, 0.2, 8000, 8000, 0.230, 0.184, 0.092, 0, 0.230, 2000, 1500, 1500, false, true

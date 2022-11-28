@@ -210,24 +210,38 @@ namespace WUInity.Fire
         {
 			int[] indexMap = new int[256];
 			int cells = landscape.Length / (int)NumVals;
-			int invalidFuelNumberCount = 0;
-			for (int i = 0; i < cells; i++)
+            List<int> invalidFuelModelNumbers = new List<int>();
+			int invalidCount = 0;
+            for (int i = 0; i < cells; i++)
             {
-				int fuelModelNumber = landscape[i * NumVals + 3];
+				int fuelModelNumber = landscape[i * NumVals + 3]; //fuel number is offset by 3
 				if (fuelModelNumber > 0 && fuelModelNumber <= 256)
                 {
 					indexMap[fuelModelNumber - 1] += 1;
                 }
 				else
                 {
-					++invalidFuelNumberCount;
+                    if(!invalidFuelModelNumbers.Contains(fuelModelNumber))
+					{
+						invalidFuelModelNumbers.Add(fuelModelNumber);
+						++invalidCount;
+                    }
                 }
             }
 
-			if(invalidFuelNumberCount > 0)
+			if(invalidFuelModelNumbers.Count > 0)
             {
-				WUInity.LOG("ERROR: Landscape data contains " + invalidFuelNumberCount + " cells with fuel model numbers outside of the valid range 1-256.");
-			}
+				string error = "ERROR: Landscape data contains " + invalidCount + " cells with fuel model numbers outside of the valid range 1-256, numbers are: ";
+				for (int i = 0; i < invalidFuelModelNumbers.Count; i++)
+				{
+					error += invalidFuelModelNumbers[i];
+					if(i < invalidFuelModelNumbers.Count - 1)
+					{
+						error += ", ";
+					}
+				}
+                WUInity.LOG(error);
+            }
 
 			List<int> presentFuelModelNumbers= new List<int>();
 			for (int i = 0; i < indexMap.Length; i++)
