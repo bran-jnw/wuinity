@@ -7,6 +7,7 @@ namespace WUInity
     public partial class WUInityGUI
     {
         string fireEditMode;
+        string lcpCurrentInfo;
         void FireMenu()
         {
             FireInput fI = WUInity.INPUT.Fire;
@@ -28,7 +29,51 @@ namespace WUInity
             }
             ++buttonIndex;
 
-            if(WUInity.DATA_STATUS.FuelModelsLoaded)
+            if(WUInity.RUNTIME_DATA.Fire.LCPData != null)
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP DATA");
+                ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.numeast + ", " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.numnorth);
+                ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + Mathf.RoundToInt((float)WUInity.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionX) + ", " + Mathf.RoundToInt((float)WUInity.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionY));
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle LCP display"))
+                {
+                    WUInity.RUNTIME_DATA.Fire.ToggleLCPDataPlane();   
+                }
+                ++buttonIndex;
+
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
+                {
+                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.FuelModel);
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
+                {
+                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.Elevation);
+                    lcpCurrentInfo = "Elevation range: " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.loelev + "-" + WUInity.RUNTIME_DATA.Fire.LCPData.Header.hielev + " [m]";
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
+                {
+                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.Slope);
+                    lcpCurrentInfo = "Slope range: " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.loslope + "-" + WUInity.RUNTIME_DATA.Fire.LCPData.Header.hislope + " [-]";
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
+                {
+                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.Aspect);
+                    lcpCurrentInfo = "Aspect range: " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.loaspect + "-" + WUInity.RUNTIME_DATA.Fire.LCPData.Header.hiaspect + " [°]";
+                }
+                ++buttonIndex;
+
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), lcpCurrentInfo);
+                ++buttonIndex;
+            }            
+
+            if (WUInity.DATA_STATUS.FuelModelsLoaded)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Custom fuel model set loaded");
                 ++buttonIndex;
@@ -139,6 +184,11 @@ namespace WUInity
         void LoadFuelModelsFile(string[] paths)
         {
             WUInity.RUNTIME_DATA.Fire.LoadFuelModelsInput(paths[0], true);
+        }
+
+        void ResetFireGUI()
+        {
+            WUInity.RUNTIME_DATA.Fire.SetLCPDataPlane(false);
         }
     }
 }

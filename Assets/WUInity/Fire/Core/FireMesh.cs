@@ -345,30 +345,47 @@ namespace WUInity.Fire
                 return;
             }
 
-            for (int i = 0; i < ignitionPoints.Length; ++i)
+            if(WUInity.INPUT.Fire.useInitialIgnitionMap)
             {
-                if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
+                for (int i = 0; i < fireCells.Length; i++)
                 {
-                    ignitionPoints[i].CalculateMeshIndex(this);
-                    if (ignitionPoints[i].IsInsideFire(cellCount))
+                    if (WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices[i])
                     {
-                        int x = ignitionPoints[i].GetX();
-                        int y = ignitionPoints[i].GetY();
-                        FireCell f = fireCells[GetCellIndex(x, y)];
+                        FireCell f = fireCells[i];
                         f.Ignite(currentTime);
                         activeCells.Add(f);
-                        ignitionPoints[i].MarkAsIgnited();
-
-                        WUInity.LOG("LOG: Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                     }
-                    ++activatedIgnitions;
                 }
-            }
 
-            if (activatedIgnitions == ignitionPoints.Length)
-            {
                 _ignitionDone = true;
             }
+            else
+            {
+                for (int i = 0; i < ignitionPoints.Length; ++i)
+                {
+                    if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
+                    {
+                        ignitionPoints[i].CalculateMeshIndex(this);
+                        if (ignitionPoints[i].IsInsideFire(cellCount))
+                        {
+                            int x = ignitionPoints[i].GetX();
+                            int y = ignitionPoints[i].GetY();
+                            FireCell f = fireCells[GetCellIndex(x, y)];
+                            f.Ignite(currentTime);
+                            activeCells.Add(f);
+                            ignitionPoints[i].MarkAsIgnited();
+
+                            WUInity.LOG("LOG: Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
+                        }
+                        ++activatedIgnitions;
+                    }
+                }
+
+                if (activatedIgnitions == ignitionPoints.Length)
+                {
+                    _ignitionDone = true;
+                }
+            }            
         }
 
         public int GetCellIndex(int x, int y)
@@ -466,6 +483,7 @@ namespace WUInity.Fire
             return ros;
         }
 
+        //remove? as we now visualize using fire renderer
         /*void CreateTerrainPlane()
         {
             terrainMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
@@ -473,7 +491,7 @@ namespace WUInity.Fire
             CreatePlane(terrainMesh, cellCount.x, cellCount.y, (float)(cellCount.x * cellSize.x), (float)(cellCount.y * cellSize.y), 0.0f, Vector2.one, true);
         }*/
 
-        private void CreatePlane(Mesh mesh, int cellsX, int cellsZ, float sizeX, float sizeZ, float yPos, Vector2 maxUV, bool getElevation)
+        /*private void CreatePlane(Mesh mesh, int cellsX, int cellsZ, float sizeX, float sizeZ, float yPos, Vector2 maxUV, bool getElevation)
         {
             //add one since we always need one extra, e.g..1 cell equals 4 vertices
             cellsX += 1;
@@ -538,6 +556,6 @@ namespace WUInity.Fire
             //mesh.RecalculateTangents();
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
-        }
+        }*/
     }
 }

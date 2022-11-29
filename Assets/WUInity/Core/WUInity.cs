@@ -843,7 +843,7 @@ namespace WUInity
 
             Vector2 maxUV = new Vector2((float)cellCount.x / tex.width, (float)cellCount.y / tex.height);
 
-            PopulationManager.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
 
             Material mat = new Material(Shader.Find("Unlit/Transparent"));
             mat.mainTexture = tex;
