@@ -209,8 +209,8 @@ namespace WUInity.Population
             {
                 path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimulationID + ".pop");
             }
-            WUInity.INPUT.Population.populationFile = path;
-            System.IO.File.WriteAllLines(path, data);
+            WUInity.INPUT.Population.populationFile = Path.GetFileName(path);
+            File.WriteAllLines(path, data);
         }
 
         public bool LoadPopulationFromFile(string file)
@@ -272,7 +272,9 @@ namespace WUInity.Population
             if(success)
             {
                 CreateTexture();
-                isLoaded = true;                
+                isLoaded = true;
+                WUInity.INPUT.Population.populationFile = Path.GetFileName(path);
+                WUInityInput.SaveInput();
                 WUInity.LOG("LOG: Loaded population from file " + path + ".");
             }
             else
