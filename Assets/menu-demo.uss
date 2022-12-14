@@ -1,0 +1,111 @@
+:root {
+    --accent-color: rgb(127, 127, 255);
+}
+
+.menu-button {
+    height: 100%;
+    width: 30%;
+    min-width: auto;
+    flex-grow: 1;
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    font-size: 15px;
+    align-items: center;
+    justify-content: center;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    -unity-font-style: bold;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-top-width: 1.5px;
+    border-bottom-width: 1.5px;
+    border-left-color: rgb(128, 128, 128);
+    border-right-color: rgb(128, 128, 128);
+    border-top-color: rgb(130, 128, 128);
+    border-bottom-color: rgb(130, 128, 128);
+    color: rgb(0, 0, 0);
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out-bounce;
+    -unity-background-image-tint-color: rgb(149, 149, 149);
+    background-color: rgb(164, 164, 164);
+    overflow: visible;
+    text-shadow: 0 0 0 rgb(0, 0, 0);
+}
+
+.menu-button:hover {
+    background-color: rgb(255, 255, 255);
+    scale: 1.03 1.03;
+}
+
+.menu-button:active {
+    translate: 0 4px;
+    scale: 1 1;
+    background-color: rgb(150, 192, 150);
+}
+
+.hide {
+    display: none;
+}
+
+.menu-label {
+    -unity-text-align: upper-center;
+    height: 30px;
+    width: 100%;
+    font-size: 15px;
+    color: var(--accent-color);
+}
+
+.foldout-item {
+    height: auto;
+    width: auto;
+    background-color: rgb(200, 200, 200);
+    font-size: 14px;
+    white-space: normal;
+    transition-timing-function: ease-in-out-bounce;
+    align-items: stretch;
+    color: rgb(7, 7, 7);
+    -unity-font-style: bold;
+}
+
+
+.tree-item {
+    -unity-font-style: normal;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    font-size: 12px;
+    height: auto;
+    width: auto;
+}
+
+.tree-item:hover {
+    border-left-color: rgb(15, 37, 245);
+    border-right-color: rgb(15, 37, 245);
+    border-top-color: rgb(15, 37, 245);
+    border-bottom-color: rgb(15, 37, 245);
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-color: rgb(221, 220, 220);
+}
+
+.tree-text-edit {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    color: rgb(0, 0, 0);
+    align-items: flex-end;
+    min-width: 100px;
+    max-width: 300px;
+    width: 800px;
+    max-height: none;
+	font-size: 12px;
+}
+
