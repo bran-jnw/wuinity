@@ -151,7 +151,7 @@ namespace WUInity
             convergenceMinSequence = WUInity.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
         }
 
-        public void ParseMainData(WUInityInput wO)
+        void ParseMainData(WUInityInput wO)
         {
             ParseEvacInput();
             ParseTrafficInput();
