@@ -158,6 +158,7 @@ namespace WUInity
             if(lastMenu != menuChoice)
             {
                 WUInity.INSTANCE.StopPainter();
+                ResetFireGUI();
             }
 
             if (GUI.Button(exitMenu.rect, exitMenu.text))
