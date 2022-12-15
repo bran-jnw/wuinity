@@ -12,9 +12,14 @@
                     <ui:Toggle value="false" name="TogAddFirewallException" text="Add firewall exception for WUINITY" tooltip="Create an account on the linked website and download a global .gpw file" picking-mode="Ignore" class="tree-item" />
                     <ui:Foldout text="Fetch population data" name="FoldPopulationData" tooltip="Define the base population data" focusable="true" view-data-key="population-data-foldout" picking-mode="Ignore" class="foldout-item">
                         <ui:Toggle value="false" name="TogDownloadGPW" text="Download population database and save it in the WUINITY case folder" tooltip="Create an account on the linked website and download a global .gpw file" picking-mode="Ignore" class="tree-item" />
-                        <ui:Toggle value="false" name="TogGetMapboxToken" text="Fetch Mapbox token ands save it in the WUINITY case folder" tooltip="Download the token for Mapbox (create an account if prompted)." picking-mode="Ignore" class="tree-item" />
                     </ui:Foldout>
-                    <ui:Toggle value="false" name="TogDownloadOSM" text="Fetch OpenStreetMap data" tooltip="Download the smallest specific file for the target region in OpenStreetMap." class="tree-item" />
+                    <ui:Foldout text="Fetch Mapbox API access token" name="FoldMapboxAccessToken" tooltip="..." focusable="true" view-data-key="mapbox-access-token-foldout" picking-mode="Ignore" class="foldout-item">
+                        <ui:Toggle value="false" name="TogGetMapboxToken" text="Fetch Mapbox API access token and save it in the WUINITY case folder" tooltip="Download the token for Mapbox (create an account if prompted)." picking-mode="Ignore" class="tree-item" />
+                        <ui:Toggle value="false" name="TogAddTokenToMapbox" text="Add Mapbox API access token and save it in the WUINITY case folder" tooltip="Add the token for Mapbox." picking-mode="Ignore" class="tree-item" />
+                    </ui:Foldout>
+                    <ui:Foldout text="Fetch OpenStreetMap data" name="FoldOSMData" tooltip="..." focusable="true" view-data-key="openstreetmap-data-foldout" picking-mode="Ignore" class="foldout-item">
+                        <ui:Toggle value="false" name="TogDownloadOSM" text="Fetch OpenStreetMap data" tooltip="Download the smallest specific file for the target region in OpenStreetMap." class="tree-item" />
+                    </ui:Foldout>
                 </ui:Foldout>
                 <ui:Foldout text="Configure location and map" name="FoldConfigLocationMap" tooltip="Specify coordinates and extent of your target area" focusable="true" view-data-key="workflow-foldout" class="foldout-item">
                     <ui:Toggle value="false" name="TogSetLatLong" text="Specify primary latitude and longitude (UTM lat.,long.)" tooltip="Type UTM coordinates as lat., long., found by right clicking the relevant point on Google Maps" class="tree-item" />
@@ -115,13 +120,13 @@
                     <ui:TextField label="Specify Simulation ID " value="001" text="001" name="TxTSetSimID" tooltip="Specify a Simulation ID for your desired simulation" class="tree-item tree-text-edit" />
                     <ui:TextField label="Specify simulation time step (seconds)" value="10" text="10" name="TxTSetTimeStep" tooltip="Specify the simulation ganulariry (time duration of each step)" class="tree-item tree-text-edit" />
                     <ui:TextField label="Number of simulation runs" value="10" text="10" name="TxTSetNumSims" tooltip="Set the number of simulation iterations that you want to run" class="tree-item tree-text-edit" />
+                    <ui:Toggle value="false" name="TogMultipleSim" text="Run multiple simulations" tooltip="Choose whether to run mutiple simuations" class="tree-item" />
                     <ui:Toggle value="false" name="TogSimPeds" text="Simulate pedestrian movements" tooltip="Choose whether to model pedestrian movements" class="tree-item" />
                     <ui:Toggle value="false" name="TogSimTraf" text="Simulate traffic flow " tooltip="Choose whether to include the traffic model" class="tree-item" />
                     <ui:Toggle value="false" name="TogSimFire" text="Simulate fire spread" tooltip="Choose whether to model fire growth and spread" class="tree-item" />
                     <ui:Toggle value="false" name="TogSimSmoke" text="Simulate smoke spread" tooltip="Choose whether to include the smoke-spread model" class="tree-item" />
-                    <ui:Toggle value="false" name="TogCheckLCPFile" text="Verify that the .lcp file is loaded" tooltip="Click on fire spread -&gt; load LCP file  and choose the generated .lcp file from ‘Inputs’" class="tree-item" />
-                    <ui:Button text="Start / Stop" display-tooltip-when-elided="true" name="StartSimButton" class="menu-button" style="height: 40px; width: 200px;" />
-                    <ui:Button text="Pause / Continue" display-tooltip-when-elided="true" name="PauseSimButton" class="menu-button" style="height: 40px; width: 200px;" />
+                    <ui:Button text="Start / Stop simulation" display-tooltip-when-elided="true" name="StartSimButton" class="menu-button" style="height: 35px; width: 220px;" />
+                    <ui:Button text="Pause / Continue simulation" display-tooltip-when-elided="true" name="PauseSimButton" class="menu-button" style="height: 35px; width: 220px;" />
                 </ui:Foldout>
             </ui:ScrollView>
             <ui:Label text="Select items in the workflow tree, from top to bottom, in order to set up and start your simulations." display-tooltip-when-elided="true" name="TipsLabel" tooltip="Hints to help guide you through the workflow" style="height: 10%; width: 100%; flex-wrap: wrap; justify-content: space-between; white-space: normal; color: rgb(0, 0, 0); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; background-color: rgb(160, 160, 160); flex-grow: 1; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px;" />

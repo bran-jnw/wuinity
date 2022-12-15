@@ -89,10 +89,60 @@ namespace WUInity
 
                 LoadLCP(root);
 
+
+                // Register simulation settings begins -----------------------------------------------
+
+                Toggle togTogMultipleSim = root.Q<Toggle>("TogMultipleSim");
+                if (togTogMultipleSim != null)
+                    togTogMultipleSim.RegisterValueChangedCallback(evt =>
+                    {
+                        WUInity.RUNTIME_DATA.Simulation.MultipleSimulations = evt.newValue;
+                        UnityEngine.Debug.Log($"TogMultipleSim = {evt.newValue}");
+                    });
+
+                Toggle togTogSimPeds = root.Q<Toggle>("TogSimPeds");
+                if (togTogSimPeds != null)
+                    togTogSimPeds.RegisterValueChangedCallback(evt =>
+                    {
+                        WUInity.INPUT.Simulation.RunEvacSim = evt.newValue;
+                        UnityEngine.Debug.Log($"TogSimPeds = {evt.newValue}");
+                    });
+
+                Toggle togTogSimTraf = root.Q<Toggle>("TogSimTraf");
+                if (togTogSimTraf != null)
+                    togTogSimTraf.RegisterValueChangedCallback(evt =>
+                    {
+                        WUInity.INPUT.Simulation.RunTrafficSim = evt.newValue;
+                        UnityEngine.Debug.Log($"TogSimTraf = {evt.newValue}");
+                    });
+
+                Toggle togTogSimFire = root.Q<Toggle>("TogSimFire");
+                if (togTogSimFire != null)
+                    togTogSimFire.RegisterValueChangedCallback(evt =>
+                    {
+                        WUInity.INPUT.Simulation.RunFireSim = evt.newValue;
+                        UnityEngine.Debug.Log($"TogSimFire = {evt.newValue}");
+                    });
+
+                Toggle togTogSimSmoke = root.Q<Toggle>("TogSimSmoke");
+                if (togTogSimSmoke != null)
+                    togTogSimSmoke.RegisterValueChangedCallback(evt =>
+                    {
+                        WUInity.INPUT.Simulation.RunSmokeSim = evt.newValue;
+                        UnityEngine.Debug.Log($"TogSimSmoke = {evt.newValue}");
+                    });
+
+
+                // Register simulation settings ends -----------------------------------------------
+
+
+
                 // Activate "Run simulation" callback for button-click event
                 SetupRunSimulationTask(root);
 
+
                 // SaveTo/LoadFrom JSON test
+                /*-----------------
                 WorkflowSettings workflow;
                 workflow = new WorkflowSettings();
 
@@ -101,7 +151,7 @@ namespace WUInity
                 UnityEngine.Debug.Log($"JSON saved OK? {bSaved}:");
                 bool bLoaded = workflow.LoadFrom("C:\\Temp\\test-load.json");
                 UnityEngine.Debug.Log($"JSON loaded OK? {bLoaded}:");
-
+                -----------------*/
             }
         }
 
@@ -156,13 +206,14 @@ namespace WUInity
             }
             */
 
-        }
+            }
 
-        void UpdateMenu()
+            void UpdateMenu()
         {
             var root = Document.rootVisualElement;
             WUInityInput wO = WUInity.INPUT;
             EvacuationInput eO = WUInity.INPUT.Evacuation;
+            TrafficInput tO = WUInity.INPUT.Traffic;
 
             if (root != null)
             {
@@ -189,9 +240,17 @@ namespace WUInity
 
 
                 // Traffic section -------------------------------------------------------------------------------------------------------------
+                UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
+                if (tfTxTSetMaxCapTrafSpeed != null)
+                {
+                    tfTxTSetMaxCapTrafSpeed.value = tO.stallSpeed.ToString();
+                }
 
-
-
+                UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke"); // Need to add it into menu-demo.uxml
+                if (tgTogSpeedAffectedBySmoke != null)
+                {
+                    tgTogSpeedAffectedBySmoke.SetValueWithoutNotify(tO.visibilityAffectsSpeed);
+                }
 
                 // Evacuation section -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.TextField tfTxTSetEvacCellSize = root.Q<UnityEngine.UIElements.TextField>("TxTSetEvacCellSize");
@@ -435,7 +494,8 @@ namespace WUInity
                     bool addTokenToMapbox = evt.newValue;
                     if (addTokenToMapbox)
                     {
-                        String FilePath = "C:\\Projects\\WUI-NITY-project\\_input";
+                        //String FilePath = "C:\\Projects\\WUI-NITY-project\\_input";
+                        String FilePath = "C:\\Temp";
                         System.Diagnostics.Process.Start("Explorer.exe", @"/select," + FilePath);
                     }
                     UnityEngine.Debug.Log($"Place in folder = {evt.newValue}");
