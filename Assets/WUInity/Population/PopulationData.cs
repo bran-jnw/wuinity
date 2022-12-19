@@ -213,12 +213,12 @@ namespace WUInity.Population
             File.WriteAllLines(path, data);
         }
 
-        public bool LoadPopulationFromFile(string file)
+        public bool LoadPopulationFromFile(string file, bool updateInput)
         {
             bool success = false;
             if (File.Exists(file))
             {
-                success = LoadPopulation(file);
+                success = LoadPopulation(file, updateInput);
             }
             else
             {
@@ -229,7 +229,7 @@ namespace WUInity.Population
             return success;
         }
 
-        private bool LoadPopulation(string path)
+        private bool LoadPopulation(string path, bool updateInput)
         {
             string[] d = File.ReadAllLines(path);
 
@@ -271,10 +271,13 @@ namespace WUInity.Population
 
             if(success)
             {
+                if(updateInput)
+                {
+                    WUInityInput.SaveInput();
+                }
                 CreateTexture();
                 isLoaded = true;
-                WUInity.INPUT.Population.populationFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUInity.INPUT.Population.populationFile = Path.GetFileName(path);                
                 WUInity.LOG("LOG: Loaded population from file " + path + ".");
             }
             else

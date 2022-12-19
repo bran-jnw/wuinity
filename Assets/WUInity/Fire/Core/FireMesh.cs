@@ -301,17 +301,20 @@ namespace WUInity.Fire
                 activeCells.Remove(f);
             }
 
-            //update data arrays for visualization and input for smoke spread          
+            //update data arrays for visualization and input for smoke spread if needed
             float dtInversed = 1.0f / (float)dt;
             for (int i = 0; i < fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
-                sootProduction[i] = 0.0f;
-                if (fireCells[i].cellState == FireCellState.Burning)
+                if(WUInity.INPUT.Simulation.RunSmokeSim)
                 {
-                    //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
-                    sootProduction[i] = Mathf.Max(0.0f, 0.015f * (float)fireCells[i].GetTimestepBurntMass() * dtInversed);
-                }
+                    sootProduction[i] = 0.0f;
+                    if (fireCells[i].cellState == FireCellState.Burning)
+                    {
+                        //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
+                        sootProduction[i] = Mathf.Max(0.0f, 0.015f * (float)fireCells[i].GetTimestepBurntMass() * dtInversed);
+                    }
+                }                
             }
 
             //update time and wind for next time step. TODO: spread out the update over several frames
@@ -353,7 +356,11 @@ namespace WUInity.Fire
                     {
                         FireCell f = fireCells[i];
                         f.Ignite(currentTime);
-                        activeCells.Add(f);
+                        //we might try to ignite on a cell that is dead which will then not be intiialized correctly
+                        if (f.cellState != FireCellState.Dead)
+                        {
+                            activeCells.Add(f);
+                        }                        
                     }
                 }
 

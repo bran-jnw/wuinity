@@ -16,16 +16,18 @@ namespace WUInity.Runtime
 
         public bool LoadPopulation(string path, bool updateInputFile)
         {
-            bool success = POPULATION.LoadPopulationFromFile(path);
+            bool success = POPULATION.LoadPopulationFromFile(path, updateInputFile);
             DATA_STATUS.PopulationLoaded = success;
             if (success)
             {
                 DATA_STATUS.PopulationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
-                if (updateInputFile)
+
+                //this is now done in actual call
+                /*if (updateInputFile)
                 {
                     INPUT.Population.populationFile = Path.GetFileName(path);
                     WUInityInput.SaveInput();
-                }
+                }*/
             }            
 
             return success;

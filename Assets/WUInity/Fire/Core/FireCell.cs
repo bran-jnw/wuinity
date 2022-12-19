@@ -33,6 +33,7 @@ namespace WUInity.Fire
         double timestepBurntMass;
         double fuelMassGround;
         bool doneSpreading;
+        InitialFuelMoisture moisture;
 
         [DllImport("BEHAVEDLL", EntryPoint = "CalcFireMaxSpreadRate")]          
         public static extern double CalcFireMaxSpreadRate(int fuelModelNumber, 
@@ -119,7 +120,9 @@ namespace WUInity.Fire
                 CalculateSlopeAndAspect();
             }                      
             maxSpreadRate = -1.0;
-            
+
+            moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
+
             double bulkDensity = fireMesh.fuelModelSet.getFuelLoadOneHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadTenHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadHundredHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
@@ -416,9 +419,7 @@ namespace WUInity.Fire
             //replaces code below as it calls surface calc too
             /*UpdateCrownFireSpreadRates();
             return;*/
-
-
-            InitialFuelMoisture moisture = fireMesh.initialFuelMoisture.GetInitialFuelMoisture(lcp.fuel_model);
+            
             double moistureOneHour = moisture.OneHour;// 6.0;
             double moistureTenHour = moisture.TenHour; //7.0;
             double moistureHundredHour = moisture.HundredHour; //8.0;
