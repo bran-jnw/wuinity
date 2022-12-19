@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.CodeDom.Compiler;
 
 namespace WUInity.Fire
 {
     [System.Serializable]
     public class InitialFuelMoisture
     {
+        public static InitialFuelMoisture DEAFULT = new InitialFuelMoisture(0, 6, 7, 8, 60, 90);
+
         public int FuelModelNumber;
         public double OneHour;
         public double TenHour;
@@ -37,7 +40,7 @@ namespace WUInity.Fire
 
     [System.Serializable]
     public class InitialFuelMoistureList
-    {
+    {        
         [SerializeField] private InitialFuelMoisture[] initialFuelMoistures;
         bool _conditioned = false;
 
@@ -73,18 +76,25 @@ namespace WUInity.Fire
 
     public InitialFuelMoisture GetInitialFuelMoisture(int fuelModelNumber)
         {
-            if (fuelModelNumber < 1 && fuelModelNumber > 255)
-            {
-                WUInity.LOG("ERROR: Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
-                return null;
+            InitialFuelMoisture result = null;
+
+            if (fuelModelNumber < 1 || fuelModelNumber > 255)
+            {                
+                WUInity.LOG("WARNING: Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
+                return InitialFuelMoisture.DEAFULT;
             }
 
-            InitialFuelMoisture result = initialFuelMoistures[fuelModelNumber - 1];
+            if(fuelModelNumber > 0 && fuelModelNumber - 1 < initialFuelMoistures.Length)
+            {
+                result = initialFuelMoistures[fuelModelNumber - 1];
+            }
+             
 
             if(result == null)
             {
                 result = new InitialFuelMoisture(fuelModelNumber, 6.0, 7.0, 8.0, 60.0, 90.0);
                 initialFuelMoistures[fuelModelNumber - 1] = result;
+                WUInity.LOG("WARNING: Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
             }
 
             return result;
@@ -121,6 +131,7 @@ namespace WUInity.Fire
                         {
                             InitialFuelMoisture iFM = new InitialFuelMoisture(fuelMod, oneHour, tenHour, hundredHour, liveH, liveW);
                             initialFuelMoistures.Add(iFM);
+                            WUInity.LOG("Loaded initial fuel moistures for fuel model " + fuelMod + ".");
                         }
                     }                    
                 }                              
