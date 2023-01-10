@@ -75,7 +75,6 @@
     -unity-font-style: bold;
 }
 
-
 .tree-item {
     -unity-font-style: normal;
     justify-content: space-between;
@@ -103,10 +102,19 @@
     color: rgb(0, 0, 0);
     align-items: center;
     min-width: 100px;
-    max-width: 410px;
-    width: 800px;
+    max-width: 380px;
+    width: 440px;
     height: 32px;
     max-height: none;
 	font-size: 12px;
 }
 
+.output-text-label {
+    left: 2px; 
+    width: 220px; 
+    font-size: 12px;     
+    border-bottom-color: rgb(127, 127, 127); 
+    border-bottom-width: 1px; 
+    -unity-font-style: normal; 
+    -unity-text-align: middle-left;
+}
