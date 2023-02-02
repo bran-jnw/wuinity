@@ -491,7 +491,7 @@ namespace WUInity.Traffic
 
                 if(allGoalsBlocked)
                 {
-                    WUInity.LOG("All goals blocked, aborting verification simulation " + wuinityOptions.Simulation.SimulationID);
+                    WUInity.LOG(WUInity.LogType.Log, "All goals blocked, aborting verification simulation " + wuinityOptions.Simulation.SimulationID);
                     break;
                 }
             }

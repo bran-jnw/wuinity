@@ -92,7 +92,7 @@ namespace WUInity.Runtime
             if (success)
             {
                 int[] fuelNrs = _lcpData.GetExisitingFuelModelNumbers();
-                string message = "LOG: Present fuel model numbers are ";
+                string message = "Present fuel model numbers are ";
                 for (int i = 0; i < fuelNrs.Length; i++)
                 {
                     message += fuelNrs[i].ToString();
@@ -106,7 +106,7 @@ namespace WUInity.Runtime
                     }
                 }
 
-                WUInity.LOG(message);
+                WUInity.LOG(WUInity.LogType.Log, message);
             }
 
             WUInity.DATA_STATUS.LcpLoaded = success;

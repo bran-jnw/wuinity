@@ -55,11 +55,11 @@ namespace WUInity.Runtime
             {
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
                 RouterDb.AddContracted(RouterDb.GetSupportedProfile("Car"));
-                WUInity.LOG("LOG: Router database loaded succesfully.");
+                WUInity.LOG(WUInity.LogType.Log, "Router database loaded succesfully.");
             }
             else
             {
-                WUInity.LOG("ERROR: Router database could not be found.");
+                WUInity.LOG(WUInity.LogType.Error, "Router database could not be found.");
             }
 
             WUInity.DATA_STATUS.RouterDbLoaded = success;
@@ -99,16 +99,16 @@ namespace WUInity.Runtime
 
                 if (newRouteCollection == null)
                 {
-                    WUInity.LOG("ERROR: Tried loading route collection from " + path + " but route collection is not valid for current input.");
+                    WUInity.LOG(WUInity.LogType.Error, "Tried loading route collection from " + path + " but route collection is not valid for current input.");
                 }
                 else
                 {
-                    WUInity.LOG("LOG: Loaded route collection from " + path);
+                    WUInity.LOG(WUInity.LogType.Log, "Loaded route collection from " + path);
                 }
             }
             else
             {
-                WUInity.LOG("WARNING: Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
+                WUInity.LOG(WUInity.LogType.Error, "Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
             }
 
             if (newRouteCollection != null)
@@ -188,11 +188,11 @@ namespace WUInity.Runtime
 
             if (success)
             {
-                WUInity.LOG("LOG: Succesfully filtered OSM data to user selected boundary. Use this filtered data to build router database.");
+                WUInity.LOG(WUInity.LogType.Log, " Succesfully filtered OSM data to user selected boundary. Use this filtered data to build router database.");
             }
             else
             {
-                WUInity.LOG("ERROR: Could not filter the selected OSM file.");
+                WUInity.LOG(WUInity.LogType.Error, " Could not filter the selected OSM file.");
             }
 
             return success;
@@ -215,7 +215,7 @@ namespace WUInity.Runtime
                 _routerDb = new RouterDb();
                 _routerDb.LoadOsmData(source, settings, Vehicle.Car);
                 DATA_STATUS.RouterDbLoaded = true;
-                LOG("LOG: Router database created from OSM file.");
+                LOG(WUInity.LogType.Warning, "Router database created from OSM file.");
 
                 // write the new routerdb to disk.
                 string internalRouterName = WUInity.INPUT.Simulation.SimulationID + ".routerdb";
@@ -223,7 +223,7 @@ namespace WUInity.Runtime
                 using (FileStream outputStream = new FileInfo(path).Open(FileMode.Create))
                 {
                     RouterDb.Serialize(outputStream);
-                    LOG("LOG: Router database saved to file " + path);
+                    LOG(WUInity.LogType.Warning, "Router database saved to file " + path);
                 }
             }
         }
@@ -253,7 +253,7 @@ namespace WUInity.Runtime
             bf.Serialize(file, save);
             file.Close();*/
 
-            WUInity.LOG("LOG: Saved route collection to " + path);
+            WUInity.LOG(WUInity.LogType.Log, " Saved route collection to " + path);
         }
     }
 }

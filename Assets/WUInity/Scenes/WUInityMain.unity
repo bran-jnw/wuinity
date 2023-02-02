@@ -519,7 +519,7 @@ PrefabInstance:
     - target: {fileID: 2022175585972520338, guid: f20edb65f477f5e4c822706c9abd759e,
         type: 3}
       propertyPath: m_Name
-      value: UIDocument
+      value: WorkflowUI
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f20edb65f477f5e4c822706c9abd759e, type: 3}

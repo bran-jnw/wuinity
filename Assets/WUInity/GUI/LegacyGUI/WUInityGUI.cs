@@ -4,7 +4,7 @@ using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
 
-namespace WUInity
+namespace WUInity.UI
 {
     public partial class WUInityGUI : MonoBehaviour
     {

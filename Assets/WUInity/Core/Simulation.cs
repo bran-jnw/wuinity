@@ -174,16 +174,16 @@ namespace WUInity
 
                 if (convergedInSequence >= 10)
                 {
-                    WUInity.LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                    WUInity.LOG(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
                 }
                 else
                 {
-                    WUInity.LOG("LOG: Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations.");
+                    WUInity.LOG(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations.");
                 }
                 WUInity.OUTPUT.totalEvacTime = Time;
                 IsRunning = false;
                 HaveResults = true;
-                WUInity.LOG("LOG: Simulation done.");
+                WUInity.LOG(WUInity.LogType.Log, " Simulation done.");
 
                 //plot results
                 double[] xData = new double[averageCurve.Length];
@@ -244,7 +244,7 @@ namespace WUInity
                 //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                 if(_fireMesh == null)
                 {
-                    WUInity.LOG("WARNING: No fire mesh has been created, disabling smoke spread simulation.");
+                    WUInity.LOG(WUInity.LogType.Warning, "No fire mesh has been created, disabling smoke spread simulation.");
                     input.Simulation.RunSmokeSim = false;
                 }
                 else
@@ -395,7 +395,7 @@ namespace WUInity
             {
                 IsRunning = false;
                 SaveOutput(0);
-                WUInity.LOG("LOG: Simulation done.");
+                WUInity.LOG(WUInity.LogType.Log, " Simulation done.");
 
                 //plot results
                 List<float> arrivalData = _macroTrafficSim.GetArrivalData();
@@ -489,7 +489,7 @@ namespace WUInity
                     Fire.FireCellState cellState = _fireMesh.GetFireCellState(eG.latLong);
                     if (cellState == Fire.FireCellState.Burning)
                     {
-                        WUInity.LOG("LOG: Goal blocked by fire: " + eG.name);
+                        WUInity.LOG(WUInity.LogType.Log, " Goal blocked by fire: " + eG.name);
                         BlockEvacGoal(i);
                     }
                 }                
@@ -501,7 +501,7 @@ namespace WUInity
             if(!_stopSim)
             {
                 _stopSim = true;
-                WUInity.LOG(stopMessage);
+                WUInity.LOG(WUInity.LogType.Log, stopMessage);
             }            
         }
 
@@ -561,7 +561,7 @@ namespace WUInity
             }          
             if(cellsWithoutRouteButNoonePlansToLeave > 0)
             {
-                WUInity.LOG("LOG: " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
+                WUInity.LOG(WUInity.LogType.Log, " " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
             }
             //update cars already in traffic
             _macroTrafficSim.UpdateEvacuationGoals();              
@@ -572,7 +572,7 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
             if (input.Simulation.RunTrafficSim)
             {
-                WUInity.LOG("LOG: Total cars in simulation: " + _macroTrafficSim.GetTotalCarsSimulated());
+                WUInity.LOG(WUInity.LogType.Log, " Total cars in simulation: " + _macroTrafficSim.GetTotalCarsSimulated());
                 _macroTrafficSim.SaveToFile(runNumber);
             }
             if (input.Simulation.RunEvacSim)
