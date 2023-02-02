@@ -2,7 +2,7 @@ using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
 
-namespace WUInity
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
@@ -91,7 +91,7 @@ namespace WUInity
                     bool success = int.TryParse(desiredPopulation, out totalPop);
                     if (!success)
                     {
-                        WUInity.LOG("ERROR: Total population not a number, ignoring changes.");
+                        WUInity.LOG(WUInity.LogType.Error, " Total population not a number, ignoring changes.");
                     }
                     else
                     {
@@ -141,7 +141,7 @@ namespace WUInity
                         }
                         else
                         {
-                            WUInity.LOG("ERROR: New population count not a number.");
+                            WUInity.LOG(WUInity.LogType.Error, " New population count not a number.");
                         }
                         reScaling = false;
                     }

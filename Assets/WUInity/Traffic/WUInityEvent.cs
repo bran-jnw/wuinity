@@ -29,7 +29,7 @@ namespace WUInity
             if(!triggered)
             {
                 triggered = true;
-                WUInity.LOG("EVENT: Goal blocked: " + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex].name);
+                WUInity.LOG(WUInity.LogType.Event, "Goal blocked: " + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex].name);
                 WUInity.SIM.BlockEvacGoal(goalIndex);
             }            
         }
@@ -76,12 +76,12 @@ namespace WUInity
                     if (dataPoints.Count >= 2)
                     {
                         //responseCurves.Add(new ResponseCurve(dataPoints, WUInity.INPUT.Evacuation.responseCurveFiles[i]));
-                        WUInity.LOG("LOG: Loaded goal blocking event from " + path);
+                        WUInity.LOG(WUInity.LogType.Log, " Loaded goal blocking event from " + path);
                     }
                 }
                 else
                 {
-                    WUInity.LOG("WARNING: Goal blocking event file not found in " + path + " and could not be loaded");
+                    WUInity.LOG(WUInity.LogType.Warning, "Goal blocking event file not found in " + path + " and could not be loaded");
                 }
             }
 
@@ -93,7 +93,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.LOG("WARNING: No valid goal blocking events could be loaded.");
+                WUInity.LOG(WUInity.LogType.Warning, "No valid goal blocking events could be loaded.");
                 return null;
             }
         }

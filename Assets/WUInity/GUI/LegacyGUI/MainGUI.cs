@@ -2,7 +2,7 @@ using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
 
-namespace WUInity
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
@@ -131,7 +131,7 @@ namespace WUInity
                 ParseMainData(wO);  
                 if (!WUInity.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.LOG("ERROR: Could not start simulation, see error log.");
+                    WUInity.LOG(WUInity.LogType.Error, " Could not start simulation, see error log.");
                 }
                 else
                 {

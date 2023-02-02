@@ -184,7 +184,7 @@ namespace WUInity.Runtime
 
             if (index < 0)
             {
-                WUInity.LOG("ERROR: User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                WUInity.LOG(WUInity.LogType.Error, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -204,7 +204,7 @@ namespace WUInity.Runtime
 
             if (index < 0)
             {
-                WUInity.LOG("ERROR: User has specified a response curve named " + name + " but no such response curve has been defined.");
+                WUInity.LOG(WUInity.LogType.Error, " User has specified a response curve named " + name + " but no such response curve has been defined.");
             }
 
             return index;

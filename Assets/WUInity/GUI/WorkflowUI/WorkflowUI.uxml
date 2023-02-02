@@ -1,5 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/menu-demo.uss?fileID=7433441132597879392&amp;guid=d8723429c9103874fa2d553ba3687e74&amp;type=3#menu-demo" />
     <ui:VisualElement name="MainUIBox" style="width: 450px; height: 1000px; align-items: auto; background-color: rgb(176, 176, 176); border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-color: rgb(255, 251, 251); border-right-color: rgb(255, 251, 251); border-top-color: rgb(255, 251, 251); border-bottom-color: rgb(255, 251, 251); overflow: visible; opacity: 1; padding-left: 5px; padding-right: 0; padding-top: 5px; padding-bottom: 10px; justify-content: left 0; top: 0; bottom: auto; right: auto; position: flex-start;">
         <ui:VisualElement name="items" style="height: auto; width: 100%; flex-direction: column; flex-grow: 1; align-items: flex-end; justify-content: flex-start; left: 0; top: auto;">
             <ui:VisualElement name="TopButtonPanel" style="width: 100%; top: 0; height: 28px; padding-left: 2px; padding-right: 2px; padding-top: 0; padding-bottom: 2px; margin-left: 2px; margin-right: 2px; margin-top: 0; margin-bottom: 2px;">
@@ -127,11 +126,11 @@
                     <ui:Label name="TxtRCFile" text="RC file: not set" display-tooltip-when-elided="true" style="left: 26px; width: 350px; font-size: 12px; -unity-font-style: normal; border-bottom-color: rgb(127, 127, 127); border-bottom-width: 1px; -unity-text-align: middle-left;" />
                 </ui:Foldout>
                 <ui:Foldout text="8. Traffic" name="FoldSetTrafficParams" tooltip="Specify factors affecting movement of traffic" focusable="true" view-data-key="workflow-foldout" class="foldout-item">
-                    <ui:DropdownField name="DfRouteChoice" label="Route choice:" index="0" choices="null" tooltip="List of road types" class="tree-item" style="width: 372px; flex-direction: row;"/>
+                    <ui:DropdownField name="DfRouteChoice" label="Route choice:" index="0" choices="null" tooltip="List of road types" class="tree-item" style="width: 372px; flex-direction: row;" />
                     <ui:TextField label="Specify vehicle speed at max. capacity " value="n/a" text="5.0" name="TxTSetMaxCapTrafSpeed" tooltip="Specify vehicle speed at max roadway capacity (km/h)" class="tree-item tree-text-edit" />
                     <ui:Toggle value="false" name="TogSpeedAffectedBySmoke" text="Speed is affected by smoke?" tooltip="Lowers traffic speed due in low visibility" class="tree-item" />
                     <ui:VisualElement name="RoadType" style="width: 376px; height: auto; padding-left: 10px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; margin-left: 0; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; top: 0; justify-content: center; align-items: stretch; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.45); border-right-color: rgba(0, 0, 0, 0.45); border-top-color: rgba(0, 0, 0, 0.45); border-bottom-color: rgba(0, 0, 0, 0.45); left: 0;">
-                        <ui:DropdownField name="DfRoadType" label="Road type:" index="0" choices="null" class="tree-item" tooltip="List of road types" style="flex-direction: row;" />
+                        <ui:DropdownField name="DfRoadType" label="Road type:" index="0" choices="null" tooltip="List of road types" class="tree-item" style="flex-direction: row;" />
                         <ui:TextField name="TxSpeedLimit" label="Speed limit:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
                         <ui:TextField name="TxLanes" label="Number of lanes:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
                         <ui:TextField name="TxMaxCapacity" label="Max. capacity:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
@@ -236,7 +235,7 @@
                     <ui:Toggle value="false" name="TogSimFire" text="Simulate fire spread" tooltip="Choose whether to model fire growth and spread" class="tree-item" />
                     <ui:Toggle value="false" name="TogSimSmoke" text="Simulate smoke spread" tooltip="Choose whether to include the smoke-spread model" class="tree-item" />
                     <ui:VisualElement name="SimulationButtons" style="width: 457px; height: 32px; padding-left: 2px; padding-right: 2px; padding-top: 0; padding-bottom: 2px; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; top: 0;">
-                        <ui:Button text="Start simulatuon" display-tooltip-when-elided="true" name="StartSimButton" class="menu-button" style="left: 0; height: 32px; width: 160px;" />
+                        <ui:Button text="Start simulation" display-tooltip-when-elided="true" name="StartSimButton" class="menu-button" style="left: 0; height: 32px; width: 160px;" />
                         <ui:Button text="Pause simulation" display-tooltip-when-elided="true" name="PauseSimButton" class="menu-button" style="left: 200px; position: absolute; height: 32px; width: 170px;" />
                     </ui:VisualElement>
                 </ui:Foldout>
@@ -286,7 +285,7 @@
             <ui:Label name="TxtActiveCells" text="Active cells:" display-tooltip-when-elided="true" class="output-text-label" />
         </ui:VisualElement>
         <ui:VisualElement name="DisplayControl" style="max-width: none; max-height: none; width: 100%; top: auto;">
-            <ui:Label name="TxtDisplayOptions" text="Display options:" display-tooltip-when-elided="true" class="output-text-label" style="-unity-font-style: bold; border-bottom-width: 0px; " />
+            <ui:Label name="TxtDisplayOptions" text="Display options:" display-tooltip-when-elided="true" class="output-text-label" style="-unity-font-style: bold; border-bottom-width: 0;" />
             <ui:Button text="Households: on" display-tooltip-when-elided="true" name="VewHouseholds" class="menu-button" style="left: 2px; width: 170px; -unity-font-style: normal;" />
             <ui:Button text="Traffic: on" display-tooltip-when-elided="true" name="VewTraffic" class="menu-button" style="left: 2px; width: 170px; -unity-font-style: normal;" />
             <ui:Button text="Fire spread: on" display-tooltip-when-elided="true" name="VewFireSpread" class="menu-button" style="left: 2px; width: 170px; -unity-font-style: normal;" />

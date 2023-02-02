@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WUInity
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {

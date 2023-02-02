@@ -85,7 +85,7 @@ namespace WUInity.Fire
             //set custom fuel models if present
             if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
-                WUInity.LOG("LOG: Adding custom fuel model specifications.");
+                WUInity.LOG(WUInity.LogType.Log, " Adding custom fuel model specifications.");
                 for (int i = 0; i < WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
                 {
                     fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
@@ -382,7 +382,7 @@ namespace WUInity.Fire
                             activeCells.Add(f);
                             ignitionPoints[i].MarkAsIgnited();
 
-                            WUInity.LOG("LOG: Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
+                            WUInity.LOG(WUInity.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                         }
                         ++activatedIgnitions;
                     }

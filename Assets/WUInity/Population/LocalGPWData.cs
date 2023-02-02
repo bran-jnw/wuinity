@@ -93,7 +93,7 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.LOG("ERROR: No local GPW data was found, build from global GPW or create custom population.");                
+                WUInity.LOG(WUInity.LogType.Error, " No local GPW data was found, build from global GPW or create custom population.");                
             }
 
             if(success)
@@ -139,7 +139,7 @@ namespace WUInity.Population
             }
             else 
             {
-                WUInity.LOG("ERROR: GPW data range is not valid. Delete the file and rebuild.");
+                WUInity.LOG(WUInity.LogType.Error, " GPW data range is not valid. Delete the file and rebuild.");
             }
             return success;
         }
@@ -205,12 +205,12 @@ namespace WUInity.Population
                     SaveLocalGPWData();
                 }
 
-                WUInity.LOG("LOG: Loaded local GPW data from pre-built file.");
+                WUInity.LOG(WUInity.LogType.Log, " Loaded local GPW data from pre-built file.");
             }
             else
             {
                 success = false;
-                WUInity.LOG("ERROR: Local GPW data not valid for current map.");
+                WUInity.LOG(WUInity.LogType.Error, " Local GPW data not valid for current map.");
             }
 
             return success;
@@ -232,7 +232,7 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.LOG("ERROR: Global GPW data files not found. Please make sure the folder structure is correct.");
+                WUInity.LOG(WUInity.LogType.Error, " Global GPW data files not found. Please make sure the folder structure is correct.");
                 return false;
             }
 
@@ -410,12 +410,12 @@ namespace WUInity.Population
                 }
                 else
                 {
-                    WUInity.LOG("ERROR: Not all GPW files found.");
+                    WUInity.LOG(WUInity.LogType.Error, " Not all GPW files found.");
                 }
             }
             else
             {
-                WUInity.LOG("WARNING: GPW path does NOT exist.");
+                WUInity.LOG(WUInity.LogType.Warning, "GPW path does NOT exist.");
             }
 
             return isAvailable;
@@ -439,22 +439,22 @@ namespace WUInity.Population
                     if (latLong.y < -90.000000000005)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
-                        WUInity.LOG("Loading GPW from sector 1");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 1");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
-                        WUInity.LOG("Loading GPW from sector 2");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 2");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
-                        WUInity.LOG("Loading GPW from sector 3");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 3");
                     }
                     else
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
-                        WUInity.LOG("Loading GPW from sector 4");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 4");
                     }
                 }
                 else
@@ -462,22 +462,22 @@ namespace WUInity.Population
                     if (latLong.y < -90.000000000005)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
-                        WUInity.LOG("Loading GPW from sector 5");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 5");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
-                        WUInity.LOG("Loading GPW from sector 6");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 6");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
-                        WUInity.LOG("Loading GPW from sector 7");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 7");
                     }
                     else
                     {
                         path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
-                        WUInity.LOG("Loading GPW from sector 8");
+                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 8");
                     }
                 }
 

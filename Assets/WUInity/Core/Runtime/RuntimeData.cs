@@ -8,6 +8,7 @@ using WUInity.Population;
 using WUInity.Fire;
 using static WUInity.WUInity;
 using System;
+using Mapbox.Map;
 
 namespace WUInity.Runtime
 {
@@ -59,12 +60,12 @@ namespace WUInity.Runtime
 
             if (!MAP.IsAccessTokenValid)
             {
-                LOG("ERROR: Mapbox token not valid.");
+                LOG(WUInity.LogType.Error, "Mapbox token not valid.");
                 return false;
             }
-            LOG("LOG: Starting to load Mapbox map.");
+            LOG(WUInity.LogType.Log, "Starting to load Mapbox map.");
             MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.Simulation.LowerLeftLatLong.x, INPUT.Simulation.LowerLeftLatLong.y), INPUT.Map.ZoomLevel);
-            LOG("LOG: Map loaded succesfully.");
+            LOG(WUInity.LogType.Log, "Map loaded succesfully.");
 
             return true;
         }
