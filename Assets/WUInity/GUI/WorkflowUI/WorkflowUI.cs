@@ -10,9 +10,9 @@ using SimpleFileBrowser;
 using System.IO;
 using static WUInity.TrafficInput;
 
-namespace WUInity
+namespace WUInity.UI
 {
-    public class menu : MonoBehaviour
+    public class WorkflowUI : MonoBehaviour
     {
         public UIDocument Document;
 
@@ -893,7 +893,7 @@ namespace WUInity
 
                         WUInity.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices(); // Reload all evacuation groups based on updated file list.
 
-                        WUInity.LOG("LOG: Loaded evacuation group from " + path + " named " + data[0]);
+                        WUInity.LOG(WUInity.LogType.Log, "Loaded evacuation group from " + path + " named " + data[0]);
 
                         WUInityInput.SaveInput();
 
@@ -969,7 +969,7 @@ namespace WUInity
 
                         WUInity.RUNTIME_DATA.Evacuation.LoadResponseCurves(); // Reload all response curves based on updated file list.
 
-                        WUInity.LOG("LOG: Loaded response curve from " + path + " named " + data[0]);
+                        WUInity.LOG(WUInity.LogType.Log, " Loaded response curve from " + path + " named " + data[0]);
 
                         WUInityInput.SaveInput();
 
@@ -1998,7 +1998,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.LOG("ERROR: New population count not a number.");
+                WUInity.LOG(WUInity.LogType.Error, " New population count not a number.");
             }
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -2703,7 +2703,7 @@ namespace WUInity
                 WUInity.GUI.ParseMainData(wO);
                 if (!WUInity.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.LOG("ERROR: Could not start simulation, see error log.");
+                    WUInity.LOG(WUInity.LogType.Error, " Could not start simulation, see error log.");
                 }
                 else
                 {

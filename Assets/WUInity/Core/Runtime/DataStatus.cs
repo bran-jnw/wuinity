@@ -33,19 +33,19 @@ namespace WUInity
             if (!MapLoaded)
             {
                 canRun = false;
-                LOG("ERROR: Map is not loaded.");
+                LOG(WUInity.LogType.Error, "Map is not loaded.");
             }
 
             if (!PopulationLoaded && (!LocalGPWLoaded || !GlobalGPWAvailable))
             {
                 canRun = false;
-                LOG("ERROR: Population is not loaded and no local nor global GPW file is found to build it from.");
+                LOG(WUInity.LogType.Error, "Population is not loaded and no local nor global GPW file is found to build it from.");
             }
 
             if (!RouterDbLoaded && !OsmFileValid)
             {
                 canRun = false;
-                LOG("ERROR: No router database loaded and no valid OSM file was found to build it from.");
+                LOG(WUInity.LogType.Error, "No router database loaded and no valid OSM file was found to build it from.");
             }
 
             if (INPUT.Simulation.RunFireSim)
@@ -53,7 +53,7 @@ namespace WUInity
                 if (!LcpLoaded)
                 {
                     canRun = false;
-                    LOG("ERROR: No LCP file loaded but fire spread is activated.");
+                    LOG(WUInity.LogType.Error, "No LCP file loaded but fire spread is activated.");
                 }
             }
 
@@ -62,7 +62,7 @@ namespace WUInity
                 if (RUNTIME_DATA.Evacuation.ResponseCurves == null)
                 {
                     canRun = false;
-                    LOG("ERROR: No valid response curves have been loaded.");
+                    LOG(WUInity.LogType.Error, "No valid response curves have been loaded.");
                 }
 
             }

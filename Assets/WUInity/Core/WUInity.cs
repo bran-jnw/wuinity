@@ -10,6 +10,7 @@ using System.IO;
 using Mapbox.Utils;                    
 using Mapbox.Unity.Utilities;
 using WUInity.Runtime;
+using WUInity.UI;
 
 
 namespace WUInity
@@ -440,15 +441,33 @@ namespace WUInity
         }     
 
         private List<string> simLog = new List<string>();
+        public enum LogType { Log, Warning, Error, Event };
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
         /// <param name="message"></param>
-        public static void LOG(string message)
-        {
+        public static void LOG(LogType logType, string message)
+        {            
             if (SIM.IsRunning)
             {
                 message = "[" + (int)SIM.Time + "s] " + message;
+            }
+
+            if (logType == LogType.Warning)
+            {
+                message = "WARNING: " + message;
+            }
+            else if (logType == LogType.Error)
+            {
+                message = "ERROR: " + message;
+            }
+            else if (logType == LogType.Event)
+            {
+                message = "EVENT: " + message;
+            }
+            else
+            {
+                message = "LOG: " + message;
             }
 
             INSTANCE.simLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
@@ -534,7 +553,7 @@ namespace WUInity
             FARSITE_VIEWER.ImportFarsite();
             FARSITE_VIEWER.TransformCoordinates();
 
-            LOG("LOG: Farsite loaded succesfully.");
+            LOG(WUInity.LogType.Warning, "Farsite loaded succesfully.");
         }               
 
         public void SetSampleMode(DataSampleMode sampleMode)
@@ -598,7 +617,7 @@ namespace WUInity
 
         public void StartSimulation()
         {
-            LOG("LOG: Simulation started, please wait.");            
+            LOG(WUInity.LogType.Warning, "Simulation started, please wait.");            
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             SetEvacDataPlane(true);            
             SIM.StartSimulation();
@@ -791,7 +810,7 @@ namespace WUInity
             }
             else
             {
-                LOG("ERROR: Paint mode not set correctly");
+                LOG(WUInity.LogType.Error, "Paint mode not set correctly");
             }
             dataSampleMode = DataSampleMode.Paint;
 

@@ -186,18 +186,18 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG("WARNING: Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                WUInity.LOG(WUInity.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
             {
                 result = new WindInput(windData.ToArray());
                 success = true;
-                WUInity.LOG("LOG: Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
+                WUInity.LOG(WUInity.LogType.Log, " Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                WUInity.LOG("WARNING: Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                WUInity.LOG(WUInity.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

@@ -231,7 +231,7 @@ namespace WUInity.Fire
 
 			if(invalidFuelModelNumbers.Count > 0)
             {
-				string error = "ERROR: Landscape data contains " + invalidCount + " cells with fuel model numbers outside of the valid range 1-256, numbers are: ";
+				string error = "Landscape data contains " + invalidCount + " cells with fuel model numbers outside of the valid range 1-256, numbers are: ";
 				for (int i = 0; i < invalidFuelModelNumbers.Count; i++)
 				{
 					error += invalidFuelModelNumbers[i];
@@ -240,7 +240,7 @@ namespace WUInity.Fire
 						error += ", ";
 					}
 				}
-                WUInity.LOG(error);
+                WUInity.LOG(WUInity.LogType.Error, error);
             }
 
 			List<int> presentFuelModelNumbers= new List<int>();
@@ -345,7 +345,7 @@ namespace WUInity.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUInity.LOG("ERROR: LCP file not found in " + path + ".");
+				WUInity.LOG(WUInity.LogType.Error, " LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -612,11 +612,11 @@ namespace WUInity.Fire
 
 			if(CantAllocLCP)
             {
-				WUInity.LOG("LOG: LCP found in " + path + " but could not properly read it.");
+				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + " but could not properly read it.");
 			}
 			else
             {
-				WUInity.LOG("LOG: LCP found in " + path + ", read succesfully.");
+				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + ", read succesfully.");
 			}
 
 		}

@@ -385,9 +385,9 @@ namespace WUInity.Evac
 
             householdPositions = new Vector4[totalHouseholds];
 
-            WUInity.LOG("LOG: Total households: " + totalHouseholds);
-            WUInity.LOG("LOG: Total cars: " +  totalCars);
-            WUInity.LOG("LOG: Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            WUInity.LOG(WUInity.LogType.Log, " Total households: " + totalHouseholds);
+            WUInity.LOG(WUInity.LogType.Log, " Total cars: " +  totalCars);
+            WUInity.LOG(WUInity.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>

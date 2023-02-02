@@ -119,7 +119,7 @@ namespace WUInity.Fire
 
         void OnGUI()                                                                           
         {
-            GUI.Label(new Rect(10, 10, 500, 20), "Elapsed time: " + time / 3600.0f + " hours");
+            UnityEngine.GUI.Label(new Rect(10, 10, 500, 20), "Elapsed time: " + time / 3600.0f + " hours");
             if (mesh != null)
             {
                 GUI.Label(new Rect(10, 30, 500, 20), "Last time step: " + mesh.dt + " seconds");

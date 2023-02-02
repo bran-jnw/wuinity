@@ -18,7 +18,7 @@ namespace WUInity.Traffic
             }
             else
             {
-                WUInity.LOG("WARNING: Optical density ramp file " + path + " not found.");
+                WUInity.LOG(WUInity.LogType.Warning, "Optical density ramp file " + path + " not found.");
                 return false;
             }
 

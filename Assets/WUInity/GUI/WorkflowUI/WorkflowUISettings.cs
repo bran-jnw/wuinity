@@ -30,14 +30,14 @@ public class VisualElementState
 /// Container class for reading/writing the object states for the elementts in the workflow tree/foldout control.
 /// </summary>
 [System.Serializable]
-public class WorkflowSettings : MonoBehaviour
+public class WorkflowUISettings : MonoBehaviour
 {
     // All public variables in : MonoBehavior type class (declared as System.Serializable) can be auto-converted to/from JSON with JsonUtility
     // This also works when these classes are stored in a simple container like a List.
     // Note: this doesn't work for advanced collections like KeyPairValue
     public List<VisualElementState> controlStates;
    
-    public WorkflowSettings()
+    public WorkflowUISettings()
     {
         controlStates = new List<VisualElementState>();
         controlStates.Add(new VisualElementState("btnOne", true));
