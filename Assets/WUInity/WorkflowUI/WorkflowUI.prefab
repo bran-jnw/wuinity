@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2022175585972520337}
   - component: {fileID: 2022175585972520343}
   m_Layer: 5
-  m_Name: UIDocument
+  m_Name: WorkflowUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

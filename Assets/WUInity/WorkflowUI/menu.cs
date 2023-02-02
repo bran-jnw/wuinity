@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using SimpleFileBrowser;
 using System.IO;
+using static WUInity.TrafficInput;
 
 namespace WUInity
 {
@@ -14,29 +16,31 @@ namespace WUInity
     {
         public UIDocument Document;
 
-        // UI control variables
+        // WorkflowUI control variables
         bool newUIMenuDirty = false;
-        static int _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230;
+        private readonly int _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230, _iLogDisplayNum=6;
         bool mainMenuDirty = true, creatingNewFile = false;
 
-        // UI operational variables
+        // WorkflowUI operational variables
         public enum FileType { lcpFile, fuelModelsFile, initialFuelMoistureFile, weatherFile, windFile, ignitionPointsFile, graphicalFireInputFile,
-                               GPWFile, POPFile, evacuationGoalFile, evacuationGroupFile, responseCureveFile, OSMDataFile, routerDBFile, routeRCFile, wuiFile }
+                               GPWFile, POPFile, evacuationGoalFile, evacuationGroupFile, responseCureveFile, OSMDataFile, routerDBFile, routeRCFile, wuiFile, syslogFile }
 
-        string[] fileFilter = { ".lcp", ".fuel", ".fmc", ".wtr", ".wnd", ".ign", ".gfi", ".gpw", ".pop" , ".ed", ".eg", ".rsp", ".pbf", ".routerdb", ".rc", ".wui"};
+        string[] fileFilter = { ".lcp", ".fuel", ".fmc", ".wtr", ".wnd", ".ign", ".gfi", ".gpw", ".pop" , ".ed", ".eg", ".rsp", ".pbf", ".routerdb", ".rc", ".wui" ,".log"};
 
         //string[] togLoadFireFiles = { ".lcp", ".fuel", ".fmc", ".wtr", "TogLoadWindFile" };
         //string[] txtFireFiles = { ".lcp", ".fuel", ".fmc", ".wtr", "TxtWindFile" };
 
         private bool _bFoldout = true, _bHideOutput=false;
-        private int iGPWfolderLength = 42;
+        private readonly int iGPWfolderLength = 42;   // Truncate the GPW folder string to display (normally the full string is too long).
 
-        // Complimentary variables for WUINITY scenario configuration
+        // Complementary variables for WUINITY scenario configuration
         private string _mapLLLatLong, _mapSizeXY, _mapZoomLevel, _rescalePop;   // Associated variables with location/size/zoom level of map
 
         private string _simulationID, _simTimeStep, _maxSimTime;
 
         private string _OSMDataFile="";
+
+        private int iLogCount = 0;
 
         // example code of an implementation of stored variable, wrapped with a get/set property protocol
         private int iTestMemberVar = 4;
@@ -48,7 +52,7 @@ namespace WUInity
         // Can now be called as: iTestProperty = 2; (to set it),
         // and the "get" is: int n = menu::iTestProperty; // after the class definition, using the menu:: class object
 
-        // New UI code starts from here -------------------------------------------------------------------------------------------------------------------
+        // WorkflowUI code starts from here -------------------------------------------------------------------------------------------------------------------
         /// <summary>
         /// Add code to handle message catching in my dialog
         /// </summary>
@@ -63,21 +67,22 @@ namespace WUInity
         /// </summary>
         void Start()
         {
-            WUInity.GUI.enabled = false;        // Turn off Jonnathan's WUINITY 2.0 UI
+            WUInity.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
 
-            // Dock new GUI box to the left edge.
+            // Dock the main workflow GUI box to the left edge.
             var root = Document.rootVisualElement;
-            UnityEngine.UIElements.VisualElement newGUI = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
-            if(newGUI != null)
+            UnityEngine.UIElements.VisualElement mainUIBox = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
+            if(mainUIBox != null)
             {
-                newGUI.style.left = newGUI.style.top = 0;
-                newGUI.style.height = Screen.height;
+                mainUIBox.style.left = mainUIBox.style.top = 0;
+                mainUIBox.style.height = Screen.height;
             }
 
-            UnityEngine.UIElements.ScrollView workflow = root.Q<UnityEngine.UIElements.ScrollView>("Workflow - Element");
-            if (workflow != null)
+            // Hide horizontal scroll bar to have a little extra space
+            UnityEngine.UIElements.ScrollView workflow = root.Q<UnityEngine.UIElements.ScrollView>("WorkflowUIElements");
+            if (workflow != null) 
             {
-                workflow.horizontalScrollerVisibility = ScrollerVisibility.Hidden; // This code doesn't work! A bug in unity?
+                workflow.horizontalScrollerVisibility = ScrollerVisibility.Hidden; 
             }
 
             //UnityEngine.Debug.Log("menu::Start();}");
@@ -93,13 +98,31 @@ namespace WUInity
                 UpdateMenu();
                 newUIMenuDirty = false;
             }
+
+            // Synchronize the count of log with the log window scroller count
+            if (iLogCount != WUInity.GetLog().Count)
+            {
+                iLogCount=WUInity.GetLog().Count;
+
+                UnityEngine.UIElements.Scroller scLogScroll = Document.rootVisualElement.Q<UnityEngine.UIElements.Scroller>("LogScroll");
+
+                if (scLogScroll != null && iLogCount > 0)
+                {
+                    if(iLogCount> _iLogDisplayNum) 
+                        scLogScroll.highValue = (float)(iLogCount - _iLogDisplayNum);
+                    else 
+                        scLogScroll.highValue = (float)iLogCount;
+                }
+
+                scLogScroll.value = scLogScroll.highValue;
+            }
+
             //UnityEngine.Debug.Log("menu::Update;}");
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// My custom methods for hadling GUI contriols setup and actions
+        /// My custom methods for handling GUI controls setup and actions
         /// 
-
         /// <summary>
         /// Manually created methods for invoking workflow actions
         /// </summary>
@@ -142,33 +165,7 @@ namespace WUInity
                 PopulateFromLocalGPWFile(root);
                 PopulateFromLocalPopFile(root);
 
-                UnityEngine.UIElements.Button btnBuildLocalGPW = root.Q<UnityEngine.UIElements.Button>("BuildLocalGPW");
-                if (btnBuildLocalGPW != null)
-                    btnBuildLocalGPW.clicked += BtnBuildLocalGPW_clicked;
-
-                UnityEngine.UIElements.Button btnShowHideLocalGPW = root.Q<UnityEngine.UIElements.Button>("ShowHideLocalGPW");
-                if (btnShowHideLocalGPW != null)
-                    btnShowHideLocalGPW.clicked += BtnShowHideLocalGPW_clicked;
-
-                UnityEngine.UIElements.Button btnShowHideLocalPOP = root.Q<UnityEngine.UIElements.Button>("ShowHideLocalPOP");
-                if (btnShowHideLocalPOP != null)
-                    btnShowHideLocalPOP.clicked += BtnShowHideLocalPOP_clicked;
-
-                UnityEngine.UIElements.Button btnCorrectPop = root.Q<UnityEngine.UIElements.Button>("CorrectPopButton");
-                if (btnCorrectPop != null)
-                    btnCorrectPop.clicked += BtnCorrectPop_clicked;
-
-                UnityEngine.UIElements.Button btnRescalePop = root.Q<UnityEngine.UIElements.Button>("RescalePopButton");
-                if (btnRescalePop != null)
-                    btnRescalePop.clicked += BtnRescalePop_clicked;
-
-                UnityEngine.UIElements.TextField tfTxTRescalePopNumber = root.Q<UnityEngine.UIElements.TextField>("TxTRescalePopNumber");
-                if (tfTxTRescalePopNumber != null)
-                    tfTxTRescalePopNumber.RegisterValueChangedCallback((evt) =>
-                    {
-                        UnityEngine.Debug.Log($"RescalePopNumber has changed to {evt.newValue}.");
-                        _rescalePop = evt.newValue;
-                    });
+                SetupPopulationControlButtons(root);
 
                 // 4. Evacuation goals ----------------------------------------------------------------------------------------------
                 SetupAddRemoveEvacGoalButtons(root);
@@ -198,6 +195,8 @@ namespace WUInity
                 SetupLoadRouterRCFile(root);
 
                 // 8. Traffic -------------------------------------------------------------------------------------------------------
+                InitRouteChoiceList(root);
+                InitRoadTypeList(root);
 
                 // 9. Landscape data ------------------------------------------------------------------------------------------------
 
@@ -229,6 +228,17 @@ namespace WUInity
                 UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("QuitButton");
                 quitButton.clicked += () => Application.Quit();
 
+                // System logs windows controls
+                UnityEngine.UIElements.Button clearLogsButton = root.Q<UnityEngine.UIElements.Button>("ClearLogsButton");
+                clearLogsButton.clicked += BtnclearLogsButton_clicked;
+
+                UnityEngine.UIElements.Button saveLogsButton = root.Q<UnityEngine.UIElements.Button>("SaveLogsButton");
+                saveLogsButton.clicked += BtnSaveLogsButton_clicked;
+
+                UnityEngine.UIElements.Scroller scLogScroll = root.Q<UnityEngine.UIElements.Scroller>("LogScroll");
+                scLogScroll.valueChanged += OnSyslogScrollerValueChanged;
+                scLogScroll.value = 0;
+
                 // SaveTo/LoadFrom JSON test
                 /*-----------------
                 WorkflowSettings workflow;
@@ -240,6 +250,38 @@ namespace WUInity
                 bool bLoaded = workflow.LoadFrom("C:\\Temp\\test-load.json");
                 UnityEngine.Debug.Log($"JSON loaded OK? {bLoaded}:");
                 -----------------*/
+            }
+        }
+
+        private void OnSyslogScrollerValueChanged(float value)
+        {
+            UnityEngine.UIElements.VisualElement systemLogBox = Document.rootVisualElement.Q<UnityEngine.UIElements.VisualElement>("SystemLogBox");
+
+            if (systemLogBox.visible)
+            {
+                List<string> log = WUInity.GetLog();
+
+                int roll = (int)value, loopN;
+
+                if (log.Count <= _iLogDisplayNum)
+                {
+                   roll = 0; loopN = log.Count;
+                }
+                else loopN = _iLogDisplayNum;
+
+                Label togLabel = Document.rootVisualElement.Q<Label>("SysLogsText");
+                if (togLabel != null)
+                {
+                    togLabel.text = "";
+
+                    for (int i = 0; i < loopN; i++)
+                    {
+                        if (log[i + roll].Length < 150)
+                            togLabel.text += log[i + roll] + "\n\r";
+                        else
+                            togLabel.text += log[i + roll].Substring(0, 150) + "\n\r";
+                    }
+                }
             }
         }
 
@@ -299,7 +341,7 @@ namespace WUInity
             if (newGUI.style.left == 0) { 
                 newGUI.style.left = Screen.width - _iMainBoxWidth;
                 newGUI.style.top = 20;
-                newGUI.style.height = Screen.height - 20 -160;
+                newGUI.style.height = Screen.height - 20 - 160;     // 20 is the hight of data examine bar, 160 is system logs window height
                 WUInity.GUI.enabled = true;
                 systemLogBox.visible = false;
             }
@@ -311,6 +353,63 @@ namespace WUInity
                 systemLogBox.visible = true;
             }
             //newGUI.SetEnabled(false);
+        }
+
+        private void BtnclearLogsButton_clicked()
+        {
+            WUInity.GetLog().Clear();
+            Label togLabel = Document.rootVisualElement.Q<Label>("SysLogsText");
+            if (togLabel != null) togLabel.text = ""; 
+        }
+
+        private void BtnSaveLogsButton_clicked()
+        {
+            FileBrowser.SetFilters(false, fileFilter[(int)FileType.syslogFile]);
+            FileBrowser.ShowSaveDialog(SaveSysLogs, null, FileBrowser.PickMode.Files, false, GetProjectPath(), "SysLogs.log", "Save log file", "Save");
+        }
+
+        void SaveSysLogs(string[] paths)
+        {
+            DateTime localDate = DateTime.Now;
+            var culture = new CultureInfo("en-GB");
+
+            string logText= "Sys logs saved data and time: " + localDate.ToString(culture)+", "+ localDate.Kind + "\n\r"; 
+
+            foreach (string logItem in WUInity.GetLog())
+                logText += (logItem + "\n");
+
+            System.IO.File.WriteAllText(paths[0], logText);
+        }
+
+        private void SetupPopulationControlButtons(VisualElement root)
+        {
+            UnityEngine.UIElements.Button btnBuildLocalGPW = root.Q<UnityEngine.UIElements.Button>("BuildLocalGPW");
+            if (btnBuildLocalGPW != null)
+                btnBuildLocalGPW.clicked += BtnBuildLocalGPW_clicked;
+
+            UnityEngine.UIElements.Button btnShowHideLocalGPW = root.Q<UnityEngine.UIElements.Button>("ShowHideLocalGPW");
+            if (btnShowHideLocalGPW != null)
+                btnShowHideLocalGPW.clicked += BtnShowHideLocalGPW_clicked;
+
+            UnityEngine.UIElements.Button btnShowHideLocalPOP = root.Q<UnityEngine.UIElements.Button>("ShowHideLocalPOP");
+            if (btnShowHideLocalPOP != null)
+                btnShowHideLocalPOP.clicked += BtnShowHideLocalPOP_clicked;
+
+            UnityEngine.UIElements.Button btnCorrectPop = root.Q<UnityEngine.UIElements.Button>("CorrectPopButton");
+            if (btnCorrectPop != null)
+                btnCorrectPop.clicked += BtnCorrectPop_clicked;
+
+            UnityEngine.UIElements.Button btnRescalePop = root.Q<UnityEngine.UIElements.Button>("RescalePopButton");
+            if (btnRescalePop != null)
+                btnRescalePop.clicked += BtnRescalePop_clicked;
+
+            UnityEngine.UIElements.TextField tfTxTRescalePopNumber = root.Q<UnityEngine.UIElements.TextField>("TxTRescalePopNumber");
+            if (tfTxTRescalePopNumber != null)
+                tfTxTRescalePopNumber.RegisterValueChangedCallback((evt) =>
+                {
+                    UnityEngine.Debug.Log($"RescalePopNumber has changed to {evt.newValue}.");
+                    _rescalePop = evt.newValue;
+                });
         }
 
         private void SetupAddRemoveEvacGoalButtons(VisualElement root)
@@ -354,16 +453,66 @@ namespace WUInity
             }
         }
 
+        private void BtnNewEvacGroupButton_clicked()
+        {
+            // Add code here to create a new evacaution group file
+            FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGroupFile]);
+            FileBrowser.ShowSaveDialog(SaveNewEvacGroup, null, FileBrowser.PickMode.Files, false, GetProjectPath(), "groupX.eg", "Create a new evacuation group file", "Save");
+        }
+
+        void SaveNewEvacGroup(string[] paths)
+        {
+            string templateText = "Name: \"Add new evacuation group name here\"\n";
+            templateText += "Response curves: \"Add the name(s) of response curve(s) here and the associalted cumulated probabilities below, separeted by comma\"\n";
+            templateText += "Response curve probabilites:\n";
+            templateText += "Destinations: \"Add evacaution goal(s) here and the associalted cumulated probabilities below, separeted by comma\"\n";
+            templateText += "Destination probabilites: \n";
+            templateText += "Color: 1.0, 1.0, 0.0";
+
+            System.IO.File.WriteAllText(paths[0], templateText);
+            System.Diagnostics.Process.Start("Notepad.exe", paths[0]);
+        }
+
+        private void BtnNewRespCurveButton_clicked()
+        {
+            // Add code here to create a new response curve file
+            FileBrowser.SetFilters(false, fileFilter[(int)FileType.responseCureveFile]);
+            FileBrowser.ShowSaveDialog(SaveNewEvacCurve, null, FileBrowser.PickMode.Files, false, GetProjectPath(), "responseX.rsp", "Create a new response curve file", "Save");
+        }
+
+        void SaveNewEvacCurve(string[] paths)
+        {
+            string templateText = "Time, Cumulative probability\n0, 0\n100, 1.0";
+
+            System.IO.File.WriteAllText(paths[0], templateText);
+            System.Diagnostics.Process.Start("Notepad.exe", paths[0]);
+        }
+
         private void BtnNewGoalButton_clicked()
         {
             // Add code here to create a new goal
+            FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGoalFile]);
+            FileBrowser.ShowSaveDialog(SaveNewGoal, null, FileBrowser.PickMode.Files, false, GetProjectPath(), "goalX.ed", "Create a new evacuation goal file", "Save");
+        }
+
+        void SaveNewGoal(string[] paths)
+        {
+            string templateText = "Name: \"Add new goal name here\"\n";
+            templateText += "Latitude:\nLongitude:\n";
+            templateText += "Goal type: \"Exit\"\n";
+            templateText += "Max flow: 3600.0\n";
+            templateText += "Car capacity: -1\n";
+            templateText += "People capacity: -1\n";
+            templateText += "Initially blocked: \"false\"\n";
+            templateText += "Color: 1.0, 0.0, 0.0";
+
+            System.IO.File.WriteAllText(paths[0], templateText);
+            System.Diagnostics.Process.Start("Notepad.exe", paths[0]);
         }
 
         private void BtnRemoveGoalButton_clicked()
         {
-            //Update dropdown 
-
-            //EditorUtility.DisplayDialogComplex
+            // EditorUtility.DisplayDialog only works in editor mode. I need to remove the function later. 
 
             if (EditorUtility.DisplayDialog("Remove current goal", "Do you want to remove the current goal?", "Confirm","Cancel")) {
 
@@ -376,8 +525,7 @@ namespace WUInity
 
                         for (int i = 0; i < dfDfEvacutionDestination.index; i++)
                         {
-                            if (i != dfDfEvacutionDestination.index) newGoalList[i] = WUInity.INPUT.Traffic.evacuationGoalFiles[i];
-                            else break;
+                            newGoalList[i] = WUInity.INPUT.Traffic.evacuationGoalFiles[i];
                         }
 
                         for (int i = dfDfEvacutionDestination.index; i < WUInity.INPUT.Traffic.evacuationGoalFiles.Length - 1; i++)
@@ -528,9 +676,9 @@ namespace WUInity
                     if (dfDfEvacutionDestination != null)
                     {
                         dfDfEvacutionDestination.choices.Add(name);
-                        dfDfEvacutionDestination.choices.Contains(name);
+                        //dfDfEvacutionDestination.choices.Contains(name);
 
-                        dfDfEvacutionDestination.index = WUInity.INPUT.Traffic.evacuationGoalFiles.Length - 1;    // Show the most resent goal
+                        dfDfEvacutionDestination.index = dfDfEvacutionDestination.choices.Count - 1; // Show the most resent goal
                     }
                 }
             }
@@ -538,19 +686,303 @@ namespace WUInity
 
         private void SetupEvacGroupRespButtons(VisualElement root)
         {
-            UnityEngine.UIElements.Button btnEditRespCurveButton = root.Q<UnityEngine.UIElements.Button>("EditRespCurveButton");
+            UnityEngine.UIElements.Button btnNewRespCurveButton = root.Q<UnityEngine.UIElements.Button>("NewRespCurveButton");
+            if (btnNewRespCurveButton != null)
+                btnNewRespCurveButton.clicked += BtnNewRespCurveButton_clicked;
 
+            UnityEngine.UIElements.Button btnNewEvacGroupButton = root.Q<UnityEngine.UIElements.Button>("NewEvacGroupButton");
+            if (btnNewEvacGroupButton != null)
+                btnNewEvacGroupButton.clicked += BtnNewEvacGroupButton_clicked;
+
+            UnityEngine.UIElements.Button btnAddEvacGroupButton = root.Q<UnityEngine.UIElements.Button>("AddEvacGroupButton");
+            if (btnAddEvacGroupButton != null)
+                btnAddEvacGroupButton.clicked += BtnAddEvacGroupButton_clicked;
+
+            UnityEngine.UIElements.Button btnAddRespCurveButton = root.Q<UnityEngine.UIElements.Button>("AddRespCurveButton");
+            if (btnAddRespCurveButton != null)
+                btnAddRespCurveButton.clicked += BtnAddRespCurveButton_clicked;
+
+            UnityEngine.UIElements.Button btnRemoveRespCurveButton = root.Q<UnityEngine.UIElements.Button>("RemoveRespCurveButton");
+            if (btnRemoveRespCurveButton != null)
+                btnRemoveRespCurveButton.clicked += BtnRemoveRespCurveButton_clicked;
+
+            UnityEngine.UIElements.Button btnRemoveEvacGroupButton = root.Q<UnityEngine.UIElements.Button>("RemoveEvacGroupButton");
+            if (btnRemoveEvacGroupButton != null)
+                btnRemoveEvacGroupButton.clicked += BtnRemoveEvacGroupButton_clicked;
+
+            UnityEngine.UIElements.Button btnEditRespCurveButton = root.Q<UnityEngine.UIElements.Button>("EditRespCurveButton");
             if (btnEditRespCurveButton != null)
                 btnEditRespCurveButton.clicked += BtnEditRespCurveButton;
 
             UnityEngine.UIElements.Button btnEditEvacGroupButton = root.Q<UnityEngine.UIElements.Button>("EditEvacGroupButton");
-
             if (btnEditEvacGroupButton != null)
                 btnEditEvacGroupButton.clicked += BtnEditEvacGroupButton;
 
             UnityEngine.UIElements.Button btnEditEvacGroupOnMap = root.Q<UnityEngine.UIElements.Button>("EditEvacGroupOnMapButton");
             if (btnEditEvacGroupOnMap != null)
                 btnEditEvacGroupOnMap.clicked += BtnEditEvacGroupOnMap_clicked;
+        }
+
+        private void BtnRemoveRespCurveButton_clicked()
+        {
+            /*
+            if (EditorUtility.DisplayDialog("Remove current response curve", "Do you want to remove the current response curve?", "Confirm", "Cancel"))
+            {
+
+                UnityEngine.UIElements.DropdownField dfResponseCurve = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
+                if (dfResponseCurve != null && dfResponseCurve.choices.Count >= 1)
+                {
+                    WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.
+
+                    if (WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.Length > 1)
+                    {
+                        string[] newGoalList = new string[WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.Length - 1];
+
+                        for (int i = 0; i < dfResponseCurve.index; i++)
+                        {
+                            if (i != dfResponseCurve.index) newGoalList[i] = WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[i].name;
+                            else break;
+                        }
+
+                        for (int i = dfResponseCurve.index; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.Length - 1; i++)
+                        {
+                            newGoalList[i] = WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[i + 1].name;
+                        }
+
+                        WUInity.INPUT.Traffic.evacuationGoalFiles = newGoalList;
+                    }
+                    else
+                    {
+                        WUInity.INPUT.Traffic.evacuationGoalFiles = null;
+                    }
+
+                    WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.RemoveAt(dfResponseCurve.index);
+                    WUInityInput.SaveInput();
+
+                    dfResponseCurve.choices.RemoveAt(dfResponseCurve.index);
+
+                    if (dfResponseCurve.choices.Count > 0) dfResponseCurve.index = 0;
+                    else dfResponseCurve.index = -1;
+                }
+            }
+            */
+        }
+        private void BtnRemoveEvacGroupButton_clicked()
+        {
+
+        }
+
+        private void BtnAddEvacGroupButton_clicked()
+        {
+            FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGroupFile]);
+            FileBrowser.ShowLoadDialog(LoadAEvacGroupFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation group file (.eg)", "Load");
+        }
+
+        private void LoadAEvacGroupFile(string[] paths)
+        {
+            string path = paths[0];
+
+            if (File.Exists(path))
+            {
+                string[] dataLines = File.ReadAllLines(path);
+                
+                if (dataLines.Length >= 6)  //The file must have 6 lines to be valid.
+                {
+                    string name;
+                    List<string> responseCurveNames = new List<string>(), destinationNames = new List<string>();
+                    List<float> responseCurveProbabilities = new List<float>();
+                    List<double> goalProbabilities = new List<double>();
+                    float r, g, b;
+                    Color color = Color.white;
+
+                    //get name
+                    string[] data = dataLines[0].Split(':');
+                    data[1].Trim('"');
+                    name = data[1].Trim(' ');
+
+                    //response curve names
+                    data = dataLines[1].Split(':');
+                    data = data[1].Split(',');
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        string value = data[j].Trim();
+                        value = value.Trim('"');
+                        responseCurveNames.Add(value);
+                    }
+
+                    //response curve probabilities
+                    data = dataLines[2].Split(':');
+                    data = data[1].Split(',');
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        float value;
+                        bool b1 = float.TryParse(data[j], out value);
+                        if (b1)
+                        {
+                            responseCurveProbabilities.Add(value);
+                        }
+                    }
+
+                    //goal names
+                    data = dataLines[3].Split(':');
+                    data = data[1].Split(',');
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        string value = data[j].Trim();
+                        value = value.Trim('"');
+                        destinationNames.Add(value);
+                    }
+
+                    //goal probabilities
+                    data = dataLines[4].Split(':');
+                    data = data[1].Split(',');
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        float value;
+                        bool b1 = float.TryParse(data[j], out value);
+                        if (b1)
+                        {
+                            goalProbabilities.Add(value);
+                        }
+                    }
+
+                    //colors
+                    data = dataLines[5].Split(':');
+                    data = data[1].Split(',');
+                    if (data.Length >= 3)
+                    {
+                        float.TryParse(data[0], out r);
+                        float.TryParse(data[1], out g);
+                        float.TryParse(data[2], out b);
+                        color = new Color(r, g, b);
+                    }
+
+                    int[] goalIndices = new int[destinationNames.Count];
+                    for (int j = 0; j < destinationNames.Count; j++)
+                    {
+                        goalIndices[j] = WUInity.RUNTIME_DATA.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
+                    }
+
+                    int[] responseCurveIndices = new int[responseCurveNames.Count];
+                    for (int j = 0; j < responseCurveNames.Count; j++)
+                    {
+                        responseCurveIndices[j] = WUInity.RUNTIME_DATA.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
+                    }
+
+                    //TODO: check if input count and probabilities match
+
+                    EvacGroup eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
+
+                    // The code above is just to check if the group file contains valid data
+                    //-----------------------------------------------------------------------------------------------------------------
+
+                    List<String> evacGroupFiles = new List<String>();
+
+                    for (int i = 0; i < WUInity.INPUT.Evacuation.EvacGroupFiles.Length; i++)
+                    {
+                        evacGroupFiles.Add(WUInity.INPUT.Evacuation.EvacGroupFiles[i]);
+                    }
+
+                    string fileName = Path.GetFileName(path);
+                    data = fileName.Split('.');
+
+                    if (!evacGroupFiles.Contains(data[0])) // Check if the evacuation group file has been added already.
+                    {
+                        evacGroupFiles.Add(data[0]);
+                        WUInity.INPUT.Evacuation.EvacGroupFiles = evacGroupFiles.ToArray();
+
+                        WUInity.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices(); // Reload all evacuation groups based on updated file list.
+
+                        WUInity.LOG("LOG: Loaded evacuation group from " + path + " named " + data[0]);
+
+                        WUInityInput.SaveInput();
+
+                        //Update dropdown 
+                        UnityEngine.UIElements.DropdownField dfEvacuationGroup = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
+                        if (dfEvacuationGroup != null)
+                        {
+                            dfEvacuationGroup.choices.Add(name);
+                            dfEvacuationGroup.index = dfEvacuationGroup.choices.Count - 1; // Show the most resent added response curve
+                        }
+                    }
+                }
+            }
+        }
+
+        private void BtnAddRespCurveButton_clicked()
+        {
+            FileBrowser.SetFilters(false, fileFilter[(int)FileType.responseCureveFile]);
+            FileBrowser.ShowLoadDialog(LoadAResponseCurveFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load response curve file (.rsp)", "Load");
+        }
+
+        private void LoadAResponseCurveFile(string[] paths)
+        {
+            string path = paths[0];
+
+            if (File.Exists(path))
+            {
+                string[] dataLines = File.ReadAllLines(path);
+                List<ResponseDataPoint> dataPoints = new List<ResponseDataPoint>();
+                //skip first line (header)
+                for (int j = 1; j < dataLines.Length; j++)
+                {
+                    string[] data = dataLines[j].Split(',');
+
+                    if (data.Length >= 2)
+                    {
+                        float time, probability;
+
+                        bool timeRead = float.TryParse(data[0], out time);
+                        bool probabilityRead = float.TryParse(data[1], out probability);
+                        if (timeRead && probabilityRead)
+                        {
+                            ResponseDataPoint dataPoint = new ResponseDataPoint(time, probability);
+                            dataPoints.Add(dataPoint);
+                        }
+                    }
+                }
+
+                // need at least two to make a curve.
+                // PS, read the contents of the response curve file just to validate it, so that it can be added into the array.
+                if (dataPoints.Count >= 2) // A valid response curve file
+                {
+                    //List<ResponseCurve> responseCurves = new List<ResponseCurve>();
+                    List<String> responseCurveFiles= new List<String>();
+
+                    for (int i = 0; i < WUInity.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
+                    {
+                        responseCurveFiles.Add(WUInity.INPUT.Evacuation.ResponseCurveFiles[i]);
+                        //responseCurves.Add(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[i]);
+                    }
+
+                    string fileName = Path.GetFileName(path);
+                    string[] data = fileName.Split('.');
+
+                    if (!responseCurveFiles.Contains(data[0])) // Check if the curve file has been already added
+                    {
+                        responseCurveFiles.Add(data[0]);
+                        WUInity.INPUT.Evacuation.ResponseCurveFiles = responseCurveFiles.ToArray();
+
+                        // ResponseCurves could be simply updated by the following two lines, but I have to reload all curves using LoadResponseCurves();
+                        //responseCurves.Add(new ResponseCurve(dataPoints, data[0]));
+                        //WUInity.RUNTIME_DATA.Evacuation.ResponseCurves = responseCurves.ToArray();
+
+                        WUInity.RUNTIME_DATA.Evacuation.LoadResponseCurves(); // Reload all response curves based on updated file list.
+
+                        WUInity.LOG("LOG: Loaded response curve from " + path + " named " + data[0]);
+
+                        WUInityInput.SaveInput();
+
+                        //Update dropdown 
+                        UnityEngine.UIElements.DropdownField dfResponseCurve = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
+                        if (dfResponseCurve != null)
+                        {
+                            dfResponseCurve.choices.Add(data[0]);
+                            dfResponseCurve.index = dfResponseCurve.choices.Count - 1; // Show the most resent added response curve
+                        }
+                    }
+                }
+            }
         }
 
         private void SetupLoadOSMDataFile(VisualElement root)
@@ -883,7 +1315,7 @@ namespace WUInity
                 {
                     UnityEngine.Debug.Log($"The Evacuation Destination dropdown selection has changed to {evt.newValue}.");
 
-                    // I need to add more fields to allow user see the detailed information about evacuation destinations.
+                    // Fields to allow user see the detailed information about evacuation destinations.
 
                     UnityEngine.UIElements.TextField tfTxEvacDestName = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestName");
                     if (tfTxEvacDestName != null)
@@ -923,7 +1355,7 @@ namespace WUInity
                 {
                     UnityEngine.Debug.Log($"The Response curve dropdown selection has changed to {evt.newValue}.");
 
-                    // I need to add more fields to allow user see the detailed information about evacuation destinations.
+                    // I need to add more fields to allow user see the detailed information about response curve.
 
                 });
             }
@@ -942,11 +1374,58 @@ namespace WUInity
 
                     WUInity.PAINTER.SetEvacGroupColor(dfDfEvacuationGroup.index);   //For editing evacuation group on map.
 
-                    // I need to add more fields to allow user see the detailed information about evacuation destinations.
+                    // I need to add more fields to allow user see the detailed information about evacuation groups.
 
                 });
             }
             // Evacuation group list initialisation end.
+        }
+
+        private void InitRouteChoiceList(VisualElement root)
+        {
+            // Route choice list initialisation starts:
+            UnityEngine.UIElements.DropdownField dfRouteChoice = root.Q<UnityEngine.UIElements.DropdownField>("DfRouteChoice");
+            if (dfRouteChoice != null)
+            {
+                dfRouteChoice.RegisterValueChangedCallback((evt) =>
+                {
+                    WUInity.INPUT.Traffic.routeChoice = (RouteChoice) dfRouteChoice.index;
+                });
+            }
+        }
+
+        private void InitRoadTypeList(VisualElement root)
+        {
+            // Route choice list initialisation starts:
+            UnityEngine.UIElements.DropdownField dfRoadType = root.Q<UnityEngine.UIElements.DropdownField>("DfRoadType");
+            if (dfRoadType != null)
+            {
+                dfRoadType.RegisterValueChangedCallback((evt) =>
+                {
+                    /**
+                    UnityEngine.UIElements.TextField tfTxRoadTypeName = root.Q<UnityEngine.UIElements.TextField>("TxRoadTypeName");
+                    if (tfTxRoadTypeName != null) 
+                        tfTxRoadTypeName.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[dfRoadType.index].name);
+                    ***/
+
+                    UnityEngine.UIElements.TextField tfTxSpeedLimit = root.Q<UnityEngine.UIElements.TextField>("TxSpeedLimit");
+                    if (tfTxSpeedLimit != null)
+                        tfTxSpeedLimit.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[dfRoadType.index].speedLimit.ToString());
+
+                    UnityEngine.UIElements.TextField tfTxLanes = root.Q<UnityEngine.UIElements.TextField>("TxLanes");
+                    if (tfTxLanes != null)
+                        tfTxLanes.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[dfRoadType.index].lanes.ToString());
+
+                    UnityEngine.UIElements.TextField tfTxMaxCapacity = root.Q<UnityEngine.UIElements.TextField>("TxMaxCapacity");
+                    if (tfTxMaxCapacity != null)
+                        tfTxMaxCapacity.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[dfRoadType.index].maxCapacity.ToString());
+
+                    UnityEngine.UIElements.TextField tfTxCanBeReversed = root.Q<UnityEngine.UIElements.TextField>("TxCanBeReversed");
+                    if (tfTxCanBeReversed != null)
+                        tfTxCanBeReversed.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[dfRoadType.index].canBeReversed.ToString());
+             
+                });
+            }
         }
 
         private void SetupSimulationParameters(VisualElement root)
@@ -1241,28 +1720,13 @@ namespace WUInity
 
                 systemLogBox.style.width = logBoxWidth;
 
-                Label togLabel = Document.rootVisualElement.Q<Label>("TestOUTPUT");
+                Label togLabel = Document.rootVisualElement.Q<Label>("SysLogsText");
 
                 if (togLabel != null)
                 {
-                    togLabel.text = ""; // "Happy new year from WUINITY! \n\r";
-                    List<string> log = WUInity.GetLog();
-
                     togLabel.style.width = logBoxWidth - 38;
-
-                    //foreach (string logItem in log)
-                    //    togLabel.text += logItem;
-
-                    int loopN;
-
-                    if(log.Count >= 6) loopN=6;
-                    else loopN= log.Count;
-
-                    for (int i = 1; i < loopN+1; i++)
-                        togLabel.text += log[log.Count - i] + "\n\r";
                 }
             }
-
 
             if (simOutputsBox.visible)
             {
@@ -1316,7 +1780,7 @@ namespace WUInity
             label1.text = "Simulation ID: " + WUInity.INPUT.Simulation.SimulationID;
 
             Label label2 = Document.rootVisualElement.Q<Label>("TxtEvacTime");
-            label2.text = "Total evac time(s): " + (int)WUInity.OUTPUT.totalEvacTime;
+            label2.text = "Sim. Clock: " + (int)WUInity.OUTPUT.totalEvacTime +" s\n\rdd:hh:mm:ss - " + TimeSpan.FromSeconds((int)WUInity.OUTPUT.totalEvacTime).ToString(@"dd\:hh\:mm\:ss");
 
             Label label3 = Document.rootVisualElement.Q<Label>("TxtTotalPop");
             label3.text = "Total population: " + WUInity.POPULATION.GetTotalPopulation();
@@ -1360,10 +1824,10 @@ namespace WUInity
             if (WUInity.INPUT.Simulation.RunFireSim)
             {
                 Label label11 = Document.rootVisualElement.Q<Label>("TxtWindSpeed");
-                label11.text = "Wind speed (m/s): " + Math.Round(WUInity.SIM.GetFireWindSpeed(),1);
+                label11.text = "Wind speed: " + Math.Round(WUInity.SIM.GetFireWindSpeed(),1) + " m/s";
 
                 Label label12 = Document.rootVisualElement.Q<Label>("TxtWindDirection");
-                label12.text = "Wind direction (°): " + Math.Round(WUInity.SIM.GetFireWindDirection(),1);
+                label12.text = "Wind direction: " + Math.Round(WUInity.SIM.GetFireWindDirection(),1) + " °";
 
                 Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
                 label13.text = "Active cells: " + WUInity.SIM.FireMesh().GetActiveCellCount();
@@ -1378,7 +1842,7 @@ namespace WUInity
             label1.text = "Simulation ID:";
 
             Label label2 = Document.rootVisualElement.Q<Label>("TxtEvacTime");
-            label2.text = "Total evac time(s):";
+            label2.text = "Sim. Clock:";
 
             Label label3 = Document.rootVisualElement.Q<Label>("TxtTotalPop");
             label3.text = "Total population:";
@@ -1405,10 +1869,10 @@ namespace WUInity
             label10.text = "Total evacuated:";
 
             Label label11 = Document.rootVisualElement.Q<Label>("TxtWindSpeed");
-            label11.text = "Wind speed (m/s):";
+            label11.text = "Wind speed:";
 
             Label label12 = Document.rootVisualElement.Q<Label>("TxtWindDirection");
-            label12.text = "Wind direction (°):";
+            label12.text = "Wind direction:";
 
             Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
             label13.text = "Active cells:";
@@ -1459,11 +1923,11 @@ namespace WUInity
         }
         private void BtnProjectOpen_clicked()
         {
-            //WUInity.GUI.OpenLoadInput(); // Avoid calling old GUI functions
+            //WUInity.GUI.OpenLoadInput(); // It should work here, but we try to avoid calling any old GUI functions
 
             OpenLoadInput();
 
-            /* The following code doesn't work right here. It is moved to OnGUI().
+            /* The following code doesn't work right here. It is moved to Update().
             if (newUIMenuDirty) {
                 UpdateMenu();
                 newUIMenuDirty = false;
@@ -1570,68 +2034,52 @@ namespace WUInity
                 SetLocalGPWNumber();
                 SetPopulationAndCellNumber();
 
-                // Load evacuation destination -------------------------------------------------------------------------------------------------------
+                // 4. Evacuation goals -------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfEvacutionDestination= root.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
 
                 if (dfDfEvacutionDestination != null && WUInity.INPUT.Traffic.evacuationGoalFiles.Length > 0 )
                 {
                     List<string> m_DropOptions = new List<string> {};
-                    for (int i = 0; i < WUInity.INPUT.Traffic.evacuationGoalFiles.Length; i++)
-                    {
-                        m_DropOptions.Add(WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name);
-                    }
 
+                    foreach(EvacuationGoal eg in WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals)
+                        m_DropOptions.Add(eg.name);
+
+                    dfDfEvacutionDestination.choices.Clear();
                     dfDfEvacutionDestination.choices = m_DropOptions;
                     dfDfEvacutionDestination.index = 0;
                 }
 
-                // Load response curve -------------------------------------------------------------------------------------------------------------
+                // 5A. Response curve -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfResponseCurve = root.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
 
                 if (dfDfResponseCurve != null && WUInity.INPUT.Evacuation.ResponseCurveFiles.Length > 0)
                 {
-                    List<string> m_DropOptions = new List<string> { };
-                    for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.Length; i++)
-                    {
-                        m_DropOptions.Add(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[i].name);
-                    }
+                    List<string> m_DropOptions = new List<string> {};
 
+                    foreach(ResponseCurve rc in WUInity.RUNTIME_DATA.Evacuation.ResponseCurves)
+                        m_DropOptions.Add(rc.name);
+
+                    dfDfResponseCurve.choices.Clear();
                     dfDfResponseCurve.choices = m_DropOptions;
                     dfDfResponseCurve.index = 0;
                 }
 
-                // Load evacuation group -------------------------------------------------------------------------------------------------------------
+                // 5B. Evacuation group -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfEvacuationGroup = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
 
                 if (dfDfEvacuationGroup != null && WUInity.INPUT.Evacuation.EvacGroupFiles.Length > 0)
                 {
-                    List<string> m_DropOptions = new List<string> { };
-                    for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups.Length; i++)
-                    {
-                        m_DropOptions.Add(WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[i].Name);
-                    }
+                    List<string> m_DropOptions = new List<string> {};
 
+                    foreach (EvacGroup eg in WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups)
+                        m_DropOptions.Add(eg.Name);
+
+                    dfDfEvacuationGroup.choices.Clear();
                     dfDfEvacuationGroup.choices = m_DropOptions;
                     dfDfEvacuationGroup.index = 0;
                 }
 
-                // Load routing and traffic section ---------------------------------------------------------------------------------------------------
-                SetRouterDBFile();
-                SetRouteRCFile();
-
-                UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
-                if (tfTxTSetMaxCapTrafSpeed != null)
-                {
-                    tfTxTSetMaxCapTrafSpeed.value = tO.stallSpeed.ToString();
-                }
-
-                UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke"); // Need to add it into menu-demo.uxml
-                if (tgTogSpeedAffectedBySmoke != null)
-                {
-                    tgTogSpeedAffectedBySmoke.SetValueWithoutNotify(tO.visibilityAffectsSpeed);
-                }
-
-                // Evacuation section -------------------------------------------------------------------------------------------------------------
+                // 6. Evacuation section -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.TextField tfTxTSetEvacCellSize = root.Q<UnityEngine.UIElements.TextField>("TxTSetEvacCellSize");
                 if (tfTxTSetEvacCellSize != null)
                 {
@@ -1686,7 +2134,7 @@ namespace WUInity
                     tfTxTSetModWalkSpeed.value = eO.walkingSpeedModifier.ToString();
                 }
 
-                UnityEngine.UIElements.TextField tfTxTSetmodWalkDist = root.Q<UnityEngine.UIElements.TextField>("TxTSetmodWalkDist");
+                UnityEngine.UIElements.TextField tfTxTSetmodWalkDist = root.Q<UnityEngine.UIElements.TextField>("TxTSetModWalkDist");
                 if (tfTxTSetmodWalkDist != null)
                 {
                     tfTxTSetmodWalkDist.value = eO.walkingDistanceModifier.ToString();
@@ -1698,7 +2146,55 @@ namespace WUInity
                     tfTxTEvaOrderTime.value = eO.EvacuationOrderStart.ToString();
                 }
 
-                // Fire characteristics -----------------------------------------------------------------------------------------------------------
+                // 7. Routing section  ------------------------------------------------------------------------------------------------------------
+                SetRouterDBFile();
+                SetRouteRCFile();
+
+                // 8. Traffic section -------------------------------------------------------------------------------------------------------------
+                UnityEngine.UIElements.DropdownField dfRouteChoice = root.Q<UnityEngine.UIElements.DropdownField>("DfRouteChoice");
+
+                if (dfRouteChoice != null)
+                {
+                    List<string> m_DropOptions = new List<string> {};
+
+                    foreach(string s in Enum.GetNames(typeof(TrafficInput.RouteChoice)))
+                        m_DropOptions.Add(s);
+
+                    dfRouteChoice.choices.Clear();
+                    dfRouteChoice.choices = m_DropOptions;
+                    dfRouteChoice.index = (int)tO.routeChoice;
+
+                    //UnityEngine.Debug.Log($"Current route choice ispppp = {(int)tO.routeChoice}");
+                }
+
+                UnityEngine.UIElements.DropdownField dfRoadType = root.Q<UnityEngine.UIElements.DropdownField>("DfRoadType");
+                if (dfRoadType != null)
+                {
+                    List<string> m_DropOptions = new List<string> {};
+
+                    foreach(Traffic.RoadData rd in WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData)
+                        m_DropOptions.Add(rd.name);
+
+                    dfRoadType.choices.Clear();
+                    dfRoadType.choices = m_DropOptions;
+                    dfRoadType.index = 0;
+                }
+
+                UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
+                if (tfTxTSetMaxCapTrafSpeed != null)
+                {
+                    tfTxTSetMaxCapTrafSpeed.value = tO.stallSpeed.ToString();
+                }
+
+                UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke"); // Need to add it into menu-demo.uxml
+                if (tgTogSpeedAffectedBySmoke != null)
+                {
+                    tgTogSpeedAffectedBySmoke.SetValueWithoutNotify(tO.visibilityAffectsSpeed);
+                }
+
+                // 9. Landscape data section ------------------------------------------------------------------------------------------------------
+
+                // 10. Fire characteristics -------------------------------------------------------------------------------------------------------
                 SetLCPFile();
                 SetFuelModelFile();
                 SetFuelMoistureFile();
@@ -1707,7 +2203,7 @@ namespace WUInity
                 SetIgnitionPointsFile();
                 SetGraphicalFireInputFile();
 
-                // Similation section -------------------------------------------------------------------------------------------------------------
+                // 12. Similation section ---------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.TextField tfTxTSetSimID = root.Q<UnityEngine.UIElements.TextField>("TxTSetSimID");
                 if (tfTxTSetSimID != null)
                 {
@@ -3016,15 +3512,17 @@ namespace WUInity
         /// <param name="root"></param>
         private void InitWorkflowControl(VisualElement root)
         {
-            //  Populate the foldout control
+            //  Populate the foldout control --- This is a piece of test code. 
             VisualElement workflowControl = root.Q<VisualElement>("WorkflowFoldout");
             if (workflowControl != null)
             {
                 workflowControl.AddToClassList("show");
             }
 
+            // Register mouse hovering behaviour to show help tooltips
             root.RegisterCallback<MouseEnterEvent>(OnMouseEnter, TrickleDown.TrickleDown);
         }
+
         private void OnMouseEnter(MouseEnterEvent evt)
         {
             VisualElement targetElement = (VisualElement)evt.target;
@@ -3035,22 +3533,18 @@ namespace WUInity
                     // Now, populate a label control with the target element tooltip text
                     String showString = targetElement.tooltip;
 
-                    var root = Document.rootVisualElement;
-                    Label tipsLabel = root.Q<Label>("TipsLabel");
-                    if (tipsLabel != null)
+                    Label tipsLabel = Document.rootVisualElement.Q<Label>("TipsLabel");
+                    if (tipsLabel != null && showString.Length > 0 )
                     {
-                        if (showString.Length > 0)
-                        {
-                            tipsLabel.text = showString;
-                        }
+                        tipsLabel.text = showString;
                     }
 
                     // debugging only:
-                    UnityEngine.Debug.Log($"Mouse is now over element = {targetElement.name}:{targetElement.name.Length}:{showString}");
+                    //UnityEngine.Debug.Log($"Mouse is now over element = {targetElement.name}:{targetElement.name.Length}:{showString}");
                 }
-                else UnityEngine.Debug.Log("Mouse is over unnamed element");
+                //else UnityEngine.Debug.Log("Mouse is over unnamed element");
             }
-            else UnityEngine.Debug.Log("Mouse is over null element");
+            //else UnityEngine.Debug.Log("Mouse is over null element");
         }
 
         /// <summary>
