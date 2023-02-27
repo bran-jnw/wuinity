@@ -198,6 +198,22 @@ namespace WUInity.UI
                 InitRouteChoiceList(root);
                 InitRoadTypeList(root);
 
+                UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
+                if (tfTxTSetMaxCapTrafSpeed != null)
+                    tfTxTSetMaxCapTrafSpeed.RegisterValueChangedCallback((evt) =>
+                    {
+                        //UnityEngine.Debug.Log($"MapZoomLevel has changed to {evt.newValue}.");
+                        int value;
+                        int.TryParse(evt.newValue, out value);
+                        if (value < 1 || value > 30)    // Set the stall speed range to be [1,30]. To be confirmed later.
+                        {
+                            tfTxTSetMaxCapTrafSpeed.SetValueWithoutNotify(WUInity.INPUT.Traffic.stallSpeed.ToString()); 
+                            WUInity.LOG(WUInity.LogType.Warning, "The vehicle speed at max roadway capacity is not valid. Please choose between 1 and 30 (km/h).");
+                        }
+                        else
+                            WUInity.INPUT.Traffic.stallSpeed = value;
+                    });
+
                 // 9. Landscape data ------------------------------------------------------------------------------------------------
 
                 // 10. Fire characteriestics ----------------------------------------------------------------------------------------
@@ -297,7 +313,7 @@ namespace WUInity.UI
         {
             UnityEngine.UIElements.Button btnFoldoutSwitchButton = root.Q<UnityEngine.UIElements.Button>("FoldoutSwitchButton");
             if (btnFoldoutSwitchButton != null)
-                btnFoldoutSwitchButton.clicked += BtnFoldoutSwitchButton;
+                btnFoldoutSwitchButton.clicked += BtnFoldoutSwitchButton_clicked;
 
             UnityEngine.UIElements.Button btnLogSwitchButton = root.Q<UnityEngine.UIElements.Button>("LogSwitchButton");
             if (btnLogSwitchButton != null)
@@ -311,7 +327,7 @@ namespace WUInity.UI
             systemLogBox.visible = !systemLogBox.visible;
         }
 
-        private void BtnFoldoutSwitchButton()
+        private void BtnFoldoutSwitchButton_clicked()
         {
             _bFoldout = !_bFoldout;
             var foldouts = Document.rootVisualElement.Query<Foldout>();
@@ -428,28 +444,29 @@ namespace WUInity.UI
 
             UnityEngine.UIElements.Button btnEditGoalButton = root.Q<UnityEngine.UIElements.Button>("EditGoalButton");
             if (btnEditGoalButton != null)
-                btnEditGoalButton.clicked += BtnEditGoalButton;
+                btnEditGoalButton.clicked += BtnEditGoalButton_clicked;
         }
 
-        private void BtnEditGoalButton()
+        private void BtnEditGoalButton_clicked()
         {
             UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
 
             if (dfDfEvacutionDestination != null && WUInity.DATA_STATUS.HaveInput && WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
             {
-                string initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
-
-                initialPath = Path.Combine(initialPath, WUInity.INPUT.Simulation.SimulationID);
-                initialPath = Path.Combine(initialPath, WUInity.INPUT.Traffic.evacuationGoalFiles[dfDfEvacutionDestination.index] + ".ed");
+                string initialPath = Path.Combine(GetProjectPath(), WUInity.INPUT.Traffic.evacuationGoalFiles[dfDfEvacutionDestination.index] + ".ed");
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
-                string message= string.Concat("Goal file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
-                EditorUtility.DisplayDialog(message, "Please remember to reload this goal file if you make and save any changes to the file in Notepad.", "Close");
+                //string message= string.Concat("Goal file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
+                //EditorUtility.DisplayDialog(message, "Please remember to reload this goal file if you make and save any changes to the file in Notepad.", "Close");
+
+                WUInity.LOG(WUInity.LogType.Log, "Edit goal file: " + Path.GetFileName(initialPath));
             }            
             else
             {
-                EditorUtility.DisplayDialog("No goal file is found", "Please create a new goal file and then load in Notepad.", "Close");
+                //EditorUtility.DisplayDialog("No goal file is found", "Please create a new goal file and then load in Notepad.", "Close");
+
+                WUInity.LOG(WUInity.LogType.Error, "No goal file is found! Please create a new goal file.");
             }
         }
 
@@ -513,12 +530,16 @@ namespace WUInity.UI
         private void BtnRemoveGoalButton_clicked()
         {
             // EditorUtility.DisplayDialog only works in editor mode. I need to remove the function later. 
+            //if (EditorUtility.DisplayDialog("Remove current goal", "Do you want to remove the current goal?", "Confirm","Cancel")) 
 
-            if (EditorUtility.DisplayDialog("Remove current goal", "Do you want to remove the current goal?", "Confirm","Cancel")) {
-
-                UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
-                if (dfDfEvacutionDestination != null && dfDfEvacutionDestination.choices.Count >= 1)
+            UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
+            if (dfDfEvacutionDestination != null && WUInity.INPUT.Traffic.evacuationGoalFiles != null)
+            {
+                if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
                 {
+                    string removeGoal = WUInity.INPUT.Traffic.evacuationGoalFiles[dfDfEvacutionDestination.index];
+                    WUInity.LOG(WUInity.LogType.Log, "Goal file " + removeGoal + " is removed.");
+
                     if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 1)
                     {
                         string[] newGoalList = new string[WUInity.INPUT.Traffic.evacuationGoalFiles.Length - 1];
@@ -549,12 +570,23 @@ namespace WUInity.UI
                     else dfDfEvacutionDestination.index = -1;
                 }
             }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Goal file list is empty.");
+            }
         }
 
         private void BtnAddGoalButton_clicked()
         {
-            FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGoalFile]);
-            FileBrowser.ShowLoadDialog(LoadAEvacGoalFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation goal file (.ed)", "Load");
+            if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals != null) // Test to see if a project is opened. I need to find a better way!
+            {
+                FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGoalFile]);
+                FileBrowser.ShowLoadDialog(LoadAEvacGoalFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation goal file (.ed)", "Load");
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a goal file.");
+            }
         }
 
         void LoadAEvacGoalFile(string[] paths)
@@ -725,6 +757,7 @@ namespace WUInity.UI
 
         private void BtnRemoveRespCurveButton_clicked()
         {
+            WUInity.LOG(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the response curve file list.");
             /*
             if (EditorUtility.DisplayDialog("Remove current response curve", "Do you want to remove the current response curve?", "Confirm", "Cancel"))
             {
@@ -769,13 +802,19 @@ namespace WUInity.UI
         }
         private void BtnRemoveEvacGroupButton_clicked()
         {
-
+            WUInity.LOG(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the evacuation group file list.");
         }
 
         private void BtnAddEvacGroupButton_clicked()
         {
-            FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGroupFile]);
-            FileBrowser.ShowLoadDialog(LoadAEvacGroupFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation group file (.eg)", "Load");
+            if (WUInity.INPUT.Evacuation.EvacGroupFiles != null ) {
+                FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGroupFile]);
+                FileBrowser.ShowLoadDialog(LoadAEvacGroupFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation group file (.eg)", "Load");
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a evacuation group file.");
+            }
         }
 
         private void LoadAEvacGroupFile(string[] paths)
@@ -891,7 +930,8 @@ namespace WUInity.UI
                         evacGroupFiles.Add(data[0]);
                         WUInity.INPUT.Evacuation.EvacGroupFiles = evacGroupFiles.ToArray();
 
-                        WUInity.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices(); // Reload all evacuation groups based on updated file list.
+                        WUInity.RUNTIME_DATA.Evacuation.LoadEvacuationGroups(); // Reload all evacuation groups based on updated file list.
+                        WUInity.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices();
 
                         WUInity.LOG(WUInity.LogType.Log, "Loaded evacuation group from " + path + " named " + data[0]);
 
@@ -911,8 +951,14 @@ namespace WUInity.UI
 
         private void BtnAddRespCurveButton_clicked()
         {
-            FileBrowser.SetFilters(false, fileFilter[(int)FileType.responseCureveFile]);
-            FileBrowser.ShowLoadDialog(LoadAResponseCurveFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load response curve file (.rsp)", "Load");
+            if (WUInity.INPUT.Evacuation.ResponseCurveFiles != null) {
+                FileBrowser.SetFilters(false, fileFilter[(int)FileType.responseCureveFile]);
+                FileBrowser.ShowLoadDialog(LoadAResponseCurveFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load response curve file (.rsp)", "Load");
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a response curve file.");
+            }
         }
 
         private void LoadAResponseCurveFile(string[] paths)
@@ -1198,10 +1244,13 @@ namespace WUInity.UI
         {
             if (File.Exists(_OSMDataFile)) { 
                 WUInity.RUNTIME_DATA.Routing.CreateRouterDatabaseFromOSM(_OSMDataFile);
-                EditorUtility.DisplayDialog("Build router database", "Router database is successfully created from OSM file.", "Close");
+                //EditorUtility.DisplayDialog("Build router database", "Router database is successfully created from OSM file.", "Close");
+                WUInity.LOG(WUInity.LogType.Log, "Router database is successfully created from OSM file: "+ _OSMDataFile);
             }
-            else
-                EditorUtility.DisplayDialog("Build router database", "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.", "Close");
+            else {
+                //EditorUtility.DisplayDialog("Build router database", "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.", "Close");
+                WUInity.LOG(WUInity.LogType.Error, "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.");
+            }
         }
 
         private void BtnbtnBuildRouteCollection_clicked()
@@ -1235,12 +1284,14 @@ namespace WUInity.UI
                 string fullPath = Path.Combine(GetProjectPath(), fileName);
                 System.Diagnostics.Process.Start("Notepad.exe", fullPath);
 
-                string message = "Fire characteristics file [" + fileName + "] is opened in Notepad.";
-                EditorUtility.DisplayDialog(message, "Please remember to reload this file into WUINITY if you make any changes to it in Notepad.", "Close");
+                //string message = "Fire characteristics file [" + fileName + "] is opened in Notepad.";
+                //EditorUtility.DisplayDialog(message, "Please remember to reload this file into WUINITY if you make any changes to it in Notepad.", "Close");
+                WUInity.LOG(WUInity.LogType.Log, "Open fire characteristics file: "+ fileName);
             }
             else
             {
-                EditorUtility.DisplayDialog("No fire characteristics file is found", "Please create a new fire characteristics file and then open in Notepad.", "Close");
+                //EditorUtility.DisplayDialog("No fire characteristics file is found", "Please create a new fire characteristics file and then open in Notepad.", "Close");
+                WUInity.LOG(WUInity.LogType.Error, "The fire characteristics file hasn't been specified.");
             }
         }
 
@@ -1254,12 +1305,14 @@ namespace WUInity.UI
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
-                string message = string.Concat("Response curve file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
-                EditorUtility.DisplayDialog(message, "Please remember to reload this response curve file if you make and save any changes to the file in Notepad.", "Close");
+                //string message = string.Concat("Response curve file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
+                //EditorUtility.DisplayDialog(message, "Please remember to reload this response curve file if you make and save any changes to the file in Notepad.", "Close");
+                WUInity.LOG(WUInity.LogType.Log, "Open response curve file: " + Path.GetFileName(initialPath));
             }
             else
             {
-                EditorUtility.DisplayDialog("No response curve file is found", "Please create a new response curve file and then load in Notepad.", "Close");
+                //EditorUtility.DisplayDialog("No response curve file is found", "Please create a new response curve file and then load in Notepad.", "Close");
+                WUInity.LOG(WUInity.LogType.Error, "The response curve file hasn't been specified.");
             }
         }
 
@@ -1273,12 +1326,14 @@ namespace WUInity.UI
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
-                string message = string.Concat("Evacuation group file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
-                EditorUtility.DisplayDialog(message, "Please remember to reload this evacuation group file if you make and save any changes to the file in Notepad.", "Close");
+                //string message = string.Concat("Evacuation group file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
+                //EditorUtility.DisplayDialog(message, "Please remember to reload this evacuation group file if you make and save any changes to the file in Notepad.", "Close");
+                WUInity.LOG(WUInity.LogType.Log, "Open evacuation group file: " + Path.GetFileName(initialPath));
             }
             else
             {
-                EditorUtility.DisplayDialog("No evacuation group file is found", "Please create a new evacuation group file and then load in Notepad.", "Close");
+                //EditorUtility.DisplayDialog("No evacuation group file is found", "Please create a new evacuation group file and then load in Notepad.", "Close");
+                WUInity.LOG(WUInity.LogType.Error, "The evacuation group file hasn't been specified.");
             }
         }
 
@@ -1311,6 +1366,8 @@ namespace WUInity.UI
             UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
             if (dfDfEvacutionDestination != null)
             {
+                dfDfEvacutionDestination.choices.Clear();   //clear initial item if any.
+
                 dfDfEvacutionDestination.RegisterValueChangedCallback((evt) =>
                 {
                     UnityEngine.Debug.Log($"The Evacuation Destination dropdown selection has changed to {evt.newValue}.");
@@ -1318,27 +1375,29 @@ namespace WUInity.UI
                     // Fields to allow user see the detailed information about evacuation destinations.
 
                     UnityEngine.UIElements.TextField tfTxEvacDestName = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestName");
-                    if (tfTxEvacDestName != null)
+                    UnityEngine.UIElements.TextField tfTxEvacDestLatLong = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestLatLong");
+                    UnityEngine.UIElements.TextField tfTxEvacDestType = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestType");
+
+                    if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
                     {
                         tfTxEvacDestName.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].name);
-                    }
-
-                    UnityEngine.UIElements.TextField tfTxEvacDestLatLong = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestLatLong");
-                    if (tfTxEvacDestLatLong != null)
-                    {
                         tfTxEvacDestLatLong.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLong.x.ToString() + ", " +
                                                                   WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLong.y.ToString());
-                    }
 
-                    UnityEngine.UIElements.TextField tfTxEvacDestType = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestType");
-                    if (tfTxEvacDestType != null)
-                    {
                         EvacGoalType evacGoalType = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].goalType;
 
                         if (evacGoalType == EvacGoalType.Refugee)
                             tfTxEvacDestType.SetValueWithoutNotify("Refugee");
                         else
                             tfTxEvacDestType.SetValueWithoutNotify("Exit");
+
+                        WUInity.INSTANCE.SpawnMarkers();    // Update the goals on map.
+                    }
+                    else
+                    {
+                        tfTxEvacDestName.SetValueWithoutNotify("");
+                        tfTxEvacDestLatLong.SetValueWithoutNotify("");
+                        tfTxEvacDestType.SetValueWithoutNotify("");
                     }
                 });
             }
@@ -1351,6 +1410,8 @@ namespace WUInity.UI
             UnityEngine.UIElements.DropdownField dfDfResponseCurve = root.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
             if (dfDfResponseCurve != null)
             {
+                dfDfResponseCurve.choices.Clear();  //clear initial item if any.
+
                 dfDfResponseCurve.RegisterValueChangedCallback((evt) =>
                 {
                     UnityEngine.Debug.Log($"The Response curve dropdown selection has changed to {evt.newValue}.");
@@ -1368,6 +1429,8 @@ namespace WUInity.UI
             UnityEngine.UIElements.DropdownField dfDfEvacuationGroup = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
             if (dfDfEvacuationGroup != null)
             {
+                dfDfEvacuationGroup.choices.Clear();    //clear initial item if any.
+
                 dfDfEvacuationGroup.RegisterValueChangedCallback((evt) =>
                 {
                     //UnityEngine.Debug.Log($"The Evacuation group dropdown selection has changed to {dfDfEvacuationGroup.index}, {evt.newValue}.");
@@ -1425,6 +1488,26 @@ namespace WUInity.UI
                         tfTxCanBeReversed.SetValueWithoutNotify(WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[dfRoadType.index].canBeReversed.ToString());
              
                 });
+            }
+
+            UnityEngine.UIElements.Button btnEditRoadTypeButton = root.Q<UnityEngine.UIElements.Button>("EditRoadTypeButton");
+            if (btnEditRoadTypeButton != null)
+                btnEditRoadTypeButton.clicked += BtnEditRoadTypeButton;
+        }
+
+        private void BtnEditRoadTypeButton()
+        {
+            if (WUInity.DATA_STATUS.HaveInput)
+            {
+                string initialPath1 = Path.Combine("default.roads");    // The file was not saved in a correct place in RoadTypeData.cs -> SaveRoadTypeData(RoadTypeData rTD)
+                string initialPath2 = Path.Combine(GetProjectPath(), "default.roads");
+
+                if (File.Exists(initialPath1))
+                    System.Diagnostics.Process.Start("Notepad.exe", initialPath1);
+                else if (File.Exists(initialPath2))
+                    System.Diagnostics.Process.Start("Notepad.exe", initialPath2);
+                else 
+                    WUInity.LOG(WUInity.LogType.Error, "default.roads file is not found!");
             }
         }
 
@@ -1536,6 +1619,10 @@ namespace WUInity.UI
 
         private void SetupOutputBoxTasks(VisualElement root)
         {
+            
+            UnityEngine.UIElements.Button btnClearOutputsButton = root.Q<UnityEngine.UIElements.Button>("ClearOutputsButton");
+            if (btnClearOutputsButton != null) btnClearOutputsButton.clicked += BtnClearOutputsButton_clicked;
+
             UnityEngine.UIElements.Button btnHideOutputButton = root.Q<UnityEngine.UIElements.Button>("HideOutputButton");
             if (btnHideOutputButton != null) btnHideOutputButton.clicked += BtnHideOutputButton_clicked;
 
@@ -1578,6 +1665,10 @@ namespace WUInity.UI
             if (btnVewTrafficDensity != null) btnVewTrafficDensity.text = "Traffic density: off";
         }
 
+        private void BtnClearOutputsButton_clicked()
+        {
+            ClearOutput();
+        }
         private void BtnHideOutputButton_clicked()
         {
             var root = Document.rootVisualElement;
@@ -1759,7 +1850,9 @@ namespace WUInity.UI
                 }
                 else
                 {
-                    ClearOutput();
+                    //ClearOutput();
+                    UnityEngine.UIElements.Button btnStartSimulation = Document.rootVisualElement.Q<UnityEngine.UIElements.Button>("StartSimButton");
+                    if (btnStartSimulation != null && btnStartSimulation.text== "Stop simulation") btnStartSimulation.text = "Start simulation";
                 }
             }
             else
@@ -1878,30 +1971,6 @@ namespace WUInity.UI
             label13.text = "Active cells:";
         }
 
-        //const int consoleHeight = 160;
-        //Vector2 scrollPosition;
-        void UpdateNewConsole()
-        {
-            //console
-            //GUI.Box(new Rect(500, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
-            //GUI.BeginGroup(new Rect(500, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
-            //scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
-            
-            List<string> log = WUInity.GetLog();
-            
-            /*
-            for (int i = log.Count - 1; i >= 0; i--)
-            {
-                GUILayout.Label(log[i]);
-            }
-            */
-
-            //UnityEngine.Debug.Log($"LOGME count = {log.Count}");
-
-            //GUILayout.EndScrollView();
-            //GUI.EndGroup();
-        }
-
         private void BtnProjectNew_clicked()
         {
             FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
@@ -1912,20 +1981,17 @@ namespace WUInity.UI
             if (!File.Exists(initialPath))
                 System.IO.Directory.CreateDirectory(initialPath);
 
+            creatingNewFile=true;
+
+            //initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);  //test code
+
             FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, "New_sim.wui", "Save file", "Save");
 
-            /*
-            if (EditorUtility.DisplayDialog("Function implementation required", "Call To ProjectNew", "Yes", "No"))
-                print("Pressed Yes.");
-            else
-                print("Pressed No.");
-            */
         }
+
         private void BtnProjectOpen_clicked()
         {
-            //WUInity.GUI.OpenLoadInput(); // It should work here, but we try to avoid calling any old GUI functions
-
-            OpenLoadInput();
+            OpenLoadInput();    // Equivalent to WUInity.GUI.OpenLoadInput(); 
 
             /* The following code doesn't work right here. It is moved to Update().
             if (newUIMenuDirty) {
@@ -1933,6 +1999,7 @@ namespace WUInity.UI
                 newUIMenuDirty = false;
             }  */
         }
+
         private void BtnUpdateMap_clicked()
         {
             WUInityInput wO = WUInity.INPUT;
@@ -2574,7 +2641,6 @@ namespace WUInity.UI
             }
         }
 
-
         void OpenLoadInput()
         {
             FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
@@ -2594,6 +2660,8 @@ namespace WUInity.UI
             WUInityInput.LoadInput(paths[0]);
             mainMenuDirty = true;
             newUIMenuDirty = true;
+
+            LoadWorkflowUIStatus();
         }
 
         /// <summary>
@@ -2601,12 +2669,10 @@ namespace WUInity.UI
         /// </summary>
         private void BtnProjectSave_clicked()
         {
-            string[] wuiFilter = new string[] { ".wui" };
-
             if (WUInity.WORKING_FILE == null)
             {
                 //OpenSaveInput(); --- port 4 lines of code below
-                FileBrowser.SetFilters(false, wuiFilter);
+                FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
                 WUInityInput wO = WUInity.INPUT;
                 string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
                 FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
@@ -2617,36 +2683,127 @@ namespace WUInity.UI
                 WUInityInput.SaveInput();
             }
 
-            //WUInity.GUI.enabled = true;
+            SaveWorkflowUIStatus();
+        }
 
-            /*
-            if (EditorUtility.DisplayDialog("Function implementation required", "Call To ProjectSave", "Yes", "No"))
-                print("Pressed Yes.");
+        private void SaveWorkflowUIStatus()
+        {
+            if (WUInity.DATA_STATUS.HaveInput)
+            {
+                var toggles = Document.rootVisualElement.Query<Toggle>();
+                List<Toggle> tlist = toggles.ToList();
+
+                string templateText = "";
+                foreach (Toggle toggle in tlist)
+                {
+                    templateText += toggle.text + " = " + toggle.value + "\n";
+                }
+
+                string initFile = Path.Combine(GetProjectPath(), WUInity.INPUT.Simulation.SimulationID + ".ini");
+                System.IO.File.WriteAllText(initFile, templateText);
+            }
+        }
+
+        private void LoadWorkflowUIStatus()
+        {
+            var toggles = Document.rootVisualElement.Query<Toggle>();
+            List<Toggle> tlist = toggles.ToList();
+
+            string initFile = Path.Combine(GetProjectPath(), WUInity.INPUT.Simulation.SimulationID + ".ini");
+
+            if (File.Exists(initFile))
+            {
+                string[] dataLines = File.ReadAllLines(initFile);
+
+                int i = 0;
+                if (tlist.Count == dataLines.Length)
+                {
+                    foreach (string line in dataLines)
+                    {
+                        string[] data = line.Split('=');
+
+                        if (data.Length == 2)
+                        {
+                            bool setValue = false;
+                            if (data[1].Contains("True")) setValue = true;
+                            
+                            tlist[i].SetValueWithoutNotify(setValue);
+                        }
+
+                        i++;
+                    }
+                }
+                else
+                {
+                    WUInity.LOG(WUInity.LogType.Error, "Workflow status file length does not match the number of toggles!");
+                }
+            }
             else
-                print("Pressed No.");
-            */
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Workflow status file does not exist!");
+            }
         }
 
         void SaveInput(string[] paths)
         {
-            WUInityInput wO = WUInity.INPUT;
 
             WUInity.WORKING_FILE = paths[0];
+            WUInityInput wO = WUInity.INPUT;
+
             if (creatingNewFile)
             {
                 mainMenuDirty = true;
-                WUInity.INSTANCE.CreateNewInputData();
-                wO = WUInity.INPUT; //have to update this since we are creating a new one
+
+                //WUInity.INSTANCE.CreateNewInputData();
+
+                WUInity.DATA_STATUS.Reset();
+                WUInity.DATA_STATUS.HaveInput = true;
+
+                WUInity.INPUT.Simulation = new SimulationInput();
+                WUInity.INPUT.Map = new MapInput();
+                WUInity.INPUT.Visualization = new VisualizationOptions();
+                WUInity.INPUT.Population = new PopulationInput();
+                WUInity.INPUT.Routing = new RoutingInput();
+                WUInity.INPUT.Evacuation = new EvacuationInput();
+                WUInity.INPUT.Traffic = new TrafficInput();
+                WUInity.INPUT.Fire = new FireInput();
+                WUInity.INPUT.Smoke = new SmokeInput();
+
+                string json = JsonUtility.ToJson(WUInity.INPUT, true);
+                System.IO.File.WriteAllText(WUInity.WORKING_FILE, json);
+
+                WUInityInput.LoadInput(paths[0]); // The default constructors have problems. This is like an initialization process for WUInity.INSTANCE
+
+                //WUInity.INPUT.Population.populationFile = "";
+                //WUInity.INPUT.Population.localGPWFile = "";
+
+                //transform input to actual data
+                //WUInity.RUNTIME_DATA.Population.LoadAll();
+                //WUInity.RUNTIME_DATA.Evacuation.LoadAll();
+                //need to load evacuation goals before routing as they rely on evacuation goals
+                //WUInity.RUNTIME_DATA.Routing.LoadAll();
+                //WUInity.RUNTIME_DATA.Traffic.LoadAll();
+                //WUInity.RUNTIME_DATA.Fire.LoadAll();
+
+                //WUInity.INSTANCE.UpdateMapResourceStatus();
+
+                //this needs map and evac goals
+
+                //WUInity.INSTANCE.SpawnMarkers();
+
+                //wO = WUInity.INPUT; //have to update this since we are creating a new one
+
+                newUIMenuDirty = true;
             }
             else
             {
                 //ParseMainData(wO);
+                WUInityInput.SaveInput();
             }
+
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
             wO.Simulation.SimulationID = name;
-
-            WUInityInput.SaveInput();
         }
 
         void CancelSaveLoad()
@@ -2710,7 +2867,7 @@ namespace WUInity.UI
                     //menuChoice = ActiveMenu.Output;
                     UnityEngine.UIElements.Button btnStartSimulation = Document.rootVisualElement.Q<UnityEngine.UIElements.Button>("StartSimButton");
                     
-                    if (btnStartSimulation != null) btnStartSimulation.text = "Stop simulatuon";
+                    if (btnStartSimulation != null) btnStartSimulation.text = "Stop simulation";
 
                     WUInity.INSTANCE.StartSimulation();
                 }
@@ -2730,7 +2887,7 @@ namespace WUInity.UI
                 WUInity.INSTANCE.StopSimulation();
 
                 UnityEngine.UIElements.Button btnStartSimulation = Document.rootVisualElement.Q<UnityEngine.UIElements.Button>("StartSimButton");
-                if (btnStartSimulation != null) btnStartSimulation.text = "Start simulatuon";
+                if (btnStartSimulation != null) btnStartSimulation.text = "Start simulation";
             }
 
             /*
@@ -3098,8 +3255,7 @@ namespace WUInity.UI
                     bool populateFromGPW = evt.newValue;
                     if (populateFromGPW)
                     {
-                        string[] gpwFilter = new string[] { ".gpw" };
-                        FileBrowser.SetFilters(false, gpwFilter);
+                        FileBrowser.SetFilters(false, fileFilter[(int)FileType.GPWFile]);
                         string initialPath = WUInity.DATA_FOLDER;
 
                         if (WUInity.DATA_STATUS.HaveInput)

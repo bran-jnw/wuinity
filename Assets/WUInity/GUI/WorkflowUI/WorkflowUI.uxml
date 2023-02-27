@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/WUInity/GUI/WorkflowUI/WorkflowUI.uss?fileID=7433441132597879392&amp;guid=72744a827f8b36a4a9b44b1e31279e20&amp;type=3#WorkflowUI" />
     <ui:VisualElement name="MainUIBox" style="width: 450px; height: 1000px; align-items: auto; background-color: rgb(176, 176, 176); border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-color: rgb(255, 251, 251); border-right-color: rgb(255, 251, 251); border-top-color: rgb(255, 251, 251); border-bottom-color: rgb(255, 251, 251); overflow: visible; opacity: 1; padding-left: 5px; padding-right: 0; padding-top: 5px; padding-bottom: 10px; justify-content: left 0; top: 0; bottom: auto; right: auto; position: flex-start;">
         <ui:VisualElement name="items" style="height: auto; width: 100%; flex-direction: column; flex-grow: 1; align-items: flex-end; justify-content: flex-start; left: 0; top: auto;">
             <ui:VisualElement name="TopButtonPanel" style="width: 100%; top: 0; height: 28px; padding-left: 2px; padding-right: 2px; padding-top: 0; padding-bottom: 2px; margin-left: 2px; margin-right: 2px; margin-top: 0; margin-bottom: 2px;">
@@ -14,11 +15,11 @@
                         <ui:Toggle value="false" name="TogDownloadGPW" text="Download GPW Population Density v4 data-set" tooltip="Create an account on the linked website and download GPWv4 Population Density data-set in ASCII formart and 30 second resolution from a single year (e.g. 2015)." picking-mode="Ignore" class="tree-item" />
                         <ui:Toggle value="false" name="TogPlaceGPWData" text="Place GPW data-set in WUINITY project folder" tooltip="Place the downloaded GPWv4 Population Density data-set in the folder indicated by File Explorer window." picking-mode="Ignore" class="tree-item" />
                     </ui:Foldout>
-                    <ui:Foldout text="1.2 Fetch Mapbox API access token" name="FoldMapboxAccessToken" tooltip="..." focusable="true" view-data-key="mapbox-access-token-foldout" picking-mode="Ignore" class="foldout-item">
+                    <ui:Foldout text="1.2 Fetch Mapbox API access token" name="FoldMapboxAccessToken" tooltip="Fetch Mapbox API access token" focusable="true" view-data-key="mapbox-access-token-foldout" picking-mode="Ignore" class="foldout-item">
                         <ui:Toggle value="false" name="TogGetMapboxToken" text="Fetch Mapbox API access token" tooltip="Download Mapbox API access token (create an account if prompted)." picking-mode="Ignore" class="tree-item" />
                         <ui:Toggle value="false" name="TogAddTokenToMapbox" text="Save Mapbox access token in WUINITY project folder" tooltip="Add the token for Mapbox." picking-mode="Ignore" class="tree-item" />
                     </ui:Foldout>
-                    <ui:Foldout text="1.3 Fetch OpenStreetMap (OSM) data" name="FoldOSMData" tooltip="..." focusable="true" view-data-key="openstreetmap-data-foldout" picking-mode="Ignore" class="foldout-item">
+                    <ui:Foldout text="1.3 Fetch OpenStreetMap (OSM) data" name="FoldOSMData" tooltip="Fetch OpenStreetMap (OSM) data" focusable="true" view-data-key="openstreetmap-data-foldout" picking-mode="Ignore" class="foldout-item">
                         <ui:Toggle value="false" name="TogDownloadOSM" text="Download OSM data for target region" tooltip="Download the specific OpenStreetMap data file for the target region from GEOFABRIK (https://download.geofabrik.de/)." class="tree-item" />
                         <ui:Toggle value="false" name="TogPlaceOSMData" text="Place OSM file in WUINITY project folder" tooltip="Place the downloaded OSM file in the folder indicated by File Explorer window." picking-mode="Ignore" class="tree-item" />
                     </ui:Foldout>
@@ -66,10 +67,10 @@
                         <ui:Button text="Remove current" display-tooltip-when-elided="true" name="RemoveGoalButton" class="menu-button" style="left: 240px; position: absolute; width: 130px; -unity-font-style: normal;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="PopulationInformation" style="width: 376px; height: auto; padding-left: 10px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; margin-left: 0; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; top: 0; justify-content: center; align-items: stretch; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.45); border-right-color: rgba(0, 0, 0, 0.45); border-top-color: rgba(0, 0, 0, 0.45); border-bottom-color: rgba(0, 0, 0, 0.45); left: 0;">
-                        <ui:DropdownField name="DfEvacutionDestination" label="Evacuation goal(s):" index="0" choices="null" tooltip="List of evacuation goals" />
-                        <ui:TextField name="TxEvacDestName" label="Goal Name:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
-                        <ui:TextField name="TxEvacDestLatLong" label="Goal Lat.,Long. (deg.):" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
-                        <ui:TextField name="TxEvacDestType" label="Goal type:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:DropdownField name="DfEvacutionDestination" label="Evacuation goal(s):" index="-1" choices="null" tooltip="List of evacuation goals" />
+                        <ui:TextField name="TxEvacDestName" label="Goal Name:" readonly="true" value="filler text" tooltip="The name of the current evacuation goal." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:TextField name="TxEvacDestLatLong" label="Goal Lat.,Long. (deg.):" readonly="true" value="filler text" tooltip="The coordinates of the current evacuation goal." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:TextField name="TxEvacDestType" label="Goal type:" readonly="true" value="filler text" tooltip="The type of the current evacuation goal. It can be either an exit or a refugee area." class="tree-item tree-text-edit" style="width: 353px;" />
                         <ui:Button text="View/Edit goal file" display-tooltip-when-elided="true" name="EditGoalButton" class="menu-button" style="left: 0; width: 200px; -unity-font-style: normal;" />
                     </ui:VisualElement>
                 </ui:Foldout>
@@ -131,10 +132,10 @@
                     <ui:Toggle value="false" name="TogSpeedAffectedBySmoke" text="Speed is affected by smoke?" tooltip="Lowers traffic speed due in low visibility" class="tree-item" />
                     <ui:VisualElement name="RoadType" style="width: 376px; height: auto; padding-left: 10px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; margin-left: 0; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; top: 0; justify-content: center; align-items: stretch; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.45); border-right-color: rgba(0, 0, 0, 0.45); border-top-color: rgba(0, 0, 0, 0.45); border-bottom-color: rgba(0, 0, 0, 0.45); left: 0;">
                         <ui:DropdownField name="DfRoadType" label="Road type:" index="0" choices="null" tooltip="List of road types" class="tree-item" style="flex-direction: row;" />
-                        <ui:TextField name="TxSpeedLimit" label="Speed limit:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
-                        <ui:TextField name="TxLanes" label="Number of lanes:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
-                        <ui:TextField name="TxMaxCapacity" label="Max. capacity:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
-                        <ui:TextField name="TxCanBeReversed" label="Can be reversed?:" value="filler text" tooltip="..." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:TextField name="TxSpeedLimit" label="Speed limit:" value="filler text" tooltip="The speed limit of the specific road type in km/h." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:TextField name="TxLanes" label="Number of lanes:" value="filler text" tooltip="The number of lanes of the specific road type." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:TextField name="TxMaxCapacity" label="Max. capacity:" value="filler text" tooltip="The maximum capacity of the specific road type." class="tree-item tree-text-edit" style="width: 353px;" />
+                        <ui:TextField name="TxCanBeReversed" label="Can be reversed?:" value="filler text" tooltip="Whether the traffic can be revered on this specifc road type." class="tree-item tree-text-edit" style="width: 353px;" />
                         <ui:Button text="View/Edit road type file" display-tooltip-when-elided="true" name="EditRoadTypeButton" class="menu-button" style="left: 0; width: 200px; -unity-font-style: normal;" />
                     </ui:VisualElement>
                 </ui:Foldout>
@@ -271,7 +272,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="Outputs" style="max-width: none; max-height: none; width: 100%; top: auto;">
             <ui:Label name="TxtEvacID" text="Simulation ID:" display-tooltip-when-elided="true" class="output-text-label" style="-unity-font-style: bold;" />
-            <ui:Label name="TxtEvacTime" text="Total evac time(s):" display-tooltip-when-elided="true" class="output-text-label" />
+            <ui:Label name="TxtEvacTime" text="Sim. Clock:" display-tooltip-when-elided="true" class="output-text-label" />
             <ui:Label name="TxtTotalPop" text="Total population:" display-tooltip-when-elided="true" class="output-text-label" />
             <ui:Label name="TxtPeopleStaying" text="People staying:" display-tooltip-when-elided="true" class="output-text-label" />
             <ui:Label name="TxtTotalCars" text="Total cars:" display-tooltip-when-elided="true" class="output-text-label" />
@@ -283,6 +284,7 @@
             <ui:Label name="TxtWindSpeed" text="Wind speed (m/s):" display-tooltip-when-elided="true" class="output-text-label" />
             <ui:Label name="TxtWindDirection" text="Wind direction (°):" display-tooltip-when-elided="true" class="output-text-label" />
             <ui:Label name="TxtActiveCells" text="Active cells:" display-tooltip-when-elided="true" class="output-text-label" />
+            <ui:Button text="Clear outputs" display-tooltip-when-elided="true" name="ClearOutputsButton" tooltip="Clear simulation outputs." class="menu-button" style="left: 2px; width: 170px; -unity-font-style: normal;" />
         </ui:VisualElement>
         <ui:VisualElement name="DisplayControl" style="max-width: none; max-height: none; width: 100%; top: auto;">
             <ui:Label name="TxtDisplayOptions" text="Display options:" display-tooltip-when-elided="true" class="output-text-label" style="-unity-font-style: bold; border-bottom-width: 0;" />
