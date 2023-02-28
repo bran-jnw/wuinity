@@ -18,7 +18,7 @@ namespace WUInity.UI
 
         // WorkflowUI control variables
         bool newUIMenuDirty = false;
-        private readonly int _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230, _iLogDisplayNum=6;
+        private readonly int _titleBarHeight = 29, _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230, _iLogDisplayNum=6;
         bool mainMenuDirty = true, creatingNewFile = false;
 
         // WorkflowUI operational variables
@@ -68,14 +68,34 @@ namespace WUInity.UI
         void Start()
         {
             WUInity.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
+            Screen.fullScreen = true;           // Enter full screen mode at the beginning
 
             // Dock the main workflow GUI box to the left edge.
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.VisualElement mainUIBox = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
-            if(mainUIBox != null)
+            if (mainUIBox != null)
             {
-                mainUIBox.style.left = mainUIBox.style.top = 0;
-                mainUIBox.style.height = Screen.height;
+                mainUIBox.style.left = 0;
+                mainUIBox.style.top = _titleBarHeight +1;
+                mainUIBox.style.height = Screen.height - _titleBarHeight -1;
+            }
+
+            UnityEngine.UIElements.VisualElement titleBar = root.Q<UnityEngine.UIElements.VisualElement>("TitleBar");
+            if (titleBar != null)
+            {
+                titleBar.style.left = titleBar.style.top = 0;
+
+                UnityEngine.UIElements.Button minimizeButton = root.Q<UnityEngine.UIElements.Button>("TBarMinimizeButton");
+                minimizeButton.style.left = Screen.width - 120;
+                minimizeButton.clicked += MinimizeButton_clicked;
+
+                UnityEngine.UIElements.Button fullScreenButton = root.Q<UnityEngine.UIElements.Button>("TBarFullScreenButton");
+                fullScreenButton.style.left = Screen.width - 80;
+                fullScreenButton.clicked += FullScreenButton_clicked;
+
+                UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("TBarQuitButton");
+                quitButton.style.left = Screen.width - 40;
+                quitButton.clicked += () => Application.Quit();
             }
 
             // Hide horizontal scroll bar to have a little extra space
@@ -86,6 +106,24 @@ namespace WUInity.UI
             }
 
             //UnityEngine.Debug.Log("menu::Start();}");
+        }
+
+        // For windows platform only.
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private const int SW_MINIMIZE = 6;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetActiveWindow();
+
+        private void MinimizeButton_clicked()
+        {
+            ShowWindow(GetActiveWindow(), SW_MINIMIZE);
+        }
+
+        private void FullScreenButton_clicked()
+        {
+            Screen.fullScreen = !Screen.fullScreen;
         }
 
         /// <summary>
@@ -241,8 +279,8 @@ namespace WUInity.UI
                 switchGUIButton.clicked += () => BtnSwitchGUIButton_clicked(100);
 
                 // Add the handler to the quit button
-                UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("QuitButton");
-                quitButton.clicked += () => Application.Quit();
+                //UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("QuitButton");
+                //quitButton.clicked += () => Application.Quit();
 
                 // System logs windows controls
                 UnityEngine.UIElements.Button clearLogsButton = root.Q<UnityEngine.UIElements.Button>("ClearLogsButton");
@@ -336,8 +374,16 @@ namespace WUInity.UI
             UnityEngine.UIElements.Button btnFoldoutSwitchButton = Document.rootVisualElement.Q<UnityEngine.UIElements.Button>("FoldoutSwitchButton");
             if (btnFoldoutSwitchButton != null)
             {
-                if (_bFoldout) btnFoldoutSwitchButton.text = "\u25B7/\u25BC";   //?/?
-                else btnFoldoutSwitchButton.text = "\u25B6/\u25BD";             //?/?
+                if (_bFoldout)
+                    //btnFoldoutSwitchButton.text = "<<"; 
+                    btnFoldoutSwitchButton.text = "\u25B7/\u25BC";   //?/?
+                    //btnFoldoutSwitchButton.text = System.Convert.ToChar("\u25B7")+"/"+ System.Convert.ToChar("\u25BC");
+                    //btnFoldoutSwitchButton.text = Regex.Unescape("\u25B7/\u25BC");
+                else
+                    //btnFoldoutSwitchButton.text = ">>"; 
+                    btnFoldoutSwitchButton.text = "\u25B6/\u25BD";             //?/?
+                    //btnFoldoutSwitchButton.text = System.Convert.ToChar("\u25B6") + "/" + System.Convert.ToChar("\u25BD");
+                    //btnFoldoutSwitchButton.text = Regex.Unescape("\u25B6/\u25BD");
             }
         }
 
@@ -351,20 +397,24 @@ namespace WUInity.UI
             UnityEngine.Debug.Log($"Switch GUI = {clicknumber}");
 
             var root = Document.rootVisualElement;
-            UnityEngine.UIElements.VisualElement newGUI = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
-            UnityEngine.UIElements.VisualElement systemLogBox = root.Q<UnityEngine.UIElements.VisualElement>("SystemLogBox");
+            UnityEngine.UIElements.VisualElement mainUIBox = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
+            UnityEngine.UIElements.VisualElement systemLogBox = root.Q<UnityEngine.UIElements.VisualElement>("SystemLogBox");     
 
-            if (newGUI.style.left == 0) { 
-                newGUI.style.left = Screen.width - _iMainBoxWidth;
-                newGUI.style.top = 20;
-                newGUI.style.height = Screen.height - 20 - 160;     // 20 is the hight of data examine bar, 160 is system logs window height
+            if (mainUIBox.style.left == 0) {
+                mainUIBox.style.left = Screen.width - _iMainBoxWidth;
+                mainUIBox.style.top = 20;
+                mainUIBox.style.height = Screen.height - 20 - 160;     // 20 is the hight of data examine bar, 160 is system logs window height
                 WUInity.GUI.enabled = true;
                 systemLogBox.visible = false;
             }
-            else { 
-                newGUI.style.left = 0;
-                newGUI.style.top = 0;
-                newGUI.style.height = Screen.height;
+            else {
+                mainUIBox.style.left = 0;
+                //mainUIBox.style.top = 0;
+                //mainUIBox.style.height = Screen.height;
+
+                mainUIBox.style.top = _titleBarHeight + 1;
+                mainUIBox.style.height = Screen.height - _titleBarHeight - 1;
+
                 WUInity.GUI.enabled = false;
                 systemLogBox.visible = true;
             }
@@ -607,7 +657,7 @@ namespace WUInity.UI
                 int maxCars, maxPeople;
                 bool initiallyBlocked;
                 EvacGoalType evacGoalType;
-                Color color = Color.white;
+                UnityEngine.Color color = Color.white;
 
                 //name
                 string[] data = dataLines[0].Split(':');
@@ -1674,12 +1724,14 @@ namespace WUInity.UI
             var root = Document.rootVisualElement;
             _bHideOutput = !_bHideOutput;
 
+            /*
             UnityEngine.UIElements.Button btnHideOutputButton = root.Q<UnityEngine.UIElements.Button>("HideOutputButton");
             if(btnHideOutputButton != null)
             {
                 if (_bHideOutput) btnHideOutputButton.text = "Unhide";
                 else btnHideOutputButton.text = "Hide";
             }
+            */
         }
 
         private void BtnVewHouseholds_clicked()
@@ -1775,23 +1827,35 @@ namespace WUInity.UI
             UnityEngine.UIElements.VisualElement newGUI = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
             UnityEngine.UIElements.VisualElement systemLogBox = root.Q<UnityEngine.UIElements.VisualElement>("SystemLogBox");
             UnityEngine.UIElements.VisualElement simOutputsBox = root.Q<UnityEngine.UIElements.VisualElement>("SimOutputBox");
+            UnityEngine.UIElements.VisualElement titleBar = root.Q<UnityEngine.UIElements.VisualElement>("TitleBar");
 
             if (WUInity.GUI.enabled)
             {
                 newGUI.style.left = Screen.width - _iMainBoxWidth;
                 newGUI.style.top = 20;
                 newGUI.style.height = Screen.height - 20 - 160;
-                //if (systemLogBox.visible) systemLogBox.visible = false;
-
+                
                 simOutputsBox.visible = false;
+                titleBar.visible = false;
             }
             else
             {
-                newGUI.style.left = newGUI.style.top = 0;
-                newGUI.style.height = Screen.height;
-                //if(!systemLogBox.visible) systemLogBox.visible = true;
-
+                newGUI.style.left = 0;
+                newGUI.style.top = _titleBarHeight+1;
+                newGUI.style.height = Screen.height - _titleBarHeight -1;
+                
                 simOutputsBox.visible = true;
+                titleBar.visible = true;
+                simOutputsBox.visible = true;
+
+                UnityEngine.UIElements.Button minimizeButton = root.Q<UnityEngine.UIElements.Button>("TBarMinimizeButton");
+                minimizeButton.style.left = Screen.width - 120;
+
+                UnityEngine.UIElements.Button fullScreenButton = root.Q<UnityEngine.UIElements.Button>("TBarFullScreenButton");
+                fullScreenButton.style.left = Screen.width - 80;
+
+                UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("TBarQuitButton");
+                quitButton.style.left = Screen.width - 40;
             }
 
             if (systemLogBox.visible)
@@ -1822,26 +1886,34 @@ namespace WUInity.UI
             if (simOutputsBox.visible)
             {
                 simOutputsBox.style.left = Screen.width - _iOutputBoxWidth;
-                simOutputsBox.style.top = 0;
+                simOutputsBox.style.top = _titleBarHeight + 1;
 
                 if (_bHideOutput)
                 {
-                    simOutputsBox.style.height = 32;
+                    UnityEngine.UIElements.VisualElement outputButtonPanel = root.Q<UnityEngine.UIElements.VisualElement>("OutputButtonPanel");
+                    if (outputButtonPanel != null) outputButtonPanel.visible = false;
+
                     UnityEngine.UIElements.VisualElement outputs = root.Q<UnityEngine.UIElements.VisualElement>("Outputs");
                     if (outputs != null) outputs.visible = false;
 
                     UnityEngine.UIElements.VisualElement displayControl = root.Q<UnityEngine.UIElements.VisualElement>("DisplayControl");
                     if (displayControl != null) displayControl.visible = false;
+
+                    simOutputsBox.style.height = 1;//32;                    
                 }
                 else
-                {
-                    simOutputsBox.style.height = Screen.height;
-                    
+                { 
+                    simOutputsBox.style.height = Screen.height - _titleBarHeight - 1;
+
+                    UnityEngine.UIElements.VisualElement outputButtonPanel = root.Q<UnityEngine.UIElements.VisualElement>("OutputButtonPanel");
+                    if (outputButtonPanel != null) outputButtonPanel.visible = true;
+
                     UnityEngine.UIElements.VisualElement outputs = root.Q<UnityEngine.UIElements.VisualElement>("Outputs");
                     if (outputs != null) outputs.visible = true;
 
                     UnityEngine.UIElements.VisualElement displayControl = root.Q<UnityEngine.UIElements.VisualElement>("DisplayControl");
                     if (displayControl != null) displayControl.visible = true;
+                    
                 }
 
                 if (WUInity.SIM.IsRunning)
@@ -1857,6 +1929,9 @@ namespace WUInity.UI
             }
             else
             {
+                UnityEngine.UIElements.VisualElement outputButtonPanel = root.Q<UnityEngine.UIElements.VisualElement>("OutputButtonPanel");
+                if (outputButtonPanel != null) outputButtonPanel.visible = false;
+
                 UnityEngine.UIElements.VisualElement outputs = root.Q<UnityEngine.UIElements.VisualElement>("Outputs");
                 if (outputs != null) outputs.visible = false;
 
