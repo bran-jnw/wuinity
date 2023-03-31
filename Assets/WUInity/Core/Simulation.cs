@@ -448,7 +448,9 @@ namespace WUInity
                     {
                         return;
                     }
-                }               
+                    // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
+                    // Note: we need to preprocess each cell which has a road on it
+                }
             }
 
             //sync with fire
