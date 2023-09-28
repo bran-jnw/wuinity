@@ -61,7 +61,7 @@ namespace WUInity
             Vector2Int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
-            //create all waypoints in cells
+            // Route analysis: create all waypoints in cells
             for (int y = 0; y < cells.y; ++y)
             {
                 for (int x = 0; x < cells.x; ++x)
