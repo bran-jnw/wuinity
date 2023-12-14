@@ -73,6 +73,7 @@
     align-items: stretch;
     color: rgb(7, 7, 7);
     -unity-font-style: bold;
+    display-tooltip-when-elided: true;
 }
 
 .tree-item {

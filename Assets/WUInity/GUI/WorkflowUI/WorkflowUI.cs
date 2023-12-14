@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,7 +20,7 @@ namespace WUInity.UI
         // WorkflowUI control variables
         bool newUIMenuDirty = false;
         private readonly int _titleBarHeight = 29, _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230, _iLogDisplayNum=6;
-        bool mainMenuDirty = true, creatingNewFile = false;
+        bool creatingNewFile = false;
 
         // WorkflowUI operational variables
         public enum FileType { lcpFile, fuelModelsFile, initialFuelMoistureFile, weatherFile, windFile, ignitionPointsFile, graphicalFireInputFile,
@@ -39,6 +40,7 @@ namespace WUInity.UI
         private string _simulationID, _simTimeStep, _maxSimTime;
 
         private string _OSMDataFile="";
+        private string _OSMBorderSize;
 
         private int iLogCount = 0;
 
@@ -69,6 +71,8 @@ namespace WUInity.UI
         {
             WUInity.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
             Screen.fullScreen = true;           // Enter full screen mode at the beginning
+
+            WUInity.RUNTIME_DATA.Routing.BorderSize = 0; // There is no initial value for OSM border size. I set it here as 0.
 
             // Dock the main workflow GUI box to the left edge.
             var root = Document.rootVisualElement;
@@ -121,9 +125,42 @@ namespace WUInity.UI
             ShowWindow(GetActiveWindow(), SW_MINIMIZE);
         }
 
+        // Code for disabling windows title bar - does not work. Leave it for now
+        /***************
+        [DllImport("user32.dll")]
+        private static extern long SetWindowLongA(IntPtr hWnd, int nIndex, long dwNewLong);
+
+        [DllImport("user32.dll")]
+        private static extern long GetWindowLongA(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        private const int GWL_STYLE = -16;
+        private const long WS_SYSMENU = 0x00080000L;
+        private const long WS_CAPTION = 0x00C00000L;
+        private const long WS_BORDER  = 0x00800000L;
+
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_FRAMECHANGED = 0x0020;
+        ***************/
         private void FullScreenButton_clicked()
         {
             Screen.fullScreen = !Screen.fullScreen;
+
+            /*********
+            if(!Screen.fullScreen)
+            {
+                IntPtr handle = GetActiveWindow();
+                long style = GetWindowLongA(handle, GWL_STYLE);
+                style &= ~(WS_SYSMENU | WS_CAPTION); //WS_SYSMENU;
+                if(SetWindowLongA(handle, GWL_STYLE, style)== style)
+                    WUInity.LOG(WUInity.LogType.Error, "Windows changed.");
+                SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            }
+            **********/
         }
 
         /// <summary>
@@ -219,38 +256,16 @@ namespace WUInity.UI
 
                 // 7. Routing data --------------------------------------------------------------------------------------------------
                 SetupLoadOSMDataFile(root);
-
-                UnityEngine.UIElements.Button btnBuildRouterDB = root.Q<UnityEngine.UIElements.Button>("BuildRouterDB");
-                if (btnBuildRouterDB != null)
-                    btnBuildRouterDB.clicked += BtnBuildRouterDB_clicked;
-
                 SetupLoadRouterDBFile(root);
-
-                UnityEngine.UIElements.Button btnBuildRouteCollection = root.Q<UnityEngine.UIElements.Button>("BuildRouteCollection");
-                if (btnBuildRouteCollection != null)
-                    btnBuildRouteCollection.clicked += BtnbtnBuildRouteCollection_clicked;
-
                 SetupLoadRouterRCFile(root);
+                
+                SetupRoutingDataButtons(root);
 
                 // 8. Traffic -------------------------------------------------------------------------------------------------------
                 InitRouteChoiceList(root);
                 InitRoadTypeList(root);
 
-                UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
-                if (tfTxTSetMaxCapTrafSpeed != null)
-                    tfTxTSetMaxCapTrafSpeed.RegisterValueChangedCallback((evt) =>
-                    {
-                        //UnityEngine.Debug.Log($"MapZoomLevel has changed to {evt.newValue}.");
-                        int value;
-                        int.TryParse(evt.newValue, out value);
-                        if (value < 1 || value > 30)    // Set the stall speed range to be [1,30]. To be confirmed later.
-                        {
-                            tfTxTSetMaxCapTrafSpeed.SetValueWithoutNotify(WUInity.INPUT.Traffic.stallSpeed.ToString()); 
-                            WUInity.LOG(WUInity.LogType.Warning, "The vehicle speed at max roadway capacity is not valid. Please choose between 1 and 30 (km/h).");
-                        }
-                        else
-                            WUInity.INPUT.Traffic.stallSpeed = value;
-                    });
+                SetupTrafficParameters(root);
 
                 // 9. Landscape data ------------------------------------------------------------------------------------------------
 
@@ -377,13 +392,15 @@ namespace WUInity.UI
                 if (_bFoldout)
                     //btnFoldoutSwitchButton.text = "<<"; 
                     btnFoldoutSwitchButton.text = "\u25B7/\u25BC";   //?/?
-                    //btnFoldoutSwitchButton.text = System.Convert.ToChar("\u25B7")+"/"+ System.Convert.ToChar("\u25BC");
+                    //btnFoldoutSwitchButton.text = System.Convert.ToChar("\u25B7")+"/"+ System.Convert.ToChar(0x25BC);
+                    //btnFoldoutSwitchButton.text = System.Convert.ToChar(0x20AC)+"/"+ System.Convert.ToChar(0x20AC);
                     //btnFoldoutSwitchButton.text = Regex.Unescape("\u25B7/\u25BC");
                 else
                     //btnFoldoutSwitchButton.text = ">>"; 
-                    btnFoldoutSwitchButton.text = "\u25B6/\u25BD";             //?/?
-                    //btnFoldoutSwitchButton.text = System.Convert.ToChar("\u25B6") + "/" + System.Convert.ToChar("\u25BD");
-                    //btnFoldoutSwitchButton.text = Regex.Unescape("\u25B6/\u25BD");
+                    btnFoldoutSwitchButton.text = "\u25B6/\u25BD";   //?/?
+                    //btnFoldoutSwitchButton.text = System.Convert.ToChar(0x25B6) + "/" + System.Convert.ToChar(0x25BD);
+                //btnFoldoutSwitchButton.text = Regex.Unescape("\u25B6/\u25BD");
+
             }
         }
 
@@ -805,6 +822,72 @@ namespace WUInity.UI
                 btnEditEvacGroupOnMap.clicked += BtnEditEvacGroupOnMap_clicked;
         }
 
+        private void SetupRoutingDataButtons(VisualElement root)
+        {
+            UnityEngine.UIElements.Button btnFilterOSMData = root.Q<UnityEngine.UIElements.Button>("FilterOSMData");
+            if (btnFilterOSMData != null)
+                btnFilterOSMData.clicked += BtnFilterOSMData_clicked;
+
+            UnityEngine.UIElements.Button btnBuildRouterDB = root.Q<UnityEngine.UIElements.Button>("BuildRouterDB");
+            if (btnBuildRouterDB != null)
+                btnBuildRouterDB.clicked += BtnBuildRouterDB_clicked;
+
+            UnityEngine.UIElements.Button btnBuildRouteCollection = root.Q<UnityEngine.UIElements.Button>("BuildRouteCollection");
+            if (btnBuildRouteCollection != null)
+                btnBuildRouteCollection.clicked += BtnbtnBuildRouteCollection_clicked;
+        }
+
+        private void SetupTrafficParameters(VisualElement root)
+        {
+            UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
+            if (tfTxTSetMaxCapTrafSpeed != null)
+                tfTxTSetMaxCapTrafSpeed.RegisterValueChangedCallback((evt) =>
+                {
+                    //UnityEngine.Debug.Log($"MapZoomLevel has changed to {evt.newValue}.");
+                    int value;
+                    int.TryParse(evt.newValue, out value);
+                    if (value < 1 || value > 20)    // Set the stall speed range to be [1,20]. To be confirmed later.
+                    {
+                        tfTxTSetMaxCapTrafSpeed.SetValueWithoutNotify(WUInity.INPUT.Traffic.stallSpeed.ToString());
+                        WUInity.LOG(WUInity.LogType.Warning, "The vehicle speed at max roadway capacity is not valid. Please choose between 1 and 20 (km/h).");
+                    }
+                    else
+                        WUInity.INPUT.Traffic.stallSpeed = value;
+                });
+
+            UnityEngine.UIElements.TextField tfTxTBackgroundDensityMin = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMin");
+            if (tfTxTBackgroundDensityMin != null)
+                tfTxTBackgroundDensityMin.RegisterValueChangedCallback((evt) =>
+                {
+                    //UnityEngine.Debug.Log($"BackgroundDensityMin has changed to {evt.newValue}.");
+                    int value;
+                    int.TryParse(evt.newValue, out value);
+                    if (value < 0 || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
+                    {
+                        //tfTxTBackgroundDensityMin.SetValueWithoutNotify(WUInity.INPUT.Traffic.backGroundDensityMinMax.x.ToString());
+                        WUInity.LOG(WUInity.LogType.Warning, "Please enter the minimum range of background traffic density between 0 and 75 vehicles/km/lane.");
+                    }
+                    else
+                        WUInity.INPUT.Traffic.backGroundDensityMinMax.x = value;
+                });
+
+            UnityEngine.UIElements.TextField tfTxTBackgroundDensityMax = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMax");
+            if (tfTxTBackgroundDensityMax != null)
+                tfTxTBackgroundDensityMax.RegisterValueChangedCallback((evt) =>
+                {
+                    //UnityEngine.Debug.Log($"BackgroundDensityMax has changed to {evt.newValue}.");
+                    int value;
+                    int.TryParse(evt.newValue, out value);
+                    if (value < WUInity.INPUT.Traffic.backGroundDensityMinMax.x || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
+                    {
+                        //tfTxTBackgroundDensityMax.SetValueWithoutNotify(WUInity.INPUT.Traffic.backGroundDensityMinMax.y.ToString());
+                        WUInity.LOG(WUInity.LogType.Warning, "Please enter the maximum range of background traffic density between the minimum and 75 vehicles/km/lane.");
+                    }
+                    else
+                        WUInity.INPUT.Traffic.backGroundDensityMinMax.y = value;
+                });
+        }
+
         private void BtnRemoveRespCurveButton_clicked()
         {
             WUInity.LOG(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the response curve file list.");
@@ -1094,12 +1177,30 @@ namespace WUInity.UI
                         FileBrowser.ShowLoadDialog(SetOSMDataFile, CancelSetOSMDataFile, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Specify OSM data file", "Select");
                     }
                     else
-                    {   // Clear GPW folder 
+                    {   // Clear OSM file path
                         Label togLabel = root.Q<Label>("TxtOSMFile");
                         if (togLabel != null) togLabel.text = "OSM data file: not set";
 
                         _OSMDataFile = ""; //clear setting.
                     }
+                });
+
+            UnityEngine.UIElements.TextField tfTxTOSMBorderSize = root.Q<UnityEngine.UIElements.TextField>("TxTOSMBorderSize");
+            if (tfTxTOSMBorderSize != null)
+                tfTxTOSMBorderSize.RegisterValueChangedCallback((evt) =>
+                {
+                    UnityEngine.Debug.Log($"OSMBorderSize has changed to {evt.newValue}.");
+
+                    int value;
+                    int.TryParse(evt.newValue, out value);
+                    if (value < 0 || value > 200)
+                    {     // Set the stall speed range to be [0,200]. To be confirmed later.
+                        tfTxTOSMBorderSize.SetValueWithoutNotify(_OSMBorderSize);
+                        WUInity.LOG(WUInity.LogType.Warning, "The OSM board size is not valid. Please set between 0 and 200 (m).");
+                    }
+                    else
+                        _OSMBorderSize = evt.newValue;
+
                 });
         }
 
@@ -1288,6 +1389,52 @@ namespace WUInity.UI
                     txtRCFile.text = filePath;
                 }
             }
+        }
+
+        private void BtnFilterOSMData_clicked()
+        {
+            // WUInity.INSTANCE.SetOSMBorderVisibility(true); // This function is only used for visually check the range of OSM map. Not necessary.
+
+            var root = Document.rootVisualElement;
+
+            // Get customised border size.
+            float.TryParse(_OSMBorderSize, out WUInity.RUNTIME_DATA.Routing.BorderSize);
+
+            if (!File.Exists(_OSMDataFile))
+            {
+                FileBrowser.SetFilters(false, fileFilter[(int)FileType.OSMDataFile]);
+                FileBrowser.ShowLoadDialog(FilterOSMFile, CancelSetOSMDataFile, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Select source OSM file", "Filter");
+            }
+            else
+            {
+                FilterOSMFile(_OSMDataFile);
+            }
+        }
+
+        void FilterOSMFile(string[] paths)
+        {
+            if(FilterOSMFile(paths[0])==false) // If success, replace the OSM file with the filered one.
+            {
+                CancelSetOSMDataFile();
+            }
+        }
+
+        bool FilterOSMFile(string filename)
+        {
+            WUInity.LOG(WUInity.LogType.Log, " Filtering is in progress and it can take a very long period of time subject to file size and computational power. Please wait until it is completed.");
+
+            if (WUInity.RUNTIME_DATA.Routing.FilterOSMData(filename)) // If success, replace the OSM file with the filered one.
+            {
+                string filteredOSMFilePath = Path.Combine(WUInity.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(_OSMDataFile) + ".osm.pbf");
+                _OSMDataFile = filteredOSMFilePath;
+
+                Label togLabel = Document.rootVisualElement.Q<Label>("TxtOSMFile");
+                string loadStatus = "OSM data file: " + Path.GetFileName(_OSMDataFile); //  + " is loaded successfully.";
+                if (togLabel != null) togLabel.text = loadStatus;
+
+                return true;
+            }
+            return false;
         }
 
         private void BtnBuildRouterDB_clicked()
@@ -1840,13 +1987,13 @@ namespace WUInity.UI
             }
             else
             {
+
                 newGUI.style.left = 0;
-                newGUI.style.top = _titleBarHeight+1;
-                newGUI.style.height = Screen.height - _titleBarHeight -1;
-                
+                newGUI.style.top = _titleBarHeight + 1;
+                newGUI.style.height = Screen.height - _titleBarHeight - 1;
+
                 simOutputsBox.visible = true;
                 titleBar.visible = true;
-                simOutputsBox.visible = true;
 
                 UnityEngine.UIElements.Button minimizeButton = root.Q<UnityEngine.UIElements.Button>("TBarMinimizeButton");
                 minimizeButton.style.left = Screen.width - 120;
@@ -1856,6 +2003,7 @@ namespace WUInity.UI
 
                 UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("TBarQuitButton");
                 quitButton.style.left = Screen.width - 40;
+
             }
 
             if (systemLogBox.visible)
@@ -1998,7 +2146,7 @@ namespace WUInity.UI
                 label12.text = "Wind direction: " + Math.Round(WUInity.SIM.GetFireWindDirection(),1) + " °";
 
                 Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
-                label13.text = "Active cells: " + WUInity.SIM.FireMesh().GetActiveCellCount();
+                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireMesh().GetActiveCellCount();
             }
         }
 
@@ -2043,7 +2191,7 @@ namespace WUInity.UI
             label12.text = "Wind direction:";
 
             Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
-            label13.text = "Active cells:";
+            label13.text = "Active cells (FireMesh):";
         }
 
         private void BtnProjectNew_clicked()
@@ -2097,7 +2245,11 @@ namespace WUInity.UI
         {
             if (WUInity.DATA_STATUS.GlobalGPWAvailable && WUInity.INPUT.Population.gpwDataFolder.Length > 0)
             {
-                WUInity.POPULATION.CreateLocalGPW();
+                if (WUInity.POPULATION.CreateLocalGPW())
+                {
+                    WUInity.LOG(WUInity.LogType.Log, "New local GPW data file is created successfully.");
+                }
+
                 SetLocalGPWNumber();
             }
             else
@@ -2246,7 +2398,7 @@ namespace WUInity.UI
                     tfTxTSetProbMCPH.value = eO.maxCarsChance.ToString();
                 }
 
-                UnityEngine.UIElements.TextField tfTxTSetMinCarsPH = root.Q<UnityEngine.UIElements.TextField>("TxTSetMinCarsPH");
+                UnityEngine.UIElements.TextField tfTxTSetMinCarsPH = root.Q<UnityEngine.UIElements.TextField>("TxTSetMinPersPH");
                 if (tfTxTSetMinCarsPH != null)
                 {
                     tfTxTSetMinCarsPH.value = eO.minHouseholdSize.ToString();
@@ -2292,6 +2444,13 @@ namespace WUInity.UI
                 SetRouterDBFile();
                 SetRouteRCFile();
 
+                UnityEngine.UIElements.TextField tfTxTOSMBorderSize = root.Q<UnityEngine.UIElements.TextField>("TxTOSMBorderSize");
+                if (tfTxTOSMBorderSize != null)
+                {
+                    _OSMBorderSize=WUInity.RUNTIME_DATA.Routing.BorderSize.ToString();
+                    tfTxTOSMBorderSize.value = _OSMBorderSize;
+                }
+
                 // 8. Traffic section -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfRouteChoice = root.Q<UnityEngine.UIElements.DropdownField>("DfRouteChoice");
 
@@ -2328,7 +2487,19 @@ namespace WUInity.UI
                     tfTxTSetMaxCapTrafSpeed.value = tO.stallSpeed.ToString();
                 }
 
-                UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke"); // Need to add it into menu-demo.uxml
+                UnityEngine.UIElements.TextField tfTxTBackgroundDensityMin = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMin");
+                if (tfTxTBackgroundDensityMin != null)
+                {
+                    tfTxTBackgroundDensityMin.value = tO.backGroundDensityMinMax.x.ToString();
+                }
+
+                UnityEngine.UIElements.TextField tfTxTBackgroundDensityMax = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMax");
+                if (tfTxTBackgroundDensityMax != null)
+                {
+                    tfTxTBackgroundDensityMax.value = tO.backGroundDensityMinMax.y.ToString();
+                }
+
+                UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke");
                 if (tgTogSpeedAffectedBySmoke != null)
                 {
                     tgTogSpeedAffectedBySmoke.SetValueWithoutNotify(tO.visibilityAffectsSpeed);
@@ -2440,9 +2611,9 @@ namespace WUInity.UI
             if (togTxtPOPCellsNumber != null)
             {
                 if (WUInity.DATA_STATUS.PopulationLoaded)
-                    togTxtPOPCellsNumber.text = "Total avtive cells: " + WUInity.POPULATION.GetTotalActiveCells();
+                    togTxtPOPCellsNumber.text = "Total active cells: " + WUInity.POPULATION.GetTotalActiveCells();
                 else
-                    togTxtPOPCellsNumber.text = "Total avtive cells:";
+                    togTxtPOPCellsNumber.text = "Total active cells:";
             }
         }
 
@@ -2733,7 +2904,6 @@ namespace WUInity.UI
         void LoadInput(string[] paths)
         {
             WUInityInput.LoadInput(paths[0]);
-            mainMenuDirty = true;
             newUIMenuDirty = true;
 
             LoadWorkflowUIStatus();
@@ -2827,8 +2997,6 @@ namespace WUInity.UI
 
             if (creatingNewFile)
             {
-                mainMenuDirty = true;
-
                 //WUInity.INSTANCE.CreateNewInputData();
 
                 WUInity.DATA_STATUS.Reset();
