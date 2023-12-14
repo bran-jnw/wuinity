@@ -120,6 +120,17 @@ namespace WUInity.Population
             return success;
         }
 
+        bool AreSame(double a, double b)    // for comparing double values, added 14/08/2023
+        {
+            double tolerance = 1.0E-8;
+            double absDiff = Math.Abs(a - b);
+
+            if (absDiff <= tolerance) return true;
+            if (absDiff < Math.Max(Math.Abs(a), Math.Abs(b)) * tolerance) return true;
+
+            return false;
+        }
+
         bool IsDataValid(string dataStamp)
         {
             string[] dummy = dataStamp.Split(' ');
@@ -135,7 +146,10 @@ namespace WUInity.Population
                 double.TryParse(dummy[3], out ySize);
 
                 WUInityInput input = WUInity.INPUT;
-                success =  lati == input.Simulation.LowerLeftLatLong.x && input.Simulation.LowerLeftLatLong.y == longi && xSize == input.Simulation.Size.x && ySize == input.Simulation.Size.y;
+
+                // There is a problem in using "==" directly to compare two double values. Use AreSame() instead to avoid issues caused by rounding error
+                //success =  lati == input.Simulation.LowerLeftLatLong.x && input.Simulation.LowerLeftLatLong.y == longi && xSize == input.Simulation.Size.x && ySize == input.Simulation.Size.y;
+                success = AreSame(lati, input.Simulation.LowerLeftLatLong.x) && AreSame(longi, input.Simulation.LowerLeftLatLong.y) && AreSame(xSize, input.Simulation.Size.x) && AreSame(ySize, input.Simulation.Size.y);
             }
             else 
             {
@@ -390,7 +404,9 @@ namespace WUInity.Population
 
             if (Directory.Exists(path))
             {
-                int fileCount = 0;
+                // This code only works for one version/year of the dataset.
+                /*int fileCount = 0;
+
                 for (int i = 0; i < 8; i++)
                 {
                     string file = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_" + (i + 1) + ".asc");
@@ -403,14 +419,20 @@ namespace WUInity.Population
                         ++fileCount;
                     }
                 }
+                */
 
-                if(fileCount == 8)
+                // New code for any version and any year of the GPW data sets
+                String[] AscFiles = Directory.GetFiles(path, "*.asc");
+                WUInity.LOG(WUInity.LogType.Log, AscFiles.Length.ToString()+ " GPW files found.");
+
+                //if (fileCount == 8)
+                if(AscFiles.Length == 8)
                 {
                     isAvailable = true;
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Error, " Not all GPW files found.");
+                    WUInity.LOG(WUInity.LogType.Error, "Not all GPW files found.");
                 }
             }
             else
@@ -433,27 +455,34 @@ namespace WUInity.Population
             string path = WUInity.INPUT.Population.gpwDataFolder;
             if (IsGPWAvailable(path))
             {
-                
+                // New code to accept GPW data-sets from any version and any year
+                String[] AscFiles = Directory.GetFiles(path, "*.asc");  // Get all ASCII files of the GPW data set
+                Array.Sort(AscFiles);   // Sort the array in case it is not already sorted.
+
                 if (latLong.x >= -3.4106051316485e-012)
                 {
                     if (latLong.y < -90.000000000005)
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
+                        path = AscFiles[0];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 1");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
+                        path = AscFiles[1];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 2");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
+                        path = AscFiles[2];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 3");
                     }
                     else
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
+                        path = AscFiles[3];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 4");
                     }
                 }
@@ -461,22 +490,26 @@ namespace WUInity.Population
                 {
                     if (latLong.y < -90.000000000005)
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
+                        path = AscFiles[4];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 5");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
+                        path = AscFiles[5];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 6");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
+                        path = AscFiles[6];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 7");
                     }
                     else
                     {
-                        path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
+                        path = AscFiles[7];
                         WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 8");
                     }
                 }

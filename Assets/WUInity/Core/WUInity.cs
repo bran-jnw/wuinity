@@ -619,7 +619,7 @@ namespace WUInity
         {
             LOG(WUInity.LogType.Warning, "Simulation started, please wait.");            
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
-            SetEvacDataPlane(true);            
+            // SetEvacDataPlane(true);   // This is turned off as we don't want to display the _evacDataPlaneMeshRenderer by default at the start of the simulation.   16/08/2023 
             SIM.StartSimulation();
 
             //this needs to be done AFTER simulation has started since we need some data from the sim
