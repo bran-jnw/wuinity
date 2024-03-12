@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Numerics;
 
 namespace WUInity.Traffic
 {
@@ -17,12 +15,13 @@ namespace WUInity.Traffic
         public float totalTravelDistance;              
         public float totalDrivingTime;
         public bool hasArrived;
+        public uint carID;
 
         public int roadSegmentHash;
       
         private float latestSpeed;
 
-        public MacroCar(RouteData desiredRoute, int numberOfPeopleInCar)
+        public MacroCar(RouteData desiredRoute, int numberOfPeopleInCar, uint carID)
         {
             routeData = desiredRoute;
             this.numberOfPeopleInCar = numberOfPeopleInCar;
@@ -42,6 +41,8 @@ namespace WUInity.Traffic
 
             totalDrivingTime = 0f;
             latestSpeed = 0;
+
+            this.carID = carID;
         }
 
         private void UpdateHash()
@@ -166,7 +167,7 @@ namespace WUInity.Traffic
             {
                 Vector2 pos = spline.GetYZValue(currentShapeLength - currentDistanceLeft);
                 float speed = latestSpeed / currentSpeedLimit;
-                positionAndSpeed = new Vector4(pos.x, pos.y, speed, 0f);
+                positionAndSpeed = new Vector4(pos.X, pos.Y, speed, 0f);
             }
 
             return positionAndSpeed;

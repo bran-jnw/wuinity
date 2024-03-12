@@ -206,7 +206,7 @@ namespace WUInity.UI
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
                 {
-                    WUInity.POPULATION.ToggleLocalGPWVisibility();
+                    WUInity.POPULATION.Visualizer.ToggleLocalGPWVisibility();
                 }
                 ++buttonIndex;
             }            

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+//using System.Numerics;
 
 namespace WUInity.Farsite
 {   
     public class FireVertex
     {
-        public Vector3D pos;
+        public Vector3d pos;
         public FireVertex prev;
         public FireVertex next;
 
@@ -49,8 +50,8 @@ namespace WUInity.Farsite
         private LineRenderer self_lineRenderer;
         private BoxCollider bC;
 
-        Vector2D min;
-        Vector2D max;
+        Vector2d min;
+        Vector2d max;
         FarsiteViewer fR;
 
         private void Start()
@@ -90,17 +91,17 @@ namespace WUInity.Farsite
             //actual fire stuff
             fireVertices = new FireVertex[resolution];
             dead = new bool[resolution];
-            
 
-            Vector3D offset = new Vector3D((double)transform.position.x, (double)transform.position.y, (double)transform.position.z);
+
+            Vector3d offset = new Vector3d((double)transform.position.x, (double)transform.position.y, (double)transform.position.z);
             for (int i = 0; i < resolution; ++i)
             {
                 double angle = 2.0 * Math.PI * (double)i / (double)resolution;
-                fireVertices[i] = new FireVertex();                
+                fireVertices[i] = new FireVertex();
                 //swapped cos sin due to azimuth has origin at north then go clockwise
-                fireVertices[i].pos = new Vector3D(radius.x * Math.Sin(angle), 0.0, radius.y * Math.Cos(angle));
+                fireVertices[i].pos = new Vector3d(radius.x * Math.Sin(angle), 0.0, radius.y * Math.Cos(angle));
                 fireVertices[i].pos += offset;
-                Vector3 pointPosition = (Vector3)fireVertices[i].pos;
+                Vector3 pointPosition = new Vector3((float)fireVertices[i].pos.x, (float)fireVertices[i].pos.y, (float)fireVertices[i].pos.z);
                 self_lineRenderer.SetPosition(i, pointPosition);
                 dead[i] = false;               
             }
@@ -128,7 +129,7 @@ namespace WUInity.Farsite
 
         public void UpdateEllipse()
         {
-            Vector3D[] newPos = new Vector3D[resolution];
+            Vector3d[] newPos = new Vector3d[resolution];
             for (int i = 0; i < resolution; ++i)
             {
                 //where is the vertex located on the ellipse
@@ -144,7 +145,7 @@ namespace WUInity.Farsite
             for (int i = 0; i < resolution; ++i)
             {
                 fireVertices[i].pos = newPos[i];
-                self_lineRenderer.SetPosition(i, (Vector3)fireVertices[i].pos);
+                self_lineRenderer.SetPosition(i, new Vector3((float)fireVertices[i].pos.x, (float)fireVertices[i].pos.y, (float)fireVertices[i].pos.z));
             }
 
             return;
@@ -183,7 +184,7 @@ namespace WUInity.Farsite
 
         }
 
-        void CalcEllipse(Vector3D[] newPos, int index)
+        void CalcEllipse(Vector3d[] newPos, int index)
         {
             //stuff for using mouse as wind inpput
             Vector3 relPos = new Vector3(Input.mousePosition.x - Screen.width / 2, Input.mousePosition.y - Screen.height / 2, 0.0f);
@@ -239,7 +240,7 @@ namespace WUInity.Farsite
             vec.Normalize();
             Vector3D normal = Vector3D.Cross(Vector3.up, vec);*/
 
-            newPos[index] = fireVertices[index].pos + new Vector3D(X_t, 0.0, Y_t) * System.Convert.ToDouble(Time.fixedDeltaTime) * fR.timeScale;            
+            newPos[index] = fireVertices[index].pos + new Vector3d(X_t, 0.0, Y_t) * System.Convert.ToDouble(Time.fixedDeltaTime) * fR.timeScale;            
 
             //update bounding box bounds
             if(fireVertices[index].pos.x < min.x)
@@ -270,7 +271,7 @@ namespace WUInity.Farsite
             return 0;
         }
 
-        Vector3D GetVectorDir(int index)
+        Vector3d GetVectorDir(int index)
         {
             int prev = index - 1;
             if (prev < 0)
@@ -284,7 +285,7 @@ namespace WUInity.Farsite
                 next = 0;
             }
 
-            Vector3D vec = fireVertices[next].pos - fireVertices[prev].pos;
+            Vector3d vec = fireVertices[next].pos - fireVertices[prev].pos;
 
             return vec;
         }

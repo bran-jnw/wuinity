@@ -1,9 +1,4 @@
 ﻿//#define USE_OLD_METHOD
-
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace WUInity.Fire
 {
     public class Extension

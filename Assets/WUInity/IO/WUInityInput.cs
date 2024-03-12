@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using WUInity.Evac;
 using WUInity.Traffic;
-using WUInity.Population;
+using System.Numerics;
 
 namespace WUInity
 {
@@ -35,7 +31,7 @@ namespace WUInity
 
         public static void SaveInput()
         {
-            string json = JsonUtility.ToJson(WUInity.INPUT, true);
+            string json = UnityEngine.JsonUtility.ToJson(WUInity.INPUT, true);
             System.IO.File.WriteAllText(WUInity.WORKING_FILE, json);
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
@@ -47,9 +43,13 @@ namespace WUInity
         {
             string input = System.IO.File.ReadAllText(path);
             if (input != null)
-            {
-                WUInityInput wui = JsonUtility.FromJson<WUInityInput>(input);
+            {                
+                WUInityInput wui = UnityEngine.JsonUtility.FromJson<WUInityInput>(input);
+
+                UnityEngine.MonoBehaviour.print(wui.Simulation.Size.x + "," + wui.Simulation.Size.y);
+
                 WUInity.WORKING_FILE = path;
+                WUInity.LOG(WUInity.LogType.Log, " Reading input file " + WUInity.WORKING_FILE + ".");
                 WUInity.INSTANCE.SetNewInputData(wui);
                 WUInity.LOG(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " loaded.");
             }
@@ -69,8 +69,8 @@ namespace WUInity
         public bool StopWhenEvacuated = true;
         //public int numberOfRuns = 1;
         public bool StopAfterConverging = true;
-        public Vector2D LowerLeftLatLong = new Vector2D(55.697354, 13.173808);
-        public Vector2D Size = new Vector2D(3000, 3000);        
+        public Vector2d LowerLeftLatLong = new Vector2d(55.697354, 13.173808);
+        public Vector2d Size = new Vector2d(3000.0, 3000.0);        
         public bool RunEvacSim = true;
         public bool RunTrafficSim = true;
         public bool RunFireSim = true;
@@ -125,15 +125,15 @@ namespace WUInity
         public RouteChoice routeChoice = RouteChoice.Closest;
                 
         public float stallSpeed = 5f;
-        public Vector2 backGroundDensityMinMax = Vector2.zero;
+        public Vector2 backGroundDensityMinMax = Vector2.Zero;
         public bool visibilityAffectsSpeed = false;
         public string opticalDensityFile;
         public float opticalDensity = 0.05f;
         public string roadTypesFile;
         public float saveInterval = 600f;
 
-        public MacroTrafficSim.TrafficAccident[] trafficAccidents = MacroTrafficSim.TrafficAccident.GetDummy();
-        public MacroTrafficSim.ReverseLanes[] reverseLanes = MacroTrafficSim.ReverseLanes.GetDummy();
+        public TrafficAccident[] trafficAccidents = TrafficAccident.GetDummy();
+        public ReverseLanes[] reverseLanes = ReverseLanes.GetDummy();
         public TrafficInjection[] trafficInjections = TrafficInjection.GetTemplate();
         public TrafficProbe[] trafficProbes = TrafficProbe.GetTemplate();
     }

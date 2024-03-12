@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
+﻿using System.IO;
 using System;
 
 namespace WUInity.Population
@@ -16,38 +13,39 @@ namespace WUInity.Population
         public double cellsize; //size in degrees
         public int NODATA_value;
         public double[] density;
-        public Vector2Int dataSize;
-        public Vector2D actualOriginDegrees;
-        public Vector2D unityOriginOffset;
-        public Vector2D realWorldSize;
+        public Vector2int dataSize;
+        public Vector2d actualOriginDegrees;
+        public Vector2d unityOriginOffset;
+        public Vector2d realWorldSize;
         public int totalPopulation;
 
-        //not saved
-        public Texture2D densityTexture;
+        //not saved        
         public bool isLoaded;
+        private PopulationManager _manager;
 
-        public LocalGPWData()
+        public LocalGPWData(PopulationManager manager)
         {
             isLoaded = false;
+            _manager = manager;
         }
 
         //http://www.land-navigation.com/latitude-and-longitude.html
-        public static Vector2D SizeToDegrees(Vector2D latLong, Vector2D desiredSize)
+        public static Vector2d SizeToDegrees(Vector2d latLong, Vector2d desiredSize)
         {
             double earth = 40075000.0 * 0.5;
             double yDegrees = 180.0 * desiredSize.y / earth;
             double xDegrees = 180.0 * desiredSize.x / Math.Abs(Math.Cos((Math.PI / 180.0) * latLong.x) * earth);
 
-            return new Vector2D(xDegrees, yDegrees);
+            return new Vector2d(xDegrees, yDegrees);
         }
 
-        public static Vector2D DegreesToSize(Vector2D latLong, Vector2D degrees)
+        public static Vector2d DegreesToSize(Vector2d latLong, Vector2d degrees)
         {
             double earth = 40075000.0 * 0.5;
             double ySize = degrees.y * earth / 180.0;
             double xSize = degrees.x * Math.Abs(Math.Cos((Math.PI / 180.0) * latLong.x) * earth) / 180.0;
 
-            return new Vector2D(xSize, ySize);
+            return new Vector2d(xSize, ySize);
         }
 
         private void SaveLocalGPWData()
@@ -57,7 +55,7 @@ namespace WUInity.Population
             //save data stamp to make sure data fits input
             WUInityInput input = WUInity.INPUT;
             string dataStamp = input.Simulation.LowerLeftLatLong.x.ToString() + " " + input.Simulation.LowerLeftLatLong.y.ToString()
-                    + " " + input.Simulation.Size.x.ToString() + " " + input.Simulation.Size.y.ToString();
+                    + " " + input.Simulation.Size.y.ToString() + " " + input.Simulation.Size.y.ToString();
             data[0] = dataStamp;
 
             data[1] = ncols.ToString();
@@ -98,7 +96,7 @@ namespace WUInity.Population
 
             if(success)
             {
-                CreateTexture();
+                _manager.CreateGPWTexture();
                 isLoaded = true;                
             }
 
@@ -113,7 +111,7 @@ namespace WUInity.Population
 
             if (success)
             {
-                CreateTexture();
+                _manager.CreateGPWTexture();
                 isLoaded = true;
             }
 
@@ -183,7 +181,7 @@ namespace WUInity.Population
                 int yI;
                 int.TryParse(dummy[0], out xI);
                 int.TryParse(dummy[1], out yI);
-                dataSize = new Vector2Int(xI, yI);
+                dataSize = new Vector2int(xI, yI);
 
                 dummy = d[7].Split(' ');
                 density = new double[dataSize.x * dataSize.y];
@@ -197,17 +195,17 @@ namespace WUInity.Population
                 double yD;
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
-                actualOriginDegrees = new Vector2D(xD, yD);
+                actualOriginDegrees = new Vector2d(xD, yD);
 
                 dummy = d[10].Split(' ');
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
-                unityOriginOffset = new Vector2D(xD, yD);
+                unityOriginOffset = new Vector2d(xD, yD);
 
                 dummy = d[11].Split(' ');
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
-                realWorldSize = new Vector2D(xD, yD);
+                realWorldSize = new Vector2d(xD, yD);
 
                 if(d.Length > 12)
                 {
@@ -233,7 +231,7 @@ namespace WUInity.Population
         /// <summary>
         /// Reads specified dataset from GPW.
         /// </summary>
-        private bool ReadGlobalGPW(string file, Vector2D latLong, Vector2D size)
+        private bool ReadGlobalGPW(string file, Vector2d latLong, Vector2d size)
         {
             string[] d = new string[6];
             StreamReader sr = new StreamReader(file);
@@ -264,27 +262,27 @@ namespace WUInity.Population
             dummy = d[5].Split(' ');
             int.TryParse(dummy[dummy.Length - 1], out NODATA_value);
 
-            Vector2D degreesToRead = SizeToDegrees(latLong, size);
+            Vector2d degreesToRead = SizeToDegrees(latLong, size);
             //number of columns and rows
-            dataSize = new Vector2Int(MathD.CeilToInt(degreesToRead.x / cellsize), MathD.CeilToInt(degreesToRead.y / cellsize));
+            dataSize = new Vector2int(Mathd.CeilToInt(degreesToRead.x / cellsize), Mathd.CeilToInt(degreesToRead.y / cellsize));
             //start index to read data
             int xSI = (int)((latLong.y - xllcorner) / cellsize);
             int ySI = (int)((latLong.x - yllcorner) / cellsize);
             //end index to read data
             int xEI = xSI + (int)(degreesToRead.x / cellsize);
-            int yEI = ySI + (int)(degreesToRead.y / cellsize);            
+            int yEI = ySI + (int)(degreesToRead.y/ cellsize);            
 
             //how far are we into the data set? 
-            actualOriginDegrees = new Vector2D(ySI * cellsize + yllcorner, xSI * cellsize + xllcorner);
+            actualOriginDegrees = new Vector2d(ySI * cellsize + yllcorner, xSI * cellsize + xllcorner);
 
             //calculate how many units we have to move the data in Unity when drawing quad
-            Vector2D dOffset = actualOriginDegrees - latLong;
+            Vector2d dOffset = actualOriginDegrees - latLong;
             //flip these as lat/long has reversed order to x/y 
-            dOffset = new Vector2D(dOffset.y, dOffset.x);
+            dOffset = new Vector2d(dOffset.y, dOffset.x);
             unityOriginOffset = DegreesToSize(latLong, dOffset);
-            realWorldSize = DegreesToSize(latLong, new Vector2D(dataSize.x * cellsize, dataSize.y * cellsize));
+            realWorldSize = DegreesToSize(latLong, new Vector2d(dataSize.x * cellsize, dataSize.y * cellsize));
             //check if we need to add another cell after shifting origin
-            Vector2D actualPositiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
+            Vector2d actualPositiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
             bool updateSize = false;
             if (actualPositiveSize.x < size.x)
             {
@@ -300,7 +298,7 @@ namespace WUInity.Population
             }
             if (updateSize)
             {
-                realWorldSize = DegreesToSize(latLong, new Vector2D(dataSize.x * cellsize, dataSize.y * cellsize));
+                realWorldSize = DegreesToSize(latLong, new Vector2d(dataSize.x * cellsize, dataSize.y * cellsize));
             }
 
             //WUInity.LogMessage("xSI: " + xSI + ", ySI: " + ySI + ", xEI: " + xEI + "yEI: " + yEI);
@@ -352,7 +350,7 @@ namespace WUInity.Population
         /// <summary>
         /// Returns the density data at a gridpoint
         /// </summary>
-        private double GetDensity(int x, int y)
+        public double GetDensity(int x, int y)
         {
             if(density == null || density.Length == 0)
             {
@@ -364,18 +362,18 @@ namespace WUInity.Population
             return density[x + y * dataSize.x];
         }
 
-        public double GetDensityUnitySpace(Vector2D pos)
+        public double GetDensityUnitySpace(Vector2d pos)
         {
-            Vector2D positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
+            Vector2d positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
             int xInt = (int)((pos.x / positiveSize.x) * dataSize.x);
             int yInt = (int)((pos.y / positiveSize.y) * dataSize.y);
             double dens = GetDensity(xInt, yInt);
             return dens;
         }
 
-        public double GetDensityUnitySpaceBilinear(Vector2D pos)
+        public double GetDensityUnitySpaceBilinear(Vector2d pos)
         {
-            Vector2D positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
+            Vector2d positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
 
             double x = (pos.x / positiveSize.x) * dataSize.x;
             int xLow = (int)x;
@@ -448,8 +446,8 @@ namespace WUInity.Population
         /// </summary>
         public bool LoadRelevantGPWData()
         {
-            Vector2D latLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
-            Vector2D size = WUInity.INPUT.Simulation.Size;
+            Vector2d latLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
+            Vector2d size = WUInity.INPUT.Simulation.Size;
 
             bool success = false;
             string path = WUInity.INPUT.Population.gpwDataFolder;
@@ -520,36 +518,6 @@ namespace WUInity.Population
             return success;
         }
 
-        private void CreateTexture()
-        {
-            //first find the correct texture size
-            int maxSide = Mathf.Max(dataSize.x, dataSize.y);
-            Vector2Int res = new Vector2Int(2, 2);
-
-            while (dataSize.x > res.x)
-            {
-                res.x *= 2;
-            }
-            while (dataSize.y > res.y)
-            {
-                res.y *= 2;
-            }
-            //Debug.Log("GPW texture resolution: " + res.x + ", " + res.y);
-
-            //paint texture based time of arrival
-            densityTexture = new Texture2D(res.x, res.y);
-            densityTexture.filterMode = FilterMode.Point;
-            for (int y = 0; y < dataSize.y; y++)
-            {
-                for (int x = 0; x < dataSize.x; x++)
-                {
-                    double density = GetDensity(x, y);
-                    Color color = PopulationManager.GetGPWColor((float)density);
-
-                    densityTexture.SetPixel(x, y, color);
-                }
-            }
-            densityTexture.Apply();
-        }
+        
     }
 }

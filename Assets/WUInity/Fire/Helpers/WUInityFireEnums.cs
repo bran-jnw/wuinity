@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace WUInity.Fire
+﻿namespace WUInity.Fire
 {
     public enum FireCellState { Dead, CanBurn, Burning}
 

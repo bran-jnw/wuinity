@@ -47,9 +47,6 @@
  *  - randthread.cpp
  *  - randthread.h
  */
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using static WUInity.Fire.MathWrap;
 
 namespace WUInity.Fire

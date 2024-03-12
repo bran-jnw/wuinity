@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using static WUInity.Fire.MathWrap;
 using static WUInity.Fire.CDT_SolarRadiationLibrary;
 
 namespace WUInity.Fire

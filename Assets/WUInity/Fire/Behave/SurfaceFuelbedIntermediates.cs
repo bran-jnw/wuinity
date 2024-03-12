@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using static WUInity.Fire.MathWrap;
+﻿using static WUInity.Fire.MathWrap;
 using static WUInity.Fire.BehaveUnits;
 
 namespace WUInity.Fire

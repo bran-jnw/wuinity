@@ -12,7 +12,7 @@ namespace WUInity.Fire
 
         [SerializeField] SpreadMode spreadMode = SpreadMode.SixteenDirections;      //Sixteen direction spread mode
         [SerializeField] Vector2Int cellCount = new Vector2Int(128, 128);           //128 x 128 raster
-        [SerializeField] Vector2D cellSize = new Vector2D(30, 30);                  //30 x 30 m cells
+        [SerializeField] Vector2d cellSize = new Vector2d(30, 30);                  //30 x 30 m cells
         [SerializeField] WindInput wind = WindInput.GetTemplate();                  //Wind data from template (default in code)
         [SerializeField] WeatherInput weather = WeatherInput.GetTemplate();         //same as above
         [SerializeField] InitialFuelMoistureList initialMoisture = new InitialFuelMoistureList();       //same as above

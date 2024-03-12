@@ -1,4 +1,3 @@
-using UnityEngine;
 using System.IO;
 using Itinero;
 using Itinero.IO.Osm;
@@ -6,7 +5,6 @@ using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
 using WUInity.Population;
 using static WUInity.WUInity;
-using System;
 using Reminiscence.Collections;
 
 namespace WUInity.Runtime
@@ -97,7 +95,7 @@ namespace WUInity.Runtime
             if (File.Exists(path))
             {
                 string input = File.ReadAllText(path);
-                RouteCollectionWrapper rCWS = JsonUtility.FromJson<RouteCollectionWrapper>(input);
+                RouteCollectionWrapper rCWS = UnityEngine.JsonUtility.FromJson<RouteCollectionWrapper>(input);
 
                 newRouteCollection = rCWS.Convert();
                 rCWS = null;
@@ -126,7 +124,7 @@ namespace WUInity.Runtime
                 {
                     if (RouteCollections[i] != null)
                     {
-                        RouteCreator.SelectCorrectRoute(RouteCollections[i], i);
+                        Traffic.RouteCreator.SelectCorrectRoute(RouteCollections[i], i);
                     }
                 }
                 success = true;
@@ -146,7 +144,7 @@ namespace WUInity.Runtime
             return success;
         }
 
-        public RouteCollection GetCellRouteCollection(Vector2D pos)
+        public RouteCollection GetCellRouteCollection(Vector2d pos)
         {
             if (WUInity.RUNTIME_DATA.Routing.RouteCollections != null)
             {
@@ -172,10 +170,10 @@ namespace WUInity.Runtime
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-                    Vector2D border = LocalGPWData.SizeToDegrees(WUInity.INPUT.Simulation.LowerLeftLatLong, new Vector2D(WUInity.RUNTIME_DATA.Routing.BorderSize, WUInity.RUNTIME_DATA.Routing.BorderSize));
+                    Vector2d border = LocalGPWData.SizeToDegrees(WUInity.INPUT.Simulation.LowerLeftLatLong, new Vector2d(WUInity.RUNTIME_DATA.Routing.BorderSize, WUInity.RUNTIME_DATA.Routing.BorderSize));
                     float left = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.y - border.x);
                     float bottom = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.x - border.y);
-                    Vector2D size = LocalGPWData.SizeToDegrees(WUInity.INPUT.Simulation.LowerLeftLatLong, WUInity.INPUT.Simulation.Size);
+                    Vector2d size = LocalGPWData.SizeToDegrees(WUInity.INPUT.Simulation.LowerLeftLatLong, WUInity.INPUT.Simulation.Size);
                     float right = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.y + size.x + border.x);
                     float top = (float)(WUInity.INPUT.Simulation.LowerLeftLatLong.x + size.y + border.y);
                     OsmStreamSource filtered = source.FilterBox(left, top, right, bottom, true);
@@ -315,7 +313,7 @@ namespace WUInity.Runtime
             string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimulationID + ".rc");
 
             RouteCollectionWrapper save = new RouteCollectionWrapper(WUInity.RUNTIME_DATA.Routing.RouteCollections);
-            string json = JsonUtility.ToJson(save, false);
+            string json = UnityEngine.JsonUtility.ToJson(save, false);
             File.WriteAllText(path, json);
 
             //slow

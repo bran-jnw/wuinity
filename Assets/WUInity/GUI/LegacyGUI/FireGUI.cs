@@ -47,24 +47,24 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.FuelModel);
+                    WUInity.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.FuelModel);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
-                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.Elevation);
+                    WUInity.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.Elevation);
                     lcpCurrentInfo = "Elevation range: " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.loelev + "-" + WUInity.RUNTIME_DATA.Fire.LCPData.Header.hielev + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
-                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.Slope);
+                    WUInity.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.Slope);
                     lcpCurrentInfo = "Slope range: " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.loslope + "-" + WUInity.RUNTIME_DATA.Fire.LCPData.Header.hislope + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
-                    WUInity.RUNTIME_DATA.Fire.SetLCPViewMode(Runtime.FireData.LcpViewMode.Aspect);
+                    WUInity.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.Aspect);
                     lcpCurrentInfo = "Aspect range: " + WUInity.RUNTIME_DATA.Fire.LCPData.Header.loaspect + "-" + WUInity.RUNTIME_DATA.Fire.LCPData.Header.hiaspect + " [°]";
                 }
                 ++buttonIndex;

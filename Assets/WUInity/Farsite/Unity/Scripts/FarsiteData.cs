@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using System.IO;
 using System;
 
@@ -44,12 +42,12 @@ namespace WUInity.Farsite
     [System.Serializable]
     public class FarsiteOutputVertex
     {
-        public Vector3D pos;
+        public Vector3d pos;
         public double timeOfArrival, firelineIntensity, flameLength, rateOfSpread, heatPerArea, reactionIntensity, crownFireActivity, spreadDirection;
 
         public FarsiteOutputVertex()
         {
-            pos = Vector3D.zero;
+            pos = Vector3d.zero;
             timeOfArrival = 0.0;
             firelineIntensity = 0.0;
             flameLength = 0.0;
@@ -59,7 +57,7 @@ namespace WUInity.Farsite
             spreadDirection = 0.0;
         }
 
-        public FarsiteOutputVertex(Vector3D pos)
+        public FarsiteOutputVertex(Vector3d pos)
         {
             this.pos = pos;
             timeOfArrival = 0.0;
@@ -135,7 +133,7 @@ namespace WUInity.Farsite
         public void OffsetPositions(double xllcorner, double yllcorner)
         {
             positionsAreOffset = true;
-            Vector3D offset = new Vector3D(xllcorner, 0.0, yllcorner);
+            Vector3d offset = new Vector3d(xllcorner, 0.0, yllcorner);
             for(int i = 0; i < firePolygons.Count; ++i)
             {
                 for(int j = 0; j < firePolygons[i].vertices.Count; ++j)
@@ -1060,7 +1058,7 @@ namespace WUInity.Farsite
                     double.TryParse(v[0], out x);
                     double y = 0.0;
                     double.TryParse(v[1], out y);
-                    Vector3D pos = new Vector3D(x, 0.0, y);
+                    Vector3d pos = new Vector3d(x, 0.0, y);
                     FarsiteOutputVertex fOV = new FarsiteOutputVertex(pos);
                     double.TryParse(v[2], out fOV.timeOfArrival);
                     //read extra data if present
@@ -1110,7 +1108,7 @@ namespace WUInity.Farsite
                         double.TryParse(v[0], out x);
                         double y = 0.0;
                         double.TryParse(v[1], out y);
-                        Vector3D pos = new Vector3D(x, 0.0, y);
+                        Vector3d pos = new Vector3d(x, 0.0, y);
                         FarsiteOutputVertex fOV = new FarsiteOutputVertex(pos);
                         currentPolygon.vertices.Add(fOV);
                     }

@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
+using System.Numerics;
 
 namespace WUInity.Fire
 {
@@ -54,7 +53,7 @@ namespace WUInity.Fire
     [System.Serializable]
     public class WindInput
     {
-        [SerializeField] private WindData[] dataPoints;         
+        private WindData[] dataPoints;         
 
         private CatmullRomSpline1D directionSpline;              
         private CatmullRomSpline1D speedSpline;

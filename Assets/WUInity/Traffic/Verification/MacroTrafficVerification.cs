@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+//using UnityEngine;
 using Itinero;
 using Itinero.Osm.Vehicles;
+using System.Numerics;
 
 namespace WUInity.Traffic
 {
@@ -16,19 +17,19 @@ namespace WUInity.Traffic
 
             //Custom road types index start at 20 and goes to 24, residential is 11, primary is 4
             //N-E road is custom 0, S-E is custom 1
-            EvacuationGoal node2 = new EvacuationGoal("Node 2", new Vector2D(0.0, -0.0090009), Color.white);
-            EvacuationGoal node4 = new EvacuationGoal("Node 4", new Vector2D(0.0, 0.0), Color.white);
-            EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2D(0.0, 0.0090009), Color.white); 
-            EvacuationGoal node6 = new EvacuationGoal("Node 6", new Vector2D(0.0, 0.0180018), Color.white);
-            EvacuationGoal node7 = new EvacuationGoal("Node 7", new Vector2D(0.0, 0.0270027), Color.white);
-            EvacuationGoal node8 = new EvacuationGoal("Node 8", new Vector2D(0.00450045, 0.00450045), Color.white);
-            EvacuationGoal node9 = new EvacuationGoal("Node 9", new Vector2D(-0.00450045, 0.01350135), Color.white);
+            EvacuationGoal node2 = new EvacuationGoal("Node 2", new Vector2d(0.0, -0.0090009), WUInityColor.white);
+            EvacuationGoal node4 = new EvacuationGoal("Node 4", new Vector2d(0.0, 0.0), WUInityColor.white);
+            EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2d(0.0, 0.0090009), WUInityColor.white);
+            EvacuationGoal node6 = new EvacuationGoal("Node 6", new Vector2d(0.0, 0.0180018), WUInityColor.white);
+            EvacuationGoal node7 = new EvacuationGoal("Node 7", new Vector2d(0.0, 0.0270027), WUInityColor.white);
+            EvacuationGoal node8 = new EvacuationGoal("Node 8", new Vector2d(0.00450045, 0.00450045), WUInityColor.white);
+            EvacuationGoal node9 = new EvacuationGoal("Node 9", new Vector2d(-0.00450045, 0.01350135), WUInityColor.white);
 
-            EvacuationGoal node10 = new EvacuationGoal("Node 10", new Vector2D(0.0, 0.0360036), Color.white);
-            EvacuationGoal node11 = new EvacuationGoal("Node 11", new Vector2D(0.0, 0.0450045), Color.white);
-            EvacuationGoal node12 = new EvacuationGoal("Node 12", new Vector2D(0.0090009, 0.0270027), Color.white);
-            EvacuationGoal node13 = new EvacuationGoal("Node 13", new Vector2D(0.0090009, 0.0360036), Color.white);
-            EvacuationGoal node14 = new EvacuationGoal("Node 14", new Vector2D(0.0090009, 0.0450045), Color.white);
+            EvacuationGoal node10 = new EvacuationGoal("Node 10", new Vector2d(0.0, 0.0360036), WUInityColor.white);
+            EvacuationGoal node11 = new EvacuationGoal("Node 11", new Vector2d(0.0, 0.0450045), WUInityColor.white);
+            EvacuationGoal node12 = new EvacuationGoal("Node 12", new Vector2d(0.0090009, 0.0270027), WUInityColor.white);
+            EvacuationGoal node13 = new EvacuationGoal("Node 13", new Vector2d(0.0090009, 0.0360036), WUInityColor.white);
+            EvacuationGoal node14 = new EvacuationGoal("Node 14", new Vector2d(0.0090009, 0.0450045), WUInityColor.white);
 
             EvacuationGoal[] nodes = new EvacuationGoal[] { node2, node4, node5, node6, node7, node8, node9, node10, node11, node12, node13, node14 };
 
@@ -36,7 +37,7 @@ namespace WUInity.Traffic
             trafficOptions.visibilityAffectsSpeed = false;
             trafficOptions.routeChoice = TrafficInput.RouteChoice.Fastest; //this will change is some cases
             trafficOptions.stallSpeed = 1f;
-            trafficOptions.backGroundDensityMinMax = Vector2.zero;
+            trafficOptions.backGroundDensityMinMax = Vector2.Zero;
 
             WUInity.RUNTIME_DATA.Evacuation.ClearAndAddEvacuationGoals(new EvacuationGoal[1]);
             SimpleTrafficInjection[] trafficInjections = new SimpleTrafficInjection[1];            
@@ -191,8 +192,8 @@ namespace WUInity.Traffic
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node5);
             WUInity.RUNTIME_DATA.Evacuation.ClearAndAddEvacuationGoals(new EvacuationGoal[1]);
             WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[0] = node5;
-            Traffic.MacroTrafficSim.TrafficAccident accident = new Traffic.MacroTrafficSim.TrafficAccident(10f, 1000000f);
-            Traffic.MacroTrafficSim.TrafficEvent[] events = new Traffic.MacroTrafficSim.TrafficEvent[1];
+            TrafficAccident accident = new TrafficAccident(10f, 1000000f);
+            TrafficEvent[] events = new TrafficEvent[1];
             events[0] = accident;
             RunTrafficVerificationSimulation(trafficInjections, events);
             //reset
@@ -287,8 +288,8 @@ namespace WUInity.Traffic
             trafficInjections[0] = new SimpleTrafficInjection(1, node4.latLong, node5);
             WUInity.RUNTIME_DATA.Evacuation.ClearAndAddEvacuationGoals(new EvacuationGoal[1]);
             WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[0] = node5;
-            Traffic.MacroTrafficSim.ReverseLanes reverse = new Traffic.MacroTrafficSim.ReverseLanes(30f, 1000000f);
-            events = new Traffic.MacroTrafficSim.TrafficEvent[1];
+            ReverseLanes reverse = new ReverseLanes(30f, 1000000f);
+            events = new TrafficEvent[1];
             events[0] = reverse;
             for (int i = 0; i < 5; i++)
             {
@@ -351,14 +352,14 @@ namespace WUInity.Traffic
             TrafficInput trafficOptions = WUInity.INPUT.Traffic;
             WUInityInput wuinityOptions = WUInity.INPUT;
 
-            EvacuationGoal node4 = new EvacuationGoal("Node 4", new Vector2D(0.0, 0.0), Color.white);
-            EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2D(0.0, 0.0090009), Color.white);
+            EvacuationGoal node4 = new EvacuationGoal("Node 4", new Vector2d(0.0, 0.0), WUInityColor.white);
+            EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2d(0.0, 0.0090009), WUInityColor.white);
 
             //modify speedlimit on primary since we are using the same osm data as the other ones that use 90 km/h
             float tempValue = WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[4].speedLimit;
             WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData[4].speedLimit = 70.0f;
 
-            Vector2D startPos = node4.latLong;//.0045, 0.0009 is on the far end with small road
+            Vector2d startPos = node4.latLong;//.0045, 0.0009 is on the far end with small road
             WUInity.RUNTIME_DATA.Evacuation.ClearAndAddEvacuationGoals(new EvacuationGoal[1]);
             WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[0] = node5;
 
@@ -411,7 +412,7 @@ namespace WUInity.Traffic
             }
         }
 
-        static void RunTrafficVerificationSimulation(SimpleTrafficInjection[] trafficInjections, Traffic.MacroTrafficSim.TrafficEvent[] events = null, BlockGoalEvent[] blockGoalEvents = null)
+        static void RunTrafficVerificationSimulation(SimpleTrafficInjection[] trafficInjections, TrafficEvent[] events = null, BlockGoalEvent[] blockGoalEvents = null)
         {
             TrafficInput trafficOptions = WUInity.INPUT.Traffic;
             WUInityInput wuinityOptions = WUInity.INPUT;
@@ -449,7 +450,7 @@ namespace WUInity.Traffic
             //inject all the traffic
             for (int i = 0; i < trafficInjections.Length; i++)
             {
-                Vector2D startPos = trafficInjections[i].startPos;
+                Vector2d startPos = trafficInjections[i].startPos;
                 RouteData routeData = GetRoute(startPos, router, p, trafficInjections[i].desiredGoal);
 
                 int carsToInject = trafficInjections[i].cars;
@@ -476,7 +477,7 @@ namespace WUInity.Traffic
                     }
                 }
 
-                traffic.AdvanceTrafficSimulation(wuinityOptions.Simulation.DeltaTime, time);
+                traffic.Update(wuinityOptions.Simulation.DeltaTime, time);
                 time += wuinityOptions.Simulation.DeltaTime;
 
                 bool allGoalsBlocked = true;
@@ -501,13 +502,13 @@ namespace WUInity.Traffic
             System.GC.Collect();
         }
 
-        static RouteData GetRoute(Vector2D startPos, Router router, Itinero.Profiles.Profile p, EvacuationGoal desiredGoal)
+        static RouteData GetRoute(Vector2d startPos, Router router, Itinero.Profiles.Profile p, EvacuationGoal desiredGoal)
         {
             TrafficInput trafficOptions = WUInity.INPUT.Traffic;
             RouteCollection rC = new RouteCollection(WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count);
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                Vector2D endPos = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].latLong;
+                Vector2d endPos = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].latLong;
 
                 RouterPoint start = router.Resolve(p, (float)startPos.x, (float)startPos.y, 100f);
                 RouterPoint end = router.Resolve(p, (float)endPos.x, (float)endPos.y, 100f);

@@ -1,15 +1,14 @@
-
-using UnityEngine;
+using System.Numerics;
 using System.Collections.Generic;
 using Mapbox.Unity.Map;
 using Mapbox.Utils;
 using Mapbox.Unity.Utilities;
-
 using Itinero;
 using Itinero.Osm.Vehicles;
 using WUInity.Population;
+using static WUInity.VectorExtensions;
 
-namespace WUInity
+namespace WUInity.Traffic
 {
     [System.Serializable]
     public class RouteCreator
@@ -57,18 +56,18 @@ namespace WUInity
             AbstractMap _map = WUInity.MAP;
             WUInity.INSTANCE.DeleteDrawnRoads();
 
-            Vector2D size = WUInity.INPUT.Simulation.Size;
-            Vector2Int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
-            Vector3[] startPoints;
-            startPoints = new Vector3[cells.x * cells.y];
+            Vector2 size = new Vector2((float)WUInity.INPUT.Simulation.Size.x, (float)WUInity.INPUT.Simulation.Size.y);
+            Vector2int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
+            Vector2d[] startPoints;
+            startPoints = new Vector2d[cells.x * cells.y];
             // Route analysis: create all waypoints in cells
             for (int y = 0; y < cells.y; ++y)
             {
                 for (int x = 0; x < cells.x; ++x)
                 {
-                    float xPos = (float)size.x * ((float)x + 0.5f) / (float)cells.x;
-                    float yPos = (float)size.y * ((float)y + 0.5f) / (float)cells.y;
-                    startPoints[x + y * cells.x] = new Vector3(xPos, 0.0f, yPos);
+                    float xPos = size.X * (x + 0.5f) / cells.x;
+                    float yPos = size.X * (y + 0.5f) / cells.y;
+                    startPoints[x + y * cells.x] = new Vector2d(xPos, yPos);
                 }
             }
 
@@ -88,13 +87,14 @@ namespace WUInity
             for (int i = 0; i < startPoints.Length; i++)
             {
                 //check that the cell has actual people, else no need for calculating routes
-                int populationInCell = WUInity.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].z);
+                int populationInCell = WUInity.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
-                    Vector2d start = startPoints[i].GetGeoPosition(_map.CenterMercator, _map.WorldRelativeScale);
+                    Vector2d m = new Vector2d(_map.CenterMercator.x, _map.CenterMercator.y);
+                    Vector2d start = startPoints[i].GetGeoPosition(m, _map.WorldRelativeScale);
 
                     //check if valid start was found
-                    RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2D(start.x, start.y), routerProfile, cellSize);
+                    RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(start.x, start.y), routerProfile, cellSize);
 
                     //no need in calculating route when start is not resolved
                     if (startRouterPoint == null)
@@ -208,7 +208,7 @@ namespace WUInity
             }
         }
 
-        RouterPoint CheckIfStartIsValid(Vector2D latLong, Itinero.Profiles.Profile p, float cellSize)
+        RouterPoint CheckIfStartIsValid(Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
         {
             //check within the radius of the diagonal of the cell (so complete cell plus some parts of neighboring cells)
             RouterPoint start = null;
@@ -218,7 +218,7 @@ namespace WUInity
                 {
                     router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
                 }
-                start = router.Resolve(p, (float)latLong.x, (float)latLong.y, cellSize * 0.70711f); //half cell size * sqrt 2
+                start = router.Resolve(p, (float)coordinate.x, (float)coordinate.y, cellSize * 0.70711f); //half cell size * sqrt 2
             }
             catch (Itinero.Exceptions.ResolveFailedException)
             {
@@ -255,7 +255,7 @@ namespace WUInity
 
                             //https://www.usna.edu/Users/oceano/pguth/md_help/html/approx_equivalents.htm
                             float maxDelta = cellSize * 0.5f; //TODO: reasonable?
-                            Vector2D v = LocalGPWData.SizeToDegrees(new Vector2D(startRouterPoint.Latitude, startRouterPoint.Longitude), new Vector2D(maxDelta, maxDelta));
+                            Vector2d v = LocalGPWData.SizeToDegrees(new Vector2d(startRouterPoint.Latitude, startRouterPoint.Longitude), new Vector2d(maxDelta, maxDelta));
 
                             if (latDelta < v.x && longDelta < v.y)
                             {
@@ -316,7 +316,7 @@ namespace WUInity
         /// </summary>
         /// <param name="startPos"></param>
         /// <returns></returns>
-        public RouteData CalcTrafficRoute(Vector2D startPos)
+        public RouteData CalcTrafficRoute(Vector2d startPos)
         {
             float cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
@@ -331,7 +331,7 @@ namespace WUInity
             }
 
             //check if valid start was found
-            RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2D(startPos.x, startPos.y), routerProfile, cellSize);
+            RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(startPos.x, startPos.y), routerProfile, cellSize);
 
             //no need in calculating route when start is not resolved
             if (startRouterPoint == null)
@@ -396,7 +396,7 @@ namespace WUInity
 
         bool HasApproxSameCoordinate(RouterPoint start, RouterPoint end)
         {
-            return MathD.Approximately(start.Latitude, end.Latitude) && MathD.Approximately(start.Longitude, end.Longitude);
+            return Mathd.Approximately(start.Latitude, end.Latitude) && Mathd.Approximately(start.Longitude, end.Longitude);
         }
 
         private static void SelectCorrectRouteFromCar(RouteCollection rC)
@@ -422,7 +422,7 @@ namespace WUInity
         public static void SelectCorrectRoute(RouteCollection rC, int cellIndex)
         {
             TrafficInput tO = WUInity.INPUT.Traffic;
-            Vector2Int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
+            Vector2int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
 
             if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
             {

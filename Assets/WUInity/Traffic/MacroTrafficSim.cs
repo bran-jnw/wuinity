@@ -1,119 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace WUInity.Traffic
 {
     [System.Serializable]
-    public class MacroTrafficSim : ITrafficSim
-    {        
-        public abstract class TrafficEvent
-        {
-            public float startTime;
-            public float endTime;
-            public bool isActive;
-
-            public abstract void ApplyEffects(MacroTrafficSim mTS);
-            public abstract void RemoveEffects(MacroTrafficSim mTS);
-            public abstract void ResetEvent();
-        }
-
-        [System.Serializable]
-        public class ReverseLanes : TrafficEvent
-        {            
-            public ReverseLanes(float startTime, float endTime)
-            {
-                this.startTime = startTime;
-                this.endTime = endTime;
-                isActive = false;
-            }
-
-            public override void ApplyEffects(MacroTrafficSim mTS)
-            {
-                if(mTS == null)
-                {
-                    MonoBehaviour.print("Error, no mCS set.");
-                    return;
-                }
-
-                mTS.reverseLanes = true;
-                //mCS.stallBigRoads = true;
-                isActive = true;
-            }
-
-            public override void RemoveEffects(MacroTrafficSim mTS)
-            {
-                if (mTS == null)
-                {
-                    MonoBehaviour.print("Error, no mCS set.");
-                    return;
-                }
-
-                mTS.reverseLanes = false;
-                //mCS.stallBigRoads = false;
-                isActive = false;
-            }
-
-            public override void ResetEvent()
-            {
-                isActive = false;
-            }
-
-            public static ReverseLanes[] GetDummy()
-            {
-                ReverseLanes[] rLs = new ReverseLanes[1];
-                rLs[0] = new ReverseLanes(float.MaxValue - 1f, float.MaxValue);
-                return rLs;
-            }
-        }
-
-        [System.Serializable]
-        public class TrafficAccident : TrafficEvent
-        {
-            public TrafficAccident(float startTime, float endTime)
-            {
-                this.startTime = startTime;
-                this.endTime = endTime;
-                isActive = false;
-            }
-
-            public override void ApplyEffects(MacroTrafficSim mTS)
-            {
-                if (mTS == null)
-                {
-                    MonoBehaviour.print("Error, no mCS set.");
-                    return;
-                }
-
-                mTS.stallBigRoads = true;
-                isActive = true;
-            }
-
-            public override void RemoveEffects(MacroTrafficSim mTS)
-            {
-                if (mTS == null)
-                {
-                    MonoBehaviour.print("Error, no mCS set.");
-                    return;
-                }
-
-                mTS.stallBigRoads = false;
-                isActive = false;
-            }
-
-            public override void ResetEvent()
-            {
-                isActive = false;
-            }
-
-            public static TrafficAccident[] GetDummy()
-            {
-                TrafficAccident[] tAs = new TrafficAccident[1];
-                tAs[0] = new TrafficAccident(float.MaxValue - 1f, float.MaxValue);
-                return tAs;
-            }
-        }        
-
+    public class MacroTrafficSim : TrafficModule
+    {     
         List<MacroCar> carsInSystem;
         List<MacroCar> carsOnHold;
         int totalCarsSimulated;
@@ -152,45 +44,45 @@ namespace WUInity.Traffic
 
             routeCreator = rC;
 
-            evacuationRenderer = MonoBehaviour.FindObjectOfType<Visualization.EvacuationRenderer>();
+            evacuationRenderer = UnityEngine.MonoBehaviour.FindObjectOfType<Visualization.EvacuationRenderer>();
 
             arrivalData = new List<float>();
         }
 
-        public void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
+        public override void InsertNewCar(RouteData routeData, int numberOfPeopleInCar)
         {
-            MacroCar car = new MacroCar(routeData, numberOfPeopleInCar);
+            MacroCar car = new MacroCar(routeData, numberOfPeopleInCar, WUInity.SIM.CreateCarID());
             carsOnHold.Add(car);
             ++totalCarsSimulated;            
         }
 
-        public void InsertNewTrafficEvent(TrafficEvent tE)
+        public override void InsertNewTrafficEvent(TrafficEvent tE)
         {
             trafficEvents.Add(tE);
         }
 
-        public int GetTotalCarsSimulated()
+        public override int GetTotalCarsSimulated()
         {
             return totalCarsSimulated;
         }
 
-        public bool EvacComplete()
+        public override bool EvacComplete()
         {
             return carsInSystem.Count == 0 ? true : false;
         }
 
-        public int GetCarsInSystem()
+        public override int GetCarsInSystem()
         {
             return carsInSystem.Count;
         }
 
-        public List<float> GetArrivalData()
+        public override List<float> GetArrivalData()
         {
             return arrivalData;
         }
 
         bool evacGoalsDirty = false;
-        public void UpdateEvacuationGoals()
+        public override void UpdateEvacuationGoals()
         {
             evacGoalsDirty = true;
         }
@@ -202,7 +94,7 @@ namespace WUInity.Traffic
             //TODO: Do we need to re-calc traffic density data since some cars are gone after update loop?  Conservative not to (and cheaper)
             foreach (KeyValuePair<int, RoadSegment> t in roadSegments)
             {
-                Vector2D startPos = new Vector2D(t.Value.goalCoord.Latitude, t.Value.goalCoord.Longitude);
+                Vector2d startPos = new Vector2d(t.Value.goalCoord.Latitude, t.Value.goalCoord.Longitude);
                 RouteData r = routeCreator.CalcTrafficRoute(startPos);
                 if (r == null)
                 {
@@ -256,7 +148,7 @@ namespace WUInity.Traffic
             return false;
         }
 
-        public void AdvanceTrafficSimulation(float deltaTime, float currentTime)
+        public override void Update(float deltaTime, float currentTime)
         {
             //first resolve traffic events
             for (int i = 0; i < trafficEvents.Count; ++i)
@@ -472,145 +364,7 @@ namespace WUInity.Traffic
             }
             return tDD;
         }
-
-        private class RoadSegment
-        {
-            public Itinero.LocalGeo.Coordinate goalCoord;
-            string streetName;
-            public int laneCount;
-            public float length;
-            public List<MacroCar> cars;
-            string highwayType;
-            MacroTrafficSim mCS;
-            public float maxCapacity;
-            private int maxCarsOnRoad;
-            public bool upstreamMovementBlocked;
-            LinearSpline2D spline;
-            public float speedLimit;
-
-            public RoadSegment(MacroCar car, MacroTrafficSim mCS)
-            {
-                goalCoord = car.goingToCoord;
-                streetName = car.drivingOnStreet;
-                car.GetCurrentMetaData().Attributes.TryGetValue("highway", out highwayType);
-                laneCount = GetNumberOfLanes(highwayType);
-                maxCapacity = GetMaxCapacity(highwayType);
-                length = car.currentShapeLength;
-                cars = new List<MacroCar>();
-                cars.Add(car);
-                this.mCS = mCS;
-
-                maxCarsOnRoad = Mathf.Max(1, (int)(length * 0.2f * laneCount)); //each car takes about 5 meters
-                upstreamMovementBlocked = false;
-
-                CalculateSpline(car);
-                speedLimit = car.GetAndSetCurrentSpeedLimit();
-                car.SetSpline(spline);
-            }
-
-            //new way of interpolating in GUI
-            public void CalculateSpline(MacroCar car)
-            {
-                RouteData routeData = car.routeData;
-                int currentShapeIndex = car.currentShapeIndex;
                
-                int startSI = routeData.route.ShapeMeta[currentShapeIndex - 1].Shape;
-                int endSI = routeData.route.ShapeMeta[currentShapeIndex].Shape;
-                int points = endSI - startSI + 1;
-                Vector3[] segmentCoordinates = new Vector3[points];
-                float distance = 0;
-                for (int i = 0; i < points; i++)
-                {
-                    Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                    Mapbox.Utils.Vector2d unityPos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(coordinate.Latitude, coordinate.Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
-                    if (i > 0)
-                    {
-                        distance += Vector2.Distance(new Vector2((float)unityPos.x, (float)unityPos.y), new Vector2(segmentCoordinates[i - 1].y, segmentCoordinates[i - 1].z));
-                    }
-                    //segmentCoordinates[i] = new Vector3(distance / currentShapeLength, (float)unityPos.x, (float)unityPos.y); // for catmull-rom splines we need fraction of distance
-                    segmentCoordinates[i] = new Vector3(distance, (float)unityPos.x, (float)unityPos.y);
-                }
-                //spline = new CatmullRomSpline2D(segmentCoordinates);
-                spline = new LinearSpline2D(segmentCoordinates);
-            }
-
-            /// <summary>
-            /// Checks if street is physically filled
-            /// </summary>
-            /// <returns></returns>
-            public bool CanAddCar()
-            {
-                bool success = false;
-                if (cars.Count < maxCarsOnRoad)
-                {
-                    success = true;
-                }
-
-                return success;
-            }
-
-            public void AddCar(MacroCar car)
-            {
-                car.SetCurrentSpeedLimit(speedLimit);
-                car.SetSpline(spline);
-                cars.Add(car);
-            }
-
-            public float CalculateSpeedBasedOnDensity()
-            {
-                TrafficInput tO = WUInity.INPUT.Traffic;
-                //reasonable? not for now
-                /*if(cars.Count == 1)
-                {
-                    return Random.Range(0.8f, 0.9f) * SpeedLimit;
-                }*/
-
-                float speedLimit = cars[0].currentSpeedLimit;
-
-                float dens = cars.Count / (length * 0.001f * laneCount);
-                //added background traffic
-                dens += Random.Range(tO.backGroundDensityMinMax.x, tO.backGroundDensityMinMax.y);                
-
-                //we use the same function to check if a road is blocked due to being main road or if they reverse lanes for now
-                if (mCS.stallBigRoads && CanReverseLanes(highwayType))
-                {
-                    dens = maxCapacity; //gives  stall speed
-                }
-                //reverse traffic in lanes means double the amount of lanes
-                else if (mCS.reverseLanes && CanReverseLanes(highwayType))
-                {                    
-                    dens *= 0.5f;
-                }
-                float speed = Mathf.Lerp(speedLimit, tO.stallSpeed / 3.6f, dens / maxCapacity);
-
-                float speed_visibilty = speed;
-                if (tO.visibilityAffectsSpeed)
-                {
-                    //added Enrico & Paolo article      
-                    float D_L = tO.opticalDensity;
-                    //get rid of any strange values of D_L, TODO: fix when checking input
-                    D_L = Mathf.Clamp(D_L, 0.0f, 0.2f);
-                    float beta = -101.57f * D_L * D_L * D_L + 49.43f * D_L * D_L - 9.2755f * D_L + 1.0f;
-
-                    //these are not needed as we implement the linear equatíon using lerp
-                    //float k_j = 100.0f; // number from above, as in max density is 100 cars per km and lane
-                    //float k = k_j * (1.0f - speed / (speedLimit * beta));
-
-                    //this is probably all that is needed? since we base speed on speed limit and not direct proportion to density
-                    float visibilityLimitedSpeed = beta * speedLimit;
-                    float stallSpeed = tO.stallSpeed / 3.6f;
-                    if (visibilityLimitedSpeed < stallSpeed)
-                    {
-                        //TODO: which approach is best ?
-                        //stallSpeed = visibilityLimitedSpeed; 
-                        visibilityLimitedSpeed = stallSpeed;
-                    }
-                    speed_visibilty = Mathf.Lerp(visibilityLimitedSpeed, stallSpeed, dens / maxCapacity);
-                }
-
-                return Mathf.Min(speed, speed_visibilty);                
-            }
-        }
 
         public static float GetMaxCapacity(string highway)
         {
@@ -659,7 +413,7 @@ namespace WUInity.Traffic
             return lanes;
         }
 
-        static bool CanReverseLanes(string highway)
+        public static bool CanReverseLanes(string highway)
         {
             bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
             RoadData[] r = WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData;

@@ -1,28 +1,25 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
-using System;
 
 namespace WUInity.Population
 {
     public class PopulationData
     {
-        public Vector2D lowerLeftLatLong;
-        public Vector2D size;
-        public Vector2Int cells;
+        public Vector2d lowerLeftLatLong;
+        public Vector2d size;
+        public Vector2int cells;
         public float cellSize;
         public int totalPopulation;
         public int totalActiveCells;
         public int[] cellPopulation;        
-        double cellArea;
+        public  double cellArea;
         public bool[] populationMask;
 
         //not saved
         public bool isLoaded, correctedForRoutes;
-        public Texture2D populationTexture;
+        PopulationManager manager;
 
-        public PopulationData()
+        public PopulationData(PopulationManager manager)
         {
             lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
             size = WUInity.INPUT.Simulation.Size;
@@ -37,6 +34,7 @@ namespace WUInity.Population
 
             isLoaded = false;
             correctedForRoutes = false;
+            this.manager = manager;
         }
 
         public int GetPeopleCount(int x, int y)
@@ -44,10 +42,7 @@ namespace WUInity.Population
             return cellPopulation[x + y * cells.x];
         }
 
-        public Texture2D GetPopulationTexture()
-        {
-            return populationTexture;
-        }
+        
 
         public void CreatePopulationFromLocalGPW(LocalGPWData localGPW)
         {
@@ -68,7 +63,7 @@ namespace WUInity.Population
                 for (int x = 0; x < cells.x; ++x)
                 {
                     double xPos = (x + 0.5) * cellSize;
-                    double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2D(xPos, yPos));
+                    double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2d(xPos, yPos));
                     int pop = 0;
                     //if data has negative values (NO_DATA) it should be zero
                     //else force at least one person if there is some density
@@ -87,7 +82,7 @@ namespace WUInity.Population
                 }
             }
 
-            CreateTexture();
+            manager.CreateTexture();
             SavePopulation();
 
             isLoaded = true;
@@ -126,7 +121,7 @@ namespace WUInity.Population
                 ScaleTotalPopulation(newTotalPopulation);
             }
 
-            CreateTexture();
+            manager.CreateTexture();
             SavePopulation();
             isLoaded = true;
             correctedForRoutes = false;
@@ -138,7 +133,7 @@ namespace WUInity.Population
             if (stuckPeople > 0)
             {
                 RelocateStuckPeople(stuckPeople);
-                CreateTexture();                
+                manager.CreateTexture();                
             }            
 
             correctedForRoutes = true;
@@ -181,7 +176,7 @@ namespace WUInity.Population
                 }
             }
 
-            CreateTexture();
+            manager.CreateTexture();
             SavePopulation();
         }
 
@@ -275,7 +270,7 @@ namespace WUInity.Population
                 {
                     WUInityInput.SaveInput();
                 }
-                CreateTexture();
+                manager.CreateTexture();
                 isLoaded = true;
                 WUInity.INPUT.Population.populationFile = Path.GetFileName(path);                
                 WUInity.LOG(WUInity.LogType.Log, " Loaded population from file " + path + ".");
@@ -344,36 +339,6 @@ namespace WUInity.Population
                     ScaleTotalPopulation(oldTotalPopulation);
                 }
             }            
-        }
-
-        private void CreateTexture()
-        {
-            //first find the correct texture size
-            int maxSide = Mathf.Max(cells.x, cells.y);
-            Vector2Int res = new Vector2Int(2, 2);
-
-            while (cells.x > res.x)
-            {
-                res.x *= 2;
-            }
-            while (cells.y > res.y)
-            {
-                res.y *= 2;
-            }
-
-            populationTexture = new Texture2D(res.x, res.y);
-            populationTexture.filterMode = FilterMode.Point;
-            for (int y = 0; y < cells.y; y++)
-            {
-                for (int x = 0; x < cells.x; x++)
-                {
-                    double density = GetPeopleCount(x, y) / cellArea;
-                    Color color = PopulationManager.GetGPWColor((float)density);
-
-                    populationTexture.SetPixel(x, y, color);
-                }
-            }
-            populationTexture.Apply();
         }
     }
 }

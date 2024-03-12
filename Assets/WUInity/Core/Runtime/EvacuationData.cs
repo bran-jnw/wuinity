@@ -1,13 +1,11 @@
-using UnityEngine;
-using System.IO;
 using System.Collections.Generic;
 
 namespace WUInity.Runtime
 {
     public class EvacuationData
     {
-        private Vector2Int _cellCount;
-        public Vector2Int CellCount
+        private Vector2int _cellCount;
+        public Vector2int CellCount
         {
             get
             {
@@ -210,7 +208,7 @@ namespace WUInity.Runtime
             return index;
         }
 
-        public EvacGroup GetEvacGroup(int index)
+        public EvacGroup GetEvacGroup(int cellIndex)
         {
             WUInityInput input = WUInity.INPUT;
             if (WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUInity.RUNTIME_DATA.Evacuation.CellCount.x * WUInity.RUNTIME_DATA.Evacuation.CellCount.y)
@@ -218,9 +216,9 @@ namespace WUInity.Runtime
                 return null;
             }
 
-            index = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[index];
+            cellIndex = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[cellIndex];
 
-            return EvacuationGroups[index];
+            return EvacuationGroups[cellIndex];
         }
 
         public EvacGroup GetEvacGroup(int x, int y)

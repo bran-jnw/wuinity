@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
-using System.CodeDom.Compiler;
 
 namespace WUInity.Fire
 {
@@ -41,7 +38,7 @@ namespace WUInity.Fire
     [System.Serializable]
     public class InitialFuelMoistureList
     {        
-        [SerializeField] private InitialFuelMoisture[] initialFuelMoistures;
+        private InitialFuelMoisture[] initialFuelMoistures;
         bool _conditioned = false;
 
         /// <summary>

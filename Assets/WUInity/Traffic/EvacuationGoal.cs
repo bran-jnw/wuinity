@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using WUInity.Traffic;
 using System.IO;
 
@@ -10,8 +8,8 @@ namespace WUInity
     public class EvacuationGoal
     {
         public string name = "Goal_1";
-        public Vector2D latLong;
-        public Color color;
+        public Vector2d latLong;
+        public WUInityColor color;
         public bool blocked = false;
         public float maxFlow = 3600f; //cars per hour
         //public GameObject marker;
@@ -28,11 +26,11 @@ namespace WUInity
         public EvacuationGoal()
         {
             name = "New goal";
-            latLong = Vector2D.zero;
-            color = Color.white;
+            latLong = Vector2d.zero;
+            color = WUInityColor.white;
         }
 
-        public EvacuationGoal(string name, Vector2D latLong, Color color)
+        public EvacuationGoal(string name, Vector2d latLong, WUInityColor color)
         {
             this.name = name;
             this.latLong = latLong;
@@ -40,7 +38,7 @@ namespace WUInity
             maxFlow = 3600f;
         }
 
-        public EvacuationGoal(string name, Vector2D latLong, Color color, float maxFlow)
+        public EvacuationGoal(string name, Vector2d latLong, WUInityColor color, float maxFlow)
         {
             this.name = name;
             this.latLong = latLong;
@@ -154,18 +152,18 @@ namespace WUInity
 
             eGs[0] = new EvacuationGoal();
             eGs[0].name = "Rox_Goal_E";
-            eGs[0].latLong = new Vector2D(39.426692, -105.071401);
-            eGs[0].color = Color.red;
+            eGs[0].latLong = new Vector2d(39.426692, -105.071401);
+            eGs[0].color = WUInityColor.red;
 
             eGs[1] = new EvacuationGoal();
             eGs[1].name = "Rox_Goal_R";
-            eGs[1].latLong = new Vector2D(39.473858, -105.092137);
-            eGs[1].color = Color.green;
+            eGs[1].latLong = new Vector2d(39.473858, -105.092137);
+            eGs[1].color = WUInityColor.green;
 
             eGs[2] = new EvacuationGoal();
             eGs[2].name = "Rox_Goal_F";
-            eGs[2].latLong = new Vector2D(39.466157, -105.082197);
-            eGs[2].color = Color.blue;
+            eGs[2].latLong = new Vector2d(39.466157, -105.082197);
+            eGs[2].color = WUInityColor.blue;
             return eGs;
         }
 
@@ -188,7 +186,7 @@ namespace WUInity
                     int maxCars, maxPeople;
                     bool initiallyBlocked;
                     EvacGoalType evacGoalType;
-                    Color color = Color.white;
+                    WUInityColor color = WUInityColor.white;
 
                     //name
                     string[] data = dataLines[0].Split(':');
@@ -248,10 +246,10 @@ namespace WUInity
                         float.TryParse(data[0], out r);
                         float.TryParse(data[1], out g);
                         float.TryParse(data[2], out b);
-                        color = new Color(r, g, b);
+                        color = new WUInityColor(r, g, b);
                     }
 
-                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2D(lati, longi), color);
+                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2d(lati, longi), color);
                     eG.goalType = evacGoalType;
                     eG.maxFlow = maxFlow;
                     eG.maxCars = maxCars;

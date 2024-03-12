@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Numerics;
 
 namespace WUInity.Traffic
 {
@@ -8,7 +8,7 @@ namespace WUInity.Traffic
     public class TrafficInjection
     {
         public int cars;
-        public Vector2D latLong;
+        public Vector2d latLong;
         public EvacuationGoal desiredGoal;
         public bool pickGoalFromMap = false;
         public Vector2[] timeFlow;
@@ -16,7 +16,7 @@ namespace WUInity.Traffic
         private RouteCollection routeCollection;
         private float accumulatedFlow;
 
-        public TrafficInjection(int cars, Vector2D startPos, EvacuationGoal desiredGoal, Vector2[] timeFlow)
+        public TrafficInjection(int cars, Vector2d startPos, EvacuationGoal desiredGoal, Vector2[] timeFlow)
         {
             this.cars = cars;
             this.latLong = startPos;
@@ -31,14 +31,14 @@ namespace WUInity.Traffic
             for (int i = 1; i < timeFlow.Length; i++)
             {
                 timeFlowIndex = i;
-                if (time < timeFlow[i].x)
+                if (time < timeFlow[i].X)
                 {                    
                     break;
                 }
             }
             
-            float fraction = (time - timeFlow[timeFlowIndex - 1].x) / (timeFlow[timeFlowIndex].x - timeFlow[timeFlowIndex - 1].x);
-            float injection = Mathf.Lerp(timeFlow[timeFlowIndex - 1].y, timeFlow[timeFlowIndex].y, fraction);  
+            float fraction = (time - timeFlow[timeFlowIndex - 1].X) / (timeFlow[timeFlowIndex].X - timeFlow[timeFlowIndex - 1].X);
+            float injection = Mathf.Lerp(timeFlow[timeFlowIndex - 1].Y, timeFlow[timeFlowIndex].Y, fraction);  
             injection *= deltaTime;
             accumulatedFlow += injection;
             int newCars = (int)accumulatedFlow;
@@ -54,7 +54,7 @@ namespace WUInity.Traffic
         {
             TrafficInjection[] t = new TrafficInjection[1];
             Vector2[] timeFlow = new Vector2[2];
-            t[0] = new TrafficInjection(1, Vector2D.zero, null, timeFlow);
+            t[0] = new TrafficInjection(1, Vector2d.zero, null, timeFlow);
 
             return t;
         }
@@ -64,10 +64,10 @@ namespace WUInity.Traffic
     public struct SimpleTrafficInjection
     {
         public int cars;
-        public Vector2D startPos;
+        public Vector2d startPos;
         public EvacuationGoal desiredGoal;
 
-        public SimpleTrafficInjection(int cars, Vector2D startPos, EvacuationGoal desiredGoal)
+        public SimpleTrafficInjection(int cars, Vector2d startPos, EvacuationGoal desiredGoal)
         {
             this.cars = cars;
             this.startPos = startPos;

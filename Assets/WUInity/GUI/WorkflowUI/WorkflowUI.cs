@@ -10,6 +10,7 @@ using UnityEngine.UIElements;
 using SimpleFileBrowser;
 using System.IO;
 using static WUInity.TrafficInput;
+using WUInity.Fire;
 
 namespace WUInity.UI
 {
@@ -674,7 +675,7 @@ namespace WUInity.UI
                 int maxCars, maxPeople;
                 bool initiallyBlocked;
                 EvacGoalType evacGoalType;
-                UnityEngine.Color color = Color.white;
+                WUInityColor color = WUInityColor.white;
 
                 //name
                 string[] data = dataLines[0].Split(':');
@@ -734,7 +735,7 @@ namespace WUInity.UI
                     float.TryParse(data[0], out r);
                     float.TryParse(data[1], out g);
                     float.TryParse(data[2], out b);
-                    color = new Color(r, g, b);
+                    color = new WUInityColor(r, g, b);
                 }
 
                 bool findDuplicate = false;
@@ -743,8 +744,8 @@ namespace WUInity.UI
                     if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name == name) findDuplicate = true;
                 }
 
-                if (!findDuplicate) { 
-                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2D(lati, longi), color);
+                if (!findDuplicate) {
+                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2d(lati, longi), color);
                     eG.goalType = evacGoalType;
                     eG.maxFlow = maxFlow;
                     eG.maxCars = maxCars;
@@ -868,7 +869,7 @@ namespace WUInity.UI
                         WUInity.LOG(WUInity.LogType.Warning, "Please enter the minimum range of background traffic density between 0 and 75 vehicles/km/lane.");
                     }
                     else
-                        WUInity.INPUT.Traffic.backGroundDensityMinMax.x = value;
+                        WUInity.INPUT.Traffic.backGroundDensityMinMax.X = value;
                 });
 
             UnityEngine.UIElements.TextField tfTxTBackgroundDensityMax = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMax");
@@ -878,13 +879,13 @@ namespace WUInity.UI
                     //UnityEngine.Debug.Log($"BackgroundDensityMax has changed to {evt.newValue}.");
                     int value;
                     int.TryParse(evt.newValue, out value);
-                    if (value < WUInity.INPUT.Traffic.backGroundDensityMinMax.x || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
+                    if (value < WUInity.INPUT.Traffic.backGroundDensityMinMax.X || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
                     {
                         //tfTxTBackgroundDensityMax.SetValueWithoutNotify(WUInity.INPUT.Traffic.backGroundDensityMinMax.y.ToString());
                         WUInity.LOG(WUInity.LogType.Warning, "Please enter the maximum range of background traffic density between the minimum and 75 vehicles/km/lane.");
                     }
                     else
-                        WUInity.INPUT.Traffic.backGroundDensityMinMax.y = value;
+                        WUInity.INPUT.Traffic.backGroundDensityMinMax.Y = value;
                 });
         }
 
@@ -965,7 +966,7 @@ namespace WUInity.UI
                     List<float> responseCurveProbabilities = new List<float>();
                     List<double> goalProbabilities = new List<double>();
                     float r, g, b;
-                    Color color = Color.white;
+                    WUInityColor color = WUInityColor.white;
 
                     //get name
                     string[] data = dataLines[0].Split(':');
@@ -1026,7 +1027,7 @@ namespace WUInity.UI
                         float.TryParse(data[0], out r);
                         float.TryParse(data[1], out g);
                         float.TryParse(data[2], out b);
-                        color = new Color(r, g, b);
+                        color = new WUInityColor(r, g, b);
                     }
 
                     int[] goalIndices = new int[destinationNames.Count];
@@ -2258,7 +2259,7 @@ namespace WUInity.UI
 
         private void BtnShowHideLocalGPW_clicked()
         {
-            if (WUInity.DATA_STATUS.LocalGPWLoaded) WUInity.POPULATION.ToggleLocalGPWVisibility();
+            if (WUInity.DATA_STATUS.LocalGPWLoaded) WUInity.POPULATION.Visualizer.ToggleLocalGPWVisibility();
         }
 
         private void BtnShowHideLocalPOP_clicked()
@@ -2413,13 +2414,13 @@ namespace WUInity.UI
                 UnityEngine.UIElements.TextField tfTxTSetMinWalkSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMinWalkSpeed");
                 if (tfTxTSetMinWalkSpeed != null)
                 {
-                    tfTxTSetMinWalkSpeed.value = eO.walkingSpeedMinMax.x.ToString();
+                    tfTxTSetMinWalkSpeed.value = eO.walkingSpeedMinMax.X.ToString();
                 }
 
                 UnityEngine.UIElements.TextField tfTxTSetMaxWalkSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxWalkSpeed");
                 if (tfTxTSetMaxWalkSpeed != null)
                 {
-                    tfTxTSetMaxWalkSpeed.value = eO.walkingSpeedMinMax.y.ToString();
+                    tfTxTSetMaxWalkSpeed.value = eO.walkingSpeedMinMax.Y.ToString();
                 }
 
                 UnityEngine.UIElements.TextField tfTxTSetModWalkSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetModWalkSpeed");
@@ -2490,13 +2491,13 @@ namespace WUInity.UI
                 UnityEngine.UIElements.TextField tfTxTBackgroundDensityMin = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMin");
                 if (tfTxTBackgroundDensityMin != null)
                 {
-                    tfTxTBackgroundDensityMin.value = tO.backGroundDensityMinMax.x.ToString();
+                    tfTxTBackgroundDensityMin.value = tO.backGroundDensityMinMax.X.ToString();
                 }
 
                 UnityEngine.UIElements.TextField tfTxTBackgroundDensityMax = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMax");
                 if (tfTxTBackgroundDensityMax != null)
                 {
-                    tfTxTBackgroundDensityMax.value = tO.backGroundDensityMinMax.y.ToString();
+                    tfTxTBackgroundDensityMax.value = tO.backGroundDensityMinMax.Y.ToString();
                 }
 
                 UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke");

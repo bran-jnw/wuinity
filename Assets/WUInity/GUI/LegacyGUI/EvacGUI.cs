@@ -20,8 +20,8 @@ namespace WUInity.UI
                 maxCarsProb = eO.maxCarsChance.ToString();
                 minHousehold = eO.minHouseholdSize.ToString();
                 maxHousehold = eO.maxHouseholdSize.ToString();
-                walkSpeedMin = eO.walkingSpeedMinMax.x.ToString();
-                walkSpeedMax = eO.walkingSpeedMinMax.y.ToString();
+                walkSpeedMin = eO.walkingSpeedMinMax.X.ToString();
+                walkSpeedMax = eO.walkingSpeedMinMax.Y.ToString();
                 walkSpeedMod = eO.walkingSpeedModifier.ToString();
                 walkingDistMod = eO.walkingDistanceModifier.ToString();
                 evacOrderTime = eO.EvacuationOrderStart.ToString();
@@ -143,8 +143,8 @@ namespace WUInity.UI
             float.TryParse(maxCarsProb, out eO.maxCarsChance);
             int.TryParse(minHousehold, out eO.minHouseholdSize);
             int.TryParse(maxHousehold, out eO.maxHouseholdSize);
-            float.TryParse(walkSpeedMin, out eO.walkingSpeedMinMax.x);
-            float.TryParse(walkSpeedMax, out eO.walkingSpeedMinMax.y);
+            float.TryParse(walkSpeedMin, out eO.walkingSpeedMinMax.X);
+            float.TryParse(walkSpeedMax, out eO.walkingSpeedMinMax.Y);
             float.TryParse(walkSpeedMod, out eO.walkingSpeedModifier);
             float.TryParse(walkingDistMod, out eO.walkingDistanceModifier);
             float.TryParse(evacOrderTime, out eO.EvacuationOrderStart);

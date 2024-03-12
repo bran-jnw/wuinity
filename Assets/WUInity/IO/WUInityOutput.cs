@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace WUInity
 {
@@ -31,8 +29,8 @@ namespace WUInity
 
         [System.NonSerialized] public int[] rawPopulation;
 
-        [System.NonSerialized] public Texture2D relocatedPopTexture;
-        [System.NonSerialized] public Texture2D popStuckTexture;
+        //[System.NonSerialized] public Texture2D relocatedPopTexture;
+        //[System.NonSerialized] public Texture2D popStuckTexture;
     }
 }
 

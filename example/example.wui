@@ -53,8 +53,8 @@
         "maxCarsChance": 0.30000001192092898,
         "walkingDistanceModifier": 1.0,
         "walkingSpeedMinMax": {
-            "x": 0.699999988079071,
-            "y": 1.0
+            "X": 0.699999988079071,
+            "Y": 1.0
         },
         "walkingSpeedModifier": 1.0,
         "BlockGoalEventFiles": []
@@ -68,8 +68,8 @@
         "routeChoice": 3,
         "stallSpeed": 1.0,
         "backGroundDensityMinMax": {
-            "x": 0.0,
-            "y": 0.0
+            "X": 0.0,
+            "Y": 0.0
         },
         "visibilityAffectsSpeed": false,
         "opticalDensityFile": "opticalDensity.odr",

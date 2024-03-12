@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace WUInity
 {
     public class WUInityPERIL
@@ -35,7 +31,7 @@ namespace WUInity
         int[,] compoundBoundary;
         int heatmapMax;
         int cellSize;
-        Vector2Int cellCount;
+        Vector2int cellCount;
         int[,] WUIarea;
 
         /// <summary>

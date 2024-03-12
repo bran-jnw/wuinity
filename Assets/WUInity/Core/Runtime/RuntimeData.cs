@@ -1,14 +1,6 @@
-using UnityEngine;
-using System.IO;
-using Itinero;
-using Itinero.IO.Osm;
-using Itinero.Osm.Vehicles;
-using OsmSharp.Streams;
 using WUInity.Population;
-using WUInity.Fire;
 using static WUInity.WUInity;
 using System;
-using Mapbox.Map;
 
 namespace WUInity.Runtime
 {
@@ -49,7 +41,7 @@ namespace WUInity.Runtime
             //https://wiki.openstreetmap.org/wiki/Zoom_levels
             double tiles = Math.Pow(4.0, mOptions.locationOptions.zoom);
             double degreesPerTile = 360.0 / (Math.Pow(2.0, mOptions.locationOptions.zoom));
-            Vector2D mapDegrees = LocalGPWData.SizeToDegrees(INPUT.Simulation.LowerLeftLatLong, INPUT.Simulation.Size);
+            Vector2d mapDegrees = LocalGPWData.SizeToDegrees(INPUT.Simulation.LowerLeftLatLong, INPUT.Simulation.Size);
             int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
             int tilesY = (int)(mapDegrees.y / (degreesPerTile * Math.Cos((Math.PI / 180.0) * INPUT.Simulation.LowerLeftLatLong.x))) + 1;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;

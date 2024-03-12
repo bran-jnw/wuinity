@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
 
 namespace WUInity.Traffic
@@ -95,7 +92,7 @@ namespace WUInity.Traffic
         private static void SaveRoadTypeData(RoadTypeData rTD)
         {
             string path = Path.Combine("default.roads");
-            string json = JsonUtility.ToJson(rTD, true);
+            string json = UnityEngine.JsonUtility.ToJson(rTD, true);
             File.WriteAllText(path, json);            
         }
 
@@ -107,7 +104,7 @@ namespace WUInity.Traffic
             if (File.Exists(path))
             {
                 string input = File.ReadAllText(path);
-                results = JsonUtility.FromJson<RoadTypeData>(input);
+                results = UnityEngine.JsonUtility.FromJson<RoadTypeData>(input);
                 loadedDefaults = false;
             }
 

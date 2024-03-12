@@ -1,21 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace WUInity.Population
+﻿namespace WUInity.Population
 {
     public class PopulationManager
     {
-        private LocalGPWData localGPWData;
-        private PopulationData populationData;
-        private GameObject m_LocalGPWDataPlane;
-        private Material gpwDataPlaneMaterial;
+        protected LocalGPWData localGPWData;
+        protected PopulationData populationData;
+
+        protected PopulationVisualizer _visualizer;
+        public PopulationVisualizer Visualizer { get { return _visualizer; } }
 
 
         public PopulationManager()
         {
-            localGPWData = new LocalGPWData();
-            populationData = new PopulationData();
+            localGPWData = new LocalGPWData(this);
+            populationData = new PopulationData(this);
+
+            #if USING_UNITY
+            _visualizer = new PopulationVisualizerUnity(this);
+            #else
+
+            #endif
+        }
+
+        public void CreateTexture()
+        {
+            _visualizer.CreateTexture();
+        }
+
+        public void CreateGPWTexture()
+        {
+            _visualizer.CreateGPWTexture();
         }
 
         public bool IsPopulationLoaded()
@@ -62,11 +75,7 @@ namespace WUInity.Population
         {
             return localGPWData;
         }*/
-
-        public Texture2D GetPopulationTexture()
-        {
-            return populationData.GetPopulationTexture();
-        }
+        
 
         public int GetTotalPopulation()
         {
@@ -117,7 +126,7 @@ namespace WUInity.Population
 
             if(success)
             {
-                DataPlane.SetActive(false);
+                _visualizer.SetDataPlane(false);
                 populationData.CreatePopulationFromLocalGPW(localGPWData);
             }            
 
@@ -137,90 +146,20 @@ namespace WUInity.Population
         public void ScaleTotalPopulation(int newTotal)
         {
             populationData.ScaleTotalPopulation(newTotal);
-        }
-
-        public GameObject DataPlane
-        {
-            get
-            {
-                if (m_LocalGPWDataPlane == null)
-                {
-                    CreateLocalGPWDataPlane();
-                }
-
-                return m_LocalGPWDataPlane;
-            }
-        }
-
-        public bool ToggleLocalGPWVisibility()
-        {
-            DataPlane.SetActive(!m_LocalGPWDataPlane.activeSelf);
-
-            return DataPlane.activeSelf;
-        }  
-
-        private void CreateLocalGPWDataPlane()
-        {
-            Mesh mesh;
-            MeshRenderer mR;
-            MeshFilter filter;
-
-            if (m_LocalGPWDataPlane == null)
-            {
-                m_LocalGPWDataPlane = new GameObject("GPWDensityMap");
-                m_LocalGPWDataPlane.transform.parent = WUInity.INSTANCE.transform;
-                m_LocalGPWDataPlane.isStatic = true;
-                // You can change that line to provide another MeshFilter
-                filter = m_LocalGPWDataPlane.AddComponent<MeshFilter>();
-                mesh = new Mesh(); // filter.mesh;
-                filter.mesh = mesh;
-                mR = m_LocalGPWDataPlane.AddComponent<MeshRenderer>();
-                mR.receiveShadows = false;
-                mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            }
-            else
-            {
-                mR = m_LocalGPWDataPlane.GetComponent<MeshRenderer>();
-                mesh = m_LocalGPWDataPlane.GetComponent<MeshFilter>().mesh;
-                filter = m_LocalGPWDataPlane.GetComponent<MeshFilter>();
-            }
-            
-            mesh.Clear();
-
-            float width = (float)localGPWData.realWorldSize.x; //(float)size.x;
-            float length = (float)localGPWData.realWorldSize.y; //(float)size.y;
-
-            Vector3 offset = new Vector3((float)localGPWData.unityOriginOffset.x, 0.0f, (float)localGPWData.unityOriginOffset.y);
-
-            Vector2 maxUV = new Vector2((float)localGPWData.dataSize.x / localGPWData.densityTexture.width, (float)localGPWData.dataSize.y / localGPWData.densityTexture.height);
-            Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
-
-            if(gpwDataPlaneMaterial == null)
-            {
-                gpwDataPlaneMaterial = new Material(Shader.Find("Unlit/Transparent"));
-            }            
-            gpwDataPlaneMaterial.mainTexture = localGPWData.densityTexture;
-
-            mR.material = gpwDataPlaneMaterial;
-            //filter.mesh = mesh;
-
-            //move up one meter
-            m_LocalGPWDataPlane.transform.position = Vector3.up;
-            m_LocalGPWDataPlane.SetActive(false);
-        }     
+        }        
 
         //colors from GPW website
-        static Color c0 = new Color(190f / 255f, 232f / 255f, 255f / 255f);
-        static Color c1 = new Color(1.0f, 241f / 255f, 208f / 255f);
-        static Color c2 = new Color(1.0f, 218f / 255f, 165f / 255f);
-        static Color c3 = new Color(252f / 255f, 183f / 255f, 82f / 255f);
-        static Color c4 = new Color(1.0f, 137f / 255f, 63f / 255f);
-        static Color c5 = new Color(238f / 255f, 60f / 255f, 30f / 255f);
-        static Color c6 = new Color(191f / 255f, 1f / 255f, 39f / 255f);
+        static WUInityColor c0 = new WUInityColor(190f / 255f, 232f / 255f, 255f / 255f);
+        static WUInityColor c1 = new WUInityColor(1.0f, 241f / 255f, 208f / 255f);
+        static WUInityColor c2 = new WUInityColor(1.0f, 218f / 255f, 165f / 255f);
+        static WUInityColor c3 = new WUInityColor(252f / 255f, 183f / 255f, 82f / 255f);
+        static WUInityColor c4 = new WUInityColor(1.0f, 137f / 255f, 63f / 255f);
+        static WUInityColor c5 = new WUInityColor(238f / 255f, 60f / 255f, 30f / 255f);
+        static WUInityColor c6 = new WUInityColor(191f / 255f, 1f / 255f, 39f / 255f);
 
-        public static Color GetGPWColor(float density)
+        public static WUInityColor GetGPWColor(float density)
         {
-            Color color;
+            WUInityColor color;
             if (density < 0.0f)
             {
                 color = c0;

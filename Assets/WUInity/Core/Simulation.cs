@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using WUInity.Evac;
 using WUInity.Traffic;
 using WUInity.Fire;
@@ -92,6 +91,13 @@ namespace WUInity
         {
 
         }  
+
+        uint carCount = 0;
+        public uint CreateCarID()
+        {
+            ++carCount;
+            return carCount;
+        }
         
 
         /// <summary>
@@ -209,9 +215,13 @@ namespace WUInity
                 //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, "traffic_avg.png"));
                 byte[] byteData = timeTraffic.GetImageBytes();
 
-                Texture2D plotFig = new Texture2D(2, 2);
-                ImageConversion.LoadImage(plotFig, byteData);
+                #if USING_UNITY
+                UnityEngine.Texture2D plotFig = new UnityEngine.Texture2D(2, 2);
+                UnityEngine.ImageConversion.LoadImage(plotFig, byteData);
                 WUInity.GUI.SetPlotTexture(plotFig);
+                #else
+
+                #endif
             }            
         }
 
@@ -469,7 +479,7 @@ namespace WUInity
             //advance traffic
             if (input.Simulation.RunTrafficSim)
             {
-                _macroTrafficSim.AdvanceTrafficSimulation(input.Simulation.DeltaTime, Time);
+                _macroTrafficSim.Update(input.Simulation.DeltaTime, Time);
             }
 
             //increase time

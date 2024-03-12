@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
 
 namespace WUInity
@@ -12,9 +10,9 @@ namespace WUInity
         public double[] GoalsCumulativeWeights;
         public int[] ResponseCurveIndices;
         public string Name;
-        public Color Color;
+        public WUInityColor Color;
 
-        public EvacGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, Color color)
+        public EvacGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, WUInityColor color)
         {
             Name = name;
             GoalIndices = goalIndices;
@@ -30,20 +28,20 @@ namespace WUInity
             int[] goalIndices = new int[] { 0, 1, 2};
             double[] goalsCumulativeWeights = new double[3] { 0.4, 0.7, 1.0 };
             string name = "Group1";
-            Color color = Color.magenta;
+            WUInityColor color = WUInityColor.magenta;
             int[] responseCurveIndices = new int[] {0};
             evacGroups[0] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
 
             goalIndices = new int[] { 0, 1, 2 };
             goalsCumulativeWeights = new double[3] {0.4, 0.7, 1.0};
             name = "Group2";
-            color = Color.cyan;
+            color = WUInityColor.cyan;
             evacGroups[1] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
 
             goalIndices = new int[] { 0, 1, 2 };
             goalsCumulativeWeights = new double[] { 0.4, 0.7, 1.0 };
             name = "Group3";
-            color = Color.yellow;
+            color = WUInityColor.yellow;
             evacGroups[2] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
 
             return evacGroups;
@@ -85,7 +83,7 @@ namespace WUInity
                         List<float> responseCurveProbabilities = new List<float>();
                         List<double> goalProbabilities = new List<double>();
                         float r, g, b;
-                        Color color = Color.white;
+                        WUInityColor color = WUInityColor.white;
 
                         //get name
                         string[] data = dataLines[0].Split(':');
@@ -146,7 +144,7 @@ namespace WUInity
                             float.TryParse(data[0], out r);
                             float.TryParse(data[1], out g);
                             float.TryParse(data[2], out b);
-                            color = new Color(r, g, b);
+                            color = new WUInityColor(r, g, b);
                         }
 
                         int[] goalIndices = new int[destinationNames.Count];
@@ -235,6 +233,7 @@ namespace WUInity
                     int.TryParse(header[0], out ncols);
                     int.TryParse(header[1], out nrows);
                     int.TryParse(header[2], out evacGroupCount);
+
                     //make sure we have the correct size
                     if (ncols == WUInity.RUNTIME_DATA.Evacuation.CellCount.x && nrows == WUInity.RUNTIME_DATA.Evacuation.CellCount.y && evacGroupCount <= WUInity.INPUT.Evacuation.EvacGroupFiles.Length)
                     {

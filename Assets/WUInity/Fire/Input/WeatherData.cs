@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using static WUInity.InterpolationLibrary;
 using System.IO;
 
@@ -88,7 +86,7 @@ namespace WUInity.Fire
     [System.Serializable]
     public class WeatherInput
     {
-        [SerializeField] private WeatherData[] weatherInputs;
+        private WeatherData[] weatherInputs;
 
         public WeatherInput(WeatherData[] weatherInputs)
         {

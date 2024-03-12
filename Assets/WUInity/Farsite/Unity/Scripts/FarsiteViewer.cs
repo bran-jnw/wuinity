@@ -60,7 +60,7 @@ namespace WUInity.Farsite
         public void TransformCoordinates()
         {
             //rox
-            Vector2D latLong = new Vector2D(39.4027342779, -105.117169657);//new Vector2D(39.409924, -105.104505);
+            Vector2d latLong = new Vector2d(39.4027342779, -105.117169657);//new Vector2d(39.409924, -105.104505);
 
             double lambda = latLong.y * PI / 180.0; //actual long
             double phi = latLong.x * PI / 180.0; //actual lat
@@ -89,7 +89,7 @@ namespace WUInity.Farsite
             print("X: " + x + ", Y:" + y);
             print(y / -x);*/
 
-            Vector2D v = global::WUInity.Conversions.LatLonToMeters(latLong);
+            Vector2d v = global::WUInity.Conversions.LatLonToMeters(latLong);
             //print("X: " + v.x + ", Y:" + v.y);
         }
 
@@ -167,13 +167,13 @@ namespace WUInity.Farsite
                 for (int x = 0; x < farsiteData.ncols; x++)
                 {
                     float tOA = farsiteData.GetTimeOfArrival(x, y);                    
-                    Color color = Color.red * tOA / (float)farsiteData.maxTimeOfArrivalRaster;
+                    WUInityColor color = WUInityColor.red * tOA / (float)farsiteData.maxTimeOfArrivalRaster;
                     color.a = 1.0f;
                     if (tOA < 0.0f)
                     {
                         color.a = 0.0f;
                     }
-                    timeOfArrivalTex.SetPixel(x, y, color);
+                    timeOfArrivalTex.SetPixel(x, y, color.UnityColor);
                 }
             }
             timeOfArrivalTex.Apply();
@@ -186,12 +186,12 @@ namespace WUInity.Farsite
                 for (int x = 0; x < farsiteData.ncols; x++)
                 {
                     float fuel = farsiteData.GetFuelModel(x, y);
-                    Color color = Color.green * (0.1f + 0.9f * fuel);
+                    WUInityColor color = WUInityColor.green * (0.1f + 0.9f * fuel);
                     if(fuel < 0.0f)
                     {
-                        color = Color.grey;
+                        color = WUInityColor.grey;
                     }
-                    fuelModelTex.SetPixel(x, y, color);
+                    fuelModelTex.SetPixel(x, y, color.UnityColor);
                 }
             }
             fuelModelTex.Apply();
@@ -205,8 +205,8 @@ namespace WUInity.Farsite
                 {
                     float f = farsiteData.GetFirelineIntensity(x, y);
                     f = (f - (float)farsiteData.minFireLineIntensity) / (float)(farsiteData.maxFireLineIntensity - farsiteData.minFireLineIntensity);
-                    Color color = Color.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
-                    firelineIntensityTex.SetPixel(x, y, color);
+                    WUInityColor color = WUInityColor.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
+                    firelineIntensityTex.SetPixel(x, y, color.UnityColor);
                 }
             }
             firelineIntensityTex.Apply();
@@ -368,7 +368,7 @@ namespace WUInity.Farsite
                 lR.endWidth = 10.0f;
                 for (int j = 0; j < lR.positionCount; ++j)
                 {
-                    Vector3 pointPosition = (Vector3)f.vertices[j].pos;
+                    Vector3 pointPosition = new Vector3((float)f.vertices[j].pos.x, (float)f.vertices[j].pos.y, (float)f.vertices[j].pos.z);
                     //place on top of terrain, add 10 meters to avoid z-fighting
                     float h = (float)farsiteData.GetElevationWorldSpace(pointPosition.x, pointPosition.z) - farsiteData.minElevation + 10.0f;
                     h = Mathf.Max(0.0f, h);
@@ -397,7 +397,7 @@ namespace WUInity.Farsite
                 if(g == 0)
                 {
                     fireGrid[xPos, yPos] = fireNumber;
-                    burntTex.SetPixel(xPos, yPos, Color.red);
+                    burntTex.SetPixel(xPos, yPos, WUInityColor.red.UnityColor);
                 }
                 /*else if(g != 0 && fireNumber != g)
                 {
