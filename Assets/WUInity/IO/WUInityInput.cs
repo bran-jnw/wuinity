@@ -120,6 +120,8 @@ namespace WUInity
     [System.Serializable]
     public class TrafficInput
     {     
+        public enum TrafficModuleChoice { MacroTrafficSim, SUMO }
+        public TrafficModuleChoice trafficModuleChoice = TrafficModuleChoice.MacroTrafficSim;        
         public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
         public string[] evacuationGoalFiles;
         public RouteChoice routeChoice = RouteChoice.Closest;
@@ -136,6 +138,14 @@ namespace WUInity
         public ReverseLanes[] reverseLanes = ReverseLanes.GetDummy();
         public TrafficInjection[] trafficInjections = TrafficInjection.GetTemplate();
         public TrafficProbe[] trafficProbes = TrafficProbe.GetTemplate();
+
+        public SUMOInput sumoInput;
+    }
+
+    [System.Serializable]
+    public class SUMOInput
+    {
+        public string inputFile;
     }
 
     [System.Serializable]

@@ -2117,13 +2117,13 @@ namespace WUInity.UI
                 label7.text = "Cars reached by Peds: " + WUInity.SIM.MacroHumanSim().GetCarsReached();
             }
 
-            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.MacroTrafficSim() != null)
+            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.TrafficModule != null)
             {
                 Label label8 = Document.rootVisualElement.Q<Label>("TxtCarsLeft");
-                label8.text = "Cars left: " + WUInity.SIM.MacroTrafficSim().GetCarsInSystem() + " (" + Math.Round((double)WUInity.SIM.MacroTrafficSim().GetCarsInSystem() / (double)WUInity.SIM.MacroTrafficSim().GetTotalCarsSimulated() * 100.0, 1) + "%)";
+                label8.text = "Cars left: " + WUInity.SIM.TrafficModule.GetCarsInSystem() + " (" + Math.Round((double)WUInity.SIM.TrafficModule.GetCarsInSystem() / (double)WUInity.SIM.TrafficModule.GetTotalCarsSimulated() * 100.0, 1) + "%)";
             }
 
-            int totalEvacuated = 0;
+            uint totalEvacuated = 0;
             string name="Evacuation goals reached:";
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {

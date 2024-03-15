@@ -1136,12 +1136,12 @@ namespace WUInity
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = carsInSystem[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsInSystem[i].numberOfPeopleInCar;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += carsInSystem[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsInSystem[i].numberOfPeopleInCar;
                     }
                 }
 
@@ -1163,12 +1163,12 @@ namespace WUInity
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = carsOnHold[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsOnHold[i].numberOfPeopleInCar;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += carsOnHold[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsOnHold[i].numberOfPeopleInCar;
                     }
                 }
 

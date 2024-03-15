@@ -225,7 +225,7 @@ namespace WUInity.Fire
         }
 
         bool initialized = false;
-        public bool Simulate()
+        public bool Update()
         {
             if(!initialized)                                        
             {

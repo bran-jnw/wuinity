@@ -457,7 +457,7 @@ namespace WUInity.Traffic
 
                 for (int j = 0; j < carsToInject; j++)
                 {
-                    traffic.InsertNewCar(routeData, 1);
+                    traffic.InsertNewCar(startPos, routeData.evacGoal, routeData, 1);
                 }
             }
 

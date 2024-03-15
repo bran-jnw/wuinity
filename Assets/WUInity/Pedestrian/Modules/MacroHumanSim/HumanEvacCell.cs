@@ -51,7 +51,7 @@ namespace WUInity.Evac
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
                 int evacGroupIndex = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];
-                macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHumanSim.GetRandomWalkingSpeed(), MacroHumanSim.GetRandomResponseTime(evacGroupIndex));
+                macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
             }
         }
 

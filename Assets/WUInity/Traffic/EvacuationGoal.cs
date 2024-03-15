@@ -16,7 +16,7 @@ namespace WUInity
         public EvacGoalType goalType = EvacGoalType.Refugee;
         public int maxCars = -1;
         public int maxPeople = -1;
-        [System.NonSerialized] public int currentPeople;
+        [System.NonSerialized] public uint currentPeople;
         public List<MacroCar> cars = new List<MacroCar>();
 
         [System.NonSerialized] public float currentFlow = 0f;

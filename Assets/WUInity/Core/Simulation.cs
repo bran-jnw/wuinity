@@ -26,22 +26,33 @@ namespace WUInity
             }
         }
 
-        private MacroTrafficSim _macroTrafficSim;
-        public MacroTrafficSim MacroTrafficSim()
+        private TrafficModule _trafficModule;
+        public TrafficModule TrafficModule
         {
-            if (_macroTrafficSim== null)
+            get
             {
-                _macroTrafficSim = new MacroTrafficSim(RouteCreator);
-            }
-            return _macroTrafficSim;
+                if (_trafficModule == null)
+                {
+                    if (WUInity.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.SUMO)
+                    {
+                        _trafficModule = new SUMOModule();
+                    }
+                    else
+                    {
+                        _trafficModule = new MacroTrafficSim(RouteCreator);
+                    }
+
+                }
+                return _trafficModule;
+            }            
         }
 
-        private MacroHumanSim _macroHumanSim;
-        public MacroHumanSim MacroHumanSim()
+        private MacroHouseholdSim _macroHumanSim;
+        public MacroHouseholdSim MacroHumanSim()
         {
             if (_macroHumanSim == null)
             {
-                _macroHumanSim = new MacroHumanSim();
+                _macroHumanSim = new MacroHouseholdSim();
             }
 
             return _macroHumanSim;
@@ -92,21 +103,13 @@ namespace WUInity
 
         }  
 
-        uint carCount = 0;
-        public uint CreateCarID()
-        {
-            ++carCount;
-            return carCount;
-        }
-        
-
         /// <summary>
         /// Should only be set by traffic verification basically, otherwise it is internally created.
         /// </summary>
         /// <param name="mTS"></param>
         public void SetMacroTrafficSim(MacroTrafficSim mTS)
         {
-            _macroTrafficSim = mTS;
+            _trafficModule = mTS;
         }        
 
         public float GetFireWindSpeed()
@@ -142,7 +145,7 @@ namespace WUInity
                     //do actual simulation
                     RunSimulation(i);
 
-                    trafficArrivalDataCollection.Add(_macroTrafficSim.GetArrivalData());
+                    trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
                     ++actualRuns;    
                     //need at least 2 simulation sto have valid average
                     if (i > 0)
@@ -283,7 +286,7 @@ namespace WUInity
                     WUInity.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routing.RouteCollections);
                 }
 
-                _macroHumanSim = new MacroHumanSim();
+                _macroHumanSim = new MacroHouseholdSim();
                 //place people
                 _macroHumanSim.PopulateCells(WUInity.RUNTIME_DATA.Routing.RouteCollections, WUInity.POPULATION.GetPopulationData());                
                 //distribute people
@@ -292,7 +295,15 @@ namespace WUInity
 
             if (input.Simulation.RunTrafficSim)
             {
-                _macroTrafficSim = new MacroTrafficSim(RouteCreator);
+                if(WUInity.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.SUMO)
+                {
+                    _trafficModule = new SUMOModule();
+                }
+                else
+                {
+                    _trafficModule = new MacroTrafficSim(RouteCreator);
+                }
+               
             }
         }
 
@@ -325,12 +336,12 @@ namespace WUInity
             {
                 for (int i = 0; i < WUInity.INPUT.Traffic.trafficAccidents.Length; i++)
                 {
-                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
+                    _trafficModule.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
                 }
 
                 for (int i = 0; i < WUInity.INPUT.Traffic.reverseLanes.Length; i++)
                 {
-                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
+                    _trafficModule.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
                 }
             }            
 
@@ -377,7 +388,7 @@ namespace WUInity
                 bool trafficDone = true;
                 if (input.Simulation.RunTrafficSim)
                 {
-                    trafficDone = _macroTrafficSim.EvacComplete();
+                    trafficDone = _trafficModule.EvacComplete();
                 }
 
                 if (evacDone && trafficDone)
@@ -408,7 +419,7 @@ namespace WUInity
                 WUInity.LOG(WUInity.LogType.Log, " Simulation done.");
 
                 //plot results
-                List<float> arrivalData = _macroTrafficSim.GetArrivalData();
+                List<float> arrivalData = _trafficModule.GetArrivalData();
                 double[] xData = new double[arrivalData.Count];
                 double[] yData = new double[arrivalData.Count];
                 for (int i = 0; i < arrivalData.Count; i++)
@@ -449,15 +460,8 @@ namespace WUInity
                 if (Time >= 0.0f && Time >= nextFireUpdate)
                 {
                     fireUpdated = true;
-                    _fireMesh.Simulate();
-                    nextFireUpdate += (float)_fireMesh.dt;
-                    //check if any goal has been blocked by fire
-                    CheckEvacuationGoalStatus();
-                    //can get set when evac goals are all gone
-                    if (_stopSim)
-                    {
-                        return;
-                    }
+                    _fireMesh.Update();
+                    nextFireUpdate += (float)_fireMesh.dt;                    
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
                     // Note: we need to preprocess each cell which has a road on it
                 }
@@ -469,7 +473,7 @@ namespace WUInity
                 //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 _advectDiffuseSim.Update(input.Simulation.DeltaTime, _fireMesh.currentWindData.direction, _fireMesh.currentWindData.speed, fireUpdated);
             }
-
+                
             //advance evac
             if (input.Simulation.RunEvacSim)
             {
@@ -479,7 +483,18 @@ namespace WUInity
             //advance traffic
             if (input.Simulation.RunTrafficSim)
             {
-                _macroTrafficSim.Update(input.Simulation.DeltaTime, Time);
+                _trafficModule.Update(input.Simulation.DeltaTime, Time);
+            }
+
+            if(input.Simulation.RunFireSim)
+            {
+                //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
+                CheckEvacuationGoalStatus();
+                //can get set when evac goals are all gone
+                if (_stopSim)
+                {
+                    return;
+                }
             }
 
             //increase time
@@ -576,7 +591,7 @@ namespace WUInity
                 WUInity.LOG(WUInity.LogType.Log, " " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
             }
             //update cars already in traffic
-            _macroTrafficSim.UpdateEvacuationGoals();              
+            _trafficModule.UpdateEvacuationGoals();              
         }
 
         void SaveOutput(int runNumber)
@@ -584,8 +599,8 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
             if (input.Simulation.RunTrafficSim)
             {
-                WUInity.LOG(WUInity.LogType.Log, " Total cars in simulation: " + _macroTrafficSim.GetTotalCarsSimulated());
-                _macroTrafficSim.SaveToFile(runNumber);
+                WUInity.LOG(WUInity.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
+                _trafficModule.SaveToFile(runNumber);
             }
             if (input.Simulation.RunEvacSim)
             {

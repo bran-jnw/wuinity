@@ -102,13 +102,13 @@ namespace WUInity.UI
             }
 
             //cars still left
-            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.MacroTrafficSim() != null)
+            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.TrafficModule != null)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.MacroTrafficSim().GetCarsInSystem() + " / " + WUInity.SIM.MacroTrafficSim().GetTotalCarsSimulated());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.TrafficModule.GetCarsInSystem() + " / " + WUInity.SIM.TrafficModule.GetTotalCarsSimulated());
                 ++buttonIndex;
             }
 
-            int totalEvacuated = 0;
+            uint totalEvacuated = 0;
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
                 totalEvacuated += WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;

@@ -181,6 +181,7 @@ namespace WUInity.Runtime
                     string path = Path.Combine(WUInity.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(osmFile) + ".osm.pbf");
                     using (FileStream targetStream = File.OpenWrite(path))
                     {
+                        //XmlOsmStreamTarget target = new XmlOsmStreamTarget(targetStream);
                         PBFOsmStreamTarget target = new PBFOsmStreamTarget(targetStream, compress: false);
                         target.RegisterSource(filtered);
                         target.Pull();

@@ -52,9 +52,9 @@ namespace WUInity.Visualization
                     carPositionsBuffer.Release();
                     carPositionsBuffer = null;
                 }
-                if(WUInity.SIM.MacroTrafficSim().GetCarsInSystem() > 0)
+                if(WUInity.SIM.TrafficModule.GetCarsInSystem() > 0)
                 {
-                    carPositionsArray = WUInity.SIM.MacroTrafficSim().GetCarPositionsAndStates();
+                    carPositionsArray = WUInity.SIM.TrafficModule.GetCarPositionsAndStates();
                     carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));
                     carPositionsBuffer.SetData(carPositionsArray);
                     carsMaterial.SetBuffer("_PositionsAndState", carPositionsBuffer);

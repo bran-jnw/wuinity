@@ -52,14 +52,11 @@
         "maxCars": 2,
         "maxCarsChance": 0.30000001192092898,
         "walkingDistanceModifier": 1.0,
-        "walkingSpeedMinMax": {
-            "X": 0.699999988079071,
-            "Y": 1.0
-        },
         "walkingSpeedModifier": 1.0,
         "BlockGoalEventFiles": []
     },
     "Traffic": {
+        "trafficModuleChoice": 1,
         "evacuationGoalFiles": [
             "goalE",
             "goalR",
@@ -67,10 +64,6 @@
         ],
         "routeChoice": 3,
         "stallSpeed": 1.0,
-        "backGroundDensityMinMax": {
-            "X": 0.0,
-            "Y": 0.0
-        },
         "visibilityAffectsSpeed": false,
         "opticalDensityFile": "opticalDensity.odr",
         "opticalDensity": 0.05000000074505806,
@@ -103,36 +96,23 @@
                         "x": 0.0,
                         "y": 0.0
                     },
-                    "color": {
-                        "r": 1.0,
-                        "g": 1.0,
-                        "b": 1.0,
-                        "a": 1.0
-                    },
                     "blocked": false,
                     "maxFlow": 3600.0,
                     "goalType": 1,
                     "maxCars": -1,
                     "maxPeople": -1
                 },
-                "pickGoalFromMap": false,
-                "timeFlow": [
-                    {
-                        "x": 0.0,
-                        "y": 0.0
-                    },
-                    {
-                        "x": 0.0,
-                        "y": 0.0
-                    }
-                ]
+                "pickGoalFromMap": false
             }
         ],
         "trafficProbes": [
             {
                 "nodeID": 0
             }
-        ]
+        ],
+        "sumoInput": {
+            "inputFile": "rox.sumocfg"
+        }
     },
     "Fire": {
         "lcpFile": "roxborough.lcp",
