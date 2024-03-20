@@ -1,4 +1,4 @@
-namespace WUInity.Evac
+namespace WUInity.Pedestrian
 {
     public static class MacroHumanVerification
     {
@@ -7,9 +7,9 @@ namespace WUInity.Evac
             WUInityInput.LoadInput("evac_verification");
             EvacuationInput evacOptions = WUInity.INPUT.Evacuation;
             WUInityInput wuinityOptions = WUInity.INPUT;
-            WUInity.INPUT.Simulation.RunEvacSim = true;
-            WUInity.INPUT.Simulation.RunTrafficSim = false;
-            WUInity.INPUT.Simulation.RunFireSim = false;
+            WUInity.INPUT.Simulation.RunPedestrianModule = true;
+            WUInity.INPUT.Simulation.RunTrafficModule = false;
+            WUInity.INPUT.Simulation.RunFireModule = false;
             WUInity.RUNTIME_DATA.Simulation.MultipleSimulations = true;
 
             //WUInity.INSTANCE.LoadGPW(); //TODO: fix this input 

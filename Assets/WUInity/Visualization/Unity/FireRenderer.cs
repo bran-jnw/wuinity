@@ -35,7 +35,7 @@ namespace WUInity.Visualization
 
         public bool ToggleFire()
         {
-            if(WUInity.INPUT.Simulation.RunFireSim)
+            if(WUInity.INPUT.Simulation.RunFireModule)
             {
                 fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
                 return fireMeshRenderer.gameObject.activeSelf;
@@ -48,7 +48,7 @@ namespace WUInity.Visualization
 
         public bool ToggleSoot()
         {
-            if(WUInity.INPUT.Simulation.RunSmokeSim)
+            if(WUInity.INPUT.Simulation.RunSmokeModule)
             {
                 sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
                 return sootMeshRenderer.gameObject.activeSelf;

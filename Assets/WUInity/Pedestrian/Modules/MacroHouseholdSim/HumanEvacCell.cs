@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace WUInity.Evac
+namespace WUInity.Pedestrian
 {
     /// <summary>
     /// Class that holds all households that are contained at the start within this cell

@@ -19,7 +19,7 @@ namespace WUInity.Traffic
       
         private float latestSpeed;
 
-        public MacroCar(RouteData desiredRoute, uint numberOfPeopleInCar, uint carID) : base(carID, numberOfPeopleInCar)
+        public MacroCar(RouteData desiredRoute, uint numberOfPeopleInCar, uint carID) : base(carID, numberOfPeopleInCar, desiredRoute.evacGoal)
         {
             routeData = desiredRoute;
             this.numberOfPeopleInCar = numberOfPeopleInCar;

@@ -15,7 +15,7 @@ namespace WUInity.Traffic
         Vector3 newVisualPos;
         float oldRotation, newRotation;
 
-        public SUMOCar(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar) : base(carID, peopleInCar)
+        public SUMOCar(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationGoal goal) : base(carID, peopleInCar, goal)
         {
             this.carID = carID;
             this.sumoID = sumoID;
@@ -88,7 +88,7 @@ namespace WUInity.Traffic
         public override void Arrive()
         {
             active = false;
-
+            goal.CarArrives(this, WUInity.SIM.Time, WUInity.INPUT.Simulation.DeltaTime);
             //TODO: send message to WUI-nity
         }
 

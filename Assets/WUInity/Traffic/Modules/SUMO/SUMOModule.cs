@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Runtime.ConstrainedExecution;
 
 namespace WUInity.Traffic
 {
@@ -9,19 +10,38 @@ namespace WUInity.Traffic
     {
         private Dictionary<string, SUMOCar> cars;
         private int carsInSystem;
+        private Vector2d offset;
 
         public SUMOModule()
         {
-            if(LIBSUMO.Simulation.isLoaded())
+            try
             {
-                LIBSUMO.Simulation.close();
+                if (LIBSUMO.Simulation.isLoaded())
+                {
+                    LIBSUMO.Simulation.close();
+                }
+
+                cars = new Dictionary<string, SUMOCar>();
+                string inputFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.sumoInput.inputFile);
+                //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUInity.SIM.StartTime.ToString(), "-e", WUInity.INPUT.Simulation.MaxSimTime.ToString() }));
+
+                var v = LIBSUMO.Simulation.getNetBoundary();
+                WUInity.LOG(WUInity.LogType.Log, "V: " + v.getString()); 
+
+                Vector2d centerMercator = new Vector2d(WUInity.MAP.CenterMercator.x, WUInity.MAP.CenterMercator.y);
+
+                //Conversions.LatLonToMeters(39.377313, -105.135152)
+                //WUInity.LOG(WUInity.LogType.Log, "Center mercator, x:" + centerMercator.x + ", y:" + centerMercator.y);
+                offset = new Vector2d(-2646, -3616);// - Conversions.LatLonToMeters(WUInity.INPUT.Simulation.LowerLeftLatLong.x, WUInity.INPUT.Simulation.LowerLeftLatLong.y);
+                //new Vector2d(-11707243.866286842, 4774513.5555263935)
+                WUInity.LOG(WUInity.LogType.Log, "SUMO started.");
+            }
+            catch
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Could not start SUMO, aborting.");
             }
             
-            cars = new Dictionary<string, SUMOCar>();
-            string inputFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.sumoInput.inputFile);
-            //see here for options https://sumo.dlr.de/docs/sumo.html
-            LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-e", WUInity.INPUT.Simulation.MaxSimTime.ToString() })); //"D:\\ITSC2020_CAV_impact\\Urban\\Simulations\\Base\\DCC_simulation.sumo.cfg"
-            WUInity.LOG(WUInity.LogType.Log, "SUMO started.");
         }
 
         ~SUMOModule()
@@ -33,7 +53,7 @@ namespace WUInity.Traffic
         {
             if(!LIBSUMO.Simulation.isLoaded())
             {
-                WUInity.LOG(WUInity.LogType.Warning, "SUMO is not loaded.");
+                WUInity.LOG(WUInity.LogType.Error, "Trying to update but SUMO is not loaded.");
                 return;
             }
 
@@ -48,8 +68,6 @@ namespace WUInity.Traffic
                 for (int i = 0; i < activeCars.Count; i++)
                 {
                     string sumoID = activeCars[i];
-                    uint carID;
-                    uint.TryParse(sumoID, out carID);
                     SUMOCar car;
                     cars.TryGetValue(sumoID, out car);
                     if(car != null)
@@ -65,6 +83,12 @@ namespace WUInity.Traffic
                 LIBSUMO.StringVector arrivedCars = LIBSUMO.Simulation.getArrivedIDList();
                 for (int i = 0; i < arrivedCars.Count; i++)
                 {
+                    SUMOCar car;
+                    cars.TryGetValue(arrivedCars[i], out car);
+                    if(car != null)
+                    {
+                        car.Arrive();
+                    }
                     cars.Remove(arrivedCars[i]);
                     arrivalData.Add(currentTime + deltaTime);
                 }
@@ -82,7 +106,7 @@ namespace WUInity.Traffic
         {
             if (!LIBSUMO.Simulation.isLoaded())
             {
-                WUInity.LOG(WUInity.LogType.Warning, "SUMO is not loaded.");
+                WUInity.LOG(WUInity.LogType.Error, "Trying to inject new car but SUMO is not loaded.");
                 return;
             }
 
@@ -109,7 +133,7 @@ namespace WUInity.Traffic
 
                 LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
 
-                SUMOCar car = new SUMOCar(carID, sumoID, startPos, 0, numberOfPeopleInCar);
+                SUMOCar car = new SUMOCar(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
                 cars.Add(sumoID, car);
                 //WUInity.LOG(WUInity.LogType.Log, "SUMO placed vehicle.");
             }
@@ -119,7 +143,7 @@ namespace WUInity.Traffic
             }
         }
 
-        public override bool EvacComplete()
+        public override bool SimulationDone()
         {
             return carsInSystem > 0 ? false : true;
         }
@@ -137,6 +161,8 @@ namespace WUInity.Traffic
             foreach(SUMOCar car in cars.Values)
             {
                 carsRendering[i] = car.GetPositionAndSpeed(true);
+                carsRendering[i].X += (float)offset.x;
+                carsRendering[i].Y += (float)offset.y;
                 ++i;
             }
             return carsRendering;

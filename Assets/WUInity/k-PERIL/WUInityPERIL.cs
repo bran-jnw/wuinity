@@ -27,7 +27,7 @@ namespace WUInity
         At this stage, k-PERIL is ready for testing. You should have received a separate email with a link to download it. Please feel free to test this code out and come back with any errors or suggestions for improvement. Feel free to forward this to other people in the team if they can test it. Any further questions feel free to reach out to me.
         */
 
-        private k_PERIL_DLL.PERIL peril;
+        //private k_PERIL_DLL.PERIL peril;
         int[,] compoundBoundary;
         int heatmapMax;
         int cellSize;
@@ -50,15 +50,15 @@ namespace WUInity
         /// <param name="EPIoutput"></param>
         public void RunPERIL()
         {
-            if (peril == null)
+            /*if (peril == null)
             {
-                peril = new k_PERIL_DLL.PERIL();
+                //peril = new k_PERIL_DLL.PERIL();
                 cellCount = WUInity.SIM.FireMesh().GetCellCount();
                 cellSize = WUInity.SIM.FireMesh().GetCellSize();
                 compoundBoundary = new int[cellCount.x, cellCount.y];
                 WUIarea = GetWUIArea();
                 heatmapMax = 0;
-            }
+            }*/
             //get wuiarea from a user defined map painted in wuinity
 
             int tBuffer = (int)WUInity.OUTPUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file

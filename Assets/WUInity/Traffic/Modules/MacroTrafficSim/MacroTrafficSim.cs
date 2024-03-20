@@ -63,7 +63,7 @@ namespace WUInity.Traffic
             return totalCarsSimulated;
         }
 
-        public override bool EvacComplete()
+        public override bool SimulationDone()
         {
             return carsInSystem.Count == 0 ? true : false;
         }

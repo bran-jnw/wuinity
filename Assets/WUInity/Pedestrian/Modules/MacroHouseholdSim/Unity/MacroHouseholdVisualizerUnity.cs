@@ -1,9 +1,9 @@
 using UnityEngine;
-using WUInity.Evac;
+using WUInity.Pedestrian;
 
 namespace WUInity.Visualization
 {
-    public class MacroHumanSimVisualizerUnity : MacroHumanSimVisualizer
+    public class MacroHouseholdVisualizerUnity : MacroHouseholdVisualizer
     {
         /// <summary>
         /// Creates texture that shown cells where people have decided to stay forever.

@@ -71,10 +71,10 @@ namespace WUInity
         public bool StopAfterConverging = true;
         public Vector2d LowerLeftLatLong = new Vector2d(55.697354, 13.173808);
         public Vector2d Size = new Vector2d(3000.0, 3000.0);        
-        public bool RunEvacSim = true;
-        public bool RunTrafficSim = true;
-        public bool RunFireSim = true;
-        public bool RunSmokeSim = true;
+        public bool RunPedestrianModule = true;
+        public bool RunTrafficModule = true;
+        public bool RunFireModule = true;
+        public bool RunSmokeModule = true;
     }
 
     [System.Serializable]
@@ -88,6 +88,9 @@ namespace WUInity
     [System.Serializable]
     public class EvacuationInput
     {
+        public enum PedestrianModuleChoice { MacroHouseholdSim, SUMO }
+        public PedestrianModuleChoice pedestrianModuleChoice = PedestrianModuleChoice.MacroHouseholdSim;
+
         public float RouteCellSize = 200f;
         public float EvacuationOrderStart = 0.0f;
         public string[] ResponseCurveFiles;
@@ -108,7 +111,13 @@ namespace WUInity
         //TODO: fix saving these?
         //[System.NonSerialized] public Texture2D evacuationForceTex;
         //[System.NonSerialized] public EvacuationGoal[] paintedForcedGoals; //contains all the forced goals per cell        
-    }    
+    }
+
+    [System.Serializable]
+    public class MacroHouseholdSimInput
+    {
+
+    }
 
     [System.Serializable]
     public class RoutingInput

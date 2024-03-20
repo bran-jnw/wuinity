@@ -13,14 +13,14 @@
             "x": 10000.0,
             "y": 10000.0
         },
-        "RunEvacSim": true,
-        "RunTrafficSim": true,
-        "RunFireSim": true,
-        "RunSmokeSim": true
+        "RunPedestrianModule": true,
+        "RunTrafficModule": true,
+        "RunFireModule": true,
+        "RunSmokeModule": true
     },
     "Map": {
         "MapProvider": 0,
-        "ZoomLevel": 13
+        "ZoomLevel": 14
     },
     "Visualization": {
         "drawRoads": false
@@ -35,6 +35,7 @@
         "routeCollectionFile": "example.rc"
     },
     "Evacuation": {
+        "pedestrianModuleChoice": 0,
         "RouteCellSize": 200.0,
         "EvacuationOrderStart": 0.0,
         "ResponseCurveFiles": [

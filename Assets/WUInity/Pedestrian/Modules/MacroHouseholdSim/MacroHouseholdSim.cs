@@ -3,14 +3,14 @@ using WUInity.Population;
 using System.Numerics;
 using WUInity.Visualization;
 
-namespace WUInity.Evac
+namespace WUInity.Pedestrian
 {
     /// <summary>
     /// Simple human evacuation simulator that lumps households of people into one unit.
     /// Household position is randomized within a cell that has been discretized from the world plane.
     /// </summary>
     [System.Serializable]
-    public class MacroHouseholdSim
+    public class MacroHouseholdSim : PedestrianModule
     {
         int[] population;
         int cellsX;
@@ -25,15 +25,15 @@ namespace WUInity.Evac
         int totalCars;
         int totalCarsReached;
         int totalPeopleWhoWillNotEvacuate;
-        public bool evacuationDone = false;
+        private bool evacuationDone = false;
         int peopleLeft;
         List<string> output;
 
         int totalHouseholds;
         Vector4[] householdPositions;
 
-        MacroHumanSimVisualizer _visualizer;
-        public MacroHumanSimVisualizer Visualizer { get { return _visualizer; } }
+        MacroHouseholdVisualizer _visualizer;
+        public MacroHouseholdVisualizer Visualizer { get { return _visualizer; } }
 
 
         public MacroHouseholdSim()
@@ -44,7 +44,7 @@ namespace WUInity.Evac
             //SaveToFile(output, true);
 
             #if USING_UNITY
-            _visualizer = new MacroHumanSimVisualizerUnity();
+            _visualizer = new MacroHouseholdVisualizerUnity();
             #else
 
             #endif
@@ -142,7 +142,7 @@ namespace WUInity.Evac
         /// </summary>
         /// <param name="deltaTime"></param>
         /// <param name="currentTime"></param>
-        public void Update(float deltaTime, float currentTime)
+        public override void Update(float currentTime, float deltaTime)
         {            
             if (!evacuationDone)
             {
@@ -224,34 +224,39 @@ namespace WUInity.Evac
             }
         }
 
+        public override bool SimulationDone()
+        {
+            return evacuationDone;
+        }
+
         public Vector4[] GetHouseholdPositions()
         {
             return householdPositions;
         }
 
-        public int GetPeopleLeft()
+        public override int GetPeopleLeft()
         {
             return peopleLeft;
         }
 
-        public int GetPeopleStaying()
+        public override int GetPeopleStaying()
         {
             return totalPeopleWhoWillNotEvacuate;
         }
 
-        public int GetTotalCars()
+        public override int GetTotalCars()
         {
             return totalCars;
         }
 
-        public int GetCarsReached()
+        public override int GetCarsReached()
         {
             return totalCarsReached;
         }
 
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
-            if(WUInity.INPUT.Simulation.RunTrafficSim)
+            if(WUInity.INPUT.Simulation.RunTrafficModule)
             {                
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());

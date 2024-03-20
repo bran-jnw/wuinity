@@ -13,7 +13,7 @@ namespace WUInity.Traffic
         }
 
         public abstract void Update(float deltaTime, float currentTime);
-        public abstract bool EvacComplete();
+        public abstract bool SimulationDone();
         public abstract void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, RouteData routeData, uint numberOfPeopleInCar);
         public abstract void InsertNewTrafficEvent(TrafficEvent tE);
         public abstract int GetTotalCarsSimulated();        

@@ -25,12 +25,12 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            dummy = WUInity.SIM.MacroHumanSim().GetPeopleStaying();
+            dummy = WUInity.SIM.PedestrianModule().GetPeopleStaying();
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
             ++buttonIndex;
 
             //toatl cars
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.MacroHumanSim().GetTotalCars());
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUInity.SIM.PedestrianModule().GetTotalCars());
             ++buttonIndex;
 
             ++buttonIndex;
@@ -79,7 +79,7 @@ namespace WUInity.UI
             ++buttonIndex;
             if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.TrafficDens)
             {
-                WUInity.INSTANCE.DisplayClosestDensityData(time);
+                //WUInity.INSTANCE.DisplayClosestDensityData(time);
             }
             ++buttonIndex;
 
@@ -90,19 +90,19 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if (WUInity.INPUT.Simulation.RunEvacSim && WUInity.SIM.MacroHumanSim() != null)
+            if (WUInity.INPUT.Simulation.RunPedestrianModule && WUInity.SIM.PedestrianModule() != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.MacroHumanSim().GetPeopleLeft() + " / " + WUInity.POPULATION.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUInity.SIM.PedestrianModule().GetPeopleLeft() + " / " + WUInity.POPULATION.GetTotalPopulation());
                 ++buttonIndex;
 
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUInity.SIM.MacroHumanSim().GetCarsReached());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUInity.SIM.PedestrianModule().GetCarsReached());
                 ++buttonIndex;
             }
 
             //cars still left
-            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.TrafficModule != null)
+            if (WUInity.INPUT.Simulation.RunTrafficModule && WUInity.SIM.TrafficModule != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUInity.SIM.TrafficModule.GetCarsInSystem() + " / " + WUInity.SIM.TrafficModule.GetTotalCarsSimulated());
                 ++buttonIndex;
@@ -116,11 +116,11 @@ namespace WUInity.UI
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
                 ++buttonIndex;
             }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.MacroHumanSim().GetPeopleStaying()));
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.PedestrianModule().GetPeopleStaying()));
             ++buttonIndex;
 
             //fire output stuff
-            if (WUInity.INPUT.Simulation.RunFireSim)
+            if (WUInity.INPUT.Simulation.RunFireModule)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUInity.SIM.GetFireWindSpeed() + " m/s");
                 ++buttonIndex;
@@ -235,7 +235,7 @@ namespace WUInity.UI
 
         void LegendGUI()
         {
-            if (WUInity.INPUT.Simulation.RunFireSim)
+            if (WUInity.INPUT.Simulation.RunFireModule)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f - 305, 120, 300));
 
@@ -249,7 +249,7 @@ namespace WUInity.UI
                 GUI.EndGroup();
             }
 
-            if (WUInity.INPUT.Simulation.RunSmokeSim)
+            if (WUInity.INPUT.Simulation.RunSmokeModule)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f + 5, 120, 300));
 

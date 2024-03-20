@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace WUInity.Evac
+namespace WUInity.Pedestrian
 {
     /// <summary>
     /// A unit of people (could also be just one person) that travel together to reach their goal (car).

@@ -720,12 +720,12 @@ PrefabInstance:
     - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: _imagery._layerProperty.sourceType
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: _imagery._layerProperty.sourceOptions.layerSource.Id
-      value: mapbox://styles/mapbox/satellite-streets-v10
+      value: mapbox://styles/mapbox/streets-v10
       objectReference: {fileID: 0}
     - target: {fileID: 9009419062416531712, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
@@ -786,6 +786,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: WUInity
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009419062933292157, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: zoomSpeed
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1323904449681020783, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3, type: 3}

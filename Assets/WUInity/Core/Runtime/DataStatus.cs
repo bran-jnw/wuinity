@@ -45,7 +45,7 @@ namespace WUInity
                 LOG(WUInity.LogType.Error, "No router database loaded and no valid OSM file was found to build it from.");
             }
 
-            if (INPUT.Simulation.RunFireSim)
+            if (INPUT.Simulation.RunFireModule)
             {
                 if (!LcpLoaded)
                 {
@@ -54,7 +54,7 @@ namespace WUInity
                 }
             }
 
-            if (INPUT.Simulation.RunEvacSim)
+            if (INPUT.Simulation.RunPedestrianModule)
             {
                 if (RUNTIME_DATA.Evacuation.ResponseCurves == null)
                 {

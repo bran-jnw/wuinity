@@ -306,7 +306,7 @@ namespace WUInity.Fire
             for (int i = 0; i < fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
-                if(WUInity.INPUT.Simulation.RunSmokeSim)
+                if(WUInity.INPUT.Simulation.RunSmokeModule)
                 {
                     sootProduction[i] = 0.0f;
                     if (fireCells[i].cellState == FireCellState.Burning)
