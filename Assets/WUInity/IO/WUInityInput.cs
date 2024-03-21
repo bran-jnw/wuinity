@@ -201,8 +201,8 @@ namespace WUInity
     {
         public enum MapServiceProvider { Mapbox, Bing, OSM };
         
-        public MapServiceProvider MapProvider = MapServiceProvider.Mapbox;
-        public int ZoomLevel = 13;
+        public MapServiceProvider mapProvider = MapServiceProvider.Mapbox;
+        public int zoomLevel = 13;
     }
 }
 

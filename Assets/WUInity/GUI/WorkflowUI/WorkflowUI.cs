@@ -2237,7 +2237,7 @@ namespace WUInity.UI
 
             double.TryParse(floatNumbers[0], out wO.Simulation.Size.x);
             double.TryParse(floatNumbers[1], out wO.Simulation.Size.y);
-            int.TryParse(_mapZoomLevel, out wO.Map.ZoomLevel);
+            int.TryParse(_mapZoomLevel, out wO.Map.zoomLevel);
 
             WUInity.INSTANCE.UpdateMapResourceStatus();
         }
@@ -2319,7 +2319,7 @@ namespace WUInity.UI
 
                 UnityEngine.UIElements.TextField tfTxTSetMapZoomLevel = root.Q<UnityEngine.UIElements.TextField>("TxTSetMapZoomLevel");
                 if (tfTxTSetMapZoomLevel != null)
-                    tfTxTSetMapZoomLevel.value = wO.Map.ZoomLevel.ToString();
+                    tfTxTSetMapZoomLevel.value = wO.Map.zoomLevel.ToString();
 
                 // 3. Population section -------------------------------------------------------------------------------------------------------------
                 SetGlobalGPWFileFoler();
