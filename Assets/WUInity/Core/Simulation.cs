@@ -2,6 +2,7 @@
 using WUInity.Pedestrian;
 using WUInity.Traffic;
 using WUInity.Fire;
+using System.Threading;
 
 namespace WUInity
 {
@@ -447,18 +448,33 @@ namespace WUInity
             }
         }
 
-        
-        float nextFireUpdate;
+        bool _runMultiThreaded = true;
         private void Update()
         {
             WUInityInput input = WUInity.INPUT;
 
-            UpdateEvents();
-            UpdateFireModule();
-            UpdateSmokeModule();
-            UpdatePedestrianModule();
-            UpdateTrafficModule();
-                
+            if(_runMultiThreaded)
+            {
+                UpdateEvents();
+                System.Threading.Tasks.Task task1 = System.Threading.Tasks.Task.Run(UpdateFireModule);
+                //can't be run on thread due to Unity stuff
+                UpdateSmokeModule();
+                System.Threading.Tasks.Task task3 = System.Threading.Tasks.Task.Run(UpdatePedestrianModule);
+                System.Threading.Tasks.Task task4 = System.Threading.Tasks.Task.Run(UpdateTrafficModule);
+
+                task1.Wait();
+                task3.Wait();
+                task4.Wait();
+            }
+            else
+            {
+                UpdateEvents();
+                UpdateFireModule();
+                UpdateSmokeModule();
+                UpdatePedestrianModule();
+                UpdateTrafficModule();
+            }
+
             //increase time
             float deltaTime = input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
@@ -491,6 +507,7 @@ namespace WUInity
         }
 
         bool fireUpdated = false;
+        float nextFireUpdate;
         private void UpdateFireModule()
         {
             WUInityInput input = WUInity.INPUT;

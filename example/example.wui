@@ -16,11 +16,11 @@
         "RunPedestrianModule": true,
         "RunTrafficModule": true,
         "RunFireModule": true,
-        "RunSmokeModule": true
+        "RunSmokeModule": false
     },
     "Map": {
-        "MapProvider": 0,
-        "ZoomLevel": 14
+        "mapProvider": 0,
+        "zoomLevel": 13
     },
     "Visualization": {
         "drawRoads": false

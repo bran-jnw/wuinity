@@ -436,7 +436,7 @@ namespace WUInity.Fire
         /// <returns></returns>
         public FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
             int x = (int)(pos.x / cellSize.x);
             int y = (int)(pos.y / cellSize.x);
