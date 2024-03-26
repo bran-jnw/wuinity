@@ -1,0 +1,17 @@
+To update or use a custom version of SUMO these are the steps to compile it for use in WUInity:
+- Clone SUMO from https://github.com/eclipse-sumo/sumo.
+- Make sure to also clone https://github.com/DLR-TS/SUMOLibraries for use on Windows.
+- Open up the project in Visual Studio (2022 community tested), make sure CMake is installed (as well as C++ support).
+- Enable the ENABLE_CS_BINDINGS flag in CMakeSettings.json.
+- Make sure also that the SUMO libraries are found, else manually set them up.
+- Disable the GUI by setting "set(FOX_FOUND false)" in CMakeList.txt just before the check is made (so after find_package(FOX)).
+- in .\src\libsumo\CMakeList.txt add "set(CMAKE_SWIG_FLAGS -namespace LIBSUMO)" right after the flags are reset (in the "if(ENABLE_CS_BINDINGS)" block).
+- Make sure that the build target is set to x64_release (and make sure that you changed the CMakeSettings for this as well as the default is debug).
+- Build all and wait for it to complete.
+- The needed libsumocs.dll will now be in .\bin\, this gets placed in the x64 plugins in WUInity SUMO module.
+- You might need some other dll files, install pre-compiled SUMO release to reduce the amount, 
+that way only geos.dll, geos_c.dll and jupedsim.dll should be needed (the rest comes with the SUMO install). 
+Verify with https://github.com/lucasg/Dependencies that all dlls are found.
+- The generated SWIG glue code will be in .\out\build\x64-Release\src\libsumo\cs, this gets placed in LibsumoCSharp in WUInity.
+- In Unity, make sure all dlls are set to x64 only. Also make sure that libsumocs.dll is loaded on startup (or else it will crash).
+- That should be it.
