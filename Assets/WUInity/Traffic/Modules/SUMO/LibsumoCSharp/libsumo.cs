@@ -2771,6 +2771,14 @@ public class libsumo {
     } 
   }
 
+  public static int TL_CONSTRAINT_ADD {
+    get {
+      int ret = libsumoPINVOKE.TL_CONSTRAINT_ADD_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
   public static int LANE_LINK_NUMBER {
     get {
       int ret = libsumoPINVOKE.LANE_LINK_NUMBER_get();
@@ -3438,6 +3446,14 @@ public class libsumo {
   public static int VAR_BOARDING_DURATION {
     get {
       int ret = libsumoPINVOKE.VAR_BOARDING_DURATION_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_IMPATIENCE {
+    get {
+      int ret = libsumoPINVOKE.VAR_IMPATIENCE_get();
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 

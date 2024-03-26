@@ -224,6 +224,18 @@ public class Lane : global::System.IDisposable {
     return ret;
   }
 
+  public static double getAngle(string laneID, double relativePosition) {
+    double ret = libsumoPINVOKE.Lane_getAngle__SWIG_0(laneID, relativePosition);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static double getAngle(string laneID) {
+    double ret = libsumoPINVOKE.Lane_getAngle__SWIG_1(laneID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.Lane_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -236,8 +248,8 @@ public class Lane : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Lane_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Lane_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -248,8 +260,8 @@ public class Lane : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Lane_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Lane_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

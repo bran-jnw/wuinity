@@ -104,8 +104,8 @@ public class POI : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.POI_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.POI_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -116,8 +116,8 @@ public class POI : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.POI_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.POI_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -228,8 +228,8 @@ public class POI : global::System.IDisposable {
     } 
   }
 
-  public static void setType(string poiID, string setType) {
-    libsumoPINVOKE.POI_setType(poiID, setType);
+  public static void setType(string poiID, string poiType) {
+    libsumoPINVOKE.POI_setType(poiID, poiType);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -263,44 +263,50 @@ public class POI : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
+  public static bool add(string poiID, double x, double y, TraCIColor color, string poiType, int layer, string imgFile, double width, double height, double angle, string icon) {
+    bool ret = libsumoPINVOKE.POI_add__SWIG_0(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width, height, angle, icon);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static bool add(string poiID, double x, double y, TraCIColor color, string poiType, int layer, string imgFile, double width, double height, double angle) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_0(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width, height, angle);
+    bool ret = libsumoPINVOKE.POI_add__SWIG_1(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width, height, angle);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool add(string poiID, double x, double y, TraCIColor color, string poiType, int layer, string imgFile, double width, double height) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_1(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width, height);
+    bool ret = libsumoPINVOKE.POI_add__SWIG_2(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width, height);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool add(string poiID, double x, double y, TraCIColor color, string poiType, int layer, string imgFile, double width) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_2(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width);
+    bool ret = libsumoPINVOKE.POI_add__SWIG_3(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile, width);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool add(string poiID, double x, double y, TraCIColor color, string poiType, int layer, string imgFile) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_3(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile);
+    bool ret = libsumoPINVOKE.POI_add__SWIG_4(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer, imgFile);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool add(string poiID, double x, double y, TraCIColor color, string poiType, int layer) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_4(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer);
+    bool ret = libsumoPINVOKE.POI_add__SWIG_5(poiID, x, y, TraCIColor.getCPtr(color), poiType, layer);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool add(string poiID, double x, double y, TraCIColor color, string poiType) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_5(poiID, x, y, TraCIColor.getCPtr(color), poiType);
+    bool ret = libsumoPINVOKE.POI_add__SWIG_6(poiID, x, y, TraCIColor.getCPtr(color), poiType);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static bool add(string poiID, double x, double y, TraCIColor color) {
-    bool ret = libsumoPINVOKE.POI_add__SWIG_6(poiID, x, y, TraCIColor.getCPtr(color));
+    bool ret = libsumoPINVOKE.POI_add__SWIG_7(poiID, x, y, TraCIColor.getCPtr(color));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

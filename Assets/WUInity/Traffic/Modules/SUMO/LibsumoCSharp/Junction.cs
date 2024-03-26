@@ -74,8 +74,8 @@ public class Junction : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Junction_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Junction_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -86,8 +86,8 @@ public class Junction : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Junction_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Junction_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

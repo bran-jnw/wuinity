@@ -182,6 +182,18 @@ public class Edge : global::System.IDisposable {
     return ret;
   }
 
+  public static double getAngle(string edgeID, double relativePosition) {
+    double ret = libsumoPINVOKE.Edge_getAngle__SWIG_0(edgeID, relativePosition);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static double getAngle(string edgeID) {
+    double ret = libsumoPINVOKE.Edge_getAngle__SWIG_1(edgeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.Edge_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -194,8 +206,8 @@ public class Edge : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Edge_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Edge_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -206,8 +218,8 @@ public class Edge : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Edge_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Edge_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -373,8 +385,8 @@ public class Edge : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public static void setFriction(string edgeID, double value) {
-    libsumoPINVOKE.Edge_setFriction(edgeID, value);
+  public static void setFriction(string edgeID, double friction) {
+    libsumoPINVOKE.Edge_setFriction(edgeID, friction);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

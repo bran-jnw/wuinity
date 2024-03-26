@@ -338,8 +338,14 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
+  public static string getStopParameter(string vehID, int nextStopIndex, string param, bool customParam) {
+    string ret = libsumoPINVOKE.Vehicle_getStopParameter__SWIG_0(vehID, nextStopIndex, param, customParam);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static string getStopParameter(string vehID, int nextStopIndex, string param) {
-    string ret = libsumoPINVOKE.Vehicle_getStopParameter(vehID, nextStopIndex, param);
+    string ret = libsumoPINVOKE.Vehicle_getStopParameter__SWIG_1(vehID, nextStopIndex, param);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -350,14 +356,14 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
-  public static double getDrivingDistance(string vehID, string edgeID, double position, int laneIndex) {
-    double ret = libsumoPINVOKE.Vehicle_getDrivingDistance__SWIG_0(vehID, edgeID, position, laneIndex);
+  public static double getDrivingDistance(string vehID, string edgeID, double pos, int laneIndex) {
+    double ret = libsumoPINVOKE.Vehicle_getDrivingDistance__SWIG_0(vehID, edgeID, pos, laneIndex);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getDrivingDistance(string vehID, string edgeID, double position) {
-    double ret = libsumoPINVOKE.Vehicle_getDrivingDistance__SWIG_1(vehID, edgeID, position);
+  public static double getDrivingDistance(string vehID, string edgeID, double pos) {
+    double ret = libsumoPINVOKE.Vehicle_getDrivingDistance__SWIG_1(vehID, edgeID, pos);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -506,8 +512,8 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Vehicle_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Vehicle_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -518,8 +524,8 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Vehicle_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Vehicle_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -661,6 +667,12 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
+  public static double getImpatience(string typeID) {
+    double ret = libsumoPINVOKE.Vehicle_getImpatience(typeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static void setStop(string vehID, string edgeID, double pos, int laneIndex, double duration, int flags, double startPos, double until) {
     libsumoPINVOKE.Vehicle_setStop__SWIG_0(vehID, edgeID, pos, laneIndex, duration, flags, startPos, until);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -776,8 +788,13 @@ public class Vehicle : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
+  public static void setStopParameter(string vehID, int nextStopIndex, string param, string value, bool customParam) {
+    libsumoPINVOKE.Vehicle_setStopParameter__SWIG_0(vehID, nextStopIndex, param, value, customParam);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
   public static void setStopParameter(string vehID, int nextStopIndex, string param, string value) {
-    libsumoPINVOKE.Vehicle_setStopParameter(vehID, nextStopIndex, param, value);
+    libsumoPINVOKE.Vehicle_setStopParameter__SWIG_1(vehID, nextStopIndex, param, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -916,8 +933,8 @@ public class Vehicle : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public static void setAcceleration(string vehID, double accel, double duration) {
-    libsumoPINVOKE.Vehicle_setAcceleration(vehID, accel, duration);
+  public static void setAcceleration(string vehID, double acceleration, double duration) {
+    libsumoPINVOKE.Vehicle_setAcceleration(vehID, acceleration, duration);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -1081,8 +1098,8 @@ public class Vehicle : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public static void setVia(string vehID, StringVector via) {
-    libsumoPINVOKE.Vehicle_setVia(vehID, StringVector.getCPtr(via));
+  public static void setVia(string vehID, StringVector edgeList) {
+    libsumoPINVOKE.Vehicle_setVia(vehID, StringVector.getCPtr(edgeList));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -1223,6 +1240,16 @@ public class Vehicle : global::System.IDisposable {
 
   public static void setActionStepLength(string typeID, double actionStepLength) {
     libsumoPINVOKE.Vehicle_setActionStepLength__SWIG_1(typeID, actionStepLength);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setBoardingDuration(string typeID, double boardingDuration) {
+    libsumoPINVOKE.Vehicle_setBoardingDuration(typeID, boardingDuration);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setImpatience(string typeID, double impatience) {
+    libsumoPINVOKE.Vehicle_setImpatience(typeID, impatience);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

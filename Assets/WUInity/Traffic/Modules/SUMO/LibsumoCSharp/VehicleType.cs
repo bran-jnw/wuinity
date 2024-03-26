@@ -182,6 +182,12 @@ public class VehicleType : global::System.IDisposable {
     return ret;
   }
 
+  public static double getImpatience(string typeID) {
+    double ret = libsumoPINVOKE.VehicleType_getImpatience(typeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.VehicleType_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -194,8 +200,8 @@ public class VehicleType : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.VehicleType_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.VehicleType_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -206,8 +212,8 @@ public class VehicleType : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.VehicleType_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.VehicleType_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -313,6 +319,16 @@ public class VehicleType : global::System.IDisposable {
 
   public static void setActionStepLength(string typeID, double actionStepLength) {
     libsumoPINVOKE.VehicleType_setActionStepLength__SWIG_1(typeID, actionStepLength);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setBoardingDuration(string typeID, double boardingDuration) {
+    libsumoPINVOKE.VehicleType_setBoardingDuration(typeID, boardingDuration);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setImpatience(string typeID, double impatience) {
+    libsumoPINVOKE.VehicleType_setImpatience(typeID, impatience);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

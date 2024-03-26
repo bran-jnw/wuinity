@@ -152,8 +152,8 @@ public class Person : global::System.IDisposable {
     return ret;
   }
 
-  public static TraCIReservationVector getTaxiReservations(int stateFilter) {
-    TraCIReservationVector ret = new TraCIReservationVector(libsumoPINVOKE.Person_getTaxiReservations__SWIG_0(stateFilter), true);
+  public static TraCIReservationVector getTaxiReservations(int onlyNew) {
+    TraCIReservationVector ret = new TraCIReservationVector(libsumoPINVOKE.Person_getTaxiReservations__SWIG_0(onlyNew), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -182,8 +182,8 @@ public class Person : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Person_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Person_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -194,8 +194,8 @@ public class Person : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Person_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Person_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -333,6 +333,12 @@ public class Person : global::System.IDisposable {
 
   public static double getBoardingDuration(string typeID) {
     double ret = libsumoPINVOKE.Person_getBoardingDuration(typeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static double getImpatience(string typeID) {
+    double ret = libsumoPINVOKE.Person_getImpatience(typeID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -569,6 +575,16 @@ public class Person : global::System.IDisposable {
 
   public static void setActionStepLength(string typeID, double actionStepLength) {
     libsumoPINVOKE.Person_setActionStepLength__SWIG_1(typeID, actionStepLength);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setBoardingDuration(string typeID, double boardingDuration) {
+    libsumoPINVOKE.Person_setBoardingDuration(typeID, boardingDuration);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setImpatience(string typeID, double impatience) {
+    libsumoPINVOKE.Person_setImpatience(typeID, impatience);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

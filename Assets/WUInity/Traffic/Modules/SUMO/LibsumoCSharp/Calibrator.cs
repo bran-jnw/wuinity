@@ -98,8 +98,8 @@ public class Calibrator : global::System.IDisposable {
     return ret;
   }
 
-  public static StringVector getVTypes(string routeID) {
-    StringVector ret = new StringVector(libsumoPINVOKE.Calibrator_getVTypes(routeID), true);
+  public static StringVector getVTypes(string calibratorID) {
+    StringVector ret = new StringVector(libsumoPINVOKE.Calibrator_getVTypes(calibratorID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -134,8 +134,8 @@ public class Calibrator : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Calibrator_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Calibrator_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -146,8 +146,8 @@ public class Calibrator : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Calibrator_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Calibrator_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

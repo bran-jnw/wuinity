@@ -164,8 +164,8 @@ public class TrafficLight : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.TrafficLight_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.TrafficLight_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -176,8 +176,8 @@ public class TrafficLight : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.TrafficLight_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.TrafficLight_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -315,6 +315,21 @@ public class TrafficLight : global::System.IDisposable {
 
   public static void setProgramLogic(string tlsID, TraCILogic logic) {
     libsumoPINVOKE.TrafficLight_setProgramLogic(tlsID, TraCILogic.getCPtr(logic));
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void addConstraint(string tlsID, string tripId, string foeSignal, string foeId, int type, int limit) {
+    libsumoPINVOKE.TrafficLight_addConstraint__SWIG_0(tlsID, tripId, foeSignal, foeId, type, limit);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void addConstraint(string tlsID, string tripId, string foeSignal, string foeId, int type) {
+    libsumoPINVOKE.TrafficLight_addConstraint__SWIG_1(tlsID, tripId, foeSignal, foeId, type);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void addConstraint(string tlsID, string tripId, string foeSignal, string foeId) {
+    libsumoPINVOKE.TrafficLight_addConstraint__SWIG_2(tlsID, tripId, foeSignal, foeId);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

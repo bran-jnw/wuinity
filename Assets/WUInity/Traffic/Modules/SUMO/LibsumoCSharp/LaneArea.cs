@@ -152,8 +152,8 @@ public class LaneArea : global::System.IDisposable {
     return ret;
   }
 
-  public static void overrideVehicleNumber(string detID, int num) {
-    libsumoPINVOKE.LaneArea_overrideVehicleNumber(detID, num);
+  public static void overrideVehicleNumber(string detID, int vehNum) {
+    libsumoPINVOKE.LaneArea_overrideVehicleNumber(detID, vehNum);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -169,8 +169,8 @@ public class LaneArea : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.LaneArea_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.LaneArea_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -181,8 +181,8 @@ public class LaneArea : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.LaneArea_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.LaneArea_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

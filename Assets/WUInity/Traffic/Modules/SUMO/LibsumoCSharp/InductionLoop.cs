@@ -44,110 +44,110 @@ public class InductionLoop : global::System.IDisposable {
     }
   }
 
-  public static double getPosition(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getPosition(detID);
+  public static double getPosition(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getPosition(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static string getLaneID(string detID) {
-    string ret = libsumoPINVOKE.InductionLoop_getLaneID(detID);
+  public static string getLaneID(string loopID) {
+    string ret = libsumoPINVOKE.InductionLoop_getLaneID(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static int getLastStepVehicleNumber(string detID) {
-    int ret = libsumoPINVOKE.InductionLoop_getLastStepVehicleNumber(detID);
+  public static int getLastStepVehicleNumber(string loopID) {
+    int ret = libsumoPINVOKE.InductionLoop_getLastStepVehicleNumber(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getLastStepMeanSpeed(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getLastStepMeanSpeed(detID);
+  public static double getLastStepMeanSpeed(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getLastStepMeanSpeed(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static StringVector getLastStepVehicleIDs(string detID) {
-    StringVector ret = new StringVector(libsumoPINVOKE.InductionLoop_getLastStepVehicleIDs(detID), true);
+  public static StringVector getLastStepVehicleIDs(string loopID) {
+    StringVector ret = new StringVector(libsumoPINVOKE.InductionLoop_getLastStepVehicleIDs(loopID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getLastStepOccupancy(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getLastStepOccupancy(detID);
+  public static double getLastStepOccupancy(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getLastStepOccupancy(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getLastStepMeanLength(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getLastStepMeanLength(detID);
+  public static double getLastStepMeanLength(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getLastStepMeanLength(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getTimeSinceDetection(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getTimeSinceDetection(detID);
+  public static double getTimeSinceDetection(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getTimeSinceDetection(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static TraCIVehicleDataVector getVehicleData(string detID) {
-    TraCIVehicleDataVector ret = new TraCIVehicleDataVector(libsumoPINVOKE.InductionLoop_getVehicleData(detID), true);
+  public static TraCIVehicleDataVector getVehicleData(string loopID) {
+    TraCIVehicleDataVector ret = new TraCIVehicleDataVector(libsumoPINVOKE.InductionLoop_getVehicleData(loopID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getIntervalOccupancy(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getIntervalOccupancy(detID);
+  public static double getIntervalOccupancy(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getIntervalOccupancy(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getIntervalMeanSpeed(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getIntervalMeanSpeed(detID);
+  public static double getIntervalMeanSpeed(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getIntervalMeanSpeed(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static int getIntervalVehicleNumber(string detID) {
-    int ret = libsumoPINVOKE.InductionLoop_getIntervalVehicleNumber(detID);
+  public static int getIntervalVehicleNumber(string loopID) {
+    int ret = libsumoPINVOKE.InductionLoop_getIntervalVehicleNumber(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static StringVector getIntervalVehicleIDs(string detID) {
-    StringVector ret = new StringVector(libsumoPINVOKE.InductionLoop_getIntervalVehicleIDs(detID), true);
+  public static StringVector getIntervalVehicleIDs(string loopID) {
+    StringVector ret = new StringVector(libsumoPINVOKE.InductionLoop_getIntervalVehicleIDs(loopID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getLastIntervalOccupancy(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getLastIntervalOccupancy(detID);
+  public static double getLastIntervalOccupancy(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getLastIntervalOccupancy(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static double getLastIntervalMeanSpeed(string detID) {
-    double ret = libsumoPINVOKE.InductionLoop_getLastIntervalMeanSpeed(detID);
+  public static double getLastIntervalMeanSpeed(string loopID) {
+    double ret = libsumoPINVOKE.InductionLoop_getLastIntervalMeanSpeed(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static int getLastIntervalVehicleNumber(string detID) {
-    int ret = libsumoPINVOKE.InductionLoop_getLastIntervalVehicleNumber(detID);
+  public static int getLastIntervalVehicleNumber(string loopID) {
+    int ret = libsumoPINVOKE.InductionLoop_getLastIntervalVehicleNumber(loopID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static StringVector getLastIntervalVehicleIDs(string detID) {
-    StringVector ret = new StringVector(libsumoPINVOKE.InductionLoop_getLastIntervalVehicleIDs(detID), true);
+  public static StringVector getLastIntervalVehicleIDs(string loopID) {
+    StringVector ret = new StringVector(libsumoPINVOKE.InductionLoop_getLastIntervalVehicleIDs(loopID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static void overrideTimeSinceDetection(string detID, double time) {
-    libsumoPINVOKE.InductionLoop_overrideTimeSinceDetection(detID, time);
+  public static void overrideTimeSinceDetection(string loopID, double time) {
+    libsumoPINVOKE.InductionLoop_overrideTimeSinceDetection(loopID, time);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -163,8 +163,8 @@ public class InductionLoop : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.InductionLoop_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.InductionLoop_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -175,8 +175,8 @@ public class InductionLoop : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.InductionLoop_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.InductionLoop_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

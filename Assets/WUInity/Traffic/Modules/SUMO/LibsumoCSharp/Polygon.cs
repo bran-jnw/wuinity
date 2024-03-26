@@ -86,8 +86,8 @@ public class Polygon : global::System.IDisposable {
     return ret;
   }
 
-  public static string getParameter(string objectID, string param) {
-    string ret = libsumoPINVOKE.Polygon_getParameter(objectID, param);
+  public static string getParameter(string objectID, string key) {
+    string ret = libsumoPINVOKE.Polygon_getParameter(objectID, key);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -98,8 +98,8 @@ public class Polygon : global::System.IDisposable {
     return ret;
   }
 
-  public static void setParameter(string objectID, string param, string value) {
-    libsumoPINVOKE.Polygon_setParameter(objectID, param, value);
+  public static void setParameter(string objectID, string key, string value) {
+    libsumoPINVOKE.Polygon_setParameter(objectID, key, value);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -210,8 +210,8 @@ public class Polygon : global::System.IDisposable {
     } 
   }
 
-  public static void setType(string polygonID, string setType) {
-    libsumoPINVOKE.Polygon_setType(polygonID, setType);
+  public static void setType(string polygonID, string polygonType) {
+    libsumoPINVOKE.Polygon_setType(polygonID, polygonType);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
