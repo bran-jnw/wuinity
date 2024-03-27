@@ -450,7 +450,7 @@ namespace WUInity
         {            
             if (SIM.IsRunning)
             {
-                message = "[" + (int)SIM.Time + "s] " + message;
+                message = "[" + (int)SIM.CurrentTime + "s] " + message;
             }
 
             if (logType == LogType.Warning)

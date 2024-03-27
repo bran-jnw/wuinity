@@ -60,11 +60,6 @@ namespace WUInity.Traffic
             throw new NotImplementedException();
         }
 
-        public override void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, RouteData routeData, uint numberOfPeopleInCar)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void InsertNewTrafficEvent(TrafficEvent tE)
         {
             throw new NotImplementedException();
@@ -91,6 +86,11 @@ namespace WUInity.Traffic
         }
 
         public override void SaveToFile(int runNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PostUpdate()
         {
             throw new NotImplementedException();
         }

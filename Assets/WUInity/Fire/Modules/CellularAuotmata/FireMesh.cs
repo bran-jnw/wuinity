@@ -6,7 +6,7 @@ using System;
 namespace WUInity.Fire
 {
     [System.Serializable]                                           
-    public class FireMesh                        
+    public class FireMesh : FireModule                        
     {
         public Vector2int cellCount;                                
         public SpreadMode spreadMode;                               
@@ -225,7 +225,7 @@ namespace WUInity.Fire
         }
 
         bool initialized = false;
-        public bool Update()
+        public override void Update(float currentTime, float deltaTime)
         {
             if(!initialized)                                        
             {
@@ -239,7 +239,7 @@ namespace WUInity.Fire
 
             if (activeCells.Count == 0)                             
             {
-                return false;
+                return;// false;
             }            
 
             //collect max spread rate
@@ -323,8 +323,18 @@ namespace WUInity.Fire
             //TODO: only update if any input has changed, re-calculate spread rates
             UpdateCellSpreadRates();
 
-            return true;
-        }     
+            //return true;
+        }
+
+        public override bool SimulationDone()
+        {
+            if(activeCells.Count == 0 && _ignitionDone)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         public int GetActiveCellCount()
         {
@@ -441,7 +451,8 @@ namespace WUInity.Fire
             int x = (int)(pos.x / cellSize.x);
             int y = (int)(pos.y / cellSize.x);
 
-            if(!IsInsideMesh(x, y))
+            //might be called before initialized, so need to check null, but should really chnag execution order
+            if(!IsInsideMesh(x, y) || fireCells == null)
             {
                 return FireCellState.Dead;
             }

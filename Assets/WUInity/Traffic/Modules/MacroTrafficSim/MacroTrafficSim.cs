@@ -46,11 +46,15 @@ namespace WUInity.Traffic
             evacuationRenderer = UnityEngine.MonoBehaviour.FindObjectOfType<Visualization.EvacuationRenderer>();
         }
 
-        public override void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, RouteData routeData, uint numberOfPeopleInCar)
+        public override void PostUpdate()
         {
-            MacroCar car = new MacroCar(routeData, numberOfPeopleInCar, GetNewCarID());
-            carsOnHold.Add(car);
-            ++totalCarsSimulated;            
+            foreach (InjectedCar injectedCar in carsToInject)
+            {
+                MacroCar car = new MacroCar(injectedCar.routeData, injectedCar.numberOfPeopleInCar, GetNewCarID());
+                carsOnHold.Add(car);
+                ++totalCarsSimulated;
+            }
+            carsToInject.Clear();
         }
 
         public override void InsertNewTrafficEvent(TrafficEvent tE)
@@ -187,10 +191,11 @@ namespace WUInity.Traffic
 
                     MacroCar car = roadSegment.Value.cars[j];
                     float speed = densitySpeed;
-                    /*if(j == 0)
+                    //the first car moves unimpeded
+                    if(j == 0)
                     {
                         speed = car.currentSpeedLimit;
-                    }*/
+                    }
                     
                     //check if we are going on to a new stretch of road (new traffic density) after this time step
                     if(car.WillChangeRoad(deltaTime, speed))

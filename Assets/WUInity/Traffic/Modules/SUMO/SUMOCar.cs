@@ -88,7 +88,7 @@ namespace WUInity.Traffic
         public override void Arrive()
         {
             active = false;
-            goal.CarArrives(this, WUInity.SIM.Time, WUInity.INPUT.Simulation.DeltaTime);
+            goal.CarArrives(this, WUInity.SIM.CurrentTime, WUInity.INPUT.Simulation.DeltaTime);
             //TODO: send message to WUI-nity
         }
 

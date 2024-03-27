@@ -98,12 +98,12 @@ namespace WUInity
             }
         }
 
-        private float _time;
-        public float Time
+        private float _currentTime;
+        public float CurrentTime
         {
             get
             {
-                return _time;
+                return _currentTime;
             }
         } 
 
@@ -160,7 +160,7 @@ namespace WUInity
                     if (i > 0)
                     {
                         float pastAverage = (averageTotalEvacTime / i);
-                        averageTotalEvacTime += Time;
+                        averageTotalEvacTime += CurrentTime;
                         float currentAverage = (averageTotalEvacTime / (i + 1));
                         float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
                         //if convergence met we can stop
@@ -180,7 +180,7 @@ namespace WUInity
                     }     
                     else
                     {
-                        averageTotalEvacTime += Time;
+                        averageTotalEvacTime += CurrentTime;
                     }
                     //force garbage collection
                     //Resources.UnloadUnusedAssets();                    
@@ -198,7 +198,7 @@ namespace WUInity
                 {
                     WUInity.LOG(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations.");
                 }
-                WUInity.OUTPUT.totalEvacTime = Time;
+                WUInity.OUTPUT.totalEvacTime = CurrentTime;
                 IsRunning = false;
                 HaveResults = true;
                 WUInity.LOG(WUInity.LogType.Log, " Simulation done.");
@@ -341,13 +341,13 @@ namespace WUInity
             }
 
             //pick start time based on curve or 0 (fire start)
-            _time = 0f;
+            _currentTime = 0f;
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves.Length; i++)
             {
                 float t = WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + input.Evacuation.EvacuationOrderStart;
-                _time = Mathf.Min(Time, t);
+                _currentTime = Mathf.Min(CurrentTime, t);
             }
-            _startTime = Time;
+            _startTime = CurrentTime;
 
             if(input.Simulation.RunTrafficModule)
             {
@@ -393,7 +393,7 @@ namespace WUInity
             }
 
             WUInityInput input = WUInity.INPUT;
-            _stopSim = Time <= input.Simulation.MaxSimTime ? false : true;
+            _stopSim = CurrentTime <= input.Simulation.MaxSimTime ? false : true;
 
             if (input.Simulation.StopWhenEvacuated)
             {
@@ -426,7 +426,7 @@ namespace WUInity
             UpdateSimStatus();
             if (!_stopSim)
             {
-                WUInity.OUTPUT.totalEvacTime = Time;
+                WUInity.OUTPUT.totalEvacTime = CurrentTime;
                 Update();
             }
             else if(IsRunning)
@@ -457,7 +457,7 @@ namespace WUInity
             {
                 UpdateEvents();
                 System.Threading.Tasks.Task task1 = System.Threading.Tasks.Task.Run(UpdateFireModule);
-                //can't be run on thread due to Unity stuff
+                //can't be run on thread due to Unity stuff for now
                 UpdateSmokeModule();
                 System.Threading.Tasks.Task task3 = System.Threading.Tasks.Task.Run(UpdatePedestrianModule);
                 System.Threading.Tasks.Task task4 = System.Threading.Tasks.Task.Run(UpdateTrafficModule);
@@ -475,6 +475,9 @@ namespace WUInity
                 UpdateTrafficModule();
             }
 
+            //take care of arrived cars and inject for next time step
+            _trafficModule.PostUpdate();
+
             //increase time
             float deltaTime = input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
@@ -482,7 +485,7 @@ namespace WUInity
             {
                 deltaTime = (float)_fireMesh.dt;
             }
-            _time += deltaTime;
+            _currentTime += deltaTime;
         }
 
         private void UpdateEvents()
@@ -497,7 +500,7 @@ namespace WUInity
                     for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents.Length; i++)
                     {
                         BlockGoalEvent bGE = WUInity.RUNTIME_DATA.Evacuation.BlockGoalEvents[i];
-                        if (Time >= bGE.startTime && !bGE.triggered)
+                        if (CurrentTime >= bGE.startTime && !bGE.triggered)
                         {
                             bGE.ApplyEffects();
                         }
@@ -516,10 +519,10 @@ namespace WUInity
             fireUpdated = false;
             if (input.Simulation.RunFireModule)
             {
-                if (Time >= 0.0f && Time >= nextFireUpdate)
+                if (CurrentTime >= 0.0f && CurrentTime >= nextFireUpdate)
                 {
                     fireUpdated = true;
-                    _fireMesh.Update();
+                    _fireMesh.Update(_currentTime, input.Simulation.DeltaTime);
                     nextFireUpdate += (float)_fireMesh.dt;
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
                     // Note: we need to preprocess each cell which has a road on it
@@ -532,7 +535,7 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
 
             //sync with fire
-            if (Time >= 0.0f && input.Simulation.RunSmokeModule)
+            if (CurrentTime >= 0.0f && input.Simulation.RunSmokeModule)
             {
                 //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 _advectDiffuseSim.Update(input.Simulation.DeltaTime, _fireMesh.currentWindData.direction, _fireMesh.currentWindData.speed, fireUpdated);
@@ -546,7 +549,7 @@ namespace WUInity
             //advance pedestrian
             if (input.Simulation.RunPedestrianModule)
             {
-                _pedestrianModule.Update(Time, input.Simulation.DeltaTime);
+                _pedestrianModule.Update(CurrentTime, input.Simulation.DeltaTime);
             }
         }
 
@@ -557,7 +560,7 @@ namespace WUInity
             //advance traffic
             if (input.Simulation.RunTrafficModule)
             {
-                _trafficModule.Update(input.Simulation.DeltaTime, Time);
+                _trafficModule.Update(input.Simulation.DeltaTime, CurrentTime);
             }
 
             if (input.Simulation.RunFireModule)

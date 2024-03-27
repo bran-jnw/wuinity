@@ -155,6 +155,7 @@ namespace WUInity
     public class SUMOInput
     {
         public string inputFile;
+        public Vector2d UTMoffset;
     }
 
     [System.Serializable]
@@ -172,6 +173,8 @@ namespace WUInity
     [System.Serializable]
     public class FireInput
     {
+        public enum FireModuleChoice { Cells, VectorCells, FarsiteDLL, FarsiteOffline, PrometheusCOM, WISEoffline }
+        public FireModuleChoice fireModuleChoice = FireModuleChoice.Cells;
         public string lcpFile;
         public string fuelModelsFile = "default.fuel";
         public string initialFuelMoistureFile = "default.fmc";

@@ -112,10 +112,15 @@
             }
         ],
         "sumoInput": {
-            "inputFile": "rox.sumocfg"
+            "inputFile": "rox.sumocfg",
+            "UTMoffset": {
+                "x": -488359.4,
+                "y": -4358657.39
+            }
         }
     },
     "Fire": {
+        "fireModuleChoice": 0,
         "lcpFile": "roxborough.lcp",
         "fuelModelsFile": "default.fuel",
         "initialFuelMoistureFile": "default.fmc",
