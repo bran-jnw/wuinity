@@ -73,6 +73,7 @@ crashlytics-build.properties
 #WUInity stuff
 /[Ee]xternal_data/
 /[Ee]xample/[Oo]utput/
+/[Ee]xample/
 *.rc
 *.routerdb
 [Mm]apbox[Cc]onfiguration.txt
