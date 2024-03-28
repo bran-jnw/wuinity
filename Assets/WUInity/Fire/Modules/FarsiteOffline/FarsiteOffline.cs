@@ -5,19 +5,23 @@ using UnityEngine.UIElements;
 
 namespace WUInity.Fire
 {
-    public struct FarsiteRasterData
+    public struct FireRasterData
     {
         public float TOA; //time of arrival
         public float ROS; //rate of spread
         public float FI; //fireline intensity
-
+        public float SD; // spread direction
     }
+
+    /// <summary>
+    /// Supports only Flammap version of Farsite.
+    /// </summary>
     public class FarsiteOffline : FireModule
     {
         float maxTimeOfArrival = float.MinValue;
         int ncols, nrows, activeCells;
         double xllcorner, yllcorner, cellsize, NODATA_VALUE;
-        FarsiteRasterData[,] data;
+        FireRasterData[,] data;
         Vector2d offset;
         bool _hasUpdatedRenderer = false;
 
@@ -26,7 +30,8 @@ namespace WUInity.Fire
             string TOAFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "TOA.asc");
             string ROSFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "ROS.asc");
             string FIFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "FI.asc");
-            ReadOutput(TOAFile, ROSFile, FIFile);
+            string SDFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "SD.asc");
+            ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             LatLngUTMConverter converter = new LatLngUTMConverter(null); //default WGS84
             LatLngUTMConverter.UTMResult simUTM = converter.convertLatLngToUtm(WUInity.INPUT.Simulation.LowerLeftLatLong.x, WUInity.INPUT.Simulation.LowerLeftLatLong.y);
@@ -80,9 +85,9 @@ namespace WUInity.Fire
         /// <summary>
         /// Imports time of arrival.
         /// </summary>
-        private void ReadOutput(string TOAFile, string ROSFile, string FIFile)
+        private void ReadOutput(string TOAFile, string ROSFile, string FIFile, string SDFile)
         {
-            string[] TOALines, ROSLines, FILines;
+            string[] TOALines, ROSLines, FILines, SDLines;
 
             if (File.Exists(TOAFile))
             {
@@ -114,6 +119,16 @@ namespace WUInity.Fire
                 return;
             }
 
+            if (File.Exists(SDFile))
+            {
+                SDLines = File.ReadAllLines(SDFile);
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                return;
+            }
+
             int.TryParse(TOALines[0].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out ncols);
             int.TryParse(TOALines[1].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out nrows);
             double.TryParse(TOALines[2].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out xllcorner);
@@ -121,17 +136,18 @@ namespace WUInity.Fire
             double.TryParse(TOALines[4].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out cellsize);
             double.TryParse(TOALines[5].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out NODATA_VALUE);
 
-            data = new FarsiteRasterData[ncols, nrows];
+            data = new FireRasterData[ncols, nrows];
 
             for (int y = 0; y < nrows; y++)
             {
                 string[] TOALine = TOALines[y + 6].Split(" ", System.StringSplitOptions.RemoveEmptyEntries);
                 string[] ROSLine = ROSLines[y + 6].Split(" ", System.StringSplitOptions.RemoveEmptyEntries);
                 string[] FILine = FILines[y + 6].Split(" ", System.StringSplitOptions.RemoveEmptyEntries);
+                string[] SDLine = SDLines[y + 6].Split(" ", System.StringSplitOptions.RemoveEmptyEntries);
 
                 for (int x = 0; x < ncols; x++)
                 {
-                    float TOAValue, ROSValue, FIValue;
+                    float TOAValue, ROSValue, FIValue, SDValue;
 
                     float.TryParse(TOALine[x], out TOAValue);
                     TOAValue *= 60f; //received in minutes, want seconds
@@ -148,11 +164,14 @@ namespace WUInity.Fire
 
                     float.TryParse(FILine[x], out FIValue);
 
+                    float.TryParse(SDLine[x], out SDValue);
+
                     //flip y-axis
                     int yIndex = nrows - 1 - y;
                     data[x, yIndex].TOA = TOAValue;
                     data[x, yIndex].ROS = ROSValue;
                     data[x, yIndex].FI = FIValue;
+                    data[x, yIndex].SD = SDValue;
                 }
             }
         }
@@ -198,6 +217,7 @@ namespace WUInity.Fire
 
         public override float[] GetFireLineIntensityData()
         {
+            activeCells = 0;
             float[] result = new float[ncols * nrows];
             int index = 0;
             for (int y = 0; y < nrows; y++)
@@ -208,6 +228,7 @@ namespace WUInity.Fire
                     if (WUInity.SIM.CurrentTime > data[x, y].TOA)
                     {
                         result[index] = data[x, y].FI;
+                        ++activeCells;
                     }                    
                     ++index;
                 }
