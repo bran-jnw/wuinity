@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>ILGPU</id>
+    <version>1.5.1</version>
+    <title>ILGPU</title>
+    <authors>Marcel Koester</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="file">LICENSE.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>http://www.ilgpu.net/</projectUrl>
+    <description>ILGPU compiler and runtime library for convenient and high-performance GPU programming in .Net.
+            Samples can be found in the GitHub repository: https://github.com/m4rs-mt/ILGPU/tree/master/Samples</description>
+    <releaseNotes>http://www.ilgpu.net/releases</releaseNotes>
+    <copyright>Copyright (c) 2016-2023 ILGPU Project. All rights reserved.</copyright>
+    <tags>ilgpu gpu msil il cil cpu ptx nvidia amd amp opencl cuda compiler jit</tags>
+    <repository type="git" url="https://github.com/m4rs-mt/ILGPU" commit="4ec9de69ff254a746d23aa19f90fb670e05b3016" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.1">
+        <dependency id="System.Collections.Immutable" version="7.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reflection.Metadata" version="7.0.2" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net5.0" />
+      <group targetFramework="net6.0" />
+      <group targetFramework="net7.0" />
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="System.Collections.Immutable" version="7.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Reflection.Metadata" version="7.0.2" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

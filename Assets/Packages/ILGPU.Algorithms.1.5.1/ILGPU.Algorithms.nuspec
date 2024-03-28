@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>ILGPU.Algorithms</id>
+    <version>1.5.1</version>
+    <title>ILGPU Algorithms Library</title>
+    <authors>ILGPU Algorithms Project</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="file">LICENSE.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>http://www.ilgpu.net/</projectUrl>
+    <description>ILGPU Algorithms library for high-level GPU programming.
+      Samples can be found in the GitHub repository: https://github.com/m4rs-mt/ILGPU/tree/master/Samples</description>
+    <releaseNotes>http://www.ilgpu.net/releases</releaseNotes>
+    <copyright>Copyright (c) 2016-2023 ILGPU Project. All rights reserved.</copyright>
+    <tags>ilgpu gpu llvm nvidia amd amp opencl cuda scan prefix sum sort reduce parallel foreach</tags>
+    <repository type="git" url="https://github.com/m4rs-mt/ILGPU" commit="4ec9de69ff254a746d23aa19f90fb670e05b3016" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.1">
+        <dependency id="ILGPU" version="1.5.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net5.0">
+        <dependency id="ILGPU" version="1.5.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net6.0">
+        <dependency id="ILGPU" version="1.5.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net7.0">
+        <dependency id="ILGPU" version="1.5.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="ILGPU" version="1.5.1" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

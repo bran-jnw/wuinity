@@ -1763,7 +1763,7 @@ namespace WUInity.UI
             if (togTogSimPeds != null)
                 togTogSimPeds.RegisterValueChangedCallback(evt =>
                 {
-                    WUInity.INPUT.Simulation.RunEvacSim = evt.newValue;
+                    WUInity.INPUT.Simulation.RunPedestrianModule = evt.newValue;
                     UnityEngine.Debug.Log($"TogSimPeds = {evt.newValue}");
                 });
 
@@ -1771,7 +1771,7 @@ namespace WUInity.UI
             if (togTogSimTraf != null)
                 togTogSimTraf.RegisterValueChangedCallback(evt =>
                 {
-                    WUInity.INPUT.Simulation.RunTrafficSim = evt.newValue;
+                    WUInity.INPUT.Simulation.RunTrafficModule = evt.newValue;
                     UnityEngine.Debug.Log($"TogSimTraf = {evt.newValue}");
                 });
 
@@ -1779,7 +1779,7 @@ namespace WUInity.UI
             if (togTogSimFire != null)
                 togTogSimFire.RegisterValueChangedCallback(evt =>
                 {
-                    WUInity.INPUT.Simulation.RunFireSim = evt.newValue;
+                    WUInity.INPUT.Simulation.RunFireModule = evt.newValue;
                     UnityEngine.Debug.Log($"TogSimFire = {evt.newValue}");
                 });
 
@@ -1787,7 +1787,7 @@ namespace WUInity.UI
             if (togTogSimSmoke != null)
                 togTogSimSmoke.RegisterValueChangedCallback(evt =>
                 {
-                    WUInity.INPUT.Simulation.RunSmokeSim = evt.newValue;
+                    WUInity.INPUT.Simulation.RunSmokeModule = evt.newValue;
                     UnityEngine.Debug.Log($"TogSimSmoke = {evt.newValue}");
                 });
 
@@ -2103,27 +2103,27 @@ namespace WUInity.UI
             label3.text = "Total population: " + WUInity.POPULATION.GetTotalPopulation();
 
             Label label4 = Document.rootVisualElement.Q<Label>("TxtPeopleStaying");
-            label4.text = "People staying: " + WUInity.SIM.MacroHumanSim().GetPeopleStaying();
+            label4.text = "People staying: " + WUInity.SIM.PedestrianModule().GetPeopleStaying();
 
             Label label5 = Document.rootVisualElement.Q<Label>("TxtTotalCars");
-            label5.text = "Total cars: " + WUInity.SIM.MacroHumanSim().GetTotalCars();
+            label5.text = "Total cars: " + WUInity.SIM.PedestrianModule().GetTotalCars();
 
-            if (WUInity.INPUT.Simulation.RunEvacSim && WUInity.SIM.MacroHumanSim() != null)
+            if (WUInity.INPUT.Simulation.RunPedestrianModule && WUInity.SIM.PedestrianModule() != null)
             {
                 Label label6 = Document.rootVisualElement.Q<Label>("TxtPedLeft");
-                label6.text = "Pedestrians left: " + WUInity.SIM.MacroHumanSim().GetPeopleLeft() + " (" + Math.Round((double)WUInity.SIM.MacroHumanSim().GetPeopleLeft() / (double)WUInity.POPULATION.GetTotalPopulation() * 100.0, 1) + "%)";
+                label6.text = "Pedestrians left: " + WUInity.SIM.PedestrianModule().GetPeopleLeft() + " (" + Math.Round((double)WUInity.SIM.PedestrianModule().GetPeopleLeft() / (double)WUInity.POPULATION.GetTotalPopulation() * 100.0, 1) + "%)";
 
                 Label label7 = Document.rootVisualElement.Q<Label>("TxtCarsReached");
-                label7.text = "Cars reached by Peds: " + WUInity.SIM.MacroHumanSim().GetCarsReached();
+                label7.text = "Cars reached by Peds: " + WUInity.SIM.PedestrianModule().GetCarsReached();
             }
 
-            if (WUInity.INPUT.Simulation.RunTrafficSim && WUInity.SIM.MacroTrafficSim() != null)
+            if (WUInity.INPUT.Simulation.RunTrafficModule && WUInity.SIM.TrafficModule != null)
             {
                 Label label8 = Document.rootVisualElement.Q<Label>("TxtCarsLeft");
-                label8.text = "Cars left: " + WUInity.SIM.MacroTrafficSim().GetCarsInSystem() + " (" + Math.Round((double)WUInity.SIM.MacroTrafficSim().GetCarsInSystem() / (double)WUInity.SIM.MacroTrafficSim().GetTotalCarsSimulated() * 100.0, 1) + "%)";
+                label8.text = "Cars left: " + WUInity.SIM.TrafficModule.GetCarsInSystem() + " (" + Math.Round((double)WUInity.SIM.TrafficModule.GetCarsInSystem() / (double)WUInity.SIM.TrafficModule.GetTotalCarsSimulated() * 100.0, 1) + "%)";
             }
 
-            int totalEvacuated = 0;
+            uint totalEvacuated = 0;
             string name="Evacuation goals reached:";
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
@@ -2138,7 +2138,7 @@ namespace WUInity.UI
             Label label10 = Document.rootVisualElement.Q<Label>("TxtTotalEvacuated");
             label10.text = "Total evacuated: " + totalEvacuated;
 
-            if (WUInity.INPUT.Simulation.RunFireSim)
+            if (WUInity.INPUT.Simulation.RunFireModule)
             {
                 Label label11 = Document.rootVisualElement.Q<Label>("TxtWindSpeed");
                 label11.text = "Wind speed: " + Math.Round(WUInity.SIM.GetFireWindSpeed(),1) + " m/s";
@@ -2147,7 +2147,7 @@ namespace WUInity.UI
                 label12.text = "Wind direction: " + Math.Round(WUInity.SIM.GetFireWindDirection(),1) + " °";
 
                 Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
-                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireMesh().GetActiveCellCount();
+                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireModule().GetActiveCellCount();
             }
         }
 
@@ -2237,7 +2237,7 @@ namespace WUInity.UI
 
             double.TryParse(floatNumbers[0], out wO.Simulation.Size.x);
             double.TryParse(floatNumbers[1], out wO.Simulation.Size.y);
-            int.TryParse(_mapZoomLevel, out wO.Map.ZoomLevel);
+            int.TryParse(_mapZoomLevel, out wO.Map.zoomLevel);
 
             WUInity.INSTANCE.UpdateMapResourceStatus();
         }
@@ -2319,7 +2319,7 @@ namespace WUInity.UI
 
                 UnityEngine.UIElements.TextField tfTxTSetMapZoomLevel = root.Q<UnityEngine.UIElements.TextField>("TxTSetMapZoomLevel");
                 if (tfTxTSetMapZoomLevel != null)
-                    tfTxTSetMapZoomLevel.value = wO.Map.ZoomLevel.ToString();
+                    tfTxTSetMapZoomLevel.value = wO.Map.zoomLevel.ToString();
 
                 // 3. Population section -------------------------------------------------------------------------------------------------------------
                 SetGlobalGPWFileFoler();
@@ -2556,25 +2556,25 @@ namespace WUInity.UI
                 UnityEngine.UIElements.Toggle tgTogSimPeds = root.Q<UnityEngine.UIElements.Toggle>("TogSimPeds");
                 if (tgTogSimPeds != null)
                 {
-                    tgTogSimPeds.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunEvacSim);
+                    tgTogSimPeds.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunPedestrianModule);
                 }
 
                 UnityEngine.UIElements.Toggle tgTogSimTraf = root.Q<UnityEngine.UIElements.Toggle>("TogSimTraf");
                 if (tgTogSimTraf != null)
                 {
-                    tgTogSimTraf.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunTrafficSim);
+                    tgTogSimTraf.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunTrafficModule);
                 }
 
                 UnityEngine.UIElements.Toggle tgTogSimFire = root.Q<UnityEngine.UIElements.Toggle>("TogSimFire");
                 if (tgTogSimFire != null)
                 {
-                    tgTogSimFire.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunFireSim);
+                    tgTogSimFire.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunFireModule);
                 }
 
                 UnityEngine.UIElements.Toggle tgTogSimSmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSimSmoke");
                 if (tgTogSimSmoke != null)
                 {
-                    tgTogSimSmoke.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunSmokeSim);
+                    tgTogSimSmoke.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunSmokeModule);
                 }
             }
         }

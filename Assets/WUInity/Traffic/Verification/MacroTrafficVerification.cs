@@ -457,12 +457,12 @@ namespace WUInity.Traffic
 
                 for (int j = 0; j < carsToInject; j++)
                 {
-                    traffic.InsertNewCar(routeData, 1);
+                    traffic.InsertNewCar(startPos, routeData.evacGoal, routeData, 1);
                 }
             }
 
             float time = 0.0f;
-            while (!traffic.EvacComplete() && time <= wuinityOptions.Simulation.MaxSimTime)
+            while (!traffic.SimulationDone() && time <= wuinityOptions.Simulation.MaxSimTime)
             {
                 //check if we are losing goals
                 if (blockGoalEvents != null)

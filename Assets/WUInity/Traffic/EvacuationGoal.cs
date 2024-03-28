@@ -16,8 +16,8 @@ namespace WUInity
         public EvacGoalType goalType = EvacGoalType.Refugee;
         public int maxCars = -1;
         public int maxPeople = -1;
-        [System.NonSerialized] public int currentPeople;
-        public List<MacroCar> cars = new List<MacroCar>();
+        [System.NonSerialized] public uint currentPeople;
+        public List<TrafficModuleCar> cars = new List<TrafficModuleCar>();
 
         [System.NonSerialized] public float currentFlow = 0f;
         private float firstArrivalTime, currentTimeStep = float.MinValue;
@@ -53,7 +53,7 @@ namespace WUInity
         /// <param name="timeStep"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public bool CarArrives(MacroCar arrivingCar, float timeStep, float deltaTime)
+        public bool CarArrives(TrafficModuleCar arrivingCar, float timeStep, float deltaTime)
         {
             UpdateFlow(timeStep, deltaTime);
 

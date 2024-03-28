@@ -82,7 +82,7 @@ namespace WUInity
                     {
                         float mod = transform.position.y * 0.1f;
                         mod = Mathf.Max(1.0f, mod);
-                        transform.position -= Vector3.up * zoomSpeed * Time.deltaTime * d * mod;
+                        transform.position -= Vector3.up * zoomSpeed * Mathf.Sign(d) * mod;
                         if (transform.position.y < lowestY)
                         {
                             transform.position = new Vector3(transform.position.x, lowestY, transform.position.z);

@@ -114,16 +114,16 @@ namespace WUInity.UI
                 }
             }
 
-            WUInity.INPUT.Simulation.RunEvacSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunEvacSim, "Simulate pedestrians");
+            WUInity.INPUT.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunPedestrianModule, "Simulate pedestrians");
             ++buttonIndex;
 
-            WUInity.INPUT.Simulation.RunTrafficSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunTrafficSim, "Simulate traffic");
+            WUInity.INPUT.Simulation.RunTrafficModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunTrafficModule, "Simulate traffic");
             ++buttonIndex;
 
-            WUInity.INPUT.Simulation.RunFireSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunFireSim, "Simulate fire spread");
+            WUInity.INPUT.Simulation.RunFireModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunFireModule, "Simulate fire spread");
             ++buttonIndex;
 
-            WUInity.INPUT.Simulation.RunSmokeSim = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunSmokeSim, "Simulate smoke spread");
+            WUInity.INPUT.Simulation.RunSmokeModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunSmokeModule, "Simulate smoke spread");
             ++buttonIndex;            
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))

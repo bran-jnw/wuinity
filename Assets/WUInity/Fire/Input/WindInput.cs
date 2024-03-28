@@ -5,7 +5,7 @@ using System.Numerics;
 namespace WUInity.Fire
 {
     [System.Serializable]
-    public struct WindData                  //Wind data struct
+    public struct WindData                  
     {
         public float time;
         public float direction;
@@ -16,7 +16,7 @@ namespace WUInity.Fire
 
         int month, day, hour;
 
-        public WindData(float time, float direction, float speed, float cloudCover)     //wind data struct constructor
+        public WindData(float time, float direction, float speed, float cloudCover)    
         {
             this.time = time;
             this.direction = direction;
@@ -30,7 +30,7 @@ namespace WUInity.Fire
             hour = 0;
         }
 
-        public WindData(int month, int day, int hour, float direction, float speed, float cloudCover)     //wind data struct constructor
+        public WindData(int month, int day, int hour, float direction, float speed, float cloudCover) 
         {
             this.month = month;
             this.day = day;
@@ -185,7 +185,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                WUInity.LOG(WUInity.LogType.Error, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
@@ -196,7 +196,7 @@ namespace WUInity.Fire
             }
             else if (fileExists)
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                WUInity.LOG(WUInity.LogType.Error, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

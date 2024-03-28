@@ -13,8 +13,8 @@ namespace WUInity
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    bw.Write(WUInity.SIM.FireMesh().cellCount.x);
-                    bw.Write(WUInity.SIM.FireMesh().cellCount.y);
+                    bw.Write(WUInity.SIM.FireModule().GetCellCountX());
+                    bw.Write(WUInity.SIM.FireModule().GetCellCountY());
                     bw.Write(GetBytes(WUInity.RUNTIME_DATA.Fire.WuiAreaIndices));
                     bw.Write(GetBytes(WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices));
                     bw.Write(GetBytes(WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices));
@@ -51,7 +51,7 @@ namespace WUInity
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
 
-                        if (ncols == WUInity.SIM.FireMesh().cellCount.x && nrows == WUInity.SIM.FireMesh().cellCount.y)
+                        if (ncols == WUInity.SIM.FireModule().GetCellCountX() && nrows == WUInity.SIM.FireModule().GetCellCountY())
                         {
                             int dataSize = ncols * nrows;
 
@@ -75,16 +75,16 @@ namespace WUInity
                         }
                         else
                         {
-                            CreateDefaultInputs();
                             WUInity.LOG(WUInity.LogType.Warning, "Graphical fire input file does not match current mesh, using default.");
+                            CreateDefaultInputs();                           
                         }
                     }
                 }
             }
             else
             {
-                CreateDefaultInputs();
                 WUInity.LOG(WUInity.LogType.Warning, "could not read GFI data, creating empty default.");
+                CreateDefaultInputs();                
             }
         }
 

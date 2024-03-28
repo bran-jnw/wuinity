@@ -13,14 +13,14 @@
             "x": 10000.0,
             "y": 10000.0
         },
-        "RunEvacSim": true,
-        "RunTrafficSim": true,
-        "RunFireSim": true,
-        "RunSmokeSim": true
+        "RunPedestrianModule": true,
+        "RunTrafficModule": true,
+        "RunFireModule": true,
+        "RunSmokeModule": false
     },
     "Map": {
-        "MapProvider": 0,
-        "ZoomLevel": 13
+        "mapProvider": 0,
+        "zoomLevel": 13
     },
     "Visualization": {
         "drawRoads": false
@@ -35,6 +35,7 @@
         "routeCollectionFile": "example.rc"
     },
     "Evacuation": {
+        "pedestrianModuleChoice": 0,
         "RouteCellSize": 200.0,
         "EvacuationOrderStart": 0.0,
         "ResponseCurveFiles": [
@@ -52,14 +53,11 @@
         "maxCars": 2,
         "maxCarsChance": 0.30000001192092898,
         "walkingDistanceModifier": 1.0,
-        "walkingSpeedMinMax": {
-            "X": 0.699999988079071,
-            "Y": 1.0
-        },
         "walkingSpeedModifier": 1.0,
         "BlockGoalEventFiles": []
     },
     "Traffic": {
+        "trafficModuleChoice": 1,
         "evacuationGoalFiles": [
             "goalE",
             "goalR",
@@ -67,10 +65,6 @@
         ],
         "routeChoice": 3,
         "stallSpeed": 1.0,
-        "backGroundDensityMinMax": {
-            "X": 0.0,
-            "Y": 0.0
-        },
         "visibilityAffectsSpeed": false,
         "opticalDensityFile": "opticalDensity.odr",
         "opticalDensity": 0.05000000074505806,
@@ -103,55 +97,49 @@
                         "x": 0.0,
                         "y": 0.0
                     },
-                    "color": {
-                        "r": 1.0,
-                        "g": 1.0,
-                        "b": 1.0,
-                        "a": 1.0
-                    },
                     "blocked": false,
                     "maxFlow": 3600.0,
                     "goalType": 1,
                     "maxCars": -1,
                     "maxPeople": -1
                 },
-                "pickGoalFromMap": false,
-                "timeFlow": [
-                    {
-                        "x": 0.0,
-                        "y": 0.0
-                    },
-                    {
-                        "x": 0.0,
-                        "y": 0.0
-                    }
-                ]
+                "pickGoalFromMap": false
             }
         ],
         "trafficProbes": [
             {
                 "nodeID": 0
             }
-        ]
+        ],
+        "sumoInput": {
+            "inputFile": "rox.sumocfg",
+            "UTMoffset": {
+                "x": -488359.4,
+                "y": -4358657.39
+            }
+        }
     },
     "Fire": {
+        "fireModuleChoice": 3,
         "lcpFile": "roxborough.lcp",
         "fuelModelsFile": "default.fuel",
         "initialFuelMoistureFile": "default.fmc",
         "weatherFile": "example.wtr",
         "windFile": "example_seconds.wnd",
         "ignitionPointsFile": "example.ign",
-        "graphicalFireInputFile": "example.gfi",
+        "graphicalFireInputFile": "default.gfi",
         "spreadMode": 2,
         "windMultiplier": 1.0,
         "useRandomIgnitionMap": false,
         "randomIgnitionPoints": 0,
         "useInitialIgnitionMap": false,
         "FarsiteData": {
-            "outputPrefix": "rox"
+            "outputPrefix": "rox",
+            "rootFolder": "farsite"
         }
     },
     "Smoke": {
+        "smokeModuleChoice": 0,
         "MixingLayerHeight": 250.0
     }
 }

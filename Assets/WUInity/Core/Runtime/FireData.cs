@@ -213,7 +213,7 @@ namespace WUInity.Runtime
         {
             if (wuiAreaIndices == null)
             {
-                wuiAreaIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
+                wuiAreaIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
             }
             WUInity.RUNTIME_DATA.Fire.WuiAreaIndices = wuiAreaIndices;
         }
@@ -222,7 +222,7 @@ namespace WUInity.Runtime
         {
             if (randomIgnitionIndices == null)
             {
-                randomIgnitionIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
+                randomIgnitionIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
             }
             WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices = randomIgnitionIndices;
         }
@@ -231,7 +231,7 @@ namespace WUInity.Runtime
         {
             if (initialIgnitionIndices == null)
             {
-                initialIgnitionIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
+                initialIgnitionIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
             }
             WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices = initialIgnitionIndices;
         }
@@ -240,7 +240,7 @@ namespace WUInity.Runtime
         {
             if (triggerBufferIndices == null)
             {
-                triggerBufferIndices = new bool[WUInity.SIM.FireMesh().cellCount.x * WUInity.SIM.FireMesh().cellCount.y];
+                triggerBufferIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
             }
             WUInity.RUNTIME_DATA.Fire.TriggerBufferIndices = triggerBufferIndices;
         }

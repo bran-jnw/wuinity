@@ -123,7 +123,7 @@ namespace WUInity.UI
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
                 {
-                    Evac.MacroHumanVerification.RunVerification();
+                    Pedestrian.MacroHumanVerification.RunVerification();
                 }
                 ++buttonIndex;
             }

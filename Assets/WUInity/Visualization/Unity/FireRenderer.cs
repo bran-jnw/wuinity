@@ -1,8 +1,10 @@
+using ScottPlot.Control;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using WUInity.Fire;
+using WUInity.Smoke;
 
 namespace WUInity.Visualization
 {
@@ -35,7 +37,7 @@ namespace WUInity.Visualization
 
         public bool ToggleFire()
         {
-            if(WUInity.INPUT.Simulation.RunFireSim)
+            if(WUInity.INPUT.Simulation.RunFireModule)
             {
                 fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
                 return fireMeshRenderer.gameObject.activeSelf;
@@ -48,7 +50,7 @@ namespace WUInity.Visualization
 
         public bool ToggleSoot()
         {
-            if(WUInity.INPUT.Simulation.RunSmokeSim)
+            if(WUInity.INPUT.Simulation.RunSmokeModule)
             {
                 sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
                 return sootMeshRenderer.gameObject.activeSelf;
@@ -76,8 +78,8 @@ namespace WUInity.Visualization
 
         void CreateFireBuffer()
         {            
-            fireCellCountX = WUInity.SIM.FireMesh().cellCount.x;
-            fireCellCountY = WUInity.SIM.FireMesh().cellCount.y;
+            fireCellCountX = WUInity.SIM.FireModule().GetCellCountX();
+            fireCellCountY = WUInity.SIM.FireModule().GetCellCountY();
             fireBuffer = new ComputeBuffer(fireCellCountX * fireCellCountY, sizeof(float));
             fireMaterial.SetInteger("_CellsX", fireCellCountX);
             fireMaterial.SetInteger("_CellsY", fireCellCountY);
@@ -85,26 +87,36 @@ namespace WUInity.Visualization
             if (fireMeshRenderer == null)
             {
                 fireMeshRenderer = CreateDataPlane(fireMaterial, "FireSpread", true);
-            }            
+            }
+
+            SetFireOffsetAndScale();
         }
 
         void CreateSootBuffer()
         {
             //sootCellCountX = WUInity.SIM.GetSmokeDispersion().GetCellsX();
             //sootCellCountY = WUInity.SIM.GetSmokeDispersion().GetCellsY();
-            sootCellCountX = WUInity.SIM.AdvectDiffuseSim().GetCellsX();
-            sootCellCountY = WUInity.SIM.AdvectDiffuseSim().GetCellsY();
-            //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
-            sootMaterial.SetInteger("_CellsX", sootCellCountX);
-            sootMaterial.SetInteger("_CellsY", sootCellCountY);
-            sootMaterial.SetFloat("_LowerCutOff", 0.0f);
-            sootMaterial.SetFloat("_MinValue", lowerSootValue); //500 meters with C = 3
-            sootMaterial.SetFloat("_MaxValue", upperSootValue); //5 meters with C = 3
-            sootMaterial.SetFloat("_DataMultiplier", 4539.13f); // 1.2 * 8700.0 / 2.3 = 4539.13 for optical density
-            if (sootMeshRenderer == null)
+            if(WUInity.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
             {
-                sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true);
-            }            
+                sootCellCountX = ((AdvectDiffuseModel)WUInity.SIM.SmokeModule()).GetCellsX();
+                sootCellCountY = ((AdvectDiffuseModel)WUInity.SIM.SmokeModule()).GetCellsY();
+                //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
+                sootMaterial.SetInteger("_CellsX", sootCellCountX);
+                sootMaterial.SetInteger("_CellsY", sootCellCountY);
+                sootMaterial.SetFloat("_LowerCutOff", 0.0f);
+                sootMaterial.SetFloat("_MinValue", lowerSootValue); //500 meters with C = 3
+                sootMaterial.SetFloat("_MaxValue", upperSootValue); //5 meters with C = 3
+                sootMaterial.SetFloat("_DataMultiplier", 4539.13f); // 1.2 * 8700.0 / 2.3 = 4539.13 for optical density
+                if (sootMeshRenderer == null)
+                {
+                    sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true);
+                }
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+            }
+                      
         }       
         
         public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival }
@@ -155,11 +167,11 @@ namespace WUInity.Visualization
                 float[] fireData = null;
                 if (_fireDisplayMode == FireDisplayMode.FirelineIntensity)
                 {
-                    fireData = WUInity.SIM.FireMesh().GetFireLineIntensityData();
+                    fireData = WUInity.SIM.FireModule().GetFireLineIntensityData();
                 }
                 else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
                 {
-                    fireData = WUInity.SIM.FireMesh().GetFuelModelNumberData();
+                    fireData = WUInity.SIM.FireModule().GetFuelModelNumberData();
                 }
                 
                 if (fireData != null)
@@ -171,11 +183,19 @@ namespace WUInity.Visualization
 
             if (renderSoot)
             {
-                ComputeBuffer buffer = WUInity.SIM.AdvectDiffuseSim().GetSootBuffer();
-                if(buffer != null)
+                if(WUInity.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    sootMaterial.SetBuffer("_Data", buffer);
-                }                
+                    ComputeBuffer buffer = ((AdvectDiffuseModel)WUInity.SIM.SmokeModule()).GetSootBuffer();
+                    if (buffer != null)
+                    {
+                        sootMaterial.SetBuffer("_Data", buffer);
+                    }                    
+                }
+                else
+                {
+                    WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                }
+
             }
         }
 
@@ -194,17 +214,33 @@ namespace WUInity.Visualization
             mesh.Clear();
 
             float width = (float)WUInity.INPUT.Simulation.Size.x;
-            float length = (float)WUInity.INPUT.Simulation.Size.y;
+            float height = (float)WUInity.INPUT.Simulation.Size.y;
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            if(material == fireMaterial && WUInity.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
+            {
+                float xScale, yScale;
+                Vector2d offsetFire;
+                ((FarsiteOffline)WUInity.SIM.FireModule()).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
+                offset.x += (float)offsetFire.x;
+                offset.y += (float)offsetFire.y;
+                width *= xScale;
+                height *= yScale;
+            }
+
+            VisualizeUtilities.CreateSimplePlane(mesh, width, height, 0.0f, offset, maxUV);
 
             mR.material = material;
             //move up one meter
             gO.transform.position += Vector3.up;
             gO.SetActive(setActive);
             return mR;
+        }
+
+        private void SetFireOffsetAndScale()
+        {
+            
         }
 
         void CreateRandomFuelModelLegend()
@@ -285,9 +321,18 @@ namespace WUInity.Visualization
                 sootBuffer = null;
             }
 
-            if(!creationCall && WUInity.SIM.AdvectDiffuseSim() != null)
+            if(!creationCall && WUInity.SIM.SmokeModule() != null)
             {
-                WUInity.SIM.AdvectDiffuseSim().Release();
+                if (WUInity.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                {
+                    ((AdvectDiffuseModel)WUInity.SIM.SmokeModule()).Release();
+                }
+                else
+                {
+                    WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                }
+
+                
             }
             
         }

@@ -181,6 +181,7 @@ namespace WUInity.Runtime
                     string path = Path.Combine(WUInity.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(osmFile) + ".osm.pbf");
                     using (FileStream targetStream = File.OpenWrite(path))
                     {
+                        //XmlOsmStreamTarget target = new XmlOsmStreamTarget(targetStream);
                         PBFOsmStreamTarget target = new PBFOsmStreamTarget(targetStream, compress: false);
                         target.RegisterSource(filtered);
                         target.Pull();
@@ -257,7 +258,7 @@ namespace WUInity.Runtime
                 //now find correct cell and add vertex index to list
                 //private List<uint>[] _cellSortedVertices;
 
-                _cellSortedVertices = new List<uint>[SIM.FireMesh().cellCount.x * SIM.FireMesh().cellCount.y];
+                _cellSortedVertices = new List<uint>[SIM.FireModule().GetCellCountX() * SIM.FireModule().GetCellCountY()];
 
                 // Sort the vertices of the cells, based on location... to be completed
                 // ... todo

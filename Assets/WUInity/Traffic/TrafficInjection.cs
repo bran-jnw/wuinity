@@ -46,7 +46,9 @@ namespace WUInity.Traffic
 
             for (int i = 0; i < newCars; i++)
             {
-                trafficSim.InsertNewCar(routeCollection.GetSelectedRoute(), 1);
+                RouteData rD = routeCollection.GetSelectedRoute();
+                Vector2d startLatLong = new Vector2d(rD.route.Shape[0].Latitude, rD.route.Shape[0].Longitude);
+                trafficSim.InsertNewCar(startLatLong, rD.evacGoal, routeCollection.GetSelectedRoute(), 1);
             }            
         }    
         

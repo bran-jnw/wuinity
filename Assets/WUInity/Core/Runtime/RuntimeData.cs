@@ -34,7 +34,7 @@ namespace WUInity.Runtime
             //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
             Mapbox.Unity.Map.MapOptions mOptions = MAP.Options; // new Mapbox.Unity.Map.MapOptions();
             mOptions.locationOptions.latitudeLongitude = "" + INPUT.Simulation.LowerLeftLatLong.x + "," + INPUT.Simulation.LowerLeftLatLong.y;
-            mOptions.locationOptions.zoom = INPUT.Map.ZoomLevel;
+            mOptions.locationOptions.zoom = INPUT.Map.zoomLevel;
             mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
@@ -56,7 +56,7 @@ namespace WUInity.Runtime
                 return false;
             }
             LOG(WUInity.LogType.Log, "Starting to load Mapbox map.");
-            MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.Simulation.LowerLeftLatLong.x, INPUT.Simulation.LowerLeftLatLong.y), INPUT.Map.ZoomLevel);
+            MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.Simulation.LowerLeftLatLong.x, INPUT.Simulation.LowerLeftLatLong.y), INPUT.Map.zoomLevel);
             LOG(WUInity.LogType.Log, "Map loaded succesfully.");
 
             return true;

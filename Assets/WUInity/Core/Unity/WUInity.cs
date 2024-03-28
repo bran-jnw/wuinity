@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;       
 using UnityEngine;                     
 using OsmSharp.Streams;                 
-using WUInity.Evac;                     
+using WUInity.Pedestrian;                     
 using WUInity.Traffic;                 
 using WUInity.Population;                     
 using System;                           
@@ -450,7 +450,7 @@ namespace WUInity
         {            
             if (SIM.IsRunning)
             {
-                message = "[" + (int)SIM.Time + "s] " + message;
+                message = "[" + (int)SIM.CurrentTime + "s] " + message;
             }
 
             if (logType == LogType.Warning)
@@ -460,6 +460,7 @@ namespace WUInity
             else if (logType == LogType.Error)
             {
                 message = "ERROR: " + message;
+                SIM.StopSim("Simulation can't run, please check log.");
             }
             else if (logType == LogType.Event)
             {
@@ -624,14 +625,14 @@ namespace WUInity
 
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EVAC_VISUALS.CreateBuffers(INPUT.Simulation.RunEvacSim, INPUT.Simulation.RunTrafficSim);
-            renderHouseholds = INPUT.Simulation.RunEvacSim;
-            renderTraffic = INPUT.Simulation.RunTrafficSim;
+            EVAC_VISUALS.CreateBuffers(INPUT.Simulation.RunPedestrianModule, INPUT.Simulation.RunTrafficModule);
+            renderHouseholds = INPUT.Simulation.RunPedestrianModule;
+            renderTraffic = INPUT.Simulation.RunTrafficModule;
 
             //and then for fire rendering
-            FIRE_VISUALS.CreateBuffers(INPUT.Simulation.RunFireSim, INPUT.Simulation.RunSmokeSim);
-            renderFireSpread = INPUT.Simulation.RunFireSim;
-            renderSmokeDispersion = INPUT.Simulation.RunSmokeSim;
+            FIRE_VISUALS.CreateBuffers(INPUT.Simulation.RunFireModule, INPUT.Simulation.RunSmokeModule);
+            renderFireSpread = INPUT.Simulation.RunFireModule;
+            renderSmokeDispersion = INPUT.Simulation.RunSmokeModule;
 
             ShowAllRuntimeVisuals();
         }
@@ -741,9 +742,9 @@ namespace WUInity
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
-                    if (SIM.MacroHumanSim() != null)
+                    if (SIM.PedestrianModule() != null)
                     {
-                        dataSampleString = "Rescaled and relocated people count: " + SIM.MacroHumanSim().GetPopulation(x, y);
+                        dataSampleString = "Rescaled and relocated people count: " + ((MacroHouseholdSim)SIM.PedestrianModule()).GetPopulation(x, y);
                     }
                 }
                 else if (dataSampleMode == DataSampleMode.TrafficDens)
@@ -908,7 +909,7 @@ namespace WUInity
         int[] currentPeopleInCells;
         public void DisplayClosestDensityData(float time)
         {
-            if(INPUT.Simulation.RunTrafficSim)
+            if(INPUT.Simulation.RunTrafficModule)
             {
                 int index = Mathf.Max(0, (int)time / (int)INPUT.Traffic.saveInterval);
                 if (index > outputTextures.Count - 1)
@@ -1067,7 +1068,7 @@ namespace WUInity
             if (fireMeshMode)
             {
                 activeMeshRenderer = _fireDataPlaneMeshRenderer;
-                cellCount = SIM.FireMesh().cellCount;
+                cellCount = new Vector2int(SIM.FireModule().GetCellCountX(), SIM.FireModule().GetCellCountY());
                 name = "Fire Data Plane";
             }
 
@@ -1136,12 +1137,12 @@ namespace WUInity
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = carsInSystem[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsInSystem[i].numberOfPeopleInCar;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += carsInSystem[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsInSystem[i].numberOfPeopleInCar;
                     }
                 }
 
@@ -1163,12 +1164,12 @@ namespace WUInity
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = carsOnHold[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsOnHold[i].numberOfPeopleInCar;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += carsOnHold[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsOnHold[i].numberOfPeopleInCar;
                     }
                 }
 
@@ -1178,7 +1179,7 @@ namespace WUInity
                 {
                     for (int x = 0; x < RUNTIME_DATA.Evacuation.CellCount.x; x++)
                     {
-                        peopleInCells[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = SIM.MacroHumanSim().GetPeopleLeftInCell(x, y);
+                        peopleInCells[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = ((MacroHouseholdSim)SIM.PedestrianModule()).GetPeopleLeftInCell(x, y);
                     }
                 }
 

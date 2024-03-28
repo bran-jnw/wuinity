@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>ScottPlot</id>
+    <version>4.1.45</version>
+    <authors>Scott Harden</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <icon>icon.png</icon>
+    <readme>README.md</readme>
+    <projectUrl>https://scottplot.net/</projectUrl>
+    <description>ScottPlot is a free and open-source plotting library for .NET. This package can be used to create static plots, and user controls for interactively displaying plots in WinForms, WPF, or Avalonia applications are available as separate NuGet packages.</description>
+    <releaseNotes>https://ScottPlot.NET/changelog</releaseNotes>
+    <tags>plot graph data chart signal line bar heatmap scatter</tags>
+    <repository type="git" url="https://github.com/ScottPlot/ScottPlot" commit="0377f82ec45608a7911c81f2e68d530ce108176c" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.1">
+        <dependency id="System.Drawing.Common" version="4.6.1" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.ValueTuple" version="4.5.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net5.0">
+        <dependency id="System.Drawing.Common" version="4.6.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="System.Drawing.Common" version="4.6.1" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

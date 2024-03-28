@@ -72,6 +72,7 @@ crashlytics-build.properties
 
 #WUInity stuff
 /[Ee]xternal_data/
+/[Ee]xample/
 /[Ee]xample/[Oo]utput/
 /[Ee]xample/
 *.rc
