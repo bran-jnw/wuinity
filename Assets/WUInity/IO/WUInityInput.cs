@@ -162,6 +162,7 @@ namespace WUInity
     public class FarsiteInput
     {
         public string outputPrefix = "rox";
+        public string rootFolder;
     }
 
     [System.Serializable]
@@ -173,7 +174,7 @@ namespace WUInity
     [System.Serializable]
     public class FireInput
     {
-        public enum FireModuleChoice { Cells, VectorCells, FarsiteDLL, FarsiteOffline, PrometheusCOM, WISEoffline }
+        public enum FireModuleChoice { Cells, VectorCells, FarsiteDLL, FarsiteOffline, PrometheusCOM, WISEOffline }
         public FireModuleChoice fireModuleChoice = FireModuleChoice.Cells;
         public string lcpFile;
         public string fuelModelsFile = "default.fuel";
@@ -196,6 +197,8 @@ namespace WUInity
     [System.Serializable]
     public class SmokeInput
     {
+        public enum SmokeModuleChoice { AdvectDiffuse, BoxModel, Lagrangian, GaussianPuff, GaussianPlume, FFD}
+        public SmokeModuleChoice smokeModuleChoice = SmokeModuleChoice.AdvectDiffuse;
         public float MixingLayerHeight = 250.0f;
     }
 

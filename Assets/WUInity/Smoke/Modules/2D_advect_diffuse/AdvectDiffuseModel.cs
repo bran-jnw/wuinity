@@ -8,12 +8,12 @@ namespace WUInity.Smoke
     /// Advects and diffuses (eddy diffusion, turbulent viscosity) on a 2d plane with height set to assumed mixing height (which gives volume).
     /// Within each volume a uniform soot distribution is assumed (perfectly mixed).
     /// </summary>
-    public class AdvectDiffuseModel
+    public class AdvectDiffuseModel : SmokeModule
     {
         int cellCountX, cellCountY, cellCountZ;
         float cellSizeX, cellSizeY, cellSizeZ;
         float cellArea, cellVolume, invertedCellVolume, cellHeight, invertedCellSizeX, invertedCellSizeY, invertedCellSizeXSq, invertedCellSizeYSq;
-        Fire.FireMesh fireMesh;
+        Fire.FireModule fireModule;
         ComputeShader _advectDiffuseCompute;
         ComputeBuffer[] _sootConcentration;
         ComputeBuffer _sootInjection;
@@ -46,16 +46,16 @@ namespace WUInity.Smoke
         }
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
-        public AdvectDiffuseModel(Fire.FireMesh fireMesh, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, Texture2D windTex, int solutionMode = 0)
+        public AdvectDiffuseModel(Fire.FireModule fireModule, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, Texture2D windTex, int solutionMode = 0)
         {
-            this.fireMesh = fireMesh;
+            this.fireModule = fireModule;
             //set all parameters
-            cellCountX = fireMesh.cellCount.x;
-            cellCountY = fireMesh.cellCount.y;
-            cellSizeX = (float)fireMesh.cellSize.x;
+            cellCountX = fireModule.GetCellCountX();
+            cellCountY = fireModule.GetCellCountY();
+            cellSizeX = fireModule.GetCellSizeX();
             invertedCellSizeX = 1.0f / cellSizeX;
             invertedCellSizeXSq = invertedCellSizeX * invertedCellSizeX;
-            cellSizeY = (float)fireMesh.cellSize.y;
+            cellSizeY = fireModule.GetCellSizeY();
             invertedCellSizeY = 1.0f / cellSizeY;
             invertedCellSizeYSq = invertedCellSizeY * invertedCellSizeY;
             cellHeight = mixingHeight;
@@ -211,7 +211,7 @@ namespace WUInity.Smoke
             //if fire has been updated we need to update the injection buffer
             if (fireHasUpdated)
             {
-                float[] sootInjectionCPU = fireMesh.GetSootProduction();
+                float[] sootInjectionCPU = fireModule.GetSootProduction();
                 _sootInjection.SetData(sootInjectionCPU);
                 _advectDiffuseCompute.SetBuffer(solutionMode, "_SootInjection", _sootInjection);
             }
@@ -276,6 +276,16 @@ namespace WUInity.Smoke
                     _allBuffers[i] = null;
                 }                
             }
+        }
+
+        public override void Update(float currentTime, float deltaTime)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override bool SimulationDone()
+        {
+            return false;
         }
     }
 }

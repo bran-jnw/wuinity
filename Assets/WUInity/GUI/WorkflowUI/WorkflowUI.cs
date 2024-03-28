@@ -2147,7 +2147,7 @@ namespace WUInity.UI
                 label12.text = "Wind direction: " + Math.Round(WUInity.SIM.GetFireWindDirection(),1) + " °";
 
                 Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
-                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireMesh().GetActiveCellCount();
+                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireModule().GetActiveCellCount();
             }
         }
 

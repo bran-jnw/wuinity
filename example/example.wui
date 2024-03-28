@@ -120,24 +120,26 @@
         }
     },
     "Fire": {
-        "fireModuleChoice": 0,
+        "fireModuleChoice": 3,
         "lcpFile": "roxborough.lcp",
         "fuelModelsFile": "default.fuel",
         "initialFuelMoistureFile": "default.fmc",
         "weatherFile": "example.wtr",
         "windFile": "example_seconds.wnd",
         "ignitionPointsFile": "example.ign",
-        "graphicalFireInputFile": "example.gfi",
+        "graphicalFireInputFile": "default.gfi",
         "spreadMode": 2,
         "windMultiplier": 1.0,
         "useRandomIgnitionMap": false,
         "randomIgnitionPoints": 0,
         "useInitialIgnitionMap": false,
         "FarsiteData": {
-            "outputPrefix": "rox"
+            "outputPrefix": "rox",
+            "rootFolder": "farsite"
         }
     },
     "Smoke": {
+        "smokeModuleChoice": 0,
         "MixingLayerHeight": 250.0
     }
 }

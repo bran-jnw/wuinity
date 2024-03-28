@@ -24,10 +24,10 @@ namespace WUInity.Smoke
         public BoxDispersionModel(Fire.FireMesh fireMesh, float height = 250.0f)
         {
             this.fireMesh = fireMesh;
-            cellCountX = fireMesh.cellCount.x;
-            cellCountY = fireMesh.cellCount.y;
-            cellSizeX = (float)fireMesh.cellSize.x;
-            cellSizeY = (float)fireMesh.cellSize.y;
+            cellCountX = fireMesh.GetCellCountX();
+            cellCountY = fireMesh.GetCellCountY();
+            cellSizeX = (float)fireMesh._cellSize.x;
+            cellSizeY = (float)fireMesh._cellSize.y;
             cellHeight = height;
             cellArea = cellSizeX * cellSizeY;
             cellVolume = cellSizeX * cellSizeY * height;

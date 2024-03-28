@@ -8,13 +8,13 @@ namespace WUInity.Fire
     [System.Serializable]                                           
     public class FireMesh : FireModule                        
     {
-        public Vector2int cellCount;                                
+        Vector2int _cellCount;                                
         public SpreadMode spreadMode;                               
         public IgnitionPoint[] ignitionPoints;                
-        FireCell[] fireCells;                                
-        public Vector2d cellSize;
+        FireCell[] _fireCells;                                
+        public Vector2d _cellSize;
         float cellArea;
-        public WindData currentWindData;                            
+        WindData _currentWindData;                            
         public double dt;                                           
         double[] angleOffsets;                                      
         public HashSet<FireCell> activeCells;                
@@ -69,8 +69,8 @@ namespace WUInity.Fire
         public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)        
         {
             this.lcpData = lcpData;
-            cellCount = new Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);
-            cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
+            _cellCount = new Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);
+            _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
 
             this.weather = weather;
             this.wind = wind;
@@ -143,29 +143,29 @@ namespace WUInity.Fire
                 }
 
             }
-            cellSizeDiagonal = cellSize.x * Math.Sqrt(2.0);                     
-            cellSizeSquared = cellSize.x * cellSize.x;
+            cellSizeDiagonal = _cellSize.x * Math.Sqrt(2.0);                     
+            cellSizeSquared = _cellSize.x * _cellSize.x;
             cellSizeDiagonalSquared = cellSizeDiagonal * cellSizeDiagonal;
-            sixteenDist = Math.Sqrt(5.0) * cellSize.x;
+            sixteenDist = Math.Sqrt(5.0) * _cellSize.x;
             sixteenDistSquared = sixteenDist * sixteenDist;
 
-            fireCells = new FireCell[cellCount.x * cellCount.y];         
-            for (int y = 0; y < cellCount.y; ++y)                                      
+            _fireCells = new FireCell[_cellCount.x * _cellCount.y];         
+            for (int y = 0; y < _cellCount.y; ++y)                                      
             {
-                for (int x = 0; x < cellCount.x; ++x)
+                for (int x = 0; x < _cellCount.x; ++x)
                 {                    
                     LandScapeStruct l = lcpData.GetCellData(x, y);                      
-                    fireCells[GetCellIndex(x, y)] = new FireCell(this, x, y, l); 
+                    _fireCells[GetCellIndex(x, y)] = new FireCell(this, x, y, l); 
                 }
             }
 
             //calc distances based on elevation etc
-            for (int y = 0; y < cellCount.y; ++y)
+            for (int y = 0; y < _cellCount.y; ++y)
             {
-                for (int x = 0; x < cellCount.x; ++x)
+                for (int x = 0; x < _cellCount.x; ++x)
                 {
                     //send data to cell, fuel type etc
-                    fireCells[GetCellIndex(x, y)].InitCell();                           
+                    _fireCells[GetCellIndex(x, y)].InitCell();                           
                 }
             }
             activeCells = new HashSet<FireCell>();                               
@@ -183,14 +183,14 @@ namespace WUInity.Fire
             }*/
 
             //data arrays for visualization
-            fireLineIntensityData = new float[fireCells.Length];
-            fuelModelNumberData = new float[fireCells.Length];
-            for (int i = 0; i < fireCells.Length; i++)
+            fireLineIntensityData = new float[_fireCells.Length];
+            fuelModelNumberData = new float[_fireCells.Length];
+            for (int i = 0; i < _fireCells.Length; i++)
             {
-                fuelModelNumberData[i] = fireCells[i].GetFuelModelNumber();
+                fuelModelNumberData[i] = _fireCells[i].GetFuelModelNumber();
             }
-            sootProduction = new float[fireCells.Length];
-            cellArea = (float)(cellSize.x * cellSize.y);
+            sootProduction = new float[_fireCells.Length];
+            cellArea = (float)(_cellSize.x * _cellSize.y);
 
             UpdateIgnitionPoints(0.0f);
             UpdateCellSpreadRates();
@@ -198,12 +198,12 @@ namespace WUInity.Fire
 
         double GetCorrectedElevation(int x, int y)                  
         {            
-            return fireCells[GetCellIndex(x, y)].GetElevation() - lcpData.Header.loelev;           
+            return _fireCells[GetCellIndex(x, y)].GetElevation() - lcpData.Header.loelev;           
         }
 
         double GetRawElevation(int x, int y)                        
         {
-            return fireCells[GetCellIndex(x, y)].GetElevation();
+            return _fireCells[GetCellIndex(x, y)].GetElevation();
         }
 
         public void AddCellToIgnite(FireCell f)              
@@ -260,7 +260,7 @@ namespace WUInity.Fire
             }
             
             //calculate max dt
-            dt = cellSize.x / maxSpreadRate;        
+            dt = _cellSize.x / maxSpreadRate;        
 
             //move fire fronts
             foreach (FireCell f in activeCells)
@@ -303,23 +303,23 @@ namespace WUInity.Fire
 
             //update data arrays for visualization and input for smoke spread if needed
             float dtInversed = 1.0f / (float)dt;
-            for (int i = 0; i < fireCells.Length; i++)
+            for (int i = 0; i < _fireCells.Length; i++)
             {
-                fireLineIntensityData[i] = (float)fireCells[i].GetFireLineIntensity(false);
+                fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
                 if(WUInity.INPUT.Simulation.RunSmokeModule)
                 {
                     sootProduction[i] = 0.0f;
-                    if (fireCells[i].cellState == FireCellState.Burning)
+                    if (_fireCells[i].cellState == FireCellState.Burning)
                     {
                         //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
-                        sootProduction[i] = Mathf.Max(0.0f, 0.015f * (float)fireCells[i].GetTimestepBurntMass() * dtInversed);
+                        sootProduction[i] = Mathf.Max(0.0f, 0.015f * (float)_fireCells[i].GetTimestepBurntMass() * dtInversed);
                     }
                 }                
             }
 
             //update time and wind for next time step. TODO: spread out the update over several frames
             timeSinceStart += dt;
-            currentWindData = wind.GetWindDataAtTime((float)timeSinceStart);
+            _currentWindData = wind.GetWindDataAtTime((float)timeSinceStart);
             //TODO: only update if any input has changed, re-calculate spread rates
             UpdateCellSpreadRates();
 
@@ -336,7 +336,7 @@ namespace WUInity.Fire
             return false;
         }
 
-        public int GetActiveCellCount()
+        public override int GetActiveCellCount()
         {
             return activeCells.Count;
         }
@@ -360,11 +360,11 @@ namespace WUInity.Fire
 
             if(WUInity.INPUT.Fire.useInitialIgnitionMap)
             {
-                for (int i = 0; i < fireCells.Length; i++)
+                for (int i = 0; i < _fireCells.Length; i++)
                 {
                     if (WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices[i])
                     {
-                        FireCell f = fireCells[i];
+                        FireCell f = _fireCells[i];
                         f.Ignite(currentTime);
                         //we might try to ignite on a cell that is dead which will then not be intiialized correctly
                         if (f.cellState != FireCellState.Dead)
@@ -383,11 +383,11 @@ namespace WUInity.Fire
                     if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
                     {
                         ignitionPoints[i].CalculateMeshIndex(this);
-                        if (ignitionPoints[i].IsInsideFire(cellCount))
+                        if (ignitionPoints[i].IsInsideFire(_cellCount))
                         {
                             int x = ignitionPoints[i].GetX();
                             int y = ignitionPoints[i].GetY();
-                            FireCell f = fireCells[GetCellIndex(x, y)];
+                            FireCell f = _fireCells[GetCellIndex(x, y)];
                             f.Ignite(currentTime);
                             activeCells.Add(f);
                             ignitionPoints[i].MarkAsIgnited();
@@ -412,12 +412,12 @@ namespace WUInity.Fire
             //x = Mathf.Clamp(x, 0, cellCount.x - 1);                 
             //y = Mathf.Clamp(y, 0, cellCount.y - 1);
             
-            return (x + y * cellCount.x);
+            return (x + y * _cellCount.x);
         }
 
         public bool IsInsideMesh(int x, int y)                      
         {
-            if (x < 0 || x > cellCount.x - 1 || y < 0 || y > cellCount.y - 1)
+            if (x < 0 || x > _cellCount.x - 1 || y < 0 || y > _cellCount.y - 1)
             {
                 return false;
             }
@@ -426,79 +426,104 @@ namespace WUInity.Fire
 
         public FireCell GetFireCell(int index)
         {
-            return fireCells[index];
+            return _fireCells[index];
         }
 
         public FireCell GetFireCell(int x, int y)            
         {
-            return fireCells[GetCellIndex(x, y)];
+            return _fireCells[GetCellIndex(x, y)];
         }
 
-        public float[] GetSootProduction()
+        public override float[] GetSootProduction()
         {
             return sootProduction;
         }
 
-        /// <summary>
-        /// Returns state of cell on mesh based on lat/long. Returns dead if outside of mesh.
-        /// </summary>
-        /// <param name="latLong"></param>
-        /// <returns></returns>
-        public FireCellState GetFireCellState(Vector2d latLong)     
+        public override FireCellState GetFireCellState(Vector2d latLong)     
         {
             Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
-            int x = (int)(pos.x / cellSize.x);
-            int y = (int)(pos.y / cellSize.x);
+            int x = (int)(pos.x / _cellSize.x);
+            int y = (int)(pos.y / _cellSize.x);
 
-            //might be called before initialized, so need to check null, but should really chnag execution order
-            if(!IsInsideMesh(x, y) || fireCells == null)
+            //might be called before initialized, so need to check null, but should really change execution order
+            if(!IsInsideMesh(x, y) || _fireCells == null)
             {
                 return FireCellState.Dead;
             }
             else
             {
-                return fireCells[GetCellIndex(x, y)].cellState;
+                return _fireCells[GetCellIndex(x, y)].cellState;
             }            
         }     
                 
-        public float[] GetFireLineIntensityData()
+        public override float[] GetFireLineIntensityData()
         {     
             return fireLineIntensityData;
         }
 
-        public float[] GetFuelModelNumberData()
+        public override float[] GetFuelModelNumberData()
         {
             return fuelModelNumberData;
         }
 
         public int GetCellSize()
         {
-            return (int)cellSize.x;
+            return (int)_cellSize.x;
         }
 
         public Vector2int GetCellCount()
         {
-            return cellCount;
+            return _cellCount;
         }
 
-        public int[,] GetMaxROS()                                   //get ROS in the eight cardinal directions
+        public override int[,] GetMaxROS()                                   
         {
-            int[,] ros = new int[cellCount.x * cellCount.y, 8];
-            for (int i = 0; i < cellCount.x; i++)
+            int[,] ros = new int[_cellCount.x * _cellCount.y, 8];
+            for (int i = 0; i < _cellCount.x; i++)
             {
-                for (int j = 0; j < cellCount.y; j++)
+                for (int j = 0; j < _cellCount.y; j++)
                 {
                     //flip on y-axis
-                    int yIndex = cellCount.y - 1 - j;
-                    FireCell f = fireCells[GetCellIndex(i, yIndex)];
+                    int yIndex = _cellCount.y - 1 - j;
+                    FireCell f = _fireCells[GetCellIndex(i, yIndex)];
                     for (int k = 0; k < 8; k++)
                     {
-                        ros[j + i * cellCount.y, k] = f.GetMaxSpreadrateInDirection(k);
+                        ros[j + i * _cellCount.y, k] = f.GetMaxSpreadrateInDirection(k);
                     }
                 }
             }
             return ros;
+        }
+
+        public override float GetInternalDeltaTime()
+        {
+            return (float)dt;
+        }
+
+        public override int GetCellCountX()
+        {
+            return _cellCount.x;
+        }
+
+        public override int GetCellCountY()
+        {
+            return _cellCount.x;
+        }
+
+        public override float GetCellSizeX()
+        {
+            return (float)_cellSize.x;
+        }
+
+        public override float GetCellSizeY()
+        {
+            return (float)_cellSize.y;
+        }
+
+        public override WindData GetCurrentWindData()
+        {
+            return _currentWindData;
         }
 
         //remove? as we now visualize using fire renderer

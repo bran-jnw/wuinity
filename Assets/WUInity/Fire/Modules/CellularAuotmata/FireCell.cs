@@ -126,7 +126,7 @@ namespace WUInity.Fire
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadHundredHour(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveHerbaceous(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
             bulkDensity += fireMesh.fuelModelSet.getFuelLoadLiveWoody(fuel, BehaveUnits.LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter);
-            fuelMassGround = bulkDensity * fireMesh.cellSize.x * fireMesh.cellSize.y;// * fireMesh.fuelModelSet.getFuelbedDepth(fuel, BehaveUnits.LengthUnits.LengthUnitsEnum.Meters);                     
+            fuelMassGround = bulkDensity * fireMesh._cellSize.x * fireMesh._cellSize.y;// * fireMesh.fuelModelSet.getFuelbedDepth(fuel, BehaveUnits.LengthUnits.LengthUnitsEnum.Meters);                     
         }
 
         public void Ignite(double timeOfArrival)            
@@ -175,7 +175,7 @@ namespace WUInity.Fire
             double e2 = neighborElevations[0];
             double e3 = neighborElevations[1];
             double e4 = neighborElevations[2];
-            double d = fireMesh.cellSize.x;
+            double d = fireMesh._cellSize.x;
 
             Vector3d n = new Vector3d(e1 - e3, e4 - e2, 2.0 * d);
             lcp.slope = (short)(0.5 + 100.0 * sqrt(n.x * n.x + n.y * n.y) / n.z);
@@ -305,7 +305,7 @@ namespace WUInity.Fire
             //the 0.5 factor comes from the prism that is created by the four cardinal fire fronts, as these will fully cover 2x2 cells when having spread fully we reduce the area by a factor of 0.5 to normalize to actual cell area
             currentBurnArea = 0.5 * (fireFront[0] + fireFront[2]) * (fireFront[1] + fireFront[3]);
             //TODO: limit area based on actual distance (slope correction)
-            currentBurnArea = System.Math.Min(currentBurnArea, fireMesh.cellSize.x * fireMesh.cellSize.y);
+            currentBurnArea = System.Math.Min(currentBurnArea, fireMesh._cellSize.x * fireMesh._cellSize.y);
 
             //burnt mass is based on half-point integral from old area and new area
             //timestepBurntMass = fireMesh.dt * (currentBurnArea - oldBurnArea) * 0.5 * reactionIntensity / 18608.0;
@@ -428,8 +428,8 @@ namespace WUInity.Fire
             int slope = lcp.slope;
             int aspect = lcp.aspect;
 
-            double windSpeed = fireMesh.currentWindData.speed;
-            double windDirection = fireMesh.currentWindData.direction;
+            double windSpeed = fireMesh.GetCurrentWindData().speed;
+            double windDirection = fireMesh.GetCurrentWindData().direction;
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
             double canopyHeight = lcp.crown_canopy_height;
@@ -542,8 +542,8 @@ namespace WUInity.Fire
             double canopyBulkDensity = lcp.crown_bulk_density;
 
 
-            double windSpeed = fireMesh.currentWindData.speed;
-            double windDirection = fireMesh.currentWindData.direction;
+            double windSpeed = fireMesh.GetCurrentWindData().speed;
+            double windDirection = fireMesh.GetCurrentWindData().direction;
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
             double canopyHeight = lcp.crown_canopy_height;

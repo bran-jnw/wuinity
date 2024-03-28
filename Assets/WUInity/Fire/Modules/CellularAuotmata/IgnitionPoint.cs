@@ -72,8 +72,8 @@ namespace WUInity.Fire
 
             Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
-            x = (int)(pos.x / mesh.cellSize.x);
-            y = (int)(pos.y / mesh.cellSize.y);
+            x = (int)(pos.x / mesh._cellSize.x);
+            y = (int)(pos.y / mesh._cellSize.y);
 
             this.IgnitionTime = ignitionTime;
 
@@ -90,8 +90,8 @@ namespace WUInity.Fire
             {
                 Mapbox.Utils.Vector2d pos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(LatLong.x, LatLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
 
-                x = (int)(pos.x / mesh.cellSize.x);
-                y = (int)(pos.y / mesh.cellSize.y);
+                x = (int)(pos.x / mesh._cellSize.x);
+                y = (int)(pos.y / mesh._cellSize.y);
             }            
         }
 

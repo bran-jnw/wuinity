@@ -3,6 +3,7 @@ using WUInity.Pedestrian;
 using WUInity.Traffic;
 using WUInity.Fire;
 using System.Threading;
+using WUInity.Smoke;
 
 namespace WUInity
 {
@@ -67,26 +68,26 @@ namespace WUInity
             return _pedestrianModule;
         }
 
-        private FireMesh _fireMesh;
-        public FireMesh FireMesh()
+        private FireModule _fireModule;
+        public FireModule FireModule()
         {
-            if (_fireMesh == null)
+            if (_fireModule == null)
             {
                 CreateFireSim();
             }
 
-            return _fireMesh;
+            return _fireModule;
         }
 
         //when is this needed, should only be internal?
-        private Smoke.AdvectDiffuseModel _advectDiffuseSim;
-        public Smoke.AdvectDiffuseModel AdvectDiffuseSim()
+        private Smoke.SmokeModule _smokeModule;
+        public Smoke.SmokeModule SmokeModule()
         {
-            if(_advectDiffuseSim == null)
+            if(_smokeModule == null)
             {
-                _advectDiffuseSim = new Smoke.AdvectDiffuseModel(_fireMesh, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
+                _smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
             }
-            return _advectDiffuseSim;
+            return _smokeModule;
         }
 
         private float _startTime;
@@ -123,12 +124,12 @@ namespace WUInity
 
         public float GetFireWindSpeed()
         {
-            return _fireMesh.currentWindData.speed;
+            return _fireModule.GetCurrentWindData().speed;
         }
 
         public float GetFireWindDirection()
         {
-            return _fireMesh.currentWindData.direction;
+            return _fireModule.GetCurrentWindData().direction;
         }       
         
         public  void StartSimulation()
@@ -264,17 +265,20 @@ namespace WUInity
             if(input.Simulation.RunSmokeModule && input.Simulation.RunFireModule)
             {
                 //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
-                if(_fireMesh == null)
+                if(_fireModule == null)
                 {
                     WUInity.LOG(WUInity.LogType.Warning, "No fire mesh has been created, disabling smoke spread simulation.");
                     input.Simulation.RunSmokeModule = false;
                 }
                 else
-                {    if(_advectDiffuseSim != null)
+                {    if(_smokeModule != null)
                     {
-                        _advectDiffuseSim.Release();
+                        if(input.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                        {
+                            ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
+                        }                        
                     }
-                    _advectDiffuseSim = new Smoke.AdvectDiffuseModel(_fireMesh, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
+                    _smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
                 }                
             }
             else
@@ -326,9 +330,17 @@ namespace WUInity
 
         private void CreateFireSim()
         {            
-            _fireMesh = new FireMesh(WUInity.RUNTIME_DATA.Fire.LCPData, WUInity.RUNTIME_DATA.Fire.WeatherInput, WUInity.RUNTIME_DATA.Fire.WindInput, WUInity.RUNTIME_DATA.Fire.InitialFuelMoistureData, WUInity.RUNTIME_DATA.Fire.IgnitionPoints);
-            _fireMesh.spreadMode = WUInity.INPUT.Fire.spreadMode;     
+            if(WUInity.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
+            {
+                _fireModule = new FarsiteOffline();
+            }
+            else
+            {
+                _fireModule = new FireMesh(WUInity.RUNTIME_DATA.Fire.LCPData, WUInity.RUNTIME_DATA.Fire.WeatherInput, WUInity.RUNTIME_DATA.Fire.WindInput, WUInity.RUNTIME_DATA.Fire.InitialFuelMoistureData, WUInity.RUNTIME_DATA.Fire.IgnitionPoints);
+                ((FireMesh)_fireModule).spreadMode = WUInity.INPUT.Fire.spreadMode;     
+            }
         }
+            
 
         private void RunSimulation(int runNumber)
         {
@@ -481,9 +493,9 @@ namespace WUInity
             //increase time
             float deltaTime = input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (input.Simulation.RunFireModule && !input.Simulation.RunPedestrianModule && !input.Simulation.RunTrafficModule)
+            if (input.Simulation.RunFireModule && !input.Simulation.RunPedestrianModule && !input.Simulation.RunTrafficModule && !input.Simulation.RunSmokeModule)
             {
-                deltaTime = (float)_fireMesh.dt;
+                deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
             _currentTime += deltaTime;
         }
@@ -522,8 +534,8 @@ namespace WUInity
                 if (CurrentTime >= 0.0f && CurrentTime >= nextFireUpdate)
                 {
                     fireUpdated = true;
-                    _fireMesh.Update(_currentTime, input.Simulation.DeltaTime);
-                    nextFireUpdate += (float)_fireMesh.dt;
+                    _fireModule.Update(_currentTime, input.Simulation.DeltaTime);
+                    nextFireUpdate += (float)_fireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
                     // Note: we need to preprocess each cell which has a road on it
                 }
@@ -537,8 +549,15 @@ namespace WUInity
             //sync with fire
             if (CurrentTime >= 0.0f && input.Simulation.RunSmokeModule)
             {
-                //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
-                _advectDiffuseSim.Update(input.Simulation.DeltaTime, _fireMesh.currentWindData.direction, _fireMesh.currentWindData.speed, fireUpdated);
+                if(input.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                {
+                    ((AdvectDiffuseModel)_smokeModule).Update(input.Simulation.DeltaTime, _fireModule.GetCurrentWindData().direction, _fireModule.GetCurrentWindData().speed, fireUpdated);
+                }
+                else if(input.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.BoxModel)
+                {
+                    //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
+                }
+                
             }
         }
 
@@ -582,7 +601,7 @@ namespace WUInity
                 EvacuationGoal eG = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 if(!eG.blocked)
                 {
-                    Fire.FireCellState cellState = _fireMesh.GetFireCellState(eG.latLong);
+                    Fire.FireCellState cellState = _fireModule.GetFireCellState(eG.latLong);
                     if (cellState == Fire.FireCellState.Burning)
                     {
                         WUInity.LOG(WUInity.LogType.Log, " Goal blocked by fire: " + eG.name);
