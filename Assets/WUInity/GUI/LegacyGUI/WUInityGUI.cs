@@ -101,7 +101,7 @@ namespace WUInity.UI
 
             //select menu
             GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
-            if (GUI.Button(mainMenu.rect, mainMenu.text) && !WUInity.SIM.IsRunning)
+            if (GUI.Button(mainMenu.rect, mainMenu.text) && WUInity.SIM.State != Simulation.SimulationState.Running)
             {
                 menuChoice = ActiveMenu.MainMenu;
                 WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
@@ -109,40 +109,43 @@ namespace WUInity.UI
 
             if(WUInity.DATA_STATUS.HaveInput)
             {
-                if (mapMenu.Pressed() && !WUInity.SIM.IsRunning)
-                {                    
-                    menuChoice = ActiveMenu.Map;
-                }
-
-                if (GUI.Button(populationMenu.rect, populationMenu.text) && !WUInity.SIM.IsRunning)
+                if(WUInity.SIM.State != Simulation.SimulationState.Running)
                 {
-                    menuChoice = ActiveMenu.Population;
-                    //WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
-                }
+                    if (mapMenu.Pressed())
+                    {
+                        menuChoice = ActiveMenu.Map;
+                    }
 
-                if (GUI.Button(evacMenu.rect, evacMenu.text) && !WUInity.SIM.IsRunning)
-                {
-                    menuChoice = ActiveMenu.Evac;
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                }
+                    if (GUI.Button(populationMenu.rect, populationMenu.text))
+                    {
+                        menuChoice = ActiveMenu.Population;
+                        //WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
+                    }
 
-                if (GUI.Button(routingMenu.rect, routingMenu.text) && !WUInity.SIM.IsRunning)
-                {
-                    menuChoice = ActiveMenu.Routing;
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                }
+                    if (GUI.Button(evacMenu.rect, evacMenu.text))
+                    {
+                        menuChoice = ActiveMenu.Evac;
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                    }
 
-                if (GUI.Button(trafficMenu.rect, trafficMenu.text) && !WUInity.SIM.IsRunning)
-                {
-                    menuChoice = ActiveMenu.Traffic;
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                }
+                    if (GUI.Button(routingMenu.rect, routingMenu.text))
+                    {
+                        menuChoice = ActiveMenu.Routing;
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                    }
 
-                if (GUI.Button(fireMenu.rect, fireMenu.text) && !WUInity.SIM.IsRunning)
-                {
-                    menuChoice = ActiveMenu.Fire;
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
-                }
+                    if (GUI.Button(trafficMenu.rect, trafficMenu.text))
+                    {
+                        menuChoice = ActiveMenu.Traffic;
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                    }
+
+                    if (GUI.Button(fireMenu.rect, fireMenu.text))
+                    {
+                        menuChoice = ActiveMenu.Fire;
+                        WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                    }
+                }                
 
                 if (WUInity.SIM.HaveResults)
                 {
@@ -196,10 +199,10 @@ namespace WUInity.UI
             {
                 TrafficMenu();
             }
-            else if (menuChoice == ActiveMenu.Farsite)
+            /*else if (menuChoice == ActiveMenu.Farsite)
             {
                 FarsiteMenu();
-            }
+            }*/
             else if (menuChoice == ActiveMenu.Fire)
             {
                 FireMenu();

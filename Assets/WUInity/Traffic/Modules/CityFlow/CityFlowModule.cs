@@ -41,7 +41,7 @@ namespace WUInity.Traffic
             //print(GetVehicle(engine));
         }
 
-        public override void Update(float deltaTime, float currentTime)
+        public override void Step(float deltaTime, float currentTime)
         {
             NextStep(engine);
             int vehicles = GetVehicleCount(engine);

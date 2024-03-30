@@ -1887,7 +1887,7 @@ namespace WUInity.UI
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.Button btnVewHouseholds = root.Q<UnityEngine.UIElements.Button>("VewHouseholds");
 
-            if (btnVewHouseholds != null&& WUInity.SIM.IsRunning)
+            if (btnVewHouseholds != null && WUInity.SIM.State == Simulation.SimulationState.Running)
             {
                 if(WUInity.INSTANCE.ToggleHouseholdRendering())
                     btnVewHouseholds.text = "Households: on";
@@ -1901,7 +1901,7 @@ namespace WUInity.UI
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.Button btnVewTraffic = root.Q<UnityEngine.UIElements.Button>("VewTraffic");
 
-            if (btnVewTraffic != null && WUInity.SIM.IsRunning)
+            if (btnVewTraffic != null && WUInity.SIM.State == Simulation.SimulationState.Running)
             {
                 if (WUInity.INSTANCE.ToggleTrafficRendering())
                     btnVewTraffic.text = "Traffic: on";
@@ -1915,7 +1915,7 @@ namespace WUInity.UI
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.Button btnVewFireSpread = root.Q<UnityEngine.UIElements.Button>("VewFireSpread");
 
-            if (btnVewFireSpread != null && WUInity.SIM.IsRunning)
+            if (btnVewFireSpread != null && WUInity.SIM.State == Simulation.SimulationState.Running)
             {
                 if (WUInity.INSTANCE.ToggleFireSpreadRendering())
                     btnVewFireSpread.text = "Fire spread: on";
@@ -1931,7 +1931,7 @@ namespace WUInity.UI
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.Button btnVewOpticalDensity = root.Q<UnityEngine.UIElements.Button>("VewOpticalDensity");
 
-            if (btnVewOpticalDensity != null && WUInity.SIM.IsRunning)
+            if (btnVewOpticalDensity != null && WUInity.SIM.State == Simulation.SimulationState.Running)
             {
                 if (WUInity.INSTANCE.ToggleSootRendering())
                     btnVewOpticalDensity.text = "Optical density: on";
@@ -1951,7 +1951,7 @@ namespace WUInity.UI
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.Button btnVewTrafficDensity = root.Q<UnityEngine.UIElements.Button>("VewTrafficDensity");
 
-            if (btnVewTrafficDensity != null && WUInity.SIM.IsRunning)
+            if (btnVewTrafficDensity != null && WUInity.SIM.State == Simulation.SimulationState.Running)
             {
                 WUInity.INSTANCE.DisplayClosestDensityData(time);
 
@@ -2065,7 +2065,7 @@ namespace WUInity.UI
                     
                 }
 
-                if (WUInity.SIM.IsRunning)
+                if (WUInity.SIM.State == Simulation.SimulationState.Running)
                 {
                     UpdateOutput();
                 }
@@ -2103,18 +2103,18 @@ namespace WUInity.UI
             label3.text = "Total population: " + WUInity.POPULATION.GetTotalPopulation();
 
             Label label4 = Document.rootVisualElement.Q<Label>("TxtPeopleStaying");
-            label4.text = "People staying: " + WUInity.SIM.PedestrianModule().GetPeopleStaying();
+            label4.text = "People staying: " + WUInity.SIM.PedestrianModule.GetPeopleStaying();
 
             Label label5 = Document.rootVisualElement.Q<Label>("TxtTotalCars");
-            label5.text = "Total cars: " + WUInity.SIM.PedestrianModule().GetTotalCars();
+            label5.text = "Total cars: " + WUInity.SIM.PedestrianModule.GetTotalCars();
 
-            if (WUInity.INPUT.Simulation.RunPedestrianModule && WUInity.SIM.PedestrianModule() != null)
+            if (WUInity.INPUT.Simulation.RunPedestrianModule && WUInity.SIM.PedestrianModule != null)
             {
                 Label label6 = Document.rootVisualElement.Q<Label>("TxtPedLeft");
-                label6.text = "Pedestrians left: " + WUInity.SIM.PedestrianModule().GetPeopleLeft() + " (" + Math.Round((double)WUInity.SIM.PedestrianModule().GetPeopleLeft() / (double)WUInity.POPULATION.GetTotalPopulation() * 100.0, 1) + "%)";
+                label6.text = "Pedestrians left: " + WUInity.SIM.PedestrianModule.GetPeopleLeft() + " (" + Math.Round((double)WUInity.SIM.PedestrianModule.GetPeopleLeft() / (double)WUInity.POPULATION.GetTotalPopulation() * 100.0, 1) + "%)";
 
                 Label label7 = Document.rootVisualElement.Q<Label>("TxtCarsReached");
-                label7.text = "Cars reached by Peds: " + WUInity.SIM.PedestrianModule().GetCarsReached();
+                label7.text = "Cars reached by Peds: " + WUInity.SIM.PedestrianModule.GetCarsReached();
             }
 
             if (WUInity.INPUT.Simulation.RunTrafficModule && WUInity.SIM.TrafficModule != null)
@@ -2141,13 +2141,13 @@ namespace WUInity.UI
             if (WUInity.INPUT.Simulation.RunFireModule)
             {
                 Label label11 = Document.rootVisualElement.Q<Label>("TxtWindSpeed");
-                label11.text = "Wind speed: " + Math.Round(WUInity.SIM.GetFireWindSpeed(),1) + " m/s";
+                label11.text = "Wind speed: " + Math.Round(WUInity.SIM.FireModule.GetCurrentWindData().speed,1) + " m/s";
 
                 Label label12 = Document.rootVisualElement.Q<Label>("TxtWindDirection");
-                label12.text = "Wind direction: " + Math.Round(WUInity.SIM.GetFireWindDirection(),1) + " °";
+                label12.text = "Wind direction: " + Math.Round(WUInity.SIM.FireModule.GetCurrentWindData().direction, 1) + " °";
 
                 Label label13 = Document.rootVisualElement.Q<Label>("TxtActiveCells");
-                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireModule().GetActiveCellCount();
+                label13.text = "Active cells (FireMesh): " + WUInity.SIM.FireModule.GetActiveCellCount();
             }
         }
 
@@ -3078,9 +3078,9 @@ namespace WUInity.UI
             // Start and stop running simulation.
             UnityEngine.UIElements.Button btnPauseSimButton = Document.rootVisualElement.Q<UnityEngine.UIElements.Button>("PauseSimButton");
 
-            if (WUInity.SIM.IsRunning)
+            if (WUInity.SIM.State == Simulation.SimulationState.Running)
             {
-                WUInity.INSTANCE.TogglePause();
+                WUInity.SIM.TogglePause();
 
                 _bSimulationPaused = !_bSimulationPaused;
 
@@ -3095,7 +3095,7 @@ namespace WUInity.UI
         private void BtnStartSim_clicked()
         {
             // Start and stop running simulation.
-            if (!WUInity.SIM.IsRunning)
+            if (WUInity.SIM.State != Simulation.SimulationState.Running)
             {
                 ResetOutputDisplayOptions();    // Reset display options:        
 
@@ -3118,9 +3118,9 @@ namespace WUInity.UI
             }
             else
             {
-                if (WUInity.INSTANCE.IsPaused())
+                if (WUInity.SIM.IsPaused)
                 {
-                    WUInity.INSTANCE.TogglePause();
+                    WUInity.SIM.TogglePause();
 
                     _bSimulationPaused = false;
 

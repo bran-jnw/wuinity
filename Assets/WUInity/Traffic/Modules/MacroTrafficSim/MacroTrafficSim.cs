@@ -144,7 +144,7 @@ namespace WUInity.Traffic
             return false;
         }
 
-        public override void Update(float deltaTime, float currentTime)
+        public override void Step(float deltaTime, float currentTime)
         {
             //first resolve traffic events
             for (int i = 0; i < trafficEvents.Count; ++i)

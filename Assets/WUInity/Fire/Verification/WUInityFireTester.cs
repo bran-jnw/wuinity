@@ -45,7 +45,7 @@ namespace WUInity.Fire
             mesh = new FireMesh(lcpData, weather, wind, initialMoisture, ignitionPoints);                                                  
             mesh.spreadMode = spreadMode;                                                              
             //start simulation and do the init
-            mesh.Update(time, 1f);                                           
+            mesh.Step(time, 1f);                                           
 
         }
 
@@ -108,7 +108,7 @@ namespace WUInity.Fire
 
             if (simulate)
             {
-                mesh.Update(time, 1f);
+                mesh.Step(time, 1f);
                 simulate = mesh.SimulationDone();
                 if (simulate)
                 {

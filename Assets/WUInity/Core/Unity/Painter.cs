@@ -249,7 +249,7 @@ namespace WUInity
                 //get correct size, fire mesh or evac mesh
                 if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
                 {
-                    fireDataCellCount = new Vector2int(WUInity.SIM.FireModule().GetCellCountX(), WUInity.SIM.FireModule().GetCellCountY());                    
+                    fireDataCellCount = new Vector2int(WUInity.SIM.FireModule.GetCellCountX(), WUInity.SIM.FireModule.GetCellCountY());                    
                     cellCount = fireDataCellCount;
                     fireDataRealSize = WUInity.INPUT.Simulation.Size;
                 }

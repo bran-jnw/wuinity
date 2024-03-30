@@ -142,7 +142,7 @@ namespace WUInity.Pedestrian
         /// </summary>
         /// <param name="deltaTime"></param>
         /// <param name="currentTime"></param>
-        public override void Update(float currentTime, float deltaTime)
+        public override void Step(float currentTime, float deltaTime)
         {            
             if (!evacuationDone)
             {

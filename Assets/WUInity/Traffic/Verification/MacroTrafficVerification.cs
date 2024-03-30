@@ -477,7 +477,7 @@ namespace WUInity.Traffic
                     }
                 }
 
-                traffic.Update(wuinityOptions.Simulation.DeltaTime, time);
+                traffic.Step(wuinityOptions.Simulation.DeltaTime, time);
                 time += wuinityOptions.Simulation.DeltaTime;
 
                 bool allGoalsBlocked = true;

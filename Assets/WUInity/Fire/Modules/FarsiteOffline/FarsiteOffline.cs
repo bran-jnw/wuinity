@@ -23,7 +23,8 @@ namespace WUInity.Fire
         double xllcorner, yllcorner, cellsize, NODATA_VALUE;
         FireRasterData[,] data;
         Vector2d offset;
-        bool _hasUpdatedRenderer = false;
+
+        float[] firelineIntensityData;
 
         public FarsiteOffline() 
         {
@@ -38,12 +39,34 @@ namespace WUInity.Fire
             Vector2d farsiteUTM = new Vector2d(xllcorner, yllcorner);
             offset = farsiteUTM - new Vector2d(simUTM.Easting, simUTM.Northing);
 
+            firelineIntensityData = new float[ncols * nrows];
+
             //WUInity.LOG(WUInity.LogType.Log, "Farsite import offset by (x/y) meters: " + offset.x + ", " + offset.y);
         }
 
-        public override void Update(float currentTime, float deltaTime)
+        public override void Step(float currentTime, float deltaTime)
         {
-            activeCells = 0; //TODO: calculate this
+            bool updateVisuals = (int)currentTime % 60 == 0 ? true : false;
+
+            if (updateVisuals)
+            {
+                activeCells = 0;
+                int index = 0;
+                for (int y = 0; y < nrows; y++)
+                {
+                    for (int x = 0; x < ncols; x++)
+                    {
+                        firelineIntensityData[index] = 0f;
+                        if (WUInity.SIM.CurrentTime > data[x, y].TOA)
+                        {
+                            firelineIntensityData[index] = data[x, y].FI;
+                            ++activeCells;
+                        }
+                        ++index;
+                    }
+                }
+            }
+            
         }
 
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
@@ -217,23 +240,7 @@ namespace WUInity.Fire
 
         public override float[] GetFireLineIntensityData()
         {
-            activeCells = 0;
-            float[] result = new float[ncols * nrows];
-            int index = 0;
-            for (int y = 0; y < nrows; y++)
-            {
-                for (int x = 0; x < ncols; x++)
-                {
-                    result[index] = 0f;
-                    if (WUInity.SIM.CurrentTime > data[x, y].TOA)
-                    {
-                        result[index] = data[x, y].FI;
-                        ++activeCells;
-                    }                    
-                    ++index;
-                }
-            }
-            return result;
+            return firelineIntensityData;
         }
 
         public override float[] GetFuelModelNumberData()

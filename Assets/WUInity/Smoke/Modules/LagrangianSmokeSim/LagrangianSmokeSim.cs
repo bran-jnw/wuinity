@@ -39,7 +39,7 @@ namespace WUInity.Smoke
             throw new NotImplementedException();
         }
 
-        public override void Update(float currentTime, float deltaTime)
+        public override void Step(float currentTime, float deltaTime)
         {
             
         }

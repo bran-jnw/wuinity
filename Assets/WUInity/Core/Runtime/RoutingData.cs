@@ -258,7 +258,7 @@ namespace WUInity.Runtime
                 //now find correct cell and add vertex index to list
                 //private List<uint>[] _cellSortedVertices;
 
-                _cellSortedVertices = new List<uint>[SIM.FireModule().GetCellCountX() * SIM.FireModule().GetCellCountY()];
+                _cellSortedVertices = new List<uint>[SIM.FireModule.GetCellCountX() * SIM.FireModule.GetCellCountY()];
 
                 // Sort the vertices of the cells, based on location... to be completed
                 // ... todo

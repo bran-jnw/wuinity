@@ -209,38 +209,38 @@ namespace WUInity.Runtime
             return success;
         }
 
-        public void UpdateWUIArea(bool[] wuiAreaIndices)
+        public void UpdateWUIArea(bool[] wuiAreaIndices, int xCount, int yCount)
         {
             if (wuiAreaIndices == null)
             {
-                wuiAreaIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
+                wuiAreaIndices = new bool[xCount * yCount];
             }
             WUInity.RUNTIME_DATA.Fire.WuiAreaIndices = wuiAreaIndices;
         }
 
-        public void UpdateRandomIgnitionIndices(bool[] randomIgnitionIndices)
+        public void UpdateRandomIgnitionIndices(bool[] randomIgnitionIndices, int xCount, int yCount)
         {
             if (randomIgnitionIndices == null)
             {
-                randomIgnitionIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
+                randomIgnitionIndices = new bool[xCount * yCount];
             }
             WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices = randomIgnitionIndices;
         }
 
-        public void UpdateInitialIgnitionIndices(bool[] initialIgnitionIndices)
+        public void UpdateInitialIgnitionIndices(bool[] initialIgnitionIndices, int xCount, int yCount)
         {
             if (initialIgnitionIndices == null)
             {
-                initialIgnitionIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
+                initialIgnitionIndices = new bool[xCount * yCount];
             }
             WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices = initialIgnitionIndices;
         }
 
-        public void UpdateTriggerBufferIndices(bool[] triggerBufferIndices)
+        public void UpdateTriggerBufferIndices(bool[] triggerBufferIndices, int xCount, int yCount)
         {
             if (triggerBufferIndices == null)
             {
-                triggerBufferIndices = new bool[WUInity.SIM.FireModule().GetCellCountX() * WUInity.SIM.FireModule().GetCellCountY()];
+                triggerBufferIndices = new bool[xCount * yCount];
             }
             WUInity.RUNTIME_DATA.Fire.TriggerBufferIndices = triggerBufferIndices;
         }

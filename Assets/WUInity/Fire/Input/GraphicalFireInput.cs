@@ -13,8 +13,11 @@ namespace WUInity
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    bw.Write(WUInity.SIM.FireModule().GetCellCountX());
-                    bw.Write(WUInity.SIM.FireModule().GetCellCountY());
+                    //always assume 30 meters for now
+                    int xCount = (int)(0.5 + WUInity.INPUT.Simulation.Size.x / 30);
+                    int yCount = (int)(0.5 + WUInity.INPUT.Simulation.Size.x / 30);
+                    bw.Write(xCount);
+                    bw.Write(yCount);
                     bw.Write(GetBytes(WUInity.RUNTIME_DATA.Fire.WuiAreaIndices));
                     bw.Write(GetBytes(WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices));
                     bw.Write(GetBytes(WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices));
@@ -51,7 +54,11 @@ namespace WUInity
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
 
-                        if (ncols == WUInity.SIM.FireModule().GetCellCountX() && nrows == WUInity.SIM.FireModule().GetCellCountY())
+                        //always assume 30 meters for now
+                        int xCount = (int)(0.5 + WUInity.INPUT.Simulation.Size.x / 30);
+                        int yCount = (int)(0.5 + WUInity.INPUT.Simulation.Size.x / 30);
+
+                        if (ncols == xCount && nrows == yCount)
                         {
                             int dataSize = ncols * nrows;
 
@@ -67,10 +74,10 @@ namespace WUInity
                             b = br.ReadBytes(dataSize * sizeof(bool));
                             bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                            WUInity.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices);
-                            WUInity.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea);
-                            WUInity.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices);
-                            WUInity.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices);
+                            WUInity.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices, xCount, yCount);
+                            WUInity.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, xCount, yCount);
+                            WUInity.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, xCount, yCount);
+                            WUInity.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, xCount, yCount);
                             success = true;
                         }
                         else
@@ -90,10 +97,14 @@ namespace WUInity
 
         private static void CreateDefaultInputs()
         {
-            WUInity.RUNTIME_DATA.Fire.UpdateWUIArea(null);
-            WUInity.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(null);
-            WUInity.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(null);
-            WUInity.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(null);
+            //always assume 30 meters for now
+            int xCount = (int)(0.5 + WUInity.INPUT.Simulation.Size.x / 30);
+            int yCount = (int)(0.5 + WUInity.INPUT.Simulation.Size.x / 30);
+
+            WUInity.RUNTIME_DATA.Fire.UpdateWUIArea(null, xCount, yCount);
+            WUInity.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);
+            WUInity.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(null, xCount, yCount);
+            WUInity.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(null, xCount, yCount);
             SaveGraphicalFireInput();
         }
     }

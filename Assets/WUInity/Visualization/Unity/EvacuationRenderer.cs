@@ -24,7 +24,7 @@ namespace WUInity.Visualization
 
             if (renderHouseholds)
             {
-                CreateHouseholdsBuffer(((MacroHouseholdSim)WUInity.SIM.PedestrianModule()).GetHouseholdPositions().Length, WUInity.INPUT.Simulation.Size);
+                CreateHouseholdsBuffer(((MacroHouseholdSim)WUInity.SIM.PedestrianModule).GetHouseholdPositions().Length, WUInity.INPUT.Simulation.Size);
             }            
         }
 
@@ -40,7 +40,7 @@ namespace WUInity.Visualization
         {
             if (renderHouseholds)
             {
-                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)WUInity.SIM.PedestrianModule()).GetHouseholdPositions();
+                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)WUInity.SIM.PedestrianModule).GetHouseholdPositions();
                 householdPositionsBuffer.SetData(newPositions);
                 householdsMaterial.SetBuffer("_PositionsAndState", householdPositionsBuffer);
                 Graphics.DrawMeshInstancedProcedural(householdMesh, 0, householdsMaterial, bounds, householdPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
@@ -56,7 +56,10 @@ namespace WUInity.Visualization
                 if(WUInity.SIM.TrafficModule.GetCarsInSystem() > 0)
                 {
                     carPositionsArray = WUInity.SIM.TrafficModule.GetCarPositionsAndStates();
-                    carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));
+                    if(carPositionsBuffer == null || carPositionsArray.Length != carPositionsBuffer.count)
+                    {
+                        carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));
+                    }                    
                     carPositionsBuffer.SetData(carPositionsArray);
                     carsMaterial.SetBuffer("_PositionsAndState", carPositionsBuffer);
                     Graphics.DrawMeshInstancedProcedural(carMesh, 0, carsMaterial, bounds, carPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);

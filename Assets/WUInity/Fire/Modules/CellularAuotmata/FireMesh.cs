@@ -225,7 +225,7 @@ namespace WUInity.Fire
         }
 
         bool initialized = false;
-        public override void Update(float currentTime, float deltaTime)
+        public override void Step(float currentTime, float deltaTime)
         {
             if(!initialized)                                        
             {

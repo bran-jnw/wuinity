@@ -14,7 +14,9 @@ namespace WUInity.Traffic
         private int carsInSystem;
         private int totalCarsSimulated;
         private Vector2d offset;
-        Dictionary<StartGoal, string> validRouteIDs;        
+        Dictionary<StartGoal, string> validRouteIDs;
+        Vector4[] carsRendering;
+
 
         public SUMOModule()
         {
@@ -36,7 +38,8 @@ namespace WUInity.Traffic
                 Vector2d sumoUTM = new Vector2d(-WUInity.INPUT.Traffic.sumoInput.UTMoffset.x, -WUInity.INPUT.Traffic.sumoInput.UTMoffset.y);
                 offset = sumoUTM - new Vector2d(simUTM.Easting, simUTM.Northing);
 
-                validRouteIDs = new Dictionary<StartGoal, string>();                
+                validRouteIDs = new Dictionary<StartGoal, string>();
+                carsRendering = new Vector4[1];
 
                 WUInity.LOG(WUInity.LogType.Log, "SUMO DLL loaded.");
             }
@@ -52,7 +55,7 @@ namespace WUInity.Traffic
             LIBSUMO.Simulation.close();
         }
 
-        public override void Update(float deltaTime, float currentTime)
+        public override void Step(float deltaTime, float currentTime)
         {
             if(!LIBSUMO.Simulation.isLoaded())
             {
@@ -96,6 +99,21 @@ namespace WUInity.Traffic
                     arrivalData.Add(currentTime + deltaTime);
                 }
             }
+
+            //finally update visuals            
+            if(carsRendering == null || carsRendering.Length != cars.Count)
+            {
+                Vector4[] buffer = new Vector4[cars.Count];
+                int index = 0;
+                foreach (SUMOCar car in cars.Values)
+                {
+                    buffer[index] = car.GetPositionAndSpeed(true);
+                    buffer[index].X += (float)offset.x;
+                    buffer[index].Y += (float)offset.y;
+                    ++index;
+                }
+                carsRendering = buffer;
+            }      
         }
 
         private struct StartGoal
@@ -229,19 +247,9 @@ namespace WUInity.Traffic
         {
             if (!LIBSUMO.Simulation.isLoaded())
             {
-                WUInity.LOG(WUInity.LogType.Warning, "SUMO is not loaded.");
-                return new Vector4[0];
+                WUInity.LOG(WUInity.LogType.Error, "SUMO is not loaded when trying to access car positions.");
             }
-
-            Vector4[] carsRendering = new Vector4[cars.Count];
-            int i = 0;
-            foreach(SUMOCar car in cars.Values)
-            {
-                carsRendering[i] = car.GetPositionAndSpeed(true);
-                carsRendering[i].X += (float)offset.x;
-                carsRendering[i].Y += (float)offset.y;
-                ++i;
-            }
+            
             return carsRendering;
         }
 

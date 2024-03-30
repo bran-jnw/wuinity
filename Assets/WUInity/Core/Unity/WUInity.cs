@@ -448,7 +448,7 @@ namespace WUInity
         /// <param name="message"></param>
         public static void LOG(LogType logType, string message)
         {            
-            if (SIM.IsRunning)
+            if (SIM.State == Simulation.SimulationState.Running)
             {
                 message = "[" + (int)SIM.CurrentTime + "s] " + message;
             }
@@ -561,17 +561,6 @@ namespace WUInity
         {
             dataSampleMode = sampleMode;
         }
-
-        bool pauseSim = false;
-        public void TogglePause()
-        {
-            pauseSim = !pauseSim;
-        }
-
-        public bool IsPaused()
-        {
-            return pauseSim;
-        }
         
         void Update()
         {
@@ -592,19 +581,10 @@ namespace WUInity
                     int y = (int)(RUNTIME_DATA.Evacuation.CellCount.y * yNorm);
                     GetCellInfo(hitPoint, x, y);
                 }
-            }           
+            }    
 
-            if(Input.GetKeyDown(KeyCode.Pause) && !RUNTIME_DATA.Simulation.MultipleSimulations)
-            {
-                TogglePause();
-            }
-
-            if(!pauseSim && !RUNTIME_DATA.Simulation.MultipleSimulations && SIM.IsRunning)
-            {
-                SIM.UpdateRealtimeSim();
-            }
             //always updatre visuals, even when paused
-            if (!RUNTIME_DATA.Simulation.MultipleSimulations && SIM.IsRunning)
+            if (!RUNTIME_DATA.Simulation.MultipleSimulations && SIM.State == Simulation.SimulationState.Running)
             {
                 EVAC_VISUALS.UpdateEvacuationRenderer(renderHouseholds, renderTraffic);
                 FIRE_VISUALS.UpdateFireRenderer(renderFireSpread, renderSmokeDispersion);
@@ -621,7 +601,7 @@ namespace WUInity
             LOG(WUInity.LogType.Warning, "Simulation started, please wait.");            
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             // SetEvacDataPlane(true);   // This is turned off as we don't want to display the _evacDataPlaneMeshRenderer by default at the start of the simulation.   16/08/2023 
-            SIM.StartSimulation();
+            SIM.Start();
 
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
@@ -742,9 +722,9 @@ namespace WUInity
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
-                    if (SIM.PedestrianModule() != null)
+                    if (SIM.PedestrianModule != null)
                     {
-                        dataSampleString = "Rescaled and relocated people count: " + ((MacroHouseholdSim)SIM.PedestrianModule()).GetPopulation(x, y);
+                        dataSampleString = "Rescaled and relocated people count: " + ((MacroHouseholdSim)SIM.PedestrianModule).GetPopulation(x, y);
                     }
                 }
                 else if (dataSampleMode == DataSampleMode.TrafficDens)
@@ -1068,7 +1048,7 @@ namespace WUInity
             if (fireMeshMode)
             {
                 activeMeshRenderer = _fireDataPlaneMeshRenderer;
-                cellCount = new Vector2int(SIM.FireModule().GetCellCountX(), SIM.FireModule().GetCellCountY());
+                cellCount = new Vector2int(SIM.FireModule.GetCellCountX(), SIM.FireModule.GetCellCountY());
                 name = "Fire Data Plane";
             }
 
@@ -1179,7 +1159,7 @@ namespace WUInity
                 {
                     for (int x = 0; x < RUNTIME_DATA.Evacuation.CellCount.x; x++)
                     {
-                        peopleInCells[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = ((MacroHouseholdSim)SIM.PedestrianModule()).GetPeopleLeftInCell(x, y);
+                        peopleInCells[outputIndex][x + y * RUNTIME_DATA.Evacuation.CellCount.x] = ((MacroHouseholdSim)SIM.PedestrianModule).GetPeopleLeftInCell(x, y);
                     }
                 }
 
