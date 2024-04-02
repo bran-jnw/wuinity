@@ -505,7 +505,7 @@ namespace WUInity
             WUInity.OUTPUT.totalEvacTime = _currentTime;
 
             _stopWatch.Stop();
-            float t = 0.05f * _stopWatch.ElapsedMilliseconds + 0.95f * _stepExecutionTime;
+            int t =(int)(0.01f * _stopWatch.ElapsedMilliseconds + 0.99f * _stepExecutionTime);
             _stepExecutionTime = t;
             _stopWatch.Reset();
         }
