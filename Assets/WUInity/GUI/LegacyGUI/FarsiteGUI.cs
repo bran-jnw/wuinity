@@ -10,7 +10,7 @@ namespace WUInity.UI
         Farsite.FarsiteViewer fV;
         void FarsiteMenu()
         {
-            FarsiteInput fI = WUInity.INPUT.Fire.FarsiteData;
+            /*FarsiteInput fI = WUInity.INPUT.Fire.farsiteData;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
@@ -45,7 +45,7 @@ namespace WUInity.UI
                     fV.ToggleTerrain();
                 }
                 ++buttonIndex;
-            }
+            }*/
         }
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using WUInity.Runtime;
+using WUInity.Utility;
 
 namespace WUInity.Visualization
 {
@@ -70,7 +71,7 @@ namespace WUInity.Visualization
             {
                 for (int x = 0; x < xPixels; x++)
                 {
-                    Fire.LandScapeStruct l = _lcpData.GetCellData(x, y);
+                    Fire.LandScapeStruct l = _lcpData.GetCellData(x, y, false);
 
                     WUInityColor c = FuelModelColors.GetFuelColor((int)l.fuel_model);
                     c.a = alpha;
@@ -95,10 +96,10 @@ namespace WUInity.Visualization
             _slopeTexture.Apply();
             _aspectTexture.Apply();
 
-            CreateLCPDataPlane(WUInity.INSTANCE.transform, "LCP_plane", true, xDim, yDim);
+            CreateLCPDataPlane(WUInity.INSTANCE.transform, "LCP_plane", true, xDim, yDim, _lcpData.OriginOffset);
         }
 
-        private MeshRenderer CreateLCPDataPlane(Transform parent, string name, bool setActive, float width, float length)
+        private MeshRenderer CreateLCPDataPlane(Transform parent, string name, bool setActive, float width, float length, Vector2d offset)
         {
             Mesh mesh;
 
@@ -124,10 +125,10 @@ namespace WUInity.Visualization
                 mesh.Clear();
                 lcpMeshRenderer = _lcpDataPlane.GetComponent<MeshRenderer>();
             }
-            Vector3 offset = Vector3.zero;
+            Vector3 unityOffset = new Vector3((float)offset.x, 0f, (float)offset.y);
             Vector2 maxUV = Vector2.one;
 
-            VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, unityOffset, maxUV);
 
             lcpMeshRenderer.material.mainTexture = _fuelModelsTexture;
 

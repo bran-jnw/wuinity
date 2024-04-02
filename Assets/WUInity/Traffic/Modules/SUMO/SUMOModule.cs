@@ -33,10 +33,8 @@ namespace WUInity.Traffic
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUInity.SIM.StartTime.ToString(), "-e", WUInity.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
 
                 //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
-                LatLngUTMConverter converter = new LatLngUTMConverter(null); //default WGS84
-                LatLngUTMConverter.UTMResult simUTM = converter.convertLatLngToUtm(WUInity.INPUT.Simulation.LowerLeftLatLong.x, WUInity.INPUT.Simulation.LowerLeftLatLong.y);
                 Vector2d sumoUTM = new Vector2d(-WUInity.INPUT.Traffic.sumoInput.UTMoffset.x, -WUInity.INPUT.Traffic.sumoInput.UTMoffset.y);
-                offset = sumoUTM - new Vector2d(simUTM.Easting, simUTM.Northing);
+                offset = sumoUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
 
                 validRouteIDs = new Dictionary<StartGoal, string>();
                 carsRendering = new Vector4[1];

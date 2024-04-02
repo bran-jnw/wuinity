@@ -172,13 +172,13 @@ namespace WUInity.Farsite
         /// <param name="mainPath">Main folder containing farsite input data as well as sub folder with output (../output).</param>
         public FarsiteData(string mainPath)
         {
-            //just make sure the path format is always the same
+            /*//just make sure the path format is always the same
             if (!mainPath.EndsWith("/"))
             {
                 mainPath +=  "/";
             }
             string input = mainPath;// + inputPrefix;
-            string output = mainPath + "output/" + WUInity.INPUT.Fire.FarsiteData.outputPrefix;// + outputPrefix;
+            string output = mainPath + "output/" + WUInity.INPUT.Fire.farsiteData.outputPrefix;// + outputPrefix;
 
             //first read input
             ReadElevation(input);
@@ -211,7 +211,7 @@ namespace WUInity.Farsite
             ReadSpreadDirection(output);
             //then the vector data
             //ReadVector(output);
-            //vectorData.OffsetPositions(xllcorner, yllcorner);
+            //vectorData.OffsetPositions(xllcorner, yllcorner);*/
         }
 
         ~FarsiteData()

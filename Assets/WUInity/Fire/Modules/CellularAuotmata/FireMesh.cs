@@ -69,14 +69,20 @@ namespace WUInity.Fire
         public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)        
         {
             this.lcpData = lcpData;
-            _cellCount = new Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);
             _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
+            int xCells = (int)(WUInity.INPUT.Simulation.Size.x / _cellSize.x);
+            int yCells = (int)(WUInity.INPUT.Simulation.Size.y / _cellSize.y);
+            _cellCount = new Vector2int(xCells, yCells); //Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);           
 
             this.weather = weather;
             this.wind = wind;
             this.initialFuelMoisture = initialFuelMoisture;
 
             this.ignitionPoints = ignitionPoints;
+
+            spreadMode = WUInity.INPUT.Fire.spreadMode;
+
+            InitializeMesh();
         }
 
         void InitializeMesh()                                                       
@@ -154,7 +160,7 @@ namespace WUInity.Fire
             {
                 for (int x = 0; x < _cellCount.x; ++x)
                 {                    
-                    LandScapeStruct l = lcpData.GetCellData(x, y);                      
+                    LandScapeStruct l = lcpData.GetCellData(x, y, true);                      
                     _fireCells[GetCellIndex(x, y)] = new FireCell(this, x, y, l); 
                 }
             }
@@ -194,6 +200,8 @@ namespace WUInity.Fire
 
             UpdateIgnitionPoints(0.0f);
             UpdateCellSpreadRates();
+
+            initialized = true;
         }
 
         double GetCorrectedElevation(int x, int y)                  
@@ -226,16 +234,8 @@ namespace WUInity.Fire
 
         bool initialized = false;
         public override void Step(float currentTime, float deltaTime)
-        {
-            if(!initialized)                                        
-            {
-                InitializeMesh();
-                initialized = true;
-            }
-            else
-            {
-                UpdateIgnitionPoints((float)timeSinceStart);
-            }
+        {            
+            UpdateIgnitionPoints((float)timeSinceStart);
 
             if (activeCells.Count == 0)                             
             {

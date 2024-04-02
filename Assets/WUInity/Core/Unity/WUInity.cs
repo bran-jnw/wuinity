@@ -549,13 +549,13 @@ namespace WUInity
 
         }
 
-        public void LoadFarsite()
+        /*public void LoadFarsite()
         {
             FARSITE_VIEWER.ImportFarsite();
             FARSITE_VIEWER.TransformCoordinates();
 
             LOG(WUInity.LogType.Warning, "Farsite loaded succesfully.");
-        }               
+        }*/           
 
         public void SetSampleMode(DataSampleMode sampleMode)
         {

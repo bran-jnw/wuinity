@@ -120,8 +120,8 @@ namespace WUInity.UI
             ++buttonIndex;
 
             //fire output stuff
-            if (WUInity.INPUT.Simulation.RunFireModule)
-            {
+            if (WUInity.INPUT.Simulation.RunFireModule && WUInity.SIM.State == Simulation.SimulationState.Running)
+            {               
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUInity.SIM.FireModule.GetCurrentWindData().speed + " m/s");
                 ++buttonIndex;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUInity.SIM.FireModule.GetCurrentWindData().direction + " degrees");

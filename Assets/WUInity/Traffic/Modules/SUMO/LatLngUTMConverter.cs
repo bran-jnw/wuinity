@@ -50,6 +50,8 @@ namespace WUInity.Utility
             this.setEllipsoid(datumName);
         }
 
+        public static readonly LatLngUTMConverter WGS84 = new LatLngUTMConverter("WGS 84");
+
         private double toRadians(double grad)
         {
             return grad * Math.PI / 180;

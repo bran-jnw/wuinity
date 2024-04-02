@@ -159,13 +159,6 @@ namespace WUInity
     }
 
     [System.Serializable]
-    public class FarsiteInput
-    {
-        public string outputPrefix = "rox";
-        public string rootFolder;
-    }
-
-    [System.Serializable]
     public class VisualizationOptions
     {
         public bool drawRoads = false;
@@ -191,7 +184,13 @@ namespace WUInity
         public int randomIgnitionPoints = 0;
         public bool useInitialIgnitionMap = false;
 
-        public FarsiteInput FarsiteData;
+        public FarsiteInput farsiteData;
+    }
+
+    [System.Serializable]
+    public class FarsiteInput
+    {
+        public string rootFolder;
     }
 
     [System.Serializable]

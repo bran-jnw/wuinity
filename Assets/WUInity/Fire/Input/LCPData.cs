@@ -18,7 +18,6 @@ namespace WUInity.Fire
 		public long ground_coarse_woody_model;
 	}
 
-	// structure for holding basic cell information (is there a reason to have short variable names here?)
 	struct celldata
 	{		
 		public short e;                 // elevation
@@ -27,8 +26,7 @@ namespace WUInity.Fire
 		public short f;                 // fuel models
 		public short c;					// canopy cover
 	}
-
-	// structure for holding optional crown fuel information
+		
 	struct crowndata
 	{
 
@@ -37,7 +35,6 @@ namespace WUInity.Fire
 		public short p;					// bulk density
 	}
 
-	// structure for holding duff and woody fuel information
 	struct grounddata
 	{
 		public short d;                // duff model
@@ -143,7 +140,12 @@ namespace WUInity.Fire
 		public short[] landscape;
 		static readonly int headsize = 7316; //header size taken from farsite source code
 
-		public LCPData()								
+		Vector2d originOffset; //offset from common origin (map lower left)
+		public Vector2d OriginOffset { get => originOffset; }
+		Vector2int originCellOffset; //cells offset from common origin
+        //public Vector2int OriginCellOffset { get => originCellOffset; }
+
+    public LCPData()								
 		{
 			
 		}
@@ -160,10 +162,18 @@ namespace WUInity.Fire
 			//SetConvFuelModelID(HaveFuelConversions());
 		}
 
-		public LandScapeStruct GetCellData(int x, int y)
+		public LandScapeStruct GetCellData(int x, int y, bool correctForOrigin)
         {
-			//flip y since dataset is north down
-			long posit = (x + (Header.numnorth - y - 1) * Header.numeast);
+			if(correctForOrigin)
+			{
+                //WUInity.LOG(WUInity.LogType.Log, "X/Y offset cells: " + originCellOffset.x + ", " + originCellOffset.y);
+                //correct for any difference in origin
+                x += originCellOffset.x;
+                y += originCellOffset.y;
+            }
+
+            //flip y since dataset is north down
+            long posit = (x + (Header.numnorth - y - 1) * Header.numeast);
 			celldata cell = new celldata();
 			crowndata cfuel = new crowndata();
 			grounddata gfuel = new grounddata();
@@ -608,7 +618,11 @@ namespace WUInity.Fire
 				}
 			}
 
-			if(CantAllocLCP)
+            Vector2d farsiteUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
+            originOffset = farsiteUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
+			originCellOffset = new Vector2int(-(int)(originOffset.x / GetCellResolutionX()), -(int)(originOffset.y / GetCellResolutionY()));
+
+            if (CantAllocLCP)
             {
 				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + " but could not properly read it.");
 			}

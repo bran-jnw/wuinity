@@ -28,16 +28,14 @@ namespace WUInity.Fire
 
         public FarsiteOffline() 
         {
-            string TOAFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "TOA.asc");
-            string ROSFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "ROS.asc");
-            string FIFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "FI.asc");
-            string SDFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.FarsiteData.rootFolder, "output", "SD.asc");
+            string TOAFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "TOA.asc");
+            string ROSFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "ROS.asc");
+            string FIFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "FI.asc");
+            string SDFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "SD.asc");
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
-            LatLngUTMConverter converter = new LatLngUTMConverter(null); //default WGS84
-            LatLngUTMConverter.UTMResult simUTM = converter.convertLatLngToUtm(WUInity.INPUT.Simulation.LowerLeftLatLong.x, WUInity.INPUT.Simulation.LowerLeftLatLong.y);
             Vector2d farsiteUTM = new Vector2d(xllcorner, yllcorner);
-            offset = farsiteUTM - new Vector2d(simUTM.Easting, simUTM.Northing);
+            offset = farsiteUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
 
             firelineIntensityData = new float[ncols * nrows];
 

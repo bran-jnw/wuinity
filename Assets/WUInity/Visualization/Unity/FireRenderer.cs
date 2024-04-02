@@ -1,7 +1,3 @@
-using ScottPlot.Control;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using WUInity.Fire;
 using WUInity.Smoke;
