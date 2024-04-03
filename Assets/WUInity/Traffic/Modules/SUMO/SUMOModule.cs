@@ -15,8 +15,6 @@ namespace WUInity.Traffic
         private int totalCarsSimulated;
         private Vector2d offset;
         Dictionary<StartGoal, string> validRouteIDs;
-        Vector4[] carsRendering;
-
 
         public SUMOModule()
         {
@@ -37,9 +35,8 @@ namespace WUInity.Traffic
                 offset = sumoUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
 
                 validRouteIDs = new Dictionary<StartGoal, string>();
-                carsRendering = new Vector4[1];
 
-                WUInity.LOG(WUInity.LogType.Log, "SUMO DLL loaded.");
+                WUInity.LOG(WUInity.LogType.Log, "SUMO initiated.");
             }
             catch
             {
@@ -99,7 +96,7 @@ namespace WUInity.Traffic
             }
 
             //finally update visuals            
-            if(carsRendering == null || carsRendering.Length != cars.Count)
+            if(carsToRender == null || carsToRender.Length != cars.Count)
             {
                 Vector4[] buffer = new Vector4[cars.Count];
                 int index = 0;
@@ -110,7 +107,7 @@ namespace WUInity.Traffic
                     buffer[index].Y += (float)offset.y;
                     ++index;
                 }
-                carsRendering = buffer;
+                carsToRender = buffer;
             }      
         }
 
@@ -126,7 +123,7 @@ namespace WUInity.Traffic
                 this.goalLong = goalLong;
             }
         }
-        public override void PostUpdate()
+        public override void PostStep()
         {
             /*if (!LIBSUMO.Simulation.isLoaded())
             {
@@ -236,7 +233,7 @@ namespace WUInity.Traffic
             carsToInject.Clear();
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             return carsInSystem > 0 ? false : true;
         }
@@ -248,7 +245,7 @@ namespace WUInity.Traffic
                 WUInity.LOG(WUInity.LogType.Error, "SUMO is not loaded when trying to access car positions.");
             }
             
-            return carsRendering;
+            return carsToRender;
         }
 
         public override int GetCarsInSystem()

@@ -233,5 +233,16 @@ namespace WUInity.Runtime
             index = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[index];
             return EvacuationGroups[index];
         }
+
+        public uint GetTotalEvacuated()
+        {
+            uint result = 0;
+            for (int i = 0; i < EvacuationGoals.Count; i++)
+            {
+                result += EvacuationGoals[i].currentPeople;
+            }
+
+            return result;
+        }
     }
 }

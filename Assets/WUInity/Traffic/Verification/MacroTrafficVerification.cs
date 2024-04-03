@@ -462,7 +462,7 @@ namespace WUInity.Traffic
             }
 
             float time = 0.0f;
-            while (!traffic.SimulationDone() && time <= wuinityOptions.Simulation.MaxSimTime)
+            while (!traffic.IsSimulationDone() && time <= wuinityOptions.Simulation.MaxSimTime)
             {
                 //check if we are losing goals
                 if (blockGoalEvents != null)

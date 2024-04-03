@@ -7,6 +7,7 @@ namespace WUInity.Traffic
     {
         protected List<float> arrivalData;
         protected LinkedList<InjectedCar> carsToInject;
+        protected Vector4[] carsToRender;
 
         protected struct InjectedCar
         {
@@ -28,6 +29,7 @@ namespace WUInity.Traffic
         {
             arrivalData = new List<float>();
             carsToInject = new LinkedList<InjectedCar>();
+            carsToRender = new Vector4[1];
         }
 
         /// <summary>
@@ -42,7 +44,7 @@ namespace WUInity.Traffic
             carsToInject.AddLast(new InjectedCar(startLatLong, evacuationGoal, routeData, numberOfPeopleInCar));
         }
 
-        public abstract void PostUpdate();
+        public abstract void PostStep();
         
         public abstract void InsertNewTrafficEvent(TrafficEvent tE);
         public abstract int GetTotalCarsSimulated();        

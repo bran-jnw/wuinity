@@ -15,8 +15,7 @@ namespace WUInity.Traffic
         public bool stallBigRoads;
         List<TrafficEvent> trafficEvents;
         RouteCreator routeCreator;
-        Dictionary<int, RoadSegment> roadSegments;
-        Visualization.EvacuationRenderer evacuationRenderer;        
+        Dictionary<int, RoadSegment> roadSegments;       
 
         public MacroTrafficSim(RouteCreator rC)
         {
@@ -43,10 +42,10 @@ namespace WUInity.Traffic
 
             routeCreator = rC;
 
-            evacuationRenderer = UnityEngine.MonoBehaviour.FindObjectOfType<Visualization.EvacuationRenderer>();
+            WUInity.LOG(WUInity.LogType.Log, "Macro traffic sim initiated.");
         }
 
-        public override void PostUpdate()
+        public override void PostStep()
         {
             foreach (InjectedCar injectedCar in carsToInject)
             {
@@ -67,7 +66,7 @@ namespace WUInity.Traffic
             return totalCarsSimulated;
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             return carsInSystem.Count == 0 ? true : false;
         }
@@ -164,6 +163,7 @@ namespace WUInity.Traffic
             roadSegments = CollectRoadSegments();
             List<MacroCar> carsToRemove = new List<MacroCar>();
             Dictionary<int, RoadSegment> newRoadSegments = new Dictionary<int, RoadSegment>();
+           
 
             float averageSpeed = 0;
             float minSpeed = 9999f;
@@ -325,18 +325,19 @@ namespace WUInity.Traffic
                 UpdateEvacGoalsInternal();
             }
 
-            WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
-                      
+            //update rendering
+            carsToRender = new Vector4[carsInSystem.Count];
+            for (int i = 0; i < carsToRender.Length; i++)
+            {
+                carsToRender[i] = carsInSystem[i].GetUnityPositionAndSpeed(true);
+            }            
+
+            //WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
         }     
         
         public override Vector4[] GetCarPositionsAndStates()
         {
-            Vector4[] carsRendering = new Vector4[carsInSystem.Count];
-            for (int i = 0; i < carsRendering.Length; i++)
-            {
-                carsRendering[i] = carsInSystem[i].GetUnityPositionAndSpeed(true);
-            }
-            return carsRendering;
+            return carsToRender;
         }
 
         //add parameter for flow reduction by adding background traffic as a density

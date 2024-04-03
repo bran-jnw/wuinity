@@ -46,7 +46,7 @@ namespace WUInity
             {                
                 WUInityInput wui = UnityEngine.JsonUtility.FromJson<WUInityInput>(input);
 
-                UnityEngine.MonoBehaviour.print(wui.Simulation.Size.x + "," + wui.Simulation.Size.y);
+                WUInity.LOG(WUInity.LogType.Log, "Smoek enabled? " + wui.Simulation.RunSmokeModule);
 
                 WUInity.WORKING_FILE = path;
                 WUInity.LOG(WUInity.LogType.Log, " Reading input file " + WUInity.WORKING_FILE + ".");
@@ -74,7 +74,7 @@ namespace WUInity
         public bool RunPedestrianModule = true;
         public bool RunTrafficModule = true;
         public bool RunFireModule = true;
-        public bool RunSmokeModule = true;
+        public bool RunSmokeModule = false;
     }
 
     [System.Serializable]

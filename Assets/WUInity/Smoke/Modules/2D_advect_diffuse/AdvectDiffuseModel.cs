@@ -283,7 +283,7 @@ namespace WUInity.Smoke
             throw new System.NotImplementedException();
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             return false;
         }

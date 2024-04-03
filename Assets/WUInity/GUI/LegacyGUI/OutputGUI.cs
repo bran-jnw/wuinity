@@ -12,6 +12,11 @@ namespace WUInity.UI
 
         void OutputMenu()
         {
+            if(WUInity.SIM.State == Simulation.SimulationState.Error || WUInity.SIM.State == Simulation.SimulationState.Initializing)
+            {
+                return;
+            }
+
             int buttonColumnStart = 140;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -108,15 +113,13 @@ namespace WUInity.UI
                 ++buttonIndex;
             }
 
-            uint totalEvacuated = 0;
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                totalEvacuated += WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
                 string name = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
                 ++buttonIndex;
             }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + totalEvacuated + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.PedestrianModule.GetPeopleStaying()));
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + WUInity.RUNTIME_DATA.Evacuation.GetTotalEvacuated() + " / " + (WUInity.POPULATION.GetTotalPopulation() - WUInity.SIM.PedestrianModule.GetPeopleStaying()));
             ++buttonIndex;
 
             //fire output stuff
@@ -177,8 +180,12 @@ namespace WUInity.UI
                 LegendGUI();                
             }
 
-            if (plotHasArrived)
+            if (plotHasArrived)  
             {
+                if(plotFig == null)
+                {
+                    CreateArrivalTexture();
+                }
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle arrival output"))
                 {
                     displayArrivalPlot = !displayArrivalPlot;
@@ -193,7 +200,7 @@ namespace WUInity.UI
         }
 
         static int headerHeight;
-        static Vector2Int plotWindowSize = new Vector2Int(532, 512);
+        static Vector2Int plotWindowSize = new Vector2Int(532, 532);
         Rect plotWindowRect = new Rect(0.5f * (Screen.width - plotWindowSize.x), 0.5f * (Screen.height - plotWindowSize.y), plotWindowSize.x, plotWindowSize.y);
         Rect plotWindowGroup = new Rect(headerHeight, 0, plotWindowSize.x, plotWindowSize.y);
         static Rect dragWindowRect = new Rect(0, 0, 10000, headerHeight);
@@ -212,7 +219,7 @@ namespace WUInity.UI
             //scrollPlot = GUI.BeginScrollView(plotWindowGroup, scrollPlot, new Rect(0, 0, 532, 1024));
             
 
-            GUI.DrawTexture(new Rect(0, 20, 512, 512), plot);
+            GUI.DrawTexture(new Rect(0, 20, 512, 512), plotFig);
 
 
             //GUI.EndScrollView();
@@ -221,13 +228,20 @@ namespace WUInity.UI
             GUI.DragWindow(dragWindowRect);
         }
 
-        Texture2D plot;
+        byte[] plotByteData;
+        Texture2D plotFig;
         bool plotHasArrived;
-        public void SetPlotTexture(Texture2D plot)
+        public void SetArrivalPlotBytes(byte[] byteData)
         {
-            this.plot = plot;
+            plotByteData = byteData;            
             displayArrivalPlot = true;
-            plotHasArrived = true;
+            plotHasArrived = true;            
+        }
+
+        private void CreateArrivalTexture()
+        {
+            plotFig = new Texture2D(2, 2);
+            ImageConversion.LoadImage(plotFig, plotByteData);
         }
 
         void ResetOutputGUI()

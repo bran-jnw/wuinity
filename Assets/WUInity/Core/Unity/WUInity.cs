@@ -126,10 +126,10 @@ namespace WUInity
         {
             get
             {
-                if (INSTANCE._input == null)
+                /*if (INSTANCE._input == null)
                 {
                     INSTANCE._input = new WUInityInput();
-                }
+                }*/
                 return INSTANCE._input;
             }
         }
@@ -459,8 +459,7 @@ namespace WUInity
             }
             else if (logType == LogType.Error)
             {
-                message = "ERROR: " + message;
-                SIM.StopSim("Simulation can't run, please check log.");
+                message = "ERROR: " + message;                
             }
             else if (logType == LogType.Event)
             {
@@ -475,6 +474,11 @@ namespace WUInity
             if (Application.isEditor || Debug.isDebugBuild)
             {
                 Debug.Log(message);
+            }
+
+            if (logType == LogType.Error)
+            {
+                SIM.StopSim("Simulation can't run, please check log.");
             }
         }
 
@@ -586,6 +590,10 @@ namespace WUInity
             //always updatre visuals, even when paused
             if (!RUNTIME_DATA.Simulation.MultipleSimulations && SIM.State == Simulation.SimulationState.Running)
             {
+                if(!_visualsExist)
+                {
+                    CreateVisualizers();
+                }
                 EVAC_VISUALS.UpdateEvacuationRenderer(renderHouseholds, renderTraffic);
                 FIRE_VISUALS.UpdateFireRenderer(renderFireSpread, renderSmokeDispersion);
             }
@@ -598,11 +606,15 @@ namespace WUInity
 
         public void StartSimulation()
         {
-            LOG(WUInity.LogType.Warning, "Simulation started, please wait.");            
+            _visualsExist = false;
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             // SetEvacDataPlane(true);   // This is turned off as we don't want to display the _evacDataPlaneMeshRenderer by default at the start of the simulation.   16/08/2023 
-            SIM.Start();
+            SIM.Start(INPUT);
+        }
 
+        bool _visualsExist = false;
+        public void CreateVisualizers()
+        {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
             EVAC_VISUALS.CreateBuffers(INPUT.Simulation.RunPedestrianModule, INPUT.Simulation.RunTrafficModule);
@@ -613,6 +625,8 @@ namespace WUInity
             FIRE_VISUALS.CreateBuffers(INPUT.Simulation.RunFireModule, INPUT.Simulation.RunSmokeModule);
             renderFireSpread = INPUT.Simulation.RunFireModule;
             renderSmokeDispersion = INPUT.Simulation.RunSmokeModule;
+
+            _visualsExist = true;
 
             ShowAllRuntimeVisuals();
         }

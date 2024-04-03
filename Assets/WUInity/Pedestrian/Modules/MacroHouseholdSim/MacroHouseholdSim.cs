@@ -224,7 +224,7 @@ namespace WUInity.Pedestrian
             }
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             return evacuationDone;
         }

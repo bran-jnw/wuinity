@@ -326,7 +326,7 @@ namespace WUInity.Fire
             //return true;
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             if(activeCells.Count == 0 && _ignitionDone)
             {

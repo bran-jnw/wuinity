@@ -55,7 +55,7 @@ namespace WUInity.Traffic
             }
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             throw new NotImplementedException();
         }
@@ -90,7 +90,7 @@ namespace WUInity.Traffic
             throw new NotImplementedException();
         }
 
-        public override void PostUpdate()
+        public override void PostStep()
         {
             throw new NotImplementedException();
         }

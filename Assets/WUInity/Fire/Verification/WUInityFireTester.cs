@@ -109,7 +109,7 @@ namespace WUInity.Fire
             if (simulate)
             {
                 mesh.Step(time, 1f);
-                simulate = mesh.SimulationDone();
+                simulate = mesh.IsSimulationDone();
                 if (simulate)
                 {
                     time += (float)mesh.dt;

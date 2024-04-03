@@ -74,7 +74,7 @@ namespace WUInity.Fire
             yScale = (float)(cellsize * nrows / WUInity.INPUT.Simulation.Size.y);
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             return WUInity.SIM.CurrentTime > maxTimeOfArrival ? true : false;
         }        

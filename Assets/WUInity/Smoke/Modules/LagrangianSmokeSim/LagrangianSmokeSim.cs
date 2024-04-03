@@ -34,7 +34,7 @@ namespace WUInity.Smoke
             context.Dispose();
         }
 
-        public override bool SimulationDone()
+        public override bool IsSimulationDone()
         {
             throw new NotImplementedException();
         }

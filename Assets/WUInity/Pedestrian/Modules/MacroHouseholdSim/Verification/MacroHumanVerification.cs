@@ -19,7 +19,7 @@ namespace WUInity.Pedestrian
             wuinityOptions.Simulation.SimulationID = "P1";
             //evacOptions.overrideTotalPopulation = true;
             //evacOptions.totalPopulation = 1000;
-            WUInity.SIM.Start();
+            //WUInity.SIM.Start();
 
             //P2
             for (int i = 1; i < 6; i++)
@@ -31,7 +31,7 @@ namespace WUInity.Pedestrian
                 evacOptions.maxCars = i;
                 evacOptions.maxCarsChance = 1f;
                 wuinityOptions.Simulation.SimulationID = "P2_" + i;
-                WUInity.SIM.Start();
+                //WUInity.SIM.Start();
             }
 
             //P3, need more curves
@@ -42,7 +42,7 @@ namespace WUInity.Pedestrian
             wuinityOptions.Simulation.SimulationID = "P3_1";
             //evacOptions.overrideTotalPopulation = true;
             //evacOptions.totalPopulation = 1000;
-            WUInity.SIM.Start();
+            //WUInity.SIM.Start();
 
             //TODO_broken after chnage of response curve input
             /*wuinityOptions.simName = "P3_2";
