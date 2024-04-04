@@ -109,7 +109,81 @@ namespace WUInity.Traffic
                 }
                 carsToRender = buffer;
             }      
+
+            //testing blocking road
+            if(currentTime > 600 && !triggered)
+            {
+                triggered = true;
+
+                LIBSUMO.StringVector incomingEdges =  LIBSUMO.Junction.getIncomingEdges(88462871.ToString());
+                for (int i = 0; i < incomingEdges.Count; i++)
+                {
+                    if (!incomingEdges[i].StartsWith(":"))
+                    {
+                        LIBSUMO.Edge.adaptTraveltime(incomingEdges[i], double.MaxValue);
+                        //LIBSUMO.Edge.setMaxSpeed(incomingEdges[i], 0.1);
+                        //LIBSUMO.Edge.setEffort(incomingEdges[i], double.MaxValue);
+                        //LIBSUMO.Edge.setDisallowed(incomingEdges[i], "passenger"); 
+
+                        /*foreach (SUMOCar car in cars.Values)
+                        {
+                            LIBSUMO.Vehicle.setAdaptedTraveltime(car.GetVehicleID(), incomingEdges[i], double.MaxValue); //rerouteTraveltime/rerouteEffort
+                        }*/
+                    }
+                }
+
+                incomingEdges = LIBSUMO.Junction.getIncomingEdges(560195640.ToString());
+                for (int i = 0; i < incomingEdges.Count; i++)
+                {
+                    if (!incomingEdges[i].StartsWith(":"))
+                    {
+                        LIBSUMO.Edge.adaptTraveltime(incomingEdges[i], double.MaxValue);
+                    }
+                }
+
+                //need to update cached routes
+                try
+                {
+                    Dictionary<StartGoal, string> newValidRoutesIDs = new Dictionary<StartGoal, string>();
+                    routeIDoffset += validRouteIDs.Count + 1;
+                    int index = 0;
+                    foreach (var p in validRouteIDs)
+                    {
+                        LIBSUMO.StringVector routeEdges = LIBSUMO.Route.getEdges(p.Value);
+                        LIBSUMO.TraCIStage route = LIBSUMO.Simulation.findRoute(routeEdges.First(), routeEdges.Last());
+
+                        string routeID = "route_" + (index + routeIDoffset);
+                        ++index;                        
+                        if (route.edges.Count == 0)
+                        {
+                            int routeIndex = Random.Range(0, newValidRoutesIDs.Count);
+                            routeID = newValidRoutesIDs.ElementAt(routeIndex).Value;
+                        }
+                        else
+                        {
+                            LIBSUMO.Route.add(routeID, route.edges);
+                        }                        
+                        newValidRoutesIDs.Add(p.Key, routeID);
+                    }
+                    validRouteIDs.Clear();
+                    validRouteIDs = newValidRoutesIDs;
+                }
+                catch (Exception e) 
+                {
+                    WUInity.CONSOLE(WUInity.LogType.Log, e.Message);
+                }
+                
+
+                //make sure everyone in network re-routes
+                foreach (SUMOCar car in cars.Values)
+                {
+                    LIBSUMO.Vehicle.rerouteTraveltime(car.GetVehicleID()); //rerouteTraveltime/rerouteEffort
+                }
+
+            }
         }
+        bool triggered = false;
+        int routeIDoffset = 0;
 
         private struct StartGoal
         {
@@ -177,7 +251,7 @@ namespace WUInity.Traffic
                         //https://sumo.dlr.de/docs/Simulation/Routing.html#travel-time_values_for_routing
                         try
                         {                            
-                            routeID = "route_" + validRouteIDs.Count;
+                            routeID = "route_" + (validRouteIDs.Count + routeIDoffset);
                             LIBSUMO.Route.add(routeID, route.edges);
                             uint carID = GetNewCarID();
                             string sumoID = carID.ToString();
@@ -277,7 +351,7 @@ namespace WUInity.Traffic
             {
                 int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                 fireCellEdges = new List<string>[WUInity.SIM.FireModule.GetCellCountX(), WUInity.SIM.FireModule.GetCellCountY()];
+                fireCellEdges = new List<string>[WUInity.SIM.FireModule.GetCellCountX(), WUInity.SIM.FireModule.GetCellCountY()];
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
@@ -320,7 +394,7 @@ namespace WUInity.Traffic
             {
                 for (int i = 0; i < fireCellEdges[x, y].Count; i++)
                 {
-                    //https://sumo.dlr.de/docs/Simulation/Routing.html#routing_by_effort
+                    //https://sumo.dlr.de/docs/Simulation/Routing.html
                     LIBSUMO.Edge.adaptTraveltime(fireCellEdges[x, y][i], 3600.0);
                 }
             }
