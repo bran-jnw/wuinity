@@ -168,13 +168,13 @@ namespace WUInity
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Warning, "Evacuation group file " + path + " not found and could not be loaded.");
+                    WUInity.CONSOLE(WUInity.LogType.Warning, "Evacuation group file " + path + " not found and could not be loaded.");
                 }
 
                 
                 if (fileExists && eG == null)
                 {
-                    WUInity.LOG(WUInity.LogType.Warning, "Evacuation group file " + path + " was found but did not contain any valid data.");
+                    WUInity.CONSOLE(WUInity.LogType.Warning, "Evacuation group file " + path + " was found but did not contain any valid data.");
                 }
             }
 
@@ -182,11 +182,11 @@ namespace WUInity
             {
                 result = evacGroups.ToArray();
                 success = true;
-                WUInity.LOG(WUInity.LogType.Log, " Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
+                WUInity.CONSOLE(WUInity.LogType.Log, " Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "No valid evacuation group data could be found or loaded, evacuation simulation will not run.");
+                WUInity.CONSOLE(WUInity.LogType.Warning, "No valid evacuation group data could be found or loaded, evacuation simulation will not run.");
             }
 
             return result;
@@ -244,20 +244,20 @@ namespace WUInity
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
                         WUInity.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(eGsIndices);
-                        WUInity.LOG(WUInity.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
+                        WUInity.CONSOLE(WUInity.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                         success = true;
                     }
                     else
                     {
                         WUInity.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(null);
-                        WUInity.LOG(WUInity.LogType.Warning, "Evac groups file does not match current mesh, using default.");
+                        WUInity.CONSOLE(WUInity.LogType.Warning, "Evac groups file does not match current mesh, using default.");
                     }
                 }
             }
             catch (System.Exception e)
             {
                 WUInity.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(null);
-                WUInity.LOG(WUInity.LogType.Warning, "Evac groups file " + path + " not found, using default.");
+                WUInity.CONSOLE(WUInity.LogType.Warning, "Evac groups file " + path + " not found, using default.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }
             

@@ -42,7 +42,7 @@ namespace WUInity.Traffic
 
             routeCreator = rC;
 
-            WUInity.LOG(WUInity.LogType.Log, "Macro traffic sim initiated.");
+            WUInity.CONSOLE(WUInity.LogType.Log, "Macro traffic sim initiated.");
         }
 
         public override void PostStep()

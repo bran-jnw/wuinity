@@ -121,7 +121,7 @@ namespace WUInity
 
             for (int i = 0; i < WUInity.RUNTIME_DATA.Simulation.NumberOfRuns; i++)
             {
-                WUInity.LOG(WUInity.LogType.Log, "Simulation number " + i + " started, please wait.");
+                WUInity.CONSOLE(WUInity.LogType.Log, "Simulation number " + i + " started, please wait.");
                 runNumber = i;                
                 CreateSubModules(i);                
                 RunSimulation();
@@ -165,11 +165,11 @@ namespace WUInity
 
             if (convergedInSequence >= 10)
             {
-                WUInity.LOG(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                WUInity.CONSOLE(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                WUInity.CONSOLE(WUInity.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
             WUInity.OUTPUT.totalEvacTime = CurrentTime;
             _haveResults = true;            
@@ -185,7 +185,7 @@ namespace WUInity
             PlotResults(xData, yData);
 
             _state = SimulationState.Finished;
-            WUInity.LOG(WUInity.LogType.Log, " Simulation/s done.");
+            WUInity.CONSOLE(WUInity.LogType.Log, " Simulation/s done.");
         }
         
         private void CreateSubModules(int runIndex)
@@ -216,7 +216,7 @@ namespace WUInity
                 return;
             }
 
-            WUInity.LOG(WUInity.LogType.Log, "All sub-modules initiated successfully.");
+            WUInity.CONSOLE(WUInity.LogType.Log, "All sub-modules initiated successfully.");
         }
 
         private void CreateFireModule()
@@ -242,7 +242,7 @@ namespace WUInity
             {
                 if(!_input.Simulation.RunFireModule)
                 {
-                    WUInity.LOG(WUInity.LogType.Error, "Smoke simulation was enabled but no fire module was enabled, aborting.");
+                    WUInity.CONSOLE(WUInity.LogType.Error, "Smoke simulation was enabled but no fire module was enabled, aborting.");
                     //input.Simulation.RunSmokeModule = false;
                 }
                 else
@@ -250,7 +250,7 @@ namespace WUInity
                     //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                     if (_fireModule == null)
                     {
-                        WUInity.LOG(WUInity.LogType.Error, "No fire module could be created, smoke simulation can not be performed, aborting");
+                        WUInity.CONSOLE(WUInity.LogType.Error, "No fire module could be created, smoke simulation can not be performed, aborting");
                         //input.Simulation.RunSmokeModule = false;
                     }
                     else
@@ -551,7 +551,7 @@ namespace WUInity
                     Fire.FireCellState cellState = _fireModule.GetFireCellState(eG.latLong);
                     if (cellState == FireCellState.Burning)
                     {
-                        WUInity.LOG(WUInity.LogType.Log, " Goal blocked by fire: " + eG.name);
+                        WUInity.CONSOLE(WUInity.LogType.Log, " Goal blocked by fire: " + eG.name);
                         BlockEvacGoal(i);
                     }
                 }                
@@ -563,7 +563,7 @@ namespace WUInity
             if(!_stopSim)
             {
                 _stopSim = true;
-                WUInity.LOG(WUInity.LogType.Log, stopMessage);
+                WUInity.CONSOLE(WUInity.LogType.Log, stopMessage);
             }            
         }
 
@@ -627,7 +627,7 @@ namespace WUInity
             }          
             if(cellsWithoutRouteButNoonePlansToLeave > 0)
             {
-                WUInity.LOG(WUInity.LogType.Log, " " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
+                WUInity.CONSOLE(WUInity.LogType.Log, " " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
             }
             //update cars already in traffic
             _trafficModule.UpdateEvacuationGoals();              
@@ -638,7 +638,7 @@ namespace WUInity
             WUInityInput input = WUInity.INPUT;
             if (input.Simulation.RunTrafficModule)
             {
-                WUInity.LOG(WUInity.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
+                WUInity.CONSOLE(WUInity.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
                 _trafficModule.SaveToFile(runNumber);
             }
             if (input.Simulation.RunPedestrianModule)

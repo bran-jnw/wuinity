@@ -51,7 +51,7 @@ namespace WUInity.Traffic
         /// </summary>
         public RouteCollection[] CalculateCellRoutes()
         {
-            WUInity.LOG(WUInity.LogType.Log, " Calculating route collection for cells, this will take some time...");
+            WUInity.CONSOLE(WUInity.LogType.Log, " Calculating route collection for cells, this will take some time...");
 
             AbstractMap _map = WUInity.MAP;
             WUInity.INSTANCE.DeleteDrawnRoads();
@@ -195,14 +195,14 @@ namespace WUInity.Traffic
                     validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
                     {
-                        WUInity.LOG(WUInity.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].name);
+                        WUInity.CONSOLE(WUInity.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].name);
                     }
                 }
                 catch (Itinero.Exceptions.ResolveFailedException)
                 {
                     if (logMessages)
                     {
-                        WUInity.LOG(WUInity.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].name);
+                        WUInity.CONSOLE(WUInity.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].name);
                     }
                 }
             }

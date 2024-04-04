@@ -3142,6 +3142,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Junction_getShape")]
   public static extern global::System.IntPtr Junction_getShape(string jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Junction_getIncomingEdges")]
+  public static extern global::System.IntPtr Junction_getIncomingEdges(string jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Junction_getIDList")]
   public static extern global::System.IntPtr Junction_getIDList();
 

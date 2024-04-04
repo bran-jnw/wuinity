@@ -110,7 +110,7 @@ namespace WUInity.Visualization
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                WUInity.CONSOLE(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
             }
                       
         }       
@@ -189,7 +189,7 @@ namespace WUInity.Visualization
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    WUInity.CONSOLE(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
             }
@@ -325,7 +325,7 @@ namespace WUInity.Visualization
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    WUInity.CONSOLE(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
                 

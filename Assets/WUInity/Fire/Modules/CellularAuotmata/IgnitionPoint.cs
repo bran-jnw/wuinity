@@ -150,18 +150,18 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Ignition points data file " + path + " not found and could not be loaded, fire and smoke spread will have to rely on other ignition methods (painted map).");
+                WUInity.CONSOLE(WUInity.LogType.Warning, "Ignition points data file " + path + " not found and could not be loaded, fire and smoke spread will have to rely on other ignition methods (painted map).");
             }
 
             if (ignitionPoints.Count > 0)
             {
                 result = ignitionPoints.ToArray();
-                WUInity.LOG(WUInity.LogType.Log, " Ignition points data file " + path + " was found, " + ignitionPoints.Count + " valid data points were succesfully loaded.");
+                WUInity.CONSOLE(WUInity.LogType.Log, " Ignition points data file " + path + " was found, " + ignitionPoints.Count + " valid data points were succesfully loaded.");
                 success = true;
             }
             else if (fileExists)
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Ignition points data file " + path + " was found but did not contain any valid data, fire and smoke spread will have to rely on other ignition methods (painted map).");
+                WUInity.CONSOLE(WUInity.LogType.Warning, "Ignition points data file " + path + " was found but did not contain any valid data, fire and smoke spread will have to rely on other ignition methods (painted map).");
             }
 
             return result;

@@ -80,24 +80,24 @@ namespace WUInity
                 if (maxCars > 0 && cars.Count >= maxCars && !blocked)
                 {
                     blocked = true;
-                    WUInity.LOG(WUInity.LogType.Event, "Evacuation goal " + name + " has reached cars capacity, re-routing");
+                    WUInity.CONSOLE(WUInity.LogType.Event, "Evacuation goal " + name + " has reached cars capacity, re-routing");
                     WUInity.SIM.GoalBlocked();
                 }
                 else if (maxCars > 0 && cars.Count > maxCars)
                 {
-                    WUInity.LOG(WUInity.LogType.Log, "Additional car arrived at " + name + ", arrived during same time step.");
+                    WUInity.CONSOLE(WUInity.LogType.Log, "Additional car arrived at " + name + ", arrived during same time step.");
                 }
 
                 //track and respond people
                 if (maxPeople > -1 && currentPeople >= maxPeople && !blocked)
                 {
                     blocked = true;
-                    WUInity.LOG(WUInity.LogType.Event, "Evacuation goal " + name + " has reached people capacity, re-routing");
+                    WUInity.CONSOLE(WUInity.LogType.Event, "Evacuation goal " + name + " has reached people capacity, re-routing");
                     WUInity.SIM.GoalBlocked();
                 }
                 else if (maxPeople > -1 && currentPeople > maxPeople)
                 {
-                    WUInity.LOG(WUInity.LogType.Log, "Additional people arrived at " + name + ", arrived during same time step.");
+                    WUInity.CONSOLE(WUInity.LogType.Log, "Additional people arrived at " + name + ", arrived during same time step.");
                 }
             }
         }
@@ -260,14 +260,14 @@ namespace WUInity
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
+                    WUInity.CONSOLE(WUInity.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
                 }
             }            
 
             if (evacuationGoals.Count > 0)
             {
                 success = true;
-                WUInity.LOG(WUInity.LogType.Log, " " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");               
+                WUInity.CONSOLE(WUInity.LogType.Log, " " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");               
             }
 
             return evacuationGoals;

@@ -115,7 +115,7 @@ namespace WUInity.Runtime
                     }
                 }
 
-                WUInity.LOG(WUInity.LogType.Log, message);
+                WUInity.CONSOLE(WUInity.LogType.Log, message);
             }
 
             WUInity.DATA_STATUS.LcpLoaded = success;

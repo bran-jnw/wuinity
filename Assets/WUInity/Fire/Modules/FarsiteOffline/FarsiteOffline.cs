@@ -116,7 +116,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite time of arrival file not found.");
+                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite time of arrival file not found.");
                 return;
             }
 
@@ -126,7 +126,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite rate of spread file not found.");
+                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite rate of spread file not found.");
                 return;
             }
 
@@ -136,7 +136,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
                 return;
             }
 
@@ -146,7 +146,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
                 return;
             }
 

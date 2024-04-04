@@ -248,7 +248,7 @@ namespace WUInity.Fire
 						error += ", ";
 					}
 				}
-                WUInity.LOG(WUInity.LogType.Error, error);
+                WUInity.CONSOLE(WUInity.LogType.Error, error);
             }
 
 			List<int> presentFuelModelNumbers= new List<int>();
@@ -353,7 +353,7 @@ namespace WUInity.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUInity.LOG(WUInity.LogType.Error, " LCP file not found in " + path + ".");
+				WUInity.CONSOLE(WUInity.LogType.Error, " LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -624,11 +624,11 @@ namespace WUInity.Fire
 
             if (CantAllocLCP)
             {
-				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + " but could not properly read it.");
+				WUInity.CONSOLE(WUInity.LogType.Log, " LCP found in " + path + " but could not properly read it.");
 			}
 			else
             {
-				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + ", read succesfully.");
+				WUInity.CONSOLE(WUInity.LogType.Log, " LCP found in " + path + ", read succesfully.");
 			}
 
 		}
