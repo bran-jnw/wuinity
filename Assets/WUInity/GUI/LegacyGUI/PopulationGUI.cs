@@ -91,7 +91,7 @@ namespace WUInity.UI
                     bool success = int.TryParse(desiredPopulation, out totalPop);
                     if (!success)
                     {
-                        WUInity.CONSOLE(WUInity.LogType.Error, " Total population not a number, ignoring changes.");
+                        WUInity.LOG(WUInity.LogType.Error, " Total population not a number, ignoring changes.");
                     }
                     else
                     {
@@ -141,7 +141,7 @@ namespace WUInity.UI
                         }
                         else
                         {
-                            WUInity.CONSOLE(WUInity.LogType.Error, " New population count not a number.");
+                            WUInity.LOG(WUInity.LogType.Error, " New population count not a number.");
                         }
                         reScaling = false;
                     }

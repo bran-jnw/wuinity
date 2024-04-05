@@ -44,7 +44,7 @@ namespace WUInity.Traffic
             carsToInject.AddLast(new InjectedCar(startLatLong, evacuationGoal, routeData, numberOfPeopleInCar));
         }
 
-        public abstract void PostStep();
+        public abstract void HandleNewCars();
         
         public abstract void InsertNewTrafficEvent(TrafficEvent tE);
         public abstract int GetTotalCarsSimulated();        
@@ -63,5 +63,7 @@ namespace WUInity.Traffic
         {
             return arrivalData;
         }
+
+        public abstract void HandleIgnitedFireCells(List<Vector2int> cellIndices);
     }
 }

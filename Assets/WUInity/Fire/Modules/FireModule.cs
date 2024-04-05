@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace WUInity.Fire
 {
     public abstract class FireModule : SimulationModule
@@ -21,6 +23,8 @@ namespace WUInity.Fire
         public abstract float[] GetFuelModelNumberData();
         public abstract float[] GetSootProduction();
         public abstract int GetActiveCellCount();
+        public abstract List<Vector2int> GetIgnitedFireCells();
+        public abstract void ConsumeIgnitedFireCells();
 
         /// <summary>
         /// Returns state of cell on mesh based on lat/long. Returns dead if outside of mesh.

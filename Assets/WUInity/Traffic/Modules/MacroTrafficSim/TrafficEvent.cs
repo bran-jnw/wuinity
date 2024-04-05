@@ -27,7 +27,7 @@ namespace WUInity.Traffic
         {
             if (mTS == null)
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Error, no mCS set.");
+                WUInity.LOG(WUInity.LogType.Error, "Error, no mCS set.");
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace WUInity.Traffic
         {
             if (mTS == null)
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Error, no mCS set.");
+                WUInity.LOG(WUInity.LogType.Error, "Error, no mCS set.");
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace WUInity.Traffic
         {
             if (mTS == null)
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Error, no mCS set.");
+                WUInity.LOG(WUInity.LogType.Error, "Error, no mCS set.");
                 return;
             }
 
@@ -88,7 +88,7 @@ namespace WUInity.Traffic
         {
             if (mTS == null)
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Error, no mCS set.");
+                WUInity.LOG(WUInity.LogType.Error, "Error, no mCS set.");
                 return;
             }
 

@@ -52,12 +52,12 @@ namespace WUInity.Runtime
 
             if (!MAP.IsAccessTokenValid)
             {
-                CONSOLE(WUInity.LogType.Error, "Mapbox token not valid.");
+                LOG(WUInity.LogType.Error, "Mapbox token not valid.");
                 return false;
             }
-            CONSOLE(WUInity.LogType.Log, "Starting to load Mapbox map.");
+            LOG(WUInity.LogType.Log, "Starting to load Mapbox map.");
             MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.Simulation.LowerLeftLatLong.x, INPUT.Simulation.LowerLeftLatLong.y), INPUT.Map.zoomLevel);
-            CONSOLE(WUInity.LogType.Log, "Map loaded succesfully.");
+            LOG(WUInity.LogType.Log, "Map loaded succesfully.");
 
             return true;
         }

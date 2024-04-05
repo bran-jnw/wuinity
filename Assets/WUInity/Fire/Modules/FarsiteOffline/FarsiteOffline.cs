@@ -1,7 +1,5 @@
 using System.IO;
-using WUInity.Utility;
-using System.Numerics;
-using UnityEngine.UIElements;
+using System.Collections.Generic;
 
 namespace WUInity.Fire
 {
@@ -11,6 +9,7 @@ namespace WUInity.Fire
         public float ROS; //rate of spread
         public float FI; //fireline intensity
         public float SD; // spread direction
+        public bool isActive;
     }
 
     /// <summary>
@@ -25,6 +24,7 @@ namespace WUInity.Fire
         Vector2d offset;
 
         float[] firelineIntensityData;
+        List<Vector2int> newlyIgnitedCells;
 
         public FarsiteOffline() 
         {
@@ -38,6 +38,7 @@ namespace WUInity.Fire
             offset = farsiteUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
 
             firelineIntensityData = new float[ncols * nrows];
+            newlyIgnitedCells = new List<Vector2int>();
 
             //WUInity.LOG(WUInity.LogType.Log, "Farsite import offset by (x/y) meters: " + offset.x + ", " + offset.y);
         }
@@ -48,23 +49,32 @@ namespace WUInity.Fire
 
             if (updateVisuals)
             {
-                activeCells = 0;
                 int index = 0;
                 for (int y = 0; y < nrows; y++)
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        firelineIntensityData[index] = 0f;
-                        if (WUInity.SIM.CurrentTime > data[x, y].TOA)
+                        if (!data[x, y].isActive && WUInity.SIM.CurrentTime > data[x, y].TOA)
                         {
+                            data[x, y].isActive = true;
+                            newlyIgnitedCells.Add(new Vector2int(x, y));
                             firelineIntensityData[index] = data[x, y].FI;
                             ++activeCells;
                         }
                         ++index;
                     }
                 }
-            }
-            
+            }            
+        }
+
+        public override List<Vector2int> GetIgnitedFireCells()
+        {
+            return newlyIgnitedCells;
+        }
+
+        public override void ConsumeIgnitedFireCells()
+        {
+            newlyIgnitedCells.Clear();
         }
 
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
@@ -116,7 +126,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite time of arrival file not found.");
+                WUInity.LOG(WUInity.LogType.Error, "Farsite time of arrival file not found.");
                 return;
             }
 
@@ -126,7 +136,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite rate of spread file not found.");
+                WUInity.LOG(WUInity.LogType.Error, "Farsite rate of spread file not found.");
                 return;
             }
 
@@ -136,7 +146,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
                 return;
             }
 
@@ -146,7 +156,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
                 return;
             }
 
@@ -193,6 +203,7 @@ namespace WUInity.Fire
                     data[x, yIndex].ROS = ROSValue;
                     data[x, yIndex].FI = FIValue;
                     data[x, yIndex].SD = SDValue;
+                    data[x, yIndex].isActive = false; ;
                 }
             }
         }

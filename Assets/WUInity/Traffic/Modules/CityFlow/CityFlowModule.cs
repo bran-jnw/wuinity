@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System;
+using System.Collections.Generic;
 
 namespace WUInity.Traffic
 {
@@ -90,7 +91,12 @@ namespace WUInity.Traffic
             throw new NotImplementedException();
         }
 
-        public override void PostStep()
+        public override void HandleNewCars()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void HandleIgnitedFireCells(List<Vector2int> cellIndices)
         {
             throw new NotImplementedException();
         }

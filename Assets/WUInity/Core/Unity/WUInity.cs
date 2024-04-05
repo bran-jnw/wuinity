@@ -446,7 +446,7 @@ namespace WUInity
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
         /// <param name="message"></param>
-        public static void CONSOLE(LogType logType, string message)
+        public static void LOG(LogType logType, string message)
         {            
             if (SIM.State == Simulation.SimulationState.Running)
             {
@@ -805,7 +805,7 @@ namespace WUInity
             }
             else
             {
-                CONSOLE(WUInity.LogType.Error, "Paint mode not set correctly");
+                LOG(WUInity.LogType.Error, "Paint mode not set correctly");
             }
             dataSampleMode = DataSampleMode.Paint;
 

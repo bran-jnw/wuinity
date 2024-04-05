@@ -425,9 +425,9 @@ namespace WUInity.Pedestrian
 
             householdPositions = new Vector4[totalHouseholds];
 
-            WUInity.CONSOLE(WUInity.LogType.Log, " Total households: " + totalHouseholds);
-            WUInity.CONSOLE(WUInity.LogType.Log, " Total cars: " +  totalCars);
-            WUInity.CONSOLE(WUInity.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            WUInity.LOG(WUInity.LogType.Log, " Total households: " + totalHouseholds);
+            WUInity.LOG(WUInity.LogType.Log, " Total cars: " +  totalCars);
+            WUInity.LOG(WUInity.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>

@@ -528,13 +528,13 @@ namespace WUInity.UI
                 //string message= string.Concat("Goal file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
                 //EditorUtility.DisplayDialog(message, "Please remember to reload this goal file if you make and save any changes to the file in Notepad.", "Close");
 
-                WUInity.CONSOLE(WUInity.LogType.Log, "Edit goal file: " + Path.GetFileName(initialPath));
+                WUInity.LOG(WUInity.LogType.Log, "Edit goal file: " + Path.GetFileName(initialPath));
             }            
             else
             {
                 //EditorUtility.DisplayDialog("No goal file is found", "Please create a new goal file and then load in Notepad.", "Close");
 
-                WUInity.CONSOLE(WUInity.LogType.Error, "No goal file is found! Please create a new goal file.");
+                WUInity.LOG(WUInity.LogType.Error, "No goal file is found! Please create a new goal file.");
             }
         }
 
@@ -606,7 +606,7 @@ namespace WUInity.UI
                 if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
                 {
                     string removeGoal = WUInity.INPUT.Traffic.evacuationGoalFiles[dfDfEvacutionDestination.index];
-                    WUInity.CONSOLE(WUInity.LogType.Log, "Goal file " + removeGoal + " is removed.");
+                    WUInity.LOG(WUInity.LogType.Log, "Goal file " + removeGoal + " is removed.");
 
                     if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 1)
                     {
@@ -640,7 +640,7 @@ namespace WUInity.UI
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Goal file list is empty.");
+                WUInity.LOG(WUInity.LogType.Error, "Goal file list is empty.");
             }
         }
 
@@ -653,7 +653,7 @@ namespace WUInity.UI
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a goal file.");
+                WUInity.LOG(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a goal file.");
             }
         }
 
@@ -850,7 +850,7 @@ namespace WUInity.UI
                     if (value < 1 || value > 20)    // Set the stall speed range to be [1,20]. To be confirmed later.
                     {
                         tfTxTSetMaxCapTrafSpeed.SetValueWithoutNotify(WUInity.INPUT.Traffic.stallSpeed.ToString());
-                        WUInity.CONSOLE(WUInity.LogType.Warning, "The vehicle speed at max roadway capacity is not valid. Please choose between 1 and 20 (km/h).");
+                        WUInity.LOG(WUInity.LogType.Warning, "The vehicle speed at max roadway capacity is not valid. Please choose between 1 and 20 (km/h).");
                     }
                     else
                         WUInity.INPUT.Traffic.stallSpeed = value;
@@ -866,7 +866,7 @@ namespace WUInity.UI
                     if (value < 0 || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
                     {
                         //tfTxTBackgroundDensityMin.SetValueWithoutNotify(WUInity.INPUT.Traffic.backGroundDensityMinMax.x.ToString());
-                        WUInity.CONSOLE(WUInity.LogType.Warning, "Please enter the minimum range of background traffic density between 0 and 75 vehicles/km/lane.");
+                        WUInity.LOG(WUInity.LogType.Warning, "Please enter the minimum range of background traffic density between 0 and 75 vehicles/km/lane.");
                     }
                     else
                         WUInity.INPUT.Traffic.backGroundDensityMinMax.X = value;
@@ -882,7 +882,7 @@ namespace WUInity.UI
                     if (value < WUInity.INPUT.Traffic.backGroundDensityMinMax.X || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
                     {
                         //tfTxTBackgroundDensityMax.SetValueWithoutNotify(WUInity.INPUT.Traffic.backGroundDensityMinMax.y.ToString());
-                        WUInity.CONSOLE(WUInity.LogType.Warning, "Please enter the maximum range of background traffic density between the minimum and 75 vehicles/km/lane.");
+                        WUInity.LOG(WUInity.LogType.Warning, "Please enter the maximum range of background traffic density between the minimum and 75 vehicles/km/lane.");
                     }
                     else
                         WUInity.INPUT.Traffic.backGroundDensityMinMax.Y = value;
@@ -891,7 +891,7 @@ namespace WUInity.UI
 
         private void BtnRemoveRespCurveButton_clicked()
         {
-            WUInity.CONSOLE(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the response curve file list.");
+            WUInity.LOG(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the response curve file list.");
             /*
             if (EditorUtility.DisplayDialog("Remove current response curve", "Do you want to remove the current response curve?", "Confirm", "Cancel"))
             {
@@ -936,7 +936,7 @@ namespace WUInity.UI
         }
         private void BtnRemoveEvacGroupButton_clicked()
         {
-            WUInity.CONSOLE(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the evacuation group file list.");
+            WUInity.LOG(WUInity.LogType.Warning, "To be implemented soon. Currently, please edit the project .WUI file to make any change to the evacuation group file list.");
         }
 
         private void BtnAddEvacGroupButton_clicked()
@@ -947,7 +947,7 @@ namespace WUInity.UI
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a evacuation group file.");
+                WUInity.LOG(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a evacuation group file.");
             }
         }
 
@@ -1067,7 +1067,7 @@ namespace WUInity.UI
                         WUInity.RUNTIME_DATA.Evacuation.LoadEvacuationGroups(); // Reload all evacuation groups based on updated file list.
                         WUInity.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices();
 
-                        WUInity.CONSOLE(WUInity.LogType.Log, "Loaded evacuation group from " + path + " named " + data[0]);
+                        WUInity.LOG(WUInity.LogType.Log, "Loaded evacuation group from " + path + " named " + data[0]);
 
                         WUInityInput.SaveInput();
 
@@ -1091,7 +1091,7 @@ namespace WUInity.UI
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a response curve file.");
+                WUInity.LOG(WUInity.LogType.Error, "Please create a new project or load an existing project before adding a response curve file.");
             }
         }
 
@@ -1149,7 +1149,7 @@ namespace WUInity.UI
 
                         WUInity.RUNTIME_DATA.Evacuation.LoadResponseCurves(); // Reload all response curves based on updated file list.
 
-                        WUInity.CONSOLE(WUInity.LogType.Log, " Loaded response curve from " + path + " named " + data[0]);
+                        WUInity.LOG(WUInity.LogType.Log, " Loaded response curve from " + path + " named " + data[0]);
 
                         WUInityInput.SaveInput();
 
@@ -1197,7 +1197,7 @@ namespace WUInity.UI
                     if (value < 0 || value > 200)
                     {     // Set the stall speed range to be [0,200]. To be confirmed later.
                         tfTxTOSMBorderSize.SetValueWithoutNotify(_OSMBorderSize);
-                        WUInity.CONSOLE(WUInity.LogType.Warning, "The OSM board size is not valid. Please set between 0 and 200 (m).");
+                        WUInity.LOG(WUInity.LogType.Warning, "The OSM board size is not valid. Please set between 0 and 200 (m).");
                     }
                     else
                         _OSMBorderSize = evt.newValue;
@@ -1422,7 +1422,7 @@ namespace WUInity.UI
 
         bool FilterOSMFile(string filename)
         {
-            WUInity.CONSOLE(WUInity.LogType.Log, " Filtering is in progress and it can take a very long period of time subject to file size and computational power. Please wait until it is completed.");
+            WUInity.LOG(WUInity.LogType.Log, " Filtering is in progress and it can take a very long period of time subject to file size and computational power. Please wait until it is completed.");
 
             if (WUInity.RUNTIME_DATA.Routing.FilterOSMData(filename)) // If success, replace the OSM file with the filered one.
             {
@@ -1443,11 +1443,11 @@ namespace WUInity.UI
             if (File.Exists(_OSMDataFile)) { 
                 WUInity.RUNTIME_DATA.Routing.CreateRouterDatabaseFromOSM(_OSMDataFile);
                 //EditorUtility.DisplayDialog("Build router database", "Router database is successfully created from OSM file.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Log, "Router database is successfully created from OSM file: "+ _OSMDataFile);
+                WUInity.LOG(WUInity.LogType.Log, "Router database is successfully created from OSM file: "+ _OSMDataFile);
             }
             else {
                 //EditorUtility.DisplayDialog("Build router database", "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Error, "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.");
+                WUInity.LOG(WUInity.LogType.Error, "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.");
             }
         }
 
@@ -1484,12 +1484,12 @@ namespace WUInity.UI
 
                 //string message = "Fire characteristics file [" + fileName + "] is opened in Notepad.";
                 //EditorUtility.DisplayDialog(message, "Please remember to reload this file into WUINITY if you make any changes to it in Notepad.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Log, "Open fire characteristics file: "+ fileName);
+                WUInity.LOG(WUInity.LogType.Log, "Open fire characteristics file: "+ fileName);
             }
             else
             {
                 //EditorUtility.DisplayDialog("No fire characteristics file is found", "Please create a new fire characteristics file and then open in Notepad.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Error, "The fire characteristics file hasn't been specified.");
+                WUInity.LOG(WUInity.LogType.Error, "The fire characteristics file hasn't been specified.");
             }
         }
 
@@ -1505,12 +1505,12 @@ namespace WUInity.UI
 
                 //string message = string.Concat("Response curve file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
                 //EditorUtility.DisplayDialog(message, "Please remember to reload this response curve file if you make and save any changes to the file in Notepad.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Log, "Open response curve file: " + Path.GetFileName(initialPath));
+                WUInity.LOG(WUInity.LogType.Log, "Open response curve file: " + Path.GetFileName(initialPath));
             }
             else
             {
                 //EditorUtility.DisplayDialog("No response curve file is found", "Please create a new response curve file and then load in Notepad.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Error, "The response curve file hasn't been specified.");
+                WUInity.LOG(WUInity.LogType.Error, "The response curve file hasn't been specified.");
             }
         }
 
@@ -1526,12 +1526,12 @@ namespace WUInity.UI
 
                 //string message = string.Concat("Evacuation group file [", Path.GetFileName(initialPath), "] is opened in Notepad.");
                 //EditorUtility.DisplayDialog(message, "Please remember to reload this evacuation group file if you make and save any changes to the file in Notepad.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Log, "Open evacuation group file: " + Path.GetFileName(initialPath));
+                WUInity.LOG(WUInity.LogType.Log, "Open evacuation group file: " + Path.GetFileName(initialPath));
             }
             else
             {
                 //EditorUtility.DisplayDialog("No evacuation group file is found", "Please create a new evacuation group file and then load in Notepad.", "Close");
-                WUInity.CONSOLE(WUInity.LogType.Error, "The evacuation group file hasn't been specified.");
+                WUInity.LOG(WUInity.LogType.Error, "The evacuation group file hasn't been specified.");
             }
         }
 
@@ -1705,7 +1705,7 @@ namespace WUInity.UI
                 else if (File.Exists(initialPath2))
                     System.Diagnostics.Process.Start("Notepad.exe", initialPath2);
                 else 
-                    WUInity.CONSOLE(WUInity.LogType.Error, "default.roads file is not found!");
+                    WUInity.LOG(WUInity.LogType.Error, "default.roads file is not found!");
             }
         }
 
@@ -2248,7 +2248,7 @@ namespace WUInity.UI
             {
                 if (WUInity.POPULATION.CreateLocalGPW())
                 {
-                    WUInity.CONSOLE(WUInity.LogType.Log, "New local GPW data file is created successfully.");
+                    WUInity.LOG(WUInity.LogType.Log, "New local GPW data file is created successfully.");
                 }
 
                 SetLocalGPWNumber();
@@ -2293,7 +2293,7 @@ namespace WUInity.UI
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, " New population count not a number.");
+                WUInity.LOG(WUInity.LogType.Error, " New population count not a number.");
             }
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -2981,12 +2981,12 @@ namespace WUInity.UI
                 }
                 else
                 {
-                    WUInity.CONSOLE(WUInity.LogType.Error, "Workflow status file length does not match the number of toggles!");
+                    WUInity.LOG(WUInity.LogType.Error, "Workflow status file length does not match the number of toggles!");
                 }
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, "Workflow status file does not exist!");
+                WUInity.LOG(WUInity.LogType.Error, "Workflow status file does not exist!");
             }
         }
 
@@ -3104,7 +3104,7 @@ namespace WUInity.UI
                 WUInity.GUI.ParseMainData(wO);
                 if (!WUInity.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.CONSOLE(WUInity.LogType.Error, " Could not start simulation, see error log.");
+                    WUInity.LOG(WUInity.LogType.Error, " Could not start simulation, see error log.");
                 }
                 else
                 {

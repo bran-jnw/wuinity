@@ -214,18 +214,18 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Warning, "Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                WUInity.LOG(WUInity.LogType.Warning, "Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (weatherData.Count > 0)
             {
                 result = new WeatherInput(weatherData.ToArray());
                 success = true;
-                WUInity.CONSOLE(WUInity.LogType.Log, " Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
+                WUInity.LOG(WUInity.LogType.Log, " Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                WUInity.CONSOLE(WUInity.LogType.Warning, "Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                WUInity.LOG(WUInity.LogType.Warning, "Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

@@ -42,10 +42,10 @@ namespace WUInity.Traffic
 
             routeCreator = rC;
 
-            WUInity.CONSOLE(WUInity.LogType.Log, "Macro traffic sim initiated.");
+            WUInity.LOG(WUInity.LogType.Log, "Macro traffic sim initiated.");
         }
 
-        public override void PostStep()
+        public override void HandleNewCars()
         {
             foreach (InjectedCar injectedCar in carsToInject)
             {
@@ -431,6 +431,11 @@ namespace WUInity.Traffic
             WUInityInput wuiIn = WUInity.INPUT;
             string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wuiIn.Simulation.SimulationID + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
+        }
+
+        public override void HandleIgnitedFireCells(List<Vector2int> cellIndices)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

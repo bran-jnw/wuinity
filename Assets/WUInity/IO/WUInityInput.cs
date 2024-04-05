@@ -36,7 +36,7 @@ namespace WUInity
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
-            WUInity.CONSOLE(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " saved.");
+            WUInity.LOG(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " saved.");
         }
 
         public static void LoadInput(string path)
@@ -45,17 +45,14 @@ namespace WUInity
             if (input != null)
             {                
                 WUInityInput wui = UnityEngine.JsonUtility.FromJson<WUInityInput>(input);
-
-                WUInity.CONSOLE(WUInity.LogType.Log, "Smoek enabled? " + wui.Simulation.RunSmokeModule);
-
                 WUInity.WORKING_FILE = path;
-                WUInity.CONSOLE(WUInity.LogType.Log, " Reading input file " + WUInity.WORKING_FILE + ".");
+                WUInity.LOG(WUInity.LogType.Log, " Reading input file " + WUInity.WORKING_FILE + ".");
                 WUInity.INSTANCE.SetNewInputData(wui);
-                WUInity.CONSOLE(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " loaded.");
+                WUInity.LOG(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " loaded.");
             }
             else
             {
-                WUInity.CONSOLE(WUInity.LogType.Error, " Input file " + path + " not found.");
+                WUInity.LOG(WUInity.LogType.Error, " Input file " + path + " not found.");
             }
         }
     }

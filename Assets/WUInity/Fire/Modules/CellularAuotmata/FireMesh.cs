@@ -91,7 +91,7 @@ namespace WUInity.Fire
             //set custom fuel models if present
             if(WUInity.DATA_STATUS.FuelModelsLoaded)
             {
-                WUInity.CONSOLE(WUInity.LogType.Log, " Adding custom fuel model specifications.");
+                WUInity.LOG(WUInity.LogType.Log, " Adding custom fuel model specifications.");
                 for (int i = 0; i < WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
                 {
                     fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
@@ -392,7 +392,7 @@ namespace WUInity.Fire
                             activeCells.Add(f);
                             ignitionPoints[i].MarkAsIgnited();
 
-                            WUInity.CONSOLE(WUInity.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
+                            WUInity.LOG(WUInity.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                         }
                         ++activatedIgnitions;
                     }
@@ -524,6 +524,16 @@ namespace WUInity.Fire
         public override WindData GetCurrentWindData()
         {
             return _currentWindData;
+        }
+
+        public override List<Vector2int> GetIgnitedFireCells()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ConsumeIgnitedFireCells()
+        {
+            throw new NotImplementedException();
         }
 
         //remove? as we now visualize using fire renderer
