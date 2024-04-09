@@ -89,19 +89,19 @@ namespace WUInity.UI
             ++buttonIndex;
 
             //edit maps
-            if (!WUInity.INSTANCE.IsPainterActive())
+            if (!WUInityEngine.INSTANCE.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit WUI area"))
                 {
                     fireEditMode = "WUI area";
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.WUIArea);
+                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.WUIArea);
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit trigger buffer"))
                 {
                     fireEditMode = "Trigger buffer";
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.TriggerBuffer);
+                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.TriggerBuffer);
                 }
                 ++buttonIndex;
 
@@ -113,7 +113,7 @@ namespace WUInity.UI
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit random ignition area"))
                     {
                         fireEditMode = "Random ignition";
-                        WUInity.INSTANCE.StartPainter(Painter.PaintMode.RandomIgnitionArea);
+                        WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.RandomIgnitionArea);
                     }
                     ++buttonIndex;
                 }
@@ -126,7 +126,7 @@ namespace WUInity.UI
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit initial ignition"))
                     {
                         fireEditMode = "Initial ignition";
-                        WUInity.INSTANCE.StartPainter(Painter.PaintMode.InitialIgnition);
+                        WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.InitialIgnition);
                     }
                     ++buttonIndex;
                 }      
@@ -138,19 +138,19 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cells"))
                 {
-                    WUInity.Painter.SetWUIAreaColor(true);
+                    WUInityEngine.Painter.SetWUIAreaColor(true);
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove cells"))
                 {
-                    WUInity.Painter.SetWUIAreaColor(false);
+                    WUInityEngine.Painter.SetWUIAreaColor(false);
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop editing"))
                 {                    
-                    WUInity.INSTANCE.StopPainter();
+                    WUInityEngine.INSTANCE.StopPainter();
                     GraphicalFireInput.SaveGraphicalFireInput();
                 }
                 ++buttonIndex;                
@@ -160,7 +160,7 @@ namespace WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Farsite import"))
             {
                 menuChoice = ActiveMenu.Farsite;
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Farsite);
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.Farsite);
             }
             ++buttonIndex;
         }

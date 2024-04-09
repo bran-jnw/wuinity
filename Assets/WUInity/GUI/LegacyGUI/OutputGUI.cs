@@ -43,27 +43,27 @@ namespace WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Households"))
             {
-                WUInity.INSTANCE.ToggleHouseholdRendering();
+                WUInityEngine.INSTANCE.ToggleHouseholdRendering();
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic"))
             {
-                WUInity.INSTANCE.ToggleTrafficRendering();
+                WUInityEngine.INSTANCE.ToggleTrafficRendering();
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fire spread"))
             {
-                WUInity.INSTANCE.ToggleFireSpreadRendering();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                WUInityEngine.INSTANCE.ToggleFireSpreadRendering();
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density"))
             {
-                WUInity.INSTANCE.ToggleSootRendering();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                WUInityEngine.INSTANCE.ToggleSootRendering();
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
             }
             ++buttonIndex;
 
@@ -71,9 +71,9 @@ namespace WUInity.UI
             float time = sliderVtraffic * timeRange + Engine.SIM.StartTime;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
-                WUInity.INSTANCE.DisplayClosestDensityData(time);
-                WUInity.INSTANCE.ToggleEvacDataPlane();
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
+                WUInityEngine.INSTANCE.DisplayClosestDensityData(time);
+                WUInityEngine.INSTANCE.ToggleEvacDataPlane();
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.TrafficDens);
             }
             ++buttonIndex;
 
@@ -81,7 +81,7 @@ namespace WUInity.UI
             ++buttonIndex;
             sliderVtraffic = GUI.HorizontalSlider(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sliderVtraffic, 0.0f, 1.0f);
             ++buttonIndex;
-            if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.TrafficDens)
+            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.TrafficDens)
             {
                 //WUInity.INSTANCE.DisplayClosestDensityData(time);
             }
@@ -89,8 +89,8 @@ namespace WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Hide visual data"))
             {
-                WUInity.INSTANCE.SetEvacDataPlane(false);
-                WUInity.INSTANCE.SetFireDataPlane(false);
+                WUInityEngine.INSTANCE.SetEvacDataPlane(false);
+                WUInityEngine.INSTANCE.SetFireDataPlane(false);
             }
             ++buttonIndex;
 
@@ -136,12 +136,12 @@ namespace WUInity.UI
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fireline intensity"))
                 {
-                    WUInity.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
+                    WUInityEngine.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    WUInity.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
+                    WUInityEngine.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
                 }
                 ++buttonIndex;
             }
@@ -169,7 +169,13 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
                 {                    
-                    WUInity.INSTANCE.StopSimulation();
+                    WUInityEngine.INSTANCE.StopSimulation();
+                }
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle realtime"))
+                {
+                    Engine.SIM.ToogleRealtime();
                 }
                 ++buttonIndex;
 
@@ -257,9 +263,9 @@ namespace WUInity.UI
 
                 GUI.Box(new Rect(0, 0, 120, 300), "Fireline int.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = WUInity.FIRE_VISUALS.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                string upperLimit = WUInityEngine.FIRE_VISUALS.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = WUInity.FIRE_VISUALS.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                string lowerLimit = WUInityEngine.FIRE_VISUALS.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();
@@ -271,9 +277,9 @@ namespace WUInity.UI
 
                 GUI.Box(new Rect(0, 0, 120, 300), "Optical dens.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = WUInity.FIRE_VISUALS.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string upperLimit = WUInityEngine.FIRE_VISUALS.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = WUInity.FIRE_VISUALS.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string lowerLimit = WUInityEngine.FIRE_VISUALS.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();

@@ -66,7 +66,7 @@ namespace WUInity.UI
         /// </summary>
         void Start()
         {
-            WUInity.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
+            WUInityEngine.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
             Screen.fullScreen = true;           // Enter full screen mode at the beginning
 
             Engine.RUNTIME_DATA.Routing.BorderSize = 0; // There is no initial value for OSM border size. I set it here as 0.
@@ -418,7 +418,7 @@ namespace WUInity.UI
                 mainUIBox.style.left = Screen.width - _iMainBoxWidth;
                 mainUIBox.style.top = 20;
                 mainUIBox.style.height = Screen.height - 20 - 160;     // 20 is the hight of data examine bar, 160 is system logs window height
-                WUInity.GUI.enabled = true;
+                WUInityEngine.GUI.enabled = true;
                 systemLogBox.visible = false;
             }
             else {
@@ -429,7 +429,7 @@ namespace WUInity.UI
                 mainUIBox.style.top = _titleBarHeight + 1;
                 mainUIBox.style.height = Screen.height - _titleBarHeight - 1;
 
-                WUInity.GUI.enabled = false;
+                WUInityEngine.GUI.enabled = false;
                 systemLogBox.visible = true;
             }
             //newGUI.SetEnabled(false);
@@ -1540,16 +1540,16 @@ namespace WUInity.UI
 
             if (dfDfEvacuationGroup != null && Engine.DATA_STATUS.HaveInput && Engine.RUNTIME_DATA.Evacuation.EvacuationGroups.Length > 0)
             {
-                if (!WUInity.INSTANCE.IsPainterActive())
+                if (!WUInityEngine.INSTANCE.IsPainterActive())
                 {
                     btnEditEvacGroupOnMap.text = "Stop editing";
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
-                    WUInity.Painter.SetEvacGroupColor(dfDfEvacuationGroup.index);
+                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
+                    WUInityEngine.Painter.SetEvacGroupColor(dfDfEvacuationGroup.index);
                 }
                 else
                 {
                     btnEditEvacGroupOnMap.text = "Edit evacuatoin group on map";
-                    WUInity.INSTANCE.StopPainter();
+                    WUInityEngine.INSTANCE.StopPainter();
                 }
             }
         }
@@ -1585,7 +1585,7 @@ namespace WUInity.UI
                         else
                             tfTxEvacDestType.SetValueWithoutNotify("Exit");
 
-                        WUInity.INSTANCE.SpawnMarkers();    // Update the goals on map.
+                        WUInityEngine.INSTANCE.SpawnEvacuationGoalMarkers();    // Update the goals on map.
                     }
                     else
                     {
@@ -1629,7 +1629,7 @@ namespace WUInity.UI
                 {
                     //UnityEngine.Debug.Log($"The Evacuation group dropdown selection has changed to {dfDfEvacuationGroup.index}, {evt.newValue}.");
 
-                    WUInity.Painter.SetEvacGroupColor(dfDfEvacuationGroup.index);   //For editing evacuation group on map.
+                    WUInityEngine.Painter.SetEvacGroupColor(dfDfEvacuationGroup.index);   //For editing evacuation group on map.
 
                     // I need to add more fields to allow user see the detailed information about evacuation groups.
 
@@ -1885,7 +1885,7 @@ namespace WUInity.UI
 
             if (btnVewHouseholds != null && Engine.SIM.State == Simulation.SimulationState.Running)
             {
-                if(WUInity.INSTANCE.ToggleHouseholdRendering())
+                if(WUInityEngine.INSTANCE.ToggleHouseholdRendering())
                     btnVewHouseholds.text = "Households: on";
                 else
                     btnVewHouseholds.text = "Households: off";
@@ -1899,7 +1899,7 @@ namespace WUInity.UI
 
             if (btnVewTraffic != null && Engine.SIM.State == Simulation.SimulationState.Running)
             {
-                if (WUInity.INSTANCE.ToggleTrafficRendering())
+                if (WUInityEngine.INSTANCE.ToggleTrafficRendering())
                     btnVewTraffic.text = "Traffic: on";
                 else
                     btnVewTraffic.text = "Traffic: off";
@@ -1913,12 +1913,12 @@ namespace WUInity.UI
 
             if (btnVewFireSpread != null && Engine.SIM.State == Simulation.SimulationState.Running)
             {
-                if (WUInity.INSTANCE.ToggleFireSpreadRendering())
+                if (WUInityEngine.INSTANCE.ToggleFireSpreadRendering())
                     btnVewFireSpread.text = "Fire spread: on";
                 else
                     btnVewFireSpread.text = "Fire spread: off";
 
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
             }
         }
 
@@ -1929,12 +1929,12 @@ namespace WUInity.UI
 
             if (btnVewOpticalDensity != null && Engine.SIM.State == Simulation.SimulationState.Running)
             {
-                if (WUInity.INSTANCE.ToggleSootRendering())
+                if (WUInityEngine.INSTANCE.ToggleSootRendering())
                     btnVewOpticalDensity.text = "Optical density: on";
                 else
                     btnVewOpticalDensity.text = "Optical density: off";
 
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
             }
         }
 
@@ -1949,14 +1949,14 @@ namespace WUInity.UI
 
             if (btnVewTrafficDensity != null && Engine.SIM.State == Simulation.SimulationState.Running)
             {
-                WUInity.INSTANCE.DisplayClosestDensityData(time);
+                WUInityEngine.INSTANCE.DisplayClosestDensityData(time);
 
-                if (WUInity.INSTANCE.ToggleEvacDataPlane())
+                if (WUInityEngine.INSTANCE.ToggleEvacDataPlane())
                     btnVewTrafficDensity.text = "Traffic density: on";
                 else
                     btnVewTrafficDensity.text = "Traffic density: off";
 
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.TrafficDens);
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.TrafficDens);
             }
         }
 
@@ -1973,7 +1973,7 @@ namespace WUInity.UI
             UnityEngine.UIElements.VisualElement simOutputsBox = root.Q<UnityEngine.UIElements.VisualElement>("SimOutputBox");
             UnityEngine.UIElements.VisualElement titleBar = root.Q<UnityEngine.UIElements.VisualElement>("TitleBar");
 
-            if (WUInity.GUI.enabled)
+            if (WUInityEngine.GUI.enabled)
             {
                 newGUI.style.left = Screen.width - _iMainBoxWidth;
                 newGUI.style.top = 20;
@@ -1992,13 +1992,13 @@ namespace WUInity.UI
                 simOutputsBox.visible = true;
                 titleBar.visible = true;
 
-                UnityEngine.UIElements.Button minimizeButton = root.Q<UnityEngine.UIElements.Button>("TBarMinimizeButton");
+                UnityEngine.UIElements.Button minimizeButton = root.Q<Button>("TBarMinimizeButton");
                 minimizeButton.style.left = Screen.width - 120;
 
-                UnityEngine.UIElements.Button fullScreenButton = root.Q<UnityEngine.UIElements.Button>("TBarFullScreenButton");
+                UnityEngine.UIElements.Button fullScreenButton = root.Q<Button>("TBarFullScreenButton");
                 fullScreenButton.style.left = Screen.width - 80;
 
-                UnityEngine.UIElements.Button quitButton = root.Q<UnityEngine.UIElements.Button>("TBarQuitButton");
+                UnityEngine.UIElements.Button quitButton = root.Q<Button>("TBarQuitButton");
                 quitButton.style.left = Screen.width - 40;
 
             }
@@ -2262,9 +2262,9 @@ namespace WUInity.UI
         {
             if (Engine.POPULATION.IsPopulationLoaded())
             {
-                WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Population);
-                WUInity.INSTANCE.DisplayPopulation();
-                WUInity.INSTANCE.ToggleEvacDataPlane();
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.Population);
+                WUInityEngine.INSTANCE.DisplayPopulation();
+                WUInityEngine.INSTANCE.ToggleEvacDataPlane();
             }
         }
 
@@ -2273,7 +2273,7 @@ namespace WUInity.UI
             if (Engine.POPULATION.IsPopulationLoaded())
             {
                 Engine.POPULATION.UpdatePopulationBasedOnRoutes(Engine.RUNTIME_DATA.Routing.RouteCollections);
-                WUInity.INSTANCE.DisplayPopulation();
+                WUInityEngine.INSTANCE.DisplayPopulation();
                 SetPopulationAndCellNumber();
             }
         }
@@ -2284,7 +2284,7 @@ namespace WUInity.UI
             if (int.TryParse(_rescalePop, out newPop))
             {
                 Engine.POPULATION.ScaleTotalPopulation(newPop);
-                WUInity.INSTANCE.DisplayPopulation();
+                WUInityEngine.INSTANCE.DisplayPopulation();
                 SetPopulationAndCellNumber();
             }
             else
@@ -3097,7 +3097,7 @@ namespace WUInity.UI
 
                 WUInityInput wO = Engine.INPUT;
 
-                WUInity.GUI.ParseMainData(wO);
+                WUInityEngine.GUI.ParseMainData(wO);
                 if (!Engine.DATA_STATUS.CanRunSimulation())
                 {
                     Engine.LOG(Engine.LogType.Error, " Could not start simulation, see error log.");
@@ -3109,7 +3109,7 @@ namespace WUInity.UI
                     
                     if (btnStartSimulation != null) btnStartSimulation.text = "Stop simulation";
 
-                    WUInity.INSTANCE.StartSimulation();
+                    WUInityEngine.INSTANCE.StartSimulation();
                 }
             }
             else
@@ -3124,7 +3124,7 @@ namespace WUInity.UI
                     btnPauseSimButton.text = "Pause simulation";
                 }
 
-                WUInity.INSTANCE.StopSimulation();
+                WUInityEngine.INSTANCE.StopSimulation();
 
                 UnityEngine.UIElements.Button btnStartSimulation = Document.rootVisualElement.Q<UnityEngine.UIElements.Button>("StartSimButton");
                 if (btnStartSimulation != null) btnStartSimulation.text = "Start simulation";

@@ -61,11 +61,11 @@ namespace WUInity.UI
             ++buttonIndex;
 
             //custom population creation
-            if (!WUInity.INSTANCE.IsPainterActive())
+            if (!WUInityEngine.INSTANCE.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create/edit custom pop."))
                 {
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.CustomPopulation);
+                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.CustomPopulation);
                 }
                 ++buttonIndex;
             }
@@ -78,12 +78,12 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cell"))
                 {
-                    WUInity.Painter.SetCustomGPWColor(true);
+                    WUInityEngine.Painter.SetCustomGPWColor(true);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove cell"))
                 {
-                    WUInity.Painter.SetCustomGPWColor(false);
+                    WUInityEngine.Painter.SetCustomGPWColor(false);
                 }
                 ++buttonIndex;
 
@@ -99,8 +99,8 @@ namespace WUInity.UI
                     {
                         Engine.POPULATION.GetPopulationData().PlaceUniformPopulation(totalPop);
                     }
-                    WUInity.INSTANCE.StopPainter();
-                    WUInity.INSTANCE.DisplayPopulation();
+                    WUInityEngine.INSTANCE.StopPainter();
+                    WUInityEngine.INSTANCE.DisplayPopulation();
                 }
                 ++buttonIndex;
                 ++buttonIndex;
@@ -113,7 +113,7 @@ namespace WUInity.UI
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Correct for route access"))
                     {
                         Engine.POPULATION.UpdatePopulationBasedOnRoutes(Engine.RUNTIME_DATA.Routing.RouteCollections);
-                        WUInity.INSTANCE.DisplayPopulation();
+                        WUInityEngine.INSTANCE.DisplayPopulation();
                     }
                     ++buttonIndex;
                 }
@@ -139,7 +139,7 @@ namespace WUInity.UI
                         if(int.TryParse(desiredPopulation, out newPop))
                         {
                             Engine.POPULATION.ScaleTotalPopulation(newPop);
-                            WUInity.INSTANCE.DisplayPopulation();
+                            WUInityEngine.INSTANCE.DisplayPopulation();
                         }
                         else
                         {
@@ -152,9 +152,9 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide population data"))
                 {
-                    WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.Population);
-                    WUInity.INSTANCE.DisplayPopulation();
-                    WUInity.INSTANCE.ToggleEvacDataPlane();
+                    WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.Population);
+                    WUInityEngine.INSTANCE.DisplayPopulation();
+                    WUInityEngine.INSTANCE.ToggleEvacDataPlane();
                     
                 }
                 ++buttonIndex;

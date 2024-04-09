@@ -92,11 +92,11 @@ namespace WUInity.UI
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
             ++buttonIndex;            
 
-            if (!WUInity.INSTANCE.IsPainterActive())
+            if (!WUInityEngine.INSTANCE.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
-                    WUInity.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
+                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
                 }
                 ++buttonIndex;                
             }
@@ -106,20 +106,20 @@ namespace WUInity.UI
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.RUNTIME_DATA.Evacuation.EvacuationGroups[i].Name))
                     {
-                        WUInity.Painter.SetEvacGroupColor(i);
+                        WUInityEngine.Painter.SetEvacGroupColor(i);
                     }
                     ++buttonIndex;
                 }
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop editing"))
                 {
-                    WUInity.INSTANCE.StopPainter();
+                    WUInityEngine.INSTANCE.StopPainter();
                 }
                 ++buttonIndex;
             }
 
             ++buttonIndex;
-            if (WUInity.INSTANCE.DeveloperMode)
+            if (WUInityEngine.INSTANCE.DeveloperMode)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
                 {

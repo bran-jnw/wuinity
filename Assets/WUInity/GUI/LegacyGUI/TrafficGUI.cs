@@ -54,7 +54,7 @@ namespace WUInity.UI
                 ++buttonIndex;
             } 
 
-            if (WUInity.INSTANCE.DeveloperMode)
+            if (WUInityEngine.INSTANCE.DeveloperMode)
             {
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))

@@ -101,7 +101,7 @@ namespace WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
             {
                 filterMenuActive = true;
-                WUInity.INSTANCE.SetOSMBorderVisibility(true);
+                WUInityEngine.INSTANCE.SetOSMBorderVisibility(true);
             }
             ++buttonIndex;
 
@@ -115,7 +115,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM file"))
                 {
-                    WUInity.INSTANCE.SetOSMBorderVisibility(false);
+                    WUInityEngine.INSTANCE.SetOSMBorderVisibility(false);
                     ParseRoutingInput();
                     OpenFilterOSMFile();
                 }
@@ -123,7 +123,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
                 {
-                    WUInity.INSTANCE.SetOSMBorderVisibility(false);
+                    WUInityEngine.INSTANCE.SetOSMBorderVisibility(false);
                     filterMenuActive = false;
                 }
                 ++buttonIndex;

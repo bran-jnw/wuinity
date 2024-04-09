@@ -24,7 +24,7 @@ namespace WUInity.UI
             GUI.Box(new Rect(subMenuXOrigin, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            if (!WUInity.MAP.IsAccessTokenValid)
+            if (!WUInityEngine.MAP.IsAccessTokenValid)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "ERROR: Mapbox token not valid.");
                 return;
@@ -138,7 +138,7 @@ namespace WUInity.UI
                 else
                 {
                     menuChoice = ActiveMenu.Output;
-                    WUInity.INSTANCE.StartSimulation();                   
+                    WUInityEngine.INSTANCE.StartSimulation();                   
                 }
             }
             ++buttonIndex;            
@@ -234,7 +234,7 @@ namespace WUInity.UI
 
         void RunFolder(string[] paths)
         {
-            WUInity.INSTANCE.RunAllCasesInFolder(paths[0]);
+            WUInityEngine.INSTANCE.RunAllCasesInFolder(paths[0]);
         }
 
         
