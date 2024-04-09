@@ -22,6 +22,11 @@ namespace WUIEngine.Smoke
             device = context.GetPreferredDevice(false).CreateAccelerator(context);
         }
 
+        public override void Step(float currentTime, float deltaTime)
+        {
+
+        }
+
         ~LagrangianSmokeSim()
         {
             Dispose();
@@ -34,15 +39,20 @@ namespace WUIEngine.Smoke
             context.Dispose();
         }
 
-        public override bool IsSimulationDone()
+        public override int GetCellsX()
         {
             throw new NotImplementedException();
         }
 
-        public override void Step(float currentTime, float deltaTime)
+        public override int GetCellsY()
         {
-            
+            throw new NotImplementedException();
         }
+
+        public override bool IsSimulationDone()
+        {
+            throw new NotImplementedException();
+        }        
     }
 }
 

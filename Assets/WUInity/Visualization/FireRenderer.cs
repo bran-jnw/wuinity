@@ -97,8 +97,8 @@ namespace WUInity.Visualization
             //sootCellCountY = WUIEngine.SIM.GetSmokeDispersion().GetCellsY();
             if(Engine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
             {
-                sootCellCountX = ((AdvectDiffuseModel)Engine.SIM.SmokeModule).GetCellsX();
-                sootCellCountY = ((AdvectDiffuseModel)Engine.SIM.SmokeModule).GetCellsY();
+                sootCellCountX = Engine.SIM.SmokeModule.GetCellsX();
+                sootCellCountY = Engine.SIM.SmokeModule.GetCellsY();
                 //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);

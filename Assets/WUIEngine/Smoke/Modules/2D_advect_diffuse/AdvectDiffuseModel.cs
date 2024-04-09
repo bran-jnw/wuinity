@@ -35,12 +35,12 @@ namespace WUIEngine.Smoke
             Release();
         }
 
-        public int GetCellsX()
+        public override int GetCellsX()
         {
             return cellCountX;
         }
 
-        public int GetCellsY()
+        public override int GetCellsY()
         {
             return cellCountY;
         }
