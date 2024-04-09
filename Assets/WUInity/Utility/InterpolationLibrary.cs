@@ -1,6 +1,6 @@
-using static WUInity.Fire.MathWrap;
+using static WUIEngine.Fire.MathWrap;
 
-namespace WUInity
+namespace WUIEngine
 {
     public static class InterpolationLibrary
     {

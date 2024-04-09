@@ -1,4 +1,4 @@
-namespace WUInity.Population
+namespace WUIEngine.Population
 {
     public abstract class PopulationVisualizer
     {

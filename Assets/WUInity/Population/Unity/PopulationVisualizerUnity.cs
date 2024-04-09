@@ -1,7 +1,7 @@
 using UnityEngine;
-using WUInity.Runtime;
+using WUIEngine.Runtime;
 
-namespace WUInity.Population
+namespace WUIEngine.Population
 {
     public class PopulationVisualizerUnity : PopulationVisualizer
     {
@@ -74,7 +74,7 @@ namespace WUInity.Population
                 for (int x = 0; x < data.cells.x; x++)
                 {
                     double density = data.GetPeopleCount(x, y) / data.cellArea;
-                    WUInityColor color = PopulationManager.GetGPWColor((float)density);
+                    WUIEngineColor color = PopulationManager.GetGPWColor((float)density);
 
                     populationTexture.SetPixel(x, y, color.UnityColor);
                 }
@@ -91,7 +91,7 @@ namespace WUInity.Population
             if (m_LocalGPWDataPlane == null)
             {
                 m_LocalGPWDataPlane = new GameObject("GPWDensityMap");
-                m_LocalGPWDataPlane.transform.parent = WUInity.INSTANCE.transform;
+                m_LocalGPWDataPlane.transform.parent = WUInity.WUInity.INSTANCE.transform;
                 m_LocalGPWDataPlane.isStatic = true;
                 // You can change that line to provide another MeshFilter
                 filter = m_LocalGPWDataPlane.AddComponent<MeshFilter>();
@@ -118,7 +118,7 @@ namespace WUInity.Population
             Vector3 offset = new Vector3((float)localGPWData.unityOriginOffset.x, 0.0f, (float)localGPWData.unityOriginOffset.y);
 
             Vector2 maxUV = new Vector2((float)localGPWData.dataSize.x / densityTexture.width, (float)localGPWData.dataSize.y / densityTexture.height);
-            Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
 
             if (gpwDataPlaneMaterial == null)
             {
@@ -159,7 +159,7 @@ namespace WUInity.Population
                 for (int x = 0; x < dataSize.x; x++)
                 {
                     double density = owner.GetLocalGPWData().GetDensity(x, y);
-                    WUInityColor color = PopulationManager.GetGPWColor((float)density);
+                    WUIEngineColor color = PopulationManager.GetGPWColor((float)density);
 
                     densityTexture.SetPixel(x, y, color.UnityColor);
                 }

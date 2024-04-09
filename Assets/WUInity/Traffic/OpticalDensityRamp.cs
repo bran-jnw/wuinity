@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     public class OpticalDensityRamp
     {
@@ -17,7 +17,7 @@ namespace WUInity.Traffic
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Optical density ramp file " + path + " not found.");
+                Engine.LOG(Engine.LogType.Warning, "Optical density ramp file " + path + " not found.");
                 return false;
             }
 

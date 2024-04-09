@@ -1,6 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using WUIEngine.IO;
+using WUIEngine;
 
 namespace WUInity.UI
 {
@@ -11,7 +11,7 @@ namespace WUInity.UI
 
         void MapMenu()
         {
-            WUInityInput wO = WUInity.INPUT;
+            WUInityInput wO = Engine.INPUT;
 
             //whenever we load a file we need to set the new data for the GUI
             if (mapMenuDirty)
@@ -51,7 +51,7 @@ namespace WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex* (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
             {
                 ParseMapData(wO);
-                WUInity.INSTANCE.UpdateMapResourceStatus();
+                Engine.ENGINE.UpdateMapResourceStatus();
             }
         }
 

@@ -1,7 +1,7 @@
 using Itinero.IO.Xml;
 using System.Numerics;
 
-namespace WUInity
+namespace WUIEngine
 {
     public class CatmullRomSpline1D
     {

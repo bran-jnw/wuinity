@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using static WUInity.InterpolationLibrary;
+using static WUIEngine.InterpolationLibrary;
 using System.IO;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     /// <summary>
     /// Precipitation is the daily rain amount specified in hundredths of an inch or millimeters (integer).
@@ -179,7 +179,7 @@ namespace WUInity.Fire
             WeatherInput result = null;
             List<WeatherData> weatherData = new List<WeatherData>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.weatherFile);
+            string path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.weatherFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
@@ -214,18 +214,18 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                Engine.LOG(Engine.LogType.Warning, "Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (weatherData.Count > 0)
             {
                 result = new WeatherInput(weatherData.ToArray());
                 success = true;
-                WUInity.LOG(WUInity.LogType.Log, " Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
+                Engine.LOG(Engine.LogType.Log, " Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                Engine.LOG(Engine.LogType.Warning, "Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

@@ -1,6 +1,6 @@
-using WUInity.Runtime;
+using WUIEngine.Runtime;
 
-namespace WUInity.Visualization
+namespace WUIEngine.Visualization
 {
     public abstract class FireDataVisualizer
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 
-namespace WUInity.Smoke
+namespace WUIEngine.Smoke
 {
     /// <summary>
     /// Based on https://www.sciencedirect.com/topics/engineering/box-model

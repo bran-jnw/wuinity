@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     public class CityFlowModule : TrafficModule
     {

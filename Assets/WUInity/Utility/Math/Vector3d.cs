@@ -5,7 +5,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Numerics;
 
-namespace WUInity 
+namespace WUIEngine 
 {
     [System.Serializable]
     public struct Vector3d 

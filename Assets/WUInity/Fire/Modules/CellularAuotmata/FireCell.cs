@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using static WUInity.Fire.MathWrap;
+using static WUIEngine.Fire.MathWrap;
 using System.Runtime.InteropServices;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {  
     //[System.Serializable]
     public class FireCell                

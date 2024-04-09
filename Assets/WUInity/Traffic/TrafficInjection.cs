@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     [System.Serializable]
     public class TrafficInjection

@@ -1,7 +1,7 @@
 using UnityEngine;
-using WUInity.Pedestrian;
+using WUIEngine.Pedestrian;
 
-namespace WUInity.Visualization
+namespace WUIEngine.Visualization
 {
     public class MacroHouseholdVisualizerUnity : MacroHouseholdVisualizer
     {

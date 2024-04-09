@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public abstract class FireModule : SimulationModule
     {

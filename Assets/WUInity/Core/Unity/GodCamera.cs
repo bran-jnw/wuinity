@@ -16,7 +16,7 @@ namespace WUInity
         bool dragging = false;
         Vector3 startDragPos;
         Vector3 startMousePos;
-        Vector2d mapSize;
+        WUIEngine.Vector2d mapSize;
         bool refreshClipPlanes = false;
 
         // Use this for initialization
@@ -28,7 +28,7 @@ namespace WUInity
             }            
         }
 
-        public void SetCameraStartPosition(Vector2d mapSize)
+        public void SetCameraStartPosition(WUIEngine.Vector2d mapSize)
         {
             this.mapSize = mapSize;
             float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * c.fieldOfView * 0.5f);
@@ -52,7 +52,7 @@ namespace WUInity
                 {
                     cMode = CameraMode.twoD;
                 }
-                SetCameraStartPosition(WUInity.INPUT.Simulation.Size);
+                SetCameraStartPosition(WUIEngine.Engine.INPUT.Simulation.Size);
             }
 
             if (cMode == CameraMode.twoD)

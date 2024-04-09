@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 //using System.Numerics;
 
-namespace WUInity.Farsite
+namespace WUIEngine.Farsite
 {   
     public class FireVertex
     {
@@ -64,7 +64,7 @@ namespace WUInity.Farsite
             max.x = float.MinValue;
             max.y = float.MinValue;
 
-            fR = WUInity.FARSITE_VIEWER;                       
+            //fR = WUInity.FARSITE_VIEWER;                       
 
             InitiateEllipse();
         }

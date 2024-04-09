@@ -1,4 +1,4 @@
-namespace WUInity
+namespace WUIEngine
 {
     /// <summary>
     /// Contains route/routes calculated from a location to possibly several goals.
@@ -35,7 +35,7 @@ namespace WUInity
         {
             if(selectedRouteIndex == -1)
             {
-                WUInity.SIM.StopSim("No route selected (likely due to all routes being blocked), people will get stuck.");
+                Engine.SIM.StopSim("No route selected (likely due to all routes being blocked), people will get stuck.");
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace WUInity
 
             if (selectedRouteIndex == -1)
             {
-                WUInity.SIM.StopSim("STOP: Route selection failed, no routes left that are not blocked");
+                Engine.SIM.StopSim("STOP: Route selection failed, no routes left that are not blocked");
             }
         }
 
@@ -114,7 +114,7 @@ namespace WUInity
 
             if(selectedRouteIndex == -1)
             {
-                WUInity.SIM.StopSim("No routes left to take");
+                Engine.SIM.StopSim("No routes left to take");
             }
         }
 

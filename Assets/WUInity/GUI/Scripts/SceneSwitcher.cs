@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace WUInity
+namespace WUIEngine
 {
     public class SceneSwitcher : MonoBehaviour
     {

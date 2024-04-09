@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using WUInity.Pedestrian;
+using WUIEngine.Pedestrian;
+using WUIEngine;
 
 namespace WUInity.Visualization
 {
@@ -24,7 +23,7 @@ namespace WUInity.Visualization
 
             if (renderHouseholds)
             {
-                CreateHouseholdsBuffer(((MacroHouseholdSim)WUInity.SIM.PedestrianModule).GetHouseholdPositions().Length, WUInity.INPUT.Simulation.Size);
+                CreateHouseholdsBuffer(((MacroHouseholdSim)Engine.SIM.PedestrianModule).GetHouseholdPositions().Length, Engine.INPUT.Simulation.Size);
             }            
         }
 
@@ -40,7 +39,7 @@ namespace WUInity.Visualization
         {
             if (renderHouseholds)
             {
-                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)WUInity.SIM.PedestrianModule).GetHouseholdPositions();
+                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)Engine.SIM.PedestrianModule).GetHouseholdPositions();
                 householdPositionsBuffer.SetData(newPositions);
                 householdsMaterial.SetBuffer("_PositionsAndState", householdPositionsBuffer);
                 Graphics.DrawMeshInstancedProcedural(householdMesh, 0, householdsMaterial, bounds, householdPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
@@ -53,9 +52,9 @@ namespace WUInity.Visualization
                     carPositionsBuffer.Release();
                     carPositionsBuffer = null;
                 }
-                if(WUInity.SIM.TrafficModule.GetCarsInSystem() > 0)
+                if(Engine.SIM.TrafficModule.GetCarsInSystem() > 0)
                 {
-                    carPositionsArray = WUInity.SIM.TrafficModule.GetCarPositionsAndStates();
+                    carPositionsArray = Engine.SIM.TrafficModule.GetCarPositionsAndStates();
                     if(carPositionsBuffer == null || carPositionsArray.Length != carPositionsBuffer.count)
                     {
                         carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));

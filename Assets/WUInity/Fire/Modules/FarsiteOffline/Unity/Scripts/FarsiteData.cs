@@ -3,7 +3,7 @@ using System.IO;
 using System;
 
 
-namespace WUInity.Farsite
+namespace WUIEngine.Farsite
 {
     [System.Serializable]
     public struct FarsiteBurnPeriod
@@ -178,7 +178,7 @@ namespace WUInity.Farsite
                 mainPath +=  "/";
             }
             string input = mainPath;// + inputPrefix;
-            string output = mainPath + "output/" + WUInity.INPUT.Fire.farsiteData.outputPrefix;// + outputPrefix;
+            string output = mainPath + "output/" + WUIEngine.Input.Fire.farsiteData.outputPrefix;// + outputPrefix;
 
             //first read input
             ReadElevation(input);

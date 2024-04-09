@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------
 using System.Numerics;
 
-namespace WUInity
+namespace WUIEngine
 {
     public static class VectorExtensions
     {

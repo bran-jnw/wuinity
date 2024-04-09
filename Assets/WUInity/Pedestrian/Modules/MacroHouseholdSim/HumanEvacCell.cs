@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using WUIEngine.IO;
 
-namespace WUInity.Pedestrian
+namespace WUIEngine.Pedestrian
 {
     /// <summary>
     /// Class that holds all households that are contained at the start within this cell
@@ -25,7 +26,7 @@ namespace WUInity.Pedestrian
         /// <param name="personsInCell"></param>
         public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, RouteCollection route, int personsInCell, int cellIndex)
         {
-            EvacuationInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = Engine.INPUT.Evacuation;
 
             this.cellWorldSize = cellWorldSize;
             this.routeCollection = route;
@@ -46,11 +47,11 @@ namespace WUInity.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(routeCollection.GetSelectedRoute().route.Shape[0].Latitude, routeCollection.GetSelectedRoute().route.Shape[0].Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            Mapbox.Utils.Vector2d v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(routeCollection.GetSelectedRoute().route.Shape[0].Latitude, routeCollection.GetSelectedRoute().route.Shape[0].Longitude, WUInity.WUInity.MAP.CenterMercator, WUInity.WUInity.MAP.WorldRelativeScale);
             closestNodeUnitySpace = new Vector2d(v.x, v.y);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
-                int evacGroupIndex = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];
+                int evacGroupIndex = Engine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];
                 macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
             }
         }

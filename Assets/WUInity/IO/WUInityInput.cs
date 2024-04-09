@@ -1,7 +1,7 @@
-using WUInity.Traffic;
+using WUIEngine.Traffic;
 using System.Numerics;
 
-namespace WUInity
+namespace WUIEngine.IO
 {
     [System.Serializable]
     public class WUInityInput
@@ -31,12 +31,12 @@ namespace WUInity
 
         public static void SaveInput()
         {
-            string json = UnityEngine.JsonUtility.ToJson(WUInity.INPUT, true);
-            System.IO.File.WriteAllText(WUInity.WORKING_FILE, json);
+            string json = UnityEngine.JsonUtility.ToJson(Engine.INPUT, true);
+            System.IO.File.WriteAllText(Engine.WORKING_FILE, json);
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
-            WUInity.LOG(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " saved.");
+            Engine.LOG(Engine.LogType.Log, " Input file " + Engine.WORKING_FILE + " saved.");
         }
 
         public static void LoadInput(string path)
@@ -45,14 +45,14 @@ namespace WUInity
             if (input != null)
             {                
                 WUInityInput wui = UnityEngine.JsonUtility.FromJson<WUInityInput>(input);
-                WUInity.WORKING_FILE = path;
-                WUInity.LOG(WUInity.LogType.Log, " Reading input file " + WUInity.WORKING_FILE + ".");
-                WUInity.INSTANCE.SetNewInputData(wui);
-                WUInity.LOG(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " loaded.");
+                Engine.WORKING_FILE = path;
+                Engine.LOG(Engine.LogType.Log, " Reading input file " + Engine.WORKING_FILE + ".");
+                Engine.ENGINE.SetNewInputData(wui);
+                Engine.LOG(Engine.LogType.Log, " Input file " + Engine.WORKING_FILE + " loaded.");
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, " Input file " + path + " not found.");
+                Engine.LOG(Engine.LogType.Error, " Input file " + path + " not found.");
             }
         }
     }

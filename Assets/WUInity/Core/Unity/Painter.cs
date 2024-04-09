@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WUIEngine;
 
 namespace WUInity
 {
@@ -153,7 +154,7 @@ namespace WUInity
             else if(paintMode == PaintMode.EvacGroup)
             {
                 evacGroupIndex = arrayIndex;
-                activeColor = WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
+                activeColor = Engine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
                 activeColor.a = 0.5f;
             }
         }
@@ -186,7 +187,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Desired paint mode not yet implemented.");
+                Engine.LOG(Engine.LogType.Error, "Desired paint mode not yet implemented.");
             }
         }
 
@@ -196,7 +197,7 @@ namespace WUInity
             CheckDataResources(evacGroupTex, evacGroupColorArray, evacDataUV);
             //select first zone
             evacGroupIndex = 0;
-            activeColor = WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
+            activeColor = Engine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
             activeColor.a = 0.5f;
             brushSize = 1;
         }
@@ -249,16 +250,16 @@ namespace WUInity
                 //get correct size, fire mesh or evac mesh
                 if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
                 {
-                    fireDataCellCount = new Vector2int(WUInity.SIM.FireModule.GetCellCountX(), WUInity.SIM.FireModule.GetCellCountY());                    
+                    fireDataCellCount = new Vector2int(Engine.SIM.FireModule.GetCellCountX(), Engine.SIM.FireModule.GetCellCountY());                    
                     cellCount = fireDataCellCount;
-                    fireDataRealSize = WUInity.INPUT.Simulation.Size;
+                    fireDataRealSize = Engine.INPUT.Simulation.Size;
                 }
                 else
                 {
-                    //WUInity.SIM.UpdateNeededData();
-                    evacDataCellCount = WUInity.RUNTIME_DATA.Evacuation.CellCount;
+                    //WUIEngine.SIM.UpdateNeededData();
+                    evacDataCellCount = Engine.RUNTIME_DATA.Evacuation.CellCount;
                     cellCount = evacDataCellCount;
-                    evacDataRealSize = WUInity.INPUT.Simulation.Size;
+                    evacDataRealSize = Engine.INPUT.Simulation.Size;
                 }
                 //painter
                 Vector2int res = new Vector2int(2, 2);
@@ -280,27 +281,27 @@ namespace WUInity
                         Color c = Color.white;
                         if (paintMode == PaintMode.WUIArea)
                         {
-                            c = WUInity.RUNTIME_DATA.Fire.WuiAreaIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = Engine.RUNTIME_DATA.Fire.WuiAreaIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.RandomIgnitionArea)
                         {
-                            c = WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = Engine.RUNTIME_DATA.Fire.RandomIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.InitialIgnition)
                         {
-                            c = WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = Engine.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.TriggerBuffer)
                         {
-                            c = WUInity.RUNTIME_DATA.Fire.TriggerBufferIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = Engine.RUNTIME_DATA.Fire.TriggerBufferIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
-                            c = WUInity.RUNTIME_DATA.Evacuation.GetEvacGroup(x, y).Color.UnityColor;
+                            c = Engine.RUNTIME_DATA.Evacuation.GetEvacGroup(x, y).Color.UnityColor;
                         }
                         else if (paintMode == PaintMode.CustomPopulation)
                         {
-                            c = WUInity.POPULATION.GetPopulationData().populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
+                            c = Engine.POPULATION.GetPopulationData().populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
                         }
                         c.a = 0.5f;
                         requestedColorArray[x + y * res.x] = c;
@@ -417,10 +418,10 @@ namespace WUInity
             }
             else
             {
-                int minX = Mathf.Max(0, x - brushSize - 1);
-                int maxX = Mathf.Min(activeCellCount.x - 1, x + brushSize - 1);
-                int minY = Mathf.Max(0, y - brushSize - 1);
-                int maxY = Mathf.Min(activeCellCount.y - 1, y + brushSize - 1);
+                int minX = UnityEngine.Mathf.Max(0, x - brushSize - 1);
+                int maxX = UnityEngine.Mathf.Min(activeCellCount.x - 1, x + brushSize - 1);
+                int minY = UnityEngine.Mathf.Max(0, y - brushSize - 1);
+                int maxY = UnityEngine.Mathf.Min(activeCellCount.y - 1, y + brushSize - 1);
 
                 Vector2int center = new Vector2int(x, y);
 
@@ -456,27 +457,27 @@ namespace WUInity
 
             if(paintMode == PaintMode.EvacGroup)
             {
-                WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
+                Engine.RUNTIME_DATA.Evacuation.EvacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
             }
             else if(paintMode == PaintMode.WUIArea)
             {
-                WUInity.RUNTIME_DATA.Fire.WuiAreaIndices[x + y * activeCellCount.x] = addingArea;
+                Engine.RUNTIME_DATA.Fire.WuiAreaIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.RandomIgnitionArea)
             {
-                WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices[x + y * activeCellCount.x] = addingArea;
+                Engine.RUNTIME_DATA.Fire.RandomIgnitionIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.InitialIgnition)
             {
-                WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * activeCellCount.x] = addingArea;
+                Engine.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.TriggerBuffer)
             {
-                WUInity.RUNTIME_DATA.Fire.TriggerBufferIndices[x + y * activeCellCount.x] = addingArea;
+                Engine.RUNTIME_DATA.Fire.TriggerBufferIndices[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.CustomPopulation)
             {
-                WUInity.POPULATION.GetPopulationData().populationMask[x + y * activeCellCount.x] = addingArea;
+                Engine.POPULATION.GetPopulationData().populationMask[x + y * activeCellCount.x] = addingArea;
             }
         }
 
@@ -491,15 +492,15 @@ namespace WUInity
             Color currentColor = GetArrayPixel(x, y, colorArray);
 
             //already the same color in pixel
-            if (Mathf.Approximately(currentColor.r, wantedColor.r) && Mathf.Approximately(currentColor.g, wantedColor.g)
-                && Mathf.Approximately(currentColor.b, wantedColor.b))
+            if (UnityEngine.Mathf.Approximately(currentColor.r, wantedColor.r) && UnityEngine.Mathf.Approximately(currentColor.g, wantedColor.g)
+                && UnityEngine.Mathf.Approximately(currentColor.b, wantedColor.b))
             {
                 return;
             }
 
             //not color we want to overwrite
-            if (!Mathf.Approximately(currentColor.r, colorToOverwrite.r) && !Mathf.Approximately(currentColor.g, colorToOverwrite.g)
-                && !Mathf.Approximately(colorToOverwrite.b, wantedColor.b))
+            if (!UnityEngine.Mathf.Approximately(currentColor.r, colorToOverwrite.r) && !UnityEngine.Mathf.Approximately(currentColor.g, colorToOverwrite.g)
+                && !UnityEngine.Mathf.Approximately(colorToOverwrite.b, wantedColor.b))
             {
                 return;
             }

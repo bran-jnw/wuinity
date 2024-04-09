@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace WUInity
+namespace WUIEngine
 {  
     /// <summary>
     /// A set of Geo and Terrain Conversion utils.

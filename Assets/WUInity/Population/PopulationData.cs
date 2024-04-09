@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
+using WUIEngine.IO;
 
-namespace WUInity.Population
+namespace WUIEngine.Population
 {
     public class PopulationData
     {
@@ -21,10 +22,10 @@ namespace WUInity.Population
 
         public PopulationData(PopulationManager manager)
         {
-            lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
-            size = WUInity.INPUT.Simulation.Size;
-            cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
-            cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
+            lowerLeftLatLong = Engine.INPUT.Simulation.LowerLeftLatLong;
+            size = Engine.INPUT.Simulation.Size;
+            cells = Engine.RUNTIME_DATA.Evacuation.CellCount;
+            cellSize = Engine.INPUT.Evacuation.RouteCellSize;
 
             cellArea = cellSize * cellSize / (1000000d); // people/square km
             totalPopulation = 0;
@@ -46,10 +47,10 @@ namespace WUInity.Population
 
         public void CreatePopulationFromLocalGPW(LocalGPWData localGPW)
         {
-            lowerLeftLatLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
-            size = WUInity.INPUT.Simulation.Size;
-            cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
-            cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
+            lowerLeftLatLong = Engine.INPUT.Simulation.LowerLeftLatLong;
+            size = Engine.INPUT.Simulation.Size;
+            cells = Engine.RUNTIME_DATA.Evacuation.CellCount;
+            cellSize = Engine.INPUT.Evacuation.RouteCellSize;
 
             cellPopulation = new int[cells.x * cells.y];
             populationMask = new bool[cells.x * cells.y];
@@ -78,7 +79,7 @@ namespace WUInity.Population
                         ++totalActiveCells;
                     }
 
-                    //WUInity.OUTPUT.evac.rawPopulation[x + y * cells.x] = pop;
+                    //WUIEngine.OUTPUT.evac.rawPopulation[x + y * cells.x] = pop;
                 }
             }
 
@@ -199,12 +200,12 @@ namespace WUInity.Population
                 data[9] += cellPopulation[i] + " ";
             }
 
-            string path = WUInity.INPUT.Population.populationFile;
+            string path = Engine.INPUT.Population.populationFile;
             if(!File.Exists(path))
             {
-                path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimulationID + ".pop");
+                path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Simulation.SimulationID + ".pop");
             }
-            WUInity.INPUT.Population.populationFile = Path.GetFileName(path);
+            Engine.INPUT.Population.populationFile = Path.GetFileName(path);
             File.WriteAllLines(path, data);
         }
 
@@ -217,7 +218,7 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Log, " Could not load population, file not found.");
+                Engine.LOG(Engine.LogType.Log, " Could not load population, file not found.");
 
             }
 
@@ -272,12 +273,12 @@ namespace WUInity.Population
                 }
                 manager.CreateTexture();
                 isLoaded = true;
-                WUInity.INPUT.Population.populationFile = Path.GetFileName(path);                
-                WUInity.LOG(WUInity.LogType.Log, " Loaded population from file " + path + ".");
+                Engine.INPUT.Population.populationFile = Path.GetFileName(path);                
+                Engine.LOG(Engine.LogType.Log, " Loaded population from file " + path + ".");
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, " Population data not valid for current map.");
+                Engine.LOG(Engine.LogType.Error, " Population data not valid for current map.");
             }
 
             return success;
@@ -292,7 +293,7 @@ namespace WUInity.Population
         {
             if(cellRoutes.Length != cellPopulation.Length)
             {
-                WUInity.LOG(WUInity.LogType.Error, " Route collection and population does not have same size.");
+                Engine.LOG(Engine.LogType.Error, " Route collection and population does not have same size.");
                 return -1;
             }
 

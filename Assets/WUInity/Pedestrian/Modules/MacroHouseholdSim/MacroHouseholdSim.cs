@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using WUInity.Population;
+using WUIEngine.Population;
 using System.Numerics;
-using WUInity.Visualization;
+using WUIEngine.Visualization;
+using WUIEngine.IO;
 
-namespace WUInity.Pedestrian
+namespace WUIEngine.Pedestrian
 {
     /// <summary>
     /// Simple human evacuation simulator that lumps households of people into one unit.
@@ -256,7 +257,7 @@ namespace WUInity.Pedestrian
 
         private void ReachedCar(MacroHousehold household, HumanEvacCell cell, ref int peopleWhoReachedCar)
         {
-            if(WUInity.INPUT.Simulation.RunTrafficModule)
+            if(Engine.INPUT.Simulation.RunTrafficModule)
             {                
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
@@ -283,14 +284,14 @@ namespace WUInity.Pedestrian
                     {
                         RouteData rD = cell.routeCollection.GetSelectedRoute();
                         Vector2d startLatLong = new Vector2d(rD.route.Shape[0].Latitude, rD.route.Shape[0].Longitude);
-                        WUInity.SIM.TrafficModule.InsertNewCar(startLatLong, rD.evacGoal, rD, (uint)peopleInCar[i]);
+                        Engine.SIM.TrafficModule.InsertNewCar(startLatLong, rD.evacGoal, rD, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
                     RouteData rD = cell.routeCollection.GetSelectedRoute();
                     Vector2d startLatLong = new Vector2d(rD.route.Shape[0].Latitude, rD.route.Shape[0].Longitude);
-                    WUInity.SIM.TrafficModule.InsertNewCar(startLatLong, rD.evacGoal, rD, (uint)household.peopleInHousehold);
+                    Engine.SIM.TrafficModule.InsertNewCar(startLatLong, rD.evacGoal, rD, (uint)household.peopleInHousehold);
                 }
             }
             
@@ -301,8 +302,8 @@ namespace WUInity.Pedestrian
 
         public void SaveToFile(int runNumber)
         {
-            WUInityInput wO = WUInity.INPUT;
-            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_pedestrian_output_" + runNumber + ".csv");
+            WUInityInput wO = Engine.INPUT;
+            string path = System.IO.Path.Combine(Engine.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -311,9 +312,9 @@ namespace WUInity.Pedestrian
         /// </summary>
         public void PopulateCells(RouteCollection[] routeCollection, PopulationData populationData)
         {          
-            cellsX = WUInity.RUNTIME_DATA.Evacuation.CellCount.x;
-            cellsY = WUInity.RUNTIME_DATA.Evacuation.CellCount.y;
-            this.realWorldSize = WUInity.INPUT.Simulation.Size;
+            cellsX = Engine.RUNTIME_DATA.Evacuation.CellCount.x;
+            cellsY = Engine.RUNTIME_DATA.Evacuation.CellCount.y;
+            this.realWorldSize = Engine.INPUT.Simulation.Size;
             population = new int[cellsX * cellsY];
 
             cellRoutes = routeCollection;
@@ -340,30 +341,30 @@ namespace WUInity.Pedestrian
         /// <returns></returns>
         static public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacuationInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = Engine.INPUT.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
-            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
+            for (int i = 0; i < Engine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= Engine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
                 {
                     randomResponseCurveIndex = i;
                     break;
                 }
             }
-            int curveIndex = WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
+            int curveIndex = Engine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
 
             //skip first as that is always zero probability
-            for (int i = 1; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
+            for (int i = 1; i < Engine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= Engine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    responseTime = Random.Range(Engine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, Engine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
                     break;
                 }
             }
@@ -377,7 +378,7 @@ namespace WUInity.Pedestrian
         /// <returns></returns>
         static public float GetRandomWalkingSpeed()
         {
-            EvacuationInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = Engine.INPUT.Evacuation;
             return Random.Range(eO.walkingSpeedMinMax.X, eO.walkingSpeedMinMax.Y) * eO.walkingSpeedModifier;
         }
 
@@ -425,9 +426,9 @@ namespace WUInity.Pedestrian
 
             householdPositions = new Vector4[totalHouseholds];
 
-            WUInity.LOG(WUInity.LogType.Log, " Total households: " + totalHouseholds);
-            WUInity.LOG(WUInity.LogType.Log, " Total cars: " +  totalCars);
-            WUInity.LOG(WUInity.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            Engine.LOG(Engine.LogType.Log, " Total households: " + totalHouseholds);
+            Engine.LOG(Engine.LogType.Log, " Total cars: " +  totalCars);
+            Engine.LOG(Engine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>

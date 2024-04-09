@@ -1,4 +1,4 @@
-namespace WUInity
+namespace WUIEngine
 {
     [System.Serializable]
     public class RouteDataSave
@@ -26,17 +26,17 @@ namespace WUInity
         public static EvacuationGoal GetRealEvacGoal(string name)
         {
             EvacuationGoal result = null;
-            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+            for (int i = 0; i < Engine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                if (WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name == name)
+                if (Engine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name == name)
                 {
-                    result = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
+                    result = Engine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 }
             }
 
             if(result == null)
             {
-                WUInity.LOG(WUInity.LogType.Warning, " While loading the route collection the evacuation goal named " + name + " did not match any of the specified evacuation goals, the route collection is therefore not valid.");
+                Engine.LOG(Engine.LogType.Warning, " While loading the route collection the evacuation goal named " + name + " did not match any of the specified evacuation goals, the route collection is therefore not valid.");
             }
 
             return result;

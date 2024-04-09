@@ -1,8 +1,9 @@
 using System.IO;
-using WUInity.Fire;
-using WUInity.Visualization;
+using WUIEngine.Fire;
+using WUIEngine.Visualization;
+using WUIEngine.IO;
 
-namespace WUInity.Runtime
+namespace WUIEngine.Runtime
 {
     public class FireData
     {
@@ -83,13 +84,13 @@ namespace WUInity.Runtime
 
         public void LoadAll()
         {
-            LoadLCPFile(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.lcpFile), false);
-            LoadFuelModelsInput(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.fuelModelsFile), false);
-            LoadIgnitionPoints(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.ignitionPointsFile), false);
-            LoadInitialFuelMoistureData(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.initialFuelMoistureFile), false);
-            LoadWeatherInput(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.weatherFile), false);
-            LoadWindInput(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.windFile), false);
-            LoadGraphicalFireInput(Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.graphicalFireInputFile), false);
+            LoadLCPFile(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.lcpFile), false);
+            LoadFuelModelsInput(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.fuelModelsFile), false);
+            LoadIgnitionPoints(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.ignitionPointsFile), false);
+            LoadInitialFuelMoistureData(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.initialFuelMoistureFile), false);
+            LoadWeatherInput(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.weatherFile), false);
+            LoadWindInput(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.windFile), false);
+            LoadGraphicalFireInput(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.graphicalFireInputFile), false);
         }
 
         public bool LoadLCPFile(string path, bool updateInputFile)
@@ -115,13 +116,13 @@ namespace WUInity.Runtime
                     }
                 }
 
-                WUInity.LOG(WUInity.LogType.Log, message);
+                Engine.LOG(Engine.LogType.Log, message);
             }
 
-            WUInity.DATA_STATUS.LcpLoaded = success;
+            Engine.DATA_STATUS.LcpLoaded = success;
             if (success && updateInputFile)
             {
-                WUInity.INPUT.Fire.lcpFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.lcpFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -134,10 +135,10 @@ namespace WUInity.Runtime
             _fuelModelsData = new FuelModelInput();
             success = _fuelModelsData.LoadFuelModelInputFile(path);
 
-            WUInity.DATA_STATUS.FuelModelsLoaded = success;
+            Engine.DATA_STATUS.FuelModelsLoaded = success;
             if(success && updateInputFile)
             {
-                WUInity.INPUT.Fire.fuelModelsFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.fuelModelsFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -150,7 +151,7 @@ namespace WUInity.Runtime
             _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(path, out success);
             if (success && updateInputFile)
             {
-                WUInity.INPUT.Fire.ignitionPointsFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.ignitionPointsFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -163,7 +164,7 @@ namespace WUInity.Runtime
             _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile(out success);
             if (success && updateInputFile)
             {
-                WUInity.INPUT.Fire.initialFuelMoistureFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.initialFuelMoistureFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -176,7 +177,7 @@ namespace WUInity.Runtime
             _weatherInput = WeatherInput.LoadWeatherInputFile(out success);
             if (success && updateInputFile)
             {
-                WUInity.INPUT.Fire.weatherFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.weatherFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -189,7 +190,7 @@ namespace WUInity.Runtime
             _windInput = WindInput.LoadWindInputFile(out success);
             if (success && updateInputFile)
             {
-                WUInity.INPUT.Fire.windFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.windFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -202,7 +203,7 @@ namespace WUInity.Runtime
             GraphicalFireInput.LoadGraphicalFireInput(out success);
             if (success && updateInputFile)
             {
-                WUInity.INPUT.Fire.graphicalFireInputFile = Path.GetFileName(path);
+                Engine.INPUT.Fire.graphicalFireInputFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -215,7 +216,7 @@ namespace WUInity.Runtime
             {
                 wuiAreaIndices = new bool[xCount * yCount];
             }
-            WUInity.RUNTIME_DATA.Fire.WuiAreaIndices = wuiAreaIndices;
+            Engine.RUNTIME_DATA.Fire.WuiAreaIndices = wuiAreaIndices;
         }
 
         public void UpdateRandomIgnitionIndices(bool[] randomIgnitionIndices, int xCount, int yCount)
@@ -224,7 +225,7 @@ namespace WUInity.Runtime
             {
                 randomIgnitionIndices = new bool[xCount * yCount];
             }
-            WUInity.RUNTIME_DATA.Fire.RandomIgnitionIndices = randomIgnitionIndices;
+            Engine.RUNTIME_DATA.Fire.RandomIgnitionIndices = randomIgnitionIndices;
         }
 
         public void UpdateInitialIgnitionIndices(bool[] initialIgnitionIndices, int xCount, int yCount)
@@ -233,7 +234,7 @@ namespace WUInity.Runtime
             {
                 initialIgnitionIndices = new bool[xCount * yCount];
             }
-            WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices = initialIgnitionIndices;
+            Engine.RUNTIME_DATA.Fire.InitialIgnitionIndices = initialIgnitionIndices;
         }
 
         public void UpdateTriggerBufferIndices(bool[] triggerBufferIndices, int xCount, int yCount)
@@ -242,7 +243,7 @@ namespace WUInity.Runtime
             {
                 triggerBufferIndices = new bool[xCount * yCount];
             }
-            WUInity.RUNTIME_DATA.Fire.TriggerBufferIndices = triggerBufferIndices;
+            Engine.RUNTIME_DATA.Fire.TriggerBufferIndices = triggerBufferIndices;
         }
 
         public void ToggleLCPDataPlane()

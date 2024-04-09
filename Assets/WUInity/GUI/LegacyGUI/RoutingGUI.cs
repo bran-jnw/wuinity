@@ -1,8 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
+using WUIEngine.IO;
+using WUIEngine;
 
 namespace WUInity.UI
 {
@@ -21,16 +21,16 @@ namespace WUInity.UI
         {
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
-            TrafficInput tO = WUInity.INPUT.Traffic;
+            TrafficInput tO = Engine.INPUT.Traffic;
             if (routingMenuDirty)
             {
                 routingMenuDirty = false;
-                borderSize = WUInity.RUNTIME_DATA.Routing.BorderSize.ToString();
+                borderSize = Engine.RUNTIME_DATA.Routing.BorderSize.ToString();
             }
 
             //router db
             string routerStatus = "RouterDb NOT loaded";
-            if (WUInity.DATA_STATUS.RouterDbLoaded)
+            if (Engine.DATA_STATUS.RouterDbLoaded)
             {
                 routerStatus = "RouterDb loaded";
             }
@@ -73,7 +73,7 @@ namespace WUInity.UI
 
             //route collection
             string routeCollectionStatus = "Route collection NOT loaded";
-            if (WUInity.DATA_STATUS.RouteCollectionLoaded)
+            if (Engine.DATA_STATUS.RouteCollectionLoaded)
             {
                 routeCollectionStatus = "Route collection loaded";
             }
@@ -87,11 +87,11 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if (WUInity.DATA_STATUS.RouterDbLoaded)
+            if (Engine.DATA_STATUS.RouterDbLoaded)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Build route collection"))
                 {
-                    WUInity.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
+                    Engine.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
                 }
                 ++buttonIndex;
             }
@@ -110,7 +110,7 @@ namespace WUInity.UI
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM border size [m]");
                 ++buttonIndex;
                 borderSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), borderSize);
-                float.TryParse(borderSize, out WUInity.RUNTIME_DATA.Routing.BorderSize);
+                float.TryParse(borderSize, out Engine.RUNTIME_DATA.Routing.BorderSize);
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM file"))
@@ -136,59 +136,59 @@ namespace WUInity.UI
                 return;
             }
 
-            float.TryParse(borderSize, out WUInity.RUNTIME_DATA.Routing.BorderSize);
+            float.TryParse(borderSize, out Engine.RUNTIME_DATA.Routing.BorderSize);
         }
 
         void OpenLoadRouterDbFile()
         {
             FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FILE);
             FileBrowser.ShowLoadDialog(LoadRouterDbFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select RouterDb", "Load");
         }
 
         void LoadRouterDbFile(string[] paths)
         {
             string selectedFile = paths[0];            
-            WUInity.RUNTIME_DATA.Routing.LoadRouterDb(selectedFile, true);
+            Engine.RUNTIME_DATA.Routing.LoadRouterDb(selectedFile, true);
         }
 
         void OpenLoadRouteCollectionFile()
         {
             FileBrowser.SetFilters(false, routeCollectionFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FILE);
             FileBrowser.ShowLoadDialog(LoadRouteCollectionFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select Router collection", "Load");
         }
 
         void LoadRouteCollectionFile(string[] paths)
         {
             string selectedFile = paths[0];
-            WUInity.RUNTIME_DATA.Routing.LoadRouteCollection(selectedFile, true);
+            Engine.RUNTIME_DATA.Routing.LoadRouteCollection(selectedFile, true);
         }
 
         void OpenFilterOSMFile()
         {
             FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FILE);
             FileBrowser.ShowLoadDialog(FilterOSMFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select source OSM file", "Filter");
         }
 
         void FilterOSMFile(string[] paths)
         {
             string selectedFile = paths[0];
-            WUInity.RUNTIME_DATA.Routing.FilterOSMData(selectedFile);
+            Engine.RUNTIME_DATA.Routing.FilterOSMData(selectedFile);
         }
 
         void OpenBuildRouterDbFromOSM()
         {
             FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FILE);
             FileBrowser.ShowLoadDialog(BuildRouterDbFromOSM, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select source OSM file", "Build");
         }
 
         void BuildRouterDbFromOSM(string[] paths)
         {
             string selectedFile = paths[0];
-            WUInity.RUNTIME_DATA.Routing.CreateRouterDatabaseFromOSM(selectedFile);
+            Engine.RUNTIME_DATA.Routing.CreateRouterDatabaseFromOSM(selectedFile);
         }
     }
 }

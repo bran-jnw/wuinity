@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace WUInity
+namespace WUIEngine.IO
 {
     [System.Serializable]
     public class WUInityOutput
@@ -15,8 +15,8 @@ namespace WUInity
 
         public static void SaveOutput(string filename)
         {
-            List<string> log = WUInity.GetLog();
-            string path = System.IO.Path.Combine(WUInity.WORKING_FOLDER, filename + ".wuiout");
+            string[] log = Engine.GetLog();
+            string path = System.IO.Path.Combine(Engine.WORKING_FOLDER, filename + ".wuiout");
             //System.IO.File.WriteAllText(path, log);
         }
     }

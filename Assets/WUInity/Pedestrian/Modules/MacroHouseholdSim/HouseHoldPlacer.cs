@@ -3,7 +3,7 @@ using OsmSharp.Streams;
 using System.IO;
 using System.Linq;
 
-namespace WUInity.Pedestrian
+namespace WUIEngine.Pedestrian
 {
     public class HouseHoldPlacer
     {

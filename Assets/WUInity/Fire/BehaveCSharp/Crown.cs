@@ -1,7 +1,7 @@
-using static WUInity.Fire.BehaveUnits;
-using static WUInity.Fire.MathWrap;
+using static WUIEngine.Fire.BehaveUnits;
+using static WUIEngine.Fire.MathWrap;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     struct FireType
     {

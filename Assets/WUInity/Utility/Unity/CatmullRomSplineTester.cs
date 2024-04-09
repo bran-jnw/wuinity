@@ -6,7 +6,7 @@ public class CatmullRomSplineTester : MonoBehaviour
 {
 	public int samples = 20;
 	public System.Numerics.Vector2[] points;
-    WUInity.CatmullRomSpline1D spline;
+    WUIEngine.CatmullRomSpline1D spline;
 
 	// Start is called before the first frame update
 	void Start()
@@ -18,7 +18,7 @@ public class CatmullRomSplineTester : MonoBehaviour
             System.Numerics.Vector2 p = points[i - 1] + System.Numerics.Vector2.UnitX * Random.Range(10f, 20f) + System.Numerics.Vector2.UnitY * Random.Range(-20f, 20f);
 			points[i] = p;
         }
-        spline = new WUInity.CatmullRomSpline1D(points);
+        spline = new WUIEngine.CatmullRomSpline1D(points);
     }
 
 	void OnDrawGizmos()

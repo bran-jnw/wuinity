@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     public abstract class TrafficModule : SimulationModule
     {

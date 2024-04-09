@@ -1,16 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WUIEngine;
 
 namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
         float sliderValue = 0f;
-        Farsite.FarsiteViewer fV;
+        //Farsite.FarsiteViewer fV;
         void FarsiteMenu()
         {
-            /*FarsiteInput fI = WUInity.INPUT.Fire.farsiteData;
+            /*FarsiteInput fI = WUIEngine.Input.Fire.farsiteData;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;

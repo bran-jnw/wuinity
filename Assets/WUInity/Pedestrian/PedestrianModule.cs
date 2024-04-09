@@ -1,5 +1,5 @@
-using WUInity.Population;
-namespace WUInity.Pedestrian
+using WUIEngine.Population;
+namespace WUIEngine.Pedestrian
 {
     public abstract class PedestrianModule : SimulationModule
     {

@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace WUInity
+namespace WUIEngine
 {
     public class Random
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace WUInity
+namespace WUIEngine
 {
     public class LinearSpline1D
     {

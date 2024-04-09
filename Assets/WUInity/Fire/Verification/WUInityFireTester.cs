@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public class WUInityFireTester : MonoBehaviour                                  //create class with standard unity class inheritance
     {

@@ -1,4 +1,4 @@
-namespace WUInity
+namespace WUIEngine
 {
     public class WUInityPERIL
     {
@@ -53,17 +53,17 @@ namespace WUInity
             /*if (peril == null)
             {
                 //peril = new k_PERIL_DLL.PERIL();
-                cellCount = WUInity.SIM.FireMesh().GetCellCount();
-                cellSize = WUInity.SIM.FireMesh().GetCellSize();
+                cellCount = WUIEngine.SIM.FireMesh().GetCellCount();
+                cellSize = WUIEngine.SIM.FireMesh().GetCellSize();
                 compoundBoundary = new int[cellCount.x, cellCount.y];
                 WUIarea = GetWUIArea();
                 heatmapMax = 0;
             }*/
             //get wuiarea from a user defined map painted in wuinity
 
-            int tBuffer = (int)WUInity.OUTPUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file
+            int tBuffer = (int)Engine.OUTPUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file
             //collect ROS, how to send ROS data is ROStheta[X*Y,8], y first, x second, start in north and then clockwise
-            int[,] maxROS = WUInity.SIM.FireModule.GetMaxROS();
+            int[,] maxROS = Engine.SIM.FireModule.GetMaxROS();
             int[,] wuiArea = GetWUIArea();
 
             //calc new boundary
@@ -87,11 +87,11 @@ namespace WUInity
         {
             //first count how many cells we have to add to array
             int count = 0;
-            for (int i = 0; i < WUInity.RUNTIME_DATA.Fire.WuiAreaIndices.Length; i++)
+            for (int i = 0; i < Engine.RUNTIME_DATA.Fire.WuiAreaIndices.Length; i++)
             {
-                int xIndex = i % WUInity.SIM.FireModule.GetCellCountX();
-                int yIndex = i / WUInity.SIM.FireModule.GetCellCountY();
-                if(WUInity.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
+                int xIndex = i % Engine.SIM.FireModule.GetCellCountX();
+                int yIndex = i / Engine.SIM.FireModule.GetCellCountY();
+                if(Engine.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
                 {
                     ++count;
                 }
@@ -102,9 +102,9 @@ namespace WUInity
             int position = 0;
             for (int i = 0; i < count; i++)
             {
-                int xIndex = i % WUInity.SIM.FireModule.GetCellCountX();
-                int yIndex = i / WUInity.SIM.FireModule.GetCellCountY();
-                if (WUInity.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
+                int xIndex = i % Engine.SIM.FireModule.GetCellCountX();
+                int yIndex = i / Engine.SIM.FireModule.GetCellCountY();
+                if (Engine.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
                 {
                     wuiArea[0, position] = xIndex;
                     wuiArea[1, position] = yIndex; //need to flip Y?

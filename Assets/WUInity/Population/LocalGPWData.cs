@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System;
+using WUIEngine.IO;
 
-namespace WUInity.Population
+namespace WUIEngine.Population
 {
     [System.Serializable]
     public class LocalGPWData
@@ -53,7 +54,7 @@ namespace WUInity.Population
             string[] data = new string[13];
 
             //save data stamp to make sure data fits input
-            WUInityInput input = WUInity.INPUT;
+            WUInityInput input = Engine.INPUT;
             string dataStamp = input.Simulation.LowerLeftLatLong.x.ToString() + " " + input.Simulation.LowerLeftLatLong.y.ToString()
                     + " " + input.Simulation.Size.y.ToString() + " " + input.Simulation.Size.y.ToString();
             data[0] = dataStamp;
@@ -77,7 +78,7 @@ namespace WUInity.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Simulation.SimulationID + ".gpw");
+            string path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Simulation.SimulationID + ".gpw");
             File.WriteAllLines(path, data);
         }
 
@@ -91,7 +92,7 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, " No local GPW data was found, build from global GPW or create custom population.");                
+                Engine.LOG(Engine.LogType.Error, " No local GPW data was found, build from global GPW or create custom population.");                
             }
 
             if(success)
@@ -100,7 +101,7 @@ namespace WUInity.Population
                 isLoaded = true;                
             }
 
-            WUInity.DATA_STATUS.LocalGPWLoaded = success;
+            Engine.DATA_STATUS.LocalGPWLoaded = success;
 
             return success;
         }
@@ -143,7 +144,7 @@ namespace WUInity.Population
                 double.TryParse(dummy[2], out xSize);
                 double.TryParse(dummy[3], out ySize);
 
-                WUInityInput input = WUInity.INPUT;
+                WUInityInput input = Engine.INPUT;
 
                 // There is a problem in using "==" directly to compare two double values. Use AreSame() instead to avoid issues caused by rounding error
                 //success =  lati == input.Simulation.LowerLeftLatLong.x && input.Simulation.LowerLeftLatLong.y == longi && xSize == input.Simulation.Size.x && ySize == input.Simulation.Size.y;
@@ -151,7 +152,7 @@ namespace WUInity.Population
             }
             else 
             {
-                WUInity.LOG(WUInity.LogType.Error, " GPW data range is not valid. Delete the file and rebuild.");
+                Engine.LOG(Engine.LogType.Error, " GPW data range is not valid. Delete the file and rebuild.");
             }
             return success;
         }
@@ -217,12 +218,12 @@ namespace WUInity.Population
                     SaveLocalGPWData();
                 }
 
-                WUInity.LOG(WUInity.LogType.Log, " Loaded local GPW data from pre-built file.");
+                Engine.LOG(Engine.LogType.Log, " Loaded local GPW data from pre-built file.");
             }
             else
             {
                 success = false;
-                WUInity.LOG(WUInity.LogType.Error, " Local GPW data not valid for current map.");
+                Engine.LOG(Engine.LogType.Error, " Local GPW data not valid for current map.");
             }
 
             return success;
@@ -244,7 +245,7 @@ namespace WUInity.Population
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, " Global GPW data files not found. Please make sure the folder structure is correct.");
+                Engine.LOG(Engine.LogType.Error, " Global GPW data files not found. Please make sure the folder structure is correct.");
                 return false;
             }
 
@@ -421,7 +422,7 @@ namespace WUInity.Population
 
                 // New code for any version and any year of the GPW data sets
                 String[] AscFiles = Directory.GetFiles(path, "*.asc");
-                WUInity.LOG(WUInity.LogType.Log, AscFiles.Length.ToString()+ " GPW files found.");
+                Engine.LOG(Engine.LogType.Log, AscFiles.Length.ToString()+ " GPW files found.");
 
                 //if (fileCount == 8)
                 if(AscFiles.Length == 8)
@@ -430,12 +431,12 @@ namespace WUInity.Population
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Error, "Not all GPW files found.");
+                    Engine.LOG(Engine.LogType.Error, "Not all GPW files found.");
                 }
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "GPW path does NOT exist.");
+                Engine.LOG(Engine.LogType.Warning, "GPW path does NOT exist.");
             }
 
             return isAvailable;
@@ -446,11 +447,11 @@ namespace WUInity.Population
         /// </summary>
         public bool LoadRelevantGPWData()
         {
-            Vector2d latLong = WUInity.INPUT.Simulation.LowerLeftLatLong;
-            Vector2d size = WUInity.INPUT.Simulation.Size;
+            Vector2d latLong = Engine.INPUT.Simulation.LowerLeftLatLong;
+            Vector2d size = Engine.INPUT.Simulation.Size;
 
             bool success = false;
-            string path = WUInity.INPUT.Population.gpwDataFolder;
+            string path = Engine.INPUT.Population.gpwDataFolder;
             if (IsGPWAvailable(path))
             {
                 // New code to accept GPW data-sets from any version and any year
@@ -463,25 +464,25 @@ namespace WUInity.Population
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
                         path = AscFiles[0];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 1");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 1");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
                         path = AscFiles[1];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 2");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 2");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
                         path = AscFiles[2];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 3");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 3");
                     }
                     else
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
                         path = AscFiles[3];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 4");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 4");
                     }
                 }
                 else
@@ -490,25 +491,25 @@ namespace WUInity.Population
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
                         path = AscFiles[4];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 5");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 5");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
                         path = AscFiles[5];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 6");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 6");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
                         path = AscFiles[6];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 7");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 7");
                     }
                     else
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
                         path = AscFiles[7];
-                        WUInity.LOG(WUInity.LogType.Log, "Loading GPW from sector 8");
+                        Engine.LOG(Engine.LogType.Log, "Loading GPW from sector 8");
                     }
                 }
 

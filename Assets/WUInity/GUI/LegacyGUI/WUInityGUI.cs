@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using SimpleFileBrowser;
-using System.IO;
+﻿using UnityEngine;
+using WUIEngine;
 
 namespace WUInity.UI
 {
@@ -94,6 +91,12 @@ namespace WUInity.UI
             swapGUI = new MenuButton(buttonHeight, "New GUI");
         }
 
+        string[] log;
+        private void Update()
+        {
+            log = Engine.GetLog();
+        }
+
         void OnGUI()
         {
             //keep track if menu state has changed to kill things like the painter
@@ -101,15 +104,15 @@ namespace WUInity.UI
 
             //select menu
             GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
-            if (GUI.Button(mainMenu.rect, mainMenu.text) && WUInity.SIM.State != Simulation.SimulationState.Running)
+            if (GUI.Button(mainMenu.rect, mainMenu.text) && Engine.SIM.State != Simulation.SimulationState.Running)
             {
                 menuChoice = ActiveMenu.MainMenu;
                 WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.None);
             }
 
-            if(WUInity.DATA_STATUS.HaveInput)
+            if(Engine.DATA_STATUS.HaveInput)
             {
-                if(WUInity.SIM.State != Simulation.SimulationState.Running)
+                if(Engine.SIM.State != Simulation.SimulationState.Running)
                 {
                     if (mapMenu.Pressed())
                     {
@@ -147,7 +150,7 @@ namespace WUInity.UI
                     }
                 }                
 
-                if (WUInity.SIM.HaveResults)
+                if (Engine.SIM.HaveResults)
                 {
                     if (GUI.Button(outputMenu.rect, outputMenu.text))
                     {
@@ -215,18 +218,22 @@ namespace WUInity.UI
             UpdateConsole();
             DataSampleWindow();
         }
-
+                
         void UpdateConsole()
         {
             //console
             GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
-            List<string> log = WUInity.GetLog();
-            for (int i = log.Count - 1; i >= 0; i--)
+                 
+            if(log!= null)
             {
-                GUILayout.Label(log[i]);
+                for (int i = log.Length - 1; i >= 0; i--)
+                {
+                    GUILayout.Label(log[i]);
+                }
             }
+            
             GUILayout.EndScrollView();
             GUI.EndGroup();
         }

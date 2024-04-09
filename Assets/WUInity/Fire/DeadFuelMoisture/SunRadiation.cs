@@ -1,6 +1,6 @@
-using static WUInity.Fire.CDT_SolarRadiationLibrary;
+using static WUIEngine.Fire.CDT_SolarRadiationLibrary;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public static class SunRadiation
     {

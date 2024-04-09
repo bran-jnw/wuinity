@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {   
     public class FuelModelInput
     {
@@ -44,7 +44,7 @@ namespace WUInity.Fire
 
         public bool LoadFuelModelInputFile(string path)
         {
-            WUInity.LOG(WUInity.LogType.Log, " Attempting to load fuel model file.");
+            Engine.LOG(Engine.LogType.Log, " Attempting to load fuel model file.");
             bool success = false;
 
             string[] fuelLines;
@@ -54,7 +54,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Fuel model file " + path + " not found." );
+                Engine.LOG(Engine.LogType.Warning, "Fuel model file " + path + " not found." );
                 return false;
             }
 
@@ -106,7 +106,7 @@ namespace WUInity.Fire
                     isDynamic, isReserved);
 
                     Fuels.Add(newFuel);
-                    WUInity.LOG(WUInity.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
+                    Engine.LOG(Engine.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
                 }
             }
 

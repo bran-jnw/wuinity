@@ -1,10 +1,10 @@
-namespace WUInity
+namespace WUIEngine
 {
-    public struct WUInityColor
+    public struct WUIEngineColor
     {
         public float r, g, b, a;
 
-        public WUInityColor(float r, float g, float b)
+        public WUIEngineColor(float r, float g, float b)
         {
             this.r = r; 
             this.g = g; 
@@ -12,7 +12,7 @@ namespace WUInity
             this.a = 0f;
         }
 
-        public WUInityColor(float r, float g, float b, float a)
+        public WUIEngineColor(float r, float g, float b, float a)
         {
             this.r = r;
             this.g = g;
@@ -20,37 +20,37 @@ namespace WUInity
             this.a = a;
         }
 
-        public WUInityColor(int r, int g, int b, int a)
+        public WUIEngineColor(int r, int g, int b, int a)
         {
             this.r = r / 255.0f;
             this.g = g / 255.0f;
             this.b = b / 255.0f;
             this.a = a / 255.0f;
         }
-        public static WUInityColor operator *(WUInityColor c, float f) => new WUInityColor(c.r * f, c.g * f, c.b * f, c.a * f );
-        public static WUInityColor operator /(WUInityColor c, float f) => new WUInityColor(c.r / f, c.g / f, c.b / f, c.a / f);
+        public static WUIEngineColor operator *(WUIEngineColor c, float f) => new WUIEngineColor(c.r * f, c.g * f, c.b * f, c.a * f );
+        public static WUIEngineColor operator /(WUIEngineColor c, float f) => new WUIEngineColor(c.r / f, c.g / f, c.b / f, c.a / f);
 
-        public static WUInityColor red { get { return new WUInityColor(1F, 0F, 0F, 1F); } }
-        public static WUInityColor green { get { return new WUInityColor(0F, 1F, 0F, 1F); } }
-        public static WUInityColor blue { get { return new WUInityColor(0F, 0F, 1F, 1F); } }
-        public static WUInityColor white { get { return new WUInityColor(1F, 1F, 1F, 1F); } }
-        public static WUInityColor black { get { return new WUInityColor(0F, 0F, 0F, 1F); } }
-        public static WUInityColor yellow { get { return new WUInityColor(1F, 235F / 255F, 4F / 255F, 1F); } }
-        public static WUInityColor cyan { get { return new WUInityColor(0F, 1F, 1F, 1F); } }
-        public static WUInityColor magenta { get { return new WUInityColor(1F, 0F, 1F, 1F); } }
-        public static WUInityColor gray { get { return new WUInityColor(.5F, .5F, .5F, 1F); } }
-        public static WUInityColor grey { get { return new WUInityColor(.5F, .5F, .5F, 1F); } }
-        public static WUInityColor clear { get { return new WUInityColor(0F, 0F, 0F, 0F); } }
+        public static WUIEngineColor red { get { return new WUIEngineColor(1F, 0F, 0F, 1F); } }
+        public static WUIEngineColor green { get { return new WUIEngineColor(0F, 1F, 0F, 1F); } }
+        public static WUIEngineColor blue { get { return new WUIEngineColor(0F, 0F, 1F, 1F); } }
+        public static WUIEngineColor white { get { return new WUIEngineColor(1F, 1F, 1F, 1F); } }
+        public static WUIEngineColor black { get { return new WUIEngineColor(0F, 0F, 0F, 1F); } }
+        public static WUIEngineColor yellow { get { return new WUIEngineColor(1F, 235F / 255F, 4F / 255F, 1F); } }
+        public static WUIEngineColor cyan { get { return new WUIEngineColor(0F, 1F, 1F, 1F); } }
+        public static WUIEngineColor magenta { get { return new WUIEngineColor(1F, 0F, 1F, 1F); } }
+        public static WUIEngineColor gray { get { return new WUIEngineColor(.5F, .5F, .5F, 1F); } }
+        public static WUIEngineColor grey { get { return new WUIEngineColor(.5F, .5F, .5F, 1F); } }
+        public static WUIEngineColor clear { get { return new WUIEngineColor(0F, 0F, 0F, 0F); } }
 
-        public static WUInityColor HSVToRGB(float H, float S, float V)
+        public static WUIEngineColor HSVToRGB(float H, float S, float V)
         {
             return HSVToRGB(H, S, V, true);
         }
 
         // Convert a set of HSV values to an RGB Color.
-        public static WUInityColor HSVToRGB(float H, float S, float V, bool hdr)
+        public static WUIEngineColor HSVToRGB(float H, float S, float V, bool hdr)
         {
-            WUInityColor retval = WUInityColor.white;
+            WUIEngineColor retval = WUIEngineColor.white;
             if (S == 0)
             {
                 retval.r = V;

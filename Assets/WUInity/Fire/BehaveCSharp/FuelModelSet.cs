@@ -28,9 +28,9 @@
 * DEALINGS IN THE SOFTWARE.
 *
 ******************************************************************************/
-using static WUInity.Fire.BehaveUnits;
+using static WUIEngine.Fire.BehaveUnits;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public class FuelModelSet
     {

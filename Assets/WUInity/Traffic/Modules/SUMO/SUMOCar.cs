@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     public class SUMOCar : TrafficModuleCar
     {
@@ -88,7 +88,7 @@ namespace WUInity.Traffic
         public override void Arrive()
         {
             active = false;
-            goal.CarArrives(this, WUInity.SIM.CurrentTime, WUInity.INPUT.Simulation.DeltaTime);
+            goal.CarArrives(this, Engine.SIM.CurrentTime, Engine.INPUT.Simulation.DeltaTime);
             //TODO: send message to WUI-nity
         }
 

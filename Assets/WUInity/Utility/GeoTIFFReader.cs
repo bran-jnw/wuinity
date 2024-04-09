@@ -1,6 +1,6 @@
 using BitMiracle.LibTiff.Classic;
 
-namespace WUInity
+namespace WUIEngine
 {
     public class GeoTIFFReader
     {

@@ -1,6 +1,8 @@
 using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
+using WUIEngine.IO;
+using WUIEngine;
 
 namespace WUInity.UI
 {
@@ -12,7 +14,7 @@ namespace WUInity.UI
 
         void PopulationMenu()
         {
-            PopulationInput popIn = WUInity.INPUT.Population;
+            PopulationInput popIn = Engine.INPUT.Population;
             if (populationMenuDirty)
             {
                 populationMenuDirty = false;
@@ -22,7 +24,7 @@ namespace WUInity.UI
             int buttonColumnStart = 140;
 
             string localPopStatus = "Population data NOT loaded";
-            if (WUInity.POPULATION.IsPopulationLoaded())
+            if (Engine.POPULATION.IsPopulationLoaded())
             {
                 localPopStatus = "Population data loaded";
             }
@@ -30,19 +32,19 @@ namespace WUInity.UI
             ++buttonIndex;
 
             string popRouteStatus = "Population NOT adjusted to routes";
-            if (WUInity.POPULATION.IsPopulationCorrectedForRoutes())
+            if (Engine.POPULATION.IsPopulationCorrectedForRoutes())
             {
                 popRouteStatus = "Population adjusted to routes";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), popRouteStatus);
             ++buttonIndex;
 
-            if(WUInity.DATA_STATUS.PopulationLoaded)
+            if(Engine.DATA_STATUS.PopulationLoaded)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + WUInity.POPULATION.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + Engine.POPULATION.GetTotalPopulation());
                 ++buttonIndex;
 
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total active cells: " + WUInity.POPULATION.GetTotalActiveCells());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total active cells: " + Engine.POPULATION.GetTotalActiveCells());
                 ++buttonIndex;
             }
 
@@ -76,12 +78,12 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cell"))
                 {
-                    WUInity.PAINTER.SetCustomGPWColor(true);
+                    WUInity.Painter.SetCustomGPWColor(true);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove cell"))
                 {
-                    WUInity.PAINTER.SetCustomGPWColor(false);
+                    WUInity.Painter.SetCustomGPWColor(false);
                 }
                 ++buttonIndex;
 
@@ -91,11 +93,11 @@ namespace WUInity.UI
                     bool success = int.TryParse(desiredPopulation, out totalPop);
                     if (!success)
                     {
-                        WUInity.LOG(WUInity.LogType.Error, " Total population not a number, ignoring changes.");
+                        Engine.LOG(Engine.LogType.Error, " Total population not a number, ignoring changes.");
                     }
                     else
                     {
-                        WUInity.POPULATION.GetPopulationData().PlaceUniformPopulation(totalPop);
+                        Engine.POPULATION.GetPopulationData().PlaceUniformPopulation(totalPop);
                     }
                     WUInity.INSTANCE.StopPainter();
                     WUInity.INSTANCE.DisplayPopulation();
@@ -104,13 +106,13 @@ namespace WUInity.UI
                 ++buttonIndex;
             }
 
-            if (WUInity.POPULATION.IsPopulationLoaded())
+            if (Engine.POPULATION.IsPopulationLoaded())
             {
-                if (!WUInity.POPULATION.GetPopulationData().correctedForRoutes && WUInity.RUNTIME_DATA.Routing.RouteCollections != null)
+                if (!Engine.POPULATION.GetPopulationData().correctedForRoutes && Engine.RUNTIME_DATA.Routing.RouteCollections != null)
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Correct for route access"))
                     {
-                        WUInity.POPULATION.UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routing.RouteCollections);
+                        Engine.POPULATION.UpdatePopulationBasedOnRoutes(Engine.RUNTIME_DATA.Routing.RouteCollections);
                         WUInity.INSTANCE.DisplayPopulation();
                     }
                     ++buttonIndex;
@@ -136,12 +138,12 @@ namespace WUInity.UI
                         int newPop;
                         if(int.TryParse(desiredPopulation, out newPop))
                         {
-                            WUInity.POPULATION.ScaleTotalPopulation(newPop);
+                            Engine.POPULATION.ScaleTotalPopulation(newPop);
                             WUInity.INSTANCE.DisplayPopulation();
                         }
                         else
                         {
-                            WUInity.LOG(WUInity.LogType.Error, " New population count not a number.");
+                            Engine.LOG(Engine.LogType.Error, " New population count not a number.");
                         }
                         reScaling = false;
                     }
@@ -161,7 +163,7 @@ namespace WUInity.UI
             //GPW stuff
             ++buttonIndex;
             string localGPWStatus = "Local GPW data NOT loaded";
-            if (WUInity.DATA_STATUS.LocalGPWLoaded)
+            if (Engine.DATA_STATUS.LocalGPWLoaded)
             {
                 localGPWStatus = "Local GPW data loaded";
             }
@@ -169,16 +171,16 @@ namespace WUInity.UI
             ++buttonIndex;
 
             string globalGPWStatus = "Global GPW data NOT found";
-            if (WUInity.DATA_STATUS.GlobalGPWAvailable)
+            if (Engine.DATA_STATUS.GlobalGPWAvailable)
             {
                 globalGPWStatus = "Global GPW data found";
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), globalGPWStatus);
             ++buttonIndex;
 
-            if (WUInity.DATA_STATUS.LocalGPWLoaded)
+            if (Engine.DATA_STATUS.LocalGPWLoaded)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW total population: " + WUInity.POPULATION.GetLocalGPWTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW total population: " + Engine.POPULATION.GetLocalGPWTotalPopulation());
                 ++buttonIndex;
             }
 
@@ -188,25 +190,25 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if (WUInity.DATA_STATUS.GlobalGPWAvailable)
+            if (Engine.DATA_STATUS.GlobalGPWAvailable)
             {
                 string buildGPWstring = "Build local GPW file";
-                if (WUInity.POPULATION.IsLocalGPWLoaded())
+                if (Engine.POPULATION.IsLocalGPWLoaded())
                 {
                     buildGPWstring = "Re-build local GPW file";
                 }
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), buildGPWstring))
                 {
-                    WUInity.POPULATION.CreateLocalGPW();
+                    Engine.POPULATION.CreateLocalGPW();
                 }
                 ++buttonIndex;
             }            
 
-            if (WUInity.DATA_STATUS.LocalGPWLoaded)
+            if (Engine.DATA_STATUS.LocalGPWLoaded)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
                 {
-                    WUInity.POPULATION.Visualizer.ToggleLocalGPWVisibility();
+                    Engine.POPULATION.Visualizer.ToggleLocalGPWVisibility();
                 }
                 ++buttonIndex;
             }            
@@ -215,38 +217,38 @@ namespace WUInity.UI
         void OpenLoadPopulation()
         {
             FileBrowser.SetFilters(false, populationFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FOLDER);
             FileBrowser.ShowLoadDialog(LoadPopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load population file", "Load");
         }
 
         void LoadPopulation(string[] paths)
         {            
-            WUInity.POPULATION.LoadPopulationFromFile(paths[0], true);
+            Engine.POPULATION.LoadPopulationFromFile(paths[0], true);
             populationMenuDirty = true;
         }
 
         void OpenCreatePopulationFromLocalGPW()
         {
             FileBrowser.SetFilters(false, gpwFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FOLDER);
             FileBrowser.ShowLoadDialog(CreatePopulationFromLocalGPW, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load local GPW file", "Load");
         }
 
         void CreatePopulationFromLocalGPW(string[] paths)
         {
-            WUInity.POPULATION.CreatePopulationFromLocalGPW(paths[0]);
+            Engine.POPULATION.CreatePopulationFromLocalGPW(paths[0]);
             populationMenuDirty = true;
         }
 
         void OpenSetGPWFolder()
         {
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FOLDER);
             FileBrowser.ShowLoadDialog(SetGPWFolder, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Set GPW folder", "Set");
         }
 
         void SetGPWFolder(string[] paths)
         {
-            WUInity.RUNTIME_DATA.Population.LoadGlobalGPWFolder(paths[0], true);
+            Engine.RUNTIME_DATA.Population.LoadGlobalGPWFolder(paths[0], true);
         }
     }
 }

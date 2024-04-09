@@ -5,10 +5,10 @@ using Mapbox.Utils;
 using Mapbox.Unity.Utilities;
 using Itinero;
 using Itinero.Osm.Vehicles;
-using WUInity.Population;
-using static WUInity.VectorExtensions;
+using WUIEngine.Population;
+using WUIEngine.IO;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     [System.Serializable]
     public class RouteCreator
@@ -22,11 +22,11 @@ namespace WUInity.Traffic
             }
             if(_instance.router == null)
             {
-                _instance.router = new Router(WUInity.SIM_DATA.GetRouterDb());
+                _instance.router = new Router(WUIEngine.SIM_DATA.GetRouterDb());
             }
 
             RouterPoint rP = _instance.router.Resolve(_instance.GetRouterProfile(), latitude, longitude, 1f);
-            var way_ids = WUInity.SIM_DATA.GetRouterDb().EdgeData.Get("way_id");
+            var way_ids = WUIEngine.SIM_DATA.GetRouterDb().EdgeData.Get("way_id");
             return (long)way_ids.GetRaw(rP.EdgeId);
         }*/
 
@@ -41,7 +41,7 @@ namespace WUInity.Traffic
         {
             if (router == null)
             {
-                router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
+                router = new Router(Engine.RUNTIME_DATA.Routing.RouterDb);
             }
             DetermineValidGoalsAndRouterPoints(false);
         }
@@ -51,13 +51,13 @@ namespace WUInity.Traffic
         /// </summary>
         public RouteCollection[] CalculateCellRoutes()
         {
-            WUInity.LOG(WUInity.LogType.Log, " Calculating route collection for cells, this will take some time...");
+            Engine.LOG(Engine.LogType.Log, " Calculating route collection for cells, this will take some time...");
 
-            AbstractMap _map = WUInity.MAP;
-            WUInity.INSTANCE.DeleteDrawnRoads();
+            AbstractMap _map = WUInity.WUInity.MAP;
+            //WUInity.INSTANCE.DeleteDrawnRoads();
 
-            Vector2 size = new Vector2((float)WUInity.INPUT.Simulation.Size.x, (float)WUInity.INPUT.Simulation.Size.y);
-            Vector2int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
+            Vector2 size = new Vector2((float)Engine.INPUT.Simulation.Size.x, (float)Engine.INPUT.Simulation.Size.y);
+            Vector2int cells = Engine.RUNTIME_DATA.Evacuation.CellCount;
             Vector2d[] startPoints;
             startPoints = new Vector2d[cells.x * cells.y];
             // Route analysis: create all waypoints in cells
@@ -73,13 +73,13 @@ namespace WUInity.Traffic
 
             if (router == null)
             {
-                router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
+                router = new Router(Engine.RUNTIME_DATA.Routing.RouterDb);
             }
 
             //initialize some stuff            
             RouteCollection[] cellRoutes = new RouteCollection[cells.x * cells.y];
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
-            float cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
+            float cellSize = Engine.INPUT.Evacuation.RouteCellSize;
 
             DetermineValidGoalsAndRouterPoints(true);
 
@@ -87,7 +87,7 @@ namespace WUInity.Traffic
             for (int i = 0; i < startPoints.Length; i++)
             {
                 //check that the cell has actual people, else no need for calculating routes
-                int populationInCell = WUInity.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].y);
+                int populationInCell = Engine.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
                     Vector2d m = new Vector2d(_map.CenterMercator.x, _map.CenterMercator.y);
@@ -142,9 +142,9 @@ namespace WUInity.Traffic
                             SelectCorrectRoute(cellRoutes[i], i);
 
                             //this never draws duplicates as we continue on the loop (as in skip this part) if we copy route collection
-                            if (WUInity.INPUT.Visualization.drawRoads)
+                            if (Engine.INPUT.Visualization.drawRoads)
                             {
-                                WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
+                                //WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
                             }
 
                             ++cellsWithGoalsCount;
@@ -154,14 +154,14 @@ namespace WUInity.Traffic
             }
             if(cellsWithGoalsCount == 0)
             {
-                WUInity.SIM.StopSim("ERROR: Not a single route was found, make sure OSM network is valid.");
+                Engine.SIM.StopSim("ERROR: Not a single route was found, make sure OSM network is valid.");
             }
             return cellRoutes;
         }
 
         Itinero.Profiles.Profile GetRouterProfile()
         {
-            TrafficInput tO = WUInity.INPUT.Traffic;
+            TrafficInput tO = Engine.INPUT.Traffic;
 
             Itinero.Profiles.Profile p;
 
@@ -179,7 +179,7 @@ namespace WUInity.Traffic
 
         void DetermineValidGoalsAndRouterPoints(bool logMessages)
         {
-            List<EvacuationGoal> evacuatonGoals = WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals;
+            List<EvacuationGoal> evacuatonGoals = Engine.RUNTIME_DATA.Evacuation.EvacuationGoals;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //check that evac goals are valid
@@ -195,14 +195,14 @@ namespace WUInity.Traffic
                     validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
                     {
-                        WUInity.LOG(WUInity.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].name);
+                        Engine.LOG(Engine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].name);
                     }
                 }
                 catch (Itinero.Exceptions.ResolveFailedException)
                 {
                     if (logMessages)
                     {
-                        WUInity.LOG(WUInity.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].name);
+                        Engine.LOG(Engine.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].name);
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace WUInity.Traffic
             {
                 if (router == null)
                 {
-                    router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
+                    router = new Router(Engine.RUNTIME_DATA.Routing.RouterDb);
                 }
                 start = router.Resolve(p, (float)coordinate.x, (float)coordinate.y, cellSize * 0.70711f); //half cell size * sqrt 2
             }
@@ -238,7 +238,7 @@ namespace WUInity.Traffic
         /// <param name="rasterRoutes"></param>
         /// <param name="p"></param>
         /// <returns></returns>
-        static RouteCollection CheckIfNeighborsHaveSameStart(RouterPoint startRouterPoint, int currentIndex, global::WUInity.RouteCollection[] rasterRoutes, float cellSize)
+        static RouteCollection CheckIfNeighborsHaveSameStart(RouterPoint startRouterPoint, int currentIndex, global::WUIEngine.RouteCollection[] rasterRoutes, float cellSize)
         {
             //TODO: only check 8 neighbors (or actually all previous neighbors, so 4 neighbors)
             for (int i = 0; i < currentIndex; i++)
@@ -286,14 +286,14 @@ namespace WUInity.Traffic
                 return null;
             }*/
 
-            TrafficInput tO = WUInity.INPUT.Traffic;
+            TrafficInput tO = Engine.INPUT.Traffic;
             RouteData routeData = null;
 
             try
             {
                 if (router == null)
                 {
-                    router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
+                    router = new Router(Engine.RUNTIME_DATA.Routing.RouterDb);
                 }
                 Itinero.Route route = router.Calculate(routerProfile, start, goal);
                 routeData = new RouteData(route, evacGoal);
@@ -318,13 +318,13 @@ namespace WUInity.Traffic
         /// <returns></returns>
         public RouteData CalcTrafficRoute(Vector2d startPos)
         {
-            float cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
+            float cellSize = Engine.INPUT.Evacuation.RouteCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
             //this is a quick way of getting a route from an approximate position of the car
             //we just check if cell we are in has a good route and use that
-            RouteCollection rC = WUInity.RUNTIME_DATA.Routing.GetCellRouteCollection(startPos);
+            RouteCollection rC = Engine.RUNTIME_DATA.Routing.GetCellRouteCollection(startPos);
             if (rC != null && rC.GetSelectedRoute() != null)
             {
                 return rC.GetSelectedRoute();
@@ -336,7 +336,7 @@ namespace WUInity.Traffic
             //no need in calculating route when start is not resolved
             if (startRouterPoint == null)
             {
-                WUInity.SIM.StopSim("WARNING! Car could not find a valid start position, abort!");
+                Engine.SIM.StopSim("WARNING! Car could not find a valid start position, abort!");
                 return null;
             }
 
@@ -379,7 +379,7 @@ namespace WUInity.Traffic
             if (!foundOneValidRoute)
             {
                 //TODO: fix what happens when cars get stuck
-                WUInity.SIM.StopSim("STOPPING! No routes found for car, will get stuck.");
+                Engine.SIM.StopSim("STOPPING! No routes found for car, will get stuck.");
                 return null;
             }
 
@@ -406,7 +406,7 @@ namespace WUInity.Traffic
 
         public static void UpdateRouteCollectionBasedOnRouteChoice(RouteCollection rC, int cellIndex)
         {
-            if(WUInity.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.EvacGroup || WUInity.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.Random)
+            if(Engine.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.EvacGroup || Engine.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.Random)
             {
                 SelectCorrectRoute(rC, cellIndex);
             }
@@ -421,14 +421,14 @@ namespace WUInity.Traffic
         /// <param name="cellIndex"></param>
         public static void SelectCorrectRoute(RouteCollection rC, int cellIndex)
         {
-            TrafficInput tO = WUInity.INPUT.Traffic;
-            Vector2int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
+            TrafficInput tO = Engine.INPUT.Traffic;
+            Vector2int cells = Engine.RUNTIME_DATA.Evacuation.CellCount;
 
             if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
             {
                 if (cellIndex >= 0)
                 {
-                    EvacGroup group = WUInity.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
+                    EvacGroup group = Engine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
                     EvacuationGoal goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }
@@ -439,8 +439,8 @@ namespace WUInity.Traffic
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Random)
             {
-                int randomChoice = Random.Range(0, WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count);
-                rC.SelectForcedNonBlocked(WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice]);
+                int randomChoice = Random.Range(0, Engine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count);
+                rC.SelectForcedNonBlocked(Engine.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice]);
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
             {

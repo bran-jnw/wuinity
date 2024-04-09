@@ -1,4 +1,4 @@
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public class CellDeadFuelMoisture
     {

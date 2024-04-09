@@ -1,4 +1,4 @@
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     [System.Serializable]
     public class TrafficProbe

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WUInity.Smoke
+namespace WUIEngine.Smoke
 {
     /// <summary>
     /// Advects and diffuses (eddy diffusion, turbulent viscosity) on a 2d plane with height set to assumed mixing height (which gives volume).

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using static WUInity.Fire.MathWrap;
+using static WUIEngine.Fire.MathWrap;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     //------------------------------------------------------------------------------
     /*! \page DeadFuelMoisture Dead Fuel Moisture

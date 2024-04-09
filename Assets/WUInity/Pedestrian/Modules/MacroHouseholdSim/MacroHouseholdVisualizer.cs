@@ -1,6 +1,6 @@
-using WUInity.Pedestrian;
+using WUIEngine.Pedestrian;
 
-namespace WUInity.Visualization
+namespace WUIEngine.Visualization
 {
     public abstract class MacroHouseholdVisualizer
     {

@@ -1,6 +1,8 @@
 using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
+using WUIEngine.IO;
+using WUIEngine;
 
 namespace WUInity.UI
 {
@@ -11,7 +13,7 @@ namespace WUInity.UI
 
         void MainMenu()
         {
-            WUInityInput wO = WUInity.INPUT;
+            WUInityInput wO = Engine.INPUT;
 
             //whenever we load a file we need to set the new data for the GUI
             if (mainMenuDirty)
@@ -49,7 +51,7 @@ namespace WUInity.UI
             }
             ++buttonIndex;*/
 
-            if (!WUInity.DATA_STATUS.HaveInput)
+            if (!Engine.DATA_STATUS.HaveInput)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run folder"))
                 {
@@ -62,7 +64,7 @@ namespace WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save"))
             {
-                if (WUInity.WORKING_FILE == null)
+                if (Engine.WORKING_FILE== null)
                 {
                     OpenSaveInput();
                 }
@@ -92,9 +94,9 @@ namespace WUInity.UI
             dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
             ++buttonIndex;
 
-            WUInity.RUNTIME_DATA.Simulation.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.RUNTIME_DATA.Simulation.MultipleSimulations, "Multiple runs");
+            Engine.RUNTIME_DATA.Simulation.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.RUNTIME_DATA.Simulation.MultipleSimulations, "Multiple runs");
             ++buttonIndex;
-            if (WUInity.RUNTIME_DATA.Simulation.MultipleSimulations)
+            if (Engine.RUNTIME_DATA.Simulation.MultipleSimulations)
             {
                 //number of runs
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
@@ -102,10 +104,10 @@ namespace WUInity.UI
                 nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
                 ++buttonIndex;
 
-                WUInity.INPUT.Simulation.StopAfterConverging = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.StopAfterConverging, "Stop after converging");
+                Engine.INPUT.Simulation.StopAfterConverging = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.INPUT.Simulation.StopAfterConverging, "Stop after converging");
                 ++buttonIndex;
 
-                if(WUInity.INPUT.Simulation.StopAfterConverging)
+                if(Engine.INPUT.Simulation.StopAfterConverging)
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Convergence criteria:");
                     ++buttonIndex;
@@ -114,24 +116,24 @@ namespace WUInity.UI
                 }
             }
 
-            WUInity.INPUT.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunPedestrianModule, "Simulate pedestrians");
+            Engine.INPUT.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.INPUT.Simulation.RunPedestrianModule, "Simulate pedestrians");
             ++buttonIndex;
 
-            WUInity.INPUT.Simulation.RunTrafficModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunTrafficModule, "Simulate traffic");
+            Engine.INPUT.Simulation.RunTrafficModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.INPUT.Simulation.RunTrafficModule, "Simulate traffic");
             ++buttonIndex;
 
-            WUInity.INPUT.Simulation.RunFireModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunFireModule, "Simulate fire spread");
+            Engine.INPUT.Simulation.RunFireModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.INPUT.Simulation.RunFireModule, "Simulate fire spread");
             ++buttonIndex;
 
-            WUInity.INPUT.Simulation.RunSmokeModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUInity.INPUT.Simulation.RunSmokeModule, "Simulate smoke spread");
+            Engine.INPUT.Simulation.RunSmokeModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), Engine.INPUT.Simulation.RunSmokeModule, "Simulate smoke spread");
             ++buttonIndex;            
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
             {
                 ParseMainData(wO);  
-                if (!WUInity.DATA_STATUS.CanRunSimulation())
+                if (!Engine.DATA_STATUS.CanRunSimulation())
                 {
-                    WUInity.LOG(WUInity.LogType.Error, " Could not start simulation, see error log.");
+                    Engine.LOG(Engine.LogType.Error, " Could not start simulation, see error log.");
                 }
                 else
                 {
@@ -146,9 +148,9 @@ namespace WUInity.UI
         {
             mainMenuDirty = false;
             dT = wO.Simulation.DeltaTime.ToString();
-            nrRuns = WUInity.RUNTIME_DATA.Simulation.NumberOfRuns.ToString();
-            convergenceMaxDifference = WUInity.RUNTIME_DATA.Simulation.ConvergenceMaxDifference.ToString();
-            convergenceMinSequence = WUInity.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
+            nrRuns = Engine.RUNTIME_DATA.Simulation.NumberOfRuns.ToString();
+            convergenceMaxDifference = Engine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference.ToString();
+            convergenceMinSequence = Engine.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
         }
 
         public void ParseMainData(WUInityInput wO)
@@ -162,29 +164,29 @@ namespace WUInity.UI
             }
 
             float.TryParse(dT, out wO.Simulation.DeltaTime);
-            int.TryParse(nrRuns, out WUInity.RUNTIME_DATA.Simulation.NumberOfRuns);
-            float.TryParse(convergenceMaxDifference, out WUInity.RUNTIME_DATA.Simulation.ConvergenceMaxDifference);
-            int.TryParse(convergenceMinSequence, out WUInity.RUNTIME_DATA.Simulation.ConvergenceMinSequence);
+            int.TryParse(nrRuns, out Engine.RUNTIME_DATA.Simulation.NumberOfRuns);
+            float.TryParse(convergenceMaxDifference, out Engine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference);
+            int.TryParse(convergenceMinSequence, out Engine.RUNTIME_DATA.Simulation.ConvergenceMinSequence);
         }
 
         void OpenSaveInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            WUInityInput wO = WUInity.INPUT;
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            WUInityInput wO = Engine.INPUT;
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FILE);
             FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
         }                  
 
         void SaveInput(string[] paths)
         {
-            WUInityInput wO = WUInity.INPUT;
+            WUInityInput wO = Engine.INPUT;
 
-            WUInity.WORKING_FILE = paths[0];
+            Engine.WORKING_FILE = paths[0];
             if (creatingNewFile)
             {
                 mainMenuDirty = true;
-                WUInity.INSTANCE.CreateNewInputData();
-                wO = WUInity.INPUT; //have to update this since we are creating a new one
+                Engine.ENGINE.CreateNewInputData();
+                wO = Engine.INPUT; //have to update this since we are creating a new one
             }
             else
             {
@@ -200,10 +202,10 @@ namespace WUInity.UI
         void OpenLoadInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            string initialPath = WUInity.DATA_FOLDER;
-            if (WUInity.DATA_STATUS.HaveInput)
+            string initialPath = Engine.DATA_FOLDER;
+            if (Engine.DATA_STATUS.HaveInput)
             {
-                initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+                initialPath = Path.GetDirectoryName(Engine.WORKING_FOLDER);
             }
             FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
         }
@@ -222,10 +224,10 @@ namespace WUInity.UI
         void OpenRunFolder()
         {
             FileBrowser.SetFilters(true);
-            string initialPath = WUInity.DATA_FOLDER;
-            if (WUInity.DATA_STATUS.HaveInput)
+            string initialPath = Engine.DATA_FOLDER;
+            if (Engine.DATA_STATUS.HaveInput)
             {
-                initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+                initialPath = Path.GetDirectoryName(Engine.WORKING_FOLDER);
             }
             FileBrowser.ShowLoadDialog(RunFolder, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Run all files in folder", "Run");
         }

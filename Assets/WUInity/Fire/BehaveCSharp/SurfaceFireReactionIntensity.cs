@@ -27,10 +27,10 @@
 * DEALINGS IN THE SOFTWARE.
 *
 ******************************************************************************/
-using static WUInity.Fire.MathWrap;
-using static WUInity.Fire.BehaveUnits;
+using static WUIEngine.Fire.MathWrap;
+using static WUIEngine.Fire.BehaveUnits;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public class SurfaceFireReactionIntensity
     {

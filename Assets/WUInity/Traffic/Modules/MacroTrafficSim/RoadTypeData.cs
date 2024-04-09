@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     [System.Serializable]
     public class RoadData
@@ -113,7 +113,7 @@ namespace WUInity.Traffic
                 //creates default values
                 results = new RoadTypeData();
                 SaveRoadTypeData(results);
-                WUInity.INPUT.Traffic.roadTypesFile = "default";               
+                Engine.INPUT.Traffic.roadTypesFile = "default";               
             }            
 
             return results;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WUInity
+namespace WUIEngine
 {
     public static class FunctionalAnalysis
     {

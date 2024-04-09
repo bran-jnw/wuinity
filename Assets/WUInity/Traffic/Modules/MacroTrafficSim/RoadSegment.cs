@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using static WUInity.Traffic.MacroTrafficSim;
+using static WUIEngine.Traffic.MacroTrafficSim;
 using System.Numerics;
 using System;
+using WUIEngine.IO;
 
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     public class RoadSegment
     {
@@ -55,7 +56,7 @@ namespace WUInity.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Mapbox.Utils.Vector2d unityPos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(coordinate.Latitude, coordinate.Longitude, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+                Mapbox.Utils.Vector2d unityPos = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(coordinate.Latitude, coordinate.Longitude, WUInity.WUInity.MAP.CenterMercator, WUInity.WUInity.MAP.WorldRelativeScale);
                 if (i > 0)
                 {
                     distance += Vector2.Distance(new Vector2((float)unityPos.x, (float)unityPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));
@@ -91,7 +92,7 @@ namespace WUInity.Traffic
 
         public float CalculateSpeedBasedOnDensity()
         {
-            TrafficInput tO = WUInity.INPUT.Traffic;
+            TrafficInput tO = Engine.INPUT.Traffic;
             //reasonable? not for now
             /*if(cars.Count == 1)
             {

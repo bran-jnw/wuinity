@@ -1,29 +1,29 @@
 using System.IO;
-using static WUInity.WUInity;
+using WUIEngine.IO;
 
-namespace WUInity.Runtime
+namespace WUIEngine.Runtime
 {
     public class PopulationData
     {
         public void LoadAll()
         {
-            LoadPopulation(Path.Combine(WORKING_FOLDER, INPUT.Population.populationFile), false);
-            LoadLocalGPW(Path.Combine(WORKING_FOLDER, INPUT.Population.localGPWFile), false);
-            LoadGlobalGPWFolder(INPUT.Population.gpwDataFolder, false);
+            LoadPopulation(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Population.populationFile), false);
+            LoadLocalGPW(Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Population.localGPWFile), false);
+            LoadGlobalGPWFolder(Engine.INPUT.Population.gpwDataFolder, false);
         }
 
         public bool LoadPopulation(string path, bool updateInputFile)
         {
-            bool success = POPULATION.LoadPopulationFromFile(path, updateInputFile);
-            DATA_STATUS.PopulationLoaded = success;
+            bool success = Engine.POPULATION.LoadPopulationFromFile(path, updateInputFile);
+            Engine.DATA_STATUS.PopulationLoaded = success;
             if (success)
             {
-                DATA_STATUS.PopulationCorrectedForRoutes = POPULATION.IsPopulationCorrectedForRoutes();
+                Engine.DATA_STATUS.PopulationCorrectedForRoutes = Engine.POPULATION.IsPopulationCorrectedForRoutes();
 
                 //this is now done in actual call
                 /*if (updateInputFile)
                 {
-                    INPUT.Population.populationFile = Path.GetFileName(path);
+                    Input.Population.populationFile = Path.GetFileName(path);
                     WUInityInput.SaveInput();
                 }*/
             }            
@@ -33,11 +33,11 @@ namespace WUInity.Runtime
 
         public bool LoadLocalGPW(string path, bool updateInputFile)
         {
-            bool success = POPULATION.LoadLocalGPWFromFile(path);
-            DATA_STATUS.LocalGPWLoaded = success;
+            bool success = Engine.POPULATION.LoadLocalGPWFromFile(path);
+            Engine.DATA_STATUS.LocalGPWLoaded = success;
             if(success && updateInputFile)
             {
-                INPUT.Population.localGPWFile = Path.GetFileName(path);
+                Engine.INPUT.Population.localGPWFile = Path.GetFileName(path);
                 WUInityInput.SaveInput();
             }
 
@@ -47,10 +47,10 @@ namespace WUInity.Runtime
         public bool LoadGlobalGPWFolder(string path, bool updateInputFile)
         {            
             bool success = Population.LocalGPWData.IsGPWAvailable(path);
-            DATA_STATUS.GlobalGPWAvailable = success;
+            Engine.DATA_STATUS.GlobalGPWAvailable = success;
             if(success && updateInputFile)
             {
-                INPUT.Population.gpwDataFolder = path;
+                Engine.INPUT.Population.gpwDataFolder = path;
                 WUInityInput.SaveInput();
             }
 

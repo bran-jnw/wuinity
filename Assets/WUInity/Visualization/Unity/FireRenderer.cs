@@ -1,6 +1,9 @@
 using UnityEngine;
-using WUInity.Fire;
-using WUInity.Smoke;
+using WUIEngine.Fire;
+using WUIEngine.Smoke;
+using WUIEngine.IO;
+using WUIEngine;
+using WUIEngine.Visualization;
 
 namespace WUInity.Visualization
 {
@@ -33,7 +36,7 @@ namespace WUInity.Visualization
 
         public bool ToggleFire()
         {
-            if(WUInity.INPUT.Simulation.RunFireModule)
+            if(Engine.INPUT.Simulation.RunFireModule)
             {
                 fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
                 return fireMeshRenderer.gameObject.activeSelf;
@@ -46,7 +49,7 @@ namespace WUInity.Visualization
 
         public bool ToggleSoot()
         {
-            if(WUInity.INPUT.Simulation.RunSmokeModule)
+            if(Engine.INPUT.Simulation.RunSmokeModule)
             {
                 sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
                 return sootMeshRenderer.gameObject.activeSelf;
@@ -74,8 +77,8 @@ namespace WUInity.Visualization
 
         void CreateFireBuffer()
         {            
-            fireCellCountX = WUInity.SIM.FireModule.GetCellCountX();
-            fireCellCountY = WUInity.SIM.FireModule.GetCellCountY();
+            fireCellCountX = Engine.SIM.FireModule.GetCellCountX();
+            fireCellCountY = Engine.SIM.FireModule.GetCellCountY();
             fireBuffer = new ComputeBuffer(fireCellCountX * fireCellCountY, sizeof(float));
             fireMaterial.SetInteger("_CellsX", fireCellCountX);
             fireMaterial.SetInteger("_CellsY", fireCellCountY);
@@ -90,12 +93,12 @@ namespace WUInity.Visualization
 
         void CreateSootBuffer()
         {
-            //sootCellCountX = WUInity.SIM.GetSmokeDispersion().GetCellsX();
-            //sootCellCountY = WUInity.SIM.GetSmokeDispersion().GetCellsY();
-            if(WUInity.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+            //sootCellCountX = WUIEngine.SIM.GetSmokeDispersion().GetCellsX();
+            //sootCellCountY = WUIEngine.SIM.GetSmokeDispersion().GetCellsY();
+            if(Engine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
             {
-                sootCellCountX = ((AdvectDiffuseModel)WUInity.SIM.SmokeModule).GetCellsX();
-                sootCellCountY = ((AdvectDiffuseModel)WUInity.SIM.SmokeModule).GetCellsY();
+                sootCellCountX = ((AdvectDiffuseModel)Engine.SIM.SmokeModule).GetCellsX();
+                sootCellCountY = ((AdvectDiffuseModel)Engine.SIM.SmokeModule).GetCellsY();
                 //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);
@@ -110,7 +113,7 @@ namespace WUInity.Visualization
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                Engine.LOG(Engine.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
             }
                       
         }       
@@ -163,11 +166,11 @@ namespace WUInity.Visualization
                 float[] fireData = null;
                 if (_fireDisplayMode == FireDisplayMode.FirelineIntensity)
                 {
-                    fireData = WUInity.SIM.FireModule.GetFireLineIntensityData();
+                    fireData = Engine.SIM.FireModule.GetFireLineIntensityData();
                 }
                 else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
                 {
-                    fireData = WUInity.SIM.FireModule.GetFuelModelNumberData();
+                    fireData = Engine.SIM.FireModule.GetFuelModelNumberData();
                 }
                 
                 if (fireData != null)
@@ -179,9 +182,9 @@ namespace WUInity.Visualization
 
             if (renderSoot)
             {
-                if(WUInity.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if(Engine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    ComputeBuffer buffer = ((AdvectDiffuseModel)WUInity.SIM.SmokeModule).GetSootBuffer();
+                    ComputeBuffer buffer = ((AdvectDiffuseModel)Engine.SIM.SmokeModule).GetSootBuffer();
                     if (buffer != null)
                     {
                         sootMaterial.SetBuffer("_Data", buffer);
@@ -189,7 +192,7 @@ namespace WUInity.Visualization
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    Engine.LOG(Engine.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
             }
@@ -209,16 +212,16 @@ namespace WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)WUInity.INPUT.Simulation.Size.x;
-            float height = (float)WUInity.INPUT.Simulation.Size.y;
+            float width = (float)Engine.INPUT.Simulation.Size.x;
+            float height = (float)Engine.INPUT.Simulation.Size.y;
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            if(material == fireMaterial && WUInity.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
+            if(material == fireMaterial && Engine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
             {
                 float xScale, yScale;
                 Vector2d offsetFire;
-                ((FarsiteOffline)WUInity.SIM.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
+                ((FarsiteOffline)Engine.SIM.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
                 offset.x += (float)offsetFire.x;
                 offset.y += (float)offsetFire.y;
                 width *= xScale;
@@ -245,7 +248,7 @@ namespace WUInity.Visualization
             fuelModelLegendTexture.filterMode = FilterMode.Point;
             for (int i = 0; i < 256; i++)
             {
-                WUInityColor fuelColor = FuelModelColors.GetFuelColor(i);
+                WUIEngineColor fuelColor = FuelModelColors.GetFuelColor(i);
                 fuelModelLegendTexture.SetPixel(i, 0, fuelColor.UnityColor);
                 fuelModelLegendTexture.SetPixel(i, 1, fuelColor.UnityColor);
             }
@@ -317,15 +320,15 @@ namespace WUInity.Visualization
                 sootBuffer = null;
             }
 
-            if(!creationCall && WUInity.SIM.SmokeModule != null)
+            if(!creationCall && Engine.SIM.SmokeModule != null)
             {
-                if (WUInity.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if (Engine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    ((AdvectDiffuseModel)WUInity.SIM.SmokeModule).Release();
+                    ((AdvectDiffuseModel)Engine.SIM.SmokeModule).Release();
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    Engine.LOG(Engine.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
                 

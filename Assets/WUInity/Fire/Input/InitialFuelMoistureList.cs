@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     [System.Serializable]
     public class InitialFuelMoisture
@@ -77,7 +77,7 @@ namespace WUInity.Fire
 
             if (fuelModelNumber < 1 || fuelModelNumber > 255)
             {                
-                WUInity.LOG(WUInity.LogType.Warning, "Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
+                Engine.LOG(Engine.LogType.Warning, "Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
                 return InitialFuelMoisture.DEAFULT;
             }
 
@@ -91,7 +91,7 @@ namespace WUInity.Fire
             {
                 result = new InitialFuelMoisture(fuelModelNumber, 6.0, 7.0, 8.0, 60.0, 90.0);
                 initialFuelMoistures[fuelModelNumber - 1] = result;
-                WUInity.LOG(WUInity.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
+                Engine.LOG(Engine.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
             }
 
             return result;
@@ -103,7 +103,7 @@ namespace WUInity.Fire
             InitialFuelMoistureList result = null;
             List<InitialFuelMoisture> initialFuelMoistures = new List<InitialFuelMoisture>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.initialFuelMoistureFile);
+            string path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.initialFuelMoistureFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
@@ -128,25 +128,25 @@ namespace WUInity.Fire
                         {
                             InitialFuelMoisture iFM = new InitialFuelMoisture(fuelMod, oneHour, tenHour, hundredHour, liveH, liveW);
                             initialFuelMoistures.Add(iFM);
-                            WUInity.LOG(WUInity.LogType.Log, "Loaded initial fuel moistures for fuel model " + fuelMod + ".");
+                            Engine.LOG(Engine.LogType.Log, "Loaded initial fuel moistures for fuel model " + fuelMod + ".");
                         }
                     }                    
                 }                              
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
+                Engine.LOG(Engine.LogType.Warning, "Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
             }
 
             if (initialFuelMoistures.Count > 0)
             {
                 result = new InitialFuelMoistureList(initialFuelMoistures);
                 success = true; 
-                WUInity.LOG(WUInity.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
+                Engine.LOG(Engine.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
             }
             else if(fileExists)
             {
-                WUInity.LOG(WUInity.LogType.Warning, "Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
+                Engine.LOG(Engine.LogType.Warning, "Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
             }
 
             return result;

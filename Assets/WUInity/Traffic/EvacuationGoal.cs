@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
-using WUInity.Traffic;
+using WUIEngine.Traffic;
 using System.IO;
 
-namespace WUInity
+namespace WUIEngine
 {
     [System.Serializable]
     public class EvacuationGoal
     {
         public string name = "Goal_1";
         public Vector2d latLong;
-        public WUInityColor color;
+        public WUIEngineColor color;
         public bool blocked = false;
         public float maxFlow = 3600f; //cars per hour
         //public GameObject marker;
@@ -27,10 +27,10 @@ namespace WUInity
         {
             name = "New goal";
             latLong = Vector2d.zero;
-            color = WUInityColor.white;
+            color = WUIEngineColor.white;
         }
 
-        public EvacuationGoal(string name, Vector2d latLong, WUInityColor color)
+        public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color)
         {
             this.name = name;
             this.latLong = latLong;
@@ -38,7 +38,7 @@ namespace WUInity
             maxFlow = 3600f;
         }
 
-        public EvacuationGoal(string name, Vector2d latLong, WUInityColor color, float maxFlow)
+        public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color, float maxFlow)
         {
             this.name = name;
             this.latLong = latLong;
@@ -80,24 +80,24 @@ namespace WUInity
                 if (maxCars > 0 && cars.Count >= maxCars && !blocked)
                 {
                     blocked = true;
-                    WUInity.LOG(WUInity.LogType.Event, "Evacuation goal " + name + " has reached cars capacity, re-routing");
-                    WUInity.SIM.GoalBlocked();
+                    Engine.LOG(Engine.LogType.Event, "Evacuation goal " + name + " has reached cars capacity, re-routing");
+                    Engine.SIM.GoalBlocked();
                 }
                 else if (maxCars > 0 && cars.Count > maxCars)
                 {
-                    WUInity.LOG(WUInity.LogType.Log, "Additional car arrived at " + name + ", arrived during same time step.");
+                    Engine.LOG(Engine.LogType.Log, "Additional car arrived at " + name + ", arrived during same time step.");
                 }
 
                 //track and respond people
                 if (maxPeople > -1 && currentPeople >= maxPeople && !blocked)
                 {
                     blocked = true;
-                    WUInity.LOG(WUInity.LogType.Event, "Evacuation goal " + name + " has reached people capacity, re-routing");
-                    WUInity.SIM.GoalBlocked();
+                    Engine.LOG(Engine.LogType.Event, "Evacuation goal " + name + " has reached people capacity, re-routing");
+                    Engine.SIM.GoalBlocked();
                 }
                 else if (maxPeople > -1 && currentPeople > maxPeople)
                 {
-                    WUInity.LOG(WUInity.LogType.Log, "Additional people arrived at " + name + ", arrived during same time step.");
+                    Engine.LOG(Engine.LogType.Log, "Additional people arrived at " + name + ", arrived during same time step.");
                 }
             }
         }
@@ -153,17 +153,17 @@ namespace WUInity
             eGs[0] = new EvacuationGoal();
             eGs[0].name = "Rox_Goal_E";
             eGs[0].latLong = new Vector2d(39.426692, -105.071401);
-            eGs[0].color = WUInityColor.red;
+            eGs[0].color = WUIEngineColor.red;
 
             eGs[1] = new EvacuationGoal();
             eGs[1].name = "Rox_Goal_R";
             eGs[1].latLong = new Vector2d(39.473858, -105.092137);
-            eGs[1].color = WUInityColor.green;
+            eGs[1].color = WUIEngineColor.green;
 
             eGs[2] = new EvacuationGoal();
             eGs[2].name = "Rox_Goal_F";
             eGs[2].latLong = new Vector2d(39.466157, -105.082197);
-            eGs[2].color = WUInityColor.blue;
+            eGs[2].color = WUIEngineColor.blue;
             return eGs;
         }
 
@@ -172,9 +172,9 @@ namespace WUInity
             success = false;
             List<EvacuationGoal> evacuationGoals = new List<EvacuationGoal>();
 
-            for (int i = 0; i < WUInity.INPUT.Traffic.evacuationGoalFiles.Length; i++)
+            for (int i = 0; i < Engine.INPUT.Traffic.evacuationGoalFiles.Length; i++)
             {
-                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.evacuationGoalFiles[i] + ".ed");
+                string path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Traffic.evacuationGoalFiles[i] + ".ed");
                 bool fileExists = File.Exists(path);
                 if (fileExists)
                 {
@@ -186,7 +186,7 @@ namespace WUInity
                     int maxCars, maxPeople;
                     bool initiallyBlocked;
                     EvacGoalType evacGoalType;
-                    WUInityColor color = WUInityColor.white;
+                    WUIEngineColor color = WUIEngineColor.white;
 
                     //name
                     string[] data = dataLines[0].Split(':');
@@ -246,7 +246,7 @@ namespace WUInity
                         float.TryParse(data[0], out r);
                         float.TryParse(data[1], out g);
                         float.TryParse(data[2], out b);
-                        color = new WUInityColor(r, g, b);
+                        color = new WUIEngineColor(r, g, b);
                     }
 
                     EvacuationGoal eG = new EvacuationGoal(name, new Vector2d(lati, longi), color);
@@ -260,14 +260,14 @@ namespace WUInity
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
+                    Engine.LOG(Engine.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
                 }
             }            
 
             if (evacuationGoals.Count > 0)
             {
                 success = true;
-                WUInity.LOG(WUInity.LogType.Log, " " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");               
+                Engine.LOG(Engine.LogType.Log, " " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");               
             }
 
             return evacuationGoals;

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
 	public struct LandScapeStruct
 	{
@@ -166,7 +166,7 @@ namespace WUInity.Fire
         {
 			if(correctForOrigin)
 			{
-                //WUInity.LOG(WUInity.LogType.Log, "X/Y offset cells: " + originCellOffset.x + ", " + originCellOffset.y);
+                //WUIEngine.LOG(WUIEngine.LogType.Log, "X/Y offset cells: " + originCellOffset.x + ", " + originCellOffset.y);
                 //correct for any difference in origin
                 x += originCellOffset.x;
                 y += originCellOffset.y;
@@ -248,7 +248,7 @@ namespace WUInity.Fire
 						error += ", ";
 					}
 				}
-                WUInity.LOG(WUInity.LogType.Error, error);
+                Engine.LOG(Engine.LogType.Error, error);
             }
 
 			List<int> presentFuelModelNumbers= new List<int>();
@@ -353,7 +353,7 @@ namespace WUInity.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUInity.LOG(WUInity.LogType.Error, " LCP file not found in " + path + ".");
+				Engine.LOG(Engine.LogType.Error, " LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -619,16 +619,16 @@ namespace WUInity.Fire
 			}
 
             Vector2d farsiteUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            originOffset = farsiteUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
+            originOffset = farsiteUTM - Engine.RUNTIME_DATA.Simulation.UTMOrigin;
 			originCellOffset = new Vector2int(-(int)(originOffset.x / GetCellResolutionX()), -(int)(originOffset.y / GetCellResolutionY()));
 
             if (CantAllocLCP)
             {
-				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + " but could not properly read it.");
+				Engine.LOG(Engine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
 			}
 			else
             {
-				WUInity.LOG(WUInity.LogType.Log, " LCP found in " + path + ", read succesfully.");
+				Engine.LOG(Engine.LogType.Log, " LCP found in " + path + ", read succesfully.");
 			}
 
 		}

@@ -1,5 +1,5 @@
 ﻿//#define USE_OLD_METHOD
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public class Extension
     {

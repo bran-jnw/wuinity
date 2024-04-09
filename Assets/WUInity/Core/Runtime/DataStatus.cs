@@ -1,6 +1,4 @@
-using static WUInity.WUInity;
-
-namespace WUInity
+namespace WUIEngine
 {
     public class DataStatus
     {
@@ -30,36 +28,36 @@ namespace WUInity
             if (!MapLoaded)
             {
                 canRun = false;
-                LOG(WUInity.LogType.Error, "Map is not loaded.");
+                Engine.LOG(Engine.LogType.Error, "Map is not loaded.");
             }
 
             if (!PopulationLoaded && (!LocalGPWLoaded || !GlobalGPWAvailable))
             {
                 canRun = false;
-                LOG(WUInity.LogType.Error, "Population is not loaded and no local nor global GPW file is found to build it from.");
+                Engine.LOG(Engine.LogType.Error, "Population is not loaded and no local nor global GPW file is found to build it from.");
             }
 
             if (!RouterDbLoaded && !OsmFileValid)
             {
                 canRun = false;
-                LOG(WUInity.LogType.Error, "No router database loaded and no valid OSM file was found to build it from.");
+                Engine.LOG(Engine.LogType.Error, "No router database loaded and no valid OSM file was found to build it from.");
             }
 
-            if (INPUT.Simulation.RunFireModule)
+            if (Engine.INPUT.Simulation.RunFireModule)
             {
                 if (!LcpLoaded)
                 {
                     canRun = false;
-                    LOG(WUInity.LogType.Error, "No LCP file loaded but fire spread is activated.");
+                    Engine.LOG(Engine.LogType.Error, "No LCP file loaded but fire spread is activated.");
                 }
             }
 
-            if (INPUT.Simulation.RunPedestrianModule)
+            if (Engine.INPUT.Simulation.RunPedestrianModule)
             {
-                if (RUNTIME_DATA.Evacuation.ResponseCurves == null)
+                if (Engine.RUNTIME_DATA.Evacuation.ResponseCurves == null)
                 {
                     canRun = false;
-                    LOG(WUInity.LogType.Error, "No valid response curves have been loaded.");
+                    Engine.LOG(Engine.LogType.Error, "No valid response curves have been loaded.");
                 }
 
             }

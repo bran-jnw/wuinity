@@ -1,7 +1,8 @@
 using System.IO;
 using System.Collections.Generic;
+using WUInity;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     public struct FireRasterData
     {
@@ -28,19 +29,19 @@ namespace WUInity.Fire
 
         public FarsiteOffline() 
         {
-            string TOAFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "TOA.asc");
-            string ROSFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "ROS.asc");
-            string FIFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "FI.asc");
-            string SDFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.farsiteData.rootFolder, "output", "SD.asc");
+            string TOAFile = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.farsiteData.rootFolder, "output", "TOA.asc");
+            string ROSFile = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.farsiteData.rootFolder, "output", "ROS.asc");
+            string FIFile = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.farsiteData.rootFolder, "output", "FI.asc");
+            string SDFile = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Fire.farsiteData.rootFolder, "output", "SD.asc");
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(xllcorner, yllcorner);
-            offset = farsiteUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
+            offset = farsiteUTM - Engine.RUNTIME_DATA.Simulation.UTMOrigin;
 
             firelineIntensityData = new float[ncols * nrows];
             newlyIgnitedCells = new List<Vector2int>();
 
-            //WUInity.LOG(WUInity.LogType.Log, "Farsite import offset by (x/y) meters: " + offset.x + ", " + offset.y);
+            //WUIEngine.LOG(WUIEngine.LogType.Log, "Farsite import offset by (x/y) meters: " + offset.x + ", " + offset.y);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -54,7 +55,7 @@ namespace WUInity.Fire
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        if (!data[x, y].isActive && WUInity.SIM.CurrentTime > data[x, y].TOA)
+                        if (!data[x, y].isActive && Engine.SIM.CurrentTime > data[x, y].TOA)
                         {
                             data[x, y].isActive = true;
                             newlyIgnitedCells.Add(new Vector2int(x, y));
@@ -80,13 +81,13 @@ namespace WUInity.Fire
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
             offset = this.offset;
-            xScale = (float)(cellsize * ncols / WUInity.INPUT.Simulation.Size.x);
-            yScale = (float)(cellsize * nrows / WUInity.INPUT.Simulation.Size.y);
+            xScale = (float)(cellsize * ncols / Engine.INPUT.Simulation.Size.x);
+            yScale = (float)(cellsize * nrows / Engine.INPUT.Simulation.Size.y);
         }
 
         public override bool IsSimulationDone()
         {
-            return WUInity.SIM.CurrentTime > maxTimeOfArrival ? true : false;
+            return Engine.SIM.CurrentTime > maxTimeOfArrival ? true : false;
         }        
 
         public override int[,] GetMaxROS()
@@ -126,7 +127,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite time of arrival file not found.");
+                Engine.LOG(Engine.LogType.Error, "Farsite time of arrival file not found.");
                 return;
             }
 
@@ -136,7 +137,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite rate of spread file not found.");
+                Engine.LOG(Engine.LogType.Error, "Farsite rate of spread file not found.");
                 return;
             }
 
@@ -146,7 +147,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                Engine.LOG(Engine.LogType.Error, "Farsite fireline intensity file not found.");
                 return;
             }
 
@@ -156,7 +157,7 @@ namespace WUInity.Fire
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, "Farsite fireline intensity file not found.");
+                Engine.LOG(Engine.LogType.Error, "Farsite fireline intensity file not found.");
                 return;
             }
 
@@ -215,7 +216,7 @@ namespace WUInity.Fire
         /// <returns></returns>
         public override FireCellState GetFireCellState(Vector2d latLong)
         {
-            Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y,  WUInity.WUInity.MAP.CenterMercator, WUInity.WUInity.MAP.WorldRelativeScale);
             pos += offset;
 
             int x = (int)(pos.x / cellsize);
@@ -223,7 +224,7 @@ namespace WUInity.Fire
 
             FireCellState result = FireCellState.Burning;
 
-            if (!IsInside(x, y) || WUInity.SIM.CurrentTime < data[x, y].TOA)
+            if (!IsInside(x, y) || Engine.SIM.CurrentTime < data[x, y].TOA)
             {
                 return FireCellState.Dead;
             }
@@ -244,7 +245,7 @@ namespace WUInity.Fire
 
         public override float GetInternalDeltaTime()
         {
-            return WUInity.INPUT.Simulation.DeltaTime;
+            return Engine.INPUT.Simulation.DeltaTime;
         }
 
         public override float[] GetFireLineIntensityData()

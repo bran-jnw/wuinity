@@ -1,4 +1,4 @@
-﻿namespace WUInity.Population
+﻿namespace WUIEngine.Population
 {
     public class PopulationManager
     {
@@ -100,8 +100,8 @@
         /// <returns></returns>
         public int GetPopulationUnitySpace(double x, double y)
         {
-            int xInt = (int)((x / WUInity.INPUT.Simulation.Size.x) * populationData.cells.x);
-            int yInt = (int)((y / WUInity.INPUT.Simulation.Size.y) * populationData.cells.y);
+            int xInt = (int)((x / Engine.INPUT.Simulation.Size.x) * populationData.cells.x);
+            int yInt = (int)((y / Engine.INPUT.Simulation.Size.y) * populationData.cells.y);
             return GetPopulation(xInt, yInt);
         }
 
@@ -149,17 +149,17 @@
         }        
 
         //colors from GPW website
-        static WUInityColor c0 = new WUInityColor(190f / 255f, 232f / 255f, 255f / 255f);
-        static WUInityColor c1 = new WUInityColor(1.0f, 241f / 255f, 208f / 255f);
-        static WUInityColor c2 = new WUInityColor(1.0f, 218f / 255f, 165f / 255f);
-        static WUInityColor c3 = new WUInityColor(252f / 255f, 183f / 255f, 82f / 255f);
-        static WUInityColor c4 = new WUInityColor(1.0f, 137f / 255f, 63f / 255f);
-        static WUInityColor c5 = new WUInityColor(238f / 255f, 60f / 255f, 30f / 255f);
-        static WUInityColor c6 = new WUInityColor(191f / 255f, 1f / 255f, 39f / 255f);
+        static WUIEngineColor c0 = new WUIEngineColor(190f / 255f, 232f / 255f, 255f / 255f);
+        static WUIEngineColor c1 = new WUIEngineColor(1.0f, 241f / 255f, 208f / 255f);
+        static WUIEngineColor c2 = new WUIEngineColor(1.0f, 218f / 255f, 165f / 255f);
+        static WUIEngineColor c3 = new WUIEngineColor(252f / 255f, 183f / 255f, 82f / 255f);
+        static WUIEngineColor c4 = new WUIEngineColor(1.0f, 137f / 255f, 63f / 255f);
+        static WUIEngineColor c5 = new WUIEngineColor(238f / 255f, 60f / 255f, 30f / 255f);
+        static WUIEngineColor c6 = new WUIEngineColor(191f / 255f, 1f / 255f, 39f / 255f);
 
-        public static WUInityColor GetGPWColor(float density)
+        public static WUIEngineColor GetGPWColor(float density)
         {
-            WUInityColor color;
+            WUIEngineColor color;
             if (density < 0.0f)
             {
                 color = c0;

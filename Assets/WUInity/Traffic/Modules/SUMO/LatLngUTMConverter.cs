@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WUInity.Utility
+namespace WUIEngine.Utility
 {
     //Port from javascript to c#
     //Javascript source: 

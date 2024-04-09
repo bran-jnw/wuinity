@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUInity
+namespace WUIEngine
 {
     public abstract class WUInityEvent
     {
@@ -27,8 +27,8 @@ namespace WUInity
             if(!triggered)
             {
                 triggered = true;
-                WUInity.LOG(WUInity.LogType.Event, "Goal blocked: " + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex].name);
-                WUInity.SIM.BlockEvacGoal(goalIndex);
+                Engine.LOG(Engine.LogType.Event, "Goal blocked: " + Engine.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex].name);
+                Engine.SIM.BlockEvacGoal(goalIndex);
             }            
         }
 
@@ -43,9 +43,9 @@ namespace WUInity
         {
             success = false;
             List<BlockGoalEvent> blockGoalEvents = new List<BlockGoalEvent>();
-            for (int i = 0; i < WUInity.INPUT.Evacuation.BlockGoalEventFiles.Length; i++)
+            for (int i = 0; i < Engine.INPUT.Evacuation.BlockGoalEventFiles.Length; i++)
             {
-                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Evacuation.BlockGoalEventFiles[i] + ".bge");
+                string path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Evacuation.BlockGoalEventFiles[i] + ".bge");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -73,13 +73,13 @@ namespace WUInity
                     //need at least two to make a curve
                     if (dataPoints.Count >= 2)
                     {
-                        //responseCurves.Add(new ResponseCurve(dataPoints, WUInity.INPUT.Evacuation.responseCurveFiles[i]));
-                        WUInity.LOG(WUInity.LogType.Log, " Loaded goal blocking event from " + path);
+                        //responseCurves.Add(new ResponseCurve(dataPoints, WUIEngine.Input.Evacuation.responseCurveFiles[i]));
+                        Engine.LOG(Engine.LogType.Log, " Loaded goal blocking event from " + path);
                     }
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Warning, "Goal blocking event file not found in " + path + " and could not be loaded");
+                    Engine.LOG(Engine.LogType.Warning, "Goal blocking event file not found in " + path + " and could not be loaded");
                 }
             }
 
@@ -91,7 +91,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Warning, "No valid goal blocking events could be loaded.");
+                Engine.LOG(Engine.LogType.Warning, "No valid goal blocking events could be loaded.");
                 return null;
             }
         }

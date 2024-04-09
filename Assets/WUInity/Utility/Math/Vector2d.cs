@@ -3,7 +3,7 @@
 // Assembly location: C:\Program Files (x86)\Unity\Editor\Data\Managed\UnityEngine.dll
 using System;
 
-namespace WUInity 
+namespace WUIEngine 
 {
     [System.Serializable]
     public struct Vector2d 

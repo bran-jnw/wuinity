@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static WUInity.Fire.MathWrap;
+using static WUIEngine.Fire.MathWrap;
 
-namespace WUInity.Farsite
+namespace WUIEngine.Farsite
 {
     public class FarsiteViewer
     {
@@ -89,7 +89,7 @@ namespace WUInity.Farsite
             print("X: " + x + ", Y:" + y);
             print(y / -x);*/
 
-            Vector2d v = global::WUInity.Conversions.LatLonToMeters(latLong);
+            Vector2d v = global::WUIEngine.Conversions.LatLonToMeters(latLong);
             //print("X: " + v.x + ", Y:" + v.y);
         }
 
@@ -167,7 +167,7 @@ namespace WUInity.Farsite
                 for (int x = 0; x < farsiteData.ncols; x++)
                 {
                     float tOA = farsiteData.GetTimeOfArrival(x, y);                    
-                    WUInityColor color = WUInityColor.red * tOA / (float)farsiteData.maxTimeOfArrivalRaster;
+                    WUIEngineColor color = WUIEngineColor.red * tOA / (float)farsiteData.maxTimeOfArrivalRaster;
                     color.a = 1.0f;
                     if (tOA < 0.0f)
                     {
@@ -186,10 +186,10 @@ namespace WUInity.Farsite
                 for (int x = 0; x < farsiteData.ncols; x++)
                 {
                     float fuel = farsiteData.GetFuelModel(x, y);
-                    WUInityColor color = WUInityColor.green * (0.1f + 0.9f * fuel);
+                    WUIEngineColor color = WUIEngineColor.green * (0.1f + 0.9f * fuel);
                     if(fuel < 0.0f)
                     {
-                        color = WUInityColor.grey;
+                        color = WUIEngineColor.grey;
                     }
                     fuelModelTex.SetPixel(x, y, color.UnityColor);
                 }
@@ -205,7 +205,7 @@ namespace WUInity.Farsite
                 {
                     float f = farsiteData.GetFirelineIntensity(x, y);
                     f = (f - (float)farsiteData.minFireLineIntensity) / (float)(farsiteData.maxFireLineIntensity - farsiteData.minFireLineIntensity);
-                    WUInityColor color = WUInityColor.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
+                    WUIEngineColor color = WUIEngineColor.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
                     firelineIntensityTex.SetPixel(x, y, color.UnityColor);
                 }
             }
@@ -397,7 +397,7 @@ namespace WUInity.Farsite
                 if(g == 0)
                 {
                     fireGrid[xPos, yPos] = fireNumber;
-                    burntTex.SetPixel(xPos, yPos, WUInityColor.red.UnityColor);
+                    burntTex.SetPixel(xPos, yPos, WUIEngineColor.red.UnityColor);
                 }
                 /*else if(g != 0 && fireNumber != g)
                 {

@@ -1,6 +1,6 @@
-using WUInity.Utility;
+using WUIEngine.Utility;
 
-namespace WUInity.Runtime
+namespace WUIEngine.Runtime
 {
     public class SimulationData
     {
@@ -14,7 +14,7 @@ namespace WUInity.Runtime
 
         public SimulationData() 
         {
-            LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUInity.INPUT.Simulation.LowerLeftLatLong.x, WUInity.INPUT.Simulation.LowerLeftLatLong.y);
+            LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(Engine.INPUT.Simulation.LowerLeftLatLong.x, Engine.INPUT.Simulation.LowerLeftLatLong.y);
             utmOrigin = new Vector2d(utmData.Easting, utmData.Northing);
         }
     }

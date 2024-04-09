@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using WUInity.Fire;
+using WUIEngine;
 
 namespace WUInity.Visualization
 {
@@ -21,8 +19,8 @@ namespace WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)WUInity.INPUT.Simulation.Size.x;
-            float length = (float)WUInity.INPUT.Simulation.Size.y;
+            float width = (float)Engine.INPUT.Simulation.Size.x;
+            float length = (float)Engine.INPUT.Simulation.Size.y;
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 

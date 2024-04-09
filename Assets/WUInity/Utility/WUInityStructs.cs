@@ -1,4 +1,4 @@
-﻿namespace WUInity
+﻿namespace WUIEngine
 {
     [System.Serializable] 
     public enum RoutePriority { Fastest, Closest, Forced }    

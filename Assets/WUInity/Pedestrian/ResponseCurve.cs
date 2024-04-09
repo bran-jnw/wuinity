@@ -4,7 +4,7 @@ using UnityEngine;
 using System.IO;
 
 
-namespace WUInity
+namespace WUIEngine
 {
     [System.Serializable]
     public struct ResponseDataPoint
@@ -46,9 +46,9 @@ namespace WUInity
         {
             success = false;
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
-            for (int i = 0; i < WUInity.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
+            for (int i = 0; i < Engine.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
             {
-                string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Evacuation.ResponseCurveFiles[i] + ".rsp");
+                string path = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Evacuation.ResponseCurveFiles[i] + ".rsp");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -75,13 +75,13 @@ namespace WUInity
                     //need at least two to make a curve
                     if(dataPoints.Count >= 2)
                     {
-                        responseCurves.Add(new ResponseCurve(dataPoints, WUInity.INPUT.Evacuation.ResponseCurveFiles[i]));
-                        WUInity.LOG(WUInity.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
+                        responseCurves.Add(new ResponseCurve(dataPoints, Engine.INPUT.Evacuation.ResponseCurveFiles[i]));
+                        Engine.LOG(Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
                     }                    
                 }
                 else
                 {
-                    WUInity.LOG(WUInity.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
+                    Engine.LOG(Engine.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
                 }
             }
 
@@ -93,7 +93,7 @@ namespace WUInity
             }
             else
             {
-                WUInity.LOG(WUInity.LogType.Error, " No response curves could be loaded, simulation will stall.");
+                Engine.LOG(Engine.LogType.Error, " No response curves could be loaded, simulation will stall.");
                 return null;
             }   
         }

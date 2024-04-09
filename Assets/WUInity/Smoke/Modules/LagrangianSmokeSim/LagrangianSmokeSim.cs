@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace WUInity.Smoke
+namespace WUIEngine.Smoke
 {
     public class LagrangianSmokeSim : SmokeModule, IDisposable
     {

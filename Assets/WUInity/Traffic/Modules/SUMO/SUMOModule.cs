@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
-namespace WUInity.Traffic
+namespace WUIEngine.Traffic
 {
     public class SUMOModule : TrafficModule
     {
@@ -24,13 +24,13 @@ namespace WUInity.Traffic
                 }
 
                 cars = new Dictionary<string, SUMOCar>();
-                string inputFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.sumoInput.inputFile);
+                string inputFile = Path.Combine(Engine.WORKING_FOLDER, Engine.INPUT.Traffic.sumoInput.inputFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
-                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUInity.SIM.StartTime.ToString(), "-e", WUInity.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", Engine.SIM.StartTime.ToString(), "-e", Engine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
 
                 //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
-                Vector2d sumoUTM = new Vector2d(-WUInity.INPUT.Traffic.sumoInput.UTMoffset.x, -WUInity.INPUT.Traffic.sumoInput.UTMoffset.y);
-                offset = sumoUTM - WUInity.RUNTIME_DATA.Simulation.UTMOrigin;
+                Vector2d sumoUTM = new Vector2d(-Engine.INPUT.Traffic.sumoInput.UTMoffset.x, -Engine.INPUT.Traffic.sumoInput.UTMoffset.y);
+                offset = sumoUTM - Engine.RUNTIME_DATA.Simulation.UTMOrigin;
 
                 validRouteIDs = new Dictionary<StartGoal, string>();
 
@@ -38,7 +38,7 @@ namespace WUInity.Traffic
             }
             catch
             {
-                WUInity.LOG(WUInity.LogType.Error, "Could not start SUMO, aborting.");
+                Engine.LOG(Engine.LogType.Error, "Could not start SUMO, aborting.");
             }
             
         }
@@ -52,7 +52,7 @@ namespace WUInity.Traffic
         {
             if(!LIBSUMO.Simulation.isLoaded())
             {
-                WUInity.LOG(WUInity.LogType.Error, "Trying to update SUMO but SUMO DLL is not loaded.");
+                Engine.LOG(Engine.LogType.Error, "Trying to update SUMO but SUMO DLL is not loaded.");
                 return;
             }
 
@@ -190,7 +190,7 @@ namespace WUInity.Traffic
                         }
                         catch (Exception e)
                         {
-                            WUInity.print(e.Message);
+                            Engine.LOG(Engine.LogType.Warning, e.Message);
                         }
                     }
                 }
@@ -212,7 +212,7 @@ namespace WUInity.Traffic
                     }
                     else
                     {
-                        WUInity.LOG(WUInity.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
+                        Engine.LOG(Engine.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
                     }
                 }
 
@@ -234,7 +234,7 @@ namespace WUInity.Traffic
         {
             if (!LIBSUMO.Simulation.isLoaded())
             {
-                WUInity.LOG(WUInity.LogType.Error, "SUMO is not loaded when trying to access car positions.");
+                Engine.LOG(Engine.LogType.Error, "SUMO is not loaded when trying to access car positions.");
             }
             
             return carsToRender;
@@ -275,16 +275,16 @@ namespace WUInity.Traffic
             {
                 int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[WUInity.SIM.FireModule.GetCellCountX(), WUInity.SIM.FireModule.GetCellCountY()];
+                fireCellEdges = new List<string>[Engine.SIM.FireModule.GetCellCountX(), Engine.SIM.FireModule.GetCellCountY()];
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
-                    int cellIndexX = (int)((nodePos.x + offset.x) / WUInity.SIM.FireModule.GetCellSizeX());
-                    int cellIndexY = (int)((nodePos.y + offset.y) / WUInity.SIM.FireModule.GetCellSizeY());
+                    int cellIndexX = (int)((nodePos.x + offset.x) / Engine.SIM.FireModule.GetCellSizeX());
+                    int cellIndexY = (int)((nodePos.y + offset.y) / Engine.SIM.FireModule.GetCellSizeY());
 
-                    if (cellIndexX > 0 && cellIndexX < WUInity.SIM.FireModule.GetCellCountX() - 1 &&
-                        cellIndexY > 0 && cellIndexY < WUInity.SIM.FireModule.GetCellCountY() - 1)
+                    if (cellIndexX > 0 && cellIndexX < Engine.SIM.FireModule.GetCellCountX() - 1 &&
+                        cellIndexY > 0 && cellIndexY < Engine.SIM.FireModule.GetCellCountY() - 1)
                     {
                         LIBSUMO.StringVector incomingEdges = LIBSUMO.Junction.getIncomingEdges(junctions[i]);
                         for (int j = 0; j < incomingEdges.Count; j++)
@@ -304,11 +304,11 @@ namespace WUInity.Traffic
                     }
                 }
 
-                WUInity.LOG(WUInity.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
+                Engine.LOG(Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
             }
             catch (Exception e) 
             {
-                WUInity.LOG(WUInity.LogType.Error, e.Message);
+                Engine.LOG(Engine.LogType.Error, e.Message);
             }            
         }
 
@@ -326,7 +326,7 @@ namespace WUInity.Traffic
             //make fire affected edges (based on junction) really slow 
             if (fireCellEdges[x, y] != null)
             {
-                WUInity.LOG(WUInity.LogType.Log, "Cell " + x + "," + y + " has been ignited, handling road closure.");
+                Engine.LOG(Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited, handling road closure.");
                 for (int i = 0; i < fireCellEdges[x, y].Count; i++)
                 {
                     //https://sumo.dlr.de/docs/Simulation/Routing.html
@@ -352,10 +352,18 @@ namespace WUInity.Traffic
 
                     string routeID = "route_" + (index + routeIDoffset);
                     ++index;
-                    if (route.edges.Count == 0)
+                    if (route.edges.Count == 0 )
                     {
-                        int routeIndex = Random.Range(0, newValidRoutesIDs.Count);
-                        routeID = newValidRoutesIDs.ElementAt(routeIndex).Value;
+                        if(newValidRoutesIDs.Count > 0)
+                        {
+                            int routeIndex = Random.Range(0, newValidRoutesIDs.Count);
+                            routeID = newValidRoutesIDs.ElementAt(routeIndex).Value;
+                        }
+                        else
+                        {
+                            //this should not happen, this meansa that no route could be created and we use the old one
+                            newValidRoutesIDs.Add(p.Key, p.Value);
+                        }
                     }
                     else
                     {
@@ -368,7 +376,7 @@ namespace WUInity.Traffic
             }
             catch (Exception e)
             {
-                WUInity.LOG(WUInity.LogType.Log, e.Message);
+                Engine.LOG(Engine.LogType.Log, e.Message);
             }
 
             //force update routes on all exisiting cars in system

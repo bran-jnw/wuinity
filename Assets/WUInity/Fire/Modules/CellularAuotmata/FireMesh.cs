@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System;
 
-namespace WUInity.Fire
+namespace WUIEngine.Fire
 {
     [System.Serializable]                                           
     public class FireMesh : FireModule                        
@@ -57,7 +57,7 @@ namespace WUInity.Fire
             {
                 cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);            
             }
-            cellCount = new Vector2int(Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.x / cellSize.x)), Mathf.CeilToInt((float)(WUInity.INPUT.Simulation.Size.y / cellSize.x)));        
+            cellCount = new Vector2int(Mathf.CeilToInt((float)(WUIEngine.Input.Simulation.Size.x / cellSize.x)), Mathf.CeilToInt((float)(WUIEngine.Input.Simulation.Size.y / cellSize.x)));        
 
             this.weather = weather;
             this.wind = wind;
@@ -70,8 +70,8 @@ namespace WUInity.Fire
         {
             this.lcpData = lcpData;
             _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
-            int xCells = (int)(WUInity.INPUT.Simulation.Size.x / _cellSize.x);
-            int yCells = (int)(WUInity.INPUT.Simulation.Size.y / _cellSize.y);
+            int xCells = (int)(Engine.INPUT.Simulation.Size.x / _cellSize.x);
+            int yCells = (int)(Engine.INPUT.Simulation.Size.y / _cellSize.y);
             _cellCount = new Vector2int(xCells, yCells); //Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);           
 
             this.weather = weather;
@@ -80,7 +80,7 @@ namespace WUInity.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = WUInity.INPUT.Fire.spreadMode;
+            spreadMode = Engine.INPUT.Fire.spreadMode;
 
             InitializeMesh();
         }
@@ -89,12 +89,12 @@ namespace WUInity.Fire
         {
             fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if(WUInity.DATA_STATUS.FuelModelsLoaded)
+            if(Engine.DATA_STATUS.FuelModelsLoaded)
             {
-                WUInity.LOG(WUInity.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
+                Engine.LOG(Engine.LogType.Log, " Adding custom fuel model specifications.");
+                for (int i = 0; i < Engine.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(WUInity.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(Engine.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
                 }
             }            
             surfaceFire = new Surface(fuelModelSet);            
@@ -306,7 +306,7 @@ namespace WUInity.Fire
             for (int i = 0; i < _fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
-                if(WUInity.INPUT.Simulation.RunSmokeModule)
+                if(Engine.INPUT.Simulation.RunSmokeModule)
                 {
                     sootProduction[i] = 0.0f;
                     if (_fireCells[i].cellState == FireCellState.Burning)
@@ -358,11 +358,11 @@ namespace WUInity.Fire
                 return;
             }
 
-            if(WUInity.INPUT.Fire.useInitialIgnitionMap)
+            if(Engine.INPUT.Fire.useInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
-                    if (WUInity.RUNTIME_DATA.Fire.InitialIgnitionIndices[i])
+                    if (Engine.RUNTIME_DATA.Fire.InitialIgnitionIndices[i])
                     {
                         FireCell f = _fireCells[i];
                         f.Ignite(currentTime);
@@ -392,7 +392,7 @@ namespace WUInity.Fire
                             activeCells.Add(f);
                             ignitionPoints[i].MarkAsIgnited();
 
-                            WUInity.LOG(WUInity.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
+                            Engine.LOG(Engine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                         }
                         ++activatedIgnitions;
                     }
@@ -441,7 +441,7 @@ namespace WUInity.Fire
 
         public override FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.MAP.CenterMercator, WUInity.MAP.WorldRelativeScale);
+            Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUInity.WUInity.MAP.CenterMercator, WUInity.WUInity.MAP.WorldRelativeScale);
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);

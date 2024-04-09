@@ -1,6 +1,7 @@
 using System.Numerics;
+using WUIEngine.IO;
 
-namespace WUInity.Pedestrian
+namespace WUIEngine.Pedestrian
 {
     /// <summary>
     /// A unit of people (could also be just one person) that travel together to reach their goal (car).
@@ -30,7 +31,7 @@ namespace WUInity.Pedestrian
         /// <param name="responseTime"></param>
         public MacroHousehold(HumanEvacCell humanRaster, Vector2d nodeCenter, int peopleInHousehold, float walkingSpeed, float responseTime)
         {
-            EvacuationInput eO = WUInity.INPUT.Evacuation;
+            EvacuationInput eO = Engine.INPUT.Evacuation;
 
             //nicer to be in circle instead of square?
             /*Vector2 rand = Random.insideUnitCircle;

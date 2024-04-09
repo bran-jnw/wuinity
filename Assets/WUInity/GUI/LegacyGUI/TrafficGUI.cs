@@ -1,6 +1,8 @@
 using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
+using WUIEngine.IO;
+using WUIEngine;
 
 namespace WUInity.UI
 {
@@ -13,7 +15,7 @@ namespace WUInity.UI
 
         void TrafficMenu()
         {
-            TrafficInput tO = WUInity.INPUT.Traffic;
+            TrafficInput tO = Engine.INPUT.Traffic;
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
@@ -40,7 +42,7 @@ namespace WUInity.UI
                 opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
                 ++buttonIndex;
 
-                if (WUInity.DATA_STATUS.OpticalDensityLoaded)
+                if (Engine.DATA_STATUS.OpticalDensityLoaded)
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density ramp loaded");
                     ++buttonIndex;
@@ -57,7 +59,7 @@ namespace WUInity.UI
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))
                 {
-                    Traffic.MacroTrafficVerification.RunTrafficVerificationTests();
+                    WUIEngine.Traffic.MacroTrafficVerification.RunTrafficVerificationTests();
                 }
                 ++buttonIndex;
             }
@@ -70,7 +72,7 @@ namespace WUInity.UI
                 return;
             }
 
-            TrafficInput tO = WUInity.INPUT.Traffic;
+            TrafficInput tO = Engine.INPUT.Traffic;
 
             float.TryParse(stallSpeed, out tO.stallSpeed);
             float.TryParse(opticalDensity, out tO.opticalDensity);
@@ -79,13 +81,13 @@ namespace WUInity.UI
         void OpenLoadOpticalDensityFile()
         {
             FileBrowser.SetFilters(false, opticalDensityFilter);
-            string initialPath = Path.GetDirectoryName(WUInity.WORKING_FILE);
+            string initialPath = Path.GetDirectoryName(Engine.WORKING_FILE);
             FileBrowser.ShowLoadDialog(LoadOpticalDensityFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load optical density ramp file", "Load");
         }
 
         void LoadOpticalDensityFile(string[] paths)
         {
-            WUInity.RUNTIME_DATA.Traffic.LoadOpticalDensityFile(paths[0], true);
+            Engine.RUNTIME_DATA.Traffic.LoadOpticalDensityFile(paths[0], true);
         }
     }
 }

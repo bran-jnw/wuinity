@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace WUInity
+namespace WUIEngine
 {
     public abstract class SimulationModule
     {

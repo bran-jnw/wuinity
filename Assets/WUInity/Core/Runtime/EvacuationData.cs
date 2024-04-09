@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using WUIEngine.IO;
 
-namespace WUInity.Runtime
+namespace WUIEngine.Runtime
 {
     public class EvacuationData
     {
@@ -9,7 +10,7 @@ namespace WUInity.Runtime
         {
             get
             {
-                WUInityInput input = WUInity.INPUT;
+                WUInityInput input = Engine.INPUT;
                 _cellCount.x = Mathf.CeilToInt((float)input.Simulation.Size.x / input.Evacuation.RouteCellSize);
                 _cellCount.y = Mathf.CeilToInt((float)input.Simulation.Size.y / input.Evacuation.RouteCellSize);
                 return _cellCount;
@@ -182,7 +183,7 @@ namespace WUInity.Runtime
 
             if (index < 0)
             {
-                WUInity.LOG(WUInity.LogType.Error, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                Engine.LOG(Engine.LogType.Error, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -202,7 +203,7 @@ namespace WUInity.Runtime
 
             if (index < 0)
             {
-                WUInity.LOG(WUInity.LogType.Error, " User has specified a response curve named " + name + " but no such response curve has been defined.");
+                Engine.LOG(Engine.LogType.Error, " User has specified a response curve named " + name + " but no such response curve has been defined.");
             }
 
             return index;
@@ -210,27 +211,27 @@ namespace WUInity.Runtime
 
         public EvacGroup GetEvacGroup(int cellIndex)
         {
-            WUInityInput input = WUInity.INPUT;
-            if (WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUInity.RUNTIME_DATA.Evacuation.CellCount.x * WUInity.RUNTIME_DATA.Evacuation.CellCount.y)
+            WUInityInput input = Engine.INPUT;
+            if (Engine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < Engine.RUNTIME_DATA.Evacuation.CellCount.x * Engine.RUNTIME_DATA.Evacuation.CellCount.y)
             {
                 return null;
             }
 
-            cellIndex = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[cellIndex];
+            cellIndex = Engine.RUNTIME_DATA.Evacuation.EvacGroupIndices[cellIndex];
 
             return EvacuationGroups[cellIndex];
         }
 
         public EvacGroup GetEvacGroup(int x, int y)
         {
-            WUInityInput input = WUInity.INPUT;
-            if (WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUInity.RUNTIME_DATA.Evacuation.CellCount.x * WUInity.RUNTIME_DATA.Evacuation.CellCount.y)
+            WUInityInput input = Engine.INPUT;
+            if (Engine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < Engine.RUNTIME_DATA.Evacuation.CellCount.x * Engine.RUNTIME_DATA.Evacuation.CellCount.y)
             {
                 return null;
             }
 
-            int index = x + y * WUInity.RUNTIME_DATA.Evacuation.CellCount.x;
-            index = WUInity.RUNTIME_DATA.Evacuation.EvacGroupIndices[index];
+            int index = x + y * Engine.RUNTIME_DATA.Evacuation.CellCount.x;
+            index = Engine.RUNTIME_DATA.Evacuation.EvacGroupIndices[index];
             return EvacuationGroups[index];
         }
 
