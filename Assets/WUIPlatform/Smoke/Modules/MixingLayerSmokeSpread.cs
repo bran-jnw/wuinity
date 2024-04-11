@@ -43,6 +43,7 @@ namespace WUIPlatform.Smoke
             _globalData.invertedCellSizeY = 1f / _globalData.cellSizeY;
             _globalData.cellHeight = WUIEngine.INPUT.Smoke.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
+            _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
             _globalData.deltaTime = WUIEngine.INPUT.Simulation.DeltaTime;
 
             _allBuffers = new List<MemoryBuffer1D<float, Stride1D.Dense>>();
@@ -103,15 +104,16 @@ namespace WUIPlatform.Smoke
 
             //swap buffers so that they are correct next step
             Swap(_densityRead, _densityWrite);
+            MemoryBuffer1D<float, Stride1D.Dense> temp = _densityRead;
+            _densityRead = _densityWrite;
+            _densityWrite = temp;
 
             _densityRead.CopyToCPU(sootOutput);
         }
 
         public void Swap(MemoryBuffer1D<float, Stride1D.Dense> read, MemoryBuffer1D<float, Stride1D.Dense> write)
         {
-            MemoryBuffer1D<float, Stride1D.Dense> temp = read;
-            read = write;
-            write = read;
+            
         }
 
         static void Advect(Index1D i, ArrayView<float> read, ArrayView<float> write, ArrayView<float> injection, GlobalData globalData)

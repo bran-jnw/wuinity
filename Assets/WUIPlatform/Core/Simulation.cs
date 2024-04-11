@@ -544,7 +544,7 @@ namespace WUIPlatform
             {
                 if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    ((AdvectDiffuseModel)_smokeModule).Update(WUIEngine.INPUT.Simulation.DeltaTime, _fireModule.GetCurrentWindData().direction, _fireModule.GetCurrentWindData().speed, fireUpdated);
+                    _smokeModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
                 }
                 else if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.BoxModel)
                 {

@@ -318,7 +318,11 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 if (WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    ((AdvectDiffuseModel)WUIEngine.SIM.SmokeModule).Release();
+                    AdvectDiffuseModel model = WUIEngine.SIM.SmokeModule as AdvectDiffuseModel;
+                    if(model != null)
+                    {
+                        model.Release();
+                    }
                 }
                 else
                 {

@@ -199,7 +199,7 @@ namespace WUIPlatform.Fire
             UpdateIgnitionPoints(0.0f);
             UpdateCellSpreadRates();
 
-            initialized = true;
+            _initialized = true;
         }
 
         double GetCorrectedElevation(int x, int y)                  
@@ -230,7 +230,8 @@ namespace WUIPlatform.Fire
             return angleOffsets[i];
         }
 
-        bool initialized = false;
+        bool _initialized = false;
+        List<Vector2int> _ignitedCells = new List<Vector2int>();
         public override void Step(float currentTime, float deltaTime)
         {            
             UpdateIgnitionPoints((float)timeSinceStart);
@@ -282,6 +283,7 @@ namespace WUIPlatform.Fire
             //add the ones that were ignited to the active list
             foreach (FireCell f in cellsToIgnite)
             {
+                _ignitedCells.Add(f.cellIndex);
                 f.Ignite(timeSinceStart);
                 activeCells.Add(f);
             }
@@ -526,12 +528,12 @@ namespace WUIPlatform.Fire
 
         public override List<Vector2int> GetIgnitedFireCells()
         {
-            throw new NotImplementedException();
+            return _ignitedCells;
         }
 
         public override void ConsumeIgnitedFireCells()
         {
-            throw new NotImplementedException();
+            _ignitedCells.Clear();
         }
 
         //remove? as we now visualize using fire renderer
