@@ -251,7 +251,7 @@ namespace WUIPlatform
                                 ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
                             }
                             //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/
-                            _smokeModule = new MixingLayerSmokeSpread();
+                            _smokeModule = new MixingLayerSmoke();
                             WUIEngine.LOG(WUIEngine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
                         }
                     }                    

@@ -5,33 +5,48 @@ using ILGPU.Runtime.OpenCL;
 using System;
 using System.Numerics;
 using System.Collections.Generic;
-using ILGPU.Util;
+using System.Collections.Immutable;
 
 namespace WUIPlatform.Smoke
 {
-    public class MixingLayerSmokeSpread : SmokeModule, IDisposable
+    public class MixingLayerSmoke : SmokeModule, IDisposable
     {
-        MemoryBuffer1D<float, Stride1D.Dense> _densityRead, _densityWrite, _injection;
+        const int READ = 0;
+        const int WRITE = 1;
+        MemoryBuffer1D<float, Stride1D.Dense>[] _density = new MemoryBuffer1D<float, Stride1D.Dense>[2];
+        MemoryBuffer1D<float, Stride1D.Dense> _injection;
         List<MemoryBuffer1D<float, Stride1D.Dense>> _allBuffers;
         Context _context;
         Accelerator _accelerator;
-
         Action<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData> _advectKernel;
+        Action<Index1D, ArrayView<float>, ArrayView<float>, GlobalData> _diffuseKernel;
         int bufferSize;
+        float[] _sootOutput;
+
+        //calculated from https://www.ready.noaa.gov/READYpgclass.php and from 
+        //https://doi.org/10.1016/0004-6981(75)90066-9 which describes relation between K_z and K_y 
+        //expand with https://en.wikipedia.org/wiki/Turner_stability_class?
+        static readonly float[] eddyDiffusivity = { 260.0f, 215.0f, 125.0f, 125.0f, 39.0f, 10.5f, 3.0f };
 
         private struct GlobalData
         {
             public float deltaTime, windX, windY;
             public int cellsX, cellsY;
             public float cellSizeX, cellSizeY, invertedCellVolume, cellHeight, invertedCellSizeX, invertedCellSizeY, invertedCellSizeXSq, invertedCellSizeYSq, cellArea, cellVolume;
+            public float eddyDiffusivity;
         }
         GlobalData _globalData;
 
-        public MixingLayerSmokeSpread()
+        public MixingLayerSmoke()
         {
             //initiate device to run on
             _context = Context.CreateDefault();
+            for (int i = 0; i < _context.Devices.Length; i++)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, "ILGPU available accelerator: " + _context.Devices[i].Name);
+            }
             _accelerator = _context.GetPreferredDevice(false).CreateAccelerator(_context);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "ILGPU is using accelerator: " + _accelerator.Device.Name);
 
             //set up all buffers and data containers
             _globalData = new GlobalData();
@@ -49,24 +64,25 @@ namespace WUIPlatform.Smoke
             _allBuffers = new List<MemoryBuffer1D<float, Stride1D.Dense>>();
             bufferSize = _globalData.cellsX * _globalData.cellsY;
 
-            _densityRead = _accelerator.Allocate1D(new float[bufferSize]);
-            _densityRead.MemSetToZero();
-            _allBuffers.Add(_densityRead);
-            _densityWrite = _accelerator.Allocate1D(new float[bufferSize]);
-            _densityWrite.MemSetToZero();
-            _allBuffers.Add(_densityWrite);
+            _density[READ] = _accelerator.Allocate1D(new float[bufferSize]);
+            _density[READ].MemSetToZero();
+            _allBuffers.Add(_density[READ]);
+            _density[WRITE] = _accelerator.Allocate1D(new float[bufferSize]);
+            _density[WRITE].MemSetToZero();
+            _allBuffers.Add(_density[WRITE]);
 
             _injection = _accelerator.Allocate1D(new float[bufferSize]);
             _injection.MemSetToZero();
             _allBuffers.Add(_injection);
 
-            //compile kernel
+            //compile advection kernel
             _advectKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(Advect);
-
-            sootOutput = new float[bufferSize];
+            _diffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, GlobalData>(Diffuse);
+            //we need this to send data to WUIEngine and evaluative visibility
+            _sootOutput = new float[bufferSize];
         }
 
-        ~MixingLayerSmokeSpread()
+        ~MixingLayerSmoke()
         {
             Dispose();
         }
@@ -80,8 +96,7 @@ namespace WUIPlatform.Smoke
             _accelerator.Dispose();
             _context.Dispose();
         }
-
-        float[] sootOutput;
+                
         public override void Step(float currentTime, float deltaTime)
         {
             //if fire has been updated we need to update the injection buffer
@@ -93,36 +108,46 @@ namespace WUIPlatform.Smoke
 
             //update wind
             Fire.WindData windData = WUIEngine.SIM.FireModule.GetCurrentWindData();
-            float windX = Mathf.Sin(windData.direction * Mathf.Deg2Rad) * windData.speed;
-            float windY = Mathf.Cos(windData.direction * Mathf.Deg2Rad) * windData.speed;
+            float windX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad) * windData.speed;
+            float windY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad) * windData.speed;
             _globalData.windX = windX;
             _globalData.windY = windY;
 
-            //run kernel
-            _advectKernel(bufferSize, _densityRead.View, _densityWrite.View, _injection.View, _globalData);
+            https://www.ready.noaa.gov/READYpgclass.php
+            int stability = 0; //0-6 represents stability class A-G
+            _globalData.eddyDiffusivity = eddyDiffusivity[stability];            
+
+            //run advection kernel
+            _advectKernel(bufferSize, _density[READ].View, _density[WRITE].View, _injection.View, _globalData);            
+            Swap(_density);
+            //diffusion, implicit jacobian iterations
+            for (int j = 0; j < 10; j++)
+            {
+                _diffuseKernel(bufferSize, _density[READ].View, _density[WRITE].View, _globalData);
+                Swap(_density);                
+            }
             _accelerator.Synchronize();
 
-            //swap buffers so that they are correct next step
-            Swap(_densityRead, _densityWrite);
-            MemoryBuffer1D<float, Stride1D.Dense> temp = _densityRead;
-            _densityRead = _densityWrite;
-            _densityWrite = temp;
-
-            _densityRead.CopyToCPU(sootOutput);
+            _lockOutput = true;
+            _density[READ].CopyToCPU(_sootOutput);
+            _lockOutput = false;
         }
+        bool _lockOutput = false;
 
-        public void Swap(MemoryBuffer1D<float, Stride1D.Dense> read, MemoryBuffer1D<float, Stride1D.Dense> write)
+        void Swap(MemoryBuffer1D<float, Stride1D.Dense>[] buffer)
         {
-            
+            MemoryBuffer1D<float, Stride1D.Dense> tmp = buffer[READ];
+            buffer[READ] = buffer[WRITE];
+            buffer[WRITE] = tmp;
         }
 
         static void Advect(Index1D i, ArrayView<float> read, ArrayView<float> write, ArrayView<float> injection, GlobalData globalData)
         {
             int x = i % globalData.cellsX;
-            int y = i / globalData.cellsY;
+            int y = i / globalData.cellsX;
             //advection 
-            Vector2 pos = new Vector2(x, y);
-            Vector2 advectedPos = GetAdvectedPos(pos, globalData);
+            Vector2 index = new Vector2(x, y);
+            Vector2 advectedPos = GetAdvectedIndex(index, globalData);
             float newC = SampleBilinear(advectedPos, read, globalData);
 
             //injection
@@ -133,12 +158,48 @@ namespace WUIPlatform.Smoke
             write[i] = newC + c_delta;
         }
 
-        static Vector2 GetAdvectedPos(Vector2 pos, GlobalData constantData)
+        static void Diffuse(Index1D i, ArrayView<float> read, ArrayView<float> write, GlobalData globalData)
         {
-            //when only using global wind value
+            int x = i % globalData.cellsX;
+            int y = i / globalData.cellsX;
+
+            float C = read[i];
+            //float L = 0, R = 0, D = 0, U = 0;
+            float L = C, R = C, D = C, U = C; //never diffuse to outside? else set to zero
+            if (x > 0)
+            {
+                int idxL = x - 1 + y * globalData.cellsX;
+                L = read[idxL];
+            }
+            if (x < globalData.cellsX - 1)
+            {
+                int idxR = x + 1 + y * globalData.cellsX;
+                R = read[idxR];
+            }
+            if (y > 0)
+            {
+                int idxD = x + (y - 1) * globalData.cellsX;
+                D = read[idxD];
+            }
+            if (y < globalData.cellsY - 1)
+            {
+                int idxU = x + (y + 1) * globalData.cellsX;
+                U = read[idxU];
+            }
+
+            //uniform diffusion
+            float K = globalData.eddyDiffusivity;
+            //dx^2 / v * dt
+            float alpha = (globalData.cellSizeX * globalData.cellSizeY) / (K * globalData.deltaTime);
+            float rBeta = 4.0f + alpha;
+            write[i] = (C * alpha + L + R + D + U) / rBeta;
+        }
+
+        static Vector2 GetAdvectedIndex(Vector2 startIndex, GlobalData constantData)
+        {
             Vector2 step = constantData.deltaTime * new Vector2(constantData.windX * constantData.invertedCellSizeX, constantData.windY * constantData.invertedCellSizeY);
-            pos -= step;
-            return pos;
+            startIndex -= step;
+            return startIndex;
         }
 
         static float SampleBilinear(Vector2 advectedPos, ArrayView<float> read, GlobalData globalData)
@@ -200,7 +261,12 @@ namespace WUIPlatform.Smoke
 
         public override float[] GetGroundSoot()
         {
-            return sootOutput;
+            if(_lockOutput)
+            {
+                return null;
+            }
+
+            return _sootOutput;
         }
     }
 }

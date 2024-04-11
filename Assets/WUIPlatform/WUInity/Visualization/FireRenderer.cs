@@ -181,8 +181,12 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    sootBuffer.SetData(WUIEngine.SIM.SmokeModule.GetGroundSoot());
-                    sootMaterial.SetBuffer("_Data", sootBuffer);            
+                    float[] newSoot = WUIEngine.SIM.SmokeModule.GetGroundSoot();
+                    if(newSoot != null)
+                    {
+                        sootBuffer.SetData(newSoot);
+                        sootMaterial.SetBuffer("_Data", sootBuffer);
+                    }                              
                 }
                 else
                 {
@@ -211,7 +215,7 @@ namespace WUIPlatform.WUInity.Visualization
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            if(material == fireMaterial && WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
+            if(WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
             {
                 float xScale, yScale;
                 Vector2d offsetFire;

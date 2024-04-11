@@ -18,13 +18,14 @@ namespace WUIPlatform.Fire
     public class FarsiteOffline : FireModule
     {
         float maxTimeOfArrival = float.MinValue;
-        int ncols, nrows, activeCells;
+        int ncols, nrows, _activeCells;
         double xllcorner, yllcorner, cellsize, NODATA_VALUE;
         FireRasterData[,] data;
         Vector2d offset;
 
         float[] firelineIntensityData;
         List<Vector2int> newlyIgnitedCells;
+        float[] _sootInjection;
 
         public FarsiteOffline() 
         {
@@ -39,6 +40,7 @@ namespace WUIPlatform.Fire
 
             firelineIntensityData = new float[ncols * nrows];
             newlyIgnitedCells = new List<Vector2int>();
+            _sootInjection = new float[ncols * nrows];
 
             //WUIEngine.LOG(WUIEngine.LogType.Log, "Farsite import offset by (x/y) meters: " + offset.x + ", " + offset.y);
         }
@@ -59,7 +61,8 @@ namespace WUIPlatform.Fire
                             data[x, y].isActive = true;
                             newlyIgnitedCells.Add(new Vector2int(x, y));
                             firelineIntensityData[index] = data[x, y].FI;
-                            ++activeCells;
+                            _sootInjection[index] = 1f;
+                            ++_activeCells;
                         }
                         ++index;
                     }
@@ -259,17 +262,17 @@ namespace WUIPlatform.Fire
 
         public override float[] GetSootProduction()
         {
-            throw new System.NotImplementedException();
+            return _sootInjection;
         }
 
         public override int GetActiveCellCount()
         {
-            return activeCells;
+            return _activeCells;
         }
 
         public override WindData GetCurrentWindData()
         {
-            return new WindData();
+            return new WindData(0, 270f, 5, 0);
         }
     }
 }

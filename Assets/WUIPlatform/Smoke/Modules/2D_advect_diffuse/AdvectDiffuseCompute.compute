@@ -270,7 +270,6 @@ void DiffuseImplicitIsotropic(uint3 id : SV_DispatchThreadID)
 	float alpha = _CellSizeX * _CellSizeY / (K * _DeltaTime);
 	float rBeta = 1.0f / (4.0f + alpha);
 	_Write[idx] = (C * alpha + L + R + D + U) * rBeta;
-	return;
 }
 
 //3
