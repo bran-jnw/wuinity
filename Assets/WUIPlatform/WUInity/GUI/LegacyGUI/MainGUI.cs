@@ -12,7 +12,7 @@ namespace WUIPlatform.WUInity.UI
 
         void MainMenu()
         {
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
 
             //whenever we load a file we need to set the new data for the GUI
             if (mainMenuDirty)
@@ -70,7 +70,7 @@ namespace WUIPlatform.WUInity.UI
                 else
                 {
                     ParseMainData(wO);
-                    WUInityInput.SaveInput();
+                    WUIEngineInput.SaveInput();
                 }
             }
             ++buttonIndex;
@@ -143,7 +143,7 @@ namespace WUIPlatform.WUInity.UI
             ++buttonIndex;            
         }
 
-        void CleanMainMenu(WUInityInput wO)
+        void CleanMainMenu(WUIEngineInput wO)
         {
             mainMenuDirty = false;
             dT = wO.Simulation.DeltaTime.ToString();
@@ -152,7 +152,7 @@ namespace WUIPlatform.WUInity.UI
             convergenceMinSequence = WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
         }
 
-        public void ParseMainData(WUInityInput wO)
+        public void ParseMainData(WUIEngineInput wO)
         {
             ParseEvacInput();
             ParseTrafficInput();
@@ -171,14 +171,14 @@ namespace WUIPlatform.WUInity.UI
         void OpenSaveInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
             string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
             FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
         }                  
 
         void SaveInput(string[] paths)
         {
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
 
             WUIEngine.WORKING_FILE = paths[0];
             if (creatingNewFile)
@@ -195,7 +195,7 @@ namespace WUIPlatform.WUInity.UI
             string name = Path.GetFileNameWithoutExtension(paths[0]);
             wO.Simulation.SimulationID = name;
 
-            WUInityInput.SaveInput();
+            WUIEngineInput.SaveInput();
         }
 
         void OpenLoadInput()
@@ -211,7 +211,7 @@ namespace WUIPlatform.WUInity.UI
 
         void LoadInput(string[] paths)
         {
-            WUInityInput.LoadInput(paths[0]);
+            WUIEngineInput.LoadInput(paths[0]);
             mainMenuDirty = true;
         }            
 

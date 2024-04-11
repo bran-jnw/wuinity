@@ -3,12 +3,12 @@ using System.Collections.Generic;
 namespace WUIPlatform.IO
 {
     [System.Serializable]
-    public class WUInityOutput
+    public class WUIEngineOutput
     {
         public float totalEvacTime;
         public EvacOutput evac;
 
-        public WUInityOutput()
+        public WUIEngineOutput()
         {
             evac = new EvacOutput();
         }

@@ -439,7 +439,7 @@ namespace WUIPlatform.Fire
 
         public override FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Vector2d pos = Conversions.GeoToWorldPosition(latLong.x, latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+            Vector2d pos = GeoConversions.GeoToWorldPosition(latLong.x, latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);

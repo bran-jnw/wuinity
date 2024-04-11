@@ -6,9 +6,9 @@ namespace WUIPlatform.Pedestrian
     {
         public static void RunVerification()
         {
-            WUInityInput.LoadInput("evac_verification");
+            WUIEngineInput.LoadInput("evac_verification");
             EvacuationInput evacOptions = WUIEngine.INPUT.Evacuation;
-            WUInityInput wuinityOptions = WUIEngine.INPUT;
+            WUIEngineInput wuinityOptions = WUIEngine.INPUT;
             WUIEngine.INPUT.Simulation.RunPedestrianModule = true;
             WUIEngine.INPUT.Simulation.RunTrafficModule = false;
             WUIEngine.INPUT.Simulation.RunFireModule = false;
@@ -37,7 +37,7 @@ namespace WUIPlatform.Pedestrian
             }
 
             //P3, need more curves
-            WUInityInput.LoadInput("evac_verification");
+            WUIEngineInput.LoadInput("evac_verification");
             wuinityOptions = WUIEngine.INPUT;
             evacOptions = WUIEngine.INPUT.Evacuation;
 

@@ -184,7 +184,7 @@ namespace WUIPlatform.WUInity.UI
                 LegendGUI();                
             }
 
-            if (plotHasArrived)  
+            if (WUIEngine.SIM.State == Simulation.SimulationState.Finished)  
             {
                 if(plotFig == null)
                 {
@@ -232,26 +232,16 @@ namespace WUIPlatform.WUInity.UI
             GUI.DragWindow(dragWindowRect);
         }
 
-        byte[] plotByteData;
         Texture2D plotFig;
-        bool plotHasArrived;
-        public void SetArrivalPlotBytes(byte[] byteData)
-        {
-            plotByteData = byteData;            
-            displayArrivalPlot = true;
-            plotHasArrived = true;            
-        }
-
         private void CreateArrivalTexture()
         {
             plotFig = new Texture2D(2, 2);
-            ImageConversion.LoadImage(plotFig, plotByteData);
+            ImageConversion.LoadImage(plotFig, WUIEngine.SIM.GetArrivalPlotBytes());
         }
 
         void ResetOutputGUI()
         {
             displayArrivalPlot = false;
-            plotHasArrived = false;
         }
 
         void LegendGUI()

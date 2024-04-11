@@ -56,7 +56,7 @@ namespace WUIPlatform.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Vector2d unityPos = Conversions.GeoToWorldPosition(coordinate.Latitude, coordinate.Longitude, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                Vector2d unityPos = GeoConversions.GeoToWorldPosition(coordinate.Latitude, coordinate.Longitude, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
                 if (i > 0)
                 {
                     distance += Vector2.Distance(new Vector2((float)unityPos.x, (float)unityPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));

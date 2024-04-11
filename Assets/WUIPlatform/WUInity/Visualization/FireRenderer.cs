@@ -92,13 +92,11 @@ namespace WUIPlatform.WUInity.Visualization
 
         void CreateSootBuffer()
         {
-            //sootCellCountX = WUIEngine.SIM.GetSmokeDispersion().GetCellsX();
-            //sootCellCountY = WUIEngine.SIM.GetSmokeDispersion().GetCellsY();
             if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
             {
                 sootCellCountX = WUIEngine.SIM.SmokeModule.GetCellsX();
                 sootCellCountY = WUIEngine.SIM.SmokeModule.GetCellsY();
-                //sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
+                sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);
                 sootMaterial.SetFloat("_LowerCutOff", 0.0f);
@@ -183,11 +181,8 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    ComputeBuffer buffer = ((AdvectDiffuseModel)WUIEngine.SIM.SmokeModule).GetSootBuffer();
-                    if (buffer != null)
-                    {
-                        sootMaterial.SetBuffer("_Data", buffer);
-                    }                    
+                    sootBuffer.SetData(WUIEngine.SIM.SmokeModule.GetGroundSoot());
+                    sootMaterial.SetBuffer("_Data", sootBuffer);            
                 }
                 else
                 {

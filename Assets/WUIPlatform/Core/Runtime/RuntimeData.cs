@@ -55,6 +55,7 @@ namespace WUIPlatform.Runtime
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Mapbox token not valid.");
                 return false;
             }
+            
             WUIEngine.LOG(WUIEngine.LogType.Log, "Starting to load Mapbox map.");
             WUInity.WUInityEngine.MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y), WUIEngine.INPUT.Map.zoomLevel);
             WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");

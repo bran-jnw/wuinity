@@ -38,7 +38,7 @@ namespace WUIPlatform.Runtime
             if(success && updateInputFile)
             {
                 WUIEngine.INPUT.Population.localGPWFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -51,7 +51,7 @@ namespace WUIPlatform.Runtime
             if(success && updateInputFile)
             {
                 WUIEngine.INPUT.Population.gpwDataFolder = path;
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;

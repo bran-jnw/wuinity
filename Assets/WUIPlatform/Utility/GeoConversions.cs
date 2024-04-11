@@ -6,7 +6,7 @@ namespace WUIPlatform
     /// <summary>
     /// A set of Geo and Terrain Conversion utils.
     /// </summary>
-    public static class Conversions
+    public static class GeoConversions
     {
         private const int TileSize = 256;
         /// <summary>according to https://wiki.openstreetmap.org/wiki/Zoom_levels</summary>

@@ -287,6 +287,11 @@ namespace WUIPlatform.Smoke
         {
             return false;
         }
+
+        public override float[] GetGroundSoot()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

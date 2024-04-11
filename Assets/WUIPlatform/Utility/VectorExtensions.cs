@@ -105,7 +105,7 @@ namespace WUIPlatform
         /// <param name="scale">Scale.</param>
         public static Vector3 AsUnityPosition(this Vector2 latLon, Vector2d refPoint, float scale = 1)
         {
-            return Conversions.GeoToWorldPosition(latLon.X, latLon.Y, refPoint, scale).ToVector3xz();
+            return GeoConversions.GeoToWorldPosition(latLon.X, latLon.Y, refPoint, scale).ToVector3xz();
         }
 
         /*/// <summary>
@@ -132,7 +132,7 @@ namespace WUIPlatform
         public static Vector2d GetGeoPosition(this Vector3 position, Vector2d refPoint, float scale = 1)
         {
             var pos = refPoint + (position / scale).ToVector2d();
-            return Conversions.MetersToLatLon(pos);
+            return GeoConversions.MetersToLatLon(pos);
         }
 
         public static Vector2d GetGeoPosition(this Vector2 position, Vector2d refPoint, float scale = 1)

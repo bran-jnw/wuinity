@@ -302,7 +302,7 @@ namespace WUIPlatform.Pedestrian
 
         public void SaveToFile(int runNumber)
         {
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
             string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }

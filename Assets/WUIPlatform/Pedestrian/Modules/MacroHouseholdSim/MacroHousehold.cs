@@ -55,7 +55,7 @@ namespace WUIPlatform.Pedestrian
             }
 
             reachedCar = false;
-            walkingDistance = (float)Vector2d.Distance(startPos, humanRaster.closestNodeUnitySpace) * eO.walkingDistanceModifier;
+            walkingDistance = (float)Vector2d.Distance(startPos, humanRaster.closestNodeSimulationSpace) * eO.walkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;
             this.responseTime = responseTime;
             if (responseTime == float.MaxValue)
@@ -70,7 +70,7 @@ namespace WUIPlatform.Pedestrian
 
             //for tracking progress visually
             startPosition = new Vector2((float)startPos.x, (float)startPos.y);
-            goalPosition = new Vector2((float)humanRaster.closestNodeUnitySpace.x, (float)humanRaster.closestNodeUnitySpace.y);
+            goalPosition = new Vector2((float)humanRaster.closestNodeSimulationSpace.x, (float)humanRaster.closestNodeSimulationSpace.y);
         }
 
         public Vector4 GetPositionAndState(float time)

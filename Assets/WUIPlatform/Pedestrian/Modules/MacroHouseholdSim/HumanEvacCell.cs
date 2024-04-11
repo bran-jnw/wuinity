@@ -13,7 +13,7 @@ namespace WUIPlatform.Pedestrian
         public RouteCollection routeCollection;
         public Vector2d cellWorldSize;
         //public double cellDensity; //persons / km2
-        public Vector2d closestNodeUnitySpace;
+        public Vector2d closestNodeSimulationSpace;
         public bool cellIsEvacuated;
         int cellIndex;
 
@@ -47,8 +47,7 @@ namespace WUIPlatform.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            Vector2d v = Conversions.GeoToWorldPosition(routeCollection.GetSelectedRoute().route.Shape[0].Latitude, routeCollection.GetSelectedRoute().route.Shape[0].Longitude, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
-            closestNodeUnitySpace = new Vector2d(v.x, v.y);
+            closestNodeSimulationSpace = GeoConversions.GeoToWorldPosition(routeCollection.GetSelectedRoute().route.Shape[0].Latitude, routeCollection.GetSelectedRoute().route.Shape[0].Longitude, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
                 int evacGroupIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];

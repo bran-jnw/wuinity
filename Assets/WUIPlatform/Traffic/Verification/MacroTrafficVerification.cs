@@ -9,9 +9,9 @@ namespace WUIPlatform.Traffic
     {
         public static void RunTrafficVerificationTests()
         {
-            WUInityInput.LoadInput("traffic_verification");
+            WUIEngineInput.LoadInput("traffic_verification");
             TrafficInput trafficOptions = WUIEngine.INPUT.Traffic;
-            WUInityInput wuinityOptions = WUIEngine.INPUT;
+            WUIEngineInput wuinityOptions = WUIEngine.INPUT;
 
             //Custom road types index start at 20 and goes to 24, residential is 11, primary is 4
             //N-E road is custom 0, S-E is custom 1
@@ -348,7 +348,7 @@ namespace WUIPlatform.Traffic
         static void RunDrivingInSmokeVerification()
         {
             TrafficInput trafficOptions = WUIEngine.INPUT.Traffic;
-            WUInityInput wuinityOptions = WUIEngine.INPUT;
+            WUIEngineInput wuinityOptions = WUIEngine.INPUT;
 
             EvacuationGoal node4 = new EvacuationGoal("Node 4", new Vector2d(0.0, 0.0), WUIEngineColor.white);
             EvacuationGoal node5 = new EvacuationGoal("Node 5", new Vector2d(0.0, 0.0090009), WUIEngineColor.white);
@@ -413,7 +413,7 @@ namespace WUIPlatform.Traffic
         static void RunTrafficVerificationSimulation(SimpleTrafficInjection[] trafficInjections, TrafficEvent[] events = null, BlockGoalEvent[] blockGoalEvents = null)
         {
             TrafficInput trafficOptions = WUIEngine.INPUT.Traffic;
-            WUInityInput wuinityOptions = WUIEngine.INPUT;
+            WUIEngineInput wuinityOptions = WUIEngine.INPUT;
 
             //WUIEngine.SIM_DATA.LoadRouterDatabase();
 

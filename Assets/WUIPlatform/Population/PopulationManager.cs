@@ -98,7 +98,7 @@
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public int GetPopulationUnitySpace(double x, double y)
+        public int GetPopulationSimulationSpace(double x, double y)
         {
             int xInt = (int)((x / WUIEngine.INPUT.Simulation.Size.x) * populationData.cells.x);
             int yInt = (int)((y / WUIEngine.INPUT.Simulation.Size.y) * populationData.cells.y);

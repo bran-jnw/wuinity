@@ -94,7 +94,7 @@ namespace WUIPlatform.Traffic
                 RouteData r = routeCreator.CalcTrafficRoute(startPos);
                 if (r == null)
                 {
-                    WUIEngine.SIM.StopSim("STOP! Null re-route returned to car, should not happen.");
+                    WUIEngine.SIM.Stop("Null re-route returned to car, should not happen.", true);
                 }
                 //special case where start is almost same as end
                 else if (r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
@@ -429,7 +429,7 @@ namespace WUIPlatform.Traffic
 
         public override void SaveToFile(int runNumber)
         {
-            WUInityInput wuiIn = WUIEngine.INPUT;
+            WUIEngineInput wuiIn = WUIEngine.INPUT;
             string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.SimulationID + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }

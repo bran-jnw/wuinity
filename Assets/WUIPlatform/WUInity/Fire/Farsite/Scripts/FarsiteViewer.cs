@@ -89,7 +89,7 @@ namespace WUIPlatform.Farsite
             print("X: " + x + ", Y:" + y);
             print(y / -x);*/
 
-            Vector2d v = global::WUIPlatform.Conversions.LatLonToMeters(latLong);
+            Vector2d v = global::WUIPlatform.GeoConversions.LatLonToMeters(latLong);
             //print("X: " + v.x + ", Y:" + v.y);
         }
 

@@ -87,11 +87,11 @@ namespace WUIPlatform.Traffic
             for (int i = 0; i < startPoints.Length; i++)
             {
                 //check that the cell has actual people, else no need for calculating routes
-                int populationInCell = WUIEngine.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].y);
+                int populationInCell = WUIEngine.POPULATION.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
-                    Vector2d m = new Vector2d(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator.x, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator.y); 
-                    Vector2d start = startPoints[i].GetGeoPosition(m, 1.0f);
+                    //Vector2d m = new Vector2d(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator.x, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator.y); 
+                    Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
 
                     //check if valid start was found
                     RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(start.x, start.y), routerProfile, cellSize);
@@ -154,7 +154,7 @@ namespace WUIPlatform.Traffic
             }
             if(cellsWithGoalsCount == 0)
             {
-                WUIEngine.SIM.StopSim("ERROR: Not a single route was found, make sure OSM network is valid.");
+                WUIEngine.SIM.Stop("ERROR: Not a single route was found, make sure OSM network is valid.", true);
             }
             return cellRoutes;
         }
@@ -336,7 +336,7 @@ namespace WUIPlatform.Traffic
             //no need in calculating route when start is not resolved
             if (startRouterPoint == null)
             {
-                WUIEngine.SIM.StopSim("WARNING! Car could not find a valid start position, abort!");
+                WUIEngine.SIM.Stop("WARNING! Car could not find a valid start position, abort!", true);
                 return null;
             }
 
@@ -379,7 +379,7 @@ namespace WUIPlatform.Traffic
             if (!foundOneValidRoute)
             {
                 //TODO: fix what happens when cars get stuck
-                WUIEngine.SIM.StopSim("STOPPING! No routes found for car, will get stuck.");
+                WUIEngine.SIM.Stop("No routes found for car, will get stuck.", true);
                 return null;
             }
 

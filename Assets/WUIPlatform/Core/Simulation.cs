@@ -93,6 +93,7 @@ namespace WUIPlatform
         int runNumber;
         private  void StartSimulations()
         {
+            _stoppedDueToError = false;
             runNumber = 0;
             int actualRuns = 0;
             float averageTotalEvacTime = 0.0f;
@@ -139,30 +140,33 @@ namespace WUIPlatform
                 System.GC.Collect();
             }            
 
-            //save functional analysis
-            float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
-            SaveAverageCurve(averageCurve);    
+            if(!_stoppedDueToError)
+            {
+                //save functional analysis
+                float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
+                SaveAverageCurve(averageCurve);
 
-            if (convergedInSequence >= 10)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
-            }
-            else
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
-            }
-            WUIEngine.OUTPUT.totalEvacTime = CurrentTime;
-            _haveResults = true;            
+                if (convergedInSequence >= 10)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                }
+                WUIEngine.OUTPUT.totalEvacTime = CurrentTime;
+                _haveResults = true;
 
-            //plot results
-            double[] xData = new double[averageCurve.Length];
-            double[] yData = new double[averageCurve.Length];
-            for (int i = 0; i < averageCurve.Length; i++)
-            {
-                xData[i] = averageCurve[i] / 3600.0f;
-                yData[i] = i + 1;
-            }
-            PlotResults(xData, yData);
+                //plot results
+                double[] xData = new double[averageCurve.Length];
+                double[] yData = new double[averageCurve.Length];
+                for (int i = 0; i < averageCurve.Length; i++)
+                {
+                    xData[i] = averageCurve[i] / 3600.0f;
+                    yData[i] = i + 1;
+                }
+                CreatePlotData(xData, yData);
+            }            
 
             _state = SimulationState.Finished;
             WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation/s done.");
@@ -377,8 +381,12 @@ namespace WUIPlatform
                 {
                     Step();
                 }
+            }  
+            
+            if(!_stoppedDueToError)
+            {
+                SaveOutput(runNumber);
             }            
-            SaveOutput(runNumber);
         }
 
         bool _runRealtime = false;
@@ -456,7 +464,7 @@ namespace WUIPlatform
 
             if(endTimeReached)
             {
-                StopSim("Simulation has reached specified end time.");
+                Stop("Simulation has reached specified end time.", false);
             }
 
             if (!_stopSim && WUIEngine.INPUT.Simulation.StopWhenEvacuated)
@@ -474,7 +482,7 @@ namespace WUIPlatform
 
                 if (pedestrianDone && trafficDone)
                 {
-                    StopSim("Both pedestrian and traffic simulations are done, stopping as per user settings.");
+                    Stop("Both pedestrian and traffic simulations are done, stopping as per user settings.", false);
                 }
             }
         }
@@ -491,7 +499,7 @@ namespace WUIPlatform
 
         private void UpdateEvents()
         {
-            WUInityInput input = WUIEngine.INPUT;
+            WUIEngineInput input = WUIEngine.INPUT;
 
             if (input.Simulation.RunTrafficModule)
             {
@@ -581,11 +589,13 @@ namespace WUIPlatform
             }
         }
 
-        public void StopSim(string stopMessage)
+        bool _stoppedDueToError = false;
+        public void Stop(string stopMessage, bool stoppedDueToError)
         {
             if(!_stopSim)
             {
                 _stopSim = true;
+                _stoppedDueToError |= stoppedDueToError;
                 WUIEngine.LOG(WUIEngine.LogType.Log, stopMessage);
             }            
         }
@@ -621,7 +631,7 @@ namespace WUIPlatform
             }
             if(allBlocked)
             {
-                StopSim("No evacuation goals available, stopping simulation.");
+                Stop("No evacuation goals available, stopping simulation.", false);
                 return;
             }
 
@@ -658,7 +668,7 @@ namespace WUIPlatform
 
         void SaveOutput(int runNumber)
         {
-            WUInityInput input = WUIEngine.INPUT;
+            WUIEngineInput input = WUIEngine.INPUT;
             if (input.Simulation.RunTrafficModule)
             {
                 WUIEngine.LOG(WUIEngine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
@@ -673,10 +683,11 @@ namespace WUIPlatform
                 }                    
             }
 
-            WUInityOutput.SaveOutput(WUIEngine.INPUT.Simulation.SimulationID + "_" + runNumber);            
+            WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.SimulationID + "_" + runNumber);            
         }
 
-        void PlotResults(double[] xData, double[] yData)
+        byte[] _plotBytes;
+        void CreatePlotData(double[] xData, double[] yData)
         {
             if (xData.Length > 0 && yData.Length > 0)
             {
@@ -687,11 +698,12 @@ namespace WUIPlatform
                 timeTraffic.XLabel("Time [h]");
                 //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
                 byte[] byteData = timeTraffic.GetImageBytes();
-
-#if USING_UNITY
-                WUInityEngine.GUI.SetArrivalPlotBytes(byteData);
-#endif
             }
+        }
+
+        public byte[] GetArrivalPlotBytes()
+        {
+            return _plotBytes;
         }
 
         private void SaveAverageCurve(float[] data)
@@ -703,7 +715,7 @@ namespace WUIPlatform
             {
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
-            WUInityInput wuiIn = WUIEngine.INPUT;
+            WUIEngineInput wuiIn = WUIEngine.INPUT;
             string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.SimulationID + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }

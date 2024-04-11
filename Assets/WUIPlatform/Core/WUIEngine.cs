@@ -10,8 +10,8 @@ namespace WUIPlatform
 {    
     public class WUIEngine
     {        
-        private WUInityInput _input;
-        private WUInityOutput _output;
+        private WUIEngineInput _input;
+        private WUIEngineOutput _output;
         private Simulation _sim;
         private PopulationManager _populationManager;
         private string _workingFilePath;
@@ -25,7 +25,7 @@ namespace WUIPlatform
             public Vector2d size;
             public float routeCellSize;
 
-            public ValidCriticalData(WUInityInput input)
+            public ValidCriticalData(WUIEngineInput input)
             {
                 lowerLeftLatLong = input.Simulation.LowerLeftLatLong;
                 size = input.Simulation.Size;
@@ -83,7 +83,7 @@ namespace WUIPlatform
             }
         }
 
-        public static WUInityInput INPUT
+        public static WUIEngineInput INPUT
         {
             get
             {
@@ -95,13 +95,13 @@ namespace WUIPlatform
             }
         }
 
-        public static WUInityOutput OUTPUT
+        public static WUIEngineOutput OUTPUT
         {
             get
             {
                 if (ENGINE._output == null)
                 {
-                    ENGINE._output = new WUInityOutput();
+                    ENGINE._output = new WUIEngineOutput();
                 }
                 return ENGINE._output;
             }
@@ -163,13 +163,13 @@ namespace WUIPlatform
         /// If data is valid it is also loaded.
         /// </summary>
         /// <param name="input"></param>
-        public void SetNewInputData(IO.WUInityInput input)
+        public void SetNewInputData(IO.WUIEngineInput input)
         {
             DATA_STATUS.Reset();
             DATA_STATUS.HaveInput = true;
             if (input == null)
             {
-                _input = new IO.WUInityInput();
+                _input = new IO.WUIEngineInput();
             }
             else
             {
@@ -253,7 +253,7 @@ namespace WUIPlatform
             }
         }
         
-        public enum LogType { Log, Warning, Error, Event };
+        public enum LogType { Log, Warning, Error, Event, Debug };
         private List<string> simLog = new List<string>();
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
@@ -278,6 +278,10 @@ namespace WUIPlatform
             {
                 message = "EVENT: " + message;
             }
+            else if(logType == LogType.Debug)
+            {
+                message = "!!!DEBUG!!!: " + message;
+            }
             else
             {
                 message = "LOG: " + message;
@@ -294,7 +298,7 @@ namespace WUIPlatform
 
             if (logType == LogType.Error)
             {
-                SIM.StopSim("Simulation can't run, please check log.");
+                SIM.Stop("Simulation can't run, please check log.", true);
             }
         }
 

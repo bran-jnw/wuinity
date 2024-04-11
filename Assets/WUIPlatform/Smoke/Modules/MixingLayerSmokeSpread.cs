@@ -61,6 +61,8 @@ namespace WUIPlatform.Smoke
 
             //compile kernel
             _advectKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(Advect);
+
+            sootOutput = new float[bufferSize];
         }
 
         ~MixingLayerSmokeSpread()
@@ -78,13 +80,14 @@ namespace WUIPlatform.Smoke
             _context.Dispose();
         }
 
+        float[] sootOutput;
         public override void Step(float currentTime, float deltaTime)
         {
             //if fire has been updated we need to update the injection buffer
             bool fireHasUpdated = true;
             if (fireHasUpdated)
             {
-                //_injection = _accelerator (Engine.SIM.FireModule.GetSootProduction());
+                _injection.CopyFromCPU(WUIEngine.SIM.FireModule.GetSootProduction());
             }
 
             //update wind
@@ -99,7 +102,9 @@ namespace WUIPlatform.Smoke
             _accelerator.Synchronize();
 
             //swap buffers so that they are correct next step
-            Swap(_densityRead, _densityWrite);            
+            Swap(_densityRead, _densityWrite);
+
+            _densityRead.CopyToCPU(sootOutput);
         }
 
         public void Swap(MemoryBuffer1D<float, Stride1D.Dense> read, MemoryBuffer1D<float, Stride1D.Dense> write)
@@ -189,6 +194,11 @@ namespace WUIPlatform.Smoke
         public override int GetCellsY()
         {
             return _globalData.cellsY;
+        }
+
+        public override float[] GetGroundSoot()
+        {
+            return sootOutput;
         }
     }
 }

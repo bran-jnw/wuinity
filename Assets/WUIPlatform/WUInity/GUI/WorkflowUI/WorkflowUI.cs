@@ -626,7 +626,7 @@ namespace WUIPlatform.WUInity.UI
                     }
 
                     WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.RemoveAt(dfDfEvacutionDestination.index);
-                    WUInityInput.SaveInput();
+                    WUIEngineInput.SaveInput();
 
                     dfDfEvacutionDestination.choices.RemoveAt(dfDfEvacutionDestination.index);
 
@@ -765,7 +765,7 @@ namespace WUIPlatform.WUInity.UI
                     newGoalList[WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1] = data[0];
                     WUIEngine.INPUT.Traffic.evacuationGoalFiles = newGoalList;
 
-                    WUInityInput.SaveInput();
+                    WUIEngineInput.SaveInput();
 
                     //Update dropdown 
                     UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
@@ -1065,7 +1065,7 @@ namespace WUIPlatform.WUInity.UI
 
                         WUIEngine.LOG(WUIEngine.LogType.Log, "Loaded evacuation group from " + path + " named " + data[0]);
 
-                        WUInityInput.SaveInput();
+                        WUIEngineInput.SaveInput();
 
                         //Update dropdown 
                         UnityEngine.UIElements.DropdownField dfEvacuationGroup = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
@@ -1147,7 +1147,7 @@ namespace WUIPlatform.WUInity.UI
 
                         WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded response curve from " + path + " named " + data[0]);
 
-                        WUInityInput.SaveInput();
+                        WUIEngineInput.SaveInput();
 
                         //Update dropdown 
                         UnityEngine.UIElements.DropdownField dfResponseCurve = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
@@ -2195,7 +2195,7 @@ namespace WUIPlatform.WUInity.UI
         {
             FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
 
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
             string initialPath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "Project");
 
             if (!File.Exists(initialPath))
@@ -2222,7 +2222,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnUpdateMap_clicked()
         {
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
 
             string[] floatNumbers= _mapLLLatLong.Split(',');
 
@@ -2298,7 +2298,7 @@ namespace WUIPlatform.WUInity.UI
         void UpdateMenu()
         {
             var root = Document.rootVisualElement;
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
             TrafficInput tO = WUIEngine.INPUT.Traffic;
 
@@ -2900,7 +2900,7 @@ namespace WUIPlatform.WUInity.UI
 
         void LoadInput(string[] paths)
         {
-            WUInityInput.LoadInput(paths[0]);
+            WUIEngineInput.LoadInput(paths[0]);
             newUIMenuDirty = true;
 
             LoadWorkflowUIStatus();
@@ -2915,14 +2915,14 @@ namespace WUIPlatform.WUInity.UI
             {
                 //OpenSaveInput(); --- port 4 lines of code below
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
-                WUInityInput wO = WUIEngine.INPUT;
+                WUIEngineInput wO = WUIEngine.INPUT;
                 string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
                 FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
             }
             else
             {
                 //ParseMainData(wO);    // Need to port code later
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             SaveWorkflowUIStatus();
@@ -2990,7 +2990,7 @@ namespace WUIPlatform.WUInity.UI
         {
 
             WUIEngine.WORKING_FILE = paths[0];
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
 
             if (creatingNewFile)
             {
@@ -3012,7 +3012,7 @@ namespace WUIPlatform.WUInity.UI
                 string json = JsonUtility.ToJson(WUIEngine.INPUT, true);
                 System.IO.File.WriteAllText(WUIEngine.WORKING_FILE, json);
 
-                WUInityInput.LoadInput(paths[0]); // The default constructors have problems. This is like an initialization process for WUInity.INSTANCE
+                WUIEngineInput.LoadInput(paths[0]); // The default constructors have problems. This is like an initialization process for WUInity.INSTANCE
 
                 //WUIEngine.Input.Population.populationFile = "";
                 //WUIEngine.Input.Population.localGPWFile = "";
@@ -3038,7 +3038,7 @@ namespace WUIPlatform.WUInity.UI
             else
             {
                 //ParseMainData(wO);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             creatingNewFile = false;
@@ -3095,7 +3095,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 ResetOutputDisplayOptions();    // Reset display options:        
 
-                WUInityInput wO = WUIEngine.INPUT;
+                WUIEngineInput wO = WUIEngine.INPUT;
 
                 WUInityEngine.GUI.ParseMainData(wO);
                 if (!WUIEngine.DATA_STATUS.CanRunSimulation())
@@ -3466,7 +3466,7 @@ namespace WUIPlatform.WUInity.UI
                 filePath = "POP file: "+ Path.GetFileName(paths[0]) + " is loaded successfully.";
                 
                 WUIEngine.INPUT.Population.populationFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUInityInput.SaveInput();                                               // This is a temp fix.
+                WUIEngineInput.SaveInput();                                               // This is a temp fix.
             }
             else
             {
@@ -3526,7 +3526,7 @@ namespace WUIPlatform.WUInity.UI
                 filePath = "GPW file: " + Path.GetFileName(paths[0]) + " is loaded and a .pop is created.";
 
                 WUIEngine.INPUT.Population.populationFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUInityInput.SaveInput();                                               // This is a temp fix.
+                WUIEngineInput.SaveInput();                                               // This is a temp fix.
             }
             else
             {

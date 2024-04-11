@@ -212,14 +212,22 @@ namespace WUIPlatform.WUInity
                 string path = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "example\\example.wui");
                 if (File.Exists(path))
                 {
-                    WUInityInput.LoadInput(path);
+                    WUIEngineInput.LoadInput(path);
                 }
                 else
                 {
                     print("Could not find input file for auto load in path " + path);
                 }
             }
-        }        
+        }
+
+        private void OnApplicationQuit()
+        {
+            if(WUIEngine.SIM.State == Simulation.SimulationState.Running)
+            {
+                WUIEngine.SIM.Stop("Unity is closing, ending simulation.", true);
+            }
+        }
 
         /*public void DrawRoad(RouteCollection routeCollection, int index)
         {
@@ -236,7 +244,7 @@ namespace WUIPlatform.WUInity
             }
 
             gO.transform.parent = _directionsGO.transform;
-        }   */  
+        }   */
 
         /*GameObject DrawRoute(RouteCollection rC, int index)
         {
@@ -370,7 +378,7 @@ namespace WUIPlatform.WUInity
             string[] inputFiles = Directory.GetFiles(folder, "*.wui");
             for (int i = 0; i < inputFiles.Length; i++)
             {
-                WUInityInput.LoadInput(inputFiles[i]);
+                WUIEngineInput.LoadInput(inputFiles[i]);
                 WUIEngine.INPUT.Simulation.SimulationID = Path.GetFileNameWithoutExtension(inputFiles[i]);
                 WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations = true;
                 WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns = 100;
@@ -381,7 +389,7 @@ namespace WUIPlatform.WUInity
         public void StopSimulation()
         {
             HideAllRuntimeVisuals();
-            WUIEngine.SIM.StopSim("STOP: Stopped simulation as requested by user.");
+            WUIEngine.SIM.Stop("STOP: Stopped simulation as requested by user.", true);
         }
 
         bool updateOSMBorder = false;
@@ -623,7 +631,7 @@ namespace WUIPlatform.WUInity
             {
                 EvacuationGoal eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
-                Vector2d pos = Conversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
 
                 float scale = 0.02f * (float)WUIEngine.INPUT.Simulation.Size.y;
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);

@@ -54,7 +54,7 @@ namespace WUIPlatform.Population
             string[] data = new string[13];
 
             //save data stamp to make sure data fits input
-            WUInityInput input = WUIEngine.INPUT;
+            WUIEngineInput input = WUIEngine.INPUT;
             string dataStamp = input.Simulation.LowerLeftLatLong.x.ToString() + " " + input.Simulation.LowerLeftLatLong.y.ToString()
                     + " " + input.Simulation.Size.y.ToString() + " " + input.Simulation.Size.y.ToString();
             data[0] = dataStamp;
@@ -144,7 +144,7 @@ namespace WUIPlatform.Population
                 double.TryParse(dummy[2], out xSize);
                 double.TryParse(dummy[3], out ySize);
 
-                WUInityInput input = WUIEngine.INPUT;
+                WUIEngineInput input = WUIEngine.INPUT;
 
                 // There is a problem in using "==" directly to compare two double values. Use AreSame() instead to avoid issues caused by rounding error
                 //success =  lati == input.Simulation.LowerLeftLatLong.x && input.Simulation.LowerLeftLatLong.y == longi && xSize == input.Simulation.Size.x && ySize == input.Simulation.Size.y;
@@ -372,7 +372,7 @@ namespace WUIPlatform.Population
             return dens;
         }
 
-        public double GetDensityUnitySpaceBilinear(Vector2d pos)
+        public double GetDensitySimulationSpaceBilinear(Vector2d pos)
         {
             Vector2d positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
 

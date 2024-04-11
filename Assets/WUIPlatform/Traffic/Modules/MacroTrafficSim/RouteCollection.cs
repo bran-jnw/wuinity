@@ -35,7 +35,7 @@ namespace WUIPlatform
         {
             if(selectedRouteIndex == -1)
             {
-                WUIEngine.SIM.StopSim("No route selected (likely due to all routes being blocked), people will get stuck.");
+                WUIEngine.SIM.Stop("No route selected (likely due to all routes being blocked), people will get stuck.", true);
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace WUIPlatform
 
             if (selectedRouteIndex == -1)
             {
-                WUIEngine.SIM.StopSim("STOP: Route selection failed, no routes left that are not blocked");
+                WUIEngine.SIM.Stop("STOP: Route selection failed, no routes left that are not blocked", true);
             }
         }
 
@@ -114,7 +114,7 @@ namespace WUIPlatform
 
             if(selectedRouteIndex == -1)
             {
-                WUIEngine.SIM.StopSim("No routes left to take");
+                WUIEngine.SIM.Stop("No routes left to take", true);
             }
         }
 

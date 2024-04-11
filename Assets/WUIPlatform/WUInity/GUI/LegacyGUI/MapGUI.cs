@@ -10,7 +10,7 @@ namespace WUIPlatform.WUInity.UI
 
         void MapMenu()
         {
-            WUInityInput wO = WUIEngine.INPUT;
+            WUIEngineInput wO = WUIEngine.INPUT;
 
             //whenever we load a file we need to set the new data for the GUI
             if (mapMenuDirty)
@@ -54,7 +54,7 @@ namespace WUIPlatform.WUInity.UI
             }
         }
 
-        void CleanMapMenu(WUInityInput wO)
+        void CleanMapMenu(WUIEngineInput wO)
         {
             mapMenuDirty = false;
             Lat = wO.Simulation.LowerLeftLatLong.x.ToString();
@@ -64,7 +64,7 @@ namespace WUIPlatform.WUInity.UI
             zoom = wO.Map.zoomLevel.ToString();
         }
 
-        void ParseMapData(WUInityInput wO)
+        void ParseMapData(WUIEngineInput wO)
         {
             if (mapMenuDirty)
             {

@@ -4,7 +4,7 @@ using System.Numerics;
 namespace WUIPlatform.IO
 {
     [System.Serializable]
-    public class WUInityInput
+    public class WUIEngineInput
     {    
         public SimulationInput Simulation;
         public MapInput Map;
@@ -16,7 +16,7 @@ namespace WUIPlatform.IO
         public FireInput Fire;
         public SmokeInput Smoke;
 
-        public WUInityInput()
+        public WUIEngineInput()
         {
             Simulation = new SimulationInput();
             Map = new MapInput();
@@ -44,7 +44,7 @@ namespace WUIPlatform.IO
             string input = System.IO.File.ReadAllText(path);
             if (input != null)
             {                
-                WUInityInput wui = UnityEngine.JsonUtility.FromJson<WUInityInput>(input);
+                WUIEngineInput wui = UnityEngine.JsonUtility.FromJson<WUIEngineInput>(input);
                 WUIEngine.WORKING_FILE = path;
                 WUIEngine.LOG(WUIEngine.LogType.Log, " Reading input file " + WUIEngine.WORKING_FILE + ".");
                 WUIEngine.ENGINE.SetNewInputData(wui);

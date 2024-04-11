@@ -10,7 +10,7 @@ namespace WUIPlatform.Runtime
         {
             get
             {
-                WUInityInput input = WUIEngine.INPUT;
+                WUIEngineInput input = WUIEngine.INPUT;
                 _cellCount.x = Mathf.CeilToInt((float)input.Simulation.Size.x / input.Evacuation.RouteCellSize);
                 _cellCount.y = Mathf.CeilToInt((float)input.Simulation.Size.y / input.Evacuation.RouteCellSize);
                 return _cellCount;
@@ -211,7 +211,7 @@ namespace WUIPlatform.Runtime
 
         public EvacGroup GetEvacGroup(int cellIndex)
         {
-            WUInityInput input = WUIEngine.INPUT;
+            WUIEngineInput input = WUIEngine.INPUT;
             if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
             {
                 return null;
@@ -224,7 +224,7 @@ namespace WUIPlatform.Runtime
 
         public EvacGroup GetEvacGroup(int x, int y)
         {
-            WUInityInput input = WUIEngine.INPUT;
+            WUIEngineInput input = WUIEngine.INPUT;
             if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
             {
                 return null;

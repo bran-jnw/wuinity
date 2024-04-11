@@ -64,7 +64,7 @@ namespace WUIPlatform.Population
                 for (int x = 0; x < cells.x; ++x)
                 {
                     double xPos = (x + 0.5) * cellSize;
-                    double density = localGPW.GetDensityUnitySpaceBilinear(new Vector2d(xPos, yPos));
+                    double density = localGPW.GetDensitySimulationSpaceBilinear(new Vector2d(xPos, yPos));
                     int pop = 0;
                     //if data has negative values (NO_DATA) it should be zero
                     //else force at least one person if there is some density
@@ -171,7 +171,7 @@ namespace WUIPlatform.Population
                 int loopCount = desiredPopulation - totalPopulation;
                 for (int i = 0; i < loopCount; i++)
                 {
-                    int randomIndex = UnityEngine.Random.Range(0, activeCellIndices.Count);
+                    int randomIndex = Random.Range(0, activeCellIndices.Count);
                     ++cellPopulation[activeCellIndices[randomIndex]];
                     ++totalPopulation;
                 }
@@ -269,7 +269,7 @@ namespace WUIPlatform.Population
             {
                 if(updateInput)
                 {
-                    WUInityInput.SaveInput();
+                    WUIEngineInput.SaveInput();
                 }
                 manager.CreateTexture();
                 isLoaded = true;

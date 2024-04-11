@@ -38,7 +38,7 @@ namespace WUIPlatform.Runtime
             if(success && updateInputFile)
             {
                 WUIEngine.INPUT.Traffic.roadTypesFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -54,7 +54,7 @@ namespace WUIPlatform.Runtime
             if(success && updateInputFile)
             {
                 WUIEngine.INPUT.Traffic.opticalDensityFile = Path.GetFileName(path); ;
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;

@@ -70,7 +70,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Routing.routerDbFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -138,7 +138,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Routing.routeCollectionFile = path;
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -148,7 +148,7 @@ namespace WUIPlatform.Runtime
         {
             if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections != null)
             {
-                Vector2d p = Conversions.GeoToWorldPosition(pos.x, pos.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                Vector2d p = GeoConversions.GeoToWorldPosition(pos.x, pos.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
                 int x = (int)(p.x / WUIEngine.INPUT.Evacuation.RouteCellSize);
                 int y = (int)(p.y / WUIEngine.INPUT.Evacuation.RouteCellSize);
                 int index = x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;

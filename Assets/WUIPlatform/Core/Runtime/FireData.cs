@@ -123,7 +123,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.lcpFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -139,7 +139,7 @@ namespace WUIPlatform.Runtime
             if(success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.fuelModelsFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -152,7 +152,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.ignitionPointsFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -165,7 +165,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.initialFuelMoistureFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -178,7 +178,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.weatherFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -191,7 +191,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.windFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;
@@ -204,7 +204,7 @@ namespace WUIPlatform.Runtime
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.graphicalFireInputFile = Path.GetFileName(path);
-                WUInityInput.SaveInput();
+                WUIEngineInput.SaveInput();
             }
 
             return success;

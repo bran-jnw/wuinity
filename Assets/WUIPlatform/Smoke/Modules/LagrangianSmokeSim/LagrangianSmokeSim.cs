@@ -52,7 +52,12 @@ namespace WUIPlatform.Smoke
         public override bool IsSimulationDone()
         {
             throw new NotImplementedException();
-        }        
+        }
+
+        public override float[] GetGroundSoot()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
