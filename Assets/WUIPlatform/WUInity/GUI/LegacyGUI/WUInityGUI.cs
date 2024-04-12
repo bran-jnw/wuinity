@@ -90,10 +90,10 @@ namespace WUIPlatform.WUInity.UI
             swapGUI = new MenuButton(buttonHeight, "New GUI");
         }
 
-        string[] log;
+        string[] _log;
         private void Update()
         {
-            log = WUIEngine.GetLog();
+            _log = WUIEngine.GetLog();
         }
 
         void OnGUI()
@@ -225,11 +225,11 @@ namespace WUIPlatform.WUInity.UI
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
                  
-            if(log!= null)
+            if(_log!= null)
             {
-                for (int i = log.Length - 1; i >= 0; i--)
+                for (int i = _log.Length - 1; i >= 0; i--)
                 {
-                    GUILayout.Label(log[i]);
+                    GUILayout.Label(_log[i]);
                 }
             }
             

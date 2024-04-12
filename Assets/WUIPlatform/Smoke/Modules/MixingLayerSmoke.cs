@@ -6,6 +6,7 @@ using System;
 using System.Numerics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using ILGPU.Util;
 
 namespace WUIPlatform.Smoke
 {
@@ -19,7 +20,7 @@ namespace WUIPlatform.Smoke
         Context _context;
         Accelerator _accelerator;
         Action<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData> _advectKernel;
-        Action<Index1D, ArrayView<float>, ArrayView<float>, GlobalData> _diffuseKernel;
+        Action<Index1D, ArrayView<float>, ArrayView<float>, GlobalData, int> _diffuseKernel;
         int bufferSize;
         float[] _sootOutput;
 
@@ -30,9 +31,9 @@ namespace WUIPlatform.Smoke
 
         private struct GlobalData
         {
-            public float deltaTime, windX, windY;
+            public float deltaTime, windX, windY, windDirectionX, windDirectionY;
             public int cellsX, cellsY;
-            public float cellSizeX, cellSizeY, invertedCellVolume, cellHeight, invertedCellSizeX, invertedCellSizeY, invertedCellSizeXSq, invertedCellSizeYSq, cellArea, cellVolume;
+            public float cellSizeX, cellSizeY, cellSizeXSq, cellSizeYSq, invertedCellVolume, cellHeight, inverseCellSizeX, inverseCellSizeY, inverseCellSizeXSq, inverseCellSizeYSq, cellArea, cellVolume;
             public float eddyDiffusivity;
         }
         GlobalData _globalData;
@@ -41,11 +42,24 @@ namespace WUIPlatform.Smoke
         {
             //initiate device to run on
             _context = Context.CreateDefault();
+            int deviceIndex = -1;
             for (int i = 0; i < _context.Devices.Length; i++)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "ILGPU available accelerator: " + _context.Devices[i].Name);
+            {                
+                //WUIEngine.LOG(WUIEngine.LogType.Log, "ILGPU available accelerator: " + _context.Devices[i].Name);
+                if(_context.Devices[i].Name.Contains("NVIDIA"))
+                {
+                    deviceIndex = i;
+                    break;
+                }
             }
-            _accelerator = _context.GetPreferredDevice(false).CreateAccelerator(_context);
+            if(deviceIndex > -1)
+            {
+                _accelerator = _context.Devices[deviceIndex].CreateAccelerator(_context);
+            }
+            else
+            {
+                _accelerator = _context.GetPreferredDevice(false).CreateAccelerator(_context);
+            }           
             WUIEngine.LOG(WUIEngine.LogType.Log, "ILGPU is using accelerator: " + _accelerator.Device.Name);
 
             //set up all buffers and data containers
@@ -54,8 +68,12 @@ namespace WUIPlatform.Smoke
             _globalData.cellsY = WUIEngine.SIM.FireModule.GetCellCountY();
             _globalData.cellSizeX = WUIEngine.SIM.FireModule.GetCellSizeX();
             _globalData.cellSizeY = WUIEngine.SIM.FireModule.GetCellSizeY();
-            _globalData.invertedCellSizeX = 1f / _globalData.cellSizeX;
-            _globalData.invertedCellSizeY = 1f / _globalData.cellSizeY;
+            _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
+            _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
+            _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
+            _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
+            _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
+            _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
             _globalData.cellHeight = WUIEngine.INPUT.Smoke.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
@@ -77,7 +95,7 @@ namespace WUIPlatform.Smoke
 
             //compile advection kernel
             _advectKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(Advect);
-            _diffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, GlobalData>(Diffuse);
+            _diffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, GlobalData, int>(Diffuse);
             //we need this to send data to WUIEngine and evaluative visibility
             _sootOutput = new float[bufferSize];
         }
@@ -108,22 +126,22 @@ namespace WUIPlatform.Smoke
 
             //update wind
             Fire.WindData windData = WUIEngine.SIM.FireModule.GetCurrentWindData();
-            float windX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad) * windData.speed;
-            float windY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad) * windData.speed;
-            _globalData.windX = windX;
-            _globalData.windY = windY;
+            _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
+            _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
+            _globalData.windX = _globalData.windDirectionX * windData.speed;
+            _globalData.windY = _globalData.windDirectionY * windData.speed;
 
             https://www.ready.noaa.gov/READYpgclass.php
-            int stability = 0; //0-6 represents stability class A-G
+            int stability = 4; //0-6 represents stability class A-G
             _globalData.eddyDiffusivity = eddyDiffusivity[stability];            
 
             //run advection kernel
             _advectKernel(bufferSize, _density[READ].View, _density[WRITE].View, _injection.View, _globalData);            
             Swap(_density);
             //diffusion, implicit jacobian iterations
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < 20; j++)
             {
-                _diffuseKernel(bufferSize, _density[READ].View, _density[WRITE].View, _globalData);
+                _diffuseKernel(bufferSize, _density[READ].View, _density[WRITE].View, _globalData, 1);
                 Swap(_density);                
             }
             _accelerator.Synchronize();
@@ -158,14 +176,14 @@ namespace WUIPlatform.Smoke
             write[i] = newC + c_delta;
         }
 
-        static void Diffuse(Index1D i, ArrayView<float> read, ArrayView<float> write, GlobalData globalData)
+        static void Diffuse(Index1D i, ArrayView<float> read, ArrayView<float> write, GlobalData globalData, int anisotropic)
         {
             int x = i % globalData.cellsX;
             int y = i / globalData.cellsX;
 
             float C = read[i];
             //float L = 0, R = 0, D = 0, U = 0;
-            float L = C, R = C, D = C, U = C; //never diffuse to outside? else set to zero
+            float L = C, R = C, D = C, U = C; //never diffuse to outside? creates problem of pulling in soot from boundary
             if (x > 0)
             {
                 int idxL = x - 1 + y * globalData.cellsX;
@@ -187,17 +205,41 @@ namespace WUIPlatform.Smoke
                 U = read[idxU];
             }
 
-            //uniform diffusion
+            //isotropic diffusion
             float K = globalData.eddyDiffusivity;
             //dx^2 / v * dt
             float alpha = (globalData.cellSizeX * globalData.cellSizeY) / (K * globalData.deltaTime);
             float rBeta = 4.0f + alpha;
             write[i] = (C * alpha + L + R + D + U) / rBeta;
+
+            if (anisotropic > 0)
+            {
+                //implicit jacobi
+                //https://skill-lync.com/student-projects/solving-2d-heat-conduction-equation-using-various-iterative-solvers
+                Vector2 K_y = GetCrosswindDiffusionCoefficient(globalData, K);
+                float k1 = K_y.X * globalData.deltaTime * globalData.inverseCellSizeXSq;
+                float k2 = K_y.Y * globalData.deltaTime * globalData.inverseCellSizeYSq;
+                float term1 = 1f / (1f + 2f * k1 + 2f * k2);
+                float term2 = k1 * term1;
+                float term3 = k2 * term1;
+                float h = L + R;
+                float v = D + U;
+                write[i] = C * term1 + term2 * h + term3 * v;
+            }            
+        }
+
+        static Vector2 GetCrosswindDiffusionCoefficient(GlobalData globalData, float K)
+        {
+            //swap x and y since we want cross-wind, not along wind
+            Vector2 K_y = new Vector2(XMath.Abs(globalData.windDirectionY), XMath.Abs(globalData.windDirectionX)); //can't have negative values...
+            K_y = new Vector2(K_y.X * K + 0.001f, K_y.Y * K + 0.001f); // to avoid divison by zero
+
+            return K_y;
         }
 
         static Vector2 GetAdvectedIndex(Vector2 startIndex, GlobalData constantData)
         {
-            Vector2 step = constantData.deltaTime * new Vector2(constantData.windX * constantData.invertedCellSizeX, constantData.windY * constantData.invertedCellSizeY);
+            Vector2 step = constantData.deltaTime * new Vector2(constantData.windX * constantData.inverseCellSizeX, constantData.windY * constantData.inverseCellSizeY);
             startIndex -= step;
             return startIndex;
         }

@@ -439,6 +439,7 @@ namespace WUIPlatform
                 }
             }
 
+            //just some stuff for controlling executiuon mode and timing performance
             WUIEngine.ENGINE.StopWatch.Stop();
             if(_runRealtime)
             {
@@ -448,8 +449,8 @@ namespace WUIPlatform
                     Thread.Sleep(sleepTime);
                 }                
             }
-            float t =0.05f * WUIEngine.ENGINE.StopWatch.ElapsedMilliseconds + 0.95f * _stepExecutionTime;
-            _stepExecutionTime = t;
+            float t = WUIEngine.ENGINE.StopWatch.ElapsedMilliseconds;
+            _stepExecutionTime = 0.01f * t + 0.99f * _stepExecutionTime;
             WUIEngine.ENGINE.StopWatch.Reset();
         }
 

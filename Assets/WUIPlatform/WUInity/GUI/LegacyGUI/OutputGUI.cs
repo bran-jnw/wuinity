@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 
 namespace WUIPlatform.WUInity.UI
@@ -178,7 +179,7 @@ namespace WUIPlatform.WUInity.UI
                 }
                 ++buttonIndex;
 
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Step execution time [ms]: " + WUIEngine.SIM.StepExecutionTime);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Step execution time [ms]: " + WUIEngine.SIM.StepExecutionTime.ToString("F1", CultureInfo.InvariantCulture));
                 ++buttonIndex;
 
                 LegendGUI();                

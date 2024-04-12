@@ -272,7 +272,7 @@ namespace WUIPlatform.Fire
 
         public override WindData GetCurrentWindData()
         {
-            return new WindData(0, 270f, 5, 0);
+            return new WindData(0f, 270f, 10f, 0f);
         }
     }
 }
