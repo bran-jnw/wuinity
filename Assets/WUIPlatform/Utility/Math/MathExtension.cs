@@ -1,6 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
-using UnityEngine;
 
 namespace WUIPlatform
 {
@@ -287,18 +285,18 @@ namespace WUIPlatform
             return Abs(b - a) < Max(0.000001f * Max(Abs(a), Abs(b)), Epsilon * 8);
         }
 
-        public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed)
+        /*public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed)
         {
             float deltaTime = Time.deltaTime;
             return SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, deltaTime);
-        }
+        }*/
 
-        public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime)
+        /*public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime)
         {
             float deltaTime = Time.deltaTime;
             float maxSpeed = Mathf.Infinity;
             return SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, deltaTime);
-        }
+        }*/
 
         // Gradually changes a value towards a desired goal over time.
         public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
@@ -331,18 +329,18 @@ namespace WUIPlatform
             return output;
         }
 
-        public static float SmoothDampAngle(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed)
+        /*public static float SmoothDampAngle(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed)
         {
             float deltaTime = Time.deltaTime;
             return SmoothDampAngle(current, target, ref currentVelocity, smoothTime, maxSpeed, deltaTime);
-        }
+        }*/
 
-        public static float SmoothDampAngle(float current, float target, ref float currentVelocity, float smoothTime)
+        /*public static float SmoothDampAngle(float current, float target, ref float currentVelocity, float smoothTime)
         {
             float deltaTime = Time.deltaTime;
             float maxSpeed = Mathf.Infinity;
             return SmoothDampAngle(current, target, ref currentVelocity, smoothTime, maxSpeed, deltaTime);
-        }
+        }*/
 
         // Gradually changes an angle given in degrees towards a desired goal angle over time.
         public static float SmoothDampAngle(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
@@ -383,7 +381,7 @@ namespace WUIPlatform
         }
 
         // Infinite Line Intersection (line1 is p1-p2 and line2 is p3-p4)
-        internal static bool LineIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, ref Vector2 result)
+        /*internal static bool LineIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, ref Vector2 result)
         {
             float bx = p2.x - p1.x;
             float by = p2.y - p1.y;
@@ -401,10 +399,10 @@ namespace WUIPlatform
             result.x = p1.x + t * bx;
             result.y = p1.y + t * by;
             return true;
-        }
+        }*/
 
         // Line Segment Intersection (line1 is p1-p2 and line2 is p3-p4)
-        internal static bool LineSegmentIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, ref Vector2 result)
+        /*internal static bool LineSegmentIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, ref Vector2 result)
         {
             float bx = p2.x - p1.x;
             float by = p2.y - p1.y;
@@ -431,7 +429,7 @@ namespace WUIPlatform
             result.x = p1.x + t * bx;
             result.y = p1.y + t * by;
             return true;
-        }
+        }*/
 
         static internal long RandomToLong(System.Random r)
         {

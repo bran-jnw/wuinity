@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System.IO;
 using Itinero;
 using Itinero.IO.Osm;
@@ -103,7 +110,7 @@ namespace WUIPlatform.Runtime
 
                 if (newRouteCollection == null)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "Tried loading route collection from " + path + " but route collection is not valid for current input.");
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Tried loading route collection from " + path + " but route collection is not valid for current input, have to be built at runtime (will take some time).\"");
                 }
                 else
                 {
@@ -112,7 +119,7 @@ namespace WUIPlatform.Runtime
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
             }
 
             if (newRouteCollection != null)
