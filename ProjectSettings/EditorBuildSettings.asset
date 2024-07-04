@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/WUInity/Unity/Scenes/WUInityMain.unity
+    path: Assets/WUIPlatform/WUInity/Scenes/WUInityMain.unity
     guid: 65ca41b3ee43ca4478d4b743bc1c45bf
   m_configObjects: {}
