@@ -140,7 +140,7 @@ namespace WUInity
         public bool visibilityAffectsSpeed = false;
         public string opticalDensityFile;
         public float opticalDensity = 0.05f;
-        public string roadTypesFile;
+        public string roadTypesFile = "default.roads";
         public float saveInterval = 600f;
 
         public TrafficAccident[] trafficAccidents = TrafficAccident.GetDummy();

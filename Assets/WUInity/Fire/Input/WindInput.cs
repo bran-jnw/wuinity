@@ -116,13 +116,12 @@ namespace WUInity.Fire
             return wI;
         }
 
-        public static WindInput LoadWindInputFile(out bool success)
+        public static WindInput LoadWindInputFile(string path, out bool success)
         {
             success = false;
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.windFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
