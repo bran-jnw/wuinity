@@ -110,10 +110,7 @@ namespace WUIPlatform.Fire
             InitialFuelMoistureList result = null;
             List<InitialFuelMoisture> initialFuelMoistures = new List<InitialFuelMoisture>();
 
-<<<<<<< HEAD:Assets/WUInity/Fire/Input/InitialFuelMoistureList.cs
-=======
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.initialFuelMoistureFile);
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/Fire/Input/InitialFuelMoistureList.cs
+            //string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.initialFuelMoistureFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

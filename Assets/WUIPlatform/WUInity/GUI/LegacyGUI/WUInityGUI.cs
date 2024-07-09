@@ -121,7 +121,7 @@ namespace WUIPlatform.WUInity.UI
                     if (GUI.Button(populationMenu.rect, populationMenu.text))
                     {
                         menuChoice = ActiveMenu.Population;
-                        //WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
+                        //WUInity.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.GPW);
                     }
 
                     if (GUI.Button(evacMenu.rect, evacMenu.text))

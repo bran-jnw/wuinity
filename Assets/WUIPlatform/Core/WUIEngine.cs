@@ -94,9 +94,9 @@ namespace WUIPlatform
         {
             get
             {
-                /*if (ENGINE._input == null)
+               /*if (ENGINE._input == null)                 // when enabled, evac goals will not appear on map!
                 {
-                    ENGINE._input = new WUInityInput();
+                    ENGINE._input = new WUIEngineInput();   // Was WUInityInput(); 
                 }*/
                 return ENGINE._input;
             }

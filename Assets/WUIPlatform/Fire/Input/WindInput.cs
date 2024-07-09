@@ -129,10 +129,7 @@ namespace WUIPlatform.Fire
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-<<<<<<< HEAD:Assets/WUInity/Fire/Input/WindInput.cs
-=======
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.windFile);
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/Fire/Input/WindInput.cs
+            //string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.windFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

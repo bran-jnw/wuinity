@@ -186,10 +186,7 @@ namespace WUIPlatform.Fire
             WeatherInput result = null;
             List<WeatherData> weatherData = new List<WeatherData>();
 
-<<<<<<< HEAD:Assets/WUInity/Fire/Input/WeatherData.cs
-=======
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.weatherFile);
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/Fire/Input/WeatherData.cs
+            //string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.weatherFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

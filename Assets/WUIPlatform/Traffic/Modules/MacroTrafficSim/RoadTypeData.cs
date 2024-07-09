@@ -98,7 +98,7 @@ namespace WUIPlatform.Traffic
 
         private static void SaveRoadTypeData(RoadTypeData rTD)
         {
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.roadTypesFile); // Path.Combine("default.roads"); Now save .roads file in project folder.
+            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile); // Path.Combine("default.roads"); Now save .roads file in project folder.
             string json = UnityEngine.JsonUtility.ToJson(rTD, true);
             File.WriteAllText(path, json);            
         }
@@ -121,10 +121,8 @@ namespace WUIPlatform.Traffic
                 results = new RoadTypeData();
                 //WUInity.INPUT.Traffic.roadTypesFile = "default.roads";  // Initialise through TrafficInput in WUInityInput.cs in line 143
                 SaveRoadTypeData(results);
-<<<<<<< HEAD:Assets/WUInity/Traffic/Modules/MacroTrafficSim/RoadTypeData.cs
-=======
-                WUIEngine.INPUT.Traffic.roadTypesFile = "default";               
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/Traffic/Modules/MacroTrafficSim/RoadTypeData.cs
+
+                //WUIEngine.INPUT.Traffic.roadTypesFile = "default";               
             }            
 
             return results;

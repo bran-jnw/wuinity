@@ -5,27 +5,18 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using SimpleFileBrowser;
 using System.IO;
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-using static WUInity.TrafficInput;
-using static WUInity.FireInput;
-using WUInity.Fire;
 
-using WUInity.Pedestrian;
-
-namespace WUInity.UI
-=======
 using WUIPlatform.IO;
 using WUIPlatform;
 
 namespace WUIPlatform.WUInity.UI
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
 {
     public class WorkflowUI : MonoBehaviour
     {
         public UIDocument Document;
 
         // WorkflowUI control variables
-        bool newUIMenuDirty = false;
+        bool newUIMenuDirty = false, projectLoaded = false;
         private readonly int _titleBarHeight = 29, _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230, _iLogDisplayNum=6;
         bool creatingNewFile = false;
 
@@ -175,11 +166,9 @@ namespace WUIPlatform.WUInity.UI
         /// </summary>
         void Update()
         {
-            if (newUIMenuDirty)
-            {
-                UpdateMenu();
-                newUIMenuDirty = false;
-            }
+            if (WUIEngine.WORKING_FILE != null && projectLoaded == false) newUIMenuDirty = projectLoaded = true;
+
+            if (newUIMenuDirty) UpdateMenu();
 
             // Synchronize the count of log with the log window scroller count
             if (iLogCount != WUIEngine.GetLog().Length)
@@ -200,7 +189,7 @@ namespace WUIPlatform.WUInity.UI
             }
 
             // Get sample data from the map
-            if (Input.GetMouseButtonDown(0) && WUInity.INSTANCE.dataSampleMode != WUInity.DataSampleMode.None)
+            if (Input.GetMouseButtonDown(0) && WUInityEngine.INSTANCE.dataSampleMode != WUInityEngine.DataSampleMode.None)
             {
                 Plane _yPlane = new Plane(Vector3.up, 0f);
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -208,13 +197,13 @@ namespace WUIPlatform.WUInity.UI
                 if (_yPlane.Raycast(ray, out enter))
                 {
                     Vector3 hitPoint = ray.GetPoint(enter);
-                    float xNorm = hitPoint.x / (float)WUInity.INPUT.Simulation.Size.x;
+                    float xNorm = hitPoint.x / (float)WUIEngine.INPUT.Simulation.Size.x;
                     //xNorm = Mathf.Clamp01(xNorm);
-                    int x = (int)(WUInity.RUNTIME_DATA.Evacuation.CellCount.x * xNorm);
+                    int x = (int)(WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * xNorm);
 
-                    float yNorm = hitPoint.z / (float)WUInity.INPUT.Simulation.Size.y;
+                    float yNorm = hitPoint.z / (float)WUIEngine.INPUT.Simulation.Size.y;
                     //yNorm = Mathf.Clamp01(yNorm);
-                    int y = (int)(WUInity.RUNTIME_DATA.Evacuation.CellCount.y * yNorm);
+                    int y = (int)(WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y * yNorm);
                     GetCellInfo(hitPoint, x, y);
                 }
             }
@@ -222,21 +211,21 @@ namespace WUIPlatform.WUInity.UI
             //UnityEngine.Debug.Log("menu::Update;}");
         }
 
-        string dataSampleString;
+        string dataSampleString="";
         void GetCellInfo(Vector3 pos, int x, int y)
         {
             dataSampleString = "No data to sample."; // It is equivalent to WUInity.INSTANCE.dataSampleString
 
-            if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.GPW)
+            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.GPW)
             {
-                if (WUInity.POPULATION.GetLocalGPWData() != null && WUInity.POPULATION.GetLocalGPWData().density != null && WUInity.POPULATION.GetLocalGPWData().density.Length > 0)
+                if (WUIEngine.POPULATION.GetLocalGPWData() != null && WUIEngine.POPULATION.GetLocalGPWData().density != null && WUIEngine.POPULATION.GetLocalGPWData().density.Length > 0)
                 {
-                    if (WUInity.POPULATION.Visualizer.IsDataPlaneActive())
+                    if (WUIEngine.POPULATION.Visualizer.IsDataPlaneActive())
                     {
-                        float xCellSize = (float)(WUInity.POPULATION.GetLocalGPWData().realWorldSize.x / WUInity.POPULATION.GetLocalGPWData().dataSize.x);
-                        float yCellSize = (float)(WUInity.POPULATION.GetLocalGPWData().realWorldSize.y / WUInity.POPULATION.GetLocalGPWData().dataSize.y);
+                        float xCellSize = (float)(WUIEngine.POPULATION.GetLocalGPWData().realWorldSize.x / WUIEngine.POPULATION.GetLocalGPWData().dataSize.x);
+                        float yCellSize = (float)(WUIEngine.POPULATION.GetLocalGPWData().realWorldSize.y / WUIEngine.POPULATION.GetLocalGPWData().dataSize.y);
                         double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(WUInity.POPULATION.GetLocalGPWData().GetDensityUnitySpace(new Vector2d(pos.x, pos.z)) * cellArea);
+                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(WUIEngine.POPULATION.GetLocalGPWData().GetDensityUnitySpace(new Vector2d(pos.x, pos.z)) * cellArea);
                     }
                     else
                     {
@@ -244,41 +233,41 @@ namespace WUIPlatform.WUInity.UI
                     }
                 }
             }
-            else if (x < 0 || x > WUInity.RUNTIME_DATA.Evacuation.CellCount.x || y < 0 || y > WUInity.RUNTIME_DATA.Evacuation.CellCount.y)
+            else if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
             {
                 //dataSampleString = "Outside of data range.";
                 return;
             }
-            else if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.Paint)
+            else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Paint)
             {
 
             }
-            else if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.Farsite)
+            else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Farsite)
             {
 
             }
             /*
             else //if (_evacDataPlane != null && _evacDataPlane.activeSelf)     // Need to find out how to get access to _evacDataPlane
             {
-                if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.Population)
+                if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Population)
                 {
-                    dataSampleString = "Interpolated people count: " + WUInity.POPULATION.GetPopulation(x, y);
+                    dataSampleString = "Interpolated people count: " + WUIEngine.POPULATION.GetPopulation(x, y);
                 }
-                else if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.Relocated)
+                else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Relocated)
                 {
                     if (WUInity.SIM.PedestrianModule() != null)
                     {
                         dataSampleString = "Rescaled and relocated people count: " + ((MacroHouseholdSim)WUInity.SIM.PedestrianModule()).GetPopulation(x, y);
                     }
                 }
-                else if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.TrafficDens)
+                else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.TrafficDens)
                 {
-                    int people = currentPeopleInCells[x + y * WUInity.RUNTIME_DATA.Evacuation.CellCount.x];
+                    int people = currentPeopleInCells[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x];
                     dataSampleString = "People: " + people;
-                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * WUInity.RUNTIME_DATA.Evacuation.CellCount.x] != null)
+                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x] != null)
                     {
-                        int peopleInCars = currenttrafficDensityData[x + y * WUInity.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount;
-                        int cars = currenttrafficDensityData[x + y * WUInity.RUNTIME_DATA.Evacuation.CellCount.x].carCount;
+                        int peopleInCars = currenttrafficDensityData[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount;
+                        int cars = currenttrafficDensityData[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount;
 
                         dataSampleString += " | People in cars: " + peopleInCars + " (Cars: " + cars + "). Total people " + (people + peopleInCars);
                     }
@@ -1265,7 +1254,7 @@ namespace WUIPlatform.WUInity.UI
                     if (evt.newValue) 
                     {
                         FileBrowser.SetFilters(false, fileFilter[(int)FileType.OSMDataFile]);
-                        string initialPath = WUInity.DATA_FOLDER;
+                        string initialPath = WUIEngine.DATA_FOLDER;
                         FileBrowser.ShowLoadDialog(SetOSMDataFile, CancelSetOSMDataFile, FileBrowser.PickMode.Files, false, initialPath, null, "Specify OSM data file", "Select");
                     }
                     else
@@ -1740,7 +1729,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 dfTrafficModuleChoice.RegisterValueChangedCallback((evt) =>
                 {
-                    WUInity.INPUT.Traffic.trafficModuleChoice = (TrafficModuleChoice) dfTrafficModuleChoice.index;
+                    WUIEngine.INPUT.Traffic.trafficModuleChoice = (TrafficInput.TrafficModuleChoice) dfTrafficModuleChoice.index;
                 });
             }
         }
@@ -1803,7 +1792,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 dfFireModuleChoice.RegisterValueChangedCallback((evt) =>
                 {
-                    WUInity.INPUT.Fire.fireModuleChoice = (FireModuleChoice) dfFireModuleChoice.index;
+                    WUIEngine.INPUT.Fire.fireModuleChoice = (FireInput.FireModuleChoice) dfFireModuleChoice.index;
                 });
             }
         }
@@ -1812,21 +1801,12 @@ namespace WUIPlatform.WUInity.UI
         {
             if (WUIEngine.DATA_STATUS.HaveInput)
             {
-                string roadFile = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Traffic.roadTypesFile);
+                string roadFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile);
 
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
                 if (File.Exists(roadFile))
                     System.Diagnostics.Process.Start("Notepad.exe", roadFile);
                 else
-                    WUInity.LOG(WUInity.LogType.Error, "default.roads file is not found!");
-=======
-                if (File.Exists(initialPath1))
-                    System.Diagnostics.Process.Start("Notepad.exe", initialPath1);
-                else if (File.Exists(initialPath2))
-                    System.Diagnostics.Process.Start("Notepad.exe", initialPath2);
-                else 
                     WUIEngine.LOG(WUIEngine.LogType.Error, "default.roads file is not found!");
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
             }
         }
 
@@ -1839,7 +1819,7 @@ namespace WUIPlatform.WUInity.UI
                     UnityEngine.Debug.Log($"TxTSetSimID has changed to {evt.newValue}.");
                     _simulationID = evt.newValue;
 
-                    WUInity.INPUT.Simulation.SimulationID = _simulationID;
+                    WUIEngine.INPUT.Simulation.SimulationID = _simulationID;
                 });
 
             UnityEngine.UIElements.TextField tfTxTSetTimeStep = root.Q<UnityEngine.UIElements.TextField>("TxTSetTimeStep");
@@ -2217,7 +2197,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void DisplaySampleData()
         {
-            if (WUInity.INSTANCE.dataSampleMode == WUInity.DataSampleMode.None) return;
+            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.None) return;
                 
             String showString = dataSampleString;
 
@@ -2338,10 +2318,6 @@ namespace WUIPlatform.WUInity.UI
         {
             FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
 
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-=======
-            WUIEngineInput wO = WUIEngine.INPUT;
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
             string initialPath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "Project");
 
             if (!Directory.Exists(initialPath))
@@ -2349,14 +2325,7 @@ namespace WUIPlatform.WUInity.UI
 
             creatingNewFile=true;
 
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-            FileBrowser.ShowSaveDialog(WorkflowUI_SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, "New_sim.wui", "Save file", "Save");
-=======
-            //initialPath = Path.GetDirectoryName(WUIEngine.WorkingFile);  //test code
-
-            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, "New_sim.wui", "Save file", "Save");
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-
+            FileBrowser.ShowSaveDialog(NewProjectInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, "New_sim.wui", "Save file", "Save");
         }
 
         private void BtnProjectOpen_clicked()
@@ -2596,13 +2565,8 @@ namespace WUIPlatform.WUInity.UI
                 if (dfRoadType != null)
                 {
                     List<string> m_DropOptions = new List<string> {};
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                    foreach(Traffic.RoadData rd in WUInity.RUNTIME_DATA.Traffic.RoadTypeData.roadData) m_DropOptions.Add(rd.name);
-=======
 
-                    foreach(WUIPlatform.Traffic.RoadData rd in WUIEngine.RUNTIME_DATA.Traffic.RoadTypeData.roadData)
-                        m_DropOptions.Add(rd.name);
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
+                    foreach(WUIPlatform.Traffic.RoadData rd in WUIEngine.RUNTIME_DATA.Traffic.RoadTypeData.roadData) m_DropOptions.Add(rd.name);
 
                     dfRoadType.choices.Clear();
                     dfRoadType.choices = m_DropOptions;
@@ -2633,7 +2597,18 @@ namespace WUIPlatform.WUInity.UI
 
                     dfFireModuleChoice.choices.Clear();
                     dfFireModuleChoice.choices = m_DropOptions;
-                    dfFireModuleChoice.index = (int) WUInity.INPUT.Fire.fireModuleChoice;
+                    dfFireModuleChoice.index = (int) WUIEngine.INPUT.Fire.fireModuleChoice;
+                }
+
+                UnityEngine.UIElements.DropdownField dfSmokeModuleChoice = root.Q<UnityEngine.UIElements.DropdownField>("DfSmokeModuleChoice");
+                if (dfSmokeModuleChoice != null)      // Override the choices in .uxml
+                {
+                    List<string> m_DropOptions = new List<string> {};
+                    foreach (string s in Enum.GetNames(typeof(SmokeInput.SmokeModuleChoice))) m_DropOptions.Add(s);
+
+                    dfSmokeModuleChoice.choices.Clear();
+                    dfSmokeModuleChoice.choices = m_DropOptions;
+                    dfSmokeModuleChoice.index = (int) WUIEngine.INPUT.Smoke.smokeModuleChoice;
                 }
 
                 SetLCPFile();
@@ -2672,42 +2647,19 @@ namespace WUIPlatform.WUInity.UI
                 }
 
                 UnityEngine.UIElements.Toggle tgTogSimPeds = root.Q<UnityEngine.UIElements.Toggle>("TogSimPeds");
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                if (tgTogSimPeds != null) tgTogSimPeds.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunPedestrianModule);
+                if (tgTogSimPeds != null) tgTogSimPeds.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunPedestrianModule);
 
                 UnityEngine.UIElements.Toggle tgTogSimTraf = root.Q<UnityEngine.UIElements.Toggle>("TogSimTraf");
-                if (tgTogSimTraf != null) tgTogSimTraf.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunTrafficModule);
+                if (tgTogSimTraf != null) tgTogSimTraf.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunTrafficModule);
 
                 UnityEngine.UIElements.Toggle tgTogSimFire = root.Q<UnityEngine.UIElements.Toggle>("TogSimFire");
-                if (tgTogSimFire != null) tgTogSimFire.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunFireModule);
+                if (tgTogSimFire != null) tgTogSimFire.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunFireModule);
 
                 UnityEngine.UIElements.Toggle tgTogSimSmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSimSmoke");
-                if (tgTogSimSmoke != null) tgTogSimSmoke.SetValueWithoutNotify(WUInity.INPUT.Simulation.RunSmokeModule);
-=======
-                if (tgTogSimPeds != null)
-                {
-                    tgTogSimPeds.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunPedestrianModule);
-                }
-
-                UnityEngine.UIElements.Toggle tgTogSimTraf = root.Q<UnityEngine.UIElements.Toggle>("TogSimTraf");
-                if (tgTogSimTraf != null)
-                {
-                    tgTogSimTraf.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunTrafficModule);
-                }
-
-                UnityEngine.UIElements.Toggle tgTogSimFire = root.Q<UnityEngine.UIElements.Toggle>("TogSimFire");
-                if (tgTogSimFire != null)
-                {
-                    tgTogSimFire.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunFireModule);
-                }
-
-                UnityEngine.UIElements.Toggle tgTogSimSmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSimSmoke");
-                if (tgTogSimSmoke != null)
-                {
-                    tgTogSimSmoke.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunSmokeModule);
-                }
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
+                if (tgTogSimSmoke != null) tgTogSimSmoke.SetValueWithoutNotify(WUIEngine.INPUT.Simulation.RunSmokeModule);
             }
+
+            newUIMenuDirty = false;
         }
 
         void SetLocalGPWNumber()
@@ -3022,25 +2974,15 @@ namespace WUIPlatform.WUInity.UI
         void OpenLoadInput()
         {
             FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
 
             // Load from project folder instead of WUInity.DATA_FOLDER.
-            string initialPath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "Project"); // WUInity.DATA_FOLDER;
+            string initialPath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "Project"); // WUIEngine.DATA_FOLDER;
 
             if (!Directory.Exists(initialPath))
-                if (WUInity.DATA_STATUS.HaveInput)
-                    initialPath = Path.GetDirectoryName(WUInity.WORKING_FOLDER);
+                if (WUIEngine.DATA_STATUS.HaveInput)
+                    initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
                 else
                     initialPath = Path.Combine(Directory.GetParent(Application.dataPath).ToString());
-=======
-            
-            string initialPath = WUIEngine.DATA_FOLDER;
-
-            if (WUIEngine.DATA_STATUS.HaveInput)
-            {
-                initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-            }
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
 
             FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUINITY project file (.WUI)", "Load");
         }
@@ -3060,16 +3002,8 @@ namespace WUIPlatform.WUInity.UI
         {
             if (WUIEngine.WORKING_FILE == null)
             {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
                 //Equivalent function in legacy UI: OpenSaveInput(); 
                 BtnProjectNew_clicked();    // Create a new project if no project is opened.
-=======
-                //OpenSaveInput(); --- port 4 lines of code below
-                FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
-                WUIEngineInput wO = WUIEngine.INPUT;
-                string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
-                FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
             }
             else
             {
@@ -3134,62 +3068,22 @@ namespace WUIPlatform.WUInity.UI
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Workflow status file does not exist!");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Workflow status has not been saved. Save in a new .ini file.");
+                SaveWorkflowUIStatus();
             }
         }
 
-        void WorkflowUI_SaveInput(string[] paths)
+        void NewProjectInput(string[] paths)
         {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-            //WUInityInput wO = WUInity.INPUT;
-            WUInity.WORKING_FILE = paths[0];
+            //WUIEngineInput wO = WUIEngine.INPUT;
+            WUIEngine.WORKING_FILE = paths[0];
 
             string projName = Path.GetFileNameWithoutExtension(paths[0]);
-            WUInity.INPUT.Simulation.SimulationID = projName;       // The first call for WUInity.INPUT will return a new instance if it is null.
+            WUIEngine.INPUT.Simulation.SimulationID = projName;       // The first call for WUIEngine.INPUT will return a new instance if it is null.
 
             if (creatingNewFile)
             {
-                //mainMenuDirty = true;
-                // -- WUInity.INSTANCE.CreateNewInputData();
-                WUInity.DATA_STATUS.Reset();
-                WUInity.DATA_STATUS.HaveInput = true;
-
-                /*
-                if (input == null)
-                {
-                    _input = new WUInityInput();
-                }
-                else
-                {
-                    _input = input;
-                }
-                */
-
-                WUInity.INPUT.Simulation.RunFireModule = false;        // Don't run fire sim by default
-                WUInity.INPUT.Simulation.RunSmokeModule = false;       // Don't run smoke sim by default
-
-                WUInity.INPUT.Routing.routerDbFile = "";
-                WUInity.INPUT.Routing.routeCollectionFile = "";
-
-                WUInity.INPUT.Fire.fuelModelsFile = "";             // Clear FireInput defaults as they are not required.
-                WUInity.INPUT.Fire.initialFuelMoistureFile = "";
-                WUInity.INPUT.Fire.weatherFile = "";
-                WUInity.INPUT.Fire.windFile = "";
-                WUInity.INPUT.Fire.ignitionPointsFile = "";
-                WUInity.INPUT.Fire.graphicalFireInputFile = "";
-
-                //validInput = new ValidCriticalData(_input);
-
-                // Don't load the RUNTIME_DAT from files, as they are not ready for a new project.
-=======
-
-            WUIEngine.WORKING_FILE = paths[0];
-            WUIEngineInput wO = WUIEngine.INPUT;
-
-            if (creatingNewFile)
-            {
-                //WUInity.INSTANCE.CreateNewInputData();
-
+                // -- WUIEngine.ENGINE.CreateNewInputData();
                 WUIEngine.DATA_STATUS.Reset();
                 WUIEngine.DATA_STATUS.HaveInput = true;
 
@@ -3203,15 +3097,26 @@ namespace WUIPlatform.WUInity.UI
                 WUIEngine.INPUT.Fire = new FireInput();
                 WUIEngine.INPUT.Smoke = new SmokeInput();
 
-                string json = JsonUtility.ToJson(WUIEngine.INPUT, true);
-                System.IO.File.WriteAllText(WUIEngine.WORKING_FILE, json);
+                WUIEngine.INPUT.Simulation.RunFireModule = false;        // Don't run fire sim by default
+                WUIEngine.INPUT.Simulation.RunSmokeModule = false;       // Don't run smoke sim by default
 
-                WUIEngineInput.LoadInput(paths[0]); // The default constructors have problems. This is like an initialization process for WUInity.INSTANCE
+                WUIEngine.INPUT.Population.populationFile = "";
+                WUIEngine.INPUT.Population.localGPWFile = "";
 
-                //WUIEngine.Input.Population.populationFile = "";
-                //WUIEngine.Input.Population.localGPWFile = "";
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
+                WUIEngine.INPUT.Routing.routerDbFile = "";
+                WUIEngine.INPUT.Routing.routeCollectionFile = "";
 
+                WUIEngine.INPUT.Fire.lcpFile = "";
+                WUIEngine.INPUT.Fire.fuelModelsFile = "";               // Clear FireInput defaults as they are not required.
+                WUIEngine.INPUT.Fire.initialFuelMoistureFile = "";
+                WUIEngine.INPUT.Fire.weatherFile = "";
+                WUIEngine.INPUT.Fire.windFile = "";
+                WUIEngine.INPUT.Fire.ignitionPointsFile = "";
+                WUIEngine.INPUT.Fire.graphicalFireInputFile = "";
+
+                //validInput = new ValidCriticalData(_input);
+
+                // Don't load the RUNTIME_DAT from files, as they are not ready for a new project.
                 //transform input to actual data
                 //WUIEngine.RUNTIME_DATA.Population.LoadAll();
                 //WUIEngine.RUNTIME_DATA.Evacuation.LoadAll();
@@ -3220,38 +3125,27 @@ namespace WUIPlatform.WUInity.UI
                 //WUIEngine.RUNTIME_DATA.Traffic.LoadAll();
                 //WUIEngine.RUNTIME_DATA.Fire.LoadAll();
 
-                WUInity.INSTANCE.UpdateMapResourceStatus();
+                string json = JsonUtility.ToJson(WUIEngine.INPUT, true);
+                System.IO.File.WriteAllText(WUIEngine.WORKING_FILE, json);
+                WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " saved.");
 
-                //GUI.SetDirty();
+                WUIEngineInput.LoadInput(paths[0]); // The default constructors have problems. This is like an initialization process for WUInity.INSTANCE
+
+                WUIEngine.ENGINE.UpdateMapResourceStatus();
 
                 //this needs map and evac goals
                 //WUInity.INSTANCE.SpawnMarkers();
-                // -- WUInity.INSTANCE.CreateNewInputData(); end here.
+                // -- WUIEngine.ENGINE.CreateNewInputData(); end here.
 
-                //wO = WUIEngine.Input; //have to update this since we are creating a new one
-
-                newUIMenuDirty = true;      // Notify Unity to update
+                newUIMenuDirty = true;      // Notify Unity to update UI
             }
             else
             {
                 //ParseMainData(wO);
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-=======
                 WUIEngineInput.SaveInput();
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
             }
 
             creatingNewFile = false;
-
-            // -- WUInityInput.SaveInput();
-            string json = UnityEngine.JsonUtility.ToJson(WUInity.INPUT, true);
-            System.IO.File.WriteAllText(WUInity.WORKING_FILE, json);
-            //EvacGroup.SaveEvacGroupIndices();
-            //GraphicalFireInput.SaveGraphicalFireInput();
-            WUInity.LOG(WUInity.LogType.Log, " Input file " + WUInity.WORKING_FILE + " saved.");
-            // -- End of WUInityInput.SaveInput();
-
-            WUInityInput.LoadInput(paths[0]); // The default constructors have problems. This is like an additional initialization process for WUInity.INSTANCE
             SaveWorkflowUIStatus();
         }
 
@@ -3362,12 +3256,6 @@ namespace WUIPlatform.WUInity.UI
                     bool addTokenToMapbox = evt.newValue;
                     if (addTokenToMapbox)
                     {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                        string initialPath = WUInity.DATA_FOLDER;
-                        if (!Directory.Exists(initialPath)) System.IO.Directory.CreateDirectory(initialPath);
-
-                        System.Diagnostics.Process.Start("Explorer.exe", @"/select," + initialPath);
-=======
                         string initialPath = WUIEngine.DATA_FOLDER;
 
                         if (WUIEngine.DATA_STATUS.HaveInput)
@@ -3378,7 +3266,6 @@ namespace WUIPlatform.WUInity.UI
 
                         String FilePath = initialPath;
                         System.Diagnostics.Process.Start("Explorer.exe", @"/select," + FilePath);
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
                     }
                     UnityEngine.Debug.Log($"Place in folder = {evt.newValue}");
                 });
@@ -3420,9 +3307,6 @@ namespace WUIPlatform.WUInity.UI
                     bool placeGPWData = evt.newValue;
                     if (placeGPWData)
                     {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                        string initialPath = WUInity.DATA_FOLDER;   // Save 3rd-party downloaded data to DATA_FOLDER
-=======
                         string initialPath = WUIEngine.DATA_FOLDER;
 
                         if (WUIEngine.DATA_STATUS.HaveInput)
@@ -3430,12 +3314,9 @@ namespace WUIPlatform.WUInity.UI
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
                             initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
                         }
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
 
                         String FilePath = Path.Combine(initialPath, "GPW");
-
-                        if (!Directory.Exists(FilePath))
-                            System.IO.Directory.CreateDirectory(FilePath);
+                        if (!Directory.Exists(FilePath)) System.IO.Directory.CreateDirectory(FilePath);
 
                         System.Diagnostics.Process.Start("Explorer.exe", @"/select," + FilePath);
                     }
@@ -3497,9 +3378,6 @@ namespace WUIPlatform.WUInity.UI
                     bool placeOSMData = evt.newValue;
                     if (placeOSMData)
                     {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                        string initialPath = WUInity.DATA_FOLDER;   // Save 3rd-party downloaded data to DATA_FOLDER
-=======
                         string initialPath = WUIEngine.DATA_FOLDER;
 
                         if (WUIEngine.DATA_STATUS.HaveInput)
@@ -3507,12 +3385,9 @@ namespace WUIPlatform.WUInity.UI
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
                             initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
                         }
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
 
                         String FilePath = Path.Combine(initialPath, "OSM");
-
-                        if (!Directory.Exists(FilePath))
-                            System.IO.Directory.CreateDirectory(FilePath);
+                        if (!Directory.Exists(FilePath)) System.IO.Directory.CreateDirectory(FilePath);
 
                         System.Diagnostics.Process.Start("Explorer.exe", @"/select," + FilePath);
                     }
@@ -3602,9 +3477,6 @@ namespace WUIPlatform.WUInity.UI
 
                     if (evt.newValue) // Set GPW folder 
                     {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                        string initialPath = WUInity.DATA_FOLDER;
-=======
                         string initialPath = WUIEngine.DATA_FOLDER;
 
                         if (WUIEngine.DATA_STATUS.HaveInput)
@@ -3613,7 +3485,6 @@ namespace WUIPlatform.WUInity.UI
                             initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
                         }
 
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
                         FileBrowser.ShowLoadDialog(SetGlobalGPWFileFoler, CancelGlobalGPWFolderSelection, FileBrowser.PickMode.Folders, false, initialPath, null, "Specify global GPW files folder", "Select");
                     }
                     else
@@ -3689,12 +3560,9 @@ namespace WUIPlatform.WUInity.UI
         {
             string filePath = "POP file: Failed to load .pop file.";
 
-            if (WUIEngine.POPULATION.LoadPopulationFromFile(paths[0], true))
+            if (WUIEngine.POPULATION.LoadPopulationFromFile(paths[0], true))    // Population file is saved via WUIEngineInput.SaveInput() in the call.
             {
                 filePath = "POP file: "+ Path.GetFileName(paths[0]) + " is loaded successfully.";
-                
-                WUIEngine.INPUT.Population.populationFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUIEngineInput.SaveInput();                                               // This is a temp fix.
             }
             else
             {
@@ -3728,12 +3596,8 @@ namespace WUIPlatform.WUInity.UI
 
                         if (WUIEngine.DATA_STATUS.HaveInput)
                         {
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                            initialPath = GetProjectPath();
-=======
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
                             initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
                         }
 
                         FileBrowser.ShowLoadDialog(LoadLocalGPWFile, CancelLoadLocalGPWFile, FileBrowser.PickMode.Files, false, initialPath, null, "Load GPW file", "Load");
@@ -3757,13 +3621,8 @@ namespace WUIPlatform.WUInity.UI
             {
                 filePath = "GPW file: " + Path.GetFileName(paths[0]) + " is loaded and a .pop is created.";
 
-<<<<<<< HEAD:Assets/WUInity/GUI/WorkflowUI/WorkflowUI.cs
-                WUInity.INPUT.Population.localGPWFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUInityInput.SaveInput();                                               // This is a temp fix.
-=======
-                WUIEngine.INPUT.Population.populationFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUIEngineInput.SaveInput();                                               // This is a temp fix.
->>>>>>> 72e37634c6edfc625d0838a567c9acf4762347ac:Assets/WUIPlatform/WUInity/GUI/WorkflowUI/WorkflowUI.cs
+                WUIEngine.INPUT.Population.localGPWFile = Path.GetFileName(paths[0]); // Save local GPW file. 
+                WUIEngineInput.SaveInput();                                             
             }
             else
             {
