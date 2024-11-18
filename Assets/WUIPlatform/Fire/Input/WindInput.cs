@@ -192,7 +192,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
@@ -203,7 +203,7 @@ namespace WUIPlatform.Fire
             }
             else if (fileExists)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

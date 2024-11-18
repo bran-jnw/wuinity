@@ -107,6 +107,11 @@ namespace WUIPlatform.Traffic
         {
             throw new NotImplementedException();
         }
+
+        public override void Stop()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

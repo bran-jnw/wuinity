@@ -314,6 +314,11 @@ namespace WUIPlatform.Smoke
 
             return _sootOutput;
         }
+
+        public override void Stop()
+        {
+            //throw new System.NotImplementedException();
+        }
     }
 }
 

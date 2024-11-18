@@ -99,6 +99,7 @@ namespace WUIPlatform
         int runNumber;
         private  void StartSimulations()
         {
+            _stopSim = false;
             _stoppedDueToError = false;
             runNumber = 0;
             int actualRuns = 0;
@@ -183,11 +184,11 @@ namespace WUIPlatform
             _state = SimulationState.Initializing;
 
             CreateFireModule();
-            if(_stopSim)
+            if (_stopSim)
             {
                 return;
             }
-
+            
             CreateSmokeModule();
             if (_stopSim)
             {
@@ -206,7 +207,7 @@ namespace WUIPlatform
                 return;
             }
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "All sub-modules initiated successfully.");
+            WUIEngine.LOG(WUIEngine.LogType.Log, "All requested sub-modules initiated successfully.");
         }
 
         private void CreateFireModule()
@@ -233,7 +234,7 @@ namespace WUIPlatform
         private void CreateSmokeModule()
         {
             //can only run together
-            if (WUIEngine.INPUT.Simulation.RunSmokeModule )
+            if (WUIEngine.INPUT.Simulation.RunSmokeModule)
             {
                 if(!WUIEngine.INPUT.Simulation.RunFireModule)
                 {
@@ -602,6 +603,27 @@ namespace WUIPlatform
             if(!_stopSim)
             {
                 _stopSim = true;
+
+                if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
+                {
+                    _pedestrianModule.Stop();
+                }
+
+                if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+                {
+                    _trafficModule.Stop();
+                }
+
+                if (WUIEngine.INPUT.Simulation.RunFireModule)
+                {
+                    _fireModule.Stop();
+                }
+
+                if (WUIEngine.INPUT.Simulation.RunSmokeModule)
+                {
+                    _smokeModule.Stop();
+                }
+
                 _stoppedDueToError |= stoppedDueToError;
                 WUIEngine.LOG(WUIEngine.LogType.Log, stopMessage);
             }            

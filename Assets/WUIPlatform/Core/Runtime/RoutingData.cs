@@ -70,7 +70,7 @@ namespace WUIPlatform.Runtime
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Router database could not be found.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database could not be found.");
             }
 
             WUIEngine.DATA_STATUS.RouterDbLoaded = success;

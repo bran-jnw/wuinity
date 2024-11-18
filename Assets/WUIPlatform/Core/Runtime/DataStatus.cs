@@ -44,7 +44,7 @@ namespace WUIPlatform
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Population is not loaded and no local nor global GPW file is found to build it from.");
             }
 
-            if (!RouterDbLoaded && !OsmFileValid)
+            if (WUIEngine.INPUT.Traffic.trafficModuleChoice == IO.TrafficInput.TrafficModuleChoice.MacroTrafficSim && !RouterDbLoaded && !OsmFileValid)
             {
                 canRun = false;
                 WUIEngine.LOG(WUIEngine.LogType.Error, "No router database loaded and no valid OSM file was found to build it from.");

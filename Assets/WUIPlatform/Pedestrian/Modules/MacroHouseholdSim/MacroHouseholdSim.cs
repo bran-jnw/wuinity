@@ -454,6 +454,11 @@ namespace WUIPlatform.Pedestrian
             //x = Mathf.Clamp(x, 0, xSize - 1);
             //y = Mathf.Clamp(y, 0, ySize - 1);
             return population[x + y * cellsX];
-        }     
+        }
+
+        public override void Stop()
+        {
+            //throw new System.NotImplementedException();
+        }
     }
 }

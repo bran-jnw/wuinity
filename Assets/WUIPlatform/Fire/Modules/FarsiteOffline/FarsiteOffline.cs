@@ -281,6 +281,11 @@ namespace WUIPlatform.Fire
         {
             return new WindData(0f, 270f, 10f, 0f);
         }
+
+        public override void Stop()
+        {
+            //throw new System.NotImplementedException();
+        }
     }
 }
 

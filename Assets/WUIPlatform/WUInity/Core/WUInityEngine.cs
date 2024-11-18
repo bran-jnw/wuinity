@@ -335,16 +335,19 @@ namespace WUIPlatform.WUInity
                 }
             }    
 
-            //always updatre visuals, even when paused
-            if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && WUIEngine.SIM.State == Simulation.SimulationState.Running)
+            //always update visuals, even when paused
+            if(WUIEngine.RUNTIME_DATA != null)
             {
-                if(!_visualsExist)
+                if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && WUIEngine.SIM.State == Simulation.SimulationState.Running)
                 {
-                    CreateVisualizers();
+                    if (!_visualsExist)
+                    {
+                        CreateVisualizers();
+                    }
+                    EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic);
+                    FIRE_VISUALS.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion);
                 }
-                EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic);
-                FIRE_VISUALS.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion);
-            }
+            }            
 
             if (updateOSMBorder)
             {
@@ -365,7 +368,8 @@ namespace WUIPlatform.WUInity
         {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EVAC_VISUALS.CreateBuffers(WUIEngine.INPUT.Simulation.RunPedestrianModule, WUIEngine.INPUT.Simulation.RunTrafficModule);
+            EVAC_VISUALS.CreateBuffers(WUIEngine.INPUT.Simulation.RunPedestrianModule, WUIEngine.INPUT.Simulation.RunTrafficModule);            
+
             _renderHouseholds = WUIEngine.INPUT.Simulation.RunPedestrianModule;
             _renderTraffic = WUIEngine.INPUT.Simulation.RunTrafficModule;
 
@@ -376,7 +380,7 @@ namespace WUIPlatform.WUInity
 
             _visualsExist = true;
 
-            ShowAllRuntimeVisuals();
+            ActivateSuitableVisuals();
         }
 
         public void RunAllCasesInFolder(string folder)
@@ -667,12 +671,27 @@ namespace WUIPlatform.WUInity
             }            
         }
 
-        public void ShowAllRuntimeVisuals()
+        public void ActivateSuitableVisuals()
         {
-            SetHouseholdRendering(true);
-            SetTrafficRendering(true);
-            SetFireSpreadRendering(true);
-            SetSootRendering(true);
+            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            {
+                SetHouseholdRendering(true);
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+            {
+                SetTrafficRendering(true);
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            {
+                SetFireSpreadRendering(true);
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunSmokeModule)
+            {
+                SetSootRendering(true);
+            }
         }
 
         public void HideAllRuntimeVisuals()

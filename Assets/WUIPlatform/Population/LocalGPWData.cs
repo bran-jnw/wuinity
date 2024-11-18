@@ -99,7 +99,7 @@ namespace WUIPlatform.Population
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " No local GPW data was found, build from global GPW or create custom population.");                
+                WUIEngine.LOG(WUIEngine.LogType.Warning, " No local GPW data was found, build from global GPW or create custom population.");                
             }
 
             if(success)

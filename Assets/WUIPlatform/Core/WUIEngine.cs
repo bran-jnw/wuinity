@@ -70,10 +70,10 @@ namespace WUIPlatform
         {
             get
             {
-                if (ENGINE._runtimeData == null)
+                /*if (ENGINE._runtimeData == null)
                 {
                     ENGINE._runtimeData = new RuntimeData();
-                }
+                }*/
                 return ENGINE._runtimeData;
             }
         }
@@ -184,6 +184,8 @@ namespace WUIPlatform
             }
 
             validInput = new ValidCriticalData(_input);
+
+            _runtimeData = new RuntimeData();
 
             //transform input to actual data
             RUNTIME_DATA.Population.LoadAll();

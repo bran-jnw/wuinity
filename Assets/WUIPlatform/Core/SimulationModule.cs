@@ -11,6 +11,8 @@ namespace WUIPlatform
     {
         public abstract void Step(float currentTime, float deltaTime);
         public abstract bool IsSimulationDone();
+
+        public abstract void Stop();
     }
 }
 

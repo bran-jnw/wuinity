@@ -95,7 +95,10 @@ namespace WUIPlatform.Traffic
         public override void Arrive()
         {
             active = false;
-            goal.CarArrives(this, WUIEngine.SIM.CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+            if(goal != null)
+            {
+                goal.CarArrives(this, WUIEngine.SIM.CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+            }            
             //TODO: send message to WUI-nity
         }
 

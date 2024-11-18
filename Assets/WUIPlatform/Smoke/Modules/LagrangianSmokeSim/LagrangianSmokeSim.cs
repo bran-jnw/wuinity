@@ -65,6 +65,11 @@ namespace WUIPlatform.Smoke
         {
             throw new NotImplementedException();
         }
+
+        public override void Stop()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

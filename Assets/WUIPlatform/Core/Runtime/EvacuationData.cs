@@ -190,7 +190,7 @@ namespace WUIPlatform.Runtime
 
             if (index < 0)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -210,7 +210,7 @@ namespace WUIPlatform.Runtime
 
             if (index < 0)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " User has specified a response curve named " + name + " but no such response curve has been defined.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, " User has specified a response curve named " + name + " but no such response curve has been defined.");
             }
 
             return index;

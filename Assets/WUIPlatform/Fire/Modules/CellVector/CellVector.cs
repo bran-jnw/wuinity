@@ -429,6 +429,11 @@ namespace WUIPlatform.Fire
         {
             throw new System.NotImplementedException();
         }
+
+        public override void Stop()
+        {
+            //throw new System.NotImplementedException();
+        }
     }
 }
 

@@ -543,6 +543,11 @@ namespace WUIPlatform.Fire
             _ignitedCells.Clear();
         }
 
+        public override void Stop()
+        {
+            //throw new System.NotImplementedException();
+        }
+
         //remove? as we now visualize using fire renderer
         /*void CreateTerrainPlane()
         {

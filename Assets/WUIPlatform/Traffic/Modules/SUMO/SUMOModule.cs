@@ -38,6 +38,7 @@ namespace WUIPlatform.Traffic
                 //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
                 offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO offset, x: " + offset.x + ", y: " + offset.y); 
 
                 validRouteIDs = new Dictionary<StartGoal, string>();
 
@@ -79,7 +80,13 @@ namespace WUIPlatform.Traffic
                     if(car != null)
                     {
                         car.SetPosRot(LIBSUMO.Vehicle.getPosition(sumoID), (float)LIBSUMO.Vehicle.getAngle(sumoID));
-                    }                        
+                    }
+                    //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
+                    else
+                    {
+                        car = new SUMOCar(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null);
+                        cars.Add(sumoID, car);
+                    }
                 }
             }     
 
@@ -100,20 +107,24 @@ namespace WUIPlatform.Traffic
                 }
             }
 
-            //finally update visuals            
-            if(carsToRender == null || carsToRender.Length != cars.Count)
+            //only update if we have any cars, else we break the carsToRender buffer (default dummy of 1 car)
+            if(cars.Count > 0)
             {
-                Vector4[] buffer = new Vector4[cars.Count];
-                int index = 0;
-                foreach (SUMOCar car in cars.Values)
+                //finally update visuals            
+                if (carsToRender == null || carsToRender.Length != cars.Count)
                 {
-                    buffer[index] = car.GetPositionAndSpeed(true);
-                    buffer[index].X += (float)offset.x;
-                    buffer[index].Y += (float)offset.y;
-                    ++index;
+                    Vector4[] buffer = new Vector4[cars.Count];
+                    int index = 0;
+                    foreach (SUMOCar car in cars.Values)
+                    {
+                        buffer[index] = car.GetPositionAndSpeed(true);
+                        buffer[index].X += (float)offset.x;
+                        buffer[index].Y += (float)offset.y;
+                        ++index;
+                    }
+                    carsToRender = buffer;
                 }
-                carsToRender = buffer;
-            }   
+            }            
         }
 
         private struct StartGoal
@@ -239,10 +250,11 @@ namespace WUIPlatform.Traffic
 
         public override Vector4[] GetCarPositionsAndStates()
         {
-            if (!LIBSUMO.Simulation.isLoaded())
+            //safe to skip?
+            /*if (!LIBSUMO.Simulation.isLoaded())
             {
                 WUIEngine.LOG(WUIEngine.LogType.Error, "SUMO is not loaded when trying to access car positions.");
-            }
+            }*/
             
             return carsToRender;
         }
@@ -278,6 +290,12 @@ namespace WUIPlatform.Traffic
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
+            if(!WUIEngine.INPUT.Simulation.RunFireModule)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, "No fire module loaded, can't  sort SUMO network edges in fire cells.");
+                return;
+            }
+
             try
             {
                 int fireCellsWithJunctions = 0;
@@ -392,6 +410,10 @@ namespace WUIPlatform.Traffic
                 LIBSUMO.Vehicle.rerouteTraveltime(car.GetVehicleID());
             }
         }
-    }
 
+        public override void Stop()
+        {
+            LIBSUMO.Simulation.close();
+        }
+    }
 }

@@ -75,9 +75,9 @@ namespace WUIPlatform.IO
         public bool StopAfterConverging = true;
         public Vector2d LowerLeftLatLong = new Vector2d(55.697354, 13.173808);
         public Vector2d Size = new Vector2d(3000.0, 3000.0);        
-        public bool RunPedestrianModule = true;
-        public bool RunTrafficModule = true;
-        public bool RunFireModule = true;
+        public bool RunPedestrianModule = false;
+        public bool RunTrafficModule = false;
+        public bool RunFireModule = false;
         public bool RunSmokeModule = false;
     }
 

@@ -384,7 +384,7 @@ namespace WUIPlatform.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUIEngine.LOG(WUIEngine.LogType.Error, " LCP file not found in " + path + ".");
+				WUIEngine.LOG(WUIEngine.LogType.Warning, " LCP file not found in " + path + ".");
 				return false;
 			}
 
