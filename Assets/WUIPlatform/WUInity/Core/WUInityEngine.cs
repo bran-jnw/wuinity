@@ -145,6 +145,8 @@ namespace WUIPlatform.WUInity
         [Header("Options")]
         public bool DeveloperMode = false;
         public bool AutoLoadExample = true;
+        [SerializeField] float _renderScale = 1.0f;
+        public float RenderScale { get => _renderScale; }
 
         [Header("Prefabs")]
         [SerializeField] private GameObject _markerPrefab;
