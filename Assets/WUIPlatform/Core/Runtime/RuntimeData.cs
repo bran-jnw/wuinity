@@ -7,6 +7,7 @@
 
 using WUIPlatform.Population;
 using System;
+using WUIPlatform.Utility;
 
 namespace WUIPlatform.Runtime
 {
@@ -46,7 +47,6 @@ namespace WUIPlatform.Runtime
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
             //https://wiki.openstreetmap.org/wiki/Zoom_levels
-            double tiles = Math.Pow(4.0, mOptions.locationOptions.zoom);
             double degreesPerTile = 360.0 / (Math.Pow(2.0, mOptions.locationOptions.zoom));
             Vector2d mapDegrees = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLong, WUIEngine.INPUT.Simulation.Size);
             int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
@@ -66,6 +66,23 @@ namespace WUIPlatform.Runtime
             WUIEngine.LOG(WUIEngine.LogType.Log, "Starting to load Mapbox map.");
             WUInity.WUInityEngine.MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y), WUIEngine.INPUT.Map.zoomLevel);
             WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
+
+            //all this because Mapbox does wonky calculation of scale correction...
+            Vector2d mercatorOrigin = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLong);
+            Vector2d mercatorBounds = mercatorOrigin + WUIEngine.INPUT.Simulation.Size;
+            Vector2d wgsBounds = GeoConversions.MetersToLatLon(mercatorBounds);
+            LatLngUTMConverter.UTMResult utmOriginData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
+            Vector2d utmOrigin = new Vector2d(utmOriginData.Easting, utmOriginData.Northing);
+            LatLngUTMConverter.UTMResult utmBoundsData = LatLngUTMConverter.WGS84.convertLatLngToUtm(wgsBounds.x, wgsBounds.y);
+            Vector2d utmBounds = new Vector2d(utmBoundsData.Easting, utmBoundsData.Northing);
+            Vector2d utmDistances = utmBounds - utmOrigin;
+            Vector2d realScale;
+            realScale.x = utmDistances.x / WUIEngine.INPUT.Simulation.Size.x;
+            realScale.y = utmDistances.y / WUIEngine.INPUT.Simulation.Size.y;
+            //UnityEngine.MonoBehaviour.print("UTM dist: " + utmDistances.x + ", " + utmDistances.y);
+            Mapbox.Unity.MeshGeneration.Data.UnityTile tile = WUInity.WUInityEngine.MAP.GetComponentInChildren<Mapbox.Unity.MeshGeneration.Data.UnityTile>();
+            float mapboxScale = tile.TileScale;
+            WUInity.WUInityEngine.MAP.transform.localScale = new UnityEngine.Vector3((float)(realScale.x / mapboxScale), 1f, (float)(realScale.y / mapboxScale));
 
             return true;
         }

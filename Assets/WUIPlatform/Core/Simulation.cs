@@ -604,22 +604,22 @@ namespace WUIPlatform
             {
                 _stopSim = true;
 
-                if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
+                if (WUIEngine.INPUT.Simulation.RunPedestrianModule && _pedestrianModule != null)
                 {
                     _pedestrianModule.Stop();
                 }
 
-                if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+                if (WUIEngine.INPUT.Simulation.RunTrafficModule && _trafficModule != null)
                 {
                     _trafficModule.Stop();
                 }
 
-                if (WUIEngine.INPUT.Simulation.RunFireModule)
+                if (WUIEngine.INPUT.Simulation.RunFireModule && _fireModule != null)
                 {
                     _fireModule.Stop();
                 }
 
-                if (WUIEngine.INPUT.Simulation.RunSmokeModule)
+                if (WUIEngine.INPUT.Simulation.RunSmokeModule && _smokeModule != null)
                 {
                     _smokeModule.Stop();
                 }

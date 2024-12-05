@@ -20,6 +20,7 @@ namespace WUIPlatform.Traffic
         private int totalCarsSimulated;
         private Vector2d offset;
         Dictionary<StartGoal, string> validRouteIDs;
+        private double adjustX, adjustY;
 
         public SUMOModule()
         {
@@ -38,7 +39,16 @@ namespace WUIPlatform.Traffic
                 //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
                 offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO offset, x: " + offset.x + ", y: " + offset.y); 
+
+                //keep for now if we ever want to do projection corrections here
+                //https://gis.stackexchange.com/questions/14528/better-distance-measurements-in-web-mercator-projection
+                /*double e = 0.081819191;
+                double lat = Math.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0;
+                double cosLat = Math.Cos(lat);
+                adjustX = cosLat / Math.Sqrt(1.0 - e * e * Math.Sin(lat) * Math.Sin(lat));
+                adjustX = 1.0 / adjustX;
+                adjustY = cosLat * (1.0 - e * e) / Math.Pow(1 - e * e * Math.Sin(lat) * Math.Sin(lat), 1.5);
+                adjustY = 1.0 / adjustY;;*/
 
                 validRouteIDs = new Dictionary<StartGoal, string>();
 
@@ -46,7 +56,7 @@ namespace WUIPlatform.Traffic
             }
             catch
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting");
             }
             
         }
@@ -79,7 +89,14 @@ namespace WUIPlatform.Traffic
                     cars.TryGetValue(sumoID, out car);
                     if(car != null)
                     {
-                        car.SetPosRot(LIBSUMO.Vehicle.getPosition(sumoID), (float)LIBSUMO.Vehicle.getAngle(sumoID));
+                        LIBSUMO.TraCIPosition pos = LIBSUMO.Vehicle.getPosition(sumoID);
+                        //LIBSUMO.TraCIPosition geoPos = LIBSUMO.Simulation.convertGeo(pos.x, pos.y, false);
+                        //Vector2d simPos = GeoConversions.GeoToWorldPosition(geoPos.y, geoPos.x, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
+                        //pos.x = simPos.x;
+                        //pos.y = simPos.y;
+                        //pos.x /= adjustY;
+                        //pos.y /= adjustY;
+                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));
                     }
                     //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
                     else
