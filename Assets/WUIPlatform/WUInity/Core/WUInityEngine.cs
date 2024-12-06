@@ -12,6 +12,7 @@ using WUIPlatform.Traffic;
 using System.IO;
 using WUIPlatform.IO;
 using WUIPlatform.WUInity.UI;
+using WUIPlatform.Population;
 
 namespace WUIPlatform.WUInity
 {    
@@ -265,6 +266,46 @@ namespace WUIPlatform.WUInity
             }
             return CreateLineObject(dat, index);
         }*/
+
+        public bool LoadMapbox()
+        {
+            //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
+            Mapbox.Unity.Map.MapOptions mOptions = WUInity.WUInityEngine.MAP.Options; // new Mapbox.Unity.Map.MapOptions();
+
+            mOptions.locationOptions.latitudeLongitude = "" + WUIEngine.INPUT.Simulation.LowerLeftLatLong.x + "," + WUIEngine.INPUT.Simulation.LowerLeftLatLong.y;
+            mOptions.locationOptions.zoom = WUIEngine.INPUT.Map.zoomLevel;
+            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
+            //https://wiki.openstreetmap.org/wiki/Zoom_levels
+            double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
+            Vector2d mapDegrees = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLong, WUIEngine.INPUT.Simulation.Size);
+            int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
+            int tilesY = (int)(mapDegrees.y / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)WUIEngine.INPUT.Simulation.LowerLeftLatLong.x))) + 1;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
+            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
+            mOptions.placementOptions.snapMapToZero = true;
+            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
+
+            if (!MAP.IsAccessTokenValid)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Mapbox token not valid.");
+                return false;
+            }
+
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Starting to load Mapbox map.");
+            MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y), WUIEngine.INPUT.Map.zoomLevel);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
+
+            //generally we want to convert to UTM
+            if (!WUIEngine.INPUT.Simulation.ScaleToWebMercator)
+            {
+                MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);
+            }           
+
+            return true;
+        }
 
         GameObject CreateLineObject(List<Vector3> points, int index)
         {

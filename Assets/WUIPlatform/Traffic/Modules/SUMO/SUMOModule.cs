@@ -137,6 +137,11 @@ namespace WUIPlatform.Traffic
                         buffer[index] = car.GetPositionAndSpeed(true);
                         buffer[index].X += (float)offset.x;
                         buffer[index].Y += (float)offset.y;
+                        if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
+                        {
+                            buffer[index].X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
+                            buffer[index].Y *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.y;
+                        }                        
                         ++index;
                     }
                     carsToRender = buffer;

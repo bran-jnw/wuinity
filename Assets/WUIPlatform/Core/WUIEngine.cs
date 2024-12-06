@@ -218,9 +218,8 @@ namespace WUIPlatform
 
         public void UpdateMapResourceStatus()
         {
-            DATA_STATUS.MapLoaded = RUNTIME_DATA.LoadMapbox();
-
 #if USING_UNITY
+            DATA_STATUS.MapLoaded = WUInity.WUInityEngine.INSTANCE.LoadMapbox();
             WUInity.WUInityEngine.INSTANCE.UpdateSimBorders();
             WUInity.WUInityEngine.INSTANCE.WUICamera.SetCameraStartPosition(INPUT.Simulation.Size);
 #endif

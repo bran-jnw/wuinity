@@ -74,7 +74,8 @@ namespace WUIPlatform.IO
         //public int numberOfRuns = 1;
         public bool StopAfterConverging = true;
         public Vector2d LowerLeftLatLong = new Vector2d(55.697354, 13.173808);
-        public Vector2d Size = new Vector2d(3000.0, 3000.0);        
+        public Vector2d Size = new Vector2d(3000.0, 3000.0);
+        public bool ScaleToWebMercator = false;
         public bool RunPedestrianModule = false;
         public bool RunTrafficModule = false;
         public bool RunFireModule = false;
