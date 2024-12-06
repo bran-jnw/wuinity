@@ -1,0 +1,146 @@
+{
+    "Simulation": {
+        "SimulationID": "New_sim",
+        "DeltaTime": 1.0,
+        "MaxSimTime": 864000.0,
+        "StopWhenEvacuated": true,
+        "StopAfterConverging": true,
+        "LowerLeftLatLong": {
+            "x": 55.697354,
+            "y": 13.173808
+        },
+        "Size": {
+            "x": 3000.0,
+            "y": 3000.0
+        },
+        "RunEvacSim": true,
+        "RunTrafficSim": true,
+        "RunFireSim": true,
+        "RunSmokeSim": true
+    },
+    "Map": {
+        "MapProvider": 0,
+        "ZoomLevel": 13
+    },
+    "Visualization": {
+        "drawRoads": false
+    },
+    "Population": {
+        "gpwDataFolder": "gpw-v4-population-density-rev10_2015_30_sec_asc",
+        "localGPWFile": "",
+        "populationFile": ""
+    },
+    "Routing": {
+        "routerDbFile": "example.routerdb",
+        "routeCollectionFile": "example.rc"
+    },
+    "Evacuation": {
+        "RouteCellSize": 200.0,
+        "EvacuationOrderStart": 0.0,
+        "ResponseCurveFiles": [],
+        "EvacGroupFiles": [],
+        "minHouseholdSize": 1,
+        "maxHouseholdSize": 5,
+        "allowMoreThanOneCar": true,
+        "maxCars": 2,
+        "maxCarsChance": 0.30000001192092898,
+        "walkingDistanceModifier": 1.0,
+        "walkingSpeedMinMax": {
+            "x": 0.699999988079071,
+            "y": 1.0
+        },
+        "walkingSpeedModifier": 1.0,
+        "BlockGoalEventFiles": []
+    },
+    "Traffic": {
+        "evacuationGoalFiles": [],
+        "routeChoice": 1,
+        "stallSpeed": 5.0,
+        "backGroundDensityMinMax": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "visibilityAffectsSpeed": false,
+        "opticalDensityFile": "",
+        "opticalDensity": 0.05000000074505806,
+        "roadTypesFile": "",
+        "saveInterval": 600.0,
+        "trafficAccidents": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "endTime": 3.4028234663852887e38,
+                "isActive": false
+            }
+        ],
+        "reverseLanes": [
+            {
+                "startTime": 3.4028234663852887e38,
+                "endTime": 3.4028234663852887e38,
+                "isActive": false
+            }
+        ],
+        "trafficInjections": [
+            {
+                "cars": 1,
+                "latLong": {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                "desiredGoal": {
+                    "name": "New goal",
+                    "latLong": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "color": {
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    },
+                    "blocked": false,
+                    "maxFlow": 3600.0,
+                    "goalType": 1,
+                    "maxCars": -1,
+                    "maxPeople": -1
+                },
+                "pickGoalFromMap": false,
+                "timeFlow": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0
+                    }
+                ]
+            }
+        ],
+        "trafficProbes": [
+            {
+                "nodeID": 0
+            }
+        ]
+    },
+    "Fire": {
+        "lcpFile": "",
+        "fuelModelsFile": "default.fuel",
+        "initialFuelMoistureFile": "default.fmc",
+        "weatherFile": "default.wtr",
+        "windFile": "default.wnd",
+        "ignitionPointsFile": "default.ign",
+        "graphicalFireInputFile": "default.gfi",
+        "spreadMode": 2,
+        "windMultiplier": 1.0,
+        "useRandomIgnitionMap": false,
+        "randomIgnitionPoints": 0,
+        "useInitialIgnitionMap": false,
+        "FarsiteData": {
+            "outputPrefix": "rox"
+        }
+    },
+    "Smoke": {
+        "MixingLayerHeight": 250.0
+    }
+}

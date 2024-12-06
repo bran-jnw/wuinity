@@ -61,6 +61,12 @@ namespace WUIPlatform.Traffic
             oldRotation = rotation;
             rotation = angle;
             newRotation = angle;
+
+            //Rik's
+            if(lastPos.X != xPos || lastPos.Y!=yPos)
+            {
+                CarMoved();
+            }
         }
 
         public void SetPosRot(LIBSUMO.TraCIPosition pos, float angle)
@@ -69,7 +75,9 @@ namespace WUIPlatform.Traffic
         }
 
         Vector4 positionAndSpeed;
-        public Vector4 GetPositionAndSpeed(bool updateData)
+
+        //Rik added 'override'
+        public override Vector4 GetPositionAndSpeed(bool updateData)
         {
             if (updateData)
             {

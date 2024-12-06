@@ -10,6 +10,11 @@ using WUIPlatform.IO;
 using WUIPlatform.WUInity;
 #endif
 
+//Rik's
+using System;
+using System.Numerics;
+using System.Net.Sockets;
+
 namespace WUIPlatform
 {
     [System.Serializable]
@@ -62,6 +67,14 @@ namespace WUIPlatform
         private float _stepExecutionTime;
         public float StepExecutionTime { get => _stepExecutionTime; }
 
+        //Rik's
+        public static List<TrafficModuleCar> movedCars;
+        private UdpClient udpClient;
+        static Simulation()
+        {
+            movedCars = new List<TrafficModuleCar>();
+        }
+
 
         public Simulation()
         {
@@ -81,8 +94,12 @@ namespace WUIPlatform
         {
             try
             {
+
+                //rik's
+                udpClient = new UdpClient("127.0.0.1", 9023);
                 System.Threading.Tasks.Task simTask = System.Threading.Tasks.Task.Run(StartSimulations);
                 await simTask;
+
             }
             catch(System.Exception e) 
             {
@@ -569,7 +586,78 @@ namespace WUIPlatform
             //advance traffic
             if (WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
+                movedCars.Clear();
                 _trafficModule.Step(WUIEngine.INPUT.Simulation.DeltaTime, CurrentTime);
+                SendCars();
+            }
+        }
+
+        //Rik's
+        int timesCarSent = 0;
+        float lastTime = 0f;
+
+        //Rik's
+        void SendCars()
+        {
+
+            if (CurrentTime > lastTime + 0.5f && movedCars.Count > 0)
+            {
+                //rik's
+                byte[] sendBytes = new byte[movedCars.Count * 16];
+                int i = 0;
+
+                void addBytes(byte[] bytes)
+                {
+                    for (int j = 0; j < bytes.Length; j++)
+                    {
+                        sendBytes[i + j] = bytes[j];
+                    }
+                    i += bytes.Length;
+                }
+
+                foreach (TrafficModuleCar car in movedCars)
+                {
+                    //add id
+                    /*    byte[] carIdBytes = BitConverter.GetBytes(car.carId);
+                        for(int j = 0; j<carIdBytes.Length;j++)
+                        {
+                            sendBytes[i + j] = carIdBytes[j];
+                        }
+                        i+=4;
+                        */
+
+                    Vector4 pas = car.GetPositionAndSpeed(false);
+                    addBytes(BitConverter.GetBytes(car.carID));
+                    addBytes(BitConverter.GetBytes(pas.X));
+                    addBytes(BitConverter.GetBytes(pas.Y));
+                    addBytes(BitConverter.GetBytes(pas.Z));
+
+
+                    if (timesCarSent == 1)
+                    {
+                     //   Debug.Log("id: " + car.carID + ", position and speed: " + car.GetUnityPositionAndSpeed(false));
+                    }
+                }
+
+                int maxChunkSize = 16 * 1024; //send max 1024 cars at a time
+                for (int x = 0; x < sendBytes.Length; x += maxChunkSize)
+                {
+                    int targetSize = 0;
+                    if (sendBytes.Length < maxChunkSize + x)
+                    {
+                        targetSize = sendBytes.Length - x;
+                    }
+                    else
+                    {
+                        targetSize = maxChunkSize;
+                    }
+                    byte[] chunk = new byte[targetSize];
+                    Array.Copy(sendBytes, x, chunk, 0, targetSize);
+                    udpClient.Send(chunk, chunk.Length);
+                }
+
+                lastTime = CurrentTime;
+                timesCarSent++;
             }
         }
 

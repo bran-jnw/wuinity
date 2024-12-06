@@ -1,0 +1,6 @@
+Name: "Group_1"
+Response curves: "Observed_average"
+Response curve probabilites: 1.0
+Destinations: "Goal_E", "Goal_R", "Goal_F"
+Destination probabilites: 0.4, 0.7, 1.0
+Color: 1.0, 1.0, 0.0

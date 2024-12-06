@@ -1,0 +1,9 @@
+Name: "Goal_E"
+Latitude: 39.426692
+Longitude: -105.071401
+Goal type: "Exit"
+Max flow: 3600.0
+Car capacity: -1
+People capacity: -1
+Initially blocked: "false"
+Color: 1.0, 0.0, 0.0

@@ -169,7 +169,13 @@ namespace WUIPlatform.Traffic
             }
 
             return positionAndSpeed;
-        }        
+        }
+
+        //Rik's
+        public override Vector4 GetPositionAndSpeed(bool updateData)
+        {
+            return GetUnityPositionAndSpeed(updateData);
+        }
 
         public void MoveCar(float timeStamp, float deltaTime, float speed)
         {
@@ -213,6 +219,9 @@ namespace WUIPlatform.Traffic
                     //routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("name", out drivingOnStreet);
                     UpdateHash();
                 }
+            } else //Rik added else
+            {
+                CarMoved();
             }
         }
 
