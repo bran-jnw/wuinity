@@ -1,10 +1,16 @@
-﻿using System.Collections.Generic;
+﻿//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System.Collections.Generic;
 using WUIPlatform.Pedestrian;
 using WUIPlatform.Traffic;
 using WUIPlatform.Fire;
 using System.Threading;
 using WUIPlatform.Smoke;
-using System.Diagnostics;
 using WUIPlatform.IO;
 #if USING_UNITY
 using WUIPlatform.WUInity;
@@ -110,6 +116,7 @@ namespace WUIPlatform
         int runNumber;
         private  void StartSimulations()
         {
+            _stopSim = false;
             _stoppedDueToError = false;
             runNumber = 0;
             int actualRuns = 0;
@@ -194,11 +201,11 @@ namespace WUIPlatform
             _state = SimulationState.Initializing;
 
             CreateFireModule();
-            if(_stopSim)
+            if (_stopSim)
             {
                 return;
             }
-
+            
             CreateSmokeModule();
             if (_stopSim)
             {
@@ -217,7 +224,7 @@ namespace WUIPlatform
                 return;
             }
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "All sub-modules initiated successfully.");
+            WUIEngine.LOG(WUIEngine.LogType.Log, "All requested sub-modules initiated successfully.");
         }
 
         private void CreateFireModule()
@@ -244,7 +251,7 @@ namespace WUIPlatform
         private void CreateSmokeModule()
         {
             //can only run together
-            if (WUIEngine.INPUT.Simulation.RunSmokeModule )
+            if (WUIEngine.INPUT.Simulation.RunSmokeModule)
             {
                 if(!WUIEngine.INPUT.Simulation.RunFireModule)
                 {
@@ -684,6 +691,27 @@ namespace WUIPlatform
             if(!_stopSim)
             {
                 _stopSim = true;
+
+                if (WUIEngine.INPUT.Simulation.RunPedestrianModule && _pedestrianModule != null)
+                {
+                    _pedestrianModule.Stop();
+                }
+
+                if (WUIEngine.INPUT.Simulation.RunTrafficModule && _trafficModule != null)
+                {
+                    _trafficModule.Stop();
+                }
+
+                if (WUIEngine.INPUT.Simulation.RunFireModule && _fireModule != null)
+                {
+                    _fireModule.Stop();
+                }
+
+                if (WUIEngine.INPUT.Simulation.RunSmokeModule && _smokeModule != null)
+                {
+                    _smokeModule.Stop();
+                }
+
                 _stoppedDueToError |= stoppedDueToError;
                 WUIEngine.LOG(WUIEngine.LogType.Log, stopMessage);
             }            

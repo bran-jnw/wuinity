@@ -146,10 +146,29 @@ namespace WUIPlatform.WUInity.UI
         void CleanMainMenu(WUIEngineInput wO)
         {
             mainMenuDirty = false;
-            dT = wO.Simulation.DeltaTime.ToString();
-            nrRuns = WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns.ToString();
-            convergenceMaxDifference = WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference.ToString();
-            convergenceMinSequence = WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
+            if(wO != null)
+            {
+                dT = wO.Simulation.DeltaTime.ToString();
+            }
+            else
+            {
+                dT = "-1.0";
+            }
+            
+            if(WUIEngine.RUNTIME_DATA != null)
+            {
+                nrRuns = WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns.ToString();
+                convergenceMaxDifference = WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference.ToString();
+                convergenceMinSequence = WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence.ToString();
+            }
+            else
+            {
+                nrRuns = "0";
+                convergenceMaxDifference = "0";
+                convergenceMinSequence = "0";
+            }
+
+                      
         }
 
         public void ParseMainData(WUIEngineInput wO)

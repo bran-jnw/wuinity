@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -185,7 +192,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
@@ -196,7 +203,7 @@ namespace WUIPlatform.Fire
             }
             else if (fileExists)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

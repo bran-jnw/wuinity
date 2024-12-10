@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using WUIPlatform.Traffic;
 using System.Numerics;
 
@@ -67,10 +74,11 @@ namespace WUIPlatform.IO
         //public int numberOfRuns = 1;
         public bool StopAfterConverging = true;
         public Vector2d LowerLeftLatLong = new Vector2d(55.697354, 13.173808);
-        public Vector2d Size = new Vector2d(3000.0, 3000.0);        
-        public bool RunPedestrianModule = true;
-        public bool RunTrafficModule = true;
-        public bool RunFireModule = true;
+        public Vector2d Size = new Vector2d(3000.0, 3000.0);
+        public bool ScaleToWebMercator = false;
+        public bool RunPedestrianModule = false;
+        public bool RunTrafficModule = false;
+        public bool RunFireModule = false;
         public bool RunSmokeModule = false;
     }
 

@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System.Collections.Generic;       
 using UnityEngine;                
 using WUIPlatform.Pedestrian;                     
@@ -5,7 +12,7 @@ using WUIPlatform.Traffic;
 using System.IO;
 using WUIPlatform.IO;
 using WUIPlatform.WUInity.UI;
-
+using WUIPlatform.Population;
 
 namespace WUIPlatform.WUInity
 {    
@@ -139,6 +146,8 @@ namespace WUIPlatform.WUInity
         [Header("Options")]
         public bool DeveloperMode = false;
         public bool AutoLoadExample = true;
+        [SerializeField] float _renderScale = 1.0f;
+        public float RenderScale { get => _renderScale; }
 
         [Header("Prefabs")]
         [SerializeField] private GameObject _markerPrefab;
@@ -258,6 +267,46 @@ namespace WUIPlatform.WUInity
             return CreateLineObject(dat, index);
         }*/
 
+        public bool LoadMapbox()
+        {
+            //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
+            Mapbox.Unity.Map.MapOptions mOptions = WUInity.WUInityEngine.MAP.Options; // new Mapbox.Unity.Map.MapOptions();
+
+            mOptions.locationOptions.latitudeLongitude = "" + WUIEngine.INPUT.Simulation.LowerLeftLatLong.x + "," + WUIEngine.INPUT.Simulation.LowerLeftLatLong.y;
+            mOptions.locationOptions.zoom = WUIEngine.INPUT.Map.zoomLevel;
+            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
+            //https://wiki.openstreetmap.org/wiki/Zoom_levels
+            double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
+            Vector2d mapDegrees = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLong, WUIEngine.INPUT.Simulation.Size);
+            int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
+            int tilesY = (int)(mapDegrees.y / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)WUIEngine.INPUT.Simulation.LowerLeftLatLong.x))) + 1;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
+            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
+            mOptions.placementOptions.snapMapToZero = true;
+            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
+
+            if (!MAP.IsAccessTokenValid)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Mapbox token not valid.");
+                return false;
+            }
+
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Starting to load Mapbox map.");
+            MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y), WUIEngine.INPUT.Map.zoomLevel);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
+
+            //generally we want to convert to UTM
+            if (!WUIEngine.INPUT.Simulation.ScaleToWebMercator)
+            {
+                MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);
+            }           
+
+            return true;
+        }
+
         GameObject CreateLineObject(List<Vector3> points, int index)
         {
             GameObject gO = new GameObject("Route " + index);
@@ -329,16 +378,19 @@ namespace WUIPlatform.WUInity
                 }
             }    
 
-            //always updatre visuals, even when paused
-            if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && WUIEngine.SIM.State == Simulation.SimulationState.Running)
+            //always update visuals, even when paused
+            if(WUIEngine.RUNTIME_DATA != null)
             {
-                if(!_visualsExist)
+                if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && WUIEngine.SIM.State == Simulation.SimulationState.Running)
                 {
-                    CreateVisualizers();
+                    if (!_visualsExist)
+                    {
+                        CreateVisualizers();
+                    }
+                    EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic);
+                    FIRE_VISUALS.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion);
                 }
-                EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic);
-                FIRE_VISUALS.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion);
-            }
+            }            
 
             if (updateOSMBorder)
             {
@@ -359,7 +411,8 @@ namespace WUIPlatform.WUInity
         {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EVAC_VISUALS.CreateBuffers(WUIEngine.INPUT.Simulation.RunPedestrianModule, WUIEngine.INPUT.Simulation.RunTrafficModule);
+            EVAC_VISUALS.CreateBuffers(WUIEngine.INPUT.Simulation.RunPedestrianModule, WUIEngine.INPUT.Simulation.RunTrafficModule);            
+
             _renderHouseholds = WUIEngine.INPUT.Simulation.RunPedestrianModule;
             _renderTraffic = WUIEngine.INPUT.Simulation.RunTrafficModule;
 
@@ -370,7 +423,7 @@ namespace WUIPlatform.WUInity
 
             _visualsExist = true;
 
-            ShowAllRuntimeVisuals();
+            ActivateSuitableVisuals();
         }
 
         public void RunAllCasesInFolder(string folder)
@@ -661,12 +714,27 @@ namespace WUIPlatform.WUInity
             }            
         }
 
-        public void ShowAllRuntimeVisuals()
+        public void ActivateSuitableVisuals()
         {
-            SetHouseholdRendering(true);
-            SetTrafficRendering(true);
-            SetFireSpreadRendering(true);
-            SetSootRendering(true);
+            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            {
+                SetHouseholdRendering(true);
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+            {
+                SetTrafficRendering(true);
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            {
+                SetFireSpreadRendering(true);
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunSmokeModule)
+            {
+                SetSootRendering(true);
+            }
         }
 
         public void HideAllRuntimeVisuals()

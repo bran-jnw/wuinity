@@ -29,13 +29,16 @@ namespace WUIPlatform.WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            dummy = WUIEngine.SIM.PedestrianModule.GetPeopleStaying();
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
-            ++buttonIndex;
+            if(WUIEngine.SIM.PedestrianModule != null)
+            {
+                dummy = WUIEngine.SIM.PedestrianModule.GetPeopleStaying();
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
+                ++buttonIndex;
 
-            //toatl cars
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUIEngine.SIM.PedestrianModule.GetTotalCars());
-            ++buttonIndex;
+                //toatl cars
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUIEngine.SIM.PedestrianModule.GetTotalCars());
+                ++buttonIndex;
+            }         
 
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Display options");
@@ -112,14 +115,17 @@ namespace WUIPlatform.WUInity.UI
                 ++buttonIndex;
             }
 
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
             {
-                string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
+                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+                {
+                    string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
+                    ++buttonIndex;
+                }
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + WUIEngine.RUNTIME_DATA.Evacuation.GetTotalEvacuated() + " / " + (WUIEngine.POPULATION.GetTotalPopulation() - WUIEngine.SIM.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + WUIEngine.RUNTIME_DATA.Evacuation.GetTotalEvacuated() + " / " + (WUIEngine.POPULATION.GetTotalPopulation() - WUIEngine.SIM.PedestrianModule.GetPeopleStaying()));
-            ++buttonIndex;
+            }            
 
             //fire output stuff
             if (WUIEngine.INPUT.Simulation.RunFireModule && WUIEngine.SIM.State == Simulation.SimulationState.Running)

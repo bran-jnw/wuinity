@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +20,7 @@ namespace WUIPlatform.Traffic
         private int totalCarsSimulated;
         private Vector2d offset;
         Dictionary<StartGoal, string> validRouteIDs;
+        private double adjustX, adjustY;
 
         public SUMOModule()
         {
@@ -32,13 +40,23 @@ namespace WUIPlatform.Traffic
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
                 offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
+                //keep for now if we ever want to do projection corrections here
+                //https://gis.stackexchange.com/questions/14528/better-distance-measurements-in-web-mercator-projection
+                /*double e = 0.081819191;
+                double lat = Math.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0;
+                double cosLat = Math.Cos(lat);
+                adjustX = cosLat / Math.Sqrt(1.0 - e * e * Math.Sin(lat) * Math.Sin(lat));
+                adjustX = 1.0 / adjustX;
+                adjustY = cosLat * (1.0 - e * e) / Math.Pow(1 - e * e * Math.Sin(lat) * Math.Sin(lat), 1.5);
+                adjustY = 1.0 / adjustY;;*/
+
                 validRouteIDs = new Dictionary<StartGoal, string>();
 
                 SortEdgesInFireCells();
             }
             catch
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting");
             }
             
         }
@@ -71,8 +89,21 @@ namespace WUIPlatform.Traffic
                     cars.TryGetValue(sumoID, out car);
                     if(car != null)
                     {
-                        car.SetPosRot(LIBSUMO.Vehicle.getPosition(sumoID), (float)LIBSUMO.Vehicle.getAngle(sumoID));
-                    }                        
+                        LIBSUMO.TraCIPosition pos = LIBSUMO.Vehicle.getPosition(sumoID);
+                        //LIBSUMO.TraCIPosition geoPos = LIBSUMO.Simulation.convertGeo(pos.x, pos.y, false);
+                        //Vector2d simPos = GeoConversions.GeoToWorldPosition(geoPos.y, geoPos.x, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
+                        //pos.x = simPos.x;
+                        //pos.y = simPos.y;
+                        //pos.x /= adjustY;
+                        //pos.y /= adjustY;
+                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));
+                    }
+                    //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
+                    else
+                    {
+                        car = new SUMOCar(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null);
+                        cars.Add(sumoID, car);
+                    }
                 }
             }     
 
@@ -93,20 +124,29 @@ namespace WUIPlatform.Traffic
                 }
             }
 
-            //finally update visuals            
-            if(carsToRender == null || carsToRender.Length != cars.Count)
+            //only update if we have any cars, else we break the carsToRender buffer (default dummy of 1 car)
+            if(cars.Count > 0)
             {
-                Vector4[] buffer = new Vector4[cars.Count];
-                int index = 0;
-                foreach (SUMOCar car in cars.Values)
+                //finally update visuals            
+                if (carsToRender == null || carsToRender.Length != cars.Count)
                 {
-                    buffer[index] = car.GetPositionAndSpeed(true);
-                    buffer[index].X += (float)offset.x;
-                    buffer[index].Y += (float)offset.y;
-                    ++index;
+                    Vector4[] buffer = new Vector4[cars.Count];
+                    int index = 0;
+                    foreach (SUMOCar car in cars.Values)
+                    {
+                        buffer[index] = car.GetPositionAndSpeed(true);
+                        buffer[index].X += (float)offset.x;
+                        buffer[index].Y += (float)offset.y;
+                        if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
+                        {
+                            buffer[index].X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
+                            buffer[index].Y *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.y;
+                        }                        
+                        ++index;
+                    }
+                    carsToRender = buffer;
                 }
-                carsToRender = buffer;
-            }   
+            }            
         }
 
         private struct StartGoal
@@ -232,10 +272,11 @@ namespace WUIPlatform.Traffic
 
         public override Vector4[] GetCarPositionsAndStates()
         {
-            if (!LIBSUMO.Simulation.isLoaded())
+            //safe to skip?
+            /*if (!LIBSUMO.Simulation.isLoaded())
             {
                 WUIEngine.LOG(WUIEngine.LogType.Error, "SUMO is not loaded when trying to access car positions.");
-            }
+            }*/
             
             return carsToRender;
         }
@@ -271,6 +312,12 @@ namespace WUIPlatform.Traffic
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
+            if(!WUIEngine.INPUT.Simulation.RunFireModule)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, "No fire module loaded, can't  sort SUMO network edges in fire cells.");
+                return;
+            }
+
             try
             {
                 int fireCellsWithJunctions = 0;
@@ -385,6 +432,10 @@ namespace WUIPlatform.Traffic
                 LIBSUMO.Vehicle.rerouteTraveltime(car.GetVehicleID());
             }
         }
-    }
 
+        public override void Stop()
+        {
+            LIBSUMO.Simulation.close();
+        }
+    }
 }

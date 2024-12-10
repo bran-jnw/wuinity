@@ -1,9 +1,16 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System.Collections.Generic;
 using System.IO;
 
 namespace WUIPlatform.Fire
 {
-	public struct LandScapeStruct
+	public struct LandscapeStruct
 	{
 		public short elevation;
 		public short slope;
@@ -162,56 +169,80 @@ namespace WUIPlatform.Fire
 			//SetConvFuelModelID(HaveFuelConversions());
 		}
 
-		public LandScapeStruct GetCellData(int x, int y, bool correctForOrigin)
+		/// <summary>
+		/// Returns cell data of requested index in LCP file, no correction for offset.
+		/// </summary>
+		/// <param name="xIndex"></param>
+		/// <param name="yIndex"></param>
+		/// <returns></returns>
+        public LandscapeStruct GetCellData(int xIndex, int yIndex)
+        {
+			return GetCellDataSimulationIndex(xIndex, yIndex, false);
+        }
+
+		public LandscapeStruct GetCellData(int linearIndex)
+		{
+            celldata cell = new celldata();
+            crowndata cfuel = new crowndata();
+            grounddata gfuel = new grounddata();
+            GetCellDataFromMemory(linearIndex, ref cell, ref cfuel, ref gfuel);
+
+            LandscapeStruct l = new LandscapeStruct();
+
+            l.elevation = cell.e;
+            l.slope = cell.s;
+            l.aspect = cell.a;
+            l.fuel_model = cell.f;
+            l.canopy_cover = cell.c;
+
+            switch (NumVals)
+            {
+                case 7:
+                    // 5 basic and duff and woody
+                    l.ground_duff_model = gfuel.d;
+                    l.ground_coarse_woody_model = gfuel.w;
+                    break;
+                case 8:
+                    // 5 basic and crown fuels
+                    l.crown_canopy_height = cfuel.h;
+                    l.crown_base = cfuel.b;
+                    l.crown_bulk_density = cfuel.p;
+                    break;
+                case 10:
+                    // 5 basic, crown fuels, and duff and woody
+                    l.crown_canopy_height = cfuel.h;
+                    l.crown_base = cfuel.b;
+                    l.crown_bulk_density = cfuel.p;
+
+                    l.ground_duff_model = gfuel.d;
+                    l.ground_coarse_woody_model = gfuel.w;
+                    break;
+            }
+
+            return l;
+        }
+
+        /// <summary>
+        /// Returns data in requested cell, index is based on boundary of simulation (lcp data must be bigger or equal to this size)
+        /// </summary>
+        /// <param name="xIndex"></param>
+        /// <param name="yIndex"></param>
+        /// <param name="correctForOrigin"></param>
+        /// <returns></returns>
+        public LandscapeStruct GetCellDataSimulationIndex(int xIndex, int yIndex, bool correctForOrigin)
         {
 			if(correctForOrigin)
 			{
                 //WUIEngine.LOG(WUIEngine.LogType.Log, "X/Y offset cells: " + originCellOffset.x + ", " + originCellOffset.y);
                 //correct for any difference in origin
-                x += originCellOffset.x;
-                y += originCellOffset.y;
+                xIndex += originCellOffset.x;
+                yIndex += originCellOffset.y;
             }
 
             //flip y since dataset is north down
-            long posit = (x + (Header.numnorth - y - 1) * Header.numeast);
-			celldata cell = new celldata();
-			crowndata cfuel = new crowndata();
-			grounddata gfuel = new grounddata();
-			GetCellDataFromMemory(posit, ref cell, ref cfuel, ref gfuel);
+            long posit = (xIndex + (Header.numnorth - yIndex - 1) * Header.numeast);
 
-			LandScapeStruct l = new LandScapeStruct();
-
-			l.elevation = cell.e;
-			l.slope = cell.s;
-			l.aspect = cell.a;
-			l.fuel_model = cell.f;
-			l.canopy_cover = cell.c;
-
-			switch (NumVals)									
-			{
-				case 7:
-					// 5 basic and duff and woody
-					l.ground_duff_model = gfuel.d;
-					l.ground_coarse_woody_model = gfuel.w;
-					break;
-				case 8:
-					// 5 basic and crown fuels
-					l.crown_canopy_height = cfuel.h;
-					l.crown_base = cfuel.b;
-					l.crown_bulk_density = cfuel.p;
-					break;
-				case 10:
-					// 5 basic, crown fuels, and duff and woody
-					l.crown_canopy_height = cfuel.h;
-					l.crown_base = cfuel.b;
-					l.crown_bulk_density = cfuel.p;
-
-					l.ground_duff_model = gfuel.d;
-					l.ground_coarse_woody_model = gfuel.w;
-					break;
-			}
-
-			return l;
+			return GetCellData((int)posit);
 		}
 
 		public int[] GetExisitingFuelModelNumbers()
@@ -353,7 +384,7 @@ namespace WUIPlatform.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUIEngine.LOG(WUIEngine.LogType.Error, " LCP file not found in " + path + ".");
+				WUIEngine.LOG(WUIEngine.LogType.Warning, " LCP file not found in " + path + ".");
 				return false;
 			}
 

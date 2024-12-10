@@ -1,4 +1,10 @@
-using Mapbox.Map;
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using WUIPlatform.Utility;
 
 namespace WUIPlatform.Runtime
@@ -16,12 +22,34 @@ namespace WUIPlatform.Runtime
         Vector2d _centerMercator;
         public Vector2d CenterMercator { get => _centerMercator; }
 
+        Vector2d _utmToMercatorScale;
+        public Vector2d UtmToMercatorScale { get => _utmToMercatorScale; }
+
+        Vector2d _mercatorToUtmScale;
+        public Vector2d MercatorToUtmScale { get => _mercatorToUtmScale; }
+
         public SimulationData() 
         {
-            LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
-            _utmOrigin = new Vector2d(utmData.Easting, utmData.Northing);
+            if(WUIEngine.INPUT != null)
+            {
+                LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
+                _utmOrigin = new Vector2d(utmData.Easting, utmData.Northing);
+                _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
 
-            _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
+                //Calculate scaling factors to correct overlay between web mercator and UTM
+                Vector2d mercatorBounds = _centerMercator + WUIEngine.INPUT.Simulation.Size;
+                Vector2d wgs84Bounds = GeoConversions.MetersToLatLon(mercatorBounds);
+                LatLngUTMConverter.UTMResult utmBoundsData = LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Bounds.x, wgs84Bounds.y);
+                Vector2d utmBounds = new Vector2d(utmBoundsData.Easting, utmBoundsData.Northing);
+                Vector2d utmDistances = utmBounds - _utmOrigin;
+                Vector2d realScale;
+                realScale.x = utmDistances.x / WUIEngine.INPUT.Simulation.Size.x;
+                realScale.y = utmDistances.y / WUIEngine.INPUT.Simulation.Size.y;
+
+                double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0);
+                _mercatorToUtmScale = new Vector2d(realScale.x / mercatorCorrectionScale, realScale.y / mercatorCorrectionScale);
+                _utmToMercatorScale = new Vector2d(1.0 / _mercatorToUtmScale.x, 1.0 / _mercatorToUtmScale.y);
+            }            
         }
     }
 }

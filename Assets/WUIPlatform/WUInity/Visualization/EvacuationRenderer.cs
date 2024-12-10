@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using UnityEngine;
 using WUIPlatform.Pedestrian;
 
@@ -20,17 +27,20 @@ namespace WUIPlatform.WUInity.Visualization
         {
             Release();
 
-            if (renderHouseholds)
-            {
-                CreateHouseholdsBuffer(((MacroHouseholdSim)WUIEngine.SIM.PedestrianModule).GetHouseholdPositions().Length, WUIEngine.INPUT.Simulation.Size);
-            }            
-        }
-
-        private void CreateHouseholdsBuffer(int householdCount, Vector2d domainSize)
-        {
+            //calculate bounds here as trtaffic will need it too, not only pedestrian visualizer
+            Vector2d domainSize = WUIEngine.INPUT.Simulation.Size;
             Vector3 center = new Vector3((float)domainSize.x * 0.5f, 1f, (float)domainSize.y * 0.5f);
             Vector3 size = new Vector3((float)domainSize.x + 2f, 2f, (float)domainSize.y + 2f);
             bounds = new Bounds(center, size);
+
+            if (renderHouseholds)
+            {
+                CreateHouseholdsBuffer(((MacroHouseholdSim)WUIEngine.SIM.PedestrianModule).GetHouseholdPositions().Length);
+            }            
+        }
+
+        private void CreateHouseholdsBuffer(int householdCount)
+        {            
             householdPositionsBuffer = new ComputeBuffer(householdCount, 4 * sizeof(float));
         }
 

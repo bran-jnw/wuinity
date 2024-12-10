@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using WUIPlatform.Population;
 using WUIPlatform.Runtime;
 using WUIPlatform.IO;
@@ -63,10 +70,10 @@ namespace WUIPlatform
         {
             get
             {
-                if (ENGINE._runtimeData == null)
+                /*if (ENGINE._runtimeData == null)
                 {
                     ENGINE._runtimeData = new RuntimeData();
-                }
+                }*/
                 return ENGINE._runtimeData;
             }
         }
@@ -178,6 +185,8 @@ namespace WUIPlatform
 
             validInput = new ValidCriticalData(_input);
 
+            _runtimeData = new RuntimeData();
+
             //transform input to actual data
             RUNTIME_DATA.Population.LoadAll();
             RUNTIME_DATA.Evacuation.LoadAll();
@@ -209,9 +218,8 @@ namespace WUIPlatform
 
         public void UpdateMapResourceStatus()
         {
-            DATA_STATUS.MapLoaded = RUNTIME_DATA.LoadMapbox();
-
 #if USING_UNITY
+            DATA_STATUS.MapLoaded = WUInity.WUInityEngine.INSTANCE.LoadMapbox();
             WUInity.WUInityEngine.INSTANCE.UpdateSimBorders();
             WUInity.WUInityEngine.INSTANCE.WUICamera.SetCameraStartPosition(INPUT.Simulation.Size);
 #endif
