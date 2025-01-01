@@ -204,82 +204,41 @@ namespace WUIPlatform.WUInity.UI
                     float yNorm = hitPoint.z / (float)WUIEngine.INPUT.Simulation.Size.y;
                     //yNorm = Mathf.Clamp01(yNorm);
                     int y = (int)(WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y * yNorm);
-                    GetCellInfo(hitPoint, x, y);
+                    WUInityEngine.INSTANCE.GetCellInfo(hitPoint, x, y);
                 }
+            }
+
+            if (WUInityEngine.INSTANCE.IsPainterActive() && WUInityEngine.Painter.GetPaintMode() == Painter.PaintMode.EvacGroup)
+            {
+                var root = Document.rootVisualElement;
+                int groupCell = 0, activeGroupCell = 0, groupPop = 0;
+
+                UnityEngine.UIElements.DropdownField dfEvacuationGroup = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
+                if (dfEvacuationGroup != null)
+                {
+                    for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length; i++)
+                        if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i] == dfEvacuationGroup.index)
+                        {
+                            groupCell++;
+
+                            int y = (int)((i - i % WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x) / WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x);
+                            int x = i % WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
+                            int cellPop = WUIEngine.POPULATION.GetPopulation(x, y);
+
+                            if (cellPop > 0) activeGroupCell++;
+                            groupPop += cellPop;
+                        }
+                }
+
+                Label txtGroupCell = root.Q<Label>("TxtGroupCell"), txtActiveGroupCell = root.Q<Label>("TxtActiveGroupCell"), txtGroupPopulation = root.Q<Label>("TxtGroupPopulation");
+                if (txtGroupCell != null)       txtGroupCell.text = "Group cells: " + groupCell;
+                if (txtActiveGroupCell != null) txtActiveGroupCell.text = "Active group cells: " + activeGroupCell;
+                if (txtGroupPopulation != null) txtGroupPopulation.text = "Group population: " + groupPop;
+
             }
 
             //UnityEngine.Debug.Log("menu::Update;}");
         }
-
-        string dataSampleString="";
-        void GetCellInfo(Vector3 pos, int x, int y)
-        {
-            dataSampleString = "No data to sample."; // It is equivalent to WUInity.INSTANCE.dataSampleString
-
-            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.GPW)
-            {
-                if (WUIEngine.POPULATION.GetLocalGPWData() != null && WUIEngine.POPULATION.GetLocalGPWData().density != null && WUIEngine.POPULATION.GetLocalGPWData().density.Length > 0)
-                {
-                    if (WUIEngine.POPULATION.Visualizer.IsDataPlaneActive())
-                    {
-                        float xCellSize = (float)(WUIEngine.POPULATION.GetLocalGPWData().realWorldSize.x / WUIEngine.POPULATION.GetLocalGPWData().dataSize.x);
-                        float yCellSize = (float)(WUIEngine.POPULATION.GetLocalGPWData().realWorldSize.y / WUIEngine.POPULATION.GetLocalGPWData().dataSize.y);
-                        double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(WUIEngine.POPULATION.GetLocalGPWData().GetDensityUnitySpace(new Vector2d(pos.x, pos.z)) * cellArea);
-                    }
-                    else
-                    {
-                        dataSampleString = "GPW data not visible, activate to sample data.";
-                    }
-                }
-            }
-            else if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
-            {
-                //dataSampleString = "Outside of data range.";
-                return;
-            }
-            else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Paint)
-            {
-
-            }
-            else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Farsite)
-            {
-
-            }
-            /*
-            else //if (_evacDataPlane != null && _evacDataPlane.activeSelf)     // Need to find out how to get access to _evacDataPlane
-            {
-                if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Population)
-                {
-                    dataSampleString = "Interpolated people count: " + WUIEngine.POPULATION.GetPopulation(x, y);
-                }
-                else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Relocated)
-                {
-                    if (WUInity.SIM.PedestrianModule() != null)
-                    {
-                        dataSampleString = "Rescaled and relocated people count: " + ((MacroHouseholdSim)WUInity.SIM.PedestrianModule()).GetPopulation(x, y);
-                    }
-                }
-                else if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.TrafficDens)
-                {
-                    int people = currentPeopleInCells[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x];
-                    dataSampleString = "People: " + people;
-                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x] != null)
-                    {
-                        int peopleInCars = currenttrafficDensityData[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount;
-                        int cars = currenttrafficDensityData[x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount;
-
-                        dataSampleString += " | People in cars: " + peopleInCars + " (Cars: " + cars + "). Total people " + (people + peopleInCars);
-                    }
-                }
-            }
-            */
-            else
-            {
-                dataSampleString = "Data not visible, toggle on to sample data.";
-            }
-        }
-
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// My custom methods for handling GUI controls setup and actions
@@ -337,8 +296,9 @@ namespace WUIPlatform.WUInity.UI
                 InitEvacGroupList(root);
 
                 SetupEvacGroupRespButtons(root);
-                
+
                 // 6. Evacuation settings -------------------------------------------------------------------------------------------
+                SetupEvacuationSettings(root);
 
                 // 7. Routing data --------------------------------------------------------------------------------------------------
                 SetupLoadOSMDataFile(root);
@@ -369,13 +329,11 @@ namespace WUIPlatform.WUInity.UI
 
                 SetupVewFireFileButtons(root);
 
-                // 11. Check external fire references
-
-                // 12. Running simulation settings
+                // 11. Running simulation settings
                 SetupSimulationParameters(root);
                 RegisterSimulationToggles(root);
 
-                // 13. Execute simulation
+                // 12. Execute simulation
                 // Activate "Run simulation" callback for button-click event
                 SetupRunSimulationTask(root);
 
@@ -537,7 +495,7 @@ namespace WUIPlatform.WUInity.UI
             DateTime localDate = DateTime.Now;
             var culture = new CultureInfo("en-GB");
 
-            string logText= "Sys logs saved data and time: " + localDate.ToString(culture)+", "+ localDate.Kind + "\n\r"; 
+            string logText= "Sys logs saved on: " + localDate.ToString(culture)+", "+ localDate.Kind + "\n\r"; 
 
             foreach (string logItem in WUIEngine.GetLog())
                 logText += (logItem + "\n");
@@ -902,6 +860,78 @@ namespace WUIPlatform.WUInity.UI
                 btnEditEvacGroupOnMap.clicked += BtnEditEvacGroupOnMap_clicked;
         }
 
+        private void SetupEvacuationSettings(VisualElement root)
+        {
+            Toggle togAllowMTOneCar = root.Q<Toggle>("TogAllowMTOneCar");
+            if (togAllowMTOneCar != null)
+                togAllowMTOneCar.RegisterValueChangedCallback(evt =>
+                {
+                    WUIEngine.INPUT.Evacuation.allowMoreThanOneCar = evt.newValue;
+                });
+
+            UnityEngine.UIElements.TextField txTSetMaxCarsPH = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCarsPH");
+            if (txTSetMaxCarsPH != null)
+                txTSetMaxCarsPH.RegisterValueChangedCallback((evt) =>
+                {
+                    int.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.maxCars);
+                });
+
+            UnityEngine.UIElements.TextField txTSetProbMCPH = root.Q<UnityEngine.UIElements.TextField>("TxTSetProbMCPH");
+            if (txTSetProbMCPH != null)
+                txTSetProbMCPH.RegisterValueChangedCallback((evt) =>
+                {
+                    float.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.maxCarsChance);
+                });
+
+            UnityEngine.UIElements.TextField txTSetMinPersPH = root.Q<UnityEngine.UIElements.TextField>("TxTSetMinPersPH");
+            if (txTSetMinPersPH != null)
+                txTSetMinPersPH.RegisterValueChangedCallback((evt) =>
+                {
+                    int.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.minHouseholdSize);
+                });
+
+            UnityEngine.UIElements.TextField txTSetMaxPersPH = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxPersPH");
+            if (txTSetMaxPersPH != null)
+                txTSetMaxPersPH.RegisterValueChangedCallback((evt) =>
+                {
+                    int.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.maxHouseholdSize);
+                });
+
+            UnityEngine.UIElements.TextField txTSetMinWalkSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMinWalkSpeed");
+            if (txTSetMinWalkSpeed != null)
+                txTSetMinWalkSpeed.RegisterValueChangedCallback((evt) =>
+                {
+                    float.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.walkingSpeedMinMax.X);  // Note Vector2 is changed, hence X replaced x in previous version.
+                });
+
+            UnityEngine.UIElements.TextField txTSetMaxWalkSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxWalkSpeed");
+            if (txTSetMaxWalkSpeed != null)
+                txTSetMaxWalkSpeed.RegisterValueChangedCallback((evt) =>
+                {
+                    float.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.walkingSpeedMinMax.Y);
+                });
+
+            UnityEngine.UIElements.TextField txTSetModWalkSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetModWalkSpeed");
+            if (txTSetModWalkSpeed != null)
+                txTSetModWalkSpeed.RegisterValueChangedCallback((evt) =>
+                {
+                    float.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.walkingSpeedModifier);
+                });
+
+            UnityEngine.UIElements.TextField txTSetModWalkDist = root.Q<UnityEngine.UIElements.TextField>("TxTSetModWalkDist");
+            if (txTSetModWalkDist != null)
+                txTSetModWalkDist.RegisterValueChangedCallback((evt) =>
+                {
+                    float.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.walkingDistanceModifier);
+                });
+
+            UnityEngine.UIElements.TextField txTEvaOrderTime = root.Q<UnityEngine.UIElements.TextField>("TxTEvaOrderTime");
+            if (txTEvaOrderTime != null)
+                txTEvaOrderTime.RegisterValueChangedCallback((evt) =>
+                {
+                    float.TryParse(evt.newValue, out WUIEngine.INPUT.Evacuation.EvacuationOrderStart);
+                });
+        }
         private void SetupRoutingDataButtons(VisualElement root)
         {
             UnityEngine.UIElements.Button btnFilterOSMData = root.Q<UnityEngine.UIElements.Button>("FilterOSMData");
@@ -965,6 +995,13 @@ namespace WUIPlatform.WUInity.UI
                     }
                     else
                         WUIEngine.INPUT.Traffic.backGroundDensityMinMax.Y = value;
+                });
+
+            Toggle togSpeedAffectedBySmoke = root.Q<Toggle>("TogSpeedAffectedBySmoke");
+            if (togSpeedAffectedBySmoke != null)
+                togSpeedAffectedBySmoke.RegisterValueChangedCallback(evt =>
+                {
+                    WUIEngine.INPUT.Traffic.visibilityAffectsSpeed = evt.newValue;
                 });
         }
 
@@ -1042,8 +1079,9 @@ namespace WUIPlatform.WUInity.UI
                 {
                     string name;
                     List<string> responseCurveNames = new List<string>(), destinationNames = new List<string>();
-                    List<float> responseCurveProbabilities = new List<float>();
+                    List<double> responseCurveProbabilities = new List<double>();
                     List<double> goalProbabilities = new List<double>();
+                    List<double> responseProbabilities = new List<double>();
                     float r, g, b;
                     WUIEngineColor color = WUIEngineColor.white;
 
@@ -1123,7 +1161,7 @@ namespace WUIPlatform.WUInity.UI
 
                     //TODO: check if input count and probabilities match
 
-                    EvacGroup eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
+                    EvacGroup eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, responseCurveProbabilities.ToArray(), color);
 
                     // The code above is just to check if the group file contains valid data
                     //-----------------------------------------------------------------------------------------------------------------
@@ -1494,7 +1532,7 @@ namespace WUIPlatform.WUInity.UI
 
         void FilterOSMFile(string[] paths)
         {
-            if(FilterOSMFile(paths[0])==false) // If success, replace the OSM file with the filered one.
+            if(FilterOSMFile(paths[0])==false) // If success, replace the OSM file with the filtered one.
             {
                 CancelSetOSMDataFile();
             }
@@ -1504,7 +1542,7 @@ namespace WUIPlatform.WUInity.UI
         {
             WUIEngine.LOG(WUIEngine.LogType.Log, " Filtering is in progress and it can take a very long period of time subject to file size and computational power. Please wait until it is completed.");
 
-            if (WUIEngine.RUNTIME_DATA.Routing.FilterOSMData(filename)) // If success, replace the OSM file with the filered one.
+            if (WUIEngine.RUNTIME_DATA.Routing.FilterOSMData(filename)) // If success, replace the OSM file with the filtered one.
             {
                 string filteredOSMFilePath = Path.Combine(WUIEngine.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(_OSMDataFile) + ".osm.pbf");
                 _OSMDataFile = filteredOSMFilePath;
@@ -1632,8 +1670,9 @@ namespace WUIPlatform.WUInity.UI
                 }
                 else
                 {
-                    btnEditEvacGroupOnMap.text = "Edit evacuatoin group on map";
+                    btnEditEvacGroupOnMap.text = "Edit evacuation group on map";
                     WUInityEngine.INSTANCE.StopPainter();
+                    EvacGroup.SaveEvacGroupIndices();       // Save when quit editing Group Indices
                 }
             }
         }
@@ -1714,6 +1753,24 @@ namespace WUIPlatform.WUInity.UI
                     //UnityEngine.Debug.Log($"The Evacuation group dropdown selection has changed to {dfDfEvacuationGroup.index}, {evt.newValue}.");
 
                     WUInityEngine.Painter.SetEvacGroupColor(dfDfEvacuationGroup.index);   //For editing evacuation group on map.
+
+                    int groupCell = 0, activeGroupCell = 0, groupPop = 0;
+                    for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length; i++)
+                        if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i] == dfDfEvacuationGroup.index)
+                        {
+                            groupCell++;
+                            int y = (int)((i - i % WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x) / WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x);
+                            int x = i % WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
+                            int cellPop = WUIEngine.POPULATION.GetPopulation(x, y);
+
+                            if (cellPop > 0) activeGroupCell++;
+                            groupPop += cellPop;
+                        }
+
+                    Label txtGroupCell = root.Q<Label>("TxtGroupCell"), txtActiveGroupCell = root.Q<Label>("TxtActiveGroupCell"), txtGroupPopulation = root.Q<Label>("TxtGroupPopulation");
+                    if (txtGroupCell != null) txtGroupCell.text = "Group cells: " + groupCell;
+                    if (txtActiveGroupCell != null) txtActiveGroupCell.text = "Active group cells: " + activeGroupCell;
+                    if (txtGroupPopulation != null) txtGroupPopulation.text = "Group population: " + groupPop;
 
                     // I need to add more fields to allow user see the detailed information about evacuation groups.
 
@@ -2069,7 +2126,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnVewArrivalOutput_clicked()
         {
-
+            WUIEngine.LOG(WUIEngine.LogType.Warning, "Arrival output is under development and will be made available soon.");
         }
 
         void OnGUI()
@@ -2199,7 +2256,7 @@ namespace WUIPlatform.WUInity.UI
         {
             if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.None) return;
                 
-            String showString = dataSampleString;
+            String showString = WUInityEngine.INSTANCE.GetDataSampleString();
 
             Label tipsLabel = Document.rootVisualElement.Q<Label>("TipsLabel");
             if (tipsLabel != null && showString.Length > 0)
@@ -2374,16 +2431,56 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnShowHideLocalGPW_clicked()
         {
-            if (WUIEngine.DATA_STATUS.LocalGPWLoaded) WUIEngine.POPULATION.Visualizer.ToggleLocalGPWVisibility();
+            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Population)  // Turn off Population if it is on display.
+            {
+                WUInityEngine.INSTANCE.ToggleEvacDataPlane();
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
+            }
+
+            if (WUIEngine.DATA_STATUS.LocalGPWLoaded)
+            {
+                if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.GPW)
+                {
+                    WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
+                }
+                else
+                {
+                    WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.GPW);
+                }
+
+                WUIEngine.POPULATION.Visualizer.ToggleLocalGPWVisibility();
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Local GPW has not been loaded.");
+            }
         }
 
         private void BtnShowHideLocalPOP_clicked()
         {
+            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.GPW)  // Turn off GPW if it is on display.
+            {
+                WUIEngine.POPULATION.Visualizer.ToggleLocalGPWVisibility();
+                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
+            }
+
             if (WUIEngine.POPULATION.IsPopulationLoaded())
             {
-                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.Population);
-                WUInityEngine.INSTANCE.DisplayPopulation();
+                if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.Population)
+                {
+                    WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
+                }
+                else
+                {
+                    WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.Population);
+                    WUInityEngine.INSTANCE.DisplayPopulation();
+                }
+
                 WUInityEngine.INSTANCE.ToggleEvacDataPlane();
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Local population has not been loaded.");
             }
         }
 

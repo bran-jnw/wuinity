@@ -356,7 +356,7 @@ namespace WUIPlatform.Pedestrian
             int randomResponseCurveIndex = 0;
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponsesCumulativeWeights[i]) //Mistakenly used GoalsCumulativeWeights before.
                 {
                     randomResponseCurveIndex = i;
                     break;
@@ -364,14 +364,15 @@ namespace WUIPlatform.Pedestrian
             }
             int curveIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
-
+            r = Random.Range(0f, 1f);   // Ramdomise the number again.
             //skip first as that is always zero probability
             for (int i = 1; i < WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
                 if (r <= WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    //responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
                     break;
                 }
             }

@@ -93,7 +93,7 @@ namespace WUIPlatform.Traffic
         private void UpdateEvacGoalsInternal()
         {
             evacGoalsDirty = false;
-
+            int reRoutedCar = 0;
             //TODO: Do we need to re-calc traffic density data since some cars are gone after update loop?  Conservative not to (and cheaper)
             foreach (KeyValuePair<int, RoadSegment> t in roadSegments)
             {
@@ -122,12 +122,13 @@ namespace WUIPlatform.Traffic
                         {
                             if (!car.hasArrived)
                             {
-                                car.ChangeRoute(r);
+                                car.ChangeRoute(r); reRoutedCar++;
                             }
                         }                                               
                     }
                 }
             }
+            WUIEngine.LOG(WUIEngine.LogType.Event, "Rerouted " + reRoutedCar.ToString() + " cars due to evacuation goal reached full capacity.");
         }
 
         public bool IsAnyoneGoingHere(EvacuationGoal goal)

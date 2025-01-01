@@ -443,7 +443,7 @@ namespace WUIPlatform.WUInity
             }
         }
 
-        void GetCellInfo(Vector3 pos, int x, int y)
+        public void GetCellInfo(Vector3 pos, int x, int y)      // Change to public to allow workflow UI access
         {
             dataSampleString = "No data to sample.";
             if (dataSampleMode == DataSampleMode.GPW)
@@ -480,7 +480,7 @@ namespace WUIPlatform.WUInity
             {
                 if (dataSampleMode == DataSampleMode.Population)
                 {
-                    dataSampleString = "Interpolated people count: " + WUIEngine.POPULATION.GetPopulation(x, y);
+                    dataSampleString = "Interpolated people countat at cell (" + x + ", " + y + "): " + WUIEngine.POPULATION.GetPopulation(x, y);
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
