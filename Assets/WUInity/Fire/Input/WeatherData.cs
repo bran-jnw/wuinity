@@ -175,13 +175,12 @@ namespace WUInity.Fire
             return currentWeather;
         }
 
-        public static WeatherInput LoadWeatherInputFile(out bool success)
+        public static WeatherInput LoadWeatherInputFile(string path, out bool success)
         {
             success = false;
             WeatherInput result = null;
             List<WeatherData> weatherData = new List<WeatherData>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.weatherFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

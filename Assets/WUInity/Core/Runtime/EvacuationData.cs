@@ -175,7 +175,7 @@ namespace WUInity.Runtime
             int index = -1;
             for (int i = 0; i < EvacuationGoals.Count; i++)
             {
-                if (name == EvacuationGoals[i].name)
+                if (name == EvacuationGoals[i].name || name == WUInity.INPUT.Traffic.evacuationGoalFiles[i])    // Add 2nd comparison with evacuationGoalFiles in case user uses goal filename rather than goal name in a group file.
                 {
                     index = i;
                     break;

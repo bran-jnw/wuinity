@@ -135,8 +135,13 @@ namespace WUInity.Traffic
             oldTotalCars = 0;
 
             output = new List<string>();
-            
+
+#if DEBUG
+            string start = "Time(s),#RoadSegs,#BlockedSGs,#BlockdCars,Injected cars,carsOnHold,Exiting cars,Current cars in system,CCIS, Exiting people, Avg. v [km/h], Min. v [km/h]";
+#else
             string start = "Time(s),Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
+#endif
+
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
                 start += ", Goal: " + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;
@@ -198,6 +203,8 @@ namespace WUInity.Traffic
         private void UpdateEvacGoalsInternal()
         {
             evacGoalsDirty = false;
+            int reRoutedCar = 0;
+            List<MacroCar> reroutedCarsOnHold= new List<MacroCar>();
 
             //TODO: Do we need to re-calc traffic density data since some cars are gone after update loop?  Conservative not to (and cheaper)
             foreach (KeyValuePair<int, RoadSegment> t in roadSegments)
@@ -227,12 +234,74 @@ namespace WUInity.Traffic
                         {
                             if (!car.hasArrived)
                             {
+                                int currenthash = car.roadSegmentHash;
+                                carsInSystem.Remove(car);
+
                                 car.ChangeRoute(r);
+                                int newhash = car.roadSegmentHash;
+
+                                if (currenthash!= newhash)
+                                {
+                                    t.Value.cars.RemoveAt(i);
+                                    RoadSegment tt;
+                                    if (roadSegments.TryGetValue(newhash, out tt))
+                                    {
+                                        if (tt.CanAddCar())
+                                        {
+                                            tt.AddCar(car);
+                                            carsInSystem.Add(car);
+                                        }
+                                        else
+                                        {
+                                            carsOnHold.Add(car);
+                                        }                                     
+                                    }
+                                    else
+                                    {
+                                        reroutedCarsOnHold.Add(car);
+                                        //roadSegments.Add(newhash, new RoadSegment(car, this));
+                                    }
+                                }
+                                else
+                                {
+                                    carsInSystem.Add(car);
+                                }
+                                                                
+                                reRoutedCar++;
                             }
                         }                                               
                     }
                 }
             }
+
+            for (int i = 0; i < reroutedCarsOnHold.Count; i++)
+            {
+                MacroCar car = reroutedCarsOnHold[i];
+                int hash = car.roadSegmentHash;
+                RoadSegment t;
+                if (roadSegments.TryGetValue(hash, out t))
+                {
+                    if (t.CanAddCar())
+                    {
+                        t.AddCar(car);
+                        carsInSystem.Add(car);
+                        reroutedCarsOnHold.Remove(car);
+                    }
+                    else
+                    {
+                        carsOnHold.Add(car);
+                    }
+                }
+                else
+                {
+                    //new section of road so can add without issues, create new traffic density in case any other car wants to get in on the same road
+                    roadSegments.Add(hash, new RoadSegment(car, this));
+                    reroutedCarsOnHold.Remove(car);
+                    carsInSystem.Add(car);
+                }
+            }
+
+            WUInity.LOG(WUInity.LogType.Event, "Rerouted "+ reRoutedCar.ToString() +" cars due to evacuation goal reached full capacity.");
         }
 
         public bool IsAnyoneGoingHere(EvacuationGoal goal)
@@ -280,9 +349,30 @@ namespace WUInity.Traffic
             float averageSpeed = 0;
             float minSpeed = 9999f;
             int exitingPeople = 0;
+
+            int upstreamMovementBlockedSegment = 0;
+            int blockedCars=0;
+            int minimumMaxCarsOnRoad = 99999;
+            int countCarsInSystem = 0;
+
             //loop through each road segment that has a car and we need the density data to calculate current speed/density relation
             foreach (KeyValuePair<int, RoadSegment> roadSegment in roadSegments)
             {
+                if (minimumMaxCarsOnRoad> roadSegment.Value.GetMaxCarsOnRoad())
+                {
+                    minimumMaxCarsOnRoad = roadSegment.Value.GetMaxCarsOnRoad();
+                }
+                
+                if (roadSegment.Value.cars.Count <= 0)
+                    WUInity.LOG(WUInity.LogType.Log, "roadSegment has abnormal number of cars of "+ roadSegment.Value.cars.Count);
+                else
+                    countCarsInSystem += roadSegment.Value.cars.Count;
+
+#if DEBUG
+//                if (roadSegment.Value.cars.Count > roadSegment.Value.GetMaxCarsOnRoad())
+//                    WUInity.LOG(WUInity.LogType.Warning, "RoadSegment [" + roadSegment.Value.GetStreetName() + "] has " + roadSegment.Value.cars.Count + " cars, while MaxCar= " + roadSegment.Value.GetMaxCarsOnRoad());
+#endif
+
                 //calculate the new speed based on the local density
                 float densitySpeed = roadSegment.Value.CalculateSpeedBasedOnDensity(); 
                 averageSpeed += densitySpeed;
@@ -298,6 +388,9 @@ namespace WUInity.Traffic
                     if(roadSegment.Value.upstreamMovementBlocked)
                     {
                         //densitySpeed = WUInity.INPUT.traffic.stallSpeed / 3.6f;
+                        //WUInity.LOG(WUInity.LogType.Log, "roadSegment.Value.upstreamMovementBlocked!!");
+                        upstreamMovementBlockedSegment++;
+                        blockedCars += roadSegment.Value.cars.Count;
                         break;
                     }
 
@@ -316,7 +409,7 @@ namespace WUInity.Traffic
                         //if traffic density exists we have to check if we can move over there, if not we stay still and stop the entire movement on the road
                         if(roadSegments.TryGetValue(newHash, out nextSegment))
                         {
-                            if(nextSegment.CanAddCar())
+                            if(nextSegment.CanAddCar()) //if (true)
                             {
                                 car.MoveCar(currentTime, deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
@@ -331,7 +424,7 @@ namespace WUInity.Traffic
                         //we also have to check if we move to any place that previous cars have already moved to that did not exists prior
                         else if (newRoadSegments.TryGetValue(newHash, out nextSegment))
                         {
-                            if (nextSegment.CanAddCar())
+                            if (nextSegment.CanAddCar()) //if (true)
                             {
                                 car.MoveCar(currentTime, deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
@@ -409,10 +502,17 @@ namespace WUInity.Traffic
             else 
             {
                 minSpeed *= 3.6f;
-            }   
+            }
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
+#if DEBUG            
+            string newOut = currentTime + ","+ roadSegments.Count+","+ upstreamMovementBlockedSegment+ "," + blockedCars +","+ (totalCarsSimulated - oldTotalCars) + "," 
+                            + carsOnHold.Count+"," + carsToRemove.Count + "," + carsInSystem.Count + "," + countCarsInSystem +","+ exitingPeople + ", " + averageSpeed + "," + minSpeed;
+#else
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
+#endif
+
+
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
                 newOut += "," + WUInity.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
@@ -437,9 +537,15 @@ namespace WUInity.Traffic
             }
 
             WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
-                      
-        }     
-        
+
+#if DEBUG
+//            if ((int)(currentTime - WUInity.SIM.StartTime) % 30 == 0 && upstreamMovementBlockedSegment > 0)
+//            {
+//                WUInity.LOG(WUInity.LogType.Log, "Blocked roadSegments: " + upstreamMovementBlockedSegment + " Blocked Cars: " + blockedCars + " minRoadCapa: " + minimumMaxCarsOnRoad);
+//            }
+#endif
+        }
+
         public Vector4[] GetCarPositionsAndStates()
         {
             Vector4[] carsRendering = new Vector4[carsInSystem.Count];
@@ -487,6 +593,11 @@ namespace WUInity.Traffic
             public bool upstreamMovementBlocked;
             LinearSpline2D spline;
             public float speedLimit;
+
+            public string GetStreetName()
+            {
+                return streetName;
+            }
 
             public RoadSegment(MacroCar car, MacroTrafficSim mCS)
             {
@@ -554,6 +665,11 @@ namespace WUInity.Traffic
                 car.SetCurrentSpeedLimit(speedLimit);
                 car.SetSpline(spline);
                 cars.Add(car);
+            }
+
+            public int GetMaxCarsOnRoad()
+            {
+                return maxCarsOnRoad;
             }
 
             public float CalculateSpeedBasedOnDensity()

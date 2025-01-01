@@ -271,13 +271,14 @@ namespace WUInity.Population
 
             if(success)
             {
-                if(updateInput)
+                WUInity.INPUT.Population.populationFile = Path.GetFileName(path);     // Bug fix: retrieve filename before saving input.
+                if (updateInput)
                 {
                     WUInityInput.SaveInput();
                 }
                 CreateTexture();
                 isLoaded = true;
-                WUInity.INPUT.Population.populationFile = Path.GetFileName(path);                
+                               
                 WUInity.LOG(WUInity.LogType.Log, " Loaded population from file " + path + ".");
             }
             else

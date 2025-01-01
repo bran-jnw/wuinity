@@ -277,7 +277,7 @@ namespace WUInity
                 //place people
                 _macroHumanSim.PopulateCells(WUInity.RUNTIME_DATA.Routing.RouteCollections, WUInity.POPULATION.GetPopulationData());                
                 //distribute people
-                _macroHumanSim.PlaceHouseholdsInCells();
+                _macroHumanSim.PlaceHouseholdsInCells(i);
             }
 
             if (input.Simulation.RunTrafficSim)

@@ -101,7 +101,7 @@ namespace WUInity.Traffic
             routeData = desiredNewRoute;
             currentShapeIndex = 1;
             //add old distance left to the new route piece length to keep somewhat consistent travel distance
-            currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance + currentDistanceLeft;
+            currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance;// + currentDistanceLeft;
             //currentSpeedLimit = GetAndSetCurrentSpeedLimit();
             hasArrived = false;
 
@@ -200,13 +200,17 @@ namespace WUInity.Traffic
                     }
                 }
                 else
-                {
+                {   // Jonathan's code
                     //remove any potential overshoot of distance
                     totalTravelDistance += currentDistanceLeft;
                     //add "old" current distance left since there might be some residual actual travel spent (negative distance left)?
                     currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance - routeData.route.ShapeMeta[currentShapeIndex - 1].Distance;// + currentDistanceLeft;
                     currentShapeLength = currentDistanceLeft;
                     //currentSpeedLimit = GetAndSetCurrentSpeedLimit();                                       
+                 
+                    // Hui's test code 
+                    // currentDistanceLeft += routeData.route.ShapeMeta[currentShapeIndex].Distance;
+                    // currentShapeLength = currentDistanceLeft;
 
                     //update new going to coordinates
                     int sI = routeData.route.ShapeMeta[currentShapeIndex].Shape;

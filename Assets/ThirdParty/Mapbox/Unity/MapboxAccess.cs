@@ -46,7 +46,7 @@ namespace Mapbox.Unity
 
 
 		public static bool Configured;
-		public static string ConfigurationJSON;
+		public static string ConfigurationJSON="";
 		private MapboxConfiguration _configuration;
 		private string _tokenNotSetErrorMessage = "No configuration file found! Configure your access token from the Mapbox > Setup menu.";
 
@@ -153,7 +153,7 @@ namespace Mapbox.Unity
 				{
 					throw new InvalidTokenException(_tokenNotSetErrorMessage);
 				}
-				ConfigurationJSON = configurationTextAsset.text;
+				ConfigurationJSON = configurationTextAsset.text;  //Hui Test code: ConfigurationJSON = "{\"AccessToken\":\"sk.eyJ1IjoiaHVpbWFwYm94IiwiYSI6ImNsd3lzbXM3ZjFseXoybHM3ZWozYW1mMGsifQ.YJv9zjReqcCKv143hoiuBQ\",\"MemoryCacheSize\":500,\"FileCacheSize\":3000,\"DefaultTimeout\":30,\"AutoRefreshCache\":false}";
 			}
 
 #if !WINDOWS_UWP
@@ -168,11 +168,11 @@ namespace Mapbox.Unity
 		void ConfigureFileSource()
 		{
 			_fileSource = new CachingWebFileSource(_configuration.AccessToken, _configuration.GetMapsSkuToken, _configuration.AutoRefreshCache)
-				.AddCache(new MemoryCache(_configuration.MemoryCacheSize))
+/*				.AddCache(new MemoryCache(_configuration.MemoryCacheSize))
 #if !UNITY_WEBGL
 				.AddCache(new SQLiteCache(_configuration.FileCacheSize))
 #endif
-				;
+*/				; // Some users reported "Mapbox token not valid" error. Comment out the lines with .AddCache temporarily solves the problem.
 		}
 
 

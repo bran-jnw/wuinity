@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2022175585972520336}
   - component: {fileID: 2022175585972520337}
-  - component: {fileID: 2022175585972520343}
+  - component: {fileID: 7332898369027309403}
   m_Layer: 5
   m_Name: WorkflowUI
   m_TagString: Untagged
@@ -47,9 +47,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: 3ae48cd1a91dd2244884bd094c18bdbf, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: b0d451c3f1ab22a46b86f1d2f65c9a4d, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: b0d451c3f1ab22a46b86f1d2f65c9a4d,
+    type: 3}
   m_SortingOrder: 0
---- !u!114 &2022175585972520343
+--- !u!114 &7332898369027309403
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -58,7 +59,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2022175585972520338}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d4ad04fb6f83bc40b6ef4bf5ccf0f71, type: 3}
+  m_Script: {fileID: 11500000, guid: ba46f3a7a495a0a4bb45713ea95e00fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Document: {fileID: 2022175585972520337}
+  Document: {fileID: 0}

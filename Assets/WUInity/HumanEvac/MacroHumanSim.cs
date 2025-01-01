@@ -308,7 +308,7 @@ namespace WUInity.Evac
             int randomResponseCurveIndex = 0;
             for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponsesCumulativeWeights[i]) //Mistakenly used GoalsCumulativeWeights before.
                 {
                     randomResponseCurveIndex = i;
                     break;
@@ -316,17 +316,30 @@ namespace WUInity.Evac
             }
             int curveIndex = WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
-
+            r = Random.Range(0f, 1f);   // Ramdomise the number again.
             //skip first as that is always zero probability
             for (int i = 1; i < WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
                 if (r <= WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    //responseTime = Random.Range(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    responseTime = Random.Range(WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time, WUInity.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
                     break;
                 }
             }
+
+            /* Test code
+            if(evacGroupIndex!=0) WUInity.LOG(WUInity.LogType.Log, " evacGroupIndex= " + evacGroupIndex.ToString());
+            WUInityInput wO = WUInity.INPUT;
+
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_rand_output" + ".csv");
+            List<string> output_line;
+            output_line = new List<string>();
+            output_line.Add(r.ToString()+","+ curveIndex.ToString());
+
+            System.IO.File.AppendAllLines(path, output_line);
+            */
 
             return responseTime;
         }
@@ -344,7 +357,7 @@ namespace WUInity.Evac
         /// <summary>
         /// Creates the human evac cell if cell contains population and deploys households in all of the cells based on total amount of people per cell
         /// </summary>
-        public void PlaceHouseholdsInCells()
+        public void PlaceHouseholdsInCells(int nSimRunNum)  // Add nSimRunNum for output files.
         {
             totalHouseholds = 0;
             humanEvacCells = new HumanEvacCell[population.Length];
@@ -388,6 +401,59 @@ namespace WUInity.Evac
             WUInity.LOG(WUInity.LogType.Log, " Total households: " + totalHouseholds);
             WUInity.LOG(WUInity.LogType.Log, " Total cars: " +  totalCars);
             WUInity.LOG(WUInity.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+
+            // New code to output population cells and households information - Hui    2024.09.19
+            /* Test code
+            WUInity.LOG(WUInity.LogType.Log, " EG[0].ResponseCurveIndices.Length= "+ WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[0].ResponseCurveIndices.Length.ToString());
+            
+            for (int i = 0; i < WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[0].ResponseCurveIndices.Length; i++)
+            {
+                WUInity.LOG(WUInity.LogType.Log, "GoalsCumulativeWeights [" + i.ToString() + "]=" + WUInity.RUNTIME_DATA.Evacuation.EvacuationGroups[0].ResponsesCumulativeWeights[i].ToString());
+            }
+            */
+
+            List<string> output_cells_households;
+            output_cells_households = new List<string>();
+            output_cells_households.Add("Cell, CellX, CellY, PopInCell, NumOfHouse, -, PopInHouse/HouseRT...");
+
+            List<string> output_all_responses;
+            output_all_responses = new List<string>();
+            output_all_responses.Add("PopInHouse, Response");
+
+            for (int i = 0; i < humanEvacCells.Length; ++i)
+            {
+                string aCellLine="";
+                if (population[i] > 0)
+                {
+                    int y = i / cellsX;
+                    int x = i - y * cellsX;
+                    HumanEvacCell hR = humanEvacCells[i];
+
+                    //int totalPeopleInCell=0;
+                    string sHouseHolds="";
+
+                    for (int j = 0; j < hR.macroHouseholds.Length; j++)
+                    {
+                        MacroHousehold mH = hR.macroHouseholds[j];
+                        //totalPeopleInCell += mH.peopleInHousehold;
+                        sHouseHolds += mH.peopleInHousehold.ToString() + "," + mH.responseTime.ToString() + ",";
+
+                        output_all_responses.Add(mH.peopleInHousehold.ToString() + "," + mH.responseTime.ToString());
+                    }
+
+                    aCellLine = i.ToString() + "," +x.ToString()+ ","+ y.ToString()+ "," + population[i].ToString()+","+ hR.macroHouseholds.Length.ToString()+ ", -," +sHouseHolds;
+
+                    output_cells_households.Add(aCellLine);
+                }
+            }
+
+            WUInityInput wO = WUInity.INPUT;
+            string path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_cells&households_output_"+ nSimRunNum.ToString() + ".csv");
+            System.IO.File.WriteAllLines(path, output_cells_households);
+
+            path = System.IO.Path.Combine(WUInity.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_responses_output_" + nSimRunNum.ToString() + ".csv");
+            System.IO.File.WriteAllLines(path, output_all_responses);
+
         }
 
         /// <summary>

@@ -63,6 +63,11 @@ namespace WUInity.Runtime
                 LOG(WUInity.LogType.Error, "Mapbox token not valid.");
                 return false;
             }
+            else
+            {
+                LOG(WUInity.LogType.Log, "Mapbox token: " + MAP.myAccessToken);
+            }
+
             LOG(WUInity.LogType.Log, "Starting to load Mapbox map.");
             MAP.Initialize(new Mapbox.Utils.Vector2d(INPUT.Simulation.LowerLeftLatLong.x, INPUT.Simulation.LowerLeftLatLong.y), INPUT.Map.ZoomLevel);
             LOG(WUInity.LogType.Log, "Map loaded succesfully.");

@@ -100,13 +100,12 @@ namespace WUInity.Fire
             return result;
         }        
 
-        public static InitialFuelMoistureList LoadInitialFuelMoistureDataFile(out bool success)
+        public static InitialFuelMoistureList LoadInitialFuelMoistureDataFile(string path, out bool success)
         {
             success = false;
             InitialFuelMoistureList result = null;
             List<InitialFuelMoisture> initialFuelMoistures = new List<InitialFuelMoisture>();
 
-            string path = Path.Combine(WUInity.WORKING_FOLDER, WUInity.INPUT.Fire.initialFuelMoistureFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

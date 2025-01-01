@@ -129,7 +129,7 @@ namespace WUInity
         public bool visibilityAffectsSpeed = false;
         public string opticalDensityFile;
         public float opticalDensity = 0.05f;
-        public string roadTypesFile;
+        public string roadTypesFile = "default.roads";
         public float saveInterval = 600f;
 
         public MacroTrafficSim.TrafficAccident[] trafficAccidents = MacroTrafficSim.TrafficAccident.GetDummy();
@@ -147,7 +147,7 @@ namespace WUInity
     [System.Serializable]
     public class VisualizationOptions
     {
-        public bool drawRoads = false;
+        public bool drawRoads = true;
     }
 
     [System.Serializable]

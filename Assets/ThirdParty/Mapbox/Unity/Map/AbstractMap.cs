@@ -434,23 +434,33 @@ namespace Mapbox.Unity.Map
 			}
 		}
 
+		public string myAccessToken;    // Hui: Create a copy to Mapbox token
+
 		public bool IsAccessTokenValid
 		{
 			get
 			{
 				bool isAccessTokenValid = false;
 				try
-				{
+				{	
 					var accessTokenCheck = Unity.MapboxAccess.Instance;
+
 					if (Unity.MapboxAccess.Instance.Configuration == null || string.IsNullOrEmpty(Unity.MapboxAccess.Instance.Configuration.AccessToken))
 					{
 						return false;
 					}
 
+					myAccessToken=Unity.MapboxAccess.Instance.Configuration.AccessToken;
 					isAccessTokenValid = true;
 				}
-				catch (System.Exception)
+				catch (System.Exception ex)		// Hui: attempt to catch the error message
 				{
+					string output=ex.Message;
+					
+					if (string.IsNullOrEmpty(output))
+                    {
+						Debug.LogError("ERROR Message:"+output);
+					}
 					isAccessTokenValid = false;
 				}
 				return isAccessTokenValid;

@@ -60,7 +60,7 @@ namespace WUInity.Runtime
             if (success)
             {
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
-                RouterDb.AddContracted(RouterDb.GetSupportedProfile("Car"));
+                //RouterDb.AddContracted(RouterDb.GetSupportedProfile("Car"));
                 WUInity.LOG(WUInity.LogType.Log, "Router database loaded succesfully.");
             }
             else

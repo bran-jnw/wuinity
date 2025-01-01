@@ -11,15 +11,17 @@ namespace WUInity
         public int[] GoalIndices;
         public double[] GoalsCumulativeWeights;
         public int[] ResponseCurveIndices;
+        public double[] ResponsesCumulativeWeights;     // Newly added variable for multiple responses in one EvacGroup. 2024.09.20
         public string Name;
         public Color Color;
 
-        public EvacGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, Color color)
+        public EvacGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, double[] responsesCumulativeWeight, Color color)
         {
             Name = name;
             GoalIndices = goalIndices;
             GoalsCumulativeWeights = goalsCumulativeWeight;
             ResponseCurveIndices = responseCurveIndices;
+            ResponsesCumulativeWeights = responsesCumulativeWeight;
             Color = color;
         }
 
@@ -32,19 +34,20 @@ namespace WUInity
             string name = "Group1";
             Color color = Color.magenta;
             int[] responseCurveIndices = new int[] {0};
-            evacGroups[0] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
+            double[] responsesCumulativeWeights = new double[1] { 1.0 };
+            evacGroups[0] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, responsesCumulativeWeights, color);
 
             goalIndices = new int[] { 0, 1, 2 };
             goalsCumulativeWeights = new double[3] {0.4, 0.7, 1.0};
             name = "Group2";
             color = Color.cyan;
-            evacGroups[1] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
+            evacGroups[1] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, responsesCumulativeWeights, color);
 
             goalIndices = new int[] { 0, 1, 2 };
             goalsCumulativeWeights = new double[] { 0.4, 0.7, 1.0 };
             name = "Group3";
             color = Color.yellow;
-            evacGroups[2] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
+            evacGroups[2] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, responsesCumulativeWeights, color);
 
             return evacGroups;
         }
@@ -82,7 +85,7 @@ namespace WUInity
                     {
                         string name;
                         List<string> responseCurveNames = new List<string>(), destinationNames = new List<string>();
-                        List<float> responseCurveProbabilities = new List<float>();
+                        List<double> responseCurveProbabilities = new List<double>();
                         List<double> goalProbabilities = new List<double>();
                         float r, g, b;
                         Color color = Color.white;
@@ -163,7 +166,7 @@ namespace WUInity
 
                         //TODO: check if input count and probabilities match
 
-                        eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
+                        eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, responseCurveProbabilities.ToArray(), color);
                         evacGroups.Add(eG);
                     }
                     

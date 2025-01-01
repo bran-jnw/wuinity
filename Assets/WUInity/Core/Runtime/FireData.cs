@@ -151,7 +151,7 @@ namespace WUInity.Runtime
         public bool LoadInitialFuelMoistureData(string path, bool updateInputFile)
         {
             bool success;
-            _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile(out success);
+            _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile(path, out success);
             if (success && updateInputFile)
             {
                 WUInity.INPUT.Fire.initialFuelMoistureFile = Path.GetFileName(path);
@@ -164,7 +164,7 @@ namespace WUInity.Runtime
         public bool LoadWeatherInput(string path, bool updateInputFile)
         {
             bool success;
-            _weatherInput = WeatherInput.LoadWeatherInputFile(out success);
+            _weatherInput = WeatherInput.LoadWeatherInputFile(path, out success);
             if (success && updateInputFile)
             {
                 WUInity.INPUT.Fire.weatherFile = Path.GetFileName(path);
@@ -177,7 +177,7 @@ namespace WUInity.Runtime
         public bool LoadWindInput(string path, bool updateInputFile)
         {
             bool success;
-            _windInput = WindInput.LoadWindInputFile(out success);
+            _windInput = WindInput.LoadWindInputFile(path, out success);
             if (success && updateInputFile)
             {
                 WUInity.INPUT.Fire.windFile = Path.GetFileName(path);
