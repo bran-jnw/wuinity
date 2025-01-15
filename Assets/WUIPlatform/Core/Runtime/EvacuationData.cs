@@ -69,6 +69,8 @@ namespace WUIPlatform.Runtime
             }
         }
 
+        
+
         public void LoadAll()
         {            
             //need goals and curves before can load groups    
@@ -111,7 +113,7 @@ namespace WUIPlatform.Runtime
             _evacuationGoals = EvacuationGoal.LoadEvacuationGoalFiles(out success);
 
             return success;
-        }
+        }        
 
         public void AddEvacuationGoal(EvacuationGoal newGoal)
         {

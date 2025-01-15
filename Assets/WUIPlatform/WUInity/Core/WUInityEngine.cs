@@ -684,7 +684,7 @@ namespace WUIPlatform.WUInity
             {
                 EvacuationGoal eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
-                Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
                 float scale = 0.02f * (float)WUIEngine.INPUT.Simulation.Size.y;
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);

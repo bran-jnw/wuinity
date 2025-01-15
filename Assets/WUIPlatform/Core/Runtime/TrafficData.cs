@@ -5,19 +5,25 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using Itinero.LocalGeo;
+using System;
 using System.IO;
 using WUIPlatform.IO;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace WUIPlatform.Runtime
 {
     public class TrafficData
     {
-
-        public void LoadAll()
+        private Vector2[] _validStartCoordinates;
+        public Vector2[] ValidStartCoordinates
         {
-            LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile), false);
-            LoadOpticalDensityFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.opticalDensityFile), false);            
-        }
+            get
+            {
+                return _validStartCoordinates;
+            }
+        }        
 
         Traffic.OpticalDensityRamp _opticalDensity;
         public Traffic.OpticalDensityRamp OpticalDensity
@@ -37,7 +43,14 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        public bool LoadRoadTypeData(string path, bool updateInputFile)
+        public void LoadAll()
+        {
+            LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile), false);
+            LoadOpticalDensityFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.opticalDensityFile), false);
+            LoadValidStartCoordinates(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.ValidStartCoordinates));
+        }
+
+        private bool LoadRoadTypeData(string path, bool updateInputFile)
         {
             //success in this case means that we loaded a file and not defaults
             bool success;
@@ -63,6 +76,37 @@ namespace WUIPlatform.Runtime
                 WUIEngine.INPUT.Traffic.opticalDensityFile = Path.GetFileName(path); ;
                 WUIEngineInput.SaveInput();
             }
+
+            return success;
+        }
+        private bool LoadValidStartCoordinates(string path)
+        {
+            bool success = false;
+
+            if (File.Exists(path))
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    List<String> lines = new List<String>();
+
+                    while (!sr.EndOfStream)
+                    {
+                        lines.Add(sr.ReadLine());
+                    }
+
+                    _validStartCoordinates = new Vector2[lines.Count - 1];
+                    //skip last row, should be empty
+                    for(int i = 0; i < lines.Count - 1; ++i)
+                    {
+                        string[] line = lines[i].Split(",");
+                        float lat = float.Parse(line[0]);
+                        float lon = float.Parse(line[1]);
+                        _validStartCoordinates[i] = new Vector2(lat, lon);
+                    }
+                }
+
+                success = true;
+            }            
 
             return success;
         }

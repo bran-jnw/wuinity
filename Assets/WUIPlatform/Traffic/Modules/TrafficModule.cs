@@ -72,5 +72,7 @@ namespace WUIPlatform.Traffic
         }
 
         public abstract void HandleIgnitedFireCells(List<Vector2int> cellIndices);
+
+        public abstract bool IsNetworkReachable(Vector2d startLatLong);
     }
 }

@@ -155,7 +155,7 @@ namespace WUIPlatform.Runtime
         {
             if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections != null)
             {
-                Vector2d p = GeoConversions.GeoToWorldPosition(pos.x, pos.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                Vector2d p = GeoConversions.GeoToWorldPosition(pos.x, pos.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
                 int x = (int)(p.x / WUIEngine.INPUT.Evacuation.RouteCellSize);
                 int y = (int)(p.y / WUIEngine.INPUT.Evacuation.RouteCellSize);
                 int index = x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
@@ -227,7 +227,7 @@ namespace WUIPlatform.Runtime
                 _routerDb = new RouterDb();
                 _routerDb.LoadOsmData(source, settings, Vehicle.Car);
                 WUIEngine.DATA_STATUS.RouterDbLoaded = true;
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database created from OSM file.");
+                WUIEngine.LOG(WUIEngine.LogType.Log, "Router database created from OSM file.");
 
                 // write the new routerdb to disk.
                 string internalRouterName = WUIEngine.INPUT.Simulation.SimulationID + ".routerdb";
@@ -235,7 +235,7 @@ namespace WUIPlatform.Runtime
                 using (FileStream outputStream = new FileInfo(path).Open(FileMode.Create))
                 {
                     RouterDb.Serialize(outputStream);
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database saved to file " + path);
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Router database saved to file " + path);
                 }
             }
         }

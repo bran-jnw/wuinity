@@ -76,7 +76,7 @@ namespace WUIPlatform.Fire
         {
             this.LatLong = latLong;
 
-            Vector2d pos = GeoConversions.GeoToWorldPosition(latLong.x, latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+            Vector2d pos = GeoConversions.GeoToWorldPosition(latLong.x, latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
             x = (int)(pos.x / mesh._cellSize.x);
             y = (int)(pos.y / mesh._cellSize.y);
@@ -94,7 +94,7 @@ namespace WUIPlatform.Fire
         {
             if(x < 0 && y < 0)
             {
-                Vector2d pos = GeoConversions.GeoToWorldPosition(LatLong.x, LatLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                Vector2d pos = GeoConversions.GeoToWorldPosition(LatLong.x, LatLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
                 x = (int)(pos.x / mesh._cellSize.x);
                 y = (int)(pos.y / mesh._cellSize.y);

@@ -125,7 +125,7 @@ namespace WUIPlatform
         /// <param name="latLon">Latitude Longitude.</param>
         /// <param name="refPoint">Reference point.</param>
         /// <param name="scale">Scale.</param>
-        public static Vector3 AsUnityPosition(this Vector2 latLon, Vector2d refPoint, float scale = 1)
+        public static Vector3 AsUnityPosition(this Vector2 latLon, Vector2d refPoint, float scale)
         {
             return GeoConversions.GeoToWorldPosition(latLon.X, latLon.Y, refPoint, scale).ToVector3xz();
         }
@@ -151,13 +151,13 @@ namespace WUIPlatform
             return Conversions.MetersToLatLon(pos);
         }*/
 
-        public static Vector2d GetGeoPosition(this Vector3 position, Vector2d refPoint, float scale = 1)
+        public static Vector2d GetGeoPosition(this Vector3 position, Vector2d refPoint, float scale)
         {
             var pos = refPoint + (position / scale).ToVector2d();
             return GeoConversions.MetersToLatLon(pos);
         }
 
-        public static Vector2d GetGeoPosition(this Vector2 position, Vector2d refPoint, float scale = 1)
+        public static Vector2d GetGeoPosition(this Vector2 position, Vector2d refPoint, float scale)
         {
             return position.ToVector3xz().GetGeoPosition(refPoint, scale);
         }
@@ -168,7 +168,7 @@ namespace WUIPlatform
             return Conversions.MetersToLatLon(pos);
         }*/
 
-        public static Vector2d GetGeoPosition(this Vector2d position, Vector2d refPoint, float scale = 1)
+        public static Vector2d GetGeoPosition(this Vector2d position, Vector2d refPoint, float scale)
         {
             return position.ToVector3xz().GetGeoPosition(refPoint, scale);
         }

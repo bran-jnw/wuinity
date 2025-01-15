@@ -28,6 +28,7 @@ namespace WUIPlatform.Pedestrian
         Vector2d realWorldSize;
         public Vector2d cellWorldSize;
         RouteCollection[] cellRoutes;
+        Vector2[] validStartCoordinates;
         HumanEvacCell[] humanEvacCells;
         int totalPopulation;
         int totalCars;
@@ -321,10 +322,11 @@ namespace WUIPlatform.Pedestrian
         {          
             cellsX = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
             cellsY = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y;
-            this.realWorldSize = WUIEngine.INPUT.Simulation.Size;
+            realWorldSize = WUIEngine.INPUT.Simulation.Size;
             population = new int[cellsX * cellsY];
 
             cellRoutes = routeCollection;
+            validStartCoordinates = new Vector2[cellsX * cellsY];
 
             double cellSizeX = realWorldSize.x / cellsX;
             double cellSizeY = realWorldSize.y / cellsY;
@@ -339,7 +341,108 @@ namespace WUIPlatform.Pedestrian
                 {
                     maxPop = populationData.cellPopulation[i];
                 }
+
+                float lat = routeCollection[i].GetSelectedRoute().route.Shape[0].Latitude;
+                float lon = routeCollection[i].GetSelectedRoute().route.Shape[0].Longitude;
+                validStartCoordinates[i] = new Vector2(lat, lon);
             }
+        }
+
+        public void PopulateCells(RouteCollection[] routeCollection, Vector2[] validStartCoordinates)
+        {
+            cellsX = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
+            cellsY = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y;
+            realWorldSize = WUIEngine.INPUT.Simulation.Size;            
+            population = new int[cellsX * cellsY];
+
+            cellRoutes = routeCollection;
+
+            int desiredPopCount = 120;
+            double cellSizeX = realWorldSize.x / cellsX;
+            double cellSizeY = realWorldSize.y / cellsY;
+            cellWorldSize = new Vector2d(cellSizeX, cellSizeY);
+            totalPopulation = desiredPopCount;
+            peopleLeft = desiredPopCount;
+            maxPop = 1;
+
+            if (validStartCoordinates.Length > desiredPopCount)
+            {
+                List<Vector2> v = new List<Vector2>(validStartCoordinates);
+                while(v.Count > desiredPopCount)
+                {
+                    v.RemoveAt(Random.Range(0, v.Count));
+                }
+                validStartCoordinates = v.ToArray();
+            }            
+
+            this.validStartCoordinates = new Vector2[cellsX * cellsY];
+
+            for (int i = 0; i < validStartCoordinates.Length; ++i)
+            {
+                float lat = validStartCoordinates[i].X;
+                float lon = validStartCoordinates[i].Y;
+
+                Vector2d pos = GeoConversions.GeoToWorldPosition(lat, lon, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                int xIndex = (int)(pos.x / cellSizeX);
+                int yIndex = (int)(pos.y / cellSizeY);
+
+                //check that we are inside
+                if(xIndex >= 0 && xIndex < cellsX && yIndex >= 0 && yIndex < cellsY)
+                {
+                    int index = xIndex + cellsX * yIndex;
+                    population[index] = 1; //populationData.cellPopulation[i];
+                    this.validStartCoordinates[index] = validStartCoordinates[i];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates the human evac cell if cell contains population and deploys households in all of the cells based on total amount of people per cell
+        /// </summary>
+        public void PlaceHouseholdsInCells()
+        {
+            totalHouseholds = 0;
+            humanEvacCells = new HumanEvacCell[population.Length];
+            for (int i = 0; i < humanEvacCells.Length; ++i)
+            {
+                if (population[i] > 0)
+                {
+                    int y = i / cellsX;
+                    int x = i - y * cellsX;
+                    Vector2d worldPos = new Vector2d((x + 0.5) * cellWorldSize.x, (y + 0.5) * cellWorldSize.y);
+                    humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, validStartCoordinates[i], cellRoutes[i], population[i], i);
+                    totalHouseholds += humanEvacCells[i].macroHouseholds.Length;
+                }
+            }
+
+            //sum up the number of people which will not evacuate and total cars
+            totalPeopleWhoWillNotEvacuate = 0;
+            totalCars = 0;
+            for (int i = 0; i < humanEvacCells.Length; ++i)
+            {
+                if (population[i] > 0)
+                {
+                    HumanEvacCell hR = humanEvacCells[i];
+                    for (int j = 0; j < hR.macroHouseholds.Length; j++)
+                    {
+                        MacroHousehold mH = hR.macroHouseholds[j];
+                        if (mH.responseTime < float.MaxValue)
+                        {
+                            totalCars += mH.cars;
+                        }
+                        else
+                        {
+                            totalPeopleWhoWillNotEvacuate += mH.peopleInHousehold;
+                        }
+                    }
+                }
+            }
+
+            householdPositions = new Vector4[totalHouseholds];
+
+            WUIEngine.LOG(WUIEngine.LogType.Log, " Total households: " + totalHouseholds);
+            WUIEngine.LOG(WUIEngine.LogType.Log, " Total cars: " + totalCars);
+            WUIEngine.LOG(WUIEngine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>
@@ -387,55 +490,6 @@ namespace WUIPlatform.Pedestrian
         {
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
             return Random.Range(eO.walkingSpeedMinMax.X, eO.walkingSpeedMinMax.Y) * eO.walkingSpeedModifier;
-        }
-
-        /// <summary>
-        /// Creates the human evac cell if cell contains population and deploys households in all of the cells based on total amount of people per cell
-        /// </summary>
-        public void PlaceHouseholdsInCells()
-        {
-            totalHouseholds = 0;
-            humanEvacCells = new HumanEvacCell[population.Length];
-            for (int i = 0; i < humanEvacCells.Length; ++i)
-            {
-                if (population[i] > 0)
-                {
-                    int y = i / cellsX;
-                    int x = i - y * cellsX;
-                    Vector2d worldPos = new Vector2d((x + 0.5) * cellWorldSize.x, (y + 0.5) * cellWorldSize.y);
-                    humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, cellRoutes[i], population[i], i);
-                    totalHouseholds += humanEvacCells[i].macroHouseholds.Length;
-                }
-            }
-
-            //sum up the number of people which will not evacuate and total cars
-            totalPeopleWhoWillNotEvacuate = 0;
-            totalCars = 0;
-            for (int i = 0; i < humanEvacCells.Length; ++i)
-            {
-                if (population[i] > 0)
-                {
-                    HumanEvacCell hR = humanEvacCells[i];
-                    for (int j = 0; j < hR.macroHouseholds.Length; j++)
-                    {
-                        MacroHousehold mH  = hR.macroHouseholds[j];
-                        if (mH.responseTime < float.MaxValue)
-                        {
-                            totalCars += mH.cars;
-                        }
-                        else
-                        {                            
-                            totalPeopleWhoWillNotEvacuate += mH.peopleInHousehold;
-                        }                        
-                    }
-                }
-            }
-
-            householdPositions = new Vector4[totalHouseholds];
-
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Total households: " + totalHouseholds);
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Total cars: " +  totalCars);
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>

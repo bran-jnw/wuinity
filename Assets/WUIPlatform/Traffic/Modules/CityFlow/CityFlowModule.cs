@@ -112,6 +112,11 @@ namespace WUIPlatform.Traffic
         {
             throw new System.NotImplementedException();
         }
+
+        public override bool IsNetworkReachable(Vector2d startLatLong)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

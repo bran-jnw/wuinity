@@ -295,7 +295,8 @@ namespace WUIPlatform
                     _pedestrianModule = new MacroHouseholdSim();
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
-                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
+                    //macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
+                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.RUNTIME_DATA.Traffic.ValidStartCoordinates);
                     //distribute people
                     macroHouseholdSim.PlaceHouseholdsInCells();
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
@@ -313,8 +314,16 @@ namespace WUIPlatform
             {
                 if (WUIEngine.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.SUMO)
                 {
-                    _trafficModule = new SUMOModule();
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Traffic module SUMO initiated.");
+                    bool success;
+                    _trafficModule = new SUMOModule(out success);
+                    if(success)
+                    {
+                        WUIEngine.LOG(WUIEngine.LogType.Log, "Traffic module SUMO initiated.");
+                    }  
+                    else
+                    {
+                        _stopSim = true;
+                    }
                 }
                 else
                 {

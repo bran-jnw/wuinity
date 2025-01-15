@@ -133,7 +133,9 @@ namespace WUIPlatform.IO
 
     [System.Serializable]
     public class TrafficInput
-    {     
+    {
+
+        public string ValidStartCoordinates;
         public enum TrafficModuleChoice { MacroTrafficSim, SUMO }
         public TrafficModuleChoice trafficModuleChoice = TrafficModuleChoice.MacroTrafficSim;        
         public enum RouteChoice { Fastest, Closest, Random, EvacGroup };

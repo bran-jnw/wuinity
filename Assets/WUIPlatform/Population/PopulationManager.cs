@@ -5,6 +5,8 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.IO;
+
 namespace WUIPlatform.Population
 {
     public class PopulationManager
@@ -197,6 +199,23 @@ namespace WUIPlatform.Population
             }
             color.a = 0.7f;
             return color;
+        }
+
+        public static void SaveValidStartCoordinates(RouteCollection[] routes)
+        {
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_evacAccessLatLon.csv")))
+            {
+                for (int i = 0; i < routes.Length; i++)
+                {
+                    if(routes[i] != null)
+                    {
+                        float lat = routes[i].routes[0].route.Shape[0].Latitude;
+                        float lon = routes[i].routes[0].route.Shape[0].Longitude;
+                        string line = lat + "," + lon;
+                        outputFile.WriteLine(line);
+                    }                    
+                }                
+            }            
         }
     }
 }

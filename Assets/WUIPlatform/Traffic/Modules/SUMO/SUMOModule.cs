@@ -17,13 +17,15 @@ namespace WUIPlatform.Traffic
     {
         private Dictionary<string, SUMOCar> cars;
         private int carsInSystem;
-        private int totalCarsSimulated;
+        private int totalCarsInjected;
         private Vector2d offset;
         Dictionary<StartGoal, string> validRouteIDs;
         private double adjustX, adjustY;
+        private uint wuiCarsArrived;
 
-        public SUMOModule()
+        public SUMOModule(out bool success)
         {
+            success = true;
             try
             {
                 if (LIBSUMO.Simulation.isLoaded())
@@ -36,9 +38,11 @@ namespace WUIPlatform.Traffic
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
 
-                //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
+                //need to use UTM projection in SUMO and WUInity to overlay data (an dapproximate overlay with web mercator, e.g. Mapbox)
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
                 offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + offset.x + ", " + offset.y);
 
                 //keep for now if we ever want to do projection corrections here
                 //https://gis.stackexchange.com/questions/14528/better-distance-measurements-in-web-mercator-projection
@@ -56,6 +60,7 @@ namespace WUIPlatform.Traffic
             }
             catch
             {
+                success = false; 
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting");
             }
             
@@ -96,7 +101,7 @@ namespace WUIPlatform.Traffic
                         //pos.y = simPos.y;
                         //pos.x /= adjustY;
                         //pos.y /= adjustY;
-                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));
+                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));                        
                     }
                     //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
                     else
@@ -120,7 +125,12 @@ namespace WUIPlatform.Traffic
                         car.Arrive();
                     }
                     cars.Remove(arrivedCars[i]);
-                    arrivalData.Add(currentTime + deltaTime);
+                    //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
+                    if(car.numberOfPeopleInCar > 0)
+                    {
+                        arrivalData.Add(currentTime + deltaTime);
+                        wuiCarsArrived++;
+                    }                    
                 }
             }
 
@@ -161,6 +171,7 @@ namespace WUIPlatform.Traffic
                 this.goalLong = goalLong;
             }
         }
+
         public override void HandleNewCars()
         {
             foreach (InjectedCar injectedCar in carsToInject)
@@ -168,20 +179,23 @@ namespace WUIPlatform.Traffic
                 EvacuationGoal evacuationGoal = injectedCar.evacuationGoal;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
                 Vector2d startLatLong = injectedCar.startLatLong;                
-                Vector2d goalPos = evacuationGoal.latLong;
+                Vector2d goalLatLong = evacuationGoal.latLong;
                 //used to get a hash that represent the route
-                StartGoal startGoal = new StartGoal(startLatLong.x, startLatLong.y, goalPos.x, goalPos.y);
+                StartGoal startGoal = new StartGoal(startLatLong.x, startLatLong.y, goalLatLong.x, goalLatLong.y);
 
                 bool invalidRoute = true;
                 LIBSUMO.TraCIStage route = null;
                 string routeID;
+
+                //TODO: create input for this...
+                string vehicleType = "evacuation_car";
 
                 //see if route already exist
                 if (validRouteIDs.TryGetValue(startGoal, out routeID))
                 {
                     uint carID = GetNewCarID();
                     string sumoID = carID.ToString();
-                    LIBSUMO.Vehicle.add(sumoID, routeID);
+                    LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
                     LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
                     //if we reach here the route should be valid
                     SUMOCar car = new SUMOCar(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
@@ -191,9 +205,9 @@ namespace WUIPlatform.Traffic
                 //no route found, try to create new one
                 else
                 {
-                    //IMPORTANT!!! Longitude then latitude
+                    //IMPORTANT!!! Longitude then latitude in SUMO
                     LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLong.y, startLatLong.x, true);
-                    LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalPos.y, goalPos.x, true);
+                    LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalLatLong.y, goalLatLong.x, true);       
 
                     try
                     {
@@ -205,7 +219,7 @@ namespace WUIPlatform.Traffic
                     }
                     catch (Exception e)
                     {
-                        //WUInity.print(e.Message);
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, "SUMO: " + e.Message);
                     }
 
                     //SUMO returned route that might work
@@ -219,7 +233,7 @@ namespace WUIPlatform.Traffic
                             LIBSUMO.Route.add(routeID, route.edges);
                             uint carID = GetNewCarID();
                             string sumoID = carID.ToString();
-                            LIBSUMO.Vehicle.add(sumoID, routeID);
+                            LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
                             LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
 
                             //if we reach here the route should be valid
@@ -230,7 +244,7 @@ namespace WUIPlatform.Traffic
                         }
                         catch (Exception e)
                         {
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+                            WUIEngine.LOG(WUIEngine.LogType.Warning, "SUMO: " + e.Message);
                         }
                     }
                 }
@@ -244,11 +258,12 @@ namespace WUIPlatform.Traffic
                         string sumoID = carID.ToString();
                         int routeIndex = Random.Range(0, validRouteIDs.Count);
                         routeID = validRouteIDs.ElementAt(routeIndex).Value;
-                        LIBSUMO.Vehicle.add(sumoID, routeID);
+                        LIBSUMO.Vehicle.add(sumoID, routeID, vehicleType);
                         LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
                         SUMOCar car = new SUMOCar(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
                         cars.Add(sumoID, car);
                         invalidRoute = false;
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location.");
                     }
                     else
                     {
@@ -258,7 +273,7 @@ namespace WUIPlatform.Traffic
 
                 if(!invalidRoute)
                 {
-                    ++totalCarsSimulated;
+                    ++totalCarsInjected;
                 }                
             } 
             
@@ -267,7 +282,12 @@ namespace WUIPlatform.Traffic
 
         public override bool IsSimulationDone()
         {
-            return carsInSystem > 0 ? false : true;
+            if(wuiCarsArrived == totalCarsInjected)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public override Vector4[] GetCarPositionsAndStates()
@@ -288,7 +308,7 @@ namespace WUIPlatform.Traffic
 
         public override int GetTotalCarsSimulated()
         {
-            return totalCarsSimulated;
+            return totalCarsInjected;
         }        
 
         public override void InsertNewTrafficEvent(TrafficEvent tE)
@@ -431,6 +451,11 @@ namespace WUIPlatform.Traffic
             {
                 LIBSUMO.Vehicle.rerouteTraveltime(car.GetVehicleID());
             }
+        }
+
+        public override bool IsNetworkReachable(Vector2d startLatLong)
+        {
+            throw new NotImplementedException();
         }
 
         public override void Stop()

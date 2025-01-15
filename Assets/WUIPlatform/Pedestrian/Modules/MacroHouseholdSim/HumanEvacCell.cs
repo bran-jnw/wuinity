@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using WUIPlatform.IO;
+using System.Numerics;
 
 namespace WUIPlatform.Pedestrian
 {
@@ -25,13 +26,13 @@ namespace WUIPlatform.Pedestrian
         int cellIndex;
 
         /// <summary>
-        /// Creates human evac cell ythat keeps track of households in the cell and the routes they can use after reaching their car.
+        /// Creates human evac cell that keeps track of households in the cell and the routes they can use after reaching their car.
         /// </summary>
         /// <param name="nodeCenter"></param>
         /// <param name="cellWorldSize"></param>
         /// <param name="route"></param>
         /// <param name="personsInCell"></param>
-        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, RouteCollection route, int personsInCell, int cellIndex)
+        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2 roadAccessCoord, RouteCollection route, int personsInCell, int cellIndex)
         {
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
 
@@ -54,7 +55,7 @@ namespace WUIPlatform.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            closestNodeSimulationSpace = GeoConversions.GeoToWorldPosition(routeCollection.GetSelectedRoute().route.Shape[0].Latitude, routeCollection.GetSelectedRoute().route.Shape[0].Longitude, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
+            closestNodeSimulationSpace = GeoConversions.GeoToWorldPosition(roadAccessCoord.X, roadAccessCoord.Y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
                 int evacGroupIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];

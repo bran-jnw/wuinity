@@ -28,6 +28,12 @@ namespace WUIPlatform.Runtime
         Vector2d _mercatorToUtmScale;
         public Vector2d MercatorToUtmScale { get => _mercatorToUtmScale; }
 
+        float _mercatorCorrectionScale;
+        /// <summary>
+        /// As we move away from the equator the mercator projection streteches distances, this is the correction applied by e.g. Mapbox to give reasonable distance assessment and match with UTM etc.
+        /// </summary>
+        public float MercatorCorrectionScale{ get => _mercatorCorrectionScale; }
+
         public SimulationData() 
         {
             if(WUIEngine.INPUT != null)
@@ -49,6 +55,9 @@ namespace WUIPlatform.Runtime
                 double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0);
                 _mercatorToUtmScale = new Vector2d(realScale.x / mercatorCorrectionScale, realScale.y / mercatorCorrectionScale);
                 _utmToMercatorScale = new Vector2d(1.0 / _mercatorToUtmScale.x, 1.0 / _mercatorToUtmScale.y);
+
+                double lat = Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0;
+                _mercatorCorrectionScale = (float)Mathd.Cos(lat);
             }            
         }
     }

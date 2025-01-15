@@ -82,7 +82,7 @@ namespace WUIPlatform
         /// // worldPosition = ( 11369163.38585, 34069138.17805 )
         /// </code>
         /// </example>
-        public static Vector2d GeoToWorldPosition(double lat, double lon, Vector2d refPoint, float scale = 1)
+        public static Vector2d GeoToWorldPosition(double lat, double lon, Vector2d refPoint, float scale)
         {
             var posx = lon * OriginShift / 180;
             var posy = Math.Log(Math.Tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
@@ -90,7 +90,7 @@ namespace WUIPlatform
             return new Vector2d((posx - refPoint.x) * scale, (posy - refPoint.y) * scale);
         }
         
-        public static Vector2d GeoToWorldPosition(Vector2d latLong, Vector2d refPoint, float scale = 1)
+        public static Vector2d GeoToWorldPosition(Vector2d latLong, Vector2d refPoint, float scale)
         {
             return GeoToWorldPosition(latLong.x, latLong.y, refPoint, scale);
         }

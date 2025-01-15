@@ -97,8 +97,7 @@ namespace WUIPlatform.Traffic
                 int populationInCell = WUIEngine.POPULATION.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
-                    //Vector2d m = new Vector2d(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator.x, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator.y); 
-                    Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, 1.0f);
+                    Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
                     //check if valid start was found
                     RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(start.x, start.y), routerProfile, cellSize);
@@ -159,10 +158,14 @@ namespace WUIPlatform.Traffic
                     }
                 }
             }
+
             if(cellsWithGoalsCount == 0)
             {
                 WUIEngine.SIM.Stop("ERROR: Not a single route was found, make sure OSM network is valid.", true);
             }
+
+            PopulationManager.SaveValidStartCoordinates(cellRoutes);
+
             return cellRoutes;
         }
 
@@ -229,7 +232,7 @@ namespace WUIPlatform.Traffic
             }
             catch (Itinero.Exceptions.ResolveFailedException)
             {
-                //print("resolve failed");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Itinero could not resolve requested position (point is too far from road network). Lat/long: " + coordinate.x + ", " + coordinate.y);
             }
 
             return start;
