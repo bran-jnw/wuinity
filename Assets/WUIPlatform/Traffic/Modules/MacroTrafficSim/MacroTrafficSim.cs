@@ -33,9 +33,9 @@ namespace WUIPlatform.Traffic
             totalCarsSimulated = 0;
             oldTotalCars = 0;
 
-            output = new List<string>();
-            
+            output = new List<string>();            
             string start = "Time(s),Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
+
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
                 start += ", Goal: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;

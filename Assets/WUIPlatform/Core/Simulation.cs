@@ -96,23 +96,23 @@ namespace WUIPlatform
             }
         }
 
-        int runNumber;
         private  void StartSimulations()
-        {
-            _stopSim = false;
-            _stoppedDueToError = false;
-            runNumber = 0;
+        {            
+            int runNumber = 0;
             int actualRuns = 0;
             float averageTotalEvacTime = 0.0f;
             int convergedInSequence = 0;
             List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
 
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns; i++)
+            for (int i = 1; i <= WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns; i++)
             {
+                _stopSim = false;
+                _stoppedDueToError = false;
+
                 WUIEngine.LOG(WUIEngine.LogType.Log, "Simulation number " + i + " started, please wait.");
                 runNumber = i;                
                 CreateSubModules(i);                
-                RunSimulation();
+                RunSimulation(i);
                 ++actualRuns;
 
                 trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
@@ -142,8 +142,9 @@ namespace WUIPlatform
                 {
                     averageTotalEvacTime += CurrentTime;
                 }
+
                 //force garbage collection
-                //Resources.UnloadUnusedAssets();                    
+                //Resources.UnloadUnusedAssets();                
                 System.GC.Collect();
             }            
 
@@ -177,9 +178,10 @@ namespace WUIPlatform
 
             _state = SimulationState.Finished;
             WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation/s done.");
+            WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.SimulationID);
         }
         
-        private void CreateSubModules(int runIndex)
+        private void CreateSubModules(int runNumber)
         {
             _state = SimulationState.Initializing;
 
@@ -195,7 +197,7 @@ namespace WUIPlatform
                 return;
             }
 
-            CreatePedestrianModule(runIndex);
+            CreatePedestrianModule(runNumber);
             if (_stopSim)
             {
                 return;
@@ -275,7 +277,7 @@ namespace WUIPlatform
 
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
             {
-                if (runIndex == 0)
+                if (runIndex == 1)
                 {
                     //we could not load from disk, so have to build all routes
                     if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections == null)
@@ -296,9 +298,7 @@ namespace WUIPlatform
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
                     //macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.RUNTIME_DATA.Traffic.ValidStartCoordinates);
-                    //distribute people
-                    macroHouseholdSim.PlaceHouseholdsInCells();
+                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.RUNTIME_DATA.Traffic.ValidStartCoordinates, WUIEngine.POPULATION.GetPopulationData());
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
@@ -338,7 +338,7 @@ namespace WUIPlatform
         }
 
         
-        private void RunSimulation()
+        private void RunSimulation(int runNumber)
         {
             //when creating modules we migth have found an issue
             if(_stopSim)
@@ -387,6 +387,7 @@ namespace WUIPlatform
                 _haveResults = true;
             }
 
+            //actual time step loop
             while (!_stopSim)
             {
                 if (_isPaused)
@@ -401,8 +402,26 @@ namespace WUIPlatform
             
             if(!_stoppedDueToError)
             {
-                SaveOutput(runNumber);
-            }            
+                SaveRunOutput(runNumber);
+            }
+
+            //close everything, mainly SUMO for now
+            if(_pedestrianModule != null)
+            {
+                _pedestrianModule.Stop();
+            }
+            if (_trafficModule != null)
+            {
+                _trafficModule.Stop();
+            }
+            if (_fireModule != null)
+            {
+                _fireModule.Stop();
+            }
+            if (_smokeModule != null)
+            {
+                _smokeModule.Stop();
+            }   
         }
 
         bool _runRealtime = false;
@@ -428,7 +447,8 @@ namespace WUIPlatform
                 _trafficModule.HandleIgnitedFireCells(_fireModule.GetIgnitedFireCells());
                 _fireModule.ConsumeIgnitedFireCells();
             }
-            //take care of arrived cars and inject for next time step
+
+            //handle/inject cars that arrived this timestep
             _trafficModule.HandleNewCars();
 
             //increase time
@@ -704,7 +724,7 @@ namespace WUIPlatform
             _trafficModule.UpdateEvacuationGoals();              
         }
 
-        void SaveOutput(int runNumber)
+        void SaveRunOutput(int runNumber)
         {
             WUIEngineInput input = WUIEngine.INPUT;
             if (input.Simulation.RunTrafficModule)
@@ -719,9 +739,7 @@ namespace WUIPlatform
                     MacroHouseholdSim mHS = (MacroHouseholdSim)_pedestrianModule;
                     mHS.SaveToFile(runNumber);
                 }                    
-            }
-
-            WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.SimulationID + "_" + runNumber);            
+            }                        
         }
 
         byte[] _plotBytes;

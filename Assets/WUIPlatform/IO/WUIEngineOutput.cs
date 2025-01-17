@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
+using System.IO;
 
 namespace WUIPlatform.IO
 {
@@ -23,8 +23,8 @@ namespace WUIPlatform.IO
         public static void SaveOutput(string filename)
         {
             string[] log = WUIEngine.GetLog();
-            string path = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, filename + ".wuiout");
-            //System.IO.File.WriteAllText(path, log);
+            string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, filename + ".log");
+            File.WriteAllLines(path, log);
         }
     }
 

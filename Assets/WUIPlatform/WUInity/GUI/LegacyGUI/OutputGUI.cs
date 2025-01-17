@@ -100,10 +100,10 @@ namespace WUIPlatform.WUInity.UI
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule && WUIEngine.SIM.PedestrianModule != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUIEngine.SIM.PedestrianModule.GetPeopleLeft() + " / " + WUIEngine.POPULATION.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUIEngine.SIM.PedestrianModule.GetPeopleLeft() + " / " + WUIEngine.SIM.PedestrianModule.GetTotalPopulation());
                 ++buttonIndex;
 
-                //pedestrians still left
+                //cars reached by pedestrians
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUIEngine.SIM.PedestrianModule.GetCarsReached());
                 ++buttonIndex;
             }
@@ -123,7 +123,7 @@ namespace WUIPlatform.WUInity.UI
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + WUIEngine.RUNTIME_DATA.Evacuation.GetTotalEvacuated() + " / " + (WUIEngine.POPULATION.GetTotalPopulation() - WUIEngine.SIM.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + WUIEngine.RUNTIME_DATA.Evacuation.GetTotalEvacuated() + " / " + (WUIEngine.SIM.PedestrianModule.GetTotalPopulation() - WUIEngine.SIM.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 

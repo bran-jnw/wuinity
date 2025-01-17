@@ -14,6 +14,8 @@ namespace WUIPlatform.Pedestrian
         public abstract int GetPeopleStaying();
         public abstract int GetPeopleLeft();
         public abstract int GetCarsReached();
+        public abstract int GetTotalPopulation();
+        public abstract int GetTotalHouseHolds();
     }
 }
 

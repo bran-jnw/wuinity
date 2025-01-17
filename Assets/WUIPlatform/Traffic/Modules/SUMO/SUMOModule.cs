@@ -15,23 +15,26 @@ namespace WUIPlatform.Traffic
 {
     public class SUMOModule : TrafficModule
     {
-        private Dictionary<string, SUMOCar> cars;
-        private int carsInSystem;
-        private int totalCarsInjected;
+        private Dictionary<string, SUMOCar> cars;        
         private Vector2d offset;
         Dictionary<StartGoal, string> validRouteIDs;
         private double adjustX, adjustY;
-        private uint wuiCarsArrived;
+
+        //output
+        private uint totalCarsArrived, totalPeopleArrived;
+        private int currentCarsInSystem;
+        private int totalCarsInjected;
+        private List<string> output;
 
         public SUMOModule(out bool success)
         {
             success = true;
             try
             {
-                if (LIBSUMO.Simulation.isLoaded())
+                /*if (LIBSUMO.Simulation.isLoaded())
                 {
                     LIBSUMO.Simulation.close();
-                }
+                }*/
 
                 cars = new Dictionary<string, SUMOCar>();
                 string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.sumoInput.inputFile);
@@ -56,6 +59,10 @@ namespace WUIPlatform.Traffic
 
                 validRouteIDs = new Dictionary<StartGoal, string>();
 
+                output = new List<string>();
+                string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people";
+                output.Add(header);
+
                 SortEdgesInFireCells();
             }
             catch
@@ -66,10 +73,11 @@ namespace WUIPlatform.Traffic
             
         }
 
-        ~SUMOModule()
+        //might crash SUMO when running a new instance of SUMOModule while the old one is garbage collected
+        /*~SUMOModule()
         {
             LIBSUMO.Simulation.close();
-        }
+        }*/
 
         public override void Step(float deltaTime, float currentTime)
         {
@@ -77,14 +85,14 @@ namespace WUIPlatform.Traffic
             {
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Trying to update SUMO but SUMO DLL is not loaded.");
                 return;
-            }
+            }            
 
             //https://sumo.dlr.de/doxygen/d0/d17/classlibsumo_1_1_simulation.html#afc1f3d5c1c92f49a8bf40e42bdb333ab
             LIBSUMO.Simulation.step(currentTime + deltaTime); // advances sim up to given time
 
             //update positions
             LIBSUMO.StringVector activeCars = LIBSUMO.Vehicle.getIDList();
-            carsInSystem = activeCars.Count;
+            currentCarsInSystem = 0;
             if(activeCars.Count > 0)
             {
                 for (int i = 0; i < activeCars.Count; i++)
@@ -95,13 +103,11 @@ namespace WUIPlatform.Traffic
                     if(car != null)
                     {
                         LIBSUMO.TraCIPosition pos = LIBSUMO.Vehicle.getPosition(sumoID);
-                        //LIBSUMO.TraCIPosition geoPos = LIBSUMO.Simulation.convertGeo(pos.x, pos.y, false);
-                        //Vector2d simPos = GeoConversions.GeoToWorldPosition(geoPos.y, geoPos.x, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
-                        //pos.x = simPos.x;
-                        //pos.y = simPos.y;
-                        //pos.x /= adjustY;
-                        //pos.y /= adjustY;
-                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));                        
+                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));
+                        if(car.numberOfPeopleInCar > 0)
+                        {
+                            currentCarsInSystem++;
+                        }
                     }
                     //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
                     else
@@ -129,7 +135,8 @@ namespace WUIPlatform.Traffic
                     if(car.numberOfPeopleInCar > 0)
                     {
                         arrivalData.Add(currentTime + deltaTime);
-                        wuiCarsArrived++;
+                        totalCarsArrived++;
+                        totalPeopleArrived += car.numberOfPeopleInCar;
                     }                    
                 }
             }
@@ -156,7 +163,11 @@ namespace WUIPlatform.Traffic
                     }
                     carsToRender = buffer;
                 }
-            }            
+            }
+
+            //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
+            string dataLine = currentTime + "," + totalCarsInjected + "," + totalCarsArrived + "," + currentCarsInSystem + "," + totalPeopleArrived;
+            output.Add(dataLine);
         }
 
         private struct StartGoal
@@ -256,9 +267,9 @@ namespace WUIPlatform.Traffic
                     {
                         uint carID = GetNewCarID();
                         string sumoID = carID.ToString();
-                        int routeIndex = Random.Range(0, validRouteIDs.Count);
+                        int routeIndex = Random.Range(0, validRouteIDs.Count - 1);
                         routeID = validRouteIDs.ElementAt(routeIndex).Value;
-                        LIBSUMO.Vehicle.add(sumoID, routeID, vehicleType);
+                        LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
                         LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
                         SUMOCar car = new SUMOCar(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
                         cars.Add(sumoID, car);
@@ -282,7 +293,7 @@ namespace WUIPlatform.Traffic
 
         public override bool IsSimulationDone()
         {
-            if(wuiCarsArrived == totalCarsInjected)
+            if(totalCarsArrived == totalCarsInjected)
             {
                 return true;
             }
@@ -303,7 +314,7 @@ namespace WUIPlatform.Traffic
 
         public override int GetCarsInSystem()
         {
-            return carsInSystem;
+            return currentCarsInSystem;
         }
 
         public override int GetTotalCarsSimulated()
@@ -318,7 +329,15 @@ namespace WUIPlatform.Traffic
 
         public override void SaveToFile(int runNumber)
         {
-            //throw new System.NotImplementedException();
+            try
+            {
+                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_traffic_output_" + runNumber + ".csv");
+                File.WriteAllLines(path, output);
+            }
+            catch(Exception e)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+            }
         }
                 
         public override void UpdateEvacuationGoals()
@@ -423,7 +442,7 @@ namespace WUIPlatform.Traffic
                     {
                         if(newValidRoutesIDs.Count > 0)
                         {
-                            int routeIndex = Random.Range(0, newValidRoutesIDs.Count);
+                            int routeIndex = Random.Range(0, newValidRoutesIDs.Count - 1);
                             routeID = newValidRoutesIDs.ElementAt(routeIndex).Value;
                         }
                         else

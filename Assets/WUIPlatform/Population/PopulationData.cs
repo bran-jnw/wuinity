@@ -173,15 +173,30 @@ namespace WUIPlatform.Population
             totalPopulation = newTotalPop;
 
             //make sure we hit our target, should always be lower if not matching since we are flooring the int
-            if(desiredPopulation != totalPopulation)
+            if(desiredPopulation > totalPopulation)
             {
                 int loopCount = desiredPopulation - totalPopulation;
                 for (int i = 0; i < loopCount; i++)
                 {
-                    int randomIndex = Random.Range(0, activeCellIndices.Count);
+                    int randomIndex = Random.Range(0, activeCellIndices.Count - 1);
                     ++cellPopulation[activeCellIndices[randomIndex]];
                     ++totalPopulation;
                 }
+            }
+            else if(desiredPopulation < totalPopulation)
+            {
+                int loopCount = totalPopulation - desiredPopulation;
+                for (int i = 0; i < loopCount; i++)
+                {
+                    int randomIndex = Random.Range(0, activeCellIndices.Count - 1);
+                    --cellPopulation[activeCellIndices[randomIndex]];
+                    --totalPopulation;
+                    if(cellPopulation[activeCellIndices[randomIndex]] < 1)
+                    {
+                        activeCellIndices.RemoveAt(randomIndex);
+                    }
+                }
+                totalActiveCells = activeCellIndices.Count;
             }
 
             manager.CreateTexture();

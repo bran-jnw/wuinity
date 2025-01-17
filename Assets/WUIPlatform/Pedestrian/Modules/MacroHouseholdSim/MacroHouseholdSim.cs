@@ -40,6 +40,9 @@ namespace WUIPlatform.Pedestrian
 
         int totalHouseholds;
         Vector4[] householdPositions;
+        int totalHouseholdsResponded = 0, totalHouseholdsReachedCar = 0;
+        int totalPeopleReachedCar = 0;
+        int totalPeopleResponded = 0;
 
         MacroHouseholdVisualizer _visualizer;
         public MacroHouseholdVisualizer Visualizer { get { return _visualizer; } }
@@ -48,7 +51,7 @@ namespace WUIPlatform.Pedestrian
         public MacroHouseholdSim()
         {
             output = new List<string>();
-            output.Add("Time(s),Households left,People left,Households starting moving,People started moving,Households reached car,People reached car,Total cars activated,Avg. walking dist.");
+            output.Add("Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total cars activated,Avg. walking dist.");
             //string output = "Time(s),People reached car";
             //SaveToFile(output, true);
 
@@ -73,6 +76,16 @@ namespace WUIPlatform.Pedestrian
         public HumanEvacCell[] GetHumanEvacCells()
         {
             return humanEvacCells;
+        }
+
+        public override int GetTotalPopulation()
+        {
+            return totalPopulation;
+        }
+
+        public override int GetTotalHouseHolds()
+        {
+            return totalHouseholds; 
         }
 
         public int[] GetPopulation() 
@@ -154,17 +167,15 @@ namespace WUIPlatform.Pedestrian
         public override void Step(float currentTime, float deltaTime)
         {            
             if (!evacuationDone)
-            {
-                int peopleWhoReachedCar = 0;
-                int peopleStartedMoving = 0;
-                int householdsLeft = 0, householdsStartedMoving = 0, householdsReachedCar = 0;
+            {                
                 float walkingDistance = 0f;
                 int householdsDone = 0;
                 int householdIndex = 0;
+                int totalHouseholdsLeft = 0; 
 
                 for (int i = 0; i < humanEvacCells.Length; ++i)
                 {
-                    if (population[i] > 0)
+                    if (humanEvacCells[i] != null)
                     {
                         HumanEvacCell cell = humanEvacCells[i];
                         for (int j = 0; j < cell.macroHouseholds.Length; ++j)
@@ -184,20 +195,20 @@ namespace WUIPlatform.Pedestrian
                                     if (!household.isMoving && household.responseTime <= currentTime)
                                     {
                                         household.isMoving = true;
-                                        ++householdsStartedMoving;
-                                        peopleStartedMoving += household.peopleInHousehold;
+                                        ++totalHouseholdsResponded;
+                                        totalPeopleResponded += household.peopleInHousehold;
                                     }
 
                                     //if we yet have not reached our car, check if we have
                                     if (household.evacuationTime <= currentTime)
                                     {
-                                        ReachedCar(household, cell, ref peopleWhoReachedCar);
-                                        ++householdsReachedCar;
+                                        ReachedCar(household, cell, ref totalPeopleReachedCar);
+                                        ++totalHouseholdsReachedCar;
                                         totalCarsReached += household.cars;
                                     }
                                     else
                                     {
-                                        ++householdsLeft;
+                                        ++totalHouseholdsLeft;
                                     }
                                 } 
                                 else
@@ -208,13 +219,13 @@ namespace WUIPlatform.Pedestrian
                             }
                             else
                             {
-                                householdsLeft++;                                
+                                totalHouseholdsLeft++;                                
                             }
                         }
                     }
                 }
 
-                peopleLeft -= peopleWhoReachedCar;
+                peopleLeft = totalPopulation - totalPeopleReachedCar;
                 if (peopleLeft - totalPeopleWhoWillNotEvacuate == 0)
                 {
                     evacuationDone = true;
@@ -226,8 +237,8 @@ namespace WUIPlatform.Pedestrian
                     avgWalkDist = walkingDistance / householdsDone;
                 }
 
-                //Time(s),Households left,People left,Households starting moving,People started moving,Households reached car,People reached car,Cars activated
-                output.Add(currentTime + "," + householdsLeft + "," + peopleLeft + "," + householdsStartedMoving + "," + peopleStartedMoving + "," + householdsReachedCar + "," + peopleWhoReachedCar + "," + totalCarsReached + "," + avgWalkDist);
+                //Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total cars activated,Avg. walking dist.
+                output.Add(currentTime + "," + totalHouseholdsLeft + "," + peopleLeft + "," + totalHouseholdsResponded + "," + totalPeopleResponded + "," + totalHouseholdsReachedCar + "," + totalPeopleReachedCar + "," + totalCarsReached + "," + avgWalkDist);
                 //string output = currentTime + "," +  peopleWhoReachedCar";
                 //SaveToFile(output, false);
             }
@@ -346,9 +357,11 @@ namespace WUIPlatform.Pedestrian
                 float lon = routeCollection[i].GetSelectedRoute().route.Shape[0].Longitude;
                 validStartCoordinates[i] = new Vector2(lat, lon);
             }
+
+            PlaceHouseholdsInCells();
         }
 
-        public void PopulateCells(RouteCollection[] routeCollection, Vector2[] validStartCoordinates)
+        public void PopulateCells(RouteCollection[] routeCollection, Vector2[] validStartCoordinates, PopulationData populationData)
         {
             cellsX = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
             cellsY = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y;
@@ -357,23 +370,22 @@ namespace WUIPlatform.Pedestrian
 
             cellRoutes = routeCollection;
 
-            int desiredPopCount = 120;
             double cellSizeX = realWorldSize.x / cellsX;
             double cellSizeY = realWorldSize.y / cellsY;
             cellWorldSize = new Vector2d(cellSizeX, cellSizeY);
-            totalPopulation = desiredPopCount;
-            peopleLeft = desiredPopCount;
+            totalPopulation = populationData.totalPopulation;
+            peopleLeft = totalPopulation;
             maxPop = 1;
 
-            if (validStartCoordinates.Length > desiredPopCount)
+            if (validStartCoordinates.Length > totalPopulation)
             {
                 List<Vector2> v = new List<Vector2>(validStartCoordinates);
-                while(v.Count > desiredPopCount)
+                while(v.Count > totalPopulation)
                 {
-                    v.RemoveAt(Random.Range(0, v.Count));
+                    v.RemoveAt(Random.Range(0, v.Count - 1));
                 }
                 validStartCoordinates = v.ToArray();
-            }            
+            }
 
             this.validStartCoordinates = new Vector2[cellsX * cellsY];
 
@@ -390,16 +402,22 @@ namespace WUIPlatform.Pedestrian
                 if(xIndex >= 0 && xIndex < cellsX && yIndex >= 0 && yIndex < cellsY)
                 {
                     int index = xIndex + cellsX * yIndex;
-                    population[index] = 1; //populationData.cellPopulation[i];
+                    population[index] += 1; //populationData.cellPopulation[i];
                     this.validStartCoordinates[index] = validStartCoordinates[i];
                 }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Household start coordinate was outside simulation boundary, ignoring. Lat/Lon: " + lat + ", " + lon);
+                }
             }
+
+            PlaceHouseholdsInCells();
         }
 
         /// <summary>
         /// Creates the human evac cell if cell contains population and deploys households in all of the cells based on total amount of people per cell
         /// </summary>
-        public void PlaceHouseholdsInCells()
+        private void PlaceHouseholdsInCells()
         {
             totalHouseholds = 0;
             humanEvacCells = new HumanEvacCell[population.Length];
@@ -413,7 +431,7 @@ namespace WUIPlatform.Pedestrian
                     humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, validStartCoordinates[i], cellRoutes[i], population[i], i);
                     totalHouseholds += humanEvacCells[i].macroHouseholds.Length;
                 }
-            }
+            }            
 
             //sum up the number of people which will not evacuate and total cars
             totalPeopleWhoWillNotEvacuate = 0;

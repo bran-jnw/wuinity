@@ -449,7 +449,7 @@ namespace WUIPlatform.Traffic
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Random)
             {
-                int randomChoice = Random.Range(0, WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count);
+                int randomChoice = Random.Range(0, WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1);
                 rC.SelectForcedNonBlocked(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice]);
             }
             else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)

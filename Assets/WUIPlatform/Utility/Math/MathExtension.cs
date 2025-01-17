@@ -10,9 +10,10 @@ namespace WUIPlatform
             return (float)(minInclusive + RANDOM.NextDouble() * (maxExlusive - minInclusive));
         }
 
-        public static int Range(int minInclusive, int maxExclusive)
+        public static int Range(int minInclusive, int maxInclusive)
         {
-            return RANDOM.Next(minInclusive, maxExclusive);
+            //adding 1 as Next has exclusive upper bound
+            return RANDOM.Next(minInclusive, maxInclusive + 1);
         }
 
         public static float value

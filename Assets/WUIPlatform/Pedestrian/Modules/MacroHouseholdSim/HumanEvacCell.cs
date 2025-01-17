@@ -30,21 +30,21 @@ namespace WUIPlatform.Pedestrian
         /// </summary>
         /// <param name="nodeCenter"></param>
         /// <param name="cellWorldSize"></param>
-        /// <param name="route"></param>
+        /// <param name="routeCollection"></param>
         /// <param name="personsInCell"></param>
-        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2 roadAccessCoord, RouteCollection route, int personsInCell, int cellIndex)
+        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2 roadAccessCoord, RouteCollection routeCollection, int personsInCell, int cellIndex)
         {
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
 
             this.cellWorldSize = cellWorldSize;
-            this.routeCollection = route;
+            this.routeCollection = routeCollection;
             this.cellIndex = cellIndex;
 
             int peopleWithoutHouseHold = personsInCell;
             List<int> personsPerHousehold = new List<int>();
             while (peopleWithoutHouseHold > 0)
             {
-                int p = Random.Range(eO.minHouseholdSize, eO.maxHouseholdSize + 1);
+                int p = Random.Range(eO.minHouseholdSize, eO.maxHouseholdSize);
                 if (p > peopleWithoutHouseHold)
                 {
                     p = peopleWithoutHouseHold;

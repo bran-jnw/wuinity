@@ -41,8 +41,8 @@ namespace WUIPlatform
         }
         ValidCriticalData validInput;
           
-        private static readonly WUIEngine _engine = new WUIEngine();
-        public static WUIEngine ENGINE { get => _engine; }
+        private static readonly WUIEngine _ENGINE = new WUIEngine();
+        public static WUIEngine ENGINE { get => _ENGINE; }
 
 
         private WUIEngine()
@@ -170,13 +170,13 @@ namespace WUIPlatform
         /// If data is valid it is also loaded.
         /// </summary>
         /// <param name="input"></param>
-        public void SetNewInputData(IO.WUIEngineInput input)
-        {
+        public void SetNewInputData(WUIEngineInput input)
+        {      
             DATA_STATUS.Reset();
             DATA_STATUS.HaveInput = true;
             if (input == null)
             {
-                _input = new IO.WUIEngineInput();
+                _input = new WUIEngineInput();
             }
             else
             {
@@ -307,7 +307,7 @@ namespace WUIPlatform
             if (logType == LogType.Error)
             {
                 SIM.Stop("Simulation can't run, please check log.", true);
-            }
+            }           
         }
 
         static string[] logBuffer;
