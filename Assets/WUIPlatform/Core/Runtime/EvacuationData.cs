@@ -7,6 +7,8 @@
 
 using System.Collections.Generic;
 using WUIPlatform.IO;
+using System.IO;
+using System.Numerics;
 
 namespace WUIPlatform.Runtime
 {
@@ -69,7 +71,14 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        
+        private Vector2[] _validStartCoordinates;
+        public Vector2[] ValidStartCoordinates
+        {
+            get
+            {
+                return _validStartCoordinates;
+            }
+        }
 
         public void LoadAll()
         {            
@@ -80,6 +89,7 @@ namespace WUIPlatform.Runtime
             //need to load groups before indices
             LoadEvacGroupIndices();
             LoadBlockGoalEvents();
+            //LoadValidStartCoordinates(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.ValidStartCoordinates));
         }
 
         public bool LoadBlockGoalEvents()
@@ -176,6 +186,38 @@ namespace WUIPlatform.Runtime
                     }
                 }
             }
+        }
+
+        private bool LoadValidStartCoordinates(string path)
+        {
+            bool success = false;
+
+            if (File.Exists(path))
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    List<string> lines = new List<string>();
+
+                    while (!sr.EndOfStream)
+                    {
+                        lines.Add(sr.ReadLine());
+                    }
+
+                    _validStartCoordinates = new Vector2[lines.Count - 1];
+                    //skip last row, should be empty
+                    for (int i = 1; i < lines.Count - 1; ++i)
+                    {
+                        string[] line = lines[i].Split(",");
+                        float lat = float.Parse(line[0]);
+                        float lon = float.Parse(line[1]);
+                        _validStartCoordinates[i] = new Vector2(lat, lon);
+                    }
+                }
+
+                success = true;
+            }
+
+            return success;
         }
 
         public int GetEvacGoalIndexFromName(string name)

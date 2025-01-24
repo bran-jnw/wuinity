@@ -15,16 +15,7 @@ using System.Numerics;
 namespace WUIPlatform.Runtime
 {
     public class TrafficData
-    {
-        private Vector2[] _validStartCoordinates;
-        public Vector2[] ValidStartCoordinates
-        {
-            get
-            {
-                return _validStartCoordinates;
-            }
-        }        
-
+    {         
         Traffic.OpticalDensityRamp _opticalDensity;
         public Traffic.OpticalDensityRamp OpticalDensity
         {
@@ -47,7 +38,6 @@ namespace WUIPlatform.Runtime
         {
             LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile), false);
             LoadOpticalDensityFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.opticalDensityFile), false);
-            LoadValidStartCoordinates(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.ValidStartCoordinates));
         }
 
         private bool LoadRoadTypeData(string path, bool updateInputFile)
@@ -78,37 +68,6 @@ namespace WUIPlatform.Runtime
             }
 
             return success;
-        }
-        private bool LoadValidStartCoordinates(string path)
-        {
-            bool success = false;
-
-            if (File.Exists(path))
-            {
-                using (StreamReader sr = new StreamReader(path))
-                {
-                    List<String> lines = new List<String>();
-
-                    while (!sr.EndOfStream)
-                    {
-                        lines.Add(sr.ReadLine());
-                    }
-
-                    _validStartCoordinates = new Vector2[lines.Count - 1];
-                    //skip last row, should be empty
-                    for(int i = 0; i < lines.Count - 1; ++i)
-                    {
-                        string[] line = lines[i].Split(",");
-                        float lat = float.Parse(line[0]);
-                        float lon = float.Parse(line[1]);
-                        _validStartCoordinates[i] = new Vector2(lat, lon);
-                    }
-                }
-
-                success = true;
-            }            
-
-            return success;
-        }
+        }        
     }
 }

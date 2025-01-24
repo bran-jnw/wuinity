@@ -19,7 +19,8 @@ namespace WUIPlatform.Population
         public float cellSize;
         public int totalPopulation;
         public int totalActiveCells;
-        public int[] cellPopulation;        
+        public int[] cellPopulation;
+        public Vector2d[] cellRoadAccessLatLon;
         public  double cellArea;
         public bool[] populationMask;
 
@@ -48,16 +49,17 @@ namespace WUIPlatform.Population
         public int GetPeopleCount(int x, int y)
         {
             return cellPopulation[x + y * cells.x];
-        }
+        }              
 
-        
-
-        public void CreatePopulationFromLocalGPW(LocalGPWData localGPW)
+        public void CreatePopulationFromLocalGPW(LocalGPWData localGPW, float cellSize)
         {
             lowerLeftLatLong = WUIEngine.INPUT.Simulation.LowerLeftLatLong;
             size = WUIEngine.INPUT.Simulation.Size;
-            cells = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
-            cellSize = WUIEngine.INPUT.Evacuation.RouteCellSize;
+            this.cellSize = cellSize;// WUIEngine.INPUT.Evacuation.RouteCellSize;
+
+            cells = new Vector2int((int)(0.5f + size.x / cellSize), (int)(0.5f + size.y / cellSize));// WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
+            size = new Vector2d(cellSize * cells.x, cellSize * cells.y);    
+            
 
             cellPopulation = new int[cells.x * cells.y];
             populationMask = new bool[cells.x * cells.y];
@@ -90,11 +92,168 @@ namespace WUIPlatform.Population
                 }
             }
 
+            //the bilinear interpolation might not have conserved the amount of people correctly
+            if(localGPW.totalPopulation != totalPopulation)
+            {
+                ScaleTotalPopulation(localGPW.totalPopulation);
+            }
+
+            cellRoadAccessLatLon = new Vector2d[cells.x * cells.y];
+            UpdatePopulationBasedOnRoadAccess();
+            CreateAndSaveValidStartCoordinates();
+
             manager.CreateTexture();
             SavePopulation();
 
             isLoaded = true;
             correctedForRoutes = false;
+        }
+
+        private void UpdatePopulationBasedOnRoadAccess()
+        {
+            int stuckPeople = 0;
+            for (int i = 0; i < cellPopulation.Length; ++i)
+            {
+                if (cellPopulation[i] > 0)
+                {
+                    int yIndex = i / cells.x;
+                    int xIndex = i - yIndex * cells.x;
+                    Vector2d mercatorPos = new Vector2d((xIndex + 0.5f) * cellSize, (yIndex + 0.5) * cellSize) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator;
+                    Vector2d coord = GeoConversions.MetersToLatLon(mercatorPos);
+                    Itinero.RouterPoint p = WUIEngine.SIM.RouteCreator.CheckIfStartIsValid(coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), cellSize);
+                    if(p != null)
+                    {
+                        cellRoadAccessLatLon[i].x = p.Latitude;
+                        cellRoadAccessLatLon[i].y = p.Longitude;                        
+                    }  
+                    else
+                    {
+                        stuckPeople += cellPopulation[i];
+                        //delete people in the current cell since we are relocating them
+                        cellPopulation[i] = 0;
+                    }
+                }
+            }
+
+            if (stuckPeople > 0)
+            {
+                RelocateStuckPeople(stuckPeople);
+            }
+
+            correctedForRoutes = true;
+        }
+
+        public void CreateAndSaveValidStartCoordinates()
+        {
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_evacAccessLatLon.csv")))
+            {
+                outputFile.WriteLine("HomeLat,HomeLon,CarLat,CarLon,People");
+
+                for (int i = 0; i < cellRoadAccessLatLon.Length; i++)
+                {
+                    if (cellPopulation[i] > 0)
+                    {
+                        int peopleWithoutHouseHold = cellPopulation[i];
+                        List<int> householdCounts = new List<int>();
+                        while (peopleWithoutHouseHold > 0)
+                        {
+                            int p = Random.Range(WUIEngine.INPUT.Evacuation.minHouseholdSize, WUIEngine.INPUT.Evacuation.maxHouseholdSize);
+                            if (p > peopleWithoutHouseHold)
+                            {
+                                p = peopleWithoutHouseHold;
+                            }
+                            householdCounts.Add(p);
+                            peopleWithoutHouseHold -= p;
+                        }
+
+                        int yIndex = i / cells.x;
+                        int xIndex = i - yIndex * cells.x;
+                        Vector2d nodeCenter = new Vector2d((xIndex + 0.5f) * cellSize, (yIndex + 0.5) * cellSize);
+                        for (int j = 0; j < householdCounts.Count; ++j)
+                        {                            
+                            Vector2d householdStartPos = nodeCenter;
+                            householdStartPos.x += cellSize * Random.Range(-0.5f, 0.5f);
+                            householdStartPos.y += cellSize * Random.Range(-0.5f, 0.5f);
+                            Vector2d householdStartCoord = householdStartPos.GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+
+                            double goalLat = cellRoadAccessLatLon[i].x;
+                            double goalLon = cellRoadAccessLatLon[i].y;
+                            outputFile.WriteLine(householdStartCoord.x + "," + householdStartCoord.y + "," + cellRoadAccessLatLon[i].x + "," + cellRoadAccessLatLon[i].y + "," + householdCounts[j]);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void UpdatePopulationBasedOnRoutes(RouteCollection[] cellRoutes)
+        {
+            int stuckPeople = CollectStuckPeople(cellRoutes);
+            if (stuckPeople > 0)
+            {
+                RelocateStuckPeople(stuckPeople);
+                manager.CreateTexture();
+            }
+
+            correctedForRoutes = true;
+            SavePopulation();
+        }
+
+        /// <summary>
+        /// Goes through all cells and check if they have a valid route to get away or not.
+        /// If not they are summed up for later re-distribution
+        /// </summary>
+        /// <returns></returns>
+        private int CollectStuckPeople(RouteCollection[] cellRoutes)
+        {
+            if (cellRoutes.Length != cellPopulation.Length)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Error, " Route collection and population does not have same size.");
+                return -1;
+            }
+
+            int stuckPeople = 0;
+            for (int i = 0; i < cellPopulation.Length; ++i)
+            {
+                if (cellPopulation[i] > 0 && cellRoutes[i] == null)
+                {
+                    //MonoBehaviour.print(population[i] + " persons are stuck. Index: " + i);
+                    stuckPeople += cellPopulation[i];
+                    //delete people in the current cell since we are relocating them
+                    cellPopulation[i] = 0;
+                }
+            }
+            return stuckPeople;
+        }
+
+        /// <summary>
+        /// Relocates stuck people (no route in cell), relocation based on ratio between people in cell / total people, so relative density is conserved
+        /// </summary>
+        /// <param name="stuckPeople"></param>
+        private void RelocateStuckPeople(int stuckPeople)
+        {
+            if (stuckPeople > 0)
+            {
+                int oldTotalPopulation = totalPopulation;
+                int remainingPop = totalPopulation - stuckPeople;
+                totalPopulation = 0;
+                totalActiveCells = 0;
+                for (int i = 0; i < cellPopulation.Length; ++i)
+                {
+                    if (cellPopulation[i] > 0)
+                    {
+                        float weight = cellPopulation[i] / (float)remainingPop;
+                        int extraPersonsToCell = Mathf.Max(1, Mathf.RoundToInt(weight * stuckPeople));
+                        cellPopulation[i] += extraPersonsToCell;
+                        totalPopulation += cellPopulation[i];
+                        ++totalActiveCells;
+                    }
+                }
+
+                if (totalPopulation != oldTotalPopulation)
+                {
+                    ScaleTotalPopulation(oldTotalPopulation);
+                }
+            }
         }
 
         /// <summary>
@@ -133,20 +292,7 @@ namespace WUIPlatform.Population
             SavePopulation();
             isLoaded = true;
             correctedForRoutes = false;
-        }
-
-        public void UpdatePopulationBasedOnRoutes(RouteCollection[] cellRoutes)
-        {
-            int stuckPeople = CollectStuckPeople(cellRoutes);
-            if (stuckPeople > 0)
-            {
-                RelocateStuckPeople(stuckPeople);
-                manager.CreateTexture();                
-            }            
-
-            correctedForRoutes = true;
-            SavePopulation();
-        }
+        }    
 
         /// <summary>
         /// Scales the actual poulation count from GPW down to desired amount of people
@@ -172,7 +318,7 @@ namespace WUIPlatform.Population
             }
             totalPopulation = newTotalPop;
 
-            //make sure we hit our target, should always be lower if not matching since we are flooring the int
+            //make sure we hit our target, if we have more people than cells we should always be lower if not matching since we are flooring the int
             if(desiredPopulation > totalPopulation)
             {
                 int loopCount = desiredPopulation - totalPopulation;
@@ -183,6 +329,7 @@ namespace WUIPlatform.Population
                     ++totalPopulation;
                 }
             }
+            //this can happen when we have too many acticv cells
             else if(desiredPopulation < totalPopulation)
             {
                 int loopCount = totalPopulation - desiredPopulation;
@@ -304,65 +451,7 @@ namespace WUIPlatform.Population
             }
 
             return success;
-        }        
-
-        /// <summary>
-        /// Goes through all cells and check if they have a valid route to get away or not.
-        /// If not they are summed up for later re-distribution
-        /// </summary>
-        /// <returns></returns>
-        private int CollectStuckPeople(RouteCollection[] cellRoutes)
-        {
-            if(cellRoutes.Length != cellPopulation.Length)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " Route collection and population does not have same size.");
-                return -1;
-            }
-
-            int stuckPeople = 0;
-            for (int i = 0; i < cellPopulation.Length; ++i)
-            {
-                if (cellPopulation[i] > 0 && cellRoutes[i] == null)
-                {
-                    //MonoBehaviour.print(population[i] + " persons are stuck. Index: " + i);
-                    stuckPeople += cellPopulation[i];
-                    //delete people in the current cell since we are relocating them
-                    cellPopulation[i] = 0;
-                }
-            }
-            return stuckPeople;
-        }
-
-        /// <summary>
-        /// Relocates stuck people (no route in cell), relocation based on ratio between people in cell / total people, so relative density is conserved
-        /// </summary>
-        /// <param name="stuckPeople"></param>
-        private void RelocateStuckPeople(int stuckPeople)
-        {
-            if (stuckPeople > 0)
-            {
-                int oldTotalPopulation = totalPopulation;
-                int remainingPop = totalPopulation - stuckPeople;
-                totalPopulation = 0;
-                totalActiveCells = 0;
-                for (int i = 0; i < cellPopulation.Length; ++i)
-                {
-                    if (cellPopulation[i] > 0)
-                    {
-                        float weight = cellPopulation[i] / (float)remainingPop;
-                        int extraPersonsToCell = Mathf.Max(1, Mathf.RoundToInt(weight * stuckPeople));
-                        cellPopulation[i] += extraPersonsToCell;
-                        totalPopulation += cellPopulation[i];
-                        ++totalActiveCells;
-                    }
-                }
-
-                if (totalPopulation != oldTotalPopulation)
-                {
-                    ScaleTotalPopulation(oldTotalPopulation);
-                }
-            }            
-        }
+        }     
     }
 }
 

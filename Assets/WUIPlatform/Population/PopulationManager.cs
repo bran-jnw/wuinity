@@ -136,7 +136,7 @@ namespace WUIPlatform.Population
             if(success)
             {
                 _visualizer.SetDataPlane(false);
-                populationData.CreatePopulationFromLocalGPW(localGPWData);
+                populationData.CreatePopulationFromLocalGPW(localGPWData, 100f);
             }            
 
             return success;
@@ -199,23 +199,6 @@ namespace WUIPlatform.Population
             }
             color.a = 0.7f;
             return color;
-        }
-
-        public static void SaveValidStartCoordinates(RouteCollection[] routes)
-        {
-            using (StreamWriter outputFile = new StreamWriter(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_evacAccessLatLon.csv")))
-            {
-                for (int i = 0; i < routes.Length; i++)
-                {
-                    if(routes[i] != null)
-                    {
-                        float lat = routes[i].routes[0].route.Shape[0].Latitude;
-                        float lon = routes[i].routes[0].route.Shape[0].Longitude;
-                        string line = lat + "," + lon;
-                        outputFile.WriteLine(line);
-                    }                    
-                }                
-            }            
         }
     }
 }

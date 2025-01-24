@@ -164,8 +164,6 @@ namespace WUIPlatform.Traffic
                 WUIEngine.SIM.Stop("ERROR: Not a single route was found, make sure OSM network is valid.", true);
             }
 
-            PopulationManager.SaveValidStartCoordinates(cellRoutes);
-
             return cellRoutes;
         }
 
@@ -218,7 +216,7 @@ namespace WUIPlatform.Traffic
             }
         }
 
-        RouterPoint CheckIfStartIsValid(Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
+        public RouterPoint CheckIfStartIsValid(Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
         {
             //check within the radius of the diagonal of the cell (so complete cell plus some parts of neighboring cells)
             RouterPoint start = null;
@@ -232,7 +230,7 @@ namespace WUIPlatform.Traffic
             }
             catch (Itinero.Exceptions.ResolveFailedException)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Itinero could not resolve requested position (point is too far from road network). Lat/long: " + coordinate.x + ", " + coordinate.y);
+                //WUIEngine.LOG(WUIEngine.LogType.Warning, "Itinero could not resolve requested position (point is too far from road network). Lat/long: " + coordinate.x + ", " + coordinate.y);
             }
 
             return start;

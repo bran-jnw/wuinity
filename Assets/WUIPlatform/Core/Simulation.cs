@@ -298,7 +298,7 @@ namespace WUIPlatform
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
                     //macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.RUNTIME_DATA.Traffic.ValidStartCoordinates, WUIEngine.POPULATION.GetPopulationData());
+                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.RUNTIME_DATA.Evacuation.ValidStartCoordinates, WUIEngine.POPULATION.GetPopulationData());
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
