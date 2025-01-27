@@ -282,7 +282,7 @@ namespace WUIPlatform.Fire
             else
             {
                 //north, east, south, west
-                if (direction == 0 || direction % 2 != 0)                    //@Jonathan, this if condition returns true for direction = [0,1,3,5,7], did you mean mode2 == 0?
+                if (direction == 0 || direction % 2 != 0)                   
                 {
                     direction = direction / 2;
                 }
@@ -323,7 +323,12 @@ namespace WUIPlatform.Fire
         public double GetMaxSpreadRate()
         {
             return maxSpreadRate;
-        }        
+        }
+
+        public double GetMaxSpreadRateAzimuth()
+        {
+            return maxSpreadRateDirection;
+        }
 
         private void UpdateFireFront()
         {   

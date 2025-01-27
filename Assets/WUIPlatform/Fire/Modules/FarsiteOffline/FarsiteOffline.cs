@@ -99,10 +99,16 @@ namespace WUIPlatform.Fire
             return WUIEngine.SIM.CurrentTime > maxTimeOfArrival ? true : false;
         }        
 
-        public override int[,] GetMaxROS()
+        public override float[,] GetMaxROS()
         {
             throw new System.NotImplementedException();
         }
+
+        public override float[,] GetMaxROSAzimuth()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public override int GetCellCountX()
         {
             return ncols;

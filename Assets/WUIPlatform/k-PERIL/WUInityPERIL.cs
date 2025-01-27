@@ -27,44 +27,33 @@ namespace WUIPlatform
         At this stage, k-PERIL is ready for testing. You should have received a separate email with a link to download it. Please feel free to test this code out and come back with any errors or suggestions for improvement. Feel free to forward this to other people in the team if they can test it. Any further questions feel free to reach out to me.
         */
 
-        //private k_PERIL_DLL.PERIL peril;
+        private kPERIL_DLL.kPERIL peril = new kPERIL_DLL.kPERIL();
         int[,] compoundBoundary;
         int heatmapMax;
-        int cellSize;
         Vector2int cellCount;
-        int[,] WUIarea;
-
+                
         /// <summary>
-        /// Runs k-PERIL, called after a completed simulation
+        /// Runs k-PERIL, should be called after a completed simulation
         /// </summary>
-        /// <param name="numberOfCases"></param>
-        /// <param name="cell"></param>
-        /// <param name="tBuffer"></param>
-        /// <param name="yDim"></param>
-        /// <param name="xDim"></param>
-        /// <param name="WUIarea"></param>
-        /// <param name="midFlameWindspeed"></param>
-        /// <param name="ROSpathInput"></param>
-        /// <param name="AzimuthPathInput"></param>
-        /// <param name="PerilOutput"></param>
-        /// <param name="EPIoutput"></param>
-        public void RunPERIL()
-        {
-            /*if (peril == null)
-            {
-                //peril = new k_PERIL_DLL.PERIL();
-                cellCount = WUIEngine.SIM.FireMesh().GetCellCount();
-                cellSize = WUIEngine.SIM.FireMesh().GetCellSize();
-                compoundBoundary = new int[cellCount.x, cellCount.y];
-                WUIarea = GetWUIArea();
-                heatmapMax = 0;
-            }*/
+        /// <param name="midFlameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
+        public void RunPERIL(float midFlameWindspeed)
+        {            
+            int xDim = WUIEngine.SIM.FireModule.GetCellCountX();
+            int yDim = WUIEngine.SIM.FireModule.GetCellCountY();
+            //assume cell/raster is square
+            int cellSize = Mathf.RoundToInt(WUIEngine.SIM.FireModule.GetCellSizeX());
+            compoundBoundary = new int[cellCount.x, cellCount.y];
+            int[,] WUIarea = GetWUIArea();
+            heatmapMax = 0;
             //get wuiarea from a user defined map painted in wuinity
 
-            int tBuffer = (int)WUIEngine.OUTPUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file
+            int triggerBuffer = (int)WUIEngine.OUTPUT.totalEvacTime; // tbuffer - actual evac time, user specify desired extra buffer time in input file
             //collect ROS, how to send ROS data is ROStheta[X*Y,8], y first, x second, start in north and then clockwise
-            int[,] maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
+            float[,] maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
+            float[,] rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
             int[,] wuiArea = GetWUIArea();
+
+            peril.CalculateBoundary(cellSize, triggerBuffer, midFlameWindspeed, wuiArea, maxROS, rosAzimuth);
 
             //calc new boundary
             /*int[,] boundary = peril.getSingularBoundary(cellSize, tBuffer, WUIarea, maxROS);
@@ -115,66 +104,3 @@ namespace WUIPlatform
         }
     }    
 }
-
-/*
-
-using System;
-using System.IO;
-using k_PERIL_DLL;
-
-namespace EXPERIMENTAL_PERIL
-{
-    class perilTester
-    {
-        static void Main(string[] args)     //where PERIL is actually called
-        {
-            PERIL peril = new PERIL();
-            int[,] WUIarea = new int[,]                                                         //WUI Area
-            {
-                { 7,1 },
-            };
-
-            int[,,] boundaries = new int[10, 6, 10];
-
-
-            for (int i = 0; i < 10; i++)
-            {
-                Console.WriteLine("---------------------------------------");
-                Console.WriteLine("SIMULATION " + (i+1) + " NOW RUNNING");
-                float[,] ROS = new float[,]
-                {
-                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
-                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
-                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
-                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
-                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
-                    {0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f,0.8f },
-                };
-
-                int[,] Azimuth = new int[,]
-                {
-                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
-                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
-                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
-                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
-                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
-                    {45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i,45+4*i },
-                };
-                int[,] currentBoundary = peril.getSingularBoundary(30, 140, (float)4.47, WUIarea, ROS, Azimuth);
-
-                for (int j = 0; j < currentBoundary.GetLength(0); j++)
-                {
-                    for (int k = 0; k < currentBoundary.GetLength(1); k++)
-                    {
-                        boundaries[j, k, i] = currentBoundary[j, k];
-                    }
-                }
-            }
-            int[,] evax = peril.getEVAXmatrix(boundaries, WUIarea);
-            int[,] overallboundary = peril.getCompoundBoundary(boundaries);
-        }
-    }
-}
-
-
-*/

@@ -484,23 +484,41 @@ namespace WUIPlatform.Fire
             return _cellCount;
         }
 
-        public override int[,] GetMaxROS()                                   
+        public override float[,] GetMaxROS()                                   
         {
-            int[,] ros = new int[_cellCount.x * _cellCount.y, 8];
-            for (int i = 0; i < _cellCount.x; i++)
+            float[,] maxROS = new float[_cellCount.x, _cellCount.y];
+            for (int j = 0; j < _cellCount.y; j++)
             {
-                for (int j = 0; j < _cellCount.y; j++)
+                for (int i = 0; i < _cellCount.x; i++)
                 {
                     //flip on y-axis
                     int yIndex = _cellCount.y - 1 - j;
                     FireCell f = _fireCells[GetCellIndex(i, yIndex)];
-                    for (int k = 0; k < 8; k++)
+                    maxROS[i, j] = (float)f.GetMaxSpreadRate();
+
+                    /*for (int k = 0; k < 8; k++)
                     {
                         ros[j + i * _cellCount.y, k] = f.GetMaxSpreadrateInDirection(k);
-                    }
+                    }*/
                 }
             }
-            return ros;
+            return maxROS;
+        }
+
+        public override float[,] GetMaxROSAzimuth()
+        {
+            float[,] maxROSAzimuth = new float[_cellCount.x, _cellCount.y];
+            for (int j = 0; j < _cellCount.y; j++)
+            {
+                for (int i = 0; i < _cellCount.x; i++)
+                {
+                    //flip on y-axis
+                    int yIndex = _cellCount.y - 1 - j;
+                    FireCell f = _fireCells[GetCellIndex(i, yIndex)];
+                    maxROSAzimuth[i, j] = (float)f.GetMaxSpreadRateAzimuth();
+                }
+            }
+            return maxROSAzimuth;
         }
 
         public override float GetInternalDeltaTime()

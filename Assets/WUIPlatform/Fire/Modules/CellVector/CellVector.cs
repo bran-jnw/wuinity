@@ -365,7 +365,12 @@ namespace WUIPlatform.Fire
             throw new System.NotImplementedException();
         }
 
-        public override int[,] GetMaxROS()
+        public override float[,] GetMaxROS()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override float[,] GetMaxROSAzimuth()
         {
             throw new System.NotImplementedException();
         }
@@ -433,7 +438,7 @@ namespace WUIPlatform.Fire
         public override void Stop()
         {
             //throw new System.NotImplementedException();
-        }
+        }        
     }
 }
 

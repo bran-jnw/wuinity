@@ -18,9 +18,13 @@ namespace WUIPlatform.Fire
         public abstract float GetInternalDeltaTime();
 
         /// <summary>
-        /// Get ROS in the eight cardinal directions
+        /// Get the maximum rate of spread (any direction, so azimuth is also needed to back calculate eliipse)
         /// </summary>
-        public abstract int[,] GetMaxROS();
+        public abstract float[,] GetMaxROS();
+        /// <summary>
+        /// Get the spread direction of the maximum rate of spread, 0 degrees is North and then clockwise
+        /// </summary>
+        public abstract float[,] GetMaxROSAzimuth();
 
         public abstract int GetCellCountX();
         public abstract int GetCellCountY();
