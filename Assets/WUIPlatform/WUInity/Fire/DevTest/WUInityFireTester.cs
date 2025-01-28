@@ -16,7 +16,7 @@ namespace WUIPlatform.WUInity
         [SerializeField] Material fireMaterial;
 
         [SerializeField] SpreadMode spreadMode = SpreadMode.SixteenDirections;      //Sixteen direction spread mode
-        [SerializeField] Vector2Int cellCount = new Vector2Int(128, 128);           //128 x 128 raster
+        [SerializeField] Vector2int cellCount = new Vector2int(128, 128);           //128 x 128 raster
         [SerializeField] Vector2d cellSize = new Vector2d(30, 30);                  //30 x 30 m cells
         [SerializeField] WindInput wind = WindInput.GetTemplate();                  //Wind data from template (default in code)
         [SerializeField] WeatherInput weather = WeatherInput.GetTemplate();         //same as above
@@ -56,13 +56,7 @@ namespace WUIPlatform.WUInity
 
         void CreateLCPData()                                                                    
         {
-            lcpData = new LCPData();                                                            
-            lcpData.RasterCellResolutionX = cellSize.x;                                         
-            lcpData.RasterCellResolutionY = cellSize.y;
-            lcpData.Header.numnorth = cellCount.y;
-            lcpData.Header.numeast = cellCount.x;
-            lcpData.NumVals = 10;                                                               
-            lcpData.Header.loelev = 0;                                                          
+            lcpData = new LCPData(cellSize, cellCount);                                                             
 
             //always save ten values per cell, so all of them
             int NumVals = 10;            

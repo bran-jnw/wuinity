@@ -148,10 +148,10 @@ namespace WUIPlatform.Fire
 
             _cellSizeX = (float)_lcpData.RasterCellResolutionX;
             _cellSizeY = (float)_lcpData.RasterCellResolutionY;
-            _cellsX = _lcpData.Header.numeast;
-            _cellsY = _lcpData.Header.numnorth;
+            _cellsX = _lcpData.GetCellCountX();
+            _cellsY = _lcpData.GetCellCountY();
 
-            Vector2d lcpUTM = new Vector2d(_lcpData.Header.WestUtm, _lcpData.Header.SouthUtm);
+            Vector2d lcpUTM = _lcpData.GetLowerLeftUTM();
             offset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
             bufferSize = _cellsX * _cellsY;

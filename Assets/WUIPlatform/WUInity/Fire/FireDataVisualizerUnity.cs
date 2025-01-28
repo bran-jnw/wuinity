@@ -50,11 +50,11 @@ namespace WUIPlatform.Visualization
         {
             Fire.LCPData _lcpData = owner.LCPData;
 
-            float xDim = (float)(_lcpData.Header.EastUtm - _lcpData.Header.WestUtm);
-            float yDim = (float)(_lcpData.Header.NorthUtm - _lcpData.Header.SouthUtm);
+            float xDim = (float)_lcpData.GetLCPSizeX();
+            float yDim = (float)_lcpData.GetLCPSizeY();
 
-            int xPixels = _lcpData.Header.numeast;
-            int yPixels = _lcpData.Header.numnorth;
+            int xPixels = _lcpData.GetCellCountX();
+            int yPixels = _lcpData.GetCellCountY();
 
             _fuelModelsTexture = new Texture2D(xPixels, yPixels, TextureFormat.RGBA32, false);
             _fuelModelsTexture.filterMode = FilterMode.Point;
@@ -68,9 +68,13 @@ namespace WUIPlatform.Visualization
             _aspectTexture = new Texture2D(xPixels, yPixels, TextureFormat.RGBA32, false);
             _aspectTexture.filterMode = FilterMode.Point;
 
-            float elevationRange = _lcpData.Header.hielev - _lcpData.Header.loelev;
-            float slopeRange = _lcpData.Header.hislope - _lcpData.Header.loslope;
-            float aspectRange = _lcpData.Header.hiaspect - _lcpData.Header.loaspect;
+            Vector2d elevationMinMax = _lcpData.GetElevationMinMax();
+            Vector2d slopeMinMax = _lcpData.GetSlopeMinMax();
+            Vector2d aspectMinMax = _lcpData.GetAspectMinMax();
+
+            float elevationRange = (float)(elevationMinMax.y - elevationMinMax.x);
+            float slopeRange = (float)(slopeMinMax.y - slopeMinMax.x);
+            float aspectRange = (float)(aspectMinMax.y - aspectMinMax.x);
             float alpha = 0.85f;
 
             for (int y = 0; y < yPixels; y++)
@@ -83,15 +87,15 @@ namespace WUIPlatform.Visualization
                     c.a = alpha;
                     _fuelModelsTexture.SetPixel(x, y, c.UnityColor);
 
-                    c = WUIEngineColor.white * ((l.elevation - _lcpData.Header.loelev) / elevationRange);
+                    c = WUIEngineColor.white * ((l.elevation - (float)elevationMinMax.x) / elevationRange);
                     c.a = alpha;
                     _elevationTexture.SetPixel(x, y, c.UnityColor);
 
-                    c = WUIEngineColor.white * ((l.slope - _lcpData.Header.loslope) / slopeRange);
+                    c = WUIEngineColor.white * ((l.slope - (float)slopeMinMax.x) / slopeRange);
                     c.a = alpha;
                     _slopeTexture.SetPixel(x, y, c.UnityColor);
 
-                    c = WUIEngineColor.white * ((l.aspect - _lcpData.Header.loaspect) / aspectRange);
+                    c = WUIEngineColor.white * ((l.aspect - (float)aspectMinMax.x) / aspectRange);
                     c.a = alpha;
                     _aspectTexture.SetPixel(x, y, c.UnityColor);
                 }

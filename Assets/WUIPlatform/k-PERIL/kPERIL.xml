@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>kPERIL</name>
+    </assembly>
+    <members>
+        <member name="M:kPERIL_DLL.kPERIL.CalculateBoundary(System.Single,System.Int32,System.Single,System.Int32[0:,0:],System.Single[0:,0:],System.Single[0:,0:],System.IO.StringWriter)">
+            <summary>
+            This method represents one iteration.
+            </summary>
+            <param name="cellSize">The square size of each raster (most commonly 30m)</param>
+            <param name="triggerBuffer">Trigger buffer time in minutes</param>
+            <param name="midFlameWindspeed">The wind speed in the midflame height, representing the entire domain (spatially and temporally)</param>
+            <param name="wuiArea">An X by 2 array listing points defining a polygon. This polygon is used as the urban area around which the boundary is calculated.The dimensions of each point are about the domain with (0,0) being the top left corner. </param>
+            <param name="ros">The rate of spread magniture array of size X by Y, in meters per minute</param>
+            <param name="azimuth">The rate of spread direction array of size X by Y, in degrees from north, clockwise</param>
+            <param name="consoleOutput">Optional, used to capture any consaole messages from k-PERIL.</param>
+            <returns>An X by Y array representing the landscape. Points are 1 if inside the boundary and 0 if outside.</returns>
+        </member>
+        <member name="M:kPERIL_DLL.kPERIL.CalculateMultipleBoundaries(System.Single[],System.Int32[],System.Single[],System.Int32[0:,0:][],System.Single[0:,0:][],System.Single[0:,0:][])">
+            <summary>
+            The main callable method of k-PERIL.This method calculates multiple iterations and saves them within the object.
+            </summary>
+            <param name="cellSize"> An array of The square size of each point (most commonly 30m) for each simulation</param>
+            <param name="tBuffer"> An array ofThe prescribed evacuation time, in minutes</param>
+            <param name="midFlameWindspeed">An array of The wind speed in the midflame height, representing the entire domain (spatially and temporally)</param>
+            <param name="wuIarea">A jagged array of X by 2 array listing points defining a polygon. This polygon is used as the urban area around which the boundary is calculated.The dimensions of each point are about the domain with (0,0) being the top left corner. </param>
+            <param name="ros">A jagged array of The rate of spread magniture array of size X by Y, in meters per minute</param>
+            <param name="azimuth">A jagged array of The rate of spread direction array of size X by Y, in degrees from north, clockwise</param>
+            <returns>An X by Y array representing the landscape. Points are 1 if inside the boundary and 0 if outside.</returns>
+        </member>
+        <member name="M:kPERIL_DLL.kPERIL.GetProbabilityBoundary">
+            <summary>
+            Sums up all the boundaries calculated in calcMultipleBoundaries.
+            </summary>
+            <returns>An X by Y array representing the domain</returns>
+        </member>
+        <member name="M:kPERIL_DLL.kPERIL.GetBoundaryList">
+            <summary>
+            Getter for the list containing all the calculated boundaries
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:kPERIL_DLL.kPERIL.GetPolygonEdgeNodes(System.Int32[0:,0:])">
+            <summary>
+            Function that finds all points defining the perimeter of a polygon. Used to find all points of the WUI area boundary
+            </summary>
+            <param name="endNodes"> Array of X by 2 representing the coordinates of the polygon nodes</param>
+            <returns>Array of Y by 2 of all the points in the perimeter of the polygon</returns>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.CalculateRosTheta">
+            <summary>
+            Calculate ROS, includes rate of spread to all 8 cardinal directions
+            </summary>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.SetRosN">
+            <summary>
+            Calculate RosN, a list of all the non-boundary nodes (boundary nodes do not have 8 neighbors and complicate the rest of the algorithm. As such only internal nodes are used, and boundary nodes are only used as "neighbors" for calculations
+            </summary>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.SetRosLoc">
+            <summary>
+            Calculate RosLoc, a catalog of the neighbors of each node.Orientation is same as ROS cardinal direction, starts from North and moves clockwise.
+            </summary>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.SetWeight">
+            <summary>
+            Calculate the weight variable. contains the "Weight" between each node and its 8 neighbors
+            </summary>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.GetBoundary(System.Single[0:,0:])">
+            <summary>
+            Create the boundary of the PERIL area
+            </summary>
+            <param name="weightList"></param>
+            <returns></returns>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.CompoundBoundary(System.Int32[])">
+            <summary>
+            
+            </summary>
+            <param name="boundary"></param>
+            <returns></returns>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.CheckFireOutOfBounds(System.Int32,System.Int32)">
+            <summary>
+            Check if the WUI area is not on an active node
+            </summary>
+            <param name="wuIx"></param>
+            <param name="wuIy"></param>
+            <returns></returns>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.CheckGeneralOutOfBounds(System.Int32,System.Int32)">
+            <summary>
+            Check if the WUI point is outside of Bounds
+            </summary>
+            <param name="wuIx"></param>
+            <param name="wuIy"></param>
+            <exception cref="T:System.Exception"></exception>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.Dfs(System.Int32)">
+            <summary>
+            DFS algorithm. Recursive with stop condition
+            </summary>
+            <param name="wui"></param>
+            <returns></returns>
+        </member>
+        <member name="M:kPERIL_DLL.PERILData.CheckOutOfBounds(System.Int32[0:,0:])">
+            <summary>
+            
+            </summary>
+            <param name="wui"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

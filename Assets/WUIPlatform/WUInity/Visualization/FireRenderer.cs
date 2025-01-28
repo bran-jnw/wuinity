@@ -226,7 +226,7 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 float xScale, yScale;
                 Vector2d offsetFire;
-                ((FarsiteOffline)WUIEngine.SIM.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
+                ((AsciiFireImport)WUIEngine.SIM.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
                 offset.x += (float)offsetFire.x;
                 offset.y += (float)offsetFire.y;
                 width *= xScale;

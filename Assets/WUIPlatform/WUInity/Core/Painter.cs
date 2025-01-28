@@ -254,9 +254,17 @@ namespace WUIPlatform.WUInity
                 //get correct size, fire mesh or evac mesh
                 if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
                 {
-                    fireDataCellCount = new Vector2int(WUIEngine.SIM.FireModule.GetCellCountX(), WUIEngine.SIM.FireModule.GetCellCountY());                    
-                    cellCount = fireDataCellCount;
-                    fireDataRealSize = WUIEngine.INPUT.Simulation.Size;
+                    if(WUIEngine.RUNTIME_DATA.Fire.LCPData != null)
+                    {
+                        fireDataCellCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCount();
+                        cellCount = fireDataCellCount;
+                        fireDataRealSize = WUIEngine.INPUT.Simulation.Size;
+                    }
+                    else
+                    {
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Painter is trying to access LCP data but it is not loaded.");
+                        return;
+                    }
                 }
                 else
                 {

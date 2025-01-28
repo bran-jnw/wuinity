@@ -211,7 +211,7 @@ namespace WUIPlatform.Fire
 
         double GetCorrectedElevation(int x, int y)                  
         {            
-            return _fireCells[GetCellIndex(x, y)].GetElevation() - lcpData.Header.loelev;           
+            return _fireCells[GetCellIndex(x, y)].GetElevation() - lcpData.GetElevationMinMax().x;           
         }
 
         double GetRawElevation(int x, int y)                        

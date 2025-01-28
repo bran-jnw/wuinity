@@ -20,9 +20,9 @@ namespace WUIPlatform.Fire
     }
 
     /// <summary>
-    /// Supports only Flammap version of Farsite.
+    /// Supports/tested using only Flammap version of Farsite.
     /// </summary>
-    public class FarsiteOffline : FireModule
+    public class AsciiFireImport : FireModule
     {
         float maxTimeOfArrival = float.MinValue;
         int ncols, nrows, _activeCells;
@@ -34,7 +34,7 @@ namespace WUIPlatform.Fire
         List<Vector2int> newlyIgnitedCells;
         float[] _sootInjection;
 
-        public FarsiteOffline() 
+        public AsciiFireImport() 
         {
             string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.farsiteData.rootFolder, "output", "TOA.asc");
             string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.farsiteData.rootFolder, "output", "ROS.asc");
@@ -49,7 +49,7 @@ namespace WUIPlatform.Fire
             newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
-            //WUIEngine.LOG(WUIEngine.LogType.Log, "Farsite import offset by (x/y) meters: " + offset.x + ", " + offset.y);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + offset.x + ", " + offset.y);
         }
 
         public override void Step(float currentTime, float deltaTime)

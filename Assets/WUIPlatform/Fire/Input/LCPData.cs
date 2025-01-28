@@ -53,7 +53,7 @@ namespace WUIPlatform.Fire
 	{
 		// header for landscape file
 		[System.Serializable]
-		public class LCpHeader
+		private class LCpHeader
 		{
 			public int CrownFuels;         // 20 if no crown fuels, 21 if crown fuels exist
 			public int GroundFuels;      // 20 if no ground fuels, 21 if ground fuels exist
@@ -134,7 +134,7 @@ namespace WUIPlatform.Fire
 			public char[] Description = new char[512];
 		}
 
-		public LCpHeader Header = new LCpHeader();
+		private LCpHeader Header = new LCpHeader();
 		public bool NEED_CUST_MODELS;// = false;	// custom fuel models
 		public bool HAVE_CUST_MODELS;// = false;
 		public bool NEED_CONV_MODELS;// = false;     // fuel model conversions
@@ -152,29 +152,129 @@ namespace WUIPlatform.Fire
 		Vector2int originCellOffset; //cells offset from common origin
         //public Vector2int OriginCellOffset { get => originCellOffset; }
 
-    public LCPData()								
+		public LCPData(Vector2d cellSize, Vector2int cellCount)								
 		{
-			
-		}
+            RasterCellResolutionX = cellSize.x;
+            RasterCellResolutionY = cellSize.y;
+            Header.numnorth = cellCount.y;
+            Header.numeast = cellCount.x;
+            NumVals = 10;
+            Header.loelev = 0;
+        }
 
 		public LCPData(string path)					
 		{
 			ReadLCP(path);
 		}
 
-		public void ReadLCP(string path)
+		private void ReadLCP(string path)
 		{
 			ReadData(path);
 			//SetCustFuelModelID(HaveCustomFuelModels());
 			//SetConvFuelModelID(HaveFuelConversions());
 		}
 
+        public Vector2int GetCellCount()
+        {
+            return new Vector2int(Header.numeast, Header.numnorth);
+        }
+
+        public int GetCellCountX()
+        {
+			return Header.numeast;
+        }
+
+        public int GetCellCountY()
+        {
+            return Header.numnorth;
+        }
+
+		public Vector2d GetLowerLeftUTM()
+		{
+			return new Vector2d(Header.WestUtm, Header.SouthUtm);
+		}
+
 		/// <summary>
-		/// Returns cell data of requested index in LCP file, no correction for offset.
+		/// In meters.
 		/// </summary>
-		/// <param name="xIndex"></param>
-		/// <param name="yIndex"></param>
 		/// <returns></returns>
+        public Vector2d GetLCPSize()
+		{
+			double x = Header.EastUtm - Header.WestUtm;
+            double y = Header.NorthUtm - Header.SouthUtm;
+
+			return new Vector2d(x, y);
+        }
+
+		/// <summary>
+		/// In meters.
+		/// </summary>
+		/// <returns></returns>
+        public double GetLCPSizeX()
+        {
+			return Header.EastUtm - Header.WestUtm;
+;        }
+
+		/// <summary>
+		/// In meters.
+		/// </summary>
+		/// <returns></returns>
+        public double GetLCPSizeY()
+        {
+			return Header.NorthUtm - Header.SouthUtm;
+        }
+
+		public Vector2d GetElevationMinMax()
+		{
+			return new Vector2d(Header.loelev, Header.hielev);
+        }
+
+        public double GetElevationMin()
+        {
+			return Header.loelev;
+        }
+
+        public double GetElevationMax()
+        {
+            return Header.hielev;
+        }
+
+        public Vector2d GetSlopeMinMax()
+        {
+            return new Vector2d(Header.loslope, Header.hislope);
+        }
+
+        public double GetSlopeMin()
+        {
+            return Header.loslope;
+        }
+
+        public double GetSlopeMax()
+        {
+            return Header.hislope;
+        }
+
+        public Vector2d GetAspectMinMax()
+        {
+            return new Vector2d(Header.loaspect, Header.hiaspect);
+        }
+
+        public double GetAspectMin()
+        {
+            return Header.loaspect;
+        }
+
+        public double GetAspectMax()
+        {
+            return Header.hiaspect;
+        }
+
+        /// <summary>
+        /// Returns cell data of requested index in LCP file, no correction for offset.
+        /// </summary>
+        /// <param name="xIndex"></param>
+        /// <param name="yIndex"></param>
+        /// <returns></returns>
         public LandscapeStruct GetCellData(int xIndex, int yIndex)
         {
 			return GetCellDataSimulationIndex(xIndex, yIndex, false);
@@ -649,8 +749,8 @@ namespace WUIPlatform.Fire
 				}
 			}
 
-            Vector2d farsiteUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            originOffset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
+            originOffset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 			originCellOffset = new Vector2int(-(int)(originOffset.x / GetCellResolutionX()), -(int)(originOffset.y / GetCellResolutionY()));
 
             if (CantAllocLCP)

@@ -37,7 +37,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP DATA");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.numeast + ", " + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.numnorth);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX() + ", " + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY());
                 ++buttonIndex;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionX) + ", " + UnityEngine.Mathf.RoundToInt((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionY));
                 ++buttonIndex;
@@ -57,19 +57,19 @@ namespace WUIPlatform.WUInity.UI
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
                     WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Elevation);
-                    lcpCurrentInfo = "Elevation range: " + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.loelev + "-" + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.hielev + " [m]";
+                    lcpCurrentInfo = "Elevation range: " + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetElevationMin() + "-" + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetElevationMax() + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
                     WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Slope);
-                    lcpCurrentInfo = "Slope range: " + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.loslope + "-" + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.hislope + " [-]";
+                    lcpCurrentInfo = "Slope range: " + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetSlopeMin() + "-" + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetSlopeMax() + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
                     WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Aspect);
-                    lcpCurrentInfo = "Aspect range: " + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.loaspect + "-" + WUIEngine.RUNTIME_DATA.Fire.LCPData.Header.hiaspect + " [°]";
+                    lcpCurrentInfo = "Aspect range: " + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetAspectMin() + "-" + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetAspectMax() + " [°]";
                 }
                 ++buttonIndex;
 
