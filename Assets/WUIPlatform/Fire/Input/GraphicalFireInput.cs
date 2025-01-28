@@ -60,38 +60,25 @@ namespace WUIPlatform
                     {
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
+                        int dataSize = ncols * nrows;
 
-                        //always assume 30 meters for now
-                        int xCount = (int)(0.5 + WUIEngine.INPUT.Simulation.Size.x / 30);
-                        int yCount = (int)(0.5 + WUIEngine.INPUT.Simulation.Size.x / 30);
+                        byte[] b = br.ReadBytes(dataSize * sizeof(bool));
+                        bool[] wuiAreaIndices = GetBools(b, dataSize);
 
-                        if (ncols == xCount && nrows == yCount)
-                        {
-                            int dataSize = ncols * nrows;
+                        b = br.ReadBytes(dataSize * sizeof(bool));
+                        bool[] randomIgnitionArea = GetBools(b, dataSize);
 
-                            byte[] b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] wuiAreaIndices = GetBools(b, dataSize);
+                        b = br.ReadBytes(dataSize * sizeof(bool));
+                        bool[] initialIgnitionIndices = GetBools(b, dataSize);
 
-                            b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] randomIgnitionArea = GetBools(b, dataSize);
+                        b = br.ReadBytes(dataSize * sizeof(bool));
+                        bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                            b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] initialIgnitionIndices = GetBools(b, dataSize);
-
-                            b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] triggerBufferIndices = GetBools(b, dataSize);
-
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices, xCount, yCount);
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, xCount, yCount);
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, xCount, yCount);
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, xCount, yCount);
-                            success = true;
-                        }
-                        else
-                        {
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, "Graphical fire input file does not match current mesh, using default.");
-                            CreateDefaultInputs();                           
-                        }
+                        WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
+                        WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
+                        WUIEngine.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
+                        WUIEngine.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
+                        success = true;
                     }
                 }
             }
@@ -104,9 +91,9 @@ namespace WUIPlatform
 
         private static void CreateDefaultInputs()
         {
-            //always assume 30 meters for now
-            int xCount = (int)(0.5 + WUIEngine.INPUT.Simulation.Size.x / 30);
-            int yCount = (int)(0.5 + WUIEngine.INPUT.Simulation.Size.x / 30);
+            //LCP file has already been read, use that for dimensions
+            int xCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
+            int yCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
 
             WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(null, xCount, yCount);
             WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);

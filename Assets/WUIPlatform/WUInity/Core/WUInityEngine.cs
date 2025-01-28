@@ -872,7 +872,7 @@ namespace WUIPlatform.WUInity
             if (fireMeshMode)
             {
                 activeMeshRenderer = _fireDataPlaneMeshRenderer;
-                cellCount = new Vector2int(WUIEngine.SIM.FireModule.GetCellCountX(), WUIEngine.SIM.FireModule.GetCellCountY());
+                cellCount = new Vector2int(WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX(), WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY());
                 name = "Fire Data Plane";
             }
 
