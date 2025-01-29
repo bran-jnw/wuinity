@@ -274,17 +274,17 @@ namespace WUIPlatform.WUInity
                     evacDataRealSize = WUIEngine.INPUT.Simulation.Size;
                 }
                 //painter
-                Vector2int res = new Vector2int(2, 2);
-                while (cellCount.x > res.x)
+                Vector2int textureRes = new Vector2int(2, 2);
+                while (cellCount.x > textureRes.x)
                 {
-                    res.x *= 2;
+                    textureRes.x *= 2;
                 }
-                while (cellCount.y > res.y)
+                while (cellCount.y > textureRes.y)
                 {
-                    res.y *= 2;
+                    textureRes.y *= 2;
                 }
-                requestedColorArray = new Color[res.x * res.y];
-                requestedTexture = new Texture2D(res.x, res.y);
+                requestedColorArray = new Color[textureRes.x * textureRes.y];
+                requestedTexture = new Texture2D(textureRes.x, textureRes.y);
                 requestedTexture.filterMode = FilterMode.Point;
                 for (int y = 0; y < cellCount.y; y++)
                 {
@@ -316,12 +316,12 @@ namespace WUIPlatform.WUInity
                             c = WUIEngine.POPULATION.GetPopulationData().populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
                         }
                         c.a = 0.5f;
-                        requestedColorArray[x + y * res.x] = c;
+                        requestedColorArray[x + y * textureRes.x] = c;
                         requestedTexture.SetPixel(x, y, c);
                     }
                 }
                 requestedTexture.Apply();
-                requestedUV = new Vector2((float)cellCount.x / res.x, (float)cellCount.y / res.y);                
+                requestedUV = new Vector2((float)cellCount.x / textureRes.x, (float)cellCount.y / textureRes.y);                
 
                 //fix references after created
                 if (paintMode == PaintMode.WUIArea)
@@ -411,8 +411,8 @@ namespace WUIPlatform.WUInity
                     //right click
                     else
                     {
-                        Color colorToOverwrite = activeTexture.GetPixel((int)pixelUV.x, (int)pixelUV.y);
-                        flood_fill(x, y, activeColor, colorToOverwrite, activeColorArray);
+                        Color colorToOverwrite = activeTexture.GetPixel(x, y);
+                        FloodFill(new Vector2int(x, y), activeColor, colorToOverwrite, activeColorArray);
                         activeTexture.SetPixels(activeColorArray);
                         activeTexture.Apply();
                     }
@@ -493,36 +493,75 @@ namespace WUIPlatform.WUInity
             }
         }
 
-        void flood_fill(int x, int y, Color wantedColor, Color colorToOverwrite, Color[] colorArray)
+        private void FloodFill(Vector2int startPixel, Color wantedColor, Color colorToOverwrite, Color[] colorArray)
+        {   
+            System.Collections.Generic.Stack<Vector2int> queue = new System.Collections.Generic.Stack<Vector2int>();
+            queue.Push(startPixel);
+            int maxPixels = colorArray.Length;
+            while (queue.Count > 0)
+            {
+                Vector2int pixel = queue.Pop();
+                SetArrayPixel(pixel.x, pixel.y, wantedColor, colorArray);
+
+                Vector2int right = pixel + Vector2int.right;
+                Vector2int left = pixel + Vector2int.left;
+                Vector2int up = pixel + Vector2int.up;
+                Vector2int down = pixel + Vector2int.down;
+
+                // then we can either go east
+                if (IncludePixel(right, wantedColor, colorToOverwrite, colorArray))
+                {
+                    queue.Push(right);
+                }
+                // west
+                if (IncludePixel(left, wantedColor, colorToOverwrite, colorArray))
+                {
+                    queue.Push(left);
+                }
+                //north
+                if (IncludePixel(up, wantedColor, colorToOverwrite, colorArray))
+                {
+                    queue.Push(up);
+                }
+                //south
+                if (IncludePixel(down, wantedColor, colorToOverwrite, colorArray))
+                {
+                    queue.Push(down);
+                }
+
+                --maxPixels;
+                if(maxPixels < 0)
+                {
+                    break;
+                }
+            }            
+        }
+
+        private bool IncludePixel(Vector2int pixelIndex, Color wantedColor, Color colorToOverwrite, Color[] colorArray)
         {
             //outside of texture
-            if (x < 0 || x > (int)((activeTexture.width - 1) * activeUV.x) || y < 0 || y > (int)((activeTexture.height - 1) * activeUV.y))
+            if (pixelIndex.x < 0 || pixelIndex.x > (int)((activeTexture.width - 1) * activeUV.x) || pixelIndex.y < 0 || pixelIndex.y > (int)((activeTexture.height - 1) * activeUV.y))
             {
-                return;
+                return false;
             }
 
-            Color currentColor = GetArrayPixel(x, y, colorArray);
+            Color currentColor = GetArrayPixel(pixelIndex.x, pixelIndex.y, colorArray);
 
             //already the same color in pixel
             if (UnityEngine.Mathf.Approximately(currentColor.r, wantedColor.r) && UnityEngine.Mathf.Approximately(currentColor.g, wantedColor.g)
                 && UnityEngine.Mathf.Approximately(currentColor.b, wantedColor.b))
             {
-                return;
+                return false;
             }
 
             //not color we want to overwrite
             if (!UnityEngine.Mathf.Approximately(currentColor.r, colorToOverwrite.r) && !UnityEngine.Mathf.Approximately(currentColor.g, colorToOverwrite.g)
-                && !UnityEngine.Mathf.Approximately(colorToOverwrite.b, wantedColor.b))
+                && !UnityEngine.Mathf.Approximately(currentColor.b, colorToOverwrite.b))
             {
-                return;
+                return false;
             }
 
-            SetArrayPixel(x, y, wantedColor, colorArray);
-
-            flood_fill(x + 1, y, wantedColor, colorToOverwrite, colorArray);  // then we can either go east
-            flood_fill(x - 1, y, wantedColor, colorToOverwrite, colorArray);  // or west
-            flood_fill(x, y + 1, wantedColor, colorToOverwrite, colorArray);  // or north
-            flood_fill(x, y - 1, wantedColor, colorToOverwrite, colorArray);  // or south
+            return true;
         }
     }
 }

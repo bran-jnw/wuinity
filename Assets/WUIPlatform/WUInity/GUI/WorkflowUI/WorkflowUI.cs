@@ -1542,7 +1542,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 if (!WUInityEngine.INSTANCE.IsPainterActive())
                 {
-                    btnEditEvacGroupOnMap.text = "Stop editing";
+                    btnEditEvacGroupOnMap.text = "Finsih editing";
                     WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
                     WUInityEngine.Painter.SetEvacGroupColor(dfDfEvacuationGroup.index);
                 }

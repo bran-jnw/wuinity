@@ -216,7 +216,7 @@ namespace WUIPlatform
         {            
             if (WUIEngine.INPUT.Simulation.RunFireModule)
             {
-                if (WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
+                if (WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.AscImport)
                 {
                     _fireModule = new AsciiFireImport();
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module FarsiteOffline initiated.");

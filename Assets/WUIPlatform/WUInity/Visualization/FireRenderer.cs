@@ -222,7 +222,7 @@ namespace WUIPlatform.WUInity.Visualization
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            if(WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FarsiteOffline)
+            if(WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.AscImport)
             {
                 float xScale, yScale;
                 Vector2d offsetFire;

@@ -110,7 +110,7 @@ namespace WUIPlatform.WUInity.UI
                     ++buttonIndex;
                 }
 
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop editing"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
                 {
                     WUInityEngine.INSTANCE.StopPainter();
                 }

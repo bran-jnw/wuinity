@@ -20,9 +20,8 @@ namespace WUIPlatform
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    //always assume 30 meters for now
-                    int xCount = (int)(0.5 + WUIEngine.INPUT.Simulation.Size.x / 30);
-                    int yCount = (int)(0.5 + WUIEngine.INPUT.Simulation.Size.x / 30);
+                    int xCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
+                    int yCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
                     bw.Write(xCount);
                     bw.Write(yCount);
                     bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices));
@@ -60,31 +59,40 @@ namespace WUIPlatform
                     {
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
-                        int dataSize = ncols * nrows;
+                        if(ncols == WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX() && nrows == WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY())
+                        {
+                            int dataSize = ncols * nrows;
 
-                        byte[] b = br.ReadBytes(dataSize * sizeof(bool));
-                        bool[] wuiAreaIndices = GetBools(b, dataSize);
+                            byte[] b = br.ReadBytes(dataSize * sizeof(bool));
+                            bool[] wuiAreaIndices = GetBools(b, dataSize);
 
-                        b = br.ReadBytes(dataSize * sizeof(bool));
-                        bool[] randomIgnitionArea = GetBools(b, dataSize);
+                            b = br.ReadBytes(dataSize * sizeof(bool));
+                            bool[] randomIgnitionArea = GetBools(b, dataSize);
 
-                        b = br.ReadBytes(dataSize * sizeof(bool));
-                        bool[] initialIgnitionIndices = GetBools(b, dataSize);
+                            b = br.ReadBytes(dataSize * sizeof(bool));
+                            bool[] initialIgnitionIndices = GetBools(b, dataSize);
 
-                        b = br.ReadBytes(dataSize * sizeof(bool));
-                        bool[] triggerBufferIndices = GetBools(b, dataSize);
+                            b = br.ReadBytes(dataSize * sizeof(bool));
+                            bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                        WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
-                        WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
-                        WUIEngine.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
-                        WUIEngine.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
-                        success = true;
+                            WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
+                            WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
+                            WUIEngine.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
+                            WUIEngine.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
+                            success = true;
+                        }
+                        else
+                        {
+                            WUIEngine.LOG(WUIEngine.LogType.Warning, "Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.");
+                            br.Close();
+                            CreateDefaultInputs();
+                        }
                     }
                 }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "could not read GFI data, creating empty default.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Could not find GFI data, creating empty default.");
                 CreateDefaultInputs();                
             }
         }

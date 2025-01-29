@@ -174,7 +174,7 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class FireInput
     {
-        public enum FireModuleChoice { Cells, VectorCells, FarsiteDLL, FarsiteOffline, PrometheusCOM, WISEOffline }
+        public enum FireModuleChoice { AscImport, Cells, VectorCells, FarsiteDLL, PrometheusCOM }
         public FireModuleChoice fireModuleChoice = FireModuleChoice.Cells;
         public string lcpFile;
         public string fuelModelsFile = "default.fuel";
@@ -191,11 +191,11 @@ namespace WUIPlatform.IO
         public int randomIgnitionPoints = 0;
         public bool useInitialIgnitionMap = false;
 
-        public FarsiteInput farsiteData;
+        public AscInput ascData;
     }
 
     [System.Serializable]
-    public class FarsiteInput
+    public class AscInput
     {
         public string rootFolder;
     }

@@ -36,10 +36,10 @@ namespace WUIPlatform.Fire
 
         public AsciiFireImport() 
         {
-            string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.farsiteData.rootFolder, "output", "TOA.asc");
-            string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.farsiteData.rootFolder, "output", "ROS.asc");
-            string FIFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.farsiteData.rootFolder, "output", "FI.asc");
-            string SDFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.farsiteData.rootFolder, "output", "SD.asc");
+            string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "TOA.asc");
+            string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "ROS.asc");
+            string FIFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "FI.asc");
+            string SDFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "SD.asc");
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(xllcorner, yllcorner);
