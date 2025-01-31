@@ -16,7 +16,7 @@ namespace WUIPlatform.Visualization
         /// Creates texture that shown cells where people have decided to stay forever.
         /// </summary>
         /// <returns></returns>
-        public override object CreateStayingPopulationTexture(MacroHouseholdSim sim)
+        /*public override object CreateStayingPopulationTexture(MacroHouseholdSim sim)
         {
             Vector2Int res = new Vector2Int(2, 2);
             int cellsX = sim.GetCellsX();
@@ -58,7 +58,7 @@ namespace WUIPlatform.Visualization
             }
             popTex.Apply();
             return popTex;
-        }
+        }*/
 
         private static Color GetStayColor(int peopleStaying, int actualPopInCell)
         {

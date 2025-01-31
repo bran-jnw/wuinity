@@ -71,12 +71,26 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        private Vector2[] _validStartCoordinates;
-        public Vector2[] ValidStartCoordinates
+        public struct HouseholdData
+        {
+            public Vector2d houseLatLon;
+            public Vector2d carLatLon;
+            public int peopleCount;
+
+            public HouseholdData(Vector2d startLatLon, Vector2d carLatLon, int peopleCount)
+            {
+                this.houseLatLon = startLatLon;
+                this.carLatLon = carLatLon; 
+                this.peopleCount = peopleCount;
+            }
+        }
+
+        private HouseholdData[] _householdCoordinates;
+        public HouseholdData[] HouseholdCoordinates
         {
             get
             {
-                return _validStartCoordinates;
+                return _householdCoordinates;
             }
         }
 
@@ -89,7 +103,7 @@ namespace WUIPlatform.Runtime
             //need to load groups before indices
             LoadEvacGroupIndices();
             LoadBlockGoalEvents();
-            //LoadValidStartCoordinates(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.ValidStartCoordinates));
+            LoadHouseholds(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.Households));
         }
 
         public bool LoadBlockGoalEvents()
@@ -188,7 +202,7 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        private bool LoadValidStartCoordinates(string path)
+        private bool LoadHouseholds(string path)
         {
             bool success = false;
 
@@ -203,18 +217,26 @@ namespace WUIPlatform.Runtime
                         lines.Add(sr.ReadLine());
                     }
 
-                    _validStartCoordinates = new Vector2[lines.Count - 1];
-                    //skip last row, should be empty
+                    //first rom (header, and last row (should be empty)
+                    _householdCoordinates = new HouseholdData[lines.Count - 2];
+                    
                     for (int i = 1; i < lines.Count - 1; ++i)
                     {
                         string[] line = lines[i].Split(",");
-                        float lat = float.Parse(line[0]);
-                        float lon = float.Parse(line[1]);
-                        _validStartCoordinates[i] = new Vector2(lat, lon);
+                        double lat = double.Parse(line[0]);
+                        double lon = double.Parse(line[1]);
+                        double carLat = double.Parse(line[2]);
+                        double carLon = double.Parse(line[3]);
+                        int people = int.Parse(line[4]);
+                        _householdCoordinates[i - 1] = new HouseholdData(new Vector2d(lat, lon), new Vector2d(carLat, carLon), people);
                     }
                 }
 
                 success = true;
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Start coordinates for households could not be found.");
             }
 
             return success;

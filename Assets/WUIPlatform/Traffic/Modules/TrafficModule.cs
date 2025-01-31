@@ -20,14 +20,12 @@ namespace WUIPlatform.Traffic
         {
             public Vector2d startLatLong;
             public EvacuationGoal evacuationGoal;
-            public RouteData routeData;
             public uint numberOfPeopleInCar;
 
-            public InjectedCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, RouteData routeData, uint numberOfPeopleInCar)
+            public InjectedCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
             {
                 this.startLatLong = startLatLong;
                 this.evacuationGoal = evacuationGoal;
-                this.routeData = routeData;
                 this.numberOfPeopleInCar = numberOfPeopleInCar;
             }
         }
@@ -46,9 +44,9 @@ namespace WUIPlatform.Traffic
         /// <param name="evacuationGoal"></param>
         /// <param name="routeData"></param>
         /// <param name="numberOfPeopleInCar"></param>
-        public void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, RouteData routeData, uint numberOfPeopleInCar)
+        public void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
         {
-            carsToInject.AddLast(new InjectedCar(startLatLong, evacuationGoal, routeData, numberOfPeopleInCar));
+            carsToInject.AddLast(new InjectedCar(startLatLong, evacuationGoal, numberOfPeopleInCar));
         }
 
         public abstract void HandleNewCars();

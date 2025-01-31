@@ -24,8 +24,9 @@ namespace WUIPlatform.Pedestrian
         public bool isMoving;
         public float walkingDistance;
 
-        Vector2 startPosition;
-        Vector2 goalPosition;
+        Runtime.EvacuationData.HouseholdData _houseHoldData;
+        Vector2 homePosition, carPosition;
+        int _cellIndex;
 
         /// <summary>
         /// Creates a household that will move as a unit.
@@ -36,19 +37,13 @@ namespace WUIPlatform.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(HumanEvacCell humanRaster, Vector2d nodeCenter, int peopleInHousehold, float walkingSpeed, float responseTime)
+        public MacroHousehold(Runtime.EvacuationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
         {
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
 
-            //nicer to be in circle instead of square?
-            /*Vector2 rand = Random.insideUnitCircle;
-            Vector2d randD = new Vector2d(rand.x * humanRaster.cellWorldSize.x, rand.y * humanRaster.cellWorldSize.x);
-            Vector2d startPos = nodeCenter + randD * 0.707070;*/
-
-            Vector2d startPos = nodeCenter;
-            startPos.x += humanRaster.cellWorldSize.x * Random.Range(-0.5f, 0.5f); 
-            startPos.y += humanRaster.cellWorldSize.y * Random.Range(-0.5f, 0.5f);
-            this.peopleInHousehold = peopleInHousehold;
+            _houseHoldData = householdData;
+            _cellIndex = cellIndex;
+            peopleInHousehold = householdData.peopleCount;
             cars = 1;
             if (eO.allowMoreThanOneCar)
             {
@@ -62,7 +57,11 @@ namespace WUIPlatform.Pedestrian
             }
 
             reachedCar = false;
-            walkingDistance = (float)Vector2d.Distance(startPos, humanRaster.closestNodeSimulationSpace) * eO.walkingDistanceModifier;
+            Vector2d temp = GeoConversions.GeoToWorldPosition(householdData.houseLatLon.x, householdData.houseLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            homePosition = new Vector2((float)temp.x, (float)temp.y);
+            temp = GeoConversions.GeoToWorldPosition(householdData.carLatLon.x, householdData.carLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            carPosition = new Vector2((float)temp.x, (float)temp.y);
+            walkingDistance = Vector2.Distance(homePosition, carPosition) * eO.walkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;
             this.responseTime = responseTime;
             if (responseTime == float.MaxValue)
@@ -73,11 +72,17 @@ namespace WUIPlatform.Pedestrian
             {
                 evacuationTime = travelTime + responseTime;
             }
-            isMoving = false;
+            isMoving = false;            
+        }
 
-            //for tracking progress visually
-            startPosition = new Vector2((float)startPos.x, (float)startPos.y);
-            goalPosition = new Vector2((float)humanRaster.closestNodeSimulationSpace.x, (float)humanRaster.closestNodeSimulationSpace.y);
+        public Vector2d GetCarLatLon()
+        {
+            return _houseHoldData.carLatLon;
+        }
+
+        public int GetCellIndex()
+        {
+            return _cellIndex;
         }
 
         public Vector4 GetPositionAndState(float time)
@@ -99,7 +104,7 @@ namespace WUIPlatform.Pedestrian
 
             float ratio = (time - responseTime) / (evacuationTime - responseTime);
             ratio = Mathf.Clamp01(ratio);
-            Vector2 position = Vector2.Lerp(startPosition, goalPosition, ratio);
+            Vector2 position = Vector2.Lerp(homePosition, carPosition, ratio);
             return new Vector4(position.X, position.Y, peopleInHousehold, state);
         }
     }

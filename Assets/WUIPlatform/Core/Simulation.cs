@@ -96,6 +96,7 @@ namespace WUIPlatform
             }
         }
 
+        int[,] perilOutput;
         private  void StartSimulations()
         {            
             int runNumber = 0;
@@ -114,6 +115,11 @@ namespace WUIPlatform
                 CreateSubModules(i);                
                 RunSimulation(i);
                 ++actualRuns;
+
+                if(WUIEngine.INPUT.Simulation.RunFireModule)
+                {
+                    perilOutput = WUIPlatformPERIL.RunPERIL(20f);
+                }                
 
                 trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
                 //need at least 2 simulations to have valid average
@@ -218,8 +224,8 @@ namespace WUIPlatform
             {
                 if (WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.AscImport)
                 {
-                    _fireModule = new AsciiFireImport();
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module FarsiteOffline initiated.");
+                    _fireModule = new AscFireImport();
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module AscImport initiated.");
                 }
                 else
                 {
@@ -285,7 +291,7 @@ namespace WUIPlatform
                         WUIEngine.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
                     }
 
-                    WUIEngine.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUIEngine.RUNTIME_DATA.Routing.RouteCollections);                    
+                    //WUIEngine.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUIEngine.RUNTIME_DATA.Routing.RouteCollections);                    
                 }
 
                 if (WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.SUMO)
@@ -298,7 +304,7 @@ namespace WUIPlatform
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
                     //macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.RUNTIME_DATA.Evacuation.ValidStartCoordinates, WUIEngine.POPULATION.GetPopulationData());
+                    macroHouseholdSim.PopulateSimulation(WUIEngine.RUNTIME_DATA.Evacuation.HouseholdCoordinates);
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
@@ -475,7 +481,7 @@ namespace WUIPlatform
                 }
             }
 
-            //just some stuff for controlling executiuon mode and timing performance
+            //just some stuff for controlling execution mode and timing performance
             WUIEngine.ENGINE.StopWatch.Stop();
             if(_runRealtime)
             {
@@ -616,7 +622,7 @@ namespace WUIPlatform
                 EvacuationGoal eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 if(!eG.blocked)
                 {
-                    FireCellState cellState = _fireModule.GetFireCellState(eG.latLong);
+                    FireCellState cellState = _fireModule.GetFireCellState(eG.latLon);
                     if (cellState == FireCellState.Burning)
                     {
                         WUIEngine.LOG(WUIEngine.LogType.Log, " Goal blocked by fire: " + eG.name);
@@ -701,7 +707,8 @@ namespace WUIPlatform
                 {
                     if(WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.MacroHouseholdSim)
                     {
-                        if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections[i] != null && !((MacroHouseholdSim)_pedestrianModule).IsCellEvacuated(i))
+                        //TODO: create new implementation based on households as cells are gone
+                        /*if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections[i] != null && !((MacroHouseholdSim)_pedestrianModule).IsCellEvacuated(i))
                         {
                             if (((MacroHouseholdSim)_pedestrianModule).GetPeopleLeftInCellIntendingToLeave(i) > 0)
                             {
@@ -711,7 +718,7 @@ namespace WUIPlatform
                             {
                                 ++cellsWithoutRouteButNoonePlansToLeave;
                             }
-                        }
+                        }*/
                     }
                     
                 }
@@ -774,6 +781,16 @@ namespace WUIPlatform
             WUIEngineInput wuiIn = WUIEngine.INPUT;
             string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.SimulationID + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
+        }
+
+        public void DisplayTriggerBuffer()
+        {
+            if(perilOutput != null)
+            {
+                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(perilOutput);
+                WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
+                WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPDataPlane(true);
+            }            
         }
 
     }    

@@ -30,9 +30,14 @@ namespace WUIPlatform.Population
             #endif
         }
 
-        public void CreateTexture()
+        public void CreatePopulationTexture()
         {
-            _visualizer.CreateTexture();
+            _visualizer.CreatePopulationTexture();
+        }
+
+        public void CreatePopulationMaskTexture()
+        {
+            _visualizer.CreatePopulationMaskTexture();
         }
 
         public void CreateGPWTexture()
@@ -67,7 +72,7 @@ namespace WUIPlatform.Population
 
         public void PlaceUniformPopulation(int newTotalPopulation)
         {
-            populationData.PlaceUniformPopulation(newTotalPopulation);
+            populationData.CreatePopulationFromMask(newTotalPopulation);
         }
 
         public bool IsLocalGPWLoaded()
@@ -136,7 +141,7 @@ namespace WUIPlatform.Population
             if(success)
             {
                 _visualizer.SetDataPlane(false);
-                populationData.CreatePopulationFromLocalGPW(localGPWData, 100f);
+                populationData.CreatePopulationFromLocalGPW(localGPWData, WUIEngine.INPUT.Evacuation.RouteCellSize);
             }            
 
             return success;

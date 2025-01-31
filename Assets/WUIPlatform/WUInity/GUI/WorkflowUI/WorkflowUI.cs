@@ -1575,8 +1575,8 @@ namespace WUIPlatform.WUInity.UI
                     if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
                     {
                         tfTxEvacDestName.SetValueWithoutNotify(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].name);
-                        tfTxEvacDestLatLong.SetValueWithoutNotify(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLong.x.ToString() + ", " +
-                                                                  WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLong.y.ToString());
+                        tfTxEvacDestLatLong.SetValueWithoutNotify(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLon.x.ToString() + ", " +
+                                                                  WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLon.y.ToString());
 
                         EvacGoalType evacGoalType = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].goalType;
 

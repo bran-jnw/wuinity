@@ -14,8 +14,9 @@ namespace WUIPlatform.Population
         private GameObject m_LocalGPWDataPlane;
         private Material gpwDataPlaneMaterial;
 
-        public Texture2D populationTexture;
-        public Texture2D densityTexture;
+        private Texture2D populationTexture;
+        private Texture2D populationMaskTexture;
+        private Texture2D densityTexture;
 
         public PopulationVisualizerUnity(PopulationManager owner) : base(owner)
         { 
@@ -30,6 +31,11 @@ namespace WUIPlatform.Population
         public override object GetPopulationTexture()
         {
             return populationTexture;
+        }
+
+        public override object GetPopulationMaskTexture()
+        {
+            return populationMaskTexture;
         }
 
         public GameObject DataPlane
@@ -57,9 +63,9 @@ namespace WUIPlatform.Population
             return DataPlane.activeSelf;
         }
 
-        public override void CreateTexture()
+        public override void CreatePopulationTexture()
         {
-            PopulationData data = owner.GetPopulationData();
+            PopulationData data = _owner.GetPopulationData();
             //first find the correct texture size
             int maxSide = Mathf.Max(data.cells.x, data.cells.y);
             Vector2int res = new Vector2int(2, 2);
@@ -68,7 +74,7 @@ namespace WUIPlatform.Population
             {
                 res.x *= 2;
             }
-            while (owner.GetPopulationData().cells.y > res.y)
+            while (_owner.GetPopulationData().cells.y > res.y)
             {
                 res.y *= 2;
             }
@@ -86,6 +92,38 @@ namespace WUIPlatform.Population
                 }
             }
             populationTexture.Apply();
+        }
+
+        public override void CreatePopulationMaskTexture()
+        {
+            PopulationData data = _owner.GetPopulationData();
+            //first find the correct texture size
+            int maxSide = Mathf.Max(data.cells.x, data.cells.y);
+            Vector2int res = new Vector2int(2, 2);
+
+            while (data.cells.x > res.x)
+            {
+                res.x *= 2;
+            }
+            while (_owner.GetPopulationData().cells.y > res.y)
+            {
+                res.y *= 2;
+            }
+
+            populationTexture = new Texture2D(res.x, res.y);
+            populationTexture.filterMode = FilterMode.Point;
+            for (int y = 0; y < data.cells.y; y++)
+            {
+                for (int x = 0; x < data.cells.x; x++)
+                {
+                    if(data.GetMaskValue(x, y))
+                    {
+                        Color color = Color.red;
+                        populationMaskTexture.SetPixel(x, y, color);
+                    }                    
+                }
+            }
+            populationMaskTexture.Apply();
         }
 
         private void CreateLocalGPWDataPlane()
@@ -116,7 +154,7 @@ namespace WUIPlatform.Population
 
             mesh.Clear();
 
-            LocalGPWData localGPWData = owner.GetLocalGPWData();
+            LocalGPWData localGPWData = _owner.GetLocalGPWData();
 
             float width = (float)localGPWData.realWorldSize.x; //(float)size.x;
             float length = (float)localGPWData.realWorldSize.y; //(float)size.y;
@@ -142,7 +180,7 @@ namespace WUIPlatform.Population
 
         public override void CreateGPWTexture()
         {
-            Vector2int dataSize = owner.GetLocalGPWData().dataSize;
+            Vector2int dataSize = _owner.GetLocalGPWData().dataSize;
             //first find the correct texture size
             int maxSide = Mathf.Max(dataSize.x, dataSize.y);
             Vector2int res = new Vector2int(2, 2);
@@ -164,7 +202,7 @@ namespace WUIPlatform.Population
             {
                 for (int x = 0; x < dataSize.x; x++)
                 {
-                    double density = owner.GetLocalGPWData().GetDensity(x, y);
+                    double density = _owner.GetLocalGPWData().GetDensity(x, y);
                     WUIEngineColor color = PopulationManager.GetGPWColor((float)density);
 
                     densityTexture.SetPixel(x, y, color.UnityColor);

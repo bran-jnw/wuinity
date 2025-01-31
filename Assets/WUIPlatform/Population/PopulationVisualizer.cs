@@ -9,17 +9,19 @@ namespace WUIPlatform.Population
 {
     public abstract class PopulationVisualizer
     {
-        protected PopulationManager owner;
+        protected PopulationManager _owner;
 
         public PopulationVisualizer(PopulationManager owner)
         {
-            this.owner = owner;
+            _owner = owner;
         }
 
         public abstract void SetDataPlane(bool setActive);
         public abstract bool IsDataPlaneActive();
         public abstract object GetPopulationTexture();
-        public abstract void CreateTexture();
+        public abstract object GetPopulationMaskTexture();
+        public abstract void CreatePopulationTexture();
+        public abstract void CreatePopulationMaskTexture();
         public abstract void CreateGPWTexture();
         public abstract bool ToggleLocalGPWVisibility();
     }

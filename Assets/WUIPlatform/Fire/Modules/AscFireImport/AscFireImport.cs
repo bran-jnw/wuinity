@@ -12,29 +12,31 @@ namespace WUIPlatform.Fire
 {
     public struct FireRasterData
     {
-        public float TOA; //time of arrival
-        public float ROS; //rate of spread
-        public float FI; //fireline intensity
-        public float SD; // spread direction
+        public float TimeOfAArrival; //seconds
+        public float RateOfSpread; //m/min
+        public float FirelineIntensity; //kW/m
+        public float SpreadDirection; // Degrees, 0 in North, then clockwise
         public bool isActive;
     }
 
     /// <summary>
     /// Supports/tested using only Flammap version of Farsite.
     /// </summary>
-    public class AsciiFireImport : FireModule
+    public class AscFireImport : FireModule
     {
-        float maxTimeOfArrival = float.MinValue;
-        int ncols, nrows, _activeCells;
-        double xllcorner, yllcorner, cellsize, NODATA_VALUE;
-        FireRasterData[,] data;
-        Vector2d offset;
+        private float _maxTimeOfArrival = float.MinValue;
+        private int ncols, nrows, _activeCells;
+        private double _xllcorner, _yllcorner, _cellsize, _NODATA_VALUE;
+        private FireRasterData[,] _data;
+        private Vector2d _offset;
 
+        //TODO: clean this up, this is duplicate data but is needed for shaders, come up with some way of better data storage
         float[] firelineIntensityData;
+
         List<Vector2int> newlyIgnitedCells;
         float[] _sootInjection;
 
-        public AsciiFireImport() 
+        public AscFireImport() 
         {
             string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "TOA.asc");
             string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "ROS.asc");
@@ -42,14 +44,14 @@ namespace WUIPlatform.Fire
             string SDFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascData.rootFolder, "output", "SD.asc");
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
-            Vector2d farsiteUTM = new Vector2d(xllcorner, yllcorner);
-            offset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
+            _offset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
             firelineIntensityData = new float[ncols * nrows];
             newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + offset.x + ", " + offset.y);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _offset.x + ", " + _offset.y);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -63,11 +65,11 @@ namespace WUIPlatform.Fire
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        if (!data[x, y].isActive && WUIEngine.SIM.CurrentTime > data[x, y].TOA)
+                        if (!_data[x, y].isActive && WUIEngine.SIM.CurrentTime > _data[x, y].TimeOfAArrival)
                         {
-                            data[x, y].isActive = true;
+                            _data[x, y].isActive = true;
                             newlyIgnitedCells.Add(new Vector2int(x, y));
-                            firelineIntensityData[index] = data[x, y].FI;
+                            firelineIntensityData[index] = _data[x, y].FirelineIntensity;
                             _sootInjection[index] = 1f;
                             ++_activeCells;
                         }
@@ -89,24 +91,56 @@ namespace WUIPlatform.Fire
 
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
-            offset = this.offset;
-            xScale = (float)(cellsize * ncols / WUIEngine.INPUT.Simulation.Size.x);
-            yScale = (float)(cellsize * nrows / WUIEngine.INPUT.Simulation.Size.y);
+            offset = this._offset;
+            xScale = (float)(_cellsize * ncols / WUIEngine.INPUT.Simulation.Size.x);
+            yScale = (float)(_cellsize * nrows / WUIEngine.INPUT.Simulation.Size.y);
         }
 
         public override bool IsSimulationDone()
         {
-            return WUIEngine.SIM.CurrentTime > maxTimeOfArrival ? true : false;
-        }        
-
-        public override float[,] GetMaxROS()
-        {
-            throw new System.NotImplementedException();
+            return WUIEngine.SIM.CurrentTime > _maxTimeOfArrival ? true : false;
         }
 
+        float[,] maxROS;
+        /// <summary>
+        /// Returns rate of spread (m/min), data is "flipped" on y-axis (so lower left is a (0, nrows - 1))
+        /// </summary>
+        /// <returns></returns>
+        public override float[,] GetMaxROS()
+        {
+            if(maxROS == null)
+            {
+                maxROS = new float[ncols, nrows];
+                for(int y = 0; y < nrows; ++y)
+                {
+                    int yFlipped = nrows - 1 - y;
+                    for (int x = 0; x < nrows; ++x)
+                    {
+                        maxROS[x, y] = _data[x, yFlipped].RateOfSpread;
+                    }
+                }
+            }
+            
+            return maxROS;
+        }
+
+        float[,] maxROSAzimuth;
         public override float[,] GetMaxROSAzimuth()
         {
-            throw new System.NotImplementedException();
+            if (maxROSAzimuth == null)
+            {
+                maxROSAzimuth = new float[ncols, nrows];
+                for (int y = 0; y < nrows; ++y)
+                {
+                    int yFlipped = nrows - 1 - y;
+                    for (int x = 0; x < nrows; ++x)
+                    {
+                        maxROSAzimuth[x, y] = _data[x, yFlipped].SpreadDirection;
+                    }
+                }
+            }
+
+            return maxROSAzimuth;
         }
 
         public override int GetCellCountX()
@@ -121,17 +155,21 @@ namespace WUIPlatform.Fire
 
         public override float GetCellSizeX()
         {
-            return (float)cellsize;
+            return (float)_cellsize;
         }
 
         public override float GetCellSizeY()
         {
-            return (float)cellsize;
+            return (float)_cellsize;
         }
 
         /// <summary>
-        /// Imports time of arrival.
+        /// Imports as files from external wildfire simulation.
         /// </summary>
+        /// <param name="TOAFile">Time of arrival, minutes.</param>
+        /// <param name="ROSFile">Rate of spread, m/min.</param>
+        /// <param name="FIFile">Fireline intensity, kW/m.</param>
+        /// <param name="SDFile">Spread direction, degrees from North = 0 and then clockwise.</param>
         private void ReadOutput(string TOAFile, string ROSFile, string FIFile, string SDFile)
         {
             string[] TOALines, ROSLines, FILines, SDLines;
@@ -178,12 +216,12 @@ namespace WUIPlatform.Fire
 
             int.TryParse(TOALines[0].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out ncols);
             int.TryParse(TOALines[1].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out nrows);
-            double.TryParse(TOALines[2].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out xllcorner);
-            double.TryParse(TOALines[3].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out yllcorner);
-            double.TryParse(TOALines[4].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out cellsize);
-            double.TryParse(TOALines[5].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out NODATA_VALUE);
+            double.TryParse(TOALines[2].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out _xllcorner);
+            double.TryParse(TOALines[3].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out _yllcorner);
+            double.TryParse(TOALines[4].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out _cellsize);
+            double.TryParse(TOALines[5].Split(" ", System.StringSplitOptions.RemoveEmptyEntries)[1], out _NODATA_VALUE);
 
-            data = new FireRasterData[ncols, nrows];
+            _data = new FireRasterData[ncols, nrows];
 
             for (int y = 0; y < nrows; y++)
             {
@@ -198,9 +236,9 @@ namespace WUIPlatform.Fire
 
                     float.TryParse(TOALine[x], out TOAValue);
                     TOAValue *= 60f; //received in minutes, want seconds
-                    if (TOAValue > maxTimeOfArrival)
+                    if (TOAValue > _maxTimeOfArrival)
                     {
-                        maxTimeOfArrival = TOAValue;
+                        _maxTimeOfArrival = TOAValue;
                     }
                     if(TOAValue < 0)
                     {
@@ -215,11 +253,11 @@ namespace WUIPlatform.Fire
 
                     //flip y-axis
                     int yIndex = nrows - 1 - y;
-                    data[x, yIndex].TOA = TOAValue;
-                    data[x, yIndex].ROS = ROSValue;
-                    data[x, yIndex].FI = FIValue;
-                    data[x, yIndex].SD = SDValue;
-                    data[x, yIndex].isActive = false; ;
+                    _data[x, yIndex].TimeOfAArrival = TOAValue;
+                    _data[x, yIndex].RateOfSpread = ROSValue;
+                    _data[x, yIndex].FirelineIntensity = FIValue;
+                    _data[x, yIndex].SpreadDirection = SDValue;
+                    _data[x, yIndex].isActive = false; ;
                 }
             }
         }
@@ -232,14 +270,14 @@ namespace WUIPlatform.Fire
         public override FireCellState GetFireCellState(Vector2d latLong)
         {
             Vector2d pos = GeoConversions.GeoToWorldPosition(latLong.x, latLong.y,  WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
-            pos += offset;
+            pos += _offset;
 
-            int x = (int)(pos.x / cellsize);
-            int y = (int)(pos.y / cellsize);
+            int x = (int)(pos.x / _cellsize);
+            int y = (int)(pos.y / _cellsize);
 
             FireCellState result = FireCellState.Burning;
 
-            if (!IsInside(x, y) || WUIEngine.SIM.CurrentTime < data[x, y].TOA)
+            if (!IsInside(x, y) || WUIEngine.SIM.CurrentTime < _data[x, y].TimeOfAArrival)
             {
                 return FireCellState.Dead;
             }

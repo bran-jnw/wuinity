@@ -97,7 +97,7 @@ namespace WUIPlatform.Traffic
                 int populationInCell = WUIEngine.POPULATION.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
-                    Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                    Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale); 
 
                     //check if valid start was found
                     RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(start.x, start.y), routerProfile, cellSize);
@@ -198,7 +198,7 @@ namespace WUIPlatform.Traffic
                 try
                 {
                     //TODO: hard-coded search of 200 meters, setup as option?
-                    RouterPoint rP = router.Resolve(routerProfile, (float)evacuatonGoals[i].latLong.x, (float)evacuatonGoals[i].latLong.y, 200f);
+                    RouterPoint rP = router.Resolve(routerProfile, (float)evacuatonGoals[i].latLon.x, (float)evacuatonGoals[i].latLon.y, 200f);
                     validEvacuationGoalRouterPoints.Add(rP);
                     validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
@@ -216,6 +216,13 @@ namespace WUIPlatform.Traffic
             }
         }
 
+        /// <summary>
+        /// Checks if any valid point on the network can be found within the cell, returns null if not, else a point with Lat/Lon that is valid.
+        /// </summary>
+        /// <param name="coordinate"></param>
+        /// <param name="p"></param>
+        /// <param name="cellSize"></param>
+        /// <returns></returns>
         public RouterPoint CheckIfStartIsValid(Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
         {
             //check within the radius of the diagonal of the cell (so complete cell plus some parts of neighboring cells)
@@ -227,6 +234,9 @@ namespace WUIPlatform.Traffic
                     router = new Router(WUIEngine.RUNTIME_DATA.Routing.RouterDb);
                 }
                 start = router.Resolve(p, (float)coordinate.x, (float)coordinate.y, cellSize * 0.70711f); //half cell size * sqrt 2
+                //for some reason Itinero does not return the actual point on the network, so we have to get it and overwrite
+                Itinero.LocalGeo.Coordinate temp = start.LocationOnNetwork(router.Db);
+                start = new RouterPoint(temp.Latitude, temp.Longitude, start.EdgeId, start.Offset);
             }
             catch (Itinero.Exceptions.ResolveFailedException)
             {
@@ -303,7 +313,7 @@ namespace WUIPlatform.Traffic
                 {
                     router = new Router(WUIEngine.RUNTIME_DATA.Routing.RouterDb);
                 }
-                Itinero.Route route = router.Calculate(routerProfile, start, goal);
+                Route route = router.Calculate(routerProfile, start, goal);
                 routeData = new RouteData(route, evacGoal);
             }
             /*catch (Itinero.Exceptions.ResolveFailedException)
@@ -319,7 +329,7 @@ namespace WUIPlatform.Traffic
         }
 
         /// <summary>
-        /// Called when a general route to any avialable evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long
+        /// Called when a general route to any available evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long
         /// Used mainly by traffic simulator.
         /// </summary>
         /// <param name="startPos"></param>

@@ -585,22 +585,17 @@ namespace WUIPlatform.WUInity
                 fireEdit = true;
                 DisplayInitialIgnitionMap();
             }
-            else if (paintMode == Painter.PaintMode.TriggerBuffer)
-            {
-                fireEdit = true;
-                DisplayTriggerBufferMap();
-            }
             else if(paintMode == Painter.PaintMode.EvacGroup)
             {
                 DisplayEvacGroupMap();
             }
-            else if (paintMode == Painter.PaintMode.CustomPopulation)
+            else if (paintMode == Painter.PaintMode.PopulationMask)
             {
-                DisplayCustomPopulationData();
+                DisplayPopulationMask();
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Paint mode not set correctly");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Paint mode not set correctly.");
             }
             dataSampleMode = DataSampleMode.Paint;
 
@@ -684,7 +679,7 @@ namespace WUIPlatform.WUInity
             {
                 EvacuationGoal eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
-                Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLong.x, eG.latLong.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLon.x, eG.latLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
                 float scale = 0.02f * (float)WUIEngine.INPUT.Simulation.Size.y;
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
@@ -765,17 +760,12 @@ namespace WUIPlatform.WUInity
             SetDataPlaneTexture(Painter.GetInitialIgnitionTexture(), true);
         }
 
-        public void DisplayTriggerBufferMap()
-        {
-            SetDataPlaneTexture(Painter.GetTriggerBufferTexture(), true);
-        }
-
         public void DisplayEvacGroupMap()
         {
             SetDataPlaneTexture(Painter.GetEvacGroupTexture());
         }
 
-        public void DisplayCustomPopulationData()
+        public void DisplayPopulationMask()
         {
             SetDataPlaneTexture(Painter.GetCustomPopulationMaskTexture());
         }
@@ -974,16 +964,6 @@ namespace WUIPlatform.WUInity
                     {
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsOnHold[i].numberOfPeopleInCar;
-                    }
-                }
-
-                //save data from human re as well
-                peopleInCells.Add(new int[WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y]);
-                for (int y = 0; y < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y; y++)
-                {
-                    for (int x = 0; x < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x; x++)
-                    {
-                        peopleInCells[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x] = ((MacroHouseholdSim)WUIEngine.SIM.PedestrianModule).GetPeopleLeftInCell(x, y);
                     }
                 }
 

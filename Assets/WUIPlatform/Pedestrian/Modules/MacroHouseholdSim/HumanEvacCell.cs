@@ -24,6 +24,7 @@ namespace WUIPlatform.Pedestrian
         public Vector2d closestNodeSimulationSpace;
         public bool cellIsEvacuated;
         int cellIndex;
+        private Vector2d _roadAccesLatLon;
 
         /// <summary>
         /// Creates human evac cell that keeps track of households in the cell and the routes they can use after reaching their car.
@@ -32,13 +33,13 @@ namespace WUIPlatform.Pedestrian
         /// <param name="cellWorldSize"></param>
         /// <param name="routeCollection"></param>
         /// <param name="personsInCell"></param>
-        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2 roadAccessCoord, RouteCollection routeCollection, int personsInCell, int cellIndex)
+        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2d roadAccessLatLon, int personsInCell, int cellIndex)
         {
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
 
             this.cellWorldSize = cellWorldSize;
-            this.routeCollection = routeCollection;
             this.cellIndex = cellIndex;
+            _roadAccesLatLon = roadAccessLatLon;
 
             int peopleWithoutHouseHold = personsInCell;
             List<int> personsPerHousehold = new List<int>();
@@ -55,17 +56,22 @@ namespace WUIPlatform.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            closestNodeSimulationSpace = GeoConversions.GeoToWorldPosition(roadAccessCoord.X, roadAccessCoord.Y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            closestNodeSimulationSpace = GeoConversions.GeoToWorldPosition(roadAccessLatLon.x, roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
                 int evacGroupIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];
-                macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
+                //macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
             }
         }
 
         public int GetCellIndex()
         {
             return cellIndex;
+        }
+
+        public Vector2d GetRoadAccessLatLon()
+        {
+            return _roadAccesLatLon;
         }
     }
 }

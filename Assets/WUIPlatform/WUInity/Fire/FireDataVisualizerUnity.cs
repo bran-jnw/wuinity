@@ -13,7 +13,7 @@ namespace WUIPlatform.Visualization
     public class FireDataVisualizerUnity : FireDataVisualizer
     {
         GameObject _lcpDataPlane;
-        Texture2D _fuelModelsTexture, _elevationTexture, _slopeTexture, _aspectTexture;
+        Texture2D _fuelModelsTexture, _elevationTexture, _slopeTexture, _aspectTexture, _triggerBufferTexture;
         MeshRenderer lcpMeshRenderer;
 
         public FireDataVisualizerUnity(FireData owner) : base(owner) 
@@ -44,6 +44,10 @@ namespace WUIPlatform.Visualization
             {
                 lcpMeshRenderer.material.mainTexture = _aspectTexture;
             }
+            else if (lcpViewMode == LcpViewMode.TriggerBuffer)
+            {
+                lcpMeshRenderer.material.mainTexture = _triggerBufferTexture;
+            }
         }
 
         private void CreateLCPVisuals()
@@ -66,7 +70,7 @@ namespace WUIPlatform.Visualization
             _slopeTexture.filterMode = FilterMode.Point;
 
             _aspectTexture = new Texture2D(xPixels, yPixels, TextureFormat.RGBA32, false);
-            _aspectTexture.filterMode = FilterMode.Point;
+            _aspectTexture.filterMode = FilterMode.Point;           
 
             Vector2d elevationMinMax = _lcpData.GetElevationMinMax();
             Vector2d slopeMinMax = _lcpData.GetSlopeMinMax();
@@ -108,6 +112,35 @@ namespace WUIPlatform.Visualization
 
             CreateLCPDataPlane(WUInity.WUInityEngine.INSTANCE.transform, "LCP_plane", true, xDim, yDim, _lcpData.OriginOffset);
         }
+
+        public override void CreateTriggerBufferVisuals(int[,] triggerBufferData)
+        {
+            Fire.LCPData _lcpData = owner.LCPData;
+            int xPixels = _lcpData.GetCellCountX();
+            int yPixels = _lcpData.GetCellCountY();
+
+            _triggerBufferTexture = new Texture2D(xPixels, yPixels, TextureFormat.RGBA32, false);
+            _triggerBufferTexture.filterMode = FilterMode.Point;
+            float alpha = 0.85f;
+
+            for (int y = 0; y < yPixels; y++)
+            {
+                for (int x = 0; x < xPixels; x++)
+                {
+                    //PERIL has  flipped x/y for some reason
+                    int value = triggerBufferData[triggerBufferData.GetLength(0) - 1 - y, x];
+                    Color c = Color.red * (value / 1f);
+                    c.a = alpha;
+                    if(value == 0)
+                    {
+                        c.a = 0f;
+                    }
+                    _triggerBufferTexture.SetPixel(x, y, c);
+                }
+            }
+
+            _triggerBufferTexture.Apply();
+        }        
 
         private MeshRenderer CreateLCPDataPlane(Transform parent, string name, bool setActive, float width, float length, Vector2d offset)
         {

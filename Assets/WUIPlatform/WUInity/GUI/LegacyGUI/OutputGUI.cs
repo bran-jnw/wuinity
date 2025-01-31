@@ -206,7 +206,13 @@ namespace WUIPlatform.WUInity.UI
                 if (displayArrivalPlot)
                 {
                     plotWindowRect = GUI.Window(0, plotWindowRect, ShowPlot, "Arrival output");
-                }                
+                }
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle k-PERIL results"))
+                {
+                    WUIEngine.SIM.DisplayTriggerBuffer();
+                }
+                ++buttonIndex;
             }
         }
 

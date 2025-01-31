@@ -189,10 +189,10 @@ namespace WUIPlatform.Traffic
             {
                 EvacuationGoal evacuationGoal = injectedCar.evacuationGoal;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
-                Vector2d startLatLong = injectedCar.startLatLong;                
-                Vector2d goalLatLong = evacuationGoal.latLong;
+                Vector2d startLatLon = injectedCar.startLatLong;                
+                Vector2d goalLatLon = evacuationGoal.latLon;
                 //used to get a hash that represent the route
-                StartGoal startGoal = new StartGoal(startLatLong.x, startLatLong.y, goalLatLong.x, goalLatLong.y);
+                StartGoal startGoal = new StartGoal(startLatLon.x, startLatLon.y, goalLatLon.x, goalLatLon.y);
 
                 bool invalidRoute = true;
                 LIBSUMO.TraCIStage route = null;
@@ -217,8 +217,8 @@ namespace WUIPlatform.Traffic
                 else
                 {
                     //IMPORTANT!!! Longitude then latitude in SUMO
-                    LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLong.y, startLatLong.x, true);
-                    LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalLatLong.y, goalLatLong.x, true);       
+                    LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLon.y, startLatLon.x, true);
+                    LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalLatLon.y, goalLatLon.x, true);       
 
                     try
                     {

@@ -11,7 +11,7 @@ namespace WUIPlatform.WUInity
 {
     public class Painter : MonoBehaviour
     {
-        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, CustomPopulation, TriggerBuffer };
+        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, PopulationMask };
         PaintMode paintMode = PaintMode.EvacGroup;
 
         Color activeColor = Color.red;
@@ -20,7 +20,7 @@ namespace WUIPlatform.WUInity
         Vector2d activeRealSize;
         Texture2D activeTexture;
         Color[] activeColorArray;
-        int brushSize;
+        private int _brushSize;
 
         //general evac stuff
         Vector2 evacDataUV;
@@ -49,13 +49,9 @@ namespace WUIPlatform.WUInity
         Texture2D initialIgnitionTex;
         Color[] initialIgnitionColorArray;
 
-        //initial ignition
-        Texture2D triggerBufferTex;
-        Color[] triggerBufferColorArray;
-
         //population mask painter
-        Texture2D customPopulationMaskTex;
-        Color[] customPopulationMaskColorArray;
+        Texture2D populationMaskTex;
+        Color[] populationMaskColorArray;
 
         public PaintMode GetPaintMode()
         {
@@ -73,11 +69,19 @@ namespace WUIPlatform.WUInity
 
         public Texture2D GetCustomPopulationMaskTexture()
         {
-            if (customPopulationMaskTex == null)
+            if (populationMaskTex == null)
             {
-                CheckDataResources(customPopulationMaskTex, customPopulationMaskColorArray, evacDataUV);
+                Texture2D tex = (Texture2D)WUIEngine.POPULATION.Visualizer.GetPopulationMaskTexture();
+                if (tex != null)
+                {
+                    populationMaskTex = tex;
+                }
+                else
+                {
+                    CheckDataResources(populationMaskTex, populationMaskColorArray, evacDataUV);
+                }                
             }
-            return customPopulationMaskTex;
+            return populationMaskTex;
         }
 
         public Texture2D GetWUIAreaTexture()
@@ -105,15 +109,6 @@ namespace WUIPlatform.WUInity
                 CheckDataResources(initialIgnitionTex, initialIgnitionColorArray, fireDataUV);
             }
             return initialIgnitionTex;
-        }
-
-        public Texture2D GetTriggerBufferTexture()
-        {
-            if (triggerBufferTex == null)
-            {
-                CheckDataResources(triggerBufferTex, triggerBufferColorArray, fireDataUV);
-            }
-            return triggerBufferTex;
         }
 
         public void SetEvacGroupColor(int groupIndex)
@@ -149,7 +144,7 @@ namespace WUIPlatform.WUInity
         private void SetColor(int arrayIndex = 0)
         {
             if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition 
-                || paintMode == PaintMode.CustomPopulation || paintMode == PaintMode.TriggerBuffer)
+                || paintMode == PaintMode.PopulationMask)
             {
                 activeColor = arrayIndex == 1 ? Color.red : Color.white;
                 addingArea = arrayIndex == 1;
@@ -181,13 +176,9 @@ namespace WUIPlatform.WUInity
             {
                 SetupPainterInitialIgnition();
             }
-            else if (mode == PaintMode.CustomPopulation)
+            else if (mode == PaintMode.PopulationMask)
             {
-                SetupPainterCustomGPW();
-            }
-            else if (mode == PaintMode.TriggerBuffer)
-            {
-                SetupPainterTriggerBuffer();
+                SetupPainterPopulationMask();
             }
             else
             {
@@ -203,16 +194,16 @@ namespace WUIPlatform.WUInity
             evacGroupIndex = 0;
             activeColor = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
             activeColor.a = 0.5f;
-            brushSize = 1;
+            _brushSize = 1;
         }
 
-        void SetupPainterCustomGPW()
+        void SetupPainterPopulationMask()
         {
-            paintMode = PaintMode.CustomPopulation;
-            CheckDataResources(customPopulationMaskTex, customPopulationMaskColorArray, evacDataUV);
+            paintMode = PaintMode.PopulationMask;
+            CheckDataResources(populationMaskTex, populationMaskColorArray, evacDataUV);
             //select first zone
             SetCustomGPWColor(true);
-            brushSize = 1;
+            _brushSize = 1;
         }
 
         void SetupPainterWUIArea()
@@ -220,7 +211,7 @@ namespace WUIPlatform.WUInity
             paintMode = PaintMode.WUIArea;
             CheckDataResources(wuiAreaTex, wuiAreaColorArray, fireDataUV);
             SetWUIAreaColor(true);
-            brushSize = 5;
+            _brushSize = 5;
         }
 
         void SetupPainterRandomIgnition()
@@ -228,22 +219,14 @@ namespace WUIPlatform.WUInity
             paintMode = PaintMode.RandomIgnitionArea;
             CheckDataResources(randomIgnitionTex, randomIgnitionColorArray, fireDataUV);
             SetRandomIgnitionAreaColor(true);
-            brushSize = 5;
+            _brushSize = 5;
         }
         void SetupPainterInitialIgnition()
         {
             paintMode = PaintMode.InitialIgnition;
             CheckDataResources(initialIgnitionTex, initialIgnitionColorArray, fireDataUV);
             SetInitialIgnitionAreaColor(true);
-            brushSize = 3;
-        }
-
-        void SetupPainterTriggerBuffer()
-        {
-            paintMode = PaintMode.TriggerBuffer;
-            CheckDataResources(triggerBufferTex, triggerBufferColorArray, fireDataUV);
-            SetTriggerBufferColor(true);
-            brushSize = 5;
+            _brushSize = 3;
         }
 
         void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray, Vector2 requestedUV)
@@ -252,7 +235,7 @@ namespace WUIPlatform.WUInity
             {
                 Vector2int cellCount;
                 //get correct size, fire mesh or evac mesh
-                if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
+                if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
                 {
                     if(WUIEngine.RUNTIME_DATA.Fire.LCPData != null)
                     {
@@ -303,15 +286,11 @@ namespace WUIPlatform.WUInity
                         {
                             c = WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
                         }
-                        else if (paintMode == PaintMode.TriggerBuffer)
-                        {
-                            c = WUIEngine.RUNTIME_DATA.Fire.TriggerBufferIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
-                        }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
                             c = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(x, y).Color.UnityColor;
                         }
-                        else if (paintMode == PaintMode.CustomPopulation)
+                        else if (paintMode == PaintMode.PopulationMask)
                         {
                             c = WUIEngine.POPULATION.GetPopulationData().populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
                         }
@@ -342,28 +321,22 @@ namespace WUIPlatform.WUInity
                     initialIgnitionColorArray = requestedColorArray;
                     fireDataUV = requestedUV;
                 }
-                else if (paintMode == PaintMode.TriggerBuffer)
-                {
-                    triggerBufferTex = requestedTexture;
-                    triggerBufferColorArray = requestedColorArray;
-                    fireDataUV = requestedUV;
-                }
                 else if (paintMode == PaintMode.EvacGroup)
                 {
                     evacGroupTex = requestedTexture;
                     evacGroupColorArray = requestedColorArray;
                     evacDataUV = requestedUV;
                 }
-                else if (paintMode == PaintMode.CustomPopulation)
+                else if (paintMode == PaintMode.PopulationMask)
                 {
-                    customPopulationMaskTex = requestedTexture;
-                    customPopulationMaskColorArray = requestedColorArray;
+                    populationMaskTex = requestedTexture;
+                    populationMaskColorArray = requestedColorArray;
                     evacDataUV = requestedUV;
                 }
             }
 
             if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea 
-                || paintMode == PaintMode.InitialIgnition || paintMode == PaintMode.TriggerBuffer)
+                || paintMode == PaintMode.InitialIgnition)
             {                
                 activeCellCount = fireDataCellCount;
                 activeRealSize = fireDataRealSize;
@@ -386,6 +359,18 @@ namespace WUIPlatform.WUInity
 
         void UpdatePainter()
         {
+            if(Input.GetKeyDown(KeyCode.KeypadPlus))
+            {
+                ++_brushSize;
+            }
+            if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            {
+                --_brushSize;
+                if (_brushSize < 1)
+                {
+                    _brushSize = 1;
+                }
+            }
             if (Input.GetMouseButton(0) || Input.GetMouseButtonDown(1))
             {
                 Plane _yPlane = new Plane(Vector3.up, 0f);
@@ -423,17 +408,17 @@ namespace WUIPlatform.WUInity
         
         void PaintPixels(int x, int y)
         {
-            if(brushSize == 1)
+            if(_brushSize == 1)
             {
                 activeTexture.SetPixel(x, y, activeColor);
                 SetArrayPixel(x, y, activeColor, activeColorArray);
             }
             else
             {
-                int minX = UnityEngine.Mathf.Max(0, x - brushSize - 1);
-                int maxX = UnityEngine.Mathf.Min(activeCellCount.x - 1, x + brushSize - 1);
-                int minY = UnityEngine.Mathf.Max(0, y - brushSize - 1);
-                int maxY = UnityEngine.Mathf.Min(activeCellCount.y - 1, y + brushSize - 1);
+                int minX = UnityEngine.Mathf.Max(0, x - _brushSize - 1);
+                int maxX = UnityEngine.Mathf.Min(activeCellCount.x - 1, x + _brushSize - 1);
+                int minY = UnityEngine.Mathf.Max(0, y - _brushSize - 1);
+                int maxY = UnityEngine.Mathf.Min(activeCellCount.y - 1, y + _brushSize - 1);
 
                 Vector2int center = new Vector2int(x, y);
 
@@ -442,7 +427,7 @@ namespace WUIPlatform.WUInity
                     for (int i = minX; i <= maxX; i++)
                     {
                         float dist = Vector2int.Distance(center, new Vector2int(i, j));
-                        if (dist <= brushSize)
+                        if (dist <= _brushSize)
                         {
                             activeTexture.SetPixel(i, j, activeColor);
                             SetArrayPixel(i, j, activeColor, activeColorArray);
@@ -483,11 +468,7 @@ namespace WUIPlatform.WUInity
             {
                 WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * activeCellCount.x] = addingArea;
             }
-            else if (paintMode == PaintMode.TriggerBuffer)
-            {
-                WUIEngine.RUNTIME_DATA.Fire.TriggerBufferIndices[x + y * activeCellCount.x] = addingArea;
-            }
-            else if (paintMode == PaintMode.CustomPopulation)
+            else if (paintMode == PaintMode.PopulationMask)
             {
                 WUIEngine.POPULATION.GetPopulationData().populationMask[x + y * activeCellCount.x] = addingArea;
             }

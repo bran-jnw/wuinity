@@ -122,7 +122,7 @@ namespace WUIPlatform.WUInity.Visualization
                       
         }       
         
-        public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival }
+        public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival}
         FireDisplayMode _fireDisplayMode = FireDisplayMode.FirelineIntensity;
 
         public void SetFireDisplayMode(FireDisplayMode mode)
@@ -226,7 +226,7 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 float xScale, yScale;
                 Vector2d offsetFire;
-                ((AsciiFireImport)WUIEngine.SIM.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
+                ((AscFireImport)WUIEngine.SIM.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
                 offset.x += (float)offsetFire.x;
                 offset.y += (float)offsetFire.y;
                 width *= xScale;

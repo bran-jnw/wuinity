@@ -99,13 +99,6 @@ namespace WUIPlatform.WUInity.UI
                 }
                 ++buttonIndex;
 
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit trigger buffer"))
-                {
-                    fireEditMode = "Trigger buffer";
-                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.TriggerBuffer);
-                }
-                ++buttonIndex;
-
                 WUIEngine.INPUT.Fire.useRandomIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUIEngine.INPUT.Fire.useRandomIgnitionMap, "Use random ignition");
                 ++buttonIndex;
                 if (WUIEngine.INPUT.Fire.useRandomIgnitionMap)

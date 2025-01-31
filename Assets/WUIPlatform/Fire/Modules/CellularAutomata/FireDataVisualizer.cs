@@ -11,7 +11,7 @@ namespace WUIPlatform.Visualization
 {
     public abstract class FireDataVisualizer
     {
-        public enum LcpViewMode { FuelModel, Elevation, Slope, Aspect }
+        public enum LcpViewMode { FuelModel, Elevation, Slope, Aspect, TriggerBuffer }
 
         public Runtime.FireData owner;
 
@@ -23,6 +23,7 @@ namespace WUIPlatform.Visualization
         public abstract void SetLCPViewMode(LcpViewMode lcpViewMode);
         public abstract void ToggleLCPDataPlane();
         public abstract void SetLCPDataPlane(bool setActive);
+        public abstract void CreateTriggerBufferVisuals(int[,] data);
     }
 }
 

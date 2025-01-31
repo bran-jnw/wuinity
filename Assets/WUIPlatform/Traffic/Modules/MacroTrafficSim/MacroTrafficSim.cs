@@ -58,11 +58,18 @@ namespace WUIPlatform.Traffic
         {
             foreach (InjectedCar injectedCar in carsToInject)
             {
-                MacroCar car = new MacroCar(injectedCar.routeData, injectedCar.numberOfPeopleInCar, GetNewCarID());
+                RouteData routeData = GetRouteData(injectedCar);
+                MacroCar car = new MacroCar(routeData, injectedCar.numberOfPeopleInCar, GetNewCarID());
                 carsOnHold.Add(car);
                 ++totalCarsSimulated;
             }
             carsToInject.Clear();
+        }
+
+        private RouteData GetRouteData(InjectedCar car)
+        {
+            //TODO: here we have to select aroute by quering the route creator
+            throw new NotImplementedException();
         }
 
         public override void InsertNewTrafficEvent(TrafficEvent tE)

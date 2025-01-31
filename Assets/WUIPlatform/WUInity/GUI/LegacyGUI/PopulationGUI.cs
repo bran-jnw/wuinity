@@ -62,18 +62,18 @@ namespace WUIPlatform.WUInity.UI
             //custom population creation
             if (!WUInityEngine.INSTANCE.IsPainterActive())
             {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create/edit custom pop."))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit population mask"))
                 {
-                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.CustomPopulation);
+                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.PopulationMask);
                 }
                 ++buttonIndex;
             }
             else
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Desired population:");
+                /*GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Desired population:");
                 ++buttonIndex;
                 desiredPopulation = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), desiredPopulation);
-                ++buttonIndex;
+                ++buttonIndex;*/
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cell"))
                 {
@@ -88,16 +88,18 @@ namespace WUIPlatform.WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
                 {
-                    int totalPop;
+                    WUIEngine.POPULATION.GetPopulationData().ApplyMaskToPopulation();
+
+                    /*int totalPop;
                     bool success = int.TryParse(desiredPopulation, out totalPop);
                     if (!success)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Error, " Total population not a number, ignoring changes.");
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, " Total population not a number, ignoring changes.");
                     }
                     else
                     {
-                        WUIEngine.POPULATION.GetPopulationData().PlaceUniformPopulation(totalPop);
-                    }
+                        WUIEngine.POPULATION.GetPopulationData().CreatePopulationFromMask();
+                    }*/
                     WUInityEngine.INSTANCE.StopPainter();
                     WUInityEngine.INSTANCE.DisplayPopulation();
                 }

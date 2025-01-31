@@ -15,7 +15,7 @@ namespace WUIPlatform
     public class EvacuationGoal
     {
         public string name = "Goal_1";
-        public Vector2d latLong;
+        public Vector2d latLon;
         public WUIEngineColor color;
         public bool blocked = false;
         public float maxFlow = 3600f; //cars per hour
@@ -33,14 +33,14 @@ namespace WUIPlatform
         public EvacuationGoal()
         {
             name = "New goal";
-            latLong = Vector2d.zero;
+            latLon = Vector2d.zero;
             color = WUIEngineColor.white;
         }
 
         public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color)
         {
             this.name = name;
-            this.latLong = latLong;
+            this.latLon = latLong;
             this.color = color;
             maxFlow = 3600f;
         }
@@ -48,7 +48,7 @@ namespace WUIPlatform
         public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color, float maxFlow)
         {
             this.name = name;
-            this.latLong = latLong;
+            this.latLon = latLong;
             this.color = color;
             this.maxFlow = maxFlow;
         }
@@ -159,17 +159,17 @@ namespace WUIPlatform
 
             eGs[0] = new EvacuationGoal();
             eGs[0].name = "Rox_Goal_E";
-            eGs[0].latLong = new Vector2d(39.426692, -105.071401);
+            eGs[0].latLon = new Vector2d(39.426692, -105.071401);
             eGs[0].color = WUIEngineColor.red;
 
             eGs[1] = new EvacuationGoal();
             eGs[1].name = "Rox_Goal_R";
-            eGs[1].latLong = new Vector2d(39.473858, -105.092137);
+            eGs[1].latLon = new Vector2d(39.473858, -105.092137);
             eGs[1].color = WUIEngineColor.green;
 
             eGs[2] = new EvacuationGoal();
             eGs[2].name = "Rox_Goal_F";
-            eGs[2].latLong = new Vector2d(39.466157, -105.082197);
+            eGs[2].latLon = new Vector2d(39.466157, -105.082197);
             eGs[2].color = WUIEngineColor.blue;
             return eGs;
         }

@@ -26,7 +26,7 @@ namespace WUIPlatform.Population
 
         //not saved
         public bool isLoaded, correctedForRoutes;
-        PopulationManager manager;
+        private PopulationManager _manager;
 
         public PopulationData(PopulationManager manager)
         {
@@ -43,13 +43,18 @@ namespace WUIPlatform.Population
 
             isLoaded = false;
             correctedForRoutes = false;
-            this.manager = manager;
+            _manager = manager;
         }
 
         public int GetPeopleCount(int x, int y)
         {
             return cellPopulation[x + y * cells.x];
-        }              
+        }
+
+        public bool GetMaskValue(int x, int y)
+        {
+            return populationMask[x + y * cells.x];
+        }
 
         public void CreatePopulationFromLocalGPW(LocalGPWData localGPW, float cellSize)
         {
@@ -60,9 +65,8 @@ namespace WUIPlatform.Population
             cells = new Vector2int((int)(0.5f + size.x / cellSize), (int)(0.5f + size.y / cellSize));// WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
             size = new Vector2d(cellSize * cells.x, cellSize * cells.y);    
             
-
             cellPopulation = new int[cells.x * cells.y];
-            populationMask = new bool[cells.x * cells.y];
+            cellRoadAccessLatLon = new Vector2d[cells.x * cells.y];
 
             cellArea = cellSize * cellSize / (1000000d); // people/square km
             totalPopulation = 0;
@@ -72,41 +76,41 @@ namespace WUIPlatform.Population
                 double yPos = (y + 0.5) * cellSize;
                 for (int x = 0; x < cells.x; ++x)
                 {
+                    int index = x + y * cells.x;
                     double xPos = (x + 0.5) * cellSize;
                     double density = localGPW.GetDensitySimulationSpaceBilinear(new Vector2d(xPos, yPos));
                     int pop = 0;
                     //if data has negative values (NO_DATA) it should be zero
                     //else force at least one person if there is some density
                     if (density > 0.0)
-                    {                        
+                    {
                         pop = Mathf.Max(1, Mathf.RoundToInt((float)(cellArea * density)));
                     }
-                    cellPopulation[x + y * cells.x] = pop;
-                    totalPopulation += pop;
-                    if(pop > 0)
-                    {
-                        ++totalActiveCells;
+                    
+                    //we often want to filter out locations within the area of interest as the roads are not accessible, or we simply want to focus on a specific area only
+                    if (populationMask == null || populationMask[index] == true)
+                    {                        
+                        cellPopulation[index] = pop;
+                        totalPopulation += pop;
+                        if (pop > 0)
+                        {
+                            ++totalActiveCells;
+                        }
                     }
-
-                    //WUIEngine.OUTPUT.evac.rawPopulation[x + y * cells.x] = pop;
                 }
             }
-
-            //the bilinear interpolation might not have conserved the amount of people correctly
-            if(localGPW.totalPopulation != totalPopulation)
+            
+            //the bilinear interpolation might not have conserved the amount of people correctly, or we have masked off some people
+            if (localGPW.totalPopulation != totalPopulation)
             {
                 ScaleTotalPopulation(localGPW.totalPopulation);
-            }
-
-            cellRoadAccessLatLon = new Vector2d[cells.x * cells.y];
+            }            
             UpdatePopulationBasedOnRoadAccess();
-            CreateAndSaveValidStartCoordinates();
-
-            manager.CreateTexture();
-            SavePopulation();
-
+            CreateAndSaveValidStartCoordinates();  
             isLoaded = true;
-            correctedForRoutes = false;
+            correctedForRoutes = true;
+            SavePopulation();
+            _manager.CreatePopulationTexture();            
         }
 
         private void UpdatePopulationBasedOnRoadAccess()
@@ -118,8 +122,8 @@ namespace WUIPlatform.Population
                 {
                     int yIndex = i / cells.x;
                     int xIndex = i - yIndex * cells.x;
-                    Vector2d mercatorPos = new Vector2d((xIndex + 0.5f) * cellSize, (yIndex + 0.5) * cellSize) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator;
-                    Vector2d coord = GeoConversions.MetersToLatLon(mercatorPos);
+                    Vector2d cellCenterMercatorPos = new Vector2d((xIndex + 0.5f) * cellSize, (yIndex + 0.5) * cellSize) / WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator;
+                    Vector2d coord = GeoConversions.MetersToLatLon(cellCenterMercatorPos);
                     Itinero.RouterPoint p = WUIEngine.SIM.RouteCreator.CheckIfStartIsValid(coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), cellSize);
                     if(p != null)
                     {
@@ -145,7 +149,7 @@ namespace WUIPlatform.Population
 
         public void CreateAndSaveValidStartCoordinates()
         {
-            using (StreamWriter outputFile = new StreamWriter(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_evacAccessLatLon.csv")))
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_households.csv")))
             {
                 outputFile.WriteLine("HomeLat,HomeLon,CarLat,CarLon,People");
 
@@ -191,7 +195,7 @@ namespace WUIPlatform.Population
             if (stuckPeople > 0)
             {
                 RelocateStuckPeople(stuckPeople);
-                manager.CreateTexture();
+                _manager.CreatePopulationTexture();
             }
 
             correctedForRoutes = true;
@@ -225,6 +229,21 @@ namespace WUIPlatform.Population
             return stuckPeople;
         }
 
+        public void ApplyMaskToPopulation()
+        {
+            int stuckPeople = 0;
+            for (int i = 0; i < cellPopulation.Length; ++i)
+            {
+                if (cellPopulation[i] > 0 && populationMask[i] == false)
+                {
+                    stuckPeople += cellPopulation[i];
+                    cellPopulation[i] = 0;
+                }
+            }
+
+            RelocateStuckPeople(stuckPeople);
+        }
+
         /// <summary>
         /// Relocates stuck people (no route in cell), relocation based on ratio between people in cell / total people, so relative density is conserved
         /// </summary>
@@ -254,13 +273,13 @@ namespace WUIPlatform.Population
                     ScaleTotalPopulation(oldTotalPopulation);
                 }
             }
-        }
+        }        
 
         /// <summary>
         /// Creates uniform population based on a pre-made population mask (made in painter).
         /// </summary>
         /// <param name="newTotalPopulation"></param>
-        public void PlaceUniformPopulation(int newTotalPopulation)
+        public void CreatePopulationFromMask(int newTotalPopulation)
         {
             totalActiveCells = 0;
             for (int i = 0; i < populationMask.Length; i++)
@@ -288,7 +307,7 @@ namespace WUIPlatform.Population
                 ScaleTotalPopulation(newTotalPopulation);
             }
 
-            manager.CreateTexture();
+            _manager.CreatePopulationTexture();
             SavePopulation();
             isLoaded = true;
             correctedForRoutes = false;
@@ -329,7 +348,7 @@ namespace WUIPlatform.Population
                     ++totalPopulation;
                 }
             }
-            //this can happen when we have too many acticv cells
+            //this can happen when we have too many active cells
             else if(desiredPopulation < totalPopulation)
             {
                 int loopCount = totalPopulation - desiredPopulation;
@@ -346,7 +365,8 @@ namespace WUIPlatform.Population
                 totalActiveCells = activeCellIndices.Count;
             }
 
-            manager.CreateTexture();
+            _manager.CreatePopulationTexture();
+            CreateAndSaveValidStartCoordinates();
             SavePopulation();
         }
 
@@ -371,6 +391,34 @@ namespace WUIPlatform.Population
 
             string path = WUIEngine.INPUT.Population.populationFile;
             if(!File.Exists(path))
+            {
+                path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + ".pop");
+            }
+            WUIEngine.INPUT.Population.populationFile = Path.GetFileName(path);
+            File.WriteAllLines(path, data);
+        }
+
+        private void SavePopulationMask()
+        {
+            string[] data = new string[10];
+
+            data[0] = lowerLeftLatLong.x.ToString();
+            data[1] = lowerLeftLatLong.y.ToString();
+            data[2] = size.x.ToString();
+            data[3] = size.y.ToString();
+            data[4] = cells.x.ToString();
+            data[5] = cells.y.ToString();
+            data[6] = cellSize.ToString();
+            data[7] = totalPopulation.ToString();
+            data[8] = (correctedForRoutes ? 1 : 0).ToString();
+            data[9] = "";
+            for (int i = 0; i < populationMask.Length; i++)
+            {
+                data[9] += cellPopulation[i] + " ";
+            }
+
+            string path = WUIEngine.INPUT.Population.populationMaskFile;
+            if (!File.Exists(path))
             {
                 path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + ".pop");
             }
@@ -440,7 +488,7 @@ namespace WUIPlatform.Population
                 {
                     WUIEngineInput.SaveInput();
                 }
-                manager.CreateTexture();
+                _manager.CreatePopulationTexture();
                 isLoaded = true;
                 WUIEngine.INPUT.Population.populationFile = Path.GetFileName(path);                
                 WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded population from file " + path + ".");
