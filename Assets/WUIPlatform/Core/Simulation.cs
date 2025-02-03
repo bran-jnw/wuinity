@@ -634,10 +634,10 @@ namespace WUIPlatform
                         */
 
                     Vector4 pas = car.GetPositionAndSpeed(false);
-                    addBytes(BitConverter.GetBytes(car.carID));
-                    addBytes(BitConverter.GetBytes(pas.X));
-                    addBytes(BitConverter.GetBytes(pas.Y));
-                    addBytes(BitConverter.GetBytes(pas.Z));
+                       addBytes(BitConverter.GetBytes(car.carID));
+                       addBytes(BitConverter.GetBytes(pas.X));
+                       addBytes(BitConverter.GetBytes(pas.Y));
+                       addBytes(BitConverter.GetBytes(pas.Z));
 
 
                     if (timesCarSent == 1)

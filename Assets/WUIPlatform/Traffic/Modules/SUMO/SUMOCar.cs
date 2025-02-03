@@ -21,6 +21,7 @@ namespace WUIPlatform.Traffic
         Vector3 oldVisualPos;
         Vector3 newVisualPos;
         float oldRotation, newRotation;
+        private Vector2d offset; //Rik
 
         public SUMOCar(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationGoal goal) : base(carID, peopleInCar, goal)
         {
@@ -35,6 +36,11 @@ namespace WUIPlatform.Traffic
             oldVisualPos = new Vector3(xPos, 0.0f, yPos);
             newVisualPos = oldVisualPos;
             rotation = (float)angle;
+
+            //Rik moved from SUMOMudule
+            //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
+            Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
+            offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
         }
 
         public string GetVehicleID()
@@ -92,7 +98,16 @@ namespace WUIPlatform.Traffic
                 positionAndSpeed = new Vector4(xPos, yPos, speedRatio, 0f);
             }
 
-            return positionAndSpeed;
+            Vector4 pas = positionAndSpeed;
+            pas.X += (float)offset.x;
+            pas.Y += (float)offset.y;
+            if (WUIEngine.INPUT.Simulation.ScaleToWebMercator)
+            {
+                pas.X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
+                pas.Y *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.y;
+            }
+
+            return pas;
         }
 
         public bool IsActive()
