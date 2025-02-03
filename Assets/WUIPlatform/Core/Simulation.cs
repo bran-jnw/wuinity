@@ -16,7 +16,6 @@ using WUIPlatform.IO;
 using WUIPlatform.WUInity;
 #endif
 
-//Rik's
 using System;
 using System.Numerics;
 using System.Net.Sockets;
@@ -73,7 +72,6 @@ namespace WUIPlatform
         private float _stepExecutionTime;
         public float StepExecutionTime { get => _stepExecutionTime; }
 
-        //Rik's
         public static List<TrafficModuleCar> movedCars;
         private UdpClient udpClient;
         static Simulation()
@@ -101,7 +99,6 @@ namespace WUIPlatform
             try
             {
 
-                //rik's
                 udpClient = new UdpClient("127.0.0.1", 9023);
                 System.Threading.Tasks.Task simTask = System.Threading.Tasks.Task.Run(StartSimulations);
                 await simTask;
@@ -599,17 +596,14 @@ namespace WUIPlatform
             }
         }
 
-        //Rik's
         int timesCarSent = 0;
         float lastTime = 0f;
 
-        //Rik's
         void SendCars()
         {
 
             if (CurrentTime > lastTime + 0.5f && movedCars.Count > 0)
             {
-                //rik's
                 byte[] sendBytes = new byte[movedCars.Count * 16];
                 int i = 0;
 
@@ -624,14 +618,6 @@ namespace WUIPlatform
 
                 foreach (TrafficModuleCar car in movedCars)
                 {
-                    //add id
-                    /*    byte[] carIdBytes = BitConverter.GetBytes(car.carId);
-                        for(int j = 0; j<carIdBytes.Length;j++)
-                        {
-                            sendBytes[i + j] = carIdBytes[j];
-                        }
-                        i+=4;
-                        */
 
                     Vector4 pas = car.GetPositionAndSpeed(false);
                        addBytes(BitConverter.GetBytes(car.carID));

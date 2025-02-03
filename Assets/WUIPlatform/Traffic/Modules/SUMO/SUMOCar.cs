@@ -21,7 +21,7 @@ namespace WUIPlatform.Traffic
         Vector3 oldVisualPos;
         Vector3 newVisualPos;
         float oldRotation, newRotation;
-        private Vector2d offset; //Rik
+        private Vector2d offset;
 
         public SUMOCar(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationGoal goal) : base(carID, peopleInCar, goal)
         {
@@ -37,7 +37,6 @@ namespace WUIPlatform.Traffic
             newVisualPos = oldVisualPos;
             rotation = (float)angle;
 
-            //Rik moved from SUMOMudule
             //need to use UTM projection in SUMO to match data, and since Mapbox is using Web mercator for calculations but UTM for tiles we need to do offset in UTM space
             Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
             offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
@@ -75,7 +74,6 @@ namespace WUIPlatform.Traffic
             rotation = angle;
             newRotation = angle;
 
-            //Rik's
             if(lastPos.X != xPos || lastPos.Y!=yPos)
             {
                 CarMoved();
@@ -89,7 +87,6 @@ namespace WUIPlatform.Traffic
 
         Vector4 positionAndSpeed;
 
-        //Rik added 'override'
         public override Vector4 GetPositionAndSpeed(bool updateData)
         {
             if (updateData)

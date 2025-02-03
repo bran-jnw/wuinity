@@ -21,7 +21,6 @@ namespace WUIPlatform.Traffic
 
         public abstract void Arrive();
 
-        //Rik's
         public abstract System.Numerics.Vector4 GetPositionAndSpeed(bool updateData);
         public void CarMoved()
         {
