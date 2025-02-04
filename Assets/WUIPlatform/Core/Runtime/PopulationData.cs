@@ -56,10 +56,10 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            WUIEngine.DATA_STATUS.SetPopulation(LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.HouseholdsFile)));
+            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.HouseholdsFile));
         }
         
-        private bool LoadPopulation(string path)
+        public bool LoadPopulation(string path)
         {
             bool success = false;
 
@@ -75,9 +75,9 @@ namespace WUIPlatform.Runtime
                     }
 
                     //skip first rom (header, and last row (should be empty)
-                    _householdData = new HouseholdData[lines.Count - 2];
+                    _householdData = new HouseholdData[lines.Count - 1];
                     _totalPopulation = 0;
-                    for (int i = 1; i < lines.Count - 1; ++i)
+                    for (int i = 1; i < lines.Count; ++i)
                     {
                         string[] line = lines[i].Split(",");
                         double lat = double.Parse(line[0]);
@@ -90,7 +90,7 @@ namespace WUIPlatform.Runtime
                     }
 
                     success = true;
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Loaded population " + Path.GetFileNameWithoutExtension(path) + " containing " + _totalPopulation + " people and " + _householdData.Length + " households.");
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(path) + " containing " + _totalPopulation + " people and " + _householdData.Length + " households.");
                 }                
             }
             else
@@ -98,6 +98,7 @@ namespace WUIPlatform.Runtime
                 WUIEngine.LOG(WUIEngine.LogType.Warning, "Population file could not be found.");
             }
 
+            WUIEngine.DATA_STATUS.SetPopulation(success);
             return success;
         }        
     }

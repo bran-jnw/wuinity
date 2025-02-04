@@ -457,7 +457,7 @@ namespace WUIPlatform.Population
             return success;
         }
 
-        public void CreateAndSavePopulation()
+        public void CreateAndLoadPopulation()
         {
             string file = Path.Combine(WUIEngine.WORKING_FOLDER, _fileName + "_households.csv");
             using (StreamWriter sW = new StreamWriter(file))
@@ -500,6 +500,8 @@ namespace WUIPlatform.Population
 
                 WUIEngine.LOG(WUIEngine.LogType.Log, "Generated and saved population to file " + file);
             }
+
+            WUIEngine.RUNTIME_DATA.Population.LoadPopulation(file);
         }
     }
 }

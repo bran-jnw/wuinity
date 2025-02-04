@@ -104,11 +104,11 @@ namespace WUIPlatform.Tools
             WUIEngine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
         }*/ 
 
-        public static void CreateAndSavePopulation()
+        public static void CreateAndLoadPopulation()
         {
             if (WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData && WUIEngine.RUNTIME_DATA.Population.PopulationMap.CorrectedForRoadAccess)
             {
-                WUIEngine.RUNTIME_DATA.Population.PopulationMap.CreateAndSavePopulation();
+                WUIEngine.RUNTIME_DATA.Population.PopulationMap.CreateAndLoadPopulation();
             }
             else
             {

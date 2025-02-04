@@ -166,7 +166,7 @@ namespace WUIPlatform.WUInity.UI
                     }
                     ++buttonIndex;
 
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Close and save"))
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Close & save"))
                     {
                         Tools.PopulationTools.SavePopulationMask();
                         WUInityEngine.INSTANCE.StopPainter();
@@ -188,9 +188,9 @@ namespace WUIPlatform.WUInity.UI
             ++buttonIndex;
             if(Tools.PopulationTools.HavePopulationMap && WUIEngine.RUNTIME_DATA.Population.PopulationMap.CorrectedForRoadAccess)
             {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create & load population"))
                 {
-                    CreatePopulation();
+                    CreateAndLoadPopulation();
                 }
                 ++buttonIndex;
             }
@@ -323,9 +323,9 @@ namespace WUIPlatform.WUInity.UI
             string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
             FileBrowser.ShowLoadDialog(CreatePopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select routerDb to use for road access correction", "Set");
         }*/
-        void CreatePopulation() //string[] paths
+        void CreateAndLoadPopulation() //string[] paths
         {
-            Tools.PopulationTools.CreateAndSavePopulation(); //paths[0]
+            Tools.PopulationTools.CreateAndLoadPopulation(); //paths[0]
         }
     }
 }
