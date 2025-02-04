@@ -26,8 +26,10 @@ namespace WUIPlatform.Traffic
         RouteCreator routeCreator;
         Dictionary<int, RoadSegment> roadSegments;       
 
-        public MacroTrafficSim(RouteCreator rC)
+        public MacroTrafficSim()
         {
+            //TODO: make sim read router Db, then route creator
+            //routeCreator = ;
             carsInSystem = new List<MacroCar>();
             carsOnHold = new List<MacroCar>();
             totalCarsSimulated = 0;
@@ -49,7 +51,7 @@ namespace WUIPlatform.Traffic
             stallBigRoads = false;
             trafficEvents = new List<TrafficEvent>();
 
-            routeCreator = rC;
+            
 
             WUIEngine.LOG(WUIEngine.LogType.Log, "Macro traffic sim initiated.");
         }

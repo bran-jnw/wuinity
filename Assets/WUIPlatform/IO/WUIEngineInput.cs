@@ -85,10 +85,7 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class PopulationInput
     {
-        public string gpwDataFolder = "gpw-v4-population-density-rev10_2015_30_sec_asc";
-        public string localGPWFile;
-        public string populationFile;
-        public string populationMaskFile;
+        public string HouseholdsFile;
     }
 
     [System.Serializable]
@@ -96,7 +93,7 @@ namespace WUIPlatform.IO
     {
         public enum PedestrianModuleChoice { MacroHouseholdSim, SUMO }
         public PedestrianModuleChoice pedestrianModuleChoice = PedestrianModuleChoice.MacroHouseholdSim;
-        public string Households;
+        
         public float RouteCellSize = 200f;
         public float EvacuationOrderStart = 0.0f;
         public string[] ResponseCurveFiles;

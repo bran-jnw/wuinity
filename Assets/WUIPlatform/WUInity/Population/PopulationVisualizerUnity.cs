@@ -6,19 +6,20 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
+using WUIPlatform.Runtime;
 
 namespace WUIPlatform.Population
 {
     public class PopulationVisualizerUnity : PopulationVisualizer
     {
-        private GameObject m_LocalGPWDataPlane;
+        private GameObject _LocalGPWDataPlane;
         private Material gpwDataPlaneMaterial;
 
-        private Texture2D populationTexture;
-        private Texture2D populationMaskTexture;
+        private Texture2D populationMapTexture;
+        private Texture2D populationMapMaskTexture;
         private Texture2D densityTexture;
 
-        public PopulationVisualizerUnity(PopulationManager owner) : base(owner)
+        public PopulationVisualizerUnity(PopulationData owner) : base(owner)
         { 
 
         }
@@ -30,24 +31,31 @@ namespace WUIPlatform.Population
 
         public override object GetPopulationTexture()
         {
-            return populationTexture;
+            return populationMapTexture;
         }
 
         public override object GetPopulationMaskTexture()
         {
-            return populationMaskTexture;
+            return populationMapMaskTexture;
         }
 
         public GameObject DataPlane
         {
             get
             {
-                if (m_LocalGPWDataPlane == null)
+                if (_LocalGPWDataPlane == null)
                 {
-                    CreateLocalGPWDataPlane();
+                    if(WUIEngine.RUNTIME_DATA.Population.LocalGPWData != null)
+                    {
+                        CreateLocalGPWDataPlane(WUIEngine.RUNTIME_DATA.Population.LocalGPWData);
+                    }
+                    else
+                    {
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Local GPW data not loaded.");
+                    }
                 }
 
-                return m_LocalGPWDataPlane;
+                return _LocalGPWDataPlane;
             }
         }
 
@@ -58,103 +66,109 @@ namespace WUIPlatform.Population
 
         public override bool ToggleLocalGPWVisibility()
         {
-            DataPlane.SetActive(!m_LocalGPWDataPlane.activeSelf);
+            DataPlane.SetActive(!_LocalGPWDataPlane.activeSelf);
 
             return DataPlane.activeSelf;
         }
 
-        public override void CreatePopulationTexture()
+        public override void CreatePopulationMapTexture(PopulationMap data)
         {
-            PopulationData data = _owner.GetPopulationData();
-            //first find the correct texture size
-            int maxSide = Mathf.Max(data.cells.x, data.cells.y);
+            int maxSide = Mathf.Max(data._cells.x, data._cells.y);
             Vector2int res = new Vector2int(2, 2);
 
-            while (data.cells.x > res.x)
+            while (data._cells.x > res.x)
             {
                 res.x *= 2;
             }
-            while (_owner.GetPopulationData().cells.y > res.y)
+            while (data._cells.y > res.y)
             {
                 res.y *= 2;
             }
 
-            populationTexture = new Texture2D(res.x, res.y);
-            populationTexture.filterMode = FilterMode.Point;
-            for (int y = 0; y < data.cells.y; y++)
+            if(populationMapTexture == null || !(populationMapTexture.width == res.x && populationMapTexture.height == res.y))
             {
-                for (int x = 0; x < data.cells.x; x++)
+                populationMapTexture = new Texture2D(res.x, res.y);
+                populationMapTexture.filterMode = FilterMode.Point;
+            }            
+            
+            for (int y = 0; y < data._cells.y; y++)
+            {
+                for (int x = 0; x < data._cells.x; x++)
                 {
-                    double density = data.GetPeopleCount(x, y) / data.cellArea;
-                    WUIEngineColor color = PopulationManager.GetGPWColor((float)density);
+                    double density = data.GetPeopleCount(x, y) / data._cellArea;
+                    WUIEngineColor color = GetGPWColor((float)density);
+                    if(density == 0)
+                    {
+                        color.a = 0f;
+                    }
 
-                    populationTexture.SetPixel(x, y, color.UnityColor);
+                    populationMapTexture.SetPixel(x, y, color.UnityColor);
                 }
             }
-            populationTexture.Apply();
+            populationMapTexture.Apply();
         }
 
-        public override void CreatePopulationMaskTexture()
+        public override void CreatePopulationMapMaskTexture(PopulationMap data)
         {
-            PopulationData data = _owner.GetPopulationData();
-            //first find the correct texture size
-            int maxSide = Mathf.Max(data.cells.x, data.cells.y);
+            int maxSide = Mathf.Max(data._cells.x, data._cells.y);
             Vector2int res = new Vector2int(2, 2);
 
-            while (data.cells.x > res.x)
+            while (data._cells.x > res.x)
             {
                 res.x *= 2;
             }
-            while (_owner.GetPopulationData().cells.y > res.y)
+            while (data._cells.y > res.y)
             {
                 res.y *= 2;
             }
 
-            populationTexture = new Texture2D(res.x, res.y);
-            populationTexture.filterMode = FilterMode.Point;
-            for (int y = 0; y < data.cells.y; y++)
+            if (populationMapMaskTexture == null || !(populationMapMaskTexture.width == res.x && populationMapMaskTexture.height == res.y))
             {
-                for (int x = 0; x < data.cells.x; x++)
+                populationMapMaskTexture = new Texture2D(res.x, res.y);
+                populationMapMaskTexture.filterMode = FilterMode.Point;
+            }
+
+            for (int y = 0; y < data._cells.y; y++)
+            {
+                for (int x = 0; x < data._cells.y; x++)
                 {
                     if(data.GetMaskValue(x, y))
                     {
                         Color color = Color.red;
-                        populationMaskTexture.SetPixel(x, y, color);
+                        color.a = 0.5f;
+                        populationMapMaskTexture.SetPixel(x, y, color);
                     }                    
                 }
             }
-            populationMaskTexture.Apply();
+            populationMapMaskTexture.Apply();
         }
 
-        private void CreateLocalGPWDataPlane()
+        private void CreateLocalGPWDataPlane(LocalGPWData localGPWData)
         {
             Mesh mesh;
             MeshRenderer mR;
             MeshFilter filter;
 
-            if (m_LocalGPWDataPlane == null)
+            if (_LocalGPWDataPlane == null)
             {
-                m_LocalGPWDataPlane = new GameObject("GPWDensityMap");
-                m_LocalGPWDataPlane.transform.parent = WUInity.WUInityEngine.INSTANCE.transform;
-                m_LocalGPWDataPlane.isStatic = true;
-                // You can change that line to provide another MeshFilter
-                filter = m_LocalGPWDataPlane.AddComponent<MeshFilter>();
+                _LocalGPWDataPlane = new GameObject("GPWDensityMap");
+                _LocalGPWDataPlane.transform.parent = WUInity.WUInityEngine.INSTANCE.transform;
+                _LocalGPWDataPlane.isStatic = true;
+                filter = _LocalGPWDataPlane.AddComponent<MeshFilter>();
                 mesh = new Mesh(); // filter.mesh;
                 filter.mesh = mesh;
-                mR = m_LocalGPWDataPlane.AddComponent<MeshRenderer>();
+                mR = _LocalGPWDataPlane.AddComponent<MeshRenderer>();
                 mR.receiveShadows = false;
                 mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
             else
             {
-                mR = m_LocalGPWDataPlane.GetComponent<MeshRenderer>();
-                mesh = m_LocalGPWDataPlane.GetComponent<MeshFilter>().mesh;
-                filter = m_LocalGPWDataPlane.GetComponent<MeshFilter>();
+                mR = _LocalGPWDataPlane.GetComponent<MeshRenderer>();
+                mesh = _LocalGPWDataPlane.GetComponent<MeshFilter>().mesh;
+                filter = _LocalGPWDataPlane.GetComponent<MeshFilter>();
             }
 
             mesh.Clear();
-
-            LocalGPWData localGPWData = _owner.GetLocalGPWData();
 
             float width = (float)localGPWData.realWorldSize.x; //(float)size.x;
             float length = (float)localGPWData.realWorldSize.y; //(float)size.y;
@@ -174,13 +188,13 @@ namespace WUIPlatform.Population
             //filter.mesh = mesh;
 
             //move up one meter
-            m_LocalGPWDataPlane.transform.position = Vector3.up;
-            m_LocalGPWDataPlane.SetActive(false);
+            _LocalGPWDataPlane.transform.position = Vector3.up;
+            _LocalGPWDataPlane.SetActive(false);
         }
 
-        public override void CreateGPWTexture()
+        public override void CreateGPWTexture(LocalGPWData data)
         {
-            Vector2int dataSize = _owner.GetLocalGPWData().dataSize;
+            Vector2int dataSize = data.dataSize;
             //first find the correct texture size
             int maxSide = Mathf.Max(dataSize.x, dataSize.y);
             Vector2int res = new Vector2int(2, 2);
@@ -193,7 +207,6 @@ namespace WUIPlatform.Population
             {
                 res.y *= 2;
             }
-            //Debug.Log("GPW texture resolution: " + res.x + ", " + res.y);
 
             //paint texture based time of arrival
             densityTexture = new UnityEngine.Texture2D(res.x, res.y);
@@ -202,8 +215,8 @@ namespace WUIPlatform.Population
             {
                 for (int x = 0; x < dataSize.x; x++)
                 {
-                    double density = _owner.GetLocalGPWData().GetDensity(x, y);
-                    WUIEngineColor color = PopulationManager.GetGPWColor((float)density);
+                    double density = data.GetDensity(x, y);
+                    WUIEngineColor color = GetGPWColor((float)density);
 
                     densityTexture.SetPixel(x, y, color.UnityColor);
                 }

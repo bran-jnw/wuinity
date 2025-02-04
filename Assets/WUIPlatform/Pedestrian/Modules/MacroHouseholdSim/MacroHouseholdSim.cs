@@ -203,6 +203,21 @@ namespace WUIPlatform.Pedestrian
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationGoal evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
+
+                //TODO: more sophisticated choice of new goal
+                if (evacGoal.blocked)
+                {
+                    for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+                    {
+                        if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i] != evacGoal)
+                        {
+                            if(!WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].blocked)
+                            {
+                                evacGoal = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
+                            }
+                        }
+                    }
+                }
                 Vector2d carLatLon = household.GetCarLatLon();
 
 

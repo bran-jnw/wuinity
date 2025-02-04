@@ -5,63 +5,99 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.IO;
-using WUIPlatform.IO;
+using WUIPlatform.Population;
 
 namespace WUIPlatform.Runtime
 {
     public class PopulationData
-    {
+    {    
+        public struct HouseholdData
+        {
+            public Vector2d _houseLatLon;
+            public Vector2d _carLatLon;
+            public int _peopleCount;
+
+            public HouseholdData(Vector2d houseLatLon, Vector2d carLatLon, int peopleCount)
+            {
+                _houseLatLon = houseLatLon;
+                _carLatLon = carLatLon;
+                _peopleCount = peopleCount;
+            }
+        }
+
+        private HouseholdData[] _householdData;
+        public HouseholdData[] Households { get => _householdData; }
+
+        private int _totalPopulation;
+        public int TotalPopulation { get => _totalPopulation; }
+
+        protected PopulationVisualizer _visualizer;
+        public PopulationVisualizer Visualizer { get =>_visualizer; }
+        
+        private LocalGPWData _localGPWData;
+        public LocalGPWData LocalGPWData { get => _localGPWData; }
+
+        private PopulationMap _populationMap;
+        public PopulationMap PopulationMap { get => _populationMap; }
+
+        public PopulationData()
+        {
+            _localGPWData = new LocalGPWData(this);
+            _populationMap = new PopulationMap(this);
+
+            #if USING_UNITY
+            _visualizer = new PopulationVisualizerUnity(this);
+            #else
+
+            #endif
+        }
+
         public void LoadAll()
         {
-            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.populationFile), false);
-            LoadLocalGPW(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.localGPWFile), false);
-            LoadGlobalGPWFolder(WUIEngine.INPUT.Population.gpwDataFolder, false);
+            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.HouseholdsFile));
         }
-
-        public bool LoadPopulation(string path, bool updateInputFile)
+        
+        private bool LoadPopulation(string path)
         {
-            bool success = WUIEngine.POPULATION.LoadPopulationFromFile(path, updateInputFile);
-            WUIEngine.DATA_STATUS.PopulationLoaded = success;
-            if (success)
-            {
-                WUIEngine.DATA_STATUS.PopulationCorrectedForRoutes = WUIEngine.POPULATION.IsPopulationCorrectedForRoutes();
+            bool success = false;
 
-                //this is now done in actual call
-                /*if (updateInputFile)
+            if (File.Exists(path))
+            {
+                using (StreamReader sr = new StreamReader(path))
                 {
-                    Input.Population.populationFile = Path.GetFileName(path);
-                    WUInityInput.SaveInput();
-                }*/
-            }            
+                    List<string> lines = new List<string>();
 
-            return success;
-        }
+                    while (!sr.EndOfStream)
+                    {
+                        lines.Add(sr.ReadLine());
+                    }
 
-        public bool LoadLocalGPW(string path, bool updateInputFile)
-        {
-            bool success = WUIEngine.POPULATION.LoadLocalGPWFromFile(path);
-            WUIEngine.DATA_STATUS.LocalGPWLoaded = success;
-            if(success && updateInputFile)
+                    //skip first rom (header, and last row (should be empty)
+                    _householdData = new HouseholdData[lines.Count - 2];
+                    _totalPopulation = 0;
+                    for (int i = 1; i < lines.Count - 1; ++i)
+                    {
+                        string[] line = lines[i].Split(",");
+                        double lat = double.Parse(line[0]);
+                        double lon = double.Parse(line[1]);
+                        double carLat = double.Parse(line[2]);
+                        double carLon = double.Parse(line[3]);
+                        int people = int.Parse(line[4]);                        
+                        _householdData[i - 1] = new HouseholdData(new Vector2d(lat, lon), new Vector2d(carLat, carLon), people);
+                        _totalPopulation += people;
+                    }
+                }
+
+                success = true;
+            }
+            else
             {
-                WUIEngine.INPUT.Population.localGPWFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Population file could not be found.");
             }
 
             return success;
-        }
-
-        public bool LoadGlobalGPWFolder(string path, bool updateInputFile)
-        {            
-            bool success = Population.LocalGPWData.IsGPWAvailable(path);
-            WUIEngine.DATA_STATUS.GlobalGPWAvailable = success;
-            if(success && updateInputFile)
-            {
-                WUIEngine.INPUT.Population.gpwDataFolder = path;
-                WUIEngineInput.SaveInput();
-            }
-
-            return success;
-        }
+        }        
     }
 }

@@ -14,16 +14,8 @@ namespace WUIPlatform
         public bool MapLoaded;
 
         public bool PopulationLoaded;
-        public bool PopulationCorrectedForRoutes;
-        public bool GlobalGPWAvailable;
-        public bool LocalGPWLoaded;
 
         public bool OpticalDensityLoaded;
-
-        public bool RouteCollectionLoaded;
-        public bool RouterDbLoaded;
-
-        public bool OsmFileValid;
 
         public bool LcpLoaded, FuelModelsLoaded;
 
@@ -38,16 +30,10 @@ namespace WUIPlatform
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Map is not loaded.");
             }
 
-            if (!PopulationLoaded && (!LocalGPWLoaded || !GlobalGPWAvailable))
+            if (!PopulationLoaded)
             {
                 canRun = false;
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Population is not loaded and no local nor global GPW file is found to build it from.");
-            }
-
-            if (WUIEngine.INPUT.Traffic.trafficModuleChoice == IO.TrafficInput.TrafficModuleChoice.MacroTrafficSim && !RouterDbLoaded && !OsmFileValid)
-            {
-                canRun = false;
-                WUIEngine.LOG(WUIEngine.LogType.Error, "No router database loaded and no valid OSM file was found to build it from.");
             }
 
             if (WUIEngine.INPUT.Simulation.RunFireModule)
@@ -78,13 +64,7 @@ namespace WUIPlatform
             MapLoaded = false;
 
             PopulationLoaded = false;
-            PopulationCorrectedForRoutes = false;
-            GlobalGPWAvailable = false;
-            LocalGPWLoaded = false;
 
-            RouteCollectionLoaded = false;
-            RouterDbLoaded = false;
-            OsmFileValid = false;
 
             LcpLoaded = false;
             FuelModelsLoaded = false;

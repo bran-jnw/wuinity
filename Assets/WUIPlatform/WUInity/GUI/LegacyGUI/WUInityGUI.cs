@@ -36,7 +36,7 @@ namespace WUIPlatform.WUInity.UI
         [SerializeField] GUIStyle styleAlignedRight; 
         [SerializeField] GUIStyle styleAlignedCenter;
 
-        public enum ActiveMenu { None, MainMenu, Map, Population, Evac, Traffic, Farsite, Output, Fire, Routing }
+        public enum ActiveMenu { None, MainMenu, Map, Tools, Evac, Traffic, Farsite, Output, Fire, Routing }
         ActiveMenu menuChoice = ActiveMenu.MainMenu;
 
         int menuBarHeight;
@@ -54,8 +54,7 @@ namespace WUIPlatform.WUInity.UI
 
         MenuButton mainMenu;
         MenuButton mapMenu;
-        MenuButton populationMenu;
-        //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
+        MenuButton toolsMenu;
         MenuButton fireMenu;
         MenuButton evacMenu;
         MenuButton routingMenu;
@@ -69,7 +68,7 @@ namespace WUIPlatform.WUInity.UI
         string[] lcpFilter = new string[] { ".lcp" };
         string[] fuelModelsFilter = new string[] { ".fuel" };
         
-        string[] populationFilter = new string[] { ".pop" };
+        string[] populationMapFilter = new string[] { ".pop" };
         string[] gpwFilter = new string[] { ".gpw" };
 
         private void Start()
@@ -77,8 +76,8 @@ namespace WUIPlatform.WUInity.UI
             menuBarHeight = Screen.height - consoleHeight;
 
             mainMenu = new MenuButton(buttonHeight, "Main Menu");
-            mapMenu = new MenuButton(buttonHeight, "Map");
-            populationMenu = new MenuButton(buttonHeight, "Population");
+            toolsMenu = new MenuButton(buttonHeight, "Tools");
+            mapMenu = new MenuButton(buttonHeight, "Map");            
             //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
             fireMenu = new MenuButton(buttonHeight, "Fire spread");
             evacMenu = new MenuButton(buttonHeight, "Evacuation");
@@ -118,9 +117,9 @@ namespace WUIPlatform.WUInity.UI
                         menuChoice = ActiveMenu.Map;
                     }
 
-                    if (GUI.Button(populationMenu.rect, populationMenu.text))
+                    if (GUI.Button(toolsMenu.rect, toolsMenu.text))
                     {
-                        menuChoice = ActiveMenu.Population;
+                        menuChoice = ActiveMenu.Tools;
                         //WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
                     }
 
@@ -185,9 +184,9 @@ namespace WUIPlatform.WUInity.UI
             {
                 MapMenu();
             }
-            else if (menuChoice == ActiveMenu.Population)
+            else if (menuChoice == ActiveMenu.Tools)
             {
-                PopulationMenu();
+                ToolsMenu();
             }
             else if (menuChoice == ActiveMenu.Evac)
             {

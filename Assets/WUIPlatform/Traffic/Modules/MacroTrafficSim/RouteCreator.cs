@@ -20,35 +20,25 @@ namespace WUIPlatform.Traffic
     [System.Serializable]
     public class RouteCreator
     {
-        /*private static RouteCreator _instance;
-        public static long GetWayId(float latitude, float longitude)
+
+        private Router _router;
+        private RouterDb _routerDb;
+        private List<RouterPoint> _validEvacuationGoalRouterPoints;
+        private List<EvacuationGoal> _validEvacuationGoals;
+
+        public RouteCreator(RouterDb routerDb)
         {
-            if (_instance == null)
-            {
-                _instance = new RouteCreator();
-            }
-            if(_instance.router == null)
-            {
-                _instance.router = new Router(WUIEngine.SIM_DATA.GetRouterDb());
-            }
-
-            RouterPoint rP = _instance.router.Resolve(_instance.GetRouterProfile(), latitude, longitude, 1f);
-            var way_ids = WUIEngine.SIM_DATA.GetRouterDb().EdgeData.Get("way_id");
-            return (long)way_ids.GetRaw(rP.EdgeId);
-        }*/
-
-        private Router router;
-        List<RouterPoint> validEvacuationGoalRouterPoints;
-        List<EvacuationGoal> validEvacuationGoals;
+            _routerDb = routerDb;
+        }
 
         /// <summary>
         /// Hack to allow using a route creator from traffic verification
         /// </summary>
         public void SetValidGoals()
         {
-            if (router == null)
+            if (_router == null)
             {
-                router = new Router(WUIEngine.RUNTIME_DATA.Routing.RouterDb);
+                _router = new Router(_routerDb);
             }
             DetermineValidGoalsAndRouterPoints(false);
         }
@@ -78,9 +68,9 @@ namespace WUIPlatform.Traffic
                 }
             }
 
-            if (router == null)
+            if (_router == null)
             {
-                router = new Router(WUIEngine.RUNTIME_DATA.Routing.RouterDb);
+                _router = new Router(_routerDb);
             }
 
             //initialize some stuff            
@@ -94,13 +84,14 @@ namespace WUIPlatform.Traffic
             for (int i = 0; i < startPoints.Length; i++)
             {
                 //check that the cell has actual people, else no need for calculating routes
-                int populationInCell = WUIEngine.POPULATION.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
+                //TODO:fix
+                int populationInCell = 0;// WUIEngine.RUNTIME_DATA.Population.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
                     Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale); 
 
                     //check if valid start was found
-                    RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(start.x, start.y), routerProfile, cellSize);
+                    RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(start.x, start.y), routerProfile, cellSize);
 
                     //no need in calculating route when start is not resolved
                     if (startRouterPoint == null)
@@ -119,7 +110,7 @@ namespace WUIPlatform.Traffic
                         //list that will contain all valid routes to avoid null ref in route collections
                         List<RouteData> routeData = new List<RouteData>();
                         //loop through all defined goals and save them for potential use later (old way only saved the currently needed route and the re-calced if needed)
-                        for (int j = 0; j < validEvacuationGoals.Count; j++)
+                        for (int j = 0; j < _validEvacuationGoals.Count; j++)
                         {
                             //TODO: might be cases where exits are blocked intitally but then opens, so disable this for now?
                             /*if(validEvacuationGoals[j].blocked)
@@ -127,7 +118,7 @@ namespace WUIPlatform.Traffic
                                 continue;
                             }*/
 
-                            RouteData rD = TryCalcRoute(startRouterPoint, validEvacuationGoalRouterPoints[j], validEvacuationGoals[j], routerProfile);
+                            RouteData rD = TryCalcRoute(startRouterPoint, _validEvacuationGoalRouterPoints[j], _validEvacuationGoals[j], routerProfile);
                             if (rD != null)
                             {
                                 routeData.Add(rD);
@@ -191,16 +182,16 @@ namespace WUIPlatform.Traffic
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //check that evac goals are valid
-            validEvacuationGoalRouterPoints = new List<RouterPoint>();
-            validEvacuationGoals = new List<EvacuationGoal>();
+            _validEvacuationGoalRouterPoints = new List<RouterPoint>();
+            _validEvacuationGoals = new List<EvacuationGoal>();
             for (int i = 0; i < evacuatonGoals.Count; i++)
             {
                 try
                 {
                     //TODO: hard-coded search of 200 meters, setup as option?
-                    RouterPoint rP = router.Resolve(routerProfile, (float)evacuatonGoals[i].latLon.x, (float)evacuatonGoals[i].latLon.y, 200f);
-                    validEvacuationGoalRouterPoints.Add(rP);
-                    validEvacuationGoals.Add(evacuatonGoals[i]);
+                    RouterPoint rP = _router.Resolve(routerProfile, (float)evacuatonGoals[i].latLon.x, (float)evacuatonGoals[i].latLon.y, 200f);
+                    _validEvacuationGoalRouterPoints.Add(rP);
+                    _validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
                     {
                         WUIEngine.LOG(WUIEngine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].name);
@@ -223,16 +214,12 @@ namespace WUIPlatform.Traffic
         /// <param name="p"></param>
         /// <param name="cellSize"></param>
         /// <returns></returns>
-        public RouterPoint CheckIfStartIsValid(Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
+        public static RouterPoint GetValidRouterPoint(Router router, Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
         {
             //check within the radius of the diagonal of the cell (so complete cell plus some parts of neighboring cells)
             RouterPoint start = null;
             try
             {
-                if (router == null)
-                {
-                    router = new Router(WUIEngine.RUNTIME_DATA.Routing.RouterDb);
-                }
                 start = router.Resolve(p, (float)coordinate.x, (float)coordinate.y, cellSize * 0.70711f); //half cell size * sqrt 2
                 //for some reason Itinero does not return the actual point on the network, so we have to get it and overwrite
                 Itinero.LocalGeo.Coordinate temp = start.LocationOnNetwork(router.Db);
@@ -309,11 +296,11 @@ namespace WUIPlatform.Traffic
 
             try
             {
-                if (router == null)
+                if (_router == null)
                 {
-                    router = new Router(WUIEngine.RUNTIME_DATA.Routing.RouterDb);
+                    _router = new Router(_routerDb);
                 }
-                Route route = router.Calculate(routerProfile, start, goal);
+                Route route = _router.Calculate(routerProfile, start, goal);
                 routeData = new RouteData(route, evacGoal);
             }
             /*catch (Itinero.Exceptions.ResolveFailedException)
@@ -332,9 +319,9 @@ namespace WUIPlatform.Traffic
         /// Called when a general route to any available evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long
         /// Used mainly by traffic simulator.
         /// </summary>
-        /// <param name="startPos"></param>
+        /// <param name="startLatLon"></param>
         /// <returns></returns>
-        public RouteData CalcTrafficRoute(Vector2d startPos)
+        public RouteData CalcTrafficRoute(Vector2d startLatLon)
         {
             float cellSize = WUIEngine.INPUT.Evacuation.RouteCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
@@ -342,14 +329,15 @@ namespace WUIPlatform.Traffic
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
             //this is a quick way of getting a route from an approximate position of the car
             //we just check if cell we are in has a good route and use that
-            RouteCollection rC = WUIEngine.RUNTIME_DATA.Routing.GetCellRouteCollection(startPos);
+            //TODO: fix
+            RouteCollection rC = null;// WUIEngine.RUNTIME_DATA.Routing.GetCellRouteCollection(startLatLon);
             if (rC != null && rC.GetSelectedRoute() != null)
             {
                 return rC.GetSelectedRoute();
             }
 
             //check if valid start was found
-            RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2d(startPos.x, startPos.y), routerProfile, cellSize);
+            RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(startLatLon.x, startLatLon.y), routerProfile, cellSize);
 
             //no need in calculating route when start is not resolved
             if (startRouterPoint == null)
@@ -363,11 +351,11 @@ namespace WUIPlatform.Traffic
             //list that will contain all valid routes to avoid null ref in route collections
             List<RouteData> routeData = new List<RouteData>();
             //loop through all defined goals and save them for potential use later (old way only saved the currently needed route and the re-calced if needed)
-            if (validEvacuationGoals == null || validEvacuationGoalRouterPoints == null)
+            if (_validEvacuationGoals == null || _validEvacuationGoalRouterPoints == null)
             {
                 DetermineValidGoalsAndRouterPoints(false);
             }
-            for (int i = 0; i < validEvacuationGoals.Count; i++)
+            for (int i = 0; i < _validEvacuationGoals.Count; i++)
             {
                 //TODO: use this as a quick out? this route should be both closest and fastest
                 //This is no longer an issue since any goal that is being blocked is altready flagged
@@ -379,12 +367,12 @@ namespace WUIPlatform.Traffic
                 }*/
 
                 //skip blocked goals
-                if (validEvacuationGoals[i].blocked)
+                if (_validEvacuationGoals[i].blocked)
                 {
                     continue;
                 }
 
-                RouteData rD = TryCalcRoute(startRouterPoint, validEvacuationGoalRouterPoints[i], validEvacuationGoals[i], routerProfile);
+                RouteData rD = TryCalcRoute(startRouterPoint, _validEvacuationGoalRouterPoints[i], _validEvacuationGoals[i], routerProfile);
 
                 if (rD != null)
                 {

@@ -14,7 +14,10 @@ namespace WUIPlatform.WUInity
         public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, PopulationMask };
         PaintMode paintMode = PaintMode.EvacGroup;
 
-        Color activeColor = Color.red;
+        Color currentColor = Color.red;
+        const float transparency = 0.5f;
+        Color activeAreaColor = new Color(1f, 0f, 0f, transparency);
+        Color inactiveAreaColor = new Color(1f, 1f, 1f, 0.1f);
         Vector2 activeUV;
         Vector2int activeCellCount;
         Vector2d activeRealSize;
@@ -67,11 +70,11 @@ namespace WUIPlatform.WUInity
             return evacGroupTex;
         }
 
-        public Texture2D GetCustomPopulationMaskTexture()
+        public Texture2D GetPopulationMaskTexture()
         {
             if (populationMaskTex == null)
             {
-                Texture2D tex = (Texture2D)WUIEngine.POPULATION.Visualizer.GetPopulationMaskTexture();
+                Texture2D tex = (Texture2D)WUIEngine.RUNTIME_DATA.Population.Visualizer.GetPopulationMaskTexture();
                 if (tex != null)
                 {
                     populationMaskTex = tex;
@@ -136,7 +139,7 @@ namespace WUIPlatform.WUInity
             SetColor(addArea ? 1 : 0);
         }
 
-        public void SetCustomGPWColor(bool addArea)
+        public void SetMaskGPWColor(bool addArea)
         {
             SetColor(addArea ? 1 : 0);
         }
@@ -146,15 +149,14 @@ namespace WUIPlatform.WUInity
             if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition 
                 || paintMode == PaintMode.PopulationMask)
             {
-                activeColor = arrayIndex == 1 ? Color.red : Color.white;
+                currentColor = arrayIndex == 1 ? activeAreaColor : inactiveAreaColor;
                 addingArea = arrayIndex == 1;
-                activeColor.a = 0.5f;
             }
             else if(paintMode == PaintMode.EvacGroup)
             {
                 evacGroupIndex = arrayIndex;
-                activeColor = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
-                activeColor.a = 0.5f;
+                currentColor = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
+                currentColor.a = transparency;
             }
         }
 
@@ -192,8 +194,8 @@ namespace WUIPlatform.WUInity
             CheckDataResources(evacGroupTex, evacGroupColorArray, evacDataUV);
             //select first zone
             evacGroupIndex = 0;
-            activeColor = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
-            activeColor.a = 0.5f;
+            currentColor = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
+            currentColor.a = 0.5f;
             _brushSize = 1;
         }
 
@@ -202,7 +204,7 @@ namespace WUIPlatform.WUInity
             paintMode = PaintMode.PopulationMask;
             CheckDataResources(populationMaskTex, populationMaskColorArray, evacDataUV);
             //select first zone
-            SetCustomGPWColor(true);
+            SetMaskGPWColor(true);
             _brushSize = 1;
         }
 
@@ -276,25 +278,25 @@ namespace WUIPlatform.WUInity
                         Color c = Color.white;
                         if (paintMode == PaintMode.WUIArea)
                         {
-                            c = WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.RandomIgnitionArea)
                         {
-                            c = WUIEngine.RUNTIME_DATA.Fire.RandomIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUIEngine.RUNTIME_DATA.Fire.RandomIgnitionIndices[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.InitialIgnition)
                         {
-                            c = WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * fireDataCellCount.x] == false ? Color.white : Color.red;
+                            c = WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
                             c = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(x, y).Color.UnityColor;
+                            c.a = transparency;
                         }
                         else if (paintMode == PaintMode.PopulationMask)
                         {
-                            c = WUIEngine.POPULATION.GetPopulationData().populationMask[x + y * evacDataCellCount.x] == true ? Color.red : Color.white;
+                            c = WUIEngine.RUNTIME_DATA.Population.PopulationMap.Mask[x + y * evacDataCellCount.x] == true ? activeAreaColor : inactiveAreaColor;
                         }
-                        c.a = 0.5f;
                         requestedColorArray[x + y * textureRes.x] = c;
                         requestedTexture.SetPixel(x, y, c);
                     }
@@ -397,7 +399,7 @@ namespace WUIPlatform.WUInity
                     else
                     {
                         Color colorToOverwrite = activeTexture.GetPixel(x, y);
-                        FloodFill(new Vector2int(x, y), activeColor, colorToOverwrite, activeColorArray);
+                        FloodFill(new Vector2int(x, y), currentColor, colorToOverwrite, activeColorArray);
                         activeTexture.SetPixels(activeColorArray);
                         activeTexture.Apply();
                     }
@@ -410,8 +412,8 @@ namespace WUIPlatform.WUInity
         {
             if(_brushSize == 1)
             {
-                activeTexture.SetPixel(x, y, activeColor);
-                SetArrayPixel(x, y, activeColor, activeColorArray);
+                activeTexture.SetPixel(x, y, currentColor);
+                SetArrayPixel(x, y, currentColor, activeColorArray);
             }
             else
             {
@@ -429,8 +431,8 @@ namespace WUIPlatform.WUInity
                         float dist = Vector2int.Distance(center, new Vector2int(i, j));
                         if (dist <= _brushSize)
                         {
-                            activeTexture.SetPixel(i, j, activeColor);
-                            SetArrayPixel(i, j, activeColor, activeColorArray);
+                            activeTexture.SetPixel(i, j, currentColor);
+                            SetArrayPixel(i, j, currentColor, activeColorArray);
                         }
                     }
                 }
@@ -470,7 +472,7 @@ namespace WUIPlatform.WUInity
             }
             else if (paintMode == PaintMode.PopulationMask)
             {
-                WUIEngine.POPULATION.GetPopulationData().populationMask[x + y * activeCellCount.x] = addingArea;
+                WUIEngine.RUNTIME_DATA.Population.PopulationMap.Mask[x + y * activeCellCount.x] = addingArea;
             }
         }
 

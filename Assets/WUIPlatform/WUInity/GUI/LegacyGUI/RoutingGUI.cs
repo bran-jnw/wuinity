@@ -13,6 +13,7 @@ namespace WUIPlatform.WUInity.UI
         string[] routerDbFilter = new string[] { ".routerdb" };
         string[] routeCollectionFilter = new string[] { ".rc" };
         string[] osmFilter = new string[] { ".pbf" };
+        string[] maskFilter = new string[] { ".pmk" };
 
         bool filterMenuActive = false;
 
@@ -24,17 +25,8 @@ namespace WUIPlatform.WUInity.UI
             if (routingMenuDirty)
             {
                 routingMenuDirty = false;
-                borderSize = WUIEngine.RUNTIME_DATA.Routing.BorderSize.ToString();
+                borderSize = _osmBorderSize.x.ToString();
             }
-
-            //router db
-            string routerStatus = "RouterDb NOT loaded";
-            if (WUIEngine.DATA_STATUS.RouterDbLoaded)
-            {
-                routerStatus = "RouterDb loaded";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routerStatus);
-            ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load RouterDb"))
             {
@@ -70,31 +62,6 @@ namespace WUIPlatform.WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeChoice);
             ++buttonIndex;
 
-            //route collection
-            string routeCollectionStatus = "Route collection NOT loaded";
-            if (WUIEngine.DATA_STATUS.RouteCollectionLoaded)
-            {
-                routeCollectionStatus = "Route collection loaded";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeCollectionStatus);
-            ++buttonIndex;
-
-
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load route collection"))
-            {
-                OpenLoadRouteCollectionFile();
-            }
-            ++buttonIndex;
-
-            if (WUIEngine.DATA_STATUS.RouterDbLoaded)
-            {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Build route collection"))
-                {
-                    WUIEngine.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
-                }
-                ++buttonIndex;
-            }
-
             //OSM stuff
             ++buttonIndex;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
@@ -109,7 +76,6 @@ namespace WUIPlatform.WUInity.UI
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM border size [m]");
                 ++buttonIndex;
                 borderSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), borderSize);
-                float.TryParse(borderSize, out WUIEngine.RUNTIME_DATA.Routing.BorderSize);
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM file"))
@@ -135,7 +101,8 @@ namespace WUIPlatform.WUInity.UI
                 return;
             }
 
-            float.TryParse(borderSize, out WUIEngine.RUNTIME_DATA.Routing.BorderSize);
+            double.TryParse(borderSize, out _osmBorderSize.x);
+            double.TryParse(borderSize, out _osmBorderSize.y);
         }
 
         void OpenLoadRouterDbFile()
@@ -147,21 +114,8 @@ namespace WUIPlatform.WUInity.UI
 
         void LoadRouterDbFile(string[] paths)
         {
-            string selectedFile = paths[0];            
-            WUIEngine.RUNTIME_DATA.Routing.LoadRouterDb(selectedFile, true);
-        }
-
-        void OpenLoadRouteCollectionFile()
-        {
-            FileBrowser.SetFilters(false, routeCollectionFilter);
-            string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(LoadRouteCollectionFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select Router collection", "Load");
-        }
-
-        void LoadRouteCollectionFile(string[] paths)
-        {
             string selectedFile = paths[0];
-            WUIEngine.RUNTIME_DATA.Routing.LoadRouteCollection(selectedFile, true);
+            Tools.PopulationTools.LoadRouterDb(selectedFile);
         }
 
         void OpenFilterOSMFile()
@@ -171,10 +125,12 @@ namespace WUIPlatform.WUInity.UI
             FileBrowser.ShowLoadDialog(FilterOSMFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select source OSM file", "Filter");
         }
 
+        float _interpolatedCellSize = 100f;
+        Vector2d _osmBorderSize = new Vector2d(2000, 2000);
         void FilterOSMFile(string[] paths)
         {
             string selectedFile = paths[0];
-            WUIEngine.RUNTIME_DATA.Routing.FilterOSMData(selectedFile);
+            Tools.PopulationTools.FilterOsmData(selectedFile, _osmBorderSize);
         }
 
         void OpenBuildRouterDbFromOSM()
@@ -187,7 +143,7 @@ namespace WUIPlatform.WUInity.UI
         void BuildRouterDbFromOSM(string[] paths)
         {
             string selectedFile = paths[0];
-            WUIEngine.RUNTIME_DATA.Routing.CreateRouterDatabaseFromOSM(selectedFile);
+            Tools.PopulationTools.CreateAndSaveRouterDb(selectedFile);
         }
     }
 }

@@ -20,7 +20,6 @@ namespace WUIPlatform
         private WUIEngineInput _input;
         private WUIEngineOutput _output;
         private Simulation _sim;
-        private PopulationManager _populationManager;
         private string _workingFilePath;
         private DataStatus _dataStatus;       
         private Stopwatch _stopWatch;
@@ -114,18 +113,6 @@ namespace WUIPlatform
             }
         }
 
-        public static PopulationManager POPULATION
-        {
-            get
-            {
-                if (ENGINE._populationManager == null)
-                {
-                    ENGINE._populationManager = new PopulationManager();
-                }
-                return ENGINE._populationManager;
-            }
-        }
-
         public static string DATA_FOLDER
         {
             get
@@ -188,10 +175,10 @@ namespace WUIPlatform
             _runtimeData = new RuntimeData();
 
             //transform input to actual data
-            RUNTIME_DATA.Population.LoadAll();
             RUNTIME_DATA.Evacuation.LoadAll();
-            //need to load evacuation goals before routing as they rely on evacuation goals
+            RUNTIME_DATA.Population.LoadAll();
             RUNTIME_DATA.Routing.LoadAll();
+            //need to load evacuation goals before routing as they rely on evacuation goals
             RUNTIME_DATA.Traffic.LoadAll();
             RUNTIME_DATA.Fire.LoadAll();
 

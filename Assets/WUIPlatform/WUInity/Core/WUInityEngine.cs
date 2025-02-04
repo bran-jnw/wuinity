@@ -160,7 +160,7 @@ namespace WUIPlatform.WUInity
         [SerializeField] public Texture2D NoiseTex;
         [SerializeField] public Texture2D WindTex;
 
-        public enum DataSampleMode { None, GPW, Population, Relocated, TrafficDens, Paint, Farsite }
+        public enum DataSampleMode { None, LocalGPW, PopulationMap, Relocated, TrafficDens, Paint, Farsite }
         public DataSampleMode dataSampleMode = DataSampleMode.None;
 
         //never directly call these, always use singletons (except once when setting input)
@@ -174,7 +174,7 @@ namespace WUIPlatform.WUInity
         private Visualization.FireRenderer _fireRenderer;
         private Visualization.EvacuationRenderer _evacuationRenderer;
 
-        MeshRenderer _evacDataPlaneMeshRenderer;
+        MeshRenderer _populationDataPlaneMeshRenderer;
         MeshRenderer _fireDataPlaneMeshRenderer;
         //List<GameObject> drawnRoad_s;
         GameObject[] _goalMarkers;
@@ -394,7 +394,7 @@ namespace WUIPlatform.WUInity
 
             if (updateOSMBorder)
             {
-                UpdateOSMBorder();
+                //UpdateOSMBorder();
             }                
         }
 
@@ -478,7 +478,7 @@ namespace WUIPlatform.WUInity
             }        
         }
 
-        void UpdateOSMBorder()
+        /*void UpdateOSMBorder()
         {            
             if (_osmBorder != null)
             {
@@ -488,21 +488,21 @@ namespace WUIPlatform.WUInity
                 _osmBorder.SetPosition(3, _osmBorder.GetPosition(2) - Vector3.right * ((float)WUIEngine.INPUT.Simulation.Size.x + WUIEngine.RUNTIME_DATA.Routing.BorderSize * 2f));
                 _osmBorder.SetPosition(4, _osmBorder.GetPosition(0));
             }
-        }
+        }*/
 
         void GetCellInfo(Vector3 pos, int x, int y)
         {
             dataSampleString = "No data to sample.";
-            if (dataSampleMode == DataSampleMode.GPW)
+            if (dataSampleMode == DataSampleMode.LocalGPW)
             {
-                if (WUIEngine.POPULATION.GetLocalGPWData() != null && WUIEngine.POPULATION.GetLocalGPWData().density != null && WUIEngine.POPULATION.GetLocalGPWData().density.Length > 0)
+                if (WUIEngine.RUNTIME_DATA.Population.LocalGPWData != null && WUIEngine.RUNTIME_DATA.Population.LocalGPWData.density != null && WUIEngine.RUNTIME_DATA.Population.LocalGPWData.density.Length > 0)
                 {
-                    if (WUIEngine.POPULATION.Visualizer.IsDataPlaneActive())
+                    if (WUIEngine.RUNTIME_DATA.Population.Visualizer.IsDataPlaneActive())
                     {
-                        float xCellSize = (float)(WUIEngine.POPULATION.GetLocalGPWData().realWorldSize.x / WUIEngine.POPULATION.GetLocalGPWData().dataSize.x);
-                        float yCellSize = (float)(WUIEngine.POPULATION.GetLocalGPWData().realWorldSize.y / WUIEngine.POPULATION.GetLocalGPWData().dataSize.y);
+                        float xCellSize = (float)(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.realWorldSize.x / WUIEngine.RUNTIME_DATA.Population.LocalGPWData.dataSize.x);
+                        float yCellSize = (float)(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.realWorldSize.y / WUIEngine.RUNTIME_DATA.Population.LocalGPWData.dataSize.y);
                         double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(WUIEngine.POPULATION.GetLocalGPWData().GetDensityUnitySpace(new WUIPlatform.Vector2d(pos.x, pos.z)) * cellArea);
+                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.GetDensitySimulationSpace(new WUIPlatform.Vector2d(pos.x, pos.z)) * cellArea);
                     }
                     else
                     {
@@ -525,9 +525,9 @@ namespace WUIPlatform.WUInity
             }
             else if (_evacDataPlane != null && _evacDataPlane.activeSelf)
             {
-                if (dataSampleMode == DataSampleMode.Population)
+                if (dataSampleMode == DataSampleMode.PopulationMap)
                 {
-                    dataSampleString = "Interpolated people count: " + WUIEngine.POPULATION.GetPopulation(x, y);
+                    dataSampleString = "Interpolated people count: " + WUIEngine.RUNTIME_DATA.Population.PopulationMap.GetPeopleCount(x, y);
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
@@ -601,12 +601,12 @@ namespace WUIPlatform.WUInity
 
             if(fireEdit)
             {
-                SetEvacDataPlane(false);
+                SetPopulationDataPlane(false);
                 SetFireDataPlane(true);
             }
             else
             {
-                SetEvacDataPlane(true);
+                SetPopulationDataPlane(true);
                 SetFireDataPlane(false);
             }
         }
@@ -740,9 +740,9 @@ namespace WUIPlatform.WUInity
             SetSootRendering(false);
         }
 
-        public void DisplayPopulation()
+        public void DisplayPopulationMap()
         {
-            SetDataPlaneTexture((Texture2D)WUIEngine.POPULATION.Visualizer.GetPopulationTexture());
+            SetDataPlaneTexture((Texture2D)WUIEngine.RUNTIME_DATA.Population.Visualizer.GetPopulationTexture());
         }
 
         private void DisplayWUIAreaMap()
@@ -767,14 +767,14 @@ namespace WUIPlatform.WUInity
 
         public void DisplayPopulationMask()
         {
-            SetDataPlaneTexture(Painter.GetCustomPopulationMaskTexture());
+            SetDataPlaneTexture(Painter.GetPopulationMaskTexture());
         }
 
-        public  void SetEvacDataPlane(bool setActive)
+        public  void SetPopulationDataPlane(bool setActive)
         {
-            if (_evacDataPlaneMeshRenderer != null)
+            if (_populationDataPlaneMeshRenderer != null)
             {
-                _evacDataPlaneMeshRenderer.gameObject.SetActive(setActive);
+                _populationDataPlaneMeshRenderer.gameObject.SetActive(setActive);
             }
         }
 
@@ -788,10 +788,10 @@ namespace WUIPlatform.WUInity
 
         public bool ToggleEvacDataPlane()
         {
-            if (_evacDataPlaneMeshRenderer != null)
+            if (_populationDataPlaneMeshRenderer != null)
             {
-                _evacDataPlaneMeshRenderer.gameObject.SetActive(!_evacDataPlaneMeshRenderer.gameObject.activeSelf);
-                return _evacDataPlaneMeshRenderer.gameObject.activeSelf;
+                _populationDataPlaneMeshRenderer.gameObject.SetActive(!_populationDataPlaneMeshRenderer.gameObject.activeSelf);
+                return _populationDataPlaneMeshRenderer.gameObject.activeSelf;
             }
 
             return false;
@@ -856,7 +856,7 @@ namespace WUIPlatform.WUInity
         private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
         {
             //pick needed data plane
-            MeshRenderer activeMeshRenderer = _evacDataPlaneMeshRenderer;
+            MeshRenderer activeMeshRenderer = _populationDataPlaneMeshRenderer;
             Vector2int cellCount = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
             string name = "Evac Data Plane";
             if (fireMeshMode)
@@ -877,7 +877,7 @@ namespace WUIPlatform.WUInity
                 }
                 else
                 {
-                    _evacDataPlaneMeshRenderer = activeMeshRenderer;
+                    _populationDataPlaneMeshRenderer = activeMeshRenderer;
                     _evacDataPlane = activeMeshRenderer.gameObject;
                 }                
             }

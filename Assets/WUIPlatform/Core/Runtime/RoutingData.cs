@@ -5,14 +5,12 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.IO;
 using Itinero;
+using Reminiscence.Collections;
+using System.IO;
 using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
-using WUIPlatform.Population;
-using Reminiscence.Collections;
-using WUIPlatform.IO;
 
 namespace WUIPlatform.Runtime
 {
@@ -21,41 +19,34 @@ namespace WUIPlatform.Runtime
         public float BorderSize;
 
         private RouterDb _routerDb;
+        public RouterDb RouterDb{ get => _routerDb; }
 
-        public RouterDb RouterDb
-        {
-            get
-            {
-                return _routerDb;
-            }
-        }
+        private Router _router;
+        public Router Router { get => _router; }
 
         private RouteCollection[] _routeCollections;
-        public RouteCollection[] RouteCollections
-        {
-            get
-            {
-                return _routeCollections;
-            }
-        }
+        public RouteCollection[] RouteCollections { get => _routeCollections; }
 
         // Add an array of the cell sorted vertices
-        private List<uint>[] _cellSortedVertices;
+        private List<uint>[] _cellSortedVertices;  
+
+        public RoutingData()
+        {
+
+        }
 
         public void LoadAll()
         {
-            LoadRouterDb(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Routing.routerDbFile), false);
-            LoadRouteCollection(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Routing.routeCollectionFile), false);
+
         }
 
-        //Load itinero database needed for pathfinding
-        public bool LoadRouterDb(string path, bool updateInputFile)
+        public bool LoadRouterDb(string routerDbFile)
         {
             bool success = false;
 
-            if (File.Exists(path))
+            if (File.Exists(routerDbFile))
             {
-                using (FileStream stream = new FileInfo(path).OpenRead())
+                using (FileStream stream = new FileInfo(routerDbFile).OpenRead())
                 {
                     _routerDb = RouterDb.Deserialize(stream);
                     success = true;
@@ -65,180 +56,64 @@ namespace WUIPlatform.Runtime
             if (success)
             {
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
-                RouterDb.AddContracted(RouterDb.GetSupportedProfile("Car"));
+                _routerDb.AddContracted(_routerDb.GetSupportedProfile("Car"));
+                _router = new Router(_routerDb);
                 WUIEngine.LOG(WUIEngine.LogType.Log, "Router database loaded succesfully.");
+                
             }
             else
             {
                 WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database could not be found.");
             }
 
-            WUIEngine.DATA_STATUS.RouterDbLoaded = success;
-            if (success && updateInputFile)
-            {
-                WUIEngine.INPUT.Routing.routerDbFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
-            }
-
             return success;
         }
 
-        /// <summary>
-        /// Loads wrapper format and converts to a proper route collection containing Itinero.Routes
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        public bool LoadRouteCollection(string path, bool updateInputFile)
-        {
-            bool success = false;
-            RouteCollection[] newRouteCollection = null;
-
-            //try to load default
-            if (path == null)
-            {
-                path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + ".rc");
-            }
-
-            if (File.Exists(path))
-            {
-                string input = File.ReadAllText(path);
-                RouteCollectionWrapper rCWS = UnityEngine.JsonUtility.FromJson<RouteCollectionWrapper>(input);
-
-                newRouteCollection = rCWS.Convert();
-                rCWS = null;
-                System.GC.Collect();
-
-                if (newRouteCollection == null)
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Tried loading route collection from " + path + " but route collection is not valid for current input, have to be built at runtime (will take some time).\"");
-                }
-                else
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Loaded route collection from " + path);
-                }
-            }
-            else
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Route collection file not found in " + path + ", have to be built at runtime (will take some time).");
-            }
-
-            if (newRouteCollection != null)
-            {
-                _routeCollections = newRouteCollection;
-
-                //update the selected route based on the current route choice (as that might have been changed)
-                for (int i = 0; i < RouteCollections.Length; i++)
-                {
-                    if (RouteCollections[i] != null)
-                    {
-                        Traffic.RouteCreator.SelectCorrectRoute(RouteCollections[i], i);
-                    }
-                }
-                success = true;
-            }
-            else
-            {
-                success = false;
-            }
-
-            WUIEngine.DATA_STATUS.RouteCollectionLoaded = success;
-            if (success && updateInputFile)
-            {
-                WUIEngine.INPUT.Routing.routeCollectionFile = path;
-                WUIEngineInput.SaveInput();
-            }
-
-            return success;
-        }
-
-        public RouteCollection GetCellRouteCollection(Vector2d pos)
-        {
-            if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections != null)
-            {
-                Vector2d p = GeoConversions.GeoToWorldPosition(pos.x, pos.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
-                int x = (int)(p.x / WUIEngine.INPUT.Evacuation.RouteCellSize);
-                int y = (int)(p.y / WUIEngine.INPUT.Evacuation.RouteCellSize);
-                int index = x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
-                if (index >= 0 && index < WUIEngine.RUNTIME_DATA.Routing.RouteCollections.Length && WUIEngine.RUNTIME_DATA.Routing.RouteCollections[index] != null)
-                {
-                    return WUIEngine.RUNTIME_DATA.Routing.RouteCollections[index];
-                }
-            }
-
-            return null;
-        }
-
-        public bool FilterOSMData(string osmFile)
+        public bool CreateAndSaveRouterDb(string osmFile)
         {
             bool success = false;
 
             if (File.Exists(osmFile))
             {
+                //stream in data from OSM
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-                    Vector2d border = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLong, new Vector2d(WUIEngine.RUNTIME_DATA.Routing.BorderSize, WUIEngine.RUNTIME_DATA.Routing.BorderSize));
-                    float left = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.y - border.x);
-                    float bottom = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x - border.y);
-                    Vector2d size = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLong, WUIEngine.INPUT.Simulation.Size);
-                    float right = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.y + size.x + border.x);
-                    float top = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x + size.y + border.y);
-                    OsmStreamSource filtered = source.FilterBox(left, top, right, bottom, true);
-                    //create a new filtered file
-                    string path = Path.Combine(WUIEngine.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(osmFile) + ".osm.pbf");
-                    using (FileStream targetStream = File.OpenWrite(path))
+
+                    // create the network for cars only.
+                    LoadSettings settings = new LoadSettings();
+                    settings.KeepNodeIds = true; //use to enable measure flow at nodes
+                    settings.KeepWayIds = true; //can be used to calc density easier?
+                    settings.OptimizeNetwork = true;
+
+                    //build db from OSM betwork
+                    if (_routerDb == null)
                     {
-                        //XmlOsmStreamTarget target = new XmlOsmStreamTarget(targetStream);
-                        PBFOsmStreamTarget target = new PBFOsmStreamTarget(targetStream, compress: false);
-                        target.RegisterSource(filtered);
-                        target.Pull();
-
-                        success = true;
+                        _routerDb = new RouterDb();
                     }
-                }
-            }
+                    _routerDb.LoadOsmData(source, settings, Vehicle.Car);
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Router database created from OSM file.");
 
-            if (success)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Succesfully filtered OSM data to user selected boundary. Use this filtered data to build router database.");
+                    // write the new routerdb to disk.
+                    string internalRouterName = WUIEngine.INPUT.Simulation.SimulationID + ".routerdb";
+                    osmFile = Path.Combine(WUIEngine.WORKING_FOLDER, internalRouterName);
+                    using (FileStream outputStream = new FileInfo(osmFile).Open(FileMode.Create))
+                    {
+                        _routerDb.Serialize(outputStream);
+                        WUIEngine.LOG(WUIEngine.LogType.Log, "Router database saved to file " + osmFile);
+                    }
+
+                    success = true;
+                }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " Could not filter the selected OSM file.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database file could not be found.");
             }
 
             return success;
         }
 
-        public void CreateRouterDatabaseFromOSM(string osmPath)
-        {
-            //stream in data from OSM
-            using (FileStream stream = new FileInfo(osmPath).OpenRead())
-            {
-                PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-
-                // create the network for cars only.
-                LoadSettings settings = new LoadSettings();
-                settings.KeepNodeIds = true; //use to enable measure flow at nodes
-                settings.KeepWayIds = true; //can be used to calc density easier?
-                settings.OptimizeNetwork = true;
-
-                //build db from OSM betwork
-                _routerDb = new RouterDb();
-                _routerDb.LoadOsmData(source, settings, Vehicle.Car);
-                WUIEngine.DATA_STATUS.RouterDbLoaded = true;
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Router database created from OSM file.");
-
-                // write the new routerdb to disk.
-                string internalRouterName = WUIEngine.INPUT.Simulation.SimulationID + ".routerdb";
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, internalRouterName);
-                using (FileStream outputStream = new FileInfo(path).Open(FileMode.Create))
-                {
-                    RouterDb.Serialize(outputStream);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Router database saved to file " + path);
-                }
-            }
-        }
         public void ModifyRouterDB()
         {
             // DO NOT CALL this method yet... need to work out the structure
@@ -272,7 +147,7 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        public void checkIfVerticesAreBlocked()
+        public void CheckIfVerticesAreBlocked()
         {
             // Route analysis:
             //after each fire update, check if any new burning cell has vertex
@@ -302,35 +177,6 @@ namespace WUIPlatform.Runtime
                 //if any changes, update everyone already inside the network by re-calculating their routes
                 // code TODO
             }
-        }
-
-        public void BuildAndSaveRouteCollection()
-        {
-            // Route analysis: calculate all routes
-            _routeCollections = WUIEngine.SIM.RouteCreator.CalculateCellRoutes();
-            SaveRouteCollections();
-            WUIEngine.DATA_STATUS.RouteCollectionLoaded = true;
-        }
-
-        /// <summary>
-        /// Saves a collection of routes by converting to a format that is serializable (Itinero objects does not serialize using Unitys JSONUtility)
-        /// </summary>
-        /// <param name="filename"></param>
-        public static void SaveRouteCollections()
-        {
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + ".rc");
-
-            RouteCollectionWrapper save = new RouteCollectionWrapper(WUIEngine.RUNTIME_DATA.Routing.RouteCollections);
-            string json = UnityEngine.JsonUtility.ToJson(save, false);
-            File.WriteAllText(path, json);
-
-            //slow
-            /*BinaryFormatter bf = new BinaryFormatter();
-            System.IO.FileStream file = System.IO.File.Create(path);
-            bf.Serialize(file, save);
-            file.Close();*/
-
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Saved route collection to " + path);
         }
     }
 }

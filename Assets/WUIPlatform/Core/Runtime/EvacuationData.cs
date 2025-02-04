@@ -8,7 +8,6 @@
 using System.Collections.Generic;
 using WUIPlatform.IO;
 using System.IO;
-using System.Numerics;
 
 namespace WUIPlatform.Runtime
 {
@@ -102,8 +101,7 @@ namespace WUIPlatform.Runtime
             LoadEvacuationGroups();
             //need to load groups before indices
             LoadEvacGroupIndices();
-            LoadBlockGoalEvents();
-            LoadHouseholds(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.Households));
+            LoadBlockGoalEvents();            
         }
 
         public bool LoadBlockGoalEvents()
@@ -200,46 +198,6 @@ namespace WUIPlatform.Runtime
                     }
                 }
             }
-        }
-
-        private bool LoadHouseholds(string path)
-        {
-            bool success = false;
-
-            if (File.Exists(path))
-            {
-                using (StreamReader sr = new StreamReader(path))
-                {
-                    List<string> lines = new List<string>();
-
-                    while (!sr.EndOfStream)
-                    {
-                        lines.Add(sr.ReadLine());
-                    }
-
-                    //first rom (header, and last row (should be empty)
-                    _householdCoordinates = new HouseholdData[lines.Count - 2];
-                    
-                    for (int i = 1; i < lines.Count - 1; ++i)
-                    {
-                        string[] line = lines[i].Split(",");
-                        double lat = double.Parse(line[0]);
-                        double lon = double.Parse(line[1]);
-                        double carLat = double.Parse(line[2]);
-                        double carLon = double.Parse(line[3]);
-                        int people = int.Parse(line[4]);
-                        _householdCoordinates[i - 1] = new HouseholdData(new Vector2d(lat, lon), new Vector2d(carLat, carLon), people);
-                    }
-                }
-
-                success = true;
-            }
-            else
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Start coordinates for households could not be found.");
-            }
-
-            return success;
         }
 
         public int GetEvacGoalIndexFromName(string name)

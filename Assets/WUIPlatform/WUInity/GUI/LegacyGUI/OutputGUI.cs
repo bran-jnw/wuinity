@@ -25,7 +25,7 @@ namespace WUIPlatform.WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
-            dummy = WUIEngine.POPULATION.GetTotalPopulation();
+            dummy = WUIEngine.RUNTIME_DATA.Population.TotalPopulation;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
@@ -92,7 +92,7 @@ namespace WUIPlatform.WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Hide visual data"))
             {
-                WUInityEngine.INSTANCE.SetEvacDataPlane(false);
+                WUInityEngine.INSTANCE.SetPopulationDataPlane(false);
                 WUInityEngine.INSTANCE.SetFireDataPlane(false);
             }
             ++buttonIndex;

@@ -69,8 +69,6 @@ namespace WUIPlatform.WUInity.UI
             WUInityEngine.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
             Screen.fullScreen = true;           // Enter full screen mode at the beginning
 
-            WUIEngine.RUNTIME_DATA.Routing.BorderSize = 0; // There is no initial value for OSM border size. I set it here as 0.
-
             // Dock the main workflow GUI box to the left edge.
             var root = Document.rootVisualElement;
             UnityEngine.UIElements.VisualElement mainUIBox = root.Q<UnityEngine.UIElements.VisualElement>("MainUIBox");
@@ -233,11 +231,6 @@ namespace WUIPlatform.WUInity.UI
                 SetupMapConfiguration(root);
 
                 // 3. Population data ----------------------------------------------------------------------------------------------
-                SetupGlobalGPWFolder(root);
-                PopulateFromLocalGPWFile(root);
-                PopulateFromLocalPopFile(root);
-
-                SetupPopulationControlButtons(root);
 
                 // 4. Evacuation goals ----------------------------------------------------------------------------------------------
                 SetupAddRemoveEvacGoalButtons(root);
@@ -252,11 +245,6 @@ namespace WUIPlatform.WUInity.UI
                 // 6. Evacuation settings -------------------------------------------------------------------------------------------
 
                 // 7. Routing data --------------------------------------------------------------------------------------------------
-                SetupLoadOSMDataFile(root);
-                SetupLoadRouterDBFile(root);
-                SetupLoadRouterRCFile(root);
-                
-                SetupRoutingDataButtons(root);
 
                 // 8. Traffic -------------------------------------------------------------------------------------------------------
                 InitRouteChoiceList(root);
@@ -459,37 +447,6 @@ namespace WUIPlatform.WUInity.UI
                 logText += (logItem + "\n");
 
             System.IO.File.WriteAllText(paths[0], logText);
-        }
-
-        private void SetupPopulationControlButtons(VisualElement root)
-        {
-            UnityEngine.UIElements.Button btnBuildLocalGPW = root.Q<UnityEngine.UIElements.Button>("BuildLocalGPW");
-            if (btnBuildLocalGPW != null)
-                btnBuildLocalGPW.clicked += BtnBuildLocalGPW_clicked;
-
-            UnityEngine.UIElements.Button btnShowHideLocalGPW = root.Q<UnityEngine.UIElements.Button>("ShowHideLocalGPW");
-            if (btnShowHideLocalGPW != null)
-                btnShowHideLocalGPW.clicked += BtnShowHideLocalGPW_clicked;
-
-            UnityEngine.UIElements.Button btnShowHideLocalPOP = root.Q<UnityEngine.UIElements.Button>("ShowHideLocalPOP");
-            if (btnShowHideLocalPOP != null)
-                btnShowHideLocalPOP.clicked += BtnShowHideLocalPOP_clicked;
-
-            UnityEngine.UIElements.Button btnCorrectPop = root.Q<UnityEngine.UIElements.Button>("CorrectPopButton");
-            if (btnCorrectPop != null)
-                btnCorrectPop.clicked += BtnCorrectPop_clicked;
-
-            UnityEngine.UIElements.Button btnRescalePop = root.Q<UnityEngine.UIElements.Button>("RescalePopButton");
-            if (btnRescalePop != null)
-                btnRescalePop.clicked += BtnRescalePop_clicked;
-
-            UnityEngine.UIElements.TextField tfTxTRescalePopNumber = root.Q<UnityEngine.UIElements.TextField>("TxTRescalePopNumber");
-            if (tfTxTRescalePopNumber != null)
-                tfTxTRescalePopNumber.RegisterValueChangedCallback((evt) =>
-                {
-                    UnityEngine.Debug.Log($"RescalePopNumber has changed to {evt.newValue}.");
-                    _rescalePop = evt.newValue;
-                });
         }
 
         private void SetupAddRemoveEvacGoalButtons(VisualElement root)
@@ -819,21 +776,6 @@ namespace WUIPlatform.WUInity.UI
                 btnEditEvacGroupOnMap.clicked += BtnEditEvacGroupOnMap_clicked;
         }
 
-        private void SetupRoutingDataButtons(VisualElement root)
-        {
-            UnityEngine.UIElements.Button btnFilterOSMData = root.Q<UnityEngine.UIElements.Button>("FilterOSMData");
-            if (btnFilterOSMData != null)
-                btnFilterOSMData.clicked += BtnFilterOSMData_clicked;
-
-            UnityEngine.UIElements.Button btnBuildRouterDB = root.Q<UnityEngine.UIElements.Button>("BuildRouterDB");
-            if (btnBuildRouterDB != null)
-                btnBuildRouterDB.clicked += BtnBuildRouterDB_clicked;
-
-            UnityEngine.UIElements.Button btnBuildRouteCollection = root.Q<UnityEngine.UIElements.Button>("BuildRouteCollection");
-            if (btnBuildRouteCollection != null)
-                btnBuildRouteCollection.clicked += BtnbtnBuildRouteCollection_clicked;
-        }
-
         private void SetupTrafficParameters(VisualElement root)
         {
             UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
@@ -1158,300 +1100,6 @@ namespace WUIPlatform.WUInity.UI
                         }
                     }
                 }
-            }
-        }
-
-        private void SetupLoadOSMDataFile(VisualElement root)
-        {
-            Toggle togSetOSMFile = root.Q<Toggle>("TogSetOSMFile");
-
-            if (togSetOSMFile != null)
-                togSetOSMFile.RegisterValueChangedCallback(evt =>
-                {
-                    if (evt.newValue) 
-                    {
-                        FileBrowser.SetFilters(false, fileFilter[(int)FileType.OSMDataFile]);
-                        FileBrowser.ShowLoadDialog(SetOSMDataFile, CancelSetOSMDataFile, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Specify OSM data file", "Select");
-                    }
-                    else
-                    {   // Clear OSM file path
-                        Label togLabel = root.Q<Label>("TxtOSMFile");
-                        if (togLabel != null) togLabel.text = "OSM data file: not set";
-
-                        _OSMDataFile = ""; //clear setting.
-                    }
-                });
-
-            UnityEngine.UIElements.TextField tfTxTOSMBorderSize = root.Q<UnityEngine.UIElements.TextField>("TxTOSMBorderSize");
-            if (tfTxTOSMBorderSize != null)
-                tfTxTOSMBorderSize.RegisterValueChangedCallback((evt) =>
-                {
-                    UnityEngine.Debug.Log($"OSMBorderSize has changed to {evt.newValue}.");
-
-                    int value;
-                    int.TryParse(evt.newValue, out value);
-                    if (value < 0 || value > 200)
-                    {     // Set the stall speed range to be [0,200]. To be confirmed later.
-                        tfTxTOSMBorderSize.SetValueWithoutNotify(_OSMBorderSize);
-                        WUIEngine.LOG(WUIEngine.LogType.Warning, "The OSM board size is not valid. Please set between 0 and 200 (m).");
-                    }
-                    else
-                        _OSMBorderSize = evt.newValue;
-
-                });
-        }
-
-        void SetOSMDataFile(string[] paths)
-        {
-            string loadStatus = "";
-            Toggle togSetOSMFile = Document.rootVisualElement.Q<Toggle>("TogSetOSMFile");
-
-            if (togSetOSMFile != null)
-            {
-                if (File.Exists(paths[0]))  // There may be additional way of testing the valid of this file.
-                {
-                    _OSMDataFile = paths[0];
-                    loadStatus = "OSM data file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
-                    togSetOSMFile.SetValueWithoutNotify(true);
-                }
-                else
-                {
-                    loadStatus = "OSM data file load error.";
-                    togSetOSMFile.SetValueWithoutNotify(false);
-                }
-            }
-
-            Label togLabel = Document.rootVisualElement.Q<Label>("TxtOSMFile");
-            if (togLabel != null) togLabel.text = loadStatus;
-        }
-
-        void CancelSetOSMDataFile()
-        {
-            Toggle togSetOSMFile = Document.rootVisualElement.Q<Toggle>("TogSetOSMFile");
-
-            if (togSetOSMFile != null)
-            {
-                if (File.Exists(_OSMDataFile))
-                    togSetOSMFile.value = true;
-                else
-                    togSetOSMFile.value = false;
-            }
-        }
-
-        private void SetupLoadRouterDBFile(VisualElement root)
-        {
-            Toggle togSetRouterDB = root.Q<Toggle>("TogSetRouterDB");
-
-            if (togSetRouterDB != null)
-                togSetRouterDB.RegisterValueChangedCallback(evt =>
-                {
-                    if (evt.newValue)
-                    {
-                        FileBrowser.SetFilters(false, fileFilter[(int)FileType.routerDBFile]);
-                        FileBrowser.ShowLoadDialog(LoadRouterDBFile, CancelLoadRouterDBFile, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load routerDB data file", "Select");
-                    }
-                    else
-                    {   // Clear GPW folder 
-                        Label togLabel = root.Q<Label>("TxtRouterDBFile");
-                        if (togLabel != null) togLabel.text = "RouterDB file: not set";
-                    }
-                });
-        }
-
-        void LoadRouterDBFile(string[] paths)
-        {
-            string loadStatus = "";
-            Toggle togSetRouterDB = Document.rootVisualElement.Q<Toggle>("TogSetRouterDB");
-
-            if (togSetRouterDB != null)
-            {
-                if (WUIEngine.RUNTIME_DATA.Routing.LoadRouterDb(paths[0], true))
-                {
-                    loadStatus = "RouterDB file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
-                    togSetRouterDB.SetValueWithoutNotify(true);
-                }
-                else
-                {
-                    loadStatus = "RouterDB file load error.";
-                    togSetRouterDB.SetValueWithoutNotify(false);
-                }
-            }
-
-            Label togLabel = Document.rootVisualElement.Q<Label>("TxtRouterDBFile");
-            if (togLabel != null) togLabel.text = loadStatus;
-        }
-
-        void CancelLoadRouterDBFile()
-        {
-            SetRouterDBFile();
-        }
-
-        void SetRouterDBFile()
-        { 
-            var root = Document.rootVisualElement;
-            Toggle togSetRouterDB = root.Q<Toggle>("TogSetRouterDB");
-
-            if (togSetRouterDB != null)
-            {
-                Label txtRouterDBFile = root.Q<Label>("TxtRouterDBFile");
-                if (txtRouterDBFile != null)
-                {
-                    string filePath;
-                    if (WUIEngine.INPUT.Routing.routerDbFile.Length > 0)
-                    {
-                        filePath = "RouterDB file: " + WUIEngine.INPUT.Routing.routerDbFile;
-                        togSetRouterDB.SetValueWithoutNotify(true);
-                    }
-                    else
-                    {
-                        filePath = "RouterDB file: not set";
-                        togSetRouterDB.SetValueWithoutNotify(false);
-                    }
-
-                    txtRouterDBFile.text = filePath;
-                }
-            }
-        }
-
-        private void SetupLoadRouterRCFile(VisualElement root)
-        {
-            Toggle togSetRouteRC = root.Q<Toggle>("TogSetRouteRC");
-
-            if (togSetRouteRC != null)
-                togSetRouteRC.RegisterValueChangedCallback(evt =>
-                {
-                    if (evt.newValue)
-                    {
-                        FileBrowser.SetFilters(false, fileFilter[(int)FileType.routeRCFile]);
-                        FileBrowser.ShowLoadDialog(LoadRouteRCFile, CancelLoadRouteRCFile, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load route collection file", "Select");
-                    }
-                    else
-                    {   // Clear GPW folder 
-                        Label togLabel = root.Q<Label>("TxtRCFile");
-                        if (togLabel != null) togLabel.text = "Route collection file: not set";
-                    }
-                });
-        }
-
-        void LoadRouteRCFile(string[] paths)
-        {
-            string loadStatus = "";
-            Toggle togSetRouteRC = Document.rootVisualElement.Q<Toggle>("TogSetRouteRC");
-
-            if (togSetRouteRC != null)
-            {
-                if (WUIEngine.RUNTIME_DATA.Routing.LoadRouteCollection(paths[0], true))
-                {
-                    loadStatus = "Route collection file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
-                    togSetRouteRC.SetValueWithoutNotify(true);
-                }
-                else
-                {
-                    loadStatus = "Route collection file load error.";
-                    togSetRouteRC.SetValueWithoutNotify(false);
-                }
-            }
-
-            Label togLabel = Document.rootVisualElement.Q<Label>("TxtRCFile");
-            if (togLabel != null) togLabel.text = loadStatus;
-        }
-
-        void CancelLoadRouteRCFile()
-        {
-            SetRouteRCFile();
-        }
-
-        void SetRouteRCFile()
-        {
-            var root = Document.rootVisualElement;
-            Toggle togSetRouteRC = root.Q<Toggle>("TogSetRouteRC");
-
-            if (togSetRouteRC != null)
-            {
-                Label txtRCFile = root.Q<Label>("TxtRCFile");
-                if (txtRCFile != null)
-                {
-                    string filePath;
-                    if (WUIEngine.INPUT.Routing.routeCollectionFile.Length > 0)
-                    {
-                        filePath = "Route collection file: " + Path.GetFileName(WUIEngine.INPUT.Routing.routeCollectionFile); // There is a bug in WUIEngine.RUNTIME_DATA.Routing.LoadRouteCollection.
-                        togSetRouteRC.SetValueWithoutNotify(true);
-                    }
-                    else
-                    {
-                        filePath = "Route collection file: not set";
-                        togSetRouteRC.SetValueWithoutNotify(false);
-                    }
-
-                    txtRCFile.text = filePath;
-                }
-            }
-        }
-
-        private void BtnFilterOSMData_clicked()
-        {
-            // WUInity.INSTANCE.SetOSMBorderVisibility(true); // This function is only used for visually check the range of OSM map. Not necessary.
-
-            var root = Document.rootVisualElement;
-
-            // Get customised border size.
-            float.TryParse(_OSMBorderSize, out WUIEngine.RUNTIME_DATA.Routing.BorderSize);
-
-            if (!File.Exists(_OSMDataFile))
-            {
-                FileBrowser.SetFilters(false, fileFilter[(int)FileType.OSMDataFile]);
-                FileBrowser.ShowLoadDialog(FilterOSMFile, CancelSetOSMDataFile, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Select source OSM file", "Filter");
-            }
-            else
-            {
-                FilterOSMFile(_OSMDataFile);
-            }
-        }
-
-        void FilterOSMFile(string[] paths)
-        {
-            if(FilterOSMFile(paths[0])==false) // If success, replace the OSM file with the filered one.
-            {
-                CancelSetOSMDataFile();
-            }
-        }
-
-        bool FilterOSMFile(string filename)
-        {
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Filtering is in progress and it can take a very long period of time subject to file size and computational power. Please wait until it is completed.");
-
-            if (WUIEngine.RUNTIME_DATA.Routing.FilterOSMData(filename)) // If success, replace the OSM file with the filered one.
-            {
-                string filteredOSMFilePath = Path.Combine(WUIEngine.WORKING_FOLDER, "filtered_" + Path.GetFileNameWithoutExtension(_OSMDataFile) + ".osm.pbf");
-                _OSMDataFile = filteredOSMFilePath;
-
-                Label togLabel = Document.rootVisualElement.Q<Label>("TxtOSMFile");
-                string loadStatus = "OSM data file: " + Path.GetFileName(_OSMDataFile); //  + " is loaded successfully.";
-                if (togLabel != null) togLabel.text = loadStatus;
-
-                return true;
-            }
-            return false;
-        }
-
-        private void BtnBuildRouterDB_clicked()
-        {
-            if (File.Exists(_OSMDataFile)) { 
-                WUIEngine.RUNTIME_DATA.Routing.CreateRouterDatabaseFromOSM(_OSMDataFile);
-                //EditorUtility.DisplayDialog("Build router database", "Router database is successfully created from OSM file.", "Close");
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Router database is successfully created from OSM file: "+ _OSMDataFile);
-            }
-            else {
-                //EditorUtility.DisplayDialog("Build router database", "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.", "Close");
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not create router database. Please set OSM data file first and also make sure the regional file and the location and size of region settings match each other.");
-            }
-        }
-
-        private void BtnbtnBuildRouteCollection_clicked()
-        {
-            if (WUIEngine.DATA_STATUS.RouterDbLoaded)
-            {
-                WUIEngine.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
             }
         }
 
@@ -2096,7 +1744,7 @@ namespace WUIPlatform.WUInity.UI
             label2.text = "Sim. Clock: " + (int)WUIEngine.OUTPUT.totalEvacTime +" s\n\rdd:hh:mm:ss - " + TimeSpan.FromSeconds((int)WUIEngine.OUTPUT.totalEvacTime).ToString(@"dd\:hh\:mm\:ss");
 
             Label label3 = Document.rootVisualElement.Q<Label>("TxtTotalPop");
-            label3.text = "Total population: " + WUIEngine.POPULATION.GetTotalPopulation();
+            label3.text = "Total population: " + WUIEngine.RUNTIME_DATA.Population.TotalPopulation;
 
             Label label4 = Document.rootVisualElement.Q<Label>("TxtPeopleStaying");
             label4.text = "People staying: " + WUIEngine.SIM.PedestrianModule.GetPeopleStaying();
@@ -2107,7 +1755,7 @@ namespace WUIPlatform.WUInity.UI
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule && WUIEngine.SIM.PedestrianModule != null)
             {
                 Label label6 = Document.rootVisualElement.Q<Label>("TxtPedLeft");
-                label6.text = "Pedestrians left: " + WUIEngine.SIM.PedestrianModule.GetPeopleLeft() + " (" + Math.Round((double)WUIEngine.SIM.PedestrianModule.GetPeopleLeft() / (double)WUIEngine.POPULATION.GetTotalPopulation() * 100.0, 1) + "%)";
+                label6.text = "Pedestrians left: " + WUIEngine.SIM.PedestrianModule.GetPeopleLeft() + " (" + Math.Round((double)WUIEngine.SIM.PedestrianModule.GetPeopleLeft() / (double)WUIEngine.RUNTIME_DATA.Population.TotalPopulation * 100.0, 1) + "%)";
 
                 Label label7 = Document.rootVisualElement.Q<Label>("TxtCarsReached");
                 label7.text = "Cars reached by Peds: " + WUIEngine.SIM.PedestrianModule.GetCarsReached();
@@ -2238,60 +1886,6 @@ namespace WUIPlatform.WUInity.UI
             WUIEngine.ENGINE.UpdateMapResourceStatus();
         }
 
-        private void BtnBuildLocalGPW_clicked()
-        {
-            if (WUIEngine.DATA_STATUS.GlobalGPWAvailable && WUIEngine.INPUT.Population.gpwDataFolder.Length > 0)
-            {
-                if (WUIEngine.POPULATION.CreateLocalGPW())
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "New local GPW data file is created successfully.");
-                }
-
-                SetLocalGPWNumber();
-            }
-            else
-                UnityEngine.Debug.Log($"Global GPW data is not avaible to build local GPW data.");
-        }
-
-        private void BtnShowHideLocalGPW_clicked()
-        {
-            if (WUIEngine.DATA_STATUS.LocalGPWLoaded) WUIEngine.POPULATION.Visualizer.ToggleLocalGPWVisibility();
-        }
-
-        private void BtnShowHideLocalPOP_clicked()
-        {
-            if (WUIEngine.POPULATION.IsPopulationLoaded())
-            {
-                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.Population);
-                WUInityEngine.INSTANCE.DisplayPopulation();
-                WUInityEngine.INSTANCE.ToggleEvacDataPlane();
-            }
-        }
-
-        private void BtnCorrectPop_clicked()
-        {
-            if (WUIEngine.POPULATION.IsPopulationLoaded())
-            {
-                WUIEngine.POPULATION.UpdatePopulationBasedOnRoutes(WUIEngine.RUNTIME_DATA.Routing.RouteCollections);
-                WUInityEngine.INSTANCE.DisplayPopulation();
-                SetPopulationAndCellNumber();
-            }
-        }
-
-        private void BtnRescalePop_clicked()
-        {
-            int newPop;
-            if (int.TryParse(_rescalePop, out newPop))
-            {
-                WUIEngine.POPULATION.ScaleTotalPopulation(newPop);
-                WUInityEngine.INSTANCE.DisplayPopulation();
-                SetPopulationAndCellNumber();
-            }
-            else
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " New population count not a number.");
-            }
-        }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
         // This function is called after a project is loaded from a .wui file and uses information from the file to set the menu/statue of workflow.
         //
@@ -2318,12 +1912,7 @@ namespace WUIPlatform.WUInity.UI
                     tfTxTSetMapZoomLevel.value = wO.Map.zoomLevel.ToString();
 
                 // 3. Population section -------------------------------------------------------------------------------------------------------------
-                SetGlobalGPWFileFoler();
-                SetLocalGPWFile();
-                SetPopulationFile();
-
-                SetLocalGPWNumber();
-                SetPopulationAndCellNumber();
+                SetHouseholdsFile();
 
                 // 4. Evacuation goals -------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfEvacutionDestination= root.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
@@ -2438,15 +2027,6 @@ namespace WUIPlatform.WUInity.UI
                 }
 
                 // 7. Routing section  ------------------------------------------------------------------------------------------------------------
-                SetRouterDBFile();
-                SetRouteRCFile();
-
-                UnityEngine.UIElements.TextField tfTxTOSMBorderSize = root.Q<UnityEngine.UIElements.TextField>("TxTOSMBorderSize");
-                if (tfTxTOSMBorderSize != null)
-                {
-                    _OSMBorderSize=WUIEngine.RUNTIME_DATA.Routing.BorderSize.ToString();
-                    tfTxTOSMBorderSize.value = _OSMBorderSize;
-                }
 
                 // 8. Traffic section -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfRouteChoice = root.Q<UnityEngine.UIElements.DropdownField>("DfRouteChoice");
@@ -2575,100 +2155,7 @@ namespace WUIPlatform.WUInity.UI
             }
         }
 
-        void SetLocalGPWNumber()
-        {
-            var root = Document.rootVisualElement;
-
-            Label togTxtGPWNumber = root.Q<Label>("TxtGPWNumber");
-
-            if (togTxtGPWNumber != null) { 
-                if(WUIEngine.DATA_STATUS.LocalGPWLoaded)
-                    togTxtGPWNumber.text = "GPW total population: " + WUIEngine.POPULATION.GetLocalGPWTotalPopulation();
-                else
-                    togTxtGPWNumber.text = "GPW total population:";
-            }
-        }
-
-        void SetPopulationAndCellNumber()
-        {
-            var root = Document.rootVisualElement;
-
-            Label togTxtPOPNumber = root.Q<Label>("TxtPOPNumber");
-
-            if (togTxtPOPNumber != null)
-            {
-                if (WUIEngine.DATA_STATUS.PopulationLoaded)
-                    togTxtPOPNumber.text = "Total population (adjusted): " + WUIEngine.POPULATION.GetTotalPopulation();
-                else
-                    togTxtPOPNumber.text = "Total population (adjusted):";
-            }
-
-            Label togTxtPOPCellsNumber = root.Q<Label>("TxtPOPCellsNumber");
-
-            if (togTxtPOPCellsNumber != null)
-            {
-                if (WUIEngine.DATA_STATUS.PopulationLoaded)
-                    togTxtPOPCellsNumber.text = "Total active cells: " + WUIEngine.POPULATION.GetTotalActiveCells();
-                else
-                    togTxtPOPCellsNumber.text = "Total active cells:";
-            }
-        }
-
-        void SetGlobalGPWFileFoler()
-        {
-            var root = Document.rootVisualElement;
-            Toggle togTogSetGPWFolder = root.Q<Toggle>("TogSetGPWFolder");
-            if (togTogSetGPWFolder != null)
-            {
-                string filePath = "No valid global GPW data. Please select correct GPW folder.";
-
-                if (WUIEngine.DATA_STATUS.GlobalGPWAvailable && WUIEngine.INPUT.Population.gpwDataFolder.Length > 0)
-                {
-                    togTogSetGPWFolder.SetValueWithoutNotify(true);
-
-                    if (WUIEngine.INPUT.Population.gpwDataFolder.Length < iGPWfolderLength)
-                        filePath = "GPW folder: " + WUIEngine.INPUT.Population.gpwDataFolder;
-                    else
-                        filePath = "GPW folder: ..." + WUIEngine.INPUT.Population.gpwDataFolder.Substring(WUIEngine.INPUT.Population.gpwDataFolder.Length - iGPWfolderLength);
-                }
-                else
-                {
-                    togTogSetGPWFolder.SetValueWithoutNotify(false);
-                }
-
-                Label togTxtGPWFolder = root.Q<Label>("TxtGPWFolder");
-                if (togTxtGPWFolder != null) togTxtGPWFolder.text = filePath;
-            }
-        }
-
-        void SetLocalGPWFile()
-        {
-            var root = Document.rootVisualElement;
-            Toggle togPopulateFromGPW = root.Q<Toggle>("TogPopulateFromGPW");
-
-            if (togPopulateFromGPW != null)
-            {
-                Label txtGPWFile = root.Q<Label>("TxtGPWFile");
-                if (txtGPWFile != null)
-                {
-                    string filePath;
-                    if (WUIEngine.DATA_STATUS.LocalGPWLoaded && WUIEngine.INPUT.Population.localGPWFile.Length > 0)
-                    {
-                        filePath = "GPW file: " + WUIEngine.INPUT.Population.localGPWFile;
-                        togPopulateFromGPW.SetValueWithoutNotify(true);
-                    }
-                    else
-                    {
-                        filePath = "GPW file: not set";
-                        togPopulateFromGPW.SetValueWithoutNotify(false);
-                    }
-
-                    txtGPWFile.text = filePath;
-                }
-            }
-        }
-
-        void SetPopulationFile()
+        void SetHouseholdsFile()
         {
             var root = Document.rootVisualElement;
             Toggle togPopulateFromPOP = root.Q<Toggle>("TogPopulateFromPOP");
@@ -2679,14 +2166,14 @@ namespace WUIPlatform.WUInity.UI
                 if (txtPOPFile != null)
                 {
                     string filePath;
-                    if (WUIEngine.DATA_STATUS.PopulationLoaded && WUIEngine.INPUT.Population.populationFile.Length > 0)
+                    if (WUIEngine.DATA_STATUS.PopulationLoaded && WUIEngine.INPUT.Population.HouseholdsFile.Length > 0)
                     {
-                        filePath = "POP file: " + WUIEngine.INPUT.Population.populationFile;
+                        filePath = "Households file: " + WUIEngine.INPUT.Population.HouseholdsFile;
                         togPopulateFromPOP.SetValueWithoutNotify(true);
                     }
                     else
                     {
-                        filePath = "POP file: not set";
+                        filePath = "Households file: not set";
                         togPopulateFromPOP.SetValueWithoutNotify(false);
                     }
 
@@ -3363,128 +2850,6 @@ namespace WUIPlatform.WUInity.UI
                 btnUpdateMap.clicked += BtnUpdateMap_clicked;
         }
 
-        private void SetupGlobalGPWFolder(VisualElement root)
-        {
-            Toggle togTogSetGPWFolder = root.Q<Toggle>("TogSetGPWFolder");
-
-            if (togTogSetGPWFolder != null)
-                togTogSetGPWFolder.RegisterValueChangedCallback(evt =>
-                {
-                    //togTogSetGPWFolder.value = WUIEngine.DataStatus.GlobalGPWAvailable;
-                    //if (Directory.Exists(WUIEngine.Input.Population.gpwDataFolder)) togTogSetGPWFolder.value = true;
-                    //if (WUIEngine.Input.Population.gpwDataFolder.Length>0) togTogSetGPWFolder.value = true;
-
-                    //UnityEngine.Debug.Log($"togTogSetGPWFolder = {evt.newValue}");
-
-                    if (evt.newValue) // Set GPW folder 
-                    {
-                        string initialPath = WUIEngine.DATA_FOLDER;
-
-                        if (WUIEngine.DATA_STATUS.HaveInput)
-                        {
-                            initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
-                        }
-
-                        FileBrowser.ShowLoadDialog(SetGlobalGPWFileFoler, CancelGlobalGPWFolderSelection, FileBrowser.PickMode.Folders, false, initialPath, null, "Specify global GPW files folder", "Select");
-                    }
-                    else
-                    {   // Clear GPW folder 
-                        Label togLabel = root.Q<Label>("TxtGPWFolder");
-                        if (togLabel != null) togLabel.text = "GPW folder: not set";
-                    }
-                });
-        }
-
-        void SetGlobalGPWFileFoler(string[] paths)
-        {
-            UnityEngine.Debug.Log($"TogMultipleSim = {paths[0]}");
-            string filePath = "The path does not contain valid GPW files. Please select again.";
-
-            if (WUIEngine.RUNTIME_DATA.Population.LoadGlobalGPWFolder(paths[0], true))
-            {
-                if (paths[0].Length < iGPWfolderLength)
-                    filePath = "GPW folder: " + paths[0];
-                else
-                    filePath = "GPW folder: ..." + paths[0].Substring(paths[0].Length - iGPWfolderLength);
-            }
-            else
-            {
-                Toggle togTogSetGPWFolder = Document.rootVisualElement.Q<Toggle>("TogSetGPWFolder");
-                if (togTogSetGPWFolder != null) togTogSetGPWFolder.value = false;
-            }
-
-            Label togLabel = Document.rootVisualElement.Q<Label>("TxtGPWFolder");
-            if (togLabel != null) togLabel.text = filePath;
-        }
-
-        void CancelGlobalGPWFolderSelection()
-        {
-            SetGlobalGPWFileFoler();
-        }
-        private void PopulateFromLocalPopFile(VisualElement root) //TogPopulateFromPOP
-        {
-            Toggle togTogPopulateFromPOP = root.Q<Toggle>("TogPopulateFromPOP");
-
-            if (togTogPopulateFromPOP != null)
-            {
-                togTogPopulateFromPOP.RegisterValueChangedCallback(evt =>
-                {
-                    bool checkPopOK = evt.newValue;
-                    if (checkPopOK)
-                    {
-                        string[] popFilter = new string[] { ".pop" };
-                        FileBrowser.SetFilters(false, popFilter);
-                        string initialPath = WUIEngine.DATA_FOLDER;
-
-                        if (WUIEngine.DATA_STATUS.HaveInput)
-                        {
-                            initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
-                        }
-
-                        FileBrowser.ShowLoadDialog(LoadPopulationFile, CancelLoadPopulationFile, FileBrowser.PickMode.Files, false, initialPath, null, "Load POP file", "Load");
-                    }
-                    else
-                    {
-                        Label togLabel = root.Q<Label>("TxtPOPFile");
-                        if (togLabel != null) togLabel.text = "POP file: not set";
-                    }
-                    
-                    UnityEngine.Debug.Log($"Load POP file = {checkPopOK}");
-                });
-            }
-
-        }
-
-        void LoadPopulationFile(string[] paths)
-        {
-            string filePath = "POP file: Failed to load .pop file.";
-
-            if (WUIEngine.POPULATION.LoadPopulationFromFile(paths[0], true))
-            {
-                filePath = "POP file: "+ Path.GetFileName(paths[0]) + " is loaded successfully.";
-                
-                WUIEngine.INPUT.Population.populationFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUIEngineInput.SaveInput();                                               // This is a temp fix.
-            }
-            else
-            {
-                Toggle togTogPopulateFromPOP = Document.rootVisualElement.Q<Toggle>("TogPopulateFromPOP");
-                if (togTogPopulateFromPOP != null) togTogPopulateFromPOP.value = false;
-            }
-
-            Label togLabel = Document.rootVisualElement.Q<Label>("TxtPOPFile");
-            if (togLabel != null) togLabel.text = filePath;
-
-            SetPopulationAndCellNumber();
-        }
-
-        void CancelLoadPopulationFile()
-        {
-            SetPopulationFile();    // Reset to the orignal POP file if there is one.
-        }
-
         private void PopulateFromLocalGPWFile(VisualElement root) //TogPopulateFromGPW
         {
             Toggle togPopulateFromGPW = root.Q<Toggle>("TogPopulateFromGPW");
@@ -3504,7 +2869,7 @@ namespace WUIPlatform.WUInity.UI
                             initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
                         }
 
-                        FileBrowser.ShowLoadDialog(LoadLocalGPWFile, CancelLoadLocalGPWFile, FileBrowser.PickMode.Files, false, initialPath, null, "Load GPW file", "Load");
+                        //FileBrowser.ShowLoadDialog(LoadLocalGPWFile, CancelLoadLocalGPWFile, FileBrowser.PickMode.Files, false, initialPath, null, "Load GPW file", "Load");
                     }
                     else
                     {
@@ -3515,34 +2880,6 @@ namespace WUIPlatform.WUInity.UI
                     UnityEngine.Debug.Log($"Load local GPW file = {populateFromGPW}");
                 });
             }
-        }
-
-        void LoadLocalGPWFile(string[] paths)
-        {
-            string filePath = "GPW file: Failed to load local .gpw file.";
-
-            if (WUIEngine.POPULATION.CreatePopulationFromLocalGPW(paths[0]))
-            {
-                filePath = "GPW file: " + Path.GetFileName(paths[0]) + " is loaded and a .pop is created.";
-
-                WUIEngine.INPUT.Population.populationFile = Path.GetFileName(paths[0]);   // There is a bug in Population\EvacuationData.cs between lines 274-280 in saving inputs. 
-                WUIEngineInput.SaveInput();                                               // This is a temp fix.
-            }
-            else
-            {
-                Toggle togTogPopulateFromGPW = Document.rootVisualElement.Q<Toggle>("TogPopulateFromGPW");
-                if (togTogPopulateFromGPW != null) togTogPopulateFromGPW.value = false;
-            }
-
-            Label togLabel = Document.rootVisualElement.Q<Label>("TxtGPWFile");
-            if (togLabel != null) togLabel.text = filePath;
-
-            SetLocalGPWNumber();
-        }
-
-        void CancelLoadLocalGPWFile()
-        {
-            SetLocalGPWFile();    // Reset to the orignal local GPW file if there is one.
         }
 
         private void SetupLoadLCPFile(VisualElement root)   // Catch toggle-click "Load landscape file" 

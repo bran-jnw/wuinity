@@ -52,16 +52,6 @@ namespace WUIPlatform.WUInity.UI
                 }
                 ++buttonIndex;
             } 
-
-            if (WUInityEngine.INSTANCE.DeveloperMode)
-            {
-                ++buttonIndex;
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run traffic verification"))
-                {
-                    WUIPlatform.Traffic.MacroTrafficVerification.RunTrafficVerificationTests();
-                }
-                ++buttonIndex;
-            }
         }
 
         void ParseTrafficInput()

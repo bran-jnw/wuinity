@@ -33,19 +33,6 @@ namespace WUIPlatform
 
         private bool _stopSim;
 
-        private RouteCreator _routeCreator;  
-        public RouteCreator RouteCreator
-        {
-            get 
-            { 
-                if(_routeCreator == null)
-                {
-                    _routeCreator = new RouteCreator();
-                }
-                return _routeCreator; 
-            }
-        }
-
         private TrafficModule _trafficModule;
         public TrafficModule TrafficModule { get => _trafficModule; }
 
@@ -283,22 +270,11 @@ namespace WUIPlatform
 
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
             {
-                if (runIndex == 1)
-                {
-                    //we could not load from disk, so have to build all routes
-                    if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections == null)
-                    {
-                        WUIEngine.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
-                    }
-
-                    //WUIEngine.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUIEngine.RUNTIME_DATA.Routing.RouteCollections);                    
-                }
-
                 if (WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.SUMO)
                 {
                     //placeholder for JupedSim
                 }
-                else
+                else if (WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     _pedestrianModule = new MacroHouseholdSim();
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
@@ -333,7 +309,7 @@ namespace WUIPlatform
                 }
                 else
                 {
-                    _trafficModule = new MacroTrafficSim(RouteCreator);
+                    _trafficModule = new MacroTrafficSim();
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Traffic module MacroTrafficSim initiated.");
                 }
             }
@@ -700,33 +676,8 @@ namespace WUIPlatform
             }
 
             //update raster evac routes first as traffic might use some of the updated choices
-            int cellsWithoutRouteButNoonePlansToLeave = 0;
-            if(WUIEngine.RUNTIME_DATA.Routing.RouteCollections != null)
-            {
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Routing.RouteCollections.Length; i++)
-                {
-                    if(WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.MacroHouseholdSim)
-                    {
-                        //TODO: create new implementation based on households as cells are gone
-                        /*if (WUIEngine.RUNTIME_DATA.Routing.RouteCollections[i] != null && !((MacroHouseholdSim)_pedestrianModule).IsCellEvacuated(i))
-                        {
-                            if (((MacroHouseholdSim)_pedestrianModule).GetPeopleLeftInCellIntendingToLeave(i) > 0)
-                            {
-                                WUIEngine.RUNTIME_DATA.Routing.RouteCollections[i].CheckAndUpdateRoute();
-                            }
-                            else
-                            {
-                                ++cellsWithoutRouteButNoonePlansToLeave;
-                            }
-                        }*/
-                    }
-                    
-                }
-            }          
-            if(cellsWithoutRouteButNoonePlansToLeave > 0)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " " + cellsWithoutRouteButNoonePlansToLeave +  " cells have no routes left after goal was blocked, but noone left planning to leave from those cells.");
-            }
+            //TODO
+
             //update cars already in traffic
             _trafficModule.UpdateEvacuationGoals();              
         }

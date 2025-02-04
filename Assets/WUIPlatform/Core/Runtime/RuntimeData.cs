@@ -17,9 +17,9 @@ namespace WUIPlatform.Runtime
     public class RuntimeData
     {
         public SimulationData Simulation;
+        public EvacuationData Evacuation;
         public PopulationData Population;
         public RoutingData Routing;
-        public EvacuationData Evacuation;
         public TrafficData Traffic;
         public FireData Fire;       
 
@@ -27,10 +27,10 @@ namespace WUIPlatform.Runtime
         {
             Simulation = new SimulationData();
             //Map = new MapData();
-            //Visualization = new VisualizationData();
+            //Visualization = new VisualizationData();         
+            Evacuation = new EvacuationData();
             Population = new PopulationData();
             Routing = new RoutingData();
-            Evacuation = new EvacuationData();
             Traffic = new TrafficData();
             Fire = new FireData();
             //Smoke = new SmokeData();
