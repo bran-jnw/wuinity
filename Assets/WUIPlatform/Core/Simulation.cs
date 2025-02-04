@@ -101,12 +101,7 @@ namespace WUIPlatform
                 runNumber = i;                
                 CreateSubModules(i);                
                 RunSimulation(i);
-                ++actualRuns;
-
-                if(WUIEngine.INPUT.Simulation.RunFireModule)
-                {
-                    perilOutput = WUIPlatformPERIL.RunPERIL(20f);
-                }                
+                ++actualRuns;        
 
                 trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
                 //need at least 2 simulations to have valid average
@@ -167,6 +162,11 @@ namespace WUIPlatform
                     yData[i] = i + 1;
                 }
                 CreatePlotData(xData, yData);
+
+                if (WUIEngine.INPUT.Simulation.RunFireModule)
+                {
+                    perilOutput = WUIPlatformPERIL.RunPERIL(20f);
+                }
             }            
 
             _state = SimulationState.Finished;
@@ -280,7 +280,7 @@ namespace WUIPlatform
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
                     //macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateSimulation(WUIEngine.RUNTIME_DATA.Evacuation.HouseholdCoordinates);
+                    macroHouseholdSim.PopulateSimulation(WUIEngine.RUNTIME_DATA.Population.Households);
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }

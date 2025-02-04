@@ -136,11 +136,11 @@ namespace WUIPlatform.Tools
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
                     PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
-                    float left = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.y - borderSize.x);
-                    float bottom = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x - borderSize.y);
-                    Vector2d size = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLong, WUIEngine.INPUT.Simulation.Size);
-                    float right = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.y + size.x + borderSize.x);
-                    float top = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x + size.y + borderSize.y);
+                    float left = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.y - borderSize.x);
+                    float bottom = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x - borderSize.y);
+                    Vector2d size = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLon, WUIEngine.INPUT.Simulation.Size);
+                    float right = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.y + size.x + borderSize.x);
+                    float top = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x + size.y + borderSize.y);
                     OsmStreamSource filtered = source.FilterBox(left, top, right, bottom, true);
                     //create a new filtered file
                     string path = Path.Combine(Path.GetDirectoryName(osmFile), "filtered_" + Path.GetFileName(osmFile));

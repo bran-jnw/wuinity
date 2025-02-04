@@ -13,7 +13,8 @@ namespace WUIPlatform
 
         public bool MapLoaded;
 
-        public bool PopulationLoaded;
+        private bool _populationLoaded;
+        public bool PopulationLoaded { get => _populationLoaded; }
 
         public bool OpticalDensityLoaded;
 
@@ -30,10 +31,10 @@ namespace WUIPlatform
                 WUIEngine.LOG(WUIEngine.LogType.Error, "Map is not loaded.");
             }
 
-            if (!PopulationLoaded)
+            if (WUIEngine.INPUT.Simulation.RunPedestrianModule && !PopulationLoaded)
             {
                 canRun = false;
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Population is not loaded and no local nor global GPW file is found to build it from.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Population is not loaded but user has requested pedestrian model.");
             }
 
             if (WUIEngine.INPUT.Simulation.RunFireModule)
@@ -62,12 +63,14 @@ namespace WUIPlatform
         {
             //haveInput = false; //can never lose input after getting it once
             MapLoaded = false;
-
-            PopulationLoaded = false;
-
-
+            _populationLoaded = false;
             LcpLoaded = false;
             FuelModelsLoaded = false;
+        }
+
+        public void SetPopulation(bool status)
+        {
+            _populationLoaded = status;
         }
     }
 }

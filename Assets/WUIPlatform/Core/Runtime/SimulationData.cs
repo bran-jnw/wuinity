@@ -38,9 +38,9 @@ namespace WUIPlatform.Runtime
         {
             if(WUIEngine.INPUT != null)
             {
-                LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
+                LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
                 _utmOrigin = new Vector2d(utmData.Easting, utmData.Northing);
-                _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLong.x, WUIEngine.INPUT.Simulation.LowerLeftLatLong.y);
+                _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
 
                 //Calculate scaling factors to correct overlay between web mercator and UTM
                 Vector2d mercatorBounds = _centerMercator + WUIEngine.INPUT.Simulation.Size;
@@ -52,11 +52,11 @@ namespace WUIPlatform.Runtime
                 realScale.x = utmDistances.x / WUIEngine.INPUT.Simulation.Size.x;
                 realScale.y = utmDistances.y / WUIEngine.INPUT.Simulation.Size.y;
 
-                double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0);
+                double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLon.x / 180.0);
                 _mercatorToUtmScale = new Vector2d(realScale.x / mercatorCorrectionScale, realScale.y / mercatorCorrectionScale);
                 _utmToMercatorScale = new Vector2d(1.0 / _mercatorToUtmScale.x, 1.0 / _mercatorToUtmScale.y);
 
-                double lat = Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0;
+                double lat = Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLon.x / 180.0;
                 _mercatorCorrectionScale = (float)Mathd.Cos(lat);
             }            
         }

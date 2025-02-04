@@ -27,7 +27,7 @@ namespace WUIPlatform.Pedestrian
         Vector2d realWorldSize;
         public Vector2d cellWorldSize;
 
-        Runtime.EvacuationData.HouseholdData[] _householdData;
+        Runtime.PopulationData.HouseholdData[] _householdData;
         List<MacroHousehold> _macroHouseholds;
         int totalPopulation;
         int totalCars;
@@ -290,7 +290,7 @@ namespace WUIPlatform.Pedestrian
             System.IO.File.WriteAllLines(path, output);
         }
 
-        public void PopulateSimulation(Runtime.EvacuationData.HouseholdData[] householdData)
+        public void PopulateSimulation(Runtime.PopulationData.HouseholdData[] householdData)
         {
             cellsX = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
             cellsY = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y;
@@ -313,8 +313,8 @@ namespace WUIPlatform.Pedestrian
             _macroHouseholds = new List<MacroHousehold>();
             for (int i = 0; i < _householdData.Length; ++i)
             {
-                double lat = _householdData[i].houseLatLon.x;
-                double lon = _householdData[i].houseLatLon.y;
+                double lat = _householdData[i].originLatLon.x;
+                double lon = _householdData[i].originLatLon.y;
 
                 Vector2d pos = GeoConversions.GeoToWorldPosition(lat, lon, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
                 int xIndex = (int)(pos.x / cellSizeX);

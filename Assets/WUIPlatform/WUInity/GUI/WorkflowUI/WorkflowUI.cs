@@ -1874,8 +1874,8 @@ namespace WUIPlatform.WUInity.UI
 
             string[] floatNumbers= _mapLLLatLong.Split(',');
 
-            double.TryParse(floatNumbers[0], out wO.Simulation.LowerLeftLatLong.x);
-            double.TryParse(floatNumbers[1], out wO.Simulation.LowerLeftLatLong.y);
+            double.TryParse(floatNumbers[0], out wO.Simulation.LowerLeftLatLon.x);
+            double.TryParse(floatNumbers[1], out wO.Simulation.LowerLeftLatLon.y);
             
             floatNumbers = _mapSizeXY.Split(',');
 
@@ -1901,7 +1901,7 @@ namespace WUIPlatform.WUInity.UI
                 // 2. Map section ------------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.TextField tfTxTSetLatLong = root.Q<UnityEngine.UIElements.TextField>("TxTSetLatLong");
                 if (tfTxTSetLatLong != null)
-                    tfTxTSetLatLong.value = wO.Simulation.LowerLeftLatLong.x.ToString() + ", " + wO.Simulation.LowerLeftLatLong.y.ToString();
+                    tfTxTSetLatLong.value = wO.Simulation.LowerLeftLatLon.x.ToString() + ", " + wO.Simulation.LowerLeftLatLon.y.ToString();
 
                 UnityEngine.UIElements.TextField tfTxTSetMapSize = root.Q<UnityEngine.UIElements.TextField>("TxTSetMapSize");
                 if (tfTxTSetMapSize != null)

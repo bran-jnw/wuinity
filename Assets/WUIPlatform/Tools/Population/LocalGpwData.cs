@@ -63,7 +63,7 @@ namespace WUIPlatform.Population
 
             //save data stamp to make sure data fits input
             WUIEngineInput input = WUIEngine.INPUT;
-            string dataStamp = input.Simulation.LowerLeftLatLong.x.ToString() + " " + input.Simulation.LowerLeftLatLong.y.ToString()
+            string dataStamp = input.Simulation.LowerLeftLatLon.x.ToString() + " " + input.Simulation.LowerLeftLatLon.y.ToString()
                     + " " + input.Simulation.Size.y.ToString() + " " + input.Simulation.Size.y.ToString();
             data[0] = dataStamp;
 
@@ -268,7 +268,7 @@ namespace WUIPlatform.Population
         /// </summary>
         private bool LoadRelevantGPWData(string globalGpwFolder)
         {
-            Vector2d latLong = WUIEngine.INPUT.Simulation.LowerLeftLatLong;
+            Vector2d latLong = WUIEngine.INPUT.Simulation.LowerLeftLatLon;
             Vector2d size = WUIEngine.INPUT.Simulation.Size;
 
             bool success = false;

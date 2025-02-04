@@ -73,7 +73,7 @@ namespace WUIPlatform.IO
         public bool StopWhenEvacuated = true;
         //public int numberOfRuns = 1;
         public bool StopAfterConverging = true;
-        public Vector2d LowerLeftLatLong = new Vector2d(55.697354, 13.173808);
+        public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
         public Vector2d Size = new Vector2d(3000.0, 3000.0);
         public bool ScaleToWebMercator = false;
         public bool RunPedestrianModule = false;

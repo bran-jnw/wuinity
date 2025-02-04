@@ -57,8 +57,8 @@ namespace WUIPlatform.WUInity.UI
         void CleanMapMenu(WUIEngineInput wO)
         {
             mapMenuDirty = false;
-            Lat = wO.Simulation.LowerLeftLatLong.x.ToString();
-            Long = wO.Simulation.LowerLeftLatLong.y.ToString();
+            Lat = wO.Simulation.LowerLeftLatLon.x.ToString();
+            Long = wO.Simulation.LowerLeftLatLon.y.ToString();
             sizeX = wO.Simulation.Size.x.ToString();
             sizeY = wO.Simulation.Size.y.ToString();
             zoom = wO.Map.zoomLevel.ToString();
@@ -71,8 +71,8 @@ namespace WUIPlatform.WUInity.UI
                 return;
             }
 
-            double.TryParse(Lat, out wO.Simulation.LowerLeftLatLong.x);
-            double.TryParse(Long, out wO.Simulation.LowerLeftLatLong.y);
+            double.TryParse(Lat, out wO.Simulation.LowerLeftLatLon.x);
+            double.TryParse(Long, out wO.Simulation.LowerLeftLatLon.y);
             double.TryParse(sizeX, out wO.Simulation.Size.x);
             double.TryParse(sizeY, out wO.Simulation.Size.y);
             int.TryParse(zoom, out wO.Map.zoomLevel);

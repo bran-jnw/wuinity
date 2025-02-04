@@ -24,7 +24,7 @@ namespace WUIPlatform.Pedestrian
         public bool isMoving;
         public float walkingDistance;
 
-        Runtime.EvacuationData.HouseholdData _houseHoldData;
+        Runtime.PopulationData.HouseholdData _houseHoldData;
         Vector2 homePosition, carPosition;
         int _cellIndex;
 
@@ -37,7 +37,7 @@ namespace WUIPlatform.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(Runtime.EvacuationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
+        public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
         {
             EvacuationInput eO = WUIEngine.INPUT.Evacuation;
 
@@ -57,9 +57,9 @@ namespace WUIPlatform.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = GeoConversions.GeoToWorldPosition(householdData.houseLatLon.x, householdData.houseLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            Vector2d temp = GeoConversions.GeoToWorldPosition(householdData.originLatLon.x, householdData.originLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             homePosition = new Vector2((float)temp.x, (float)temp.y);
-            temp = GeoConversions.GeoToWorldPosition(householdData.carLatLon.x, householdData.carLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            temp = GeoConversions.GeoToWorldPosition(householdData.roadAccessLatLon.x, householdData.roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * eO.walkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;
@@ -77,7 +77,7 @@ namespace WUIPlatform.Pedestrian
 
         public Vector2d GetCarLatLon()
         {
-            return _houseHoldData.carLatLon;
+            return _houseHoldData.roadAccessLatLon;
         }
 
         public int GetCellIndex()

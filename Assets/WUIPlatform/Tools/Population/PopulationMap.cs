@@ -86,7 +86,7 @@ namespace WUIPlatform.Population
 
         public void CreateAndSave(LocalGPWData localGPWData, float cellSize)
         {
-            _lowerLeftLatLong = WUIEngine.INPUT.Simulation.LowerLeftLatLong;
+            _lowerLeftLatLong = WUIEngine.INPUT.Simulation.LowerLeftLatLon;
             _size = WUIEngine.INPUT.Simulation.Size;
             _cellSize = cellSize;
             _cells = new Vector2int((int)(0.5f + _size.x / cellSize), (int)(0.5f + _size.y / cellSize));
@@ -256,8 +256,7 @@ namespace WUIPlatform.Population
 
             _haveData = true;
             _populationData.Visualizer.CreatePopulationMapTexture(this);
-            SaveToFile(WUIEngine.INPUT.Simulation.SimulationID);
-            
+            SaveToFile(WUIEngine.INPUT.Simulation.SimulationID);            
         }    
 
         /// <summary>
@@ -312,6 +311,7 @@ namespace WUIPlatform.Population
                 _totalActiveCells = activeCellIndices.Count;
             }
 
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
             _populationData.Visualizer.CreatePopulationMapTexture(this);
             if(saveWhenDone)
             {

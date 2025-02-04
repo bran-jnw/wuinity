@@ -33,7 +33,7 @@ namespace WUIPlatform
 
             public ValidCriticalData(WUIEngineInput input)
             {
-                lowerLeftLatLong = input.Simulation.LowerLeftLatLong;
+                lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
                 size = input.Simulation.Size;
                 routeCellSize = input.Evacuation.RouteCellSize;
             }
@@ -173,7 +173,6 @@ namespace WUIPlatform
             validInput = new ValidCriticalData(_input);
 
             _runtimeData = new RuntimeData();
-
             //transform input to actual data
             RUNTIME_DATA.Evacuation.LoadAll();
             RUNTIME_DATA.Population.LoadAll();
@@ -213,8 +212,8 @@ namespace WUIPlatform
             bool coordinatesAreDirty = true;
             bool sizeIsDirty = true;
 
-            if (validInput.lowerLeftLatLong.x == INPUT.Simulation.LowerLeftLatLong.x
-                && validInput.lowerLeftLatLong.y == INPUT.Simulation.LowerLeftLatLong.y)
+            if (validInput.lowerLeftLatLong.x == INPUT.Simulation.LowerLeftLatLon.x
+                && validInput.lowerLeftLatLong.y == INPUT.Simulation.LowerLeftLatLon.y)
             {
                 coordinatesAreDirty = false;
             }
@@ -235,7 +234,7 @@ namespace WUIPlatform
 
             //set cached data to be current data
             validInput.size = INPUT.Simulation.Size;
-            validInput.lowerLeftLatLong = INPUT.Simulation.LowerLeftLatLong;
+            validInput.lowerLeftLatLong = INPUT.Simulation.LowerLeftLatLon;
         }
 
         public void UpdateEvacResourceStatus()

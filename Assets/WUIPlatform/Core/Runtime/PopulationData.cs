@@ -15,15 +15,15 @@ namespace WUIPlatform.Runtime
     {    
         public struct HouseholdData
         {
-            public Vector2d _houseLatLon;
-            public Vector2d _carLatLon;
-            public int _peopleCount;
+            public Vector2d originLatLon;
+            public Vector2d roadAccessLatLon;
+            public int peopleCount;
 
-            public HouseholdData(Vector2d houseLatLon, Vector2d carLatLon, int peopleCount)
+            public HouseholdData(Vector2d originLatLon, Vector2d roadAccessLatLon, int peopleCount)
             {
-                _houseLatLon = houseLatLon;
-                _carLatLon = carLatLon;
-                _peopleCount = peopleCount;
+                this.originLatLon = originLatLon;
+                this.roadAccessLatLon = roadAccessLatLon;
+                this.peopleCount = peopleCount;
             }
         }
 
@@ -56,7 +56,7 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.HouseholdsFile));
+            WUIEngine.DATA_STATUS.SetPopulation(LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.HouseholdsFile)));
         }
         
         private bool LoadPopulation(string path)
@@ -88,9 +88,10 @@ namespace WUIPlatform.Runtime
                         _householdData[i - 1] = new HouseholdData(new Vector2d(lat, lon), new Vector2d(carLat, carLon), people);
                         _totalPopulation += people;
                     }
-                }
 
-                success = true;
+                    success = true;
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Loaded population " + Path.GetFileNameWithoutExtension(path) + " containing " + _totalPopulation + " people and " + _householdData.Length + " households.");
+                }                
             }
             else
             {

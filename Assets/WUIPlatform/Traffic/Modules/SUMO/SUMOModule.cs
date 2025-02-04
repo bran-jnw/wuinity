@@ -16,7 +16,7 @@ namespace WUIPlatform.Traffic
     public class SUMOModule : TrafficModule
     {
         private Dictionary<string, SUMOCar> cars;        
-        private Vector2d offset;
+        private Vector2d _offset;
         Dictionary<StartGoal, string> validRouteIDs;
         private double adjustX, adjustY;
 
@@ -43,9 +43,9 @@ namespace WUIPlatform.Traffic
 
                 //need to use UTM projection in SUMO and WUInity to overlay data (an dapproximate overlay with web mercator, e.g. Mapbox)
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
-                offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+                _offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + offset.x + ", " + offset.y);
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + _offset.x + ", " + _offset.y);
 
                 //keep for now if we ever want to do projection corrections here
                 //https://gis.stackexchange.com/questions/14528/better-distance-measurements-in-web-mercator-projection
@@ -152,8 +152,8 @@ namespace WUIPlatform.Traffic
                     foreach (SUMOCar car in cars.Values)
                     {
                         buffer[index] = car.GetPositionAndSpeed(true);
-                        buffer[index].X += (float)offset.x;
-                        buffer[index].Y += (float)offset.y;
+                        buffer[index].X += (float)_offset.x;
+                        buffer[index].Y += (float)_offset.y;
                         if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
                         {
                             buffer[index].X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
@@ -366,8 +366,8 @@ namespace WUIPlatform.Traffic
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
-                    int cellIndexX = (int)((nodePos.x + offset.x) / WUIEngine.SIM.FireModule.GetCellSizeX());
-                    int cellIndexY = (int)((nodePos.y + offset.y) / WUIEngine.SIM.FireModule.GetCellSizeY());
+                    int cellIndexX = (int)((nodePos.x + _offset.x) / WUIEngine.SIM.FireModule.GetCellSizeX());
+                    int cellIndexY = (int)((nodePos.y + _offset.y) / WUIEngine.SIM.FireModule.GetCellSizeY());
 
                     if (cellIndexX > 0 && cellIndexX < WUIEngine.SIM.FireModule.GetCellCountX() - 1 &&
                         cellIndexY > 0 && cellIndexY < WUIEngine.SIM.FireModule.GetCellCountY() - 1)

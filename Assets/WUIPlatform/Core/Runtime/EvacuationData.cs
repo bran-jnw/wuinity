@@ -70,29 +70,6 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        public struct HouseholdData
-        {
-            public Vector2d houseLatLon;
-            public Vector2d carLatLon;
-            public int peopleCount;
-
-            public HouseholdData(Vector2d startLatLon, Vector2d carLatLon, int peopleCount)
-            {
-                this.houseLatLon = startLatLon;
-                this.carLatLon = carLatLon; 
-                this.peopleCount = peopleCount;
-            }
-        }
-
-        private HouseholdData[] _householdCoordinates;
-        public HouseholdData[] HouseholdCoordinates
-        {
-            get
-            {
-                return _householdCoordinates;
-            }
-        }
-
         public void LoadAll()
         {            
             //need goals and curves before can load groups    
