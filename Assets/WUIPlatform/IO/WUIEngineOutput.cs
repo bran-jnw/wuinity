@@ -6,18 +6,34 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.IO;
+using System.Collections.Generic;
 
 namespace WUIPlatform.IO
 {
     [System.Serializable]
     public class WUIEngineOutput
     {
-        public float totalEvacTime;
-        public EvacOutput evac;
+        private float _totalAverageEvacTime;
+        public float TotalAverageEvacTime { get => _totalAverageEvacTime; }
+        private EvacOutput _evac;
+        public EvacOutput Evac { get => _evac; }
+        private List<float> _averageEvacTimes;
+
 
         public WUIEngineOutput()
         {
-            evac = new EvacOutput();
+            _evac = new EvacOutput();
+            _averageEvacTimes = new List<float>();
+        }
+
+        public void AddEvacTime(float totalEvacTime)
+        {
+            _averageEvacTimes.Add(totalEvacTime);
+            for (int i = 0; i < _averageEvacTimes.Count; i++)
+            {
+                _totalAverageEvacTime += _averageEvacTimes[i];
+            }
+            _totalAverageEvacTime /= _averageEvacTimes.Count;
         }
 
         public static void SaveOutput(string filename)

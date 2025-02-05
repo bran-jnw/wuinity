@@ -7,7 +7,7 @@ namespace WUIPlatform.WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string desiredPopulation;
+        string desiredPopulation, borderX, borderY;
         bool populationMenuDirty = true;
         bool reScaling = false;
         float _populationMapCellSize = 100f;
@@ -200,14 +200,27 @@ namespace WUIPlatform.WUInity.UI
                 ++buttonIndex;
             }
 
+            //OSM stuff
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM tools");
             ++buttonIndex;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
             {
-                OpenFilterOSM();
+                if(double.TryParse(borderX, out osmFilterBorder.x) && double.TryParse(borderY, out osmFilterBorder.y))
+                {
+                    OpenFilterOSM();
+                }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Border is not a valid number, please check your input.");
+                }
             }
-            ++buttonIndex;        
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
+            ++buttonIndex;
+            borderX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), borderX);
+            borderY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), borderY);
+            ++buttonIndex;
         }        
 
         //GPW

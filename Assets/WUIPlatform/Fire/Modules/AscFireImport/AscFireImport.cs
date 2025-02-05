@@ -323,7 +323,7 @@ namespace WUIPlatform.Fire
 
         public override WindData GetCurrentWindData()
         {
-            return new WindData(0f, 270f, 10f, 0f);
+            return new WindData(0f, 150f, 20f, 0f);
         }
 
         public override void Stop()

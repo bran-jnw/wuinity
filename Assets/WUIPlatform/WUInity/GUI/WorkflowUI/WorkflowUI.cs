@@ -1589,7 +1589,7 @@ namespace WUIPlatform.WUInity.UI
         float sliderVtraffic = 1f;
         private void BtnVewTrafficDensity_clicked()
         {
-            float timeRange = WUIEngine.OUTPUT.totalEvacTime - WUIEngine.SIM.StartTime;
+            float timeRange = WUIEngine.SIM.CurrentTime - WUIEngine.SIM.StartTime;
             float time = sliderVtraffic * timeRange + WUIEngine.SIM.StartTime;
 
             var root = Document.rootVisualElement;
@@ -1741,7 +1741,7 @@ namespace WUIPlatform.WUInity.UI
             label1.text = "Simulation ID: " + WUIEngine.INPUT.Simulation.SimulationID;
 
             Label label2 = Document.rootVisualElement.Q<Label>("TxtEvacTime");
-            label2.text = "Sim. Clock: " + (int)WUIEngine.OUTPUT.totalEvacTime +" s\n\rdd:hh:mm:ss - " + TimeSpan.FromSeconds((int)WUIEngine.OUTPUT.totalEvacTime).ToString(@"dd\:hh\:mm\:ss");
+            label2.text = "Sim. Clock: " + (int)WUIEngine.SIM.CurrentTime + " s\n\rdd:hh:mm:ss - " + TimeSpan.FromSeconds((int)WUIEngine.SIM.CurrentTime).ToString(@"dd\:hh\:mm\:ss");
 
             Label label3 = Document.rootVisualElement.Q<Label>("TxtTotalPop");
             label3.text = "Total population: " + WUIEngine.RUNTIME_DATA.Population.TotalPopulation;

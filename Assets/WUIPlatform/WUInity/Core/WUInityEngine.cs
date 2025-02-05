@@ -426,7 +426,7 @@ namespace WUIPlatform.WUInity
             //always update visuals, even when paused
             if(WUIEngine.RUNTIME_DATA != null)
             {
-                if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && WUIEngine.SIM.State == Simulation.SimulationState.Running)
+                if (WUIEngine.SIM.State == Simulation.SimulationState.Running) // !WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && 
                 {
                     if (!_visualsExist)
                     {

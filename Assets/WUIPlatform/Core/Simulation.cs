@@ -83,7 +83,7 @@ namespace WUIPlatform
             }
         }
 
-        int[,] perilOutput;
+        float[,] _perilOutput;
         private  void StartSimulations()
         {            
             int runNumber = 0;
@@ -101,6 +101,7 @@ namespace WUIPlatform
                 runNumber = i;                
                 CreateSubModules(i);                
                 RunSimulation(i);
+                WUIEngine.OUTPUT.AddEvacTime(CurrentTime);
                 ++actualRuns;        
 
                 trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
@@ -150,7 +151,7 @@ namespace WUIPlatform
                 {
                     WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
                 }
-                WUIEngine.OUTPUT.totalEvacTime = CurrentTime;
+                
                 _haveResults = true;
 
                 //plot results
@@ -165,7 +166,7 @@ namespace WUIPlatform
 
                 if (WUIEngine.INPUT.Simulation.RunFireModule)
                 {
-                    perilOutput = WUIPlatformPERIL.RunPERIL(20f);
+                    _perilOutput = WUIPlatformPERIL.RunPERIL(20f);
                 }
             }            
 
@@ -364,10 +365,10 @@ namespace WUIPlatform
             nextFireUpdate = 0f; //fire start is always 0 seconds
 
             //only update visuals if doing single run
-            if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations)
-            {
+            //if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations)
+            //{
                 _haveResults = true;
-            }
+            //}
 
             //actual time step loop
             while (!_stopSim)
@@ -441,7 +442,6 @@ namespace WUIPlatform
                 deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
             _currentTime += deltaTime;
-            WUIEngine.OUTPUT.totalEvacTime = _currentTime;
 
             //see if we are done or not
             CheckCompletion();
@@ -736,9 +736,9 @@ namespace WUIPlatform
 
         public void DisplayTriggerBuffer()
         {
-            if(perilOutput != null)
+            if(_perilOutput != null)
             {
-                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(perilOutput);
+                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(_perilOutput);
                 WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
                 WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPDataPlane(true);
             }            

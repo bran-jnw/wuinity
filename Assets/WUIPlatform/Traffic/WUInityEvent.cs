@@ -98,7 +98,7 @@ namespace WUIPlatform
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No valid goal blocking events could be loaded.");
+                WUIEngine.LOG(WUIEngine.LogType.Log, "No valid goal blocking events could be loaded.");
                 return null;
             }
         }

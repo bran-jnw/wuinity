@@ -113,7 +113,7 @@ namespace WUIPlatform.Visualization
             CreateLCPDataPlane(WUInity.WUInityEngine.INSTANCE.transform, "LCP_plane", true, xDim, yDim, _lcpData.OriginOffset);
         }
 
-        public override void CreateTriggerBufferVisuals(int[,] triggerBufferData)
+        public override void CreateTriggerBufferVisuals(float[,] triggerBufferData)
         {
             Fire.LCPData _lcpData = owner.LCPData;
             int xPixels = _lcpData.GetCellCountX();
@@ -121,17 +121,16 @@ namespace WUIPlatform.Visualization
 
             _triggerBufferTexture = new Texture2D(xPixels, yPixels, TextureFormat.RGBA32, false);
             _triggerBufferTexture.filterMode = FilterMode.Point;
-            float alpha = 0.85f;
 
             for (int y = 0; y < yPixels; y++)
             {
                 for (int x = 0; x < xPixels; x++)
                 {
                     //PERIL has  flipped x/y for some reason
-                    int value = triggerBufferData[triggerBufferData.GetLength(0) - 1 - y, x];
-                    Color c = Color.red * (value / 1f);
-                    c.a = alpha;
-                    if(value == 0)
+                    float value = triggerBufferData[triggerBufferData.GetLength(0) - 1 - y, x];
+                    Color c = Color.red * value;
+                    c.a = 1.0f;
+                    if(value == 0f)
                     {
                         c.a = 0f;
                     }

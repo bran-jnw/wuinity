@@ -23,7 +23,7 @@ namespace WUIPlatform.Visualization
         public abstract void SetLCPViewMode(LcpViewMode lcpViewMode);
         public abstract void ToggleLCPDataPlane();
         public abstract void SetLCPDataPlane(bool setActive);
-        public abstract void CreateTriggerBufferVisuals(int[,] data);
+        public abstract void CreateTriggerBufferVisuals(float[,] data);
     }
 }
 

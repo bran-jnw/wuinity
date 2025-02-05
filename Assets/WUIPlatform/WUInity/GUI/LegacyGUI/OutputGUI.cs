@@ -21,7 +21,7 @@ namespace WUIPlatform.WUInity.UI
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            int dummy = (int)WUIEngine.OUTPUT.totalEvacTime;
+            int dummy = (int)WUIEngine.SIM.CurrentTime;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
@@ -70,7 +70,7 @@ namespace WUIPlatform.WUInity.UI
             }
             ++buttonIndex;
 
-            float timeRange = WUIEngine.OUTPUT.totalEvacTime - WUIEngine.SIM.StartTime;
+            float timeRange = WUIEngine.SIM.CurrentTime - WUIEngine.SIM.StartTime;
             float time = sliderVtraffic * timeRange + WUIEngine.SIM.StartTime;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
