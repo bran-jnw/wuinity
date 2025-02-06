@@ -39,6 +39,15 @@ namespace WUIPlatform.Fire
         bool doneSpreading;
         InitialFuelMoisture moisture;
 
+        //private const TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
+        private const BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
+        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
+        private const BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
+        private const BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
+        private const BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
+        private const BehaveUnits.SpeedUnits.SpeedUnitsEnum speedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
+        private const WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
+
         [DllImport("BEHAVEDLL", EntryPoint = "CalcFireMaxSpreadRate")]          
         public static extern double CalcFireMaxSpreadRate(int fuelModelNumber, 
             double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody,
@@ -444,16 +453,7 @@ namespace WUIPlatform.Fire
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
             double canopyHeight = lcp.crown_canopy_height;
-            double crownRatio = lcp.crown_bulk_density; //TODO: is this correct?
-
-            TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
-            BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
-            WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
-            BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
-            BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
-            BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
-            BehaveUnits.SpeedUnits.SpeedUnitsEnum speedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
-            WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth; //fireMesh.surfaceFire.getWindAndSpreadOrientationMode(); //WindAndSpreadOrientationMode.RelativeToUpslope;
+            double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
             //feed new data
             fireMesh.surfaceFire.updateSurfaceInputs(fuelModelNumber,

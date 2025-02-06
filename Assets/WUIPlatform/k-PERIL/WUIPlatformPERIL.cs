@@ -170,7 +170,7 @@ namespace WUIPlatform
 
                     double canopyCover = cellData.canopy_cover;
                     double canopyHeight = cellData.crown_canopy_height;
-                    double crownRatio = cellData.crown_bulk_density; //TODO: is this correct?
+                    double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
                     surfaceFire.updateSurfaceInputs(fuelModelNumber, moistureOneHour, moistureTenHour, moistureHundredHour, moistureLiveHerbaceous, moistureLiveWoody, moistureUnits,
                         midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, slope, slopeUnits, aspect, canopyCover, coverUnits, canopyHeight, lengthUnits, crownRatio);
