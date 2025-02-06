@@ -166,7 +166,7 @@ namespace WUIPlatform
 
                 if (WUIEngine.INPUT.Simulation.RunFireModule)
                 {
-                    _perilOutput = WUIPlatformPERIL.RunPERIL(20f);
+                    _perilOutput = WUIPlatformPERIL.RunPERIL(10f);
                 }
             }            
 

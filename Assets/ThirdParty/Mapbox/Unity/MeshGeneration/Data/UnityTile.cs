@@ -291,7 +291,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 
 				if (_rasterData == null)
 				{
-					_rasterData = new Texture2D(0, 0, TextureFormat.RGB24, useMipMap);
+					_rasterData = new Texture2D(2, 2, TextureFormat.RGB24, useMipMap);
 					_rasterData.wrapMode = TextureWrapMode.Clamp;
 				}
 

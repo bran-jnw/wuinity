@@ -135,6 +135,8 @@ namespace WUIPlatform
             int yDim = lcpData.GetCellCountY();
             rateOfSpreads = new float[xDim, yDim];
             spreadDirections = new float[xDim, yDim];
+
+            //we need to create and fill the fuel model set. TODO: create this data globally in RUNTIME_DATA.Fire
             FuelModelSet fuelModelSet = new FuelModelSet();
             if (WUIEngine.DATA_STATUS.FuelModelsLoaded)
             {
@@ -149,9 +151,9 @@ namespace WUIPlatform
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    if(x < 20 || x > xDim - 20 || y < 20 || y > yDim - 20)
+                    //k-PERIL crashes if edges has non-zero data
+                    if(x < 1 || x > xDim - 2 || y < 1 || y > yDim - 2)
                     {
-                        int e = 0;
                         continue;
                     }
                     LandscapeStruct cellData = lcpData.GetCellData(x, y);

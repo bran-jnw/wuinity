@@ -130,10 +130,10 @@ namespace WUIPlatform.Visualization
                     float value = triggerBufferData[triggerBufferData.GetLength(0) - 1 - y, x];
                     Color c = Color.red * value;
                     c.a = 1.0f;
-                    if(value == 0f)
+                    /*if(value == 1f)
                     {
                         c.a = 0f;
-                    }
+                    }*/
                     _triggerBufferTexture.SetPixel(x, y, c);
                 }
             }
