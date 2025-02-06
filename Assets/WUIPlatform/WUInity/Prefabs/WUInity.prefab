@@ -334,6 +334,7 @@ MonoBehaviour:
   _godCamera: {fileID: 9009419062933292157}
   DeveloperMode: 0
   AutoLoadExample: 0
+  _renderScale: 1
   _markerPrefab: {fileID: 2598817330613097118, guid: 9a4214ef857ec764cafe974156c124ea,
     type: 3}
   _simBorder: {fileID: 5507650468005286544}
@@ -631,7 +632,7 @@ GameObject:
   - component: {fileID: 9009419062933292158}
   - component: {fileID: 9009419062933292157}
   m_Layer: 0
-  m_Name: GodCamera
+  m_Name: WUICamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1019,7 +1020,7 @@ PrefabInstance:
         type: 3}
       propertyPath: _options.tileMaterial
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2100000, guid: 8c9c6c0f2e0f8a34c975e3dd9a166667, type: 2}
     - target: {fileID: 114478715909612932, guid: e6b749c6d877f4c19a5a5c3c0783d53b,
         type: 3}
       propertyPath: _options.loadingTexture

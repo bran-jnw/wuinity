@@ -33,7 +33,7 @@ namespace WUIPlatform.WUInity
             }            
         }
 
-        public void SetCameraStartPosition(WUIPlatform.Vector2d mapSize)
+        public void SetCameraStartPosition(Vector2d mapSize)
         {
             this.mapSize = mapSize;
             float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * c.fieldOfView * 0.5f);
@@ -57,7 +57,7 @@ namespace WUIPlatform.WUInity
                 {
                     cMode = CameraMode.twoD;
                 }
-                SetCameraStartPosition(WUIPlatform.WUIEngine.INPUT.Simulation.Size);
+                SetCameraStartPosition(WUIEngine.INPUT.Simulation.Size);
             }
 
             if (cMode == CameraMode.twoD)

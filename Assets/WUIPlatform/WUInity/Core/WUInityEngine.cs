@@ -544,8 +544,8 @@ namespace WUIPlatform.WUInity
                 {
                     if (WUIEngine.RUNTIME_DATA.Population.Visualizer.IsDataPlaneActive())
                     {
-                        float xCellSize = (float)(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.realWorldSize.x / WUIEngine.RUNTIME_DATA.Population.LocalGPWData.dataSize.x);
-                        float yCellSize = (float)(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.realWorldSize.y / WUIEngine.RUNTIME_DATA.Population.LocalGPWData.dataSize.y);
+                        float xCellSize = (float)(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.realWorldSize.x / WUIEngine.RUNTIME_DATA.Population.LocalGPWData._cells.x);
+                        float yCellSize = (float)(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.realWorldSize.y / WUIEngine.RUNTIME_DATA.Population.LocalGPWData._cells.y);
                         double cellArea = xCellSize * yCellSize / (1000000d);
                         dataSampleString = "GPW people count: " + System.Convert.ToInt32(WUIEngine.RUNTIME_DATA.Population.LocalGPWData.GetDensitySimulationSpace(new WUIPlatform.Vector2d(pos.x, pos.z)) * cellArea);
                     }
@@ -670,7 +670,7 @@ namespace WUIPlatform.WUInity
             }
         }
 
-        private MeshRenderer CreateDataPlane(Texture2D tex, string name, Vector2int cellCount)
+        private MeshRenderer CreateDataPlane(Texture2D tex, string name, Vector2d size, Vector2d originOffset)
         {
             GameObject gO = new GameObject(name);
             gO.transform.parent = this.transform;
@@ -684,15 +684,13 @@ namespace WUIPlatform.WUInity
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)WUIEngine.INPUT.Simulation.Size.x;
-            float length = (float)WUIEngine.INPUT.Simulation.Size.y;
+            float width = (float)size.x;
+            float length = (float)size.y;
 
 
-            Vector3 offset = Vector3.zero;
+            Vector3 offset = new Vector3((float)originOffset.x, 0f, (float)originOffset.y);
 
-            Vector2 maxUV = new Vector2((float)cellCount.x / tex.width, (float)cellCount.y / tex.height);
-
-            Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset);
 
             Material mat = new Material(Shader.Find("Unlit/Transparent"));
             mat.mainTexture = tex;
@@ -903,18 +901,22 @@ namespace WUIPlatform.WUInity
             //pick needed data plane
             MeshRenderer activeMeshRenderer = _populationDataPlaneMeshRenderer;
             Vector2int cellCount = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
+            Vector2d size = WUIEngine.INPUT.Simulation.Size;
+            Vector2d offset = Vector2d.zero;
             string name = "Evac Data Plane";
             if (fireMeshMode)
             {
                 activeMeshRenderer = _fireDataPlaneMeshRenderer;
                 cellCount = new Vector2int(WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX(), WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY());
+                size = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetSize();
+                offset = WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset;
                 name = "Fire Data Plane";
             }
 
             //make sure it exists, else create
             if (activeMeshRenderer == null)
             {
-                activeMeshRenderer = CreateDataPlane(tex, name, cellCount);
+                activeMeshRenderer = CreateDataPlane(tex, name, size, offset);
                 if(fireMeshMode)
                 {
                     _fireDataPlaneMeshRenderer = activeMeshRenderer;
@@ -1013,17 +1015,7 @@ namespace WUIPlatform.WUInity
                 }
 
                 //create texture
-                Vector2Int res = new Vector2Int(2, 2);
-                while (WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x > res.x)
-                {
-                    res.x *= 2;
-                }
-                while (WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y > res.y)
-                {
-                    res.y *= 2;
-                }
-
-                Texture2D tex = new Texture2D(res.x, res.y);
+                Texture2D tex = new Texture2D(WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x, WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y);
                 tex.filterMode = FilterMode.Point;
 
                 for (int y = 0; y < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y; ++y)

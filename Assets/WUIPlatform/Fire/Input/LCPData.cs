@@ -198,7 +198,7 @@ namespace WUIPlatform.Fire
 		/// In meters.
 		/// </summary>
 		/// <returns></returns>
-        public Vector2d GetLCPSize()
+        public Vector2d GetSize()
 		{
 			double x = Header.EastUtm - Header.WestUtm;
             double y = Header.NorthUtm - Header.SouthUtm;

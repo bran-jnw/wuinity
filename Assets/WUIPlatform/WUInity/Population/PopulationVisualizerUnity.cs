@@ -73,21 +73,9 @@ namespace WUIPlatform.Population
 
         public override void CreatePopulationMapTexture(PopulationMap data)
         {
-            int maxSide = Mathf.Max(data._cells.x, data._cells.y);
-            Vector2int res = new Vector2int(2, 2);
-
-            while (data._cells.x > res.x)
+            if(populationMapTexture == null || !(populationMapTexture.width == data._cells.x && populationMapTexture.height == data._cells.y))
             {
-                res.x *= 2;
-            }
-            while (data._cells.y > res.y)
-            {
-                res.y *= 2;
-            }
-
-            if(populationMapTexture == null || !(populationMapTexture.width == res.x && populationMapTexture.height == res.y))
-            {
-                populationMapTexture = new Texture2D(res.x, res.y);
+                populationMapTexture = new Texture2D(data._cells.x, data._cells.y);
                 populationMapTexture.filterMode = FilterMode.Point;
             }            
             
@@ -110,21 +98,9 @@ namespace WUIPlatform.Population
 
         public override void CreatePopulationMapMaskTexture(PopulationMap data)
         {
-            int maxSide = Mathf.Max(data._cells.x, data._cells.y);
-            Vector2int res = new Vector2int(2, 2);
-
-            while (data._cells.x > res.x)
+            if (populationMapMaskTexture == null || !(populationMapMaskTexture.width == data._cells.x && populationMapMaskTexture.height == data._cells.y))
             {
-                res.x *= 2;
-            }
-            while (data._cells.y > res.y)
-            {
-                res.y *= 2;
-            }
-
-            if (populationMapMaskTexture == null || !(populationMapMaskTexture.width == res.x && populationMapMaskTexture.height == res.y))
-            {
-                populationMapMaskTexture = new Texture2D(res.x, res.y);
+                populationMapMaskTexture = new Texture2D(data._cells.x, data._cells.y);
                 populationMapMaskTexture.filterMode = FilterMode.Point;
             }
 
@@ -173,10 +149,9 @@ namespace WUIPlatform.Population
             float width = (float)localGPWData.realWorldSize.x; //(float)size.x;
             float length = (float)localGPWData.realWorldSize.y; //(float)size.y;
 
-            Vector3 offset = new Vector3((float)localGPWData.unityOriginOffset.x, 0.0f, (float)localGPWData.unityOriginOffset.y);
+            Vector3 offset = new Vector3((float)localGPWData.originOffset.x, 0.0f, (float)localGPWData.originOffset.y);
 
-            Vector2 maxUV = new Vector2((float)localGPWData.dataSize.x / densityTexture.width, (float)localGPWData.dataSize.y / densityTexture.height);
-            WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset);
 
             if (gpwDataPlaneMaterial == null)
             {
@@ -194,26 +169,11 @@ namespace WUIPlatform.Population
 
         public override void CreateGPWTexture(LocalGPWData data)
         {
-            Vector2int dataSize = data.dataSize;
-            //first find the correct texture size
-            int maxSide = Mathf.Max(dataSize.x, dataSize.y);
-            Vector2int res = new Vector2int(2, 2);
-
-            while (dataSize.x > res.x)
-            {
-                res.x *= 2;
-            }
-            while (dataSize.y > res.y)
-            {
-                res.y *= 2;
-            }
-
-            //paint texture based time of arrival
-            densityTexture = new UnityEngine.Texture2D(res.x, res.y);
+            densityTexture = new Texture2D(data._cells.x, data._cells.y);
             densityTexture.filterMode = UnityEngine.FilterMode.Point;
-            for (int y = 0; y < dataSize.y; y++)
+            for (int y = 0; y < data._cells.y; y++)
             {
-                for (int x = 0; x < dataSize.x; x++)
+                for (int x = 0; x < data._cells.x; x++)
                 {
                     double density = data.GetDensity(x, y);
                     WUIEngineColor color = GetGPWColor((float)density);

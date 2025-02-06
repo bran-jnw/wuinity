@@ -25,7 +25,7 @@
  */
 using static WUIPlatform.Fire.MathWrap;
 
-namespace WUIPlatform.Fire
+namespace WUIPlatform.Fire.Behave
 {
     public struct PathStruct
     {

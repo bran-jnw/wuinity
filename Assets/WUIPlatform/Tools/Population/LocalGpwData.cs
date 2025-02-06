@@ -22,9 +22,9 @@ namespace WUIPlatform.Population
         public double cellsize; //size in degrees
         public int NODATA_value;
         public double[] density;
-        public Vector2int dataSize;
+        public Vector2int _cells;
         public Vector2d actualOriginDegrees;
-        public Vector2d unityOriginOffset;
+        public Vector2d originOffset;
         public Vector2d realWorldSize;
         public int totalPopulation;
                         
@@ -80,9 +80,9 @@ namespace WUIPlatform.Population
                 densData += density[i] + " ";
             }
             data[7] = densData;
-            data[8] = dataSize.x + " " + dataSize.y;
+            data[8] = _cells.x + " " + _cells.y;
             data[9] = actualOriginDegrees.x + " " + actualOriginDegrees.y;
-            data[10] = unityOriginOffset.x + " " + unityOriginOffset.y;
+            data[10] = originOffset.x + " " + originOffset.y;
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
@@ -110,10 +110,10 @@ namespace WUIPlatform.Population
                 int yI;
                 int.TryParse(dummy[0], out xI);
                 int.TryParse(dummy[1], out yI);
-                dataSize = new Vector2int(xI, yI);
+                _cells = new Vector2int(xI, yI);
 
                 dummy = d[7].Split(' ');
-                density = new double[dataSize.x * dataSize.y];
+                density = new double[_cells.x * _cells.y];
                 for (int i = 0; i < density.Length; ++i)
                 {
                     double.TryParse(dummy[i], out density[i]);
@@ -129,7 +129,7 @@ namespace WUIPlatform.Population
                 dummy = d[10].Split(' ');
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
-                unityOriginOffset = new Vector2d(xD, yD);
+                originOffset = new Vector2d(xD, yD);
 
                 dummy = d[11].Split(' ');
                 double.TryParse(dummy[0], out xD);
@@ -197,13 +197,13 @@ namespace WUIPlatform.Population
         {
             totalPopulation = 0;
 
-            double cellSizeX = realWorldSize.x / dataSize.x;
-            double cellSizeY = realWorldSize.y / dataSize.y;
+            double cellSizeX = realWorldSize.x / _cells.x;
+            double cellSizeY = realWorldSize.y / _cells.y;
             double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
             totalPopulation = 0;
-            for (int y = 0; y < dataSize.y; ++y)
+            for (int y = 0; y < _cells.y; ++y)
             {
-                for (int x = 0; x < dataSize.x; ++x)
+                for (int x = 0; x < _cells.x; ++x)
                 {
                     double density = GetDensity(x, y);
                     int pop = Mathf.CeilToInt((float)(cellArea * density));
@@ -223,30 +223,30 @@ namespace WUIPlatform.Population
                 return -1.0;
             }
 
-            x = Mathf.Clamp(x, 0, dataSize.x - 1);
-            y = Mathf.Clamp(y, 0, dataSize.y - 1);
-            return density[x + y * dataSize.x];
+            x = Mathf.Clamp(x, 0, _cells.x - 1);
+            y = Mathf.Clamp(y, 0, _cells.y - 1);
+            return density[x + y * _cells.x];
         }
 
         public double GetDensitySimulationSpace(Vector2d pos)
         {
-            Vector2d positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
-            int xInt = (int)((pos.x / positiveSize.x) * dataSize.x);
-            int yInt = (int)((pos.y / positiveSize.y) * dataSize.y);
+            Vector2d positiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
+            int xInt = (int)((pos.x / positiveSize.x) * _cells.x);
+            int yInt = (int)((pos.y / positiveSize.y) * _cells.y);
             double dens = GetDensity(xInt, yInt);
             return dens;
         }
 
         public  double GetDensitySimulationSpaceBilinear(Vector2d pos)
         {
-            Vector2d positiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
+            Vector2d positiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
 
-            double x = (pos.x / positiveSize.x) * dataSize.x;
+            double x = (pos.x / positiveSize.x) * _cells.x;
             int xLow = (int)x;
             int xHigh = xLow + 1;
             double xWeight = x - xLow;
 
-            double y = (pos.y / positiveSize.y) * dataSize.y;
+            double y = (pos.y / positiveSize.y) * _cells.y;
             int yLow = (int)y;
             int yHigh = yLow + 1;
             double yWeight = y - yLow;
@@ -402,7 +402,7 @@ namespace WUIPlatform.Population
 
             Vector2d degreesToRead = SizeToDegrees(latLong, size);
             //number of columns and rows
-            dataSize = new Vector2int(Mathd.CeilToInt(degreesToRead.x / cellsize), Mathd.CeilToInt(degreesToRead.y / cellsize));
+            _cells = new Vector2int(Mathd.CeilToInt(degreesToRead.x / cellsize), Mathd.CeilToInt(degreesToRead.y / cellsize));
             //start index to read data
             int xSI = (int)((latLong.y - xllcorner) / cellsize);
             int ySI = (int)((latLong.x - yllcorner) / cellsize);
@@ -417,30 +417,30 @@ namespace WUIPlatform.Population
             Vector2d dOffset = actualOriginDegrees - latLong;
             //flip these as lat/long has reversed order to x/y 
             dOffset = new Vector2d(dOffset.y, dOffset.x);
-            unityOriginOffset = DegreesToSize(latLong, dOffset);
-            realWorldSize = DegreesToSize(latLong, new Vector2d(dataSize.x * cellsize, dataSize.y * cellsize));
+            originOffset = DegreesToSize(latLong, dOffset);
+            realWorldSize = DegreesToSize(latLong, new Vector2d(_cells.x * cellsize, _cells.y * cellsize));
             //check if we need to add another cell after shifting origin
-            Vector2d actualPositiveSize = realWorldSize + unityOriginOffset; //since offset is always negative we add it here
+            Vector2d actualPositiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
             bool updateSize = false;
             if (actualPositiveSize.x < size.x)
             {
                 ++xEI;
-                ++dataSize.x;
+                ++_cells.x;
                 updateSize = true;
             }
             if (actualPositiveSize.y < size.y)
             {
                 ++yEI;
-                ++dataSize.y;
+                ++_cells.y;
                 updateSize = true;
             }
             if (updateSize)
             {
-                realWorldSize = DegreesToSize(latLong, new Vector2d(dataSize.x * cellsize, dataSize.y * cellsize));
+                realWorldSize = DegreesToSize(latLong, new Vector2d(_cells.x * cellsize, _cells.y * cellsize));
             }
 
             //create needed array
-            density = new double[dataSize.x * dataSize.y];
+            density = new double[_cells.x * _cells.y];
 
             for (int i = 0; i < nrows; ++i) //density.Length
             {
@@ -451,7 +451,7 @@ namespace WUIPlatform.Population
                 {
                     if (j >= xSI && j <= xEI && realYIndex >= ySI && realYIndex <= yEI)
                     {
-                        int index = (j - xSI) + (realYIndex - ySI) * dataSize.x;
+                        int index = (j - xSI) + (realYIndex - ySI) * _cells.x;
                         double.TryParse(e[j], out density[index]);
                     }
                 }

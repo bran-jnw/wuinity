@@ -233,7 +233,7 @@ namespace WUIPlatform.WUInity.Visualization
                 height *= yScale;
             }
 
-            VisualizeUtilities.CreateSimplePlane(mesh, width, height, 0.0f, offset, maxUV);
+            VisualizeUtilities.CreateSimplePlane(mesh, width, height, 0.0f, offset);
 
             mR.material = material;
             //move up one meter

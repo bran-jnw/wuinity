@@ -30,7 +30,7 @@ namespace WUIPlatform.WUInity.Visualization
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset, maxUV);
+            CreateSimplePlane(mesh, width, length, 0.0f, offset);
 
             mR.material = material;
             //move up one meter
@@ -40,10 +40,10 @@ namespace WUIPlatform.WUInity.Visualization
         }
 
 
-        public static void CreateSimplePlane(Mesh mesh, float sizeX, float sizeZ, float yPos, Vector3 offset, Vector2 maxUV)
+        public static void CreateSimplePlane(Mesh mesh, float sizeX, float sizeZ, float yPos, Vector3 originOffset)
         {
-            int resX = 2;
-            int resZ = 2;
+            const int resX = 2;
+            const int resZ = 2;
 
             Vector3[] vertices = new Vector3[resX * resZ];
             for (int z = 0; z < resZ; z++)
@@ -52,7 +52,7 @@ namespace WUIPlatform.WUInity.Visualization
                 for (int x = 0; x < resX; x++)
                 {
                     float xPos = ((float)x / (resX - 1)) * sizeX;
-                    vertices[x + z * resX] = new Vector3(xPos, yPos, zPos) + offset;
+                    vertices[x + z * resX] = new Vector3(xPos, yPos, zPos) + originOffset;
                 }
             }
             Vector3[] normals = new Vector3[vertices.Length];
@@ -60,14 +60,8 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 normals[n] = Vector3.up;
             }
-            Vector2[] uvs = new Vector2[vertices.Length];
-            for (int v = 0; v < resZ; v++)
-            {
-                for (int u = 0; u < resX; u++)
-                {
-                    uvs[u + v * resX] = new Vector2((float)u / (resX - 1) * maxUV.x, (float)v / (resZ - 1) * maxUV.y);
-                }
-            }
+            Vector2[] uvs = new Vector2[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
+
             int nbFaces = (resX - 1) * (resZ - 1);
             int[] triangles = new int[nbFaces * 6];
             int index = 0;

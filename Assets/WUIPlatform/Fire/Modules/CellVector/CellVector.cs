@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using static WUIPlatform.Fire.MathWrap;
+using WUIPlatform.Fire.Behave;
 
 namespace WUIPlatform.Fire
 {

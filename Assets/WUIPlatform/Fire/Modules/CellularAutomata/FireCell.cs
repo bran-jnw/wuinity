@@ -7,6 +7,7 @@
 
 using static WUIPlatform.Fire.MathWrap;
 using System.Runtime.InteropServices;
+using WUIPlatform.Fire.Behave;
 
 namespace WUIPlatform.Fire
 {  

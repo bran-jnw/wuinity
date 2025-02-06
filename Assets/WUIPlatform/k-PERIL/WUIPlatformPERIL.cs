@@ -7,6 +7,8 @@
 
 using System.IO;
 using System.Collections.Generic;
+using WUIPlatform.Fire.Behave;
+using WUIPlatform.Fire;
 
 namespace WUIPlatform
 {
@@ -26,10 +28,12 @@ namespace WUIPlatform
                 PERIL = new kPERIL_DLL.kPERIL();
             }
 
-            int xDim = WUIEngine.SIM.FireModule.GetCellCountX();
-            int yDim = WUIEngine.SIM.FireModule.GetCellCountY();
+            WUIEngine.LOG(WUIEngine.LogType.Debug, WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX() + ", " + WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY() + ", " + WUIEngine.SIM.FireModule.GetCellCountX() + ", " + WUIEngine.SIM.FireModule.GetCellCountY());
+
+            int xDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
+            int yDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
             //assume cell/raster is square
-            int cellSize = Mathf.RoundToInt(WUIEngine.SIM.FireModule.GetCellSizeX());
+            int cellSize = Mathf.RoundToInt((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionX);
             //get wuiarea from a user defined map painted in wuinity
             int[,] WUIarea = GetWUIArea();
 
@@ -41,10 +45,24 @@ namespace WUIPlatform
                 RSETs[i] = RSET + i * 60 * 12f;
             }
 
-            //collect ROS, how to send ROS data is ROStheta[X*Y,8], y first, x second, start in north and then clockwise
-            float[,] maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
-            float[,] rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
+            float[,] maxROS;
+            float[,] rosAzimuth;
+            bool useFireScenarioInput = false;
+            if (useFireScenarioInput)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "Using ROS from fire.");
+                maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
+                rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "Calculating ROS with Behave.");
+                CalculateRateOfSpreadAndDirection(out maxROS, out rosAzimuth, midFlameWindspeed, 150f);
+            }
+            
             int[,] wuiArea = GetWUIArea();
+
+            WUIEngine.LOG(WUIEngine.LogType.Debug, maxROS.GetLength(0) + ", " + maxROS.GetLength(1) + ", " + rosAzimuth.GetLength(0) + ", " + rosAzimuth.GetLength(1));
 
             List<int[,]> perilOutput = new List<int[,]>(RSETs.Length);
             for (int i = 0; i < RSETs.Length; ++i)
@@ -101,15 +119,80 @@ namespace WUIPlatform
             return perilOutput;*/
         }
 
+        //private const TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
+        private const BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
+        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
+        private const BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
+        private const BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
+        private const BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
+        private const BehaveUnits.SpeedUnits.SpeedUnitsEnum speedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerMinute;
+        private const WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
+
+        private static void CalculateRateOfSpreadAndDirection(out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection)
+        {
+            LCPData lcpData = WUIEngine.RUNTIME_DATA.Fire.LCPData;
+            int xDim = lcpData.GetCellCountX();
+            int yDim = lcpData.GetCellCountY();
+            rateOfSpreads = new float[xDim, yDim];
+            spreadDirections = new float[xDim, yDim];
+            FuelModelSet fuelModelSet = new FuelModelSet();
+            if (WUIEngine.DATA_STATUS.FuelModelsLoaded)
+            {
+                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
+                {
+                    fuelModelSet.setFuelModelRecord(WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
+                }
+            }
+            Surface surfaceFire = new Surface(fuelModelSet);       
+            
+            for (int y = 0; y < yDim; ++y)
+            {
+                for (int x = 0; x < xDim; ++x)
+                {
+                    if(x < 20 || x > xDim - 20 || y < 20 || y > yDim - 20)
+                    {
+                        int e = 0;
+                        continue;
+                    }
+                    LandscapeStruct cellData = lcpData.GetCellData(x, y);
+                    int fuelModelNumber = cellData.fuel_model;
+                    int slope = cellData.slope;
+                    int aspect = cellData.aspect;
+
+                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(fuelModelNumber);
+                    double moistureOneHour = moisture.OneHour;
+                    double moistureTenHour = moisture.TenHour;
+                    double moistureHundredHour = moisture.HundredHour;
+                    double moistureLiveHerbaceous = moisture.LiveHerbaceous;
+                    double moistureLiveWoody = moisture.LiveWoody;    
+
+                    double canopyCover = cellData.canopy_cover;
+                    double canopyHeight = cellData.crown_canopy_height;
+                    double crownRatio = cellData.crown_bulk_density; //TODO: is this correct?
+
+                    surfaceFire.updateSurfaceInputs(fuelModelNumber, moistureOneHour, moistureTenHour, moistureHundredHour, moistureLiveHerbaceous, moistureLiveWoody, moistureUnits,
+                        midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, slope, slopeUnits, aspect, canopyCover, coverUnits, canopyHeight, lengthUnits, crownRatio);
+
+                    surfaceFire.doSurfaceRunInDirectionOfMaxSpread();
+                    //flip y-axis
+                    rateOfSpreads[x, yDim - 1 - y]=  (float)surfaceFire.getSpreadRate(speedUnits);
+                    spreadDirections[x, yDim - 1 - y] = (float)surfaceFire.getDirectionOfMaxSpread();
+                }
+            }            
+        }
+
         private static int[,] GetWUIArea()
         {
+            int xDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
+            int yDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
+
             //first count how many cells we have to add to array
             int count = 0;
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices.Length; i++)
             {
-                int xIndex = i % WUIEngine.SIM.FireModule.GetCellCountX();
-                int yIndex = i / WUIEngine.SIM.FireModule.GetCellCountY();
-                if(WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
+                int xIndex = i % xDim;
+                int yIndex = i / yDim; 
+                if (WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
                 {
                     ++count;
                 }
@@ -120,8 +203,8 @@ namespace WUIPlatform
             int position = 0;
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices.Length; i++)
             {
-                int xIndex = i % WUIEngine.SIM.FireModule.GetCellCountX();
-                int yIndex = i / WUIEngine.SIM.FireModule.GetCellCountY();
+                int xIndex = i % xDim;
+                int yIndex = i / yDim;
                 int yFlipped = WUIEngine.SIM.FireModule.GetCellCountY() - 1 - yIndex;
                 if (WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices[i] == true)
                 {

@@ -18,7 +18,6 @@ namespace WUIPlatform.WUInity
         const float transparency = 0.5f;
         Color activeAreaColor = new Color(1f, 0f, 0f, transparency);
         Color inactiveAreaColor = new Color(1f, 1f, 1f, 0.1f);
-        Vector2 activeUV;
         Vector2int activeCellCount;
         Vector2d activeRealSize;
         Texture2D activeTexture;
@@ -26,7 +25,6 @@ namespace WUIPlatform.WUInity
         private int _brushSize;
 
         //general evac stuff
-        Vector2 evacDataUV;
         Vector2d evacDataRealSize;
         Vector2int evacDataCellCount;
         //evac groups
@@ -35,7 +33,6 @@ namespace WUIPlatform.WUInity
         Color[] evacGroupColorArray;
 
         //general fire stuff
-        Vector2 fireDataUV;
         Vector2d fireDataRealSize;
         Vector2int fireDataCellCount;
         bool addingArea;
@@ -65,7 +62,7 @@ namespace WUIPlatform.WUInity
         {
             if (evacGroupTex == null)
             {
-                CheckDataResources(evacGroupTex, evacGroupColorArray, evacDataUV);
+                CheckDataResources(evacGroupTex, evacGroupColorArray);
             }
             return evacGroupTex;
         }
@@ -81,7 +78,7 @@ namespace WUIPlatform.WUInity
                 }
                 else
                 {
-                    CheckDataResources(populationMaskTex, populationMaskColorArray, evacDataUV);
+                    CheckDataResources(populationMaskTex, populationMaskColorArray);
                 }                
             }
             return populationMaskTex;
@@ -91,7 +88,7 @@ namespace WUIPlatform.WUInity
         {
             if (wuiAreaTex == null)
             {
-                CheckDataResources(wuiAreaTex, wuiAreaColorArray, fireDataUV);
+                CheckDataResources(wuiAreaTex, wuiAreaColorArray);
             }
             return wuiAreaTex;
         }
@@ -100,7 +97,7 @@ namespace WUIPlatform.WUInity
         {
             if (randomIgnitionTex == null)
             {
-                CheckDataResources(randomIgnitionTex, randomIgnitionColorArray, fireDataUV);
+                CheckDataResources(randomIgnitionTex, randomIgnitionColorArray);
             }
             return randomIgnitionTex;
         }
@@ -109,7 +106,7 @@ namespace WUIPlatform.WUInity
         {
             if (initialIgnitionTex == null)
             {
-                CheckDataResources(initialIgnitionTex, initialIgnitionColorArray, fireDataUV);
+                CheckDataResources(initialIgnitionTex, initialIgnitionColorArray);
             }
             return initialIgnitionTex;
         }
@@ -191,7 +188,7 @@ namespace WUIPlatform.WUInity
         void SetupPainterEvacGroups()
         {
             paintMode = PaintMode.EvacGroup;
-            CheckDataResources(evacGroupTex, evacGroupColorArray, evacDataUV);
+            CheckDataResources(evacGroupTex, evacGroupColorArray);
             //select first zone
             evacGroupIndex = 0;
             currentColor = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
@@ -202,7 +199,7 @@ namespace WUIPlatform.WUInity
         void SetupPainterPopulationMask()
         {
             paintMode = PaintMode.PopulationMask;
-            CheckDataResources(populationMaskTex, populationMaskColorArray, evacDataUV);
+            CheckDataResources(populationMaskTex, populationMaskColorArray);
             //select first zone
             SetMaskGPWColor(true);
             _brushSize = 1;
@@ -211,7 +208,7 @@ namespace WUIPlatform.WUInity
         void SetupPainterWUIArea()
         {
             paintMode = PaintMode.WUIArea;
-            CheckDataResources(wuiAreaTex, wuiAreaColorArray, fireDataUV);
+            CheckDataResources(wuiAreaTex, wuiAreaColorArray);
             SetWUIAreaColor(true);
             _brushSize = 5;
         }
@@ -219,19 +216,19 @@ namespace WUIPlatform.WUInity
         void SetupPainterRandomIgnition()
         {
             paintMode = PaintMode.RandomIgnitionArea;
-            CheckDataResources(randomIgnitionTex, randomIgnitionColorArray, fireDataUV);
+            CheckDataResources(randomIgnitionTex, randomIgnitionColorArray);
             SetRandomIgnitionAreaColor(true);
             _brushSize = 5;
         }
         void SetupPainterInitialIgnition()
         {
             paintMode = PaintMode.InitialIgnition;
-            CheckDataResources(initialIgnitionTex, initialIgnitionColorArray, fireDataUV);
+            CheckDataResources(initialIgnitionTex, initialIgnitionColorArray);
             SetInitialIgnitionAreaColor(true);
             _brushSize = 3;
         }
 
-        void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray, Vector2 requestedUV)
+        void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray)
         {
             if (requestedTexture == null)
             {
@@ -243,7 +240,7 @@ namespace WUIPlatform.WUInity
                     {
                         fireDataCellCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCount();
                         cellCount = fireDataCellCount;
-                        fireDataRealSize = WUIEngine.INPUT.Simulation.Size;
+                        fireDataRealSize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetSize();
                     }
                     else
                     {
@@ -259,17 +256,8 @@ namespace WUIPlatform.WUInity
                     evacDataRealSize = WUIEngine.INPUT.Simulation.Size;
                 }
                 //painter
-                Vector2int textureRes = new Vector2int(2, 2);
-                while (cellCount.x > textureRes.x)
-                {
-                    textureRes.x *= 2;
-                }
-                while (cellCount.y > textureRes.y)
-                {
-                    textureRes.y *= 2;
-                }
-                requestedColorArray = new Color[textureRes.x * textureRes.y];
-                requestedTexture = new Texture2D(textureRes.x, textureRes.y);
+                requestedColorArray = new Color[cellCount.x * cellCount.y];
+                requestedTexture = new Texture2D(cellCount.x, cellCount.y);
                 requestedTexture.filterMode = FilterMode.Point;
                 for (int y = 0; y < cellCount.y; y++)
                 {
@@ -297,48 +285,41 @@ namespace WUIPlatform.WUInity
                         {
                             c = WUIEngine.RUNTIME_DATA.Population.PopulationMap.Mask[x + y * evacDataCellCount.x] == true ? activeAreaColor : inactiveAreaColor;
                         }
-                        requestedColorArray[x + y * textureRes.x] = c;
+                        requestedColorArray[x + y * cellCount.x] = c;
                         requestedTexture.SetPixel(x, y, c);
                     }
                 }
-                requestedTexture.Apply();
-                requestedUV = new Vector2((float)cellCount.x / textureRes.x, (float)cellCount.y / textureRes.y);                
+                requestedTexture.Apply();              
 
                 //fix references after created
                 if (paintMode == PaintMode.WUIArea)
                 {
                     wuiAreaTex = requestedTexture;
                     wuiAreaColorArray = requestedColorArray;
-                    fireDataUV = requestedUV;
                 }
                 else if(paintMode == PaintMode.RandomIgnitionArea)
                 {
                     randomIgnitionTex = requestedTexture;
                     randomIgnitionColorArray = requestedColorArray;
-                    fireDataUV = requestedUV;
                 }
                 else if (paintMode == PaintMode.InitialIgnition)
                 {
                     initialIgnitionTex = requestedTexture;
                     initialIgnitionColorArray = requestedColorArray;
-                    fireDataUV = requestedUV;
                 }
                 else if (paintMode == PaintMode.EvacGroup)
                 {
                     evacGroupTex = requestedTexture;
                     evacGroupColorArray = requestedColorArray;
-                    evacDataUV = requestedUV;
                 }
                 else if (paintMode == PaintMode.PopulationMask)
                 {
                     populationMaskTex = requestedTexture;
                     populationMaskColorArray = requestedColorArray;
-                    evacDataUV = requestedUV;
                 }
             }
 
-            if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea 
-                || paintMode == PaintMode.InitialIgnition)
+            if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
             {                
                 activeCellCount = fireDataCellCount;
                 activeRealSize = fireDataRealSize;
@@ -348,7 +329,6 @@ namespace WUIPlatform.WUInity
                 activeCellCount = evacDataCellCount;
                 activeRealSize = evacDataRealSize;
             }
-            activeUV = requestedUV;
             activeTexture = requestedTexture;
             activeColorArray = requestedColorArray;
         }      
@@ -381,7 +361,7 @@ namespace WUIPlatform.WUInity
                 if (_yPlane.Raycast(ray, out enter))
                 {
                     Vector3 hitPoint = ray.GetPoint(enter);
-                    Vector2 pixelUV = new Vector2(activeUV.x * activeTexture.width * hitPoint.x / (float)activeRealSize.x, activeUV.y * activeTexture.height * hitPoint.z / (float)activeRealSize.y);
+                    Vector2 pixelUV = new Vector2(activeTexture.width * hitPoint.x / (float)activeRealSize.x, activeTexture.height * hitPoint.z / (float)activeRealSize.y);
 
                     int x = (int)pixelUV.x;
                     int y = (int)pixelUV.y;
@@ -523,7 +503,7 @@ namespace WUIPlatform.WUInity
         private bool IncludePixel(Vector2int pixelIndex, Color wantedColor, Color colorToOverwrite, Color[] colorArray)
         {
             //outside of texture
-            if (pixelIndex.x < 0 || pixelIndex.x > (int)((activeTexture.width - 1) * activeUV.x) || pixelIndex.y < 0 || pixelIndex.y > (int)((activeTexture.height - 1) * activeUV.y))
+            if (pixelIndex.x < 0 || pixelIndex.x > (int)((activeTexture.width - 1) ) || pixelIndex.y < 0 || pixelIndex.y > (int)((activeTexture.height - 1)))
             {
                 return false;
             }

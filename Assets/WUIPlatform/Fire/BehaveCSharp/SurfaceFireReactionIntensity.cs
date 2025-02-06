@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using static WUIPlatform.Fire.MathWrap;
-using static WUIPlatform.Fire.BehaveUnits;
+using static WUIPlatform.Fire.Behave.BehaveUnits;
 
-namespace WUIPlatform.Fire
+namespace WUIPlatform.Fire.Behave
 {
     public class SurfaceFireReactionIntensity
     {

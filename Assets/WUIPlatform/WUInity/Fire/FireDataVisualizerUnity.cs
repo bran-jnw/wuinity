@@ -170,7 +170,7 @@ namespace WUIPlatform.Visualization
             Vector3 unityOffset = new Vector3((float)offset.x, 0f, (float)offset.y);
             Vector2 maxUV = Vector2.one;
 
-            WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, unityOffset, maxUV);
+            WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, unityOffset);
 
             lcpMeshRenderer.material.mainTexture = _fuelModelsTexture;
 
