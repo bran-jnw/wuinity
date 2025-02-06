@@ -16,6 +16,7 @@ namespace WUIPlatform.Tools
     {
         public static bool HaveLocalGPW { get => WUIEngine.RUNTIME_DATA.Population.LocalGPWData.HavedData; }
         public static bool HavePopulationMap { get => WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData; }
+        public static bool PopulationMapCorrectedForRoadAccess { get => WUIEngine.RUNTIME_DATA.Population.PopulationMap.CorrectedForRoadAccess; }
         public static bool HaveRouterDb { get => WUIEngine.RUNTIME_DATA.Routing.RouterDb == null ? false : true; }
 
 
@@ -34,12 +35,25 @@ namespace WUIPlatform.Tools
             return success;
         }
 
-        public static void CreateAndSavePopulationMap(string localGpwFile, float cellSize)
+        public static void CreateAndSavePopulationMap(string localGPWFile, string cellSize)
+        {
+            float c;
+            if(float.TryParse(cellSize, out c))
+            {
+                CreateAndSavePopulationMap(localGPWFile, c);
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Population map cell size is not a valid number, please check your input.");
+            }
+        }
+
+        private static void CreateAndSavePopulationMap(string localGpwFile, float cellSize)
         {
             if (WUIEngine.RUNTIME_DATA.Population.LocalGPWData.LoadFromFile(localGpwFile))
             {
                 WUIEngine.RUNTIME_DATA.Population.PopulationMap.CreateAndSave(WUIEngine.RUNTIME_DATA.Population.LocalGPWData, cellSize);
-            }        
+            }
         }
 
         public static bool LoadPopulationMap(string populationMapFile)
@@ -47,6 +61,22 @@ namespace WUIPlatform.Tools
             bool success = false;
 
             success = WUIEngine.RUNTIME_DATA.Population.PopulationMap.LoadFromFile(populationMapFile);
+
+            return success;
+        }
+
+        public static bool ScaleTotalPopulation(string desiredPopulation)
+        {
+            bool success = false;
+            int newPop;
+            if (int.TryParse(desiredPopulation, out newPop))
+            {
+                success = ScaleTotalPopulation(newPop);
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, " New population count not a number, please check your input.");
+            }
 
             return success;
         }
@@ -127,7 +157,22 @@ namespace WUIPlatform.Tools
             return WUIEngine.RUNTIME_DATA.Routing.LoadRouterDb(routerDbFile);
         }
 
-        public static bool FilterOsmData(string osmFile, Vector2d borderSize)
+        public static bool FilterOsmData(string osmFile, string xBorder, string yBorder)
+        {
+            Vector2d osmFilterBorder;
+            if (double.TryParse(xBorder, out osmFilterBorder.x) && double.TryParse(yBorder, out osmFilterBorder.y))
+            {
+                return FilterOsmData(osmFile, osmFilterBorder);
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Border is not a valid number, please check your input.");
+            }
+
+            return false;
+        }
+
+        private static bool FilterOsmData(string osmFile, Vector2d borderSize)
         {
             bool success = false;
 

@@ -25,7 +25,6 @@ namespace WUIPlatform.WUInity.UI
             if (routingMenuDirty)
             {
                 routingMenuDirty = false;
-                borderSize = _osmBorderSize.x.ToString();
             }
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load RouterDb"))
@@ -61,38 +60,6 @@ namespace WUIPlatform.WUInity.UI
             }
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeChoice);
             ++buttonIndex;
-
-            //OSM stuff
-            ++buttonIndex;
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
-            {
-                filterMenuActive = true;
-                WUInityEngine.INSTANCE.SetOSMBorderVisibility(true);
-            }
-            ++buttonIndex;
-
-            if (filterMenuActive)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM border size [m]");
-                ++buttonIndex;
-                borderSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), borderSize);
-                ++buttonIndex;
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM file"))
-                {
-                    WUInityEngine.INSTANCE.SetOSMBorderVisibility(false);
-                    ParseRoutingInput();
-                    OpenFilterOSMFile();
-                }
-                ++buttonIndex;
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
-                {
-                    WUInityEngine.INSTANCE.SetOSMBorderVisibility(false);
-                    filterMenuActive = false;
-                }
-                ++buttonIndex;
-            }
         }
         void ParseRoutingInput()
         {
@@ -100,9 +67,6 @@ namespace WUIPlatform.WUInity.UI
             {
                 return;
             }
-
-            double.TryParse(borderSize, out _osmBorderSize.x);
-            double.TryParse(borderSize, out _osmBorderSize.y);
         }
 
         void OpenLoadRouterDbFile()
@@ -116,21 +80,6 @@ namespace WUIPlatform.WUInity.UI
         {
             string selectedFile = paths[0];
             Tools.PopulationTools.LoadRouterDb(selectedFile);
-        }
-
-        void OpenFilterOSMFile()
-        {
-            FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
-            FileBrowser.ShowLoadDialog(FilterOSMFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select source OSM file", "Filter");
-        }
-
-        float _interpolatedCellSize = 100f;
-        Vector2d _osmBorderSize = new Vector2d(2000, 2000);
-        void FilterOSMFile(string[] paths)
-        {
-            string selectedFile = paths[0];
-            Tools.PopulationTools.FilterOsmData(selectedFile, _osmBorderSize);
         }
 
         void OpenBuildRouterDbFromOSM()

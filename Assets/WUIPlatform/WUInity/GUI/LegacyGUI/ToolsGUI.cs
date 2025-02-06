@@ -7,11 +7,9 @@ namespace WUIPlatform.WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string desiredPopulation, borderX, borderY;
-        bool populationMenuDirty = true;
-        bool reScaling = false;
-        float _populationMapCellSize = 100f;
-        Vector2d osmFilterBorder = new Vector2d(1000, 1000);
+        private bool populationMenuDirty = true;
+        private bool _reScaling = false, _filteringOSM = false, _creatingPopulationMap = false;
+        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize;    
 
         void ToolsMenu()
         {
@@ -89,11 +87,34 @@ namespace WUIPlatform.WUInity.UI
                 }
                 ++buttonIndex;
             }
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population map"))
+            if(!_creatingPopulationMap)
             {
-                OpenCreateAndSavePopulationMap();
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population map"))
+                {
+                    _creatingPopulationMap = true;
+                }
+                ++buttonIndex;
             }
-            ++buttonIndex;
+            else
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size [m]:");
+                ++buttonIndex;
+                _populationMapCellSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight),_populationMapCellSize);
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select local GPW file"))
+                {
+                    OpenCreateAndSavePopulationMap();
+                    _creatingPopulationMap = false;
+                }
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
+                {
+                    _creatingPopulationMap = false;
+                }
+                ++buttonIndex;
+                ++buttonIndex;
+            }
+            
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load population map"))
             {
                 OpenLoadPopulationMap();
@@ -102,11 +123,11 @@ namespace WUIPlatform.WUInity.UI
             if (Tools.PopulationTools.HavePopulationMap)
             {               
                 //re-scaling
-                if (!reScaling)
+                if (!_reScaling)
                 {
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Re-scale total population"))
                     {
-                        reScaling = true;
+                        _reScaling = true;
                     }
                     ++buttonIndex;
                 }
@@ -114,22 +135,20 @@ namespace WUIPlatform.WUInity.UI
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Desired population:");
                     ++buttonIndex;
-                    desiredPopulation = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), desiredPopulation);
+                    _desiredPopulation = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _desiredPopulation);
                     ++buttonIndex;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply re-scale"))
                     {
-                        int newPop;
-                        if (int.TryParse(desiredPopulation, out newPop))
-                        {
-                            Tools.PopulationTools.ScaleTotalPopulation(newPop);
-                            WUInityEngine.INSTANCE.DisplayPopulationMap();
-                        }
-                        else
-                        {
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, " New population count not a number, ignoring changes.");
-                        }
-                        reScaling = false;
+                        Tools.PopulationTools.ScaleTotalPopulation(_desiredPopulation);
+                        WUInityEngine.INSTANCE.DisplayPopulationMap();
+                        _reScaling = false;
+                    }                    
+                    ++buttonIndex;
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
+                    {
+                        _reScaling = false;
                     }
+                    ++buttonIndex;
                     ++buttonIndex;
                 }
                 //correct for road access
@@ -186,7 +205,7 @@ namespace WUIPlatform.WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population tools");
             ++buttonIndex;
-            if(Tools.PopulationTools.HavePopulationMap && WUIEngine.RUNTIME_DATA.Population.PopulationMap.CorrectedForRoadAccess)
+            if(Tools.PopulationTools.HavePopulationMap && Tools.PopulationTools.PopulationMapCorrectedForRoadAccess)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create & load population"))
                 {
@@ -204,23 +223,34 @@ namespace WUIPlatform.WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM tools");
             ++buttonIndex;
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
+            if(!_filteringOSM)
             {
-                if(double.TryParse(borderX, out osmFilterBorder.x) && double.TryParse(borderY, out osmFilterBorder.y))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
                 {
-                    OpenFilterOSM();
-                }
-                else
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Border is not a valid number, please check your input.");
+                    _filteringOSM = true;
                 }
             }
-            ++buttonIndex;
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
-            ++buttonIndex;
-            borderX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), borderX);
-            borderY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), borderY);
-            ++buttonIndex;
+            else
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
+                ++buttonIndex;
+                _xBorder = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _xBorder);
+                _yBorder = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _yBorder);
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM data"))
+                {
+                    OpenFilterOSM();
+                    _filteringOSM = false;
+                }                
+                ++buttonIndex;
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
+                {
+                    _filteringOSM = false;
+                }
+                ++buttonIndex;
+                ++buttonIndex;
+            }
+            
         }        
 
         //GPW
@@ -257,7 +287,7 @@ namespace WUIPlatform.WUInity.UI
         {
             Tools.PopulationTools.CreateAndSavePopulationMap(paths[0], _populationMapCellSize);
             WUInityEngine.INSTANCE.DisplayPopulationMap();
-            WUInityEngine.INSTANCE.SetPopulationDataPlane(true);
+            WUInityEngine.INSTANCE.SetPopulationDataPlane(true);           
         }
         void OpenLoadPopulationMap()
         {
@@ -281,7 +311,7 @@ namespace WUIPlatform.WUInity.UI
         }
         void FilterOSM(string[] paths)
         {
-            Tools.PopulationTools.FilterOsmData(paths[0], osmFilterBorder);
+            Tools.PopulationTools.FilterOsmData(paths[0], _xBorder, _yBorder);            
         }
 
         //Router Db
