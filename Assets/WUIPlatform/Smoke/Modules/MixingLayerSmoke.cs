@@ -36,8 +36,8 @@ namespace WUIPlatform.Smoke
         private struct GlobalData
         {
             public float deltaTime, windX, windY, windDirectionX, windDirectionY;
-            public int cellsX, cellsY;
-            public float cellSizeX, cellSizeY, cellSizeXSq, cellSizeYSq, invertedCellVolume, cellHeight, inverseCellSizeX, inverseCellSizeY, inverseCellSizeXSq, inverseCellSizeYSq, cellArea, cellVolume;
+            public int cellsX, cellsY, cellsZ;
+            public float cellSizeX, cellSizeY, cellSizeZ, cellSizeXSq, cellSizeYSq, cellSizeZSq, invertedCellVolume, inverseCellSizeX, inverseCellSizeY, inverseCellSizeZ, inverseCellSizeXSq, inverseCellSizeYSq, inverseCellSizeZSq,  cellArea, cellVolume;
             public float eddyDiffusivity;
         }
         GlobalData _globalData;
@@ -70,21 +70,30 @@ namespace WUIPlatform.Smoke
             _globalData = new GlobalData();
             _globalData.cellsX = WUIEngine.SIM.FireModule.GetCellCountX();
             _globalData.cellsY = WUIEngine.SIM.FireModule.GetCellCountY();
+            int cellsZ = (int)(0.5f + WUIEngine.INPUT.Smoke.MixingLayerHeight / WUIEngine.SIM.FireModule.GetCellSizeX());
+            _globalData.cellsZ = cellsZ;            
+
+            //they should be square
             _globalData.cellSizeX = WUIEngine.SIM.FireModule.GetCellSizeX();
             _globalData.cellSizeY = WUIEngine.SIM.FireModule.GetCellSizeY();
+            _globalData.cellSizeZ = WUIEngine.SIM.FireModule.GetCellSizeX();
+
+
             _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
             _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
+
             _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
             _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
+
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
-            _globalData.cellHeight = WUIEngine.INPUT.Smoke.MixingLayerHeight;
-            _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
+
+            _globalData.cellVolume = _globalData.cellSizeX * _globalData.cellSizeY * _globalData.cellSizeZ;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
             _globalData.deltaTime = WUIEngine.INPUT.Simulation.DeltaTime;
 
             _allBuffers = new List<MemoryBuffer1D<float, Stride1D.Dense>>();
-            bufferSize = _globalData.cellsX * _globalData.cellsY;
+            bufferSize = _globalData.cellsX * _globalData.cellsY * _globalData.cellsZ;
 
             _density[READ] = _accelerator.Allocate1D(new float[bufferSize]);
             _density[READ].MemSetToZero();
@@ -118,7 +127,8 @@ namespace WUIPlatform.Smoke
             _accelerator.Dispose();
             _context.Dispose();
         }
-                
+
+        bool _lockOutput = false;
         public override void Step(float currentTime, float deltaTime)
         {
             //if fire has been updated we need to update the injection buffer
@@ -153,8 +163,7 @@ namespace WUIPlatform.Smoke
             _lockOutput = true;
             _density[READ].CopyToCPU(_sootOutput);
             _lockOutput = false;
-        }
-        bool _lockOutput = false;
+        }        
 
         void Swap(MemoryBuffer1D<float, Stride1D.Dense>[] buffer)
         {
