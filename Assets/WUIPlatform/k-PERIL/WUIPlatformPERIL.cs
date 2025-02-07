@@ -115,12 +115,14 @@ namespace WUIPlatform
             float[] _inverseSpreadRates = new float[8];
             float[] _spreadDistances = new float[8];
             public float _maxROS;
+            private float _cellSize;
 
 
-            public BackwardsFireCell(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed)
+            public BackwardsFireCell(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize)
             {
                 _index = new Vector2int(xIndex, yIndex);
                 _lcp = lcpData.GetCellData(_index.x, _index.y);
+                _cellSize = cellSize;
                 if (wuiArea[_index.x, _index.y] || surface.isAllFuelLoadZero(_lcp.fuel_model))
                 {
                     _burntOut = true;
@@ -154,20 +156,20 @@ namespace WUIPlatform
                     if (IsInside(xDim, yDim, neighborIndex))
                     {
                         _neighbors[i] = cells[neighborIndex.x, neighborIndex.y];
+
+                        float heightDifference = Mathf.Abs(_lcp.elevation - _neighbors[i]._lcp.elevation);
+                        float topViewDistance = _cellSize;
+                        //if not cardinal direction we go diagonally
+                        if (i % 2 != 0)
+                        {
+                            topViewDistance *= sqrt2;
+                        }
+                        _spreadDistances[i] = Mathf.Sqrt(heightDifference * heightDifference + topViewDistance * topViewDistance);
+
                         if (_neighbors[i]._burntOut)
                         {
                             _neighbors[i] = null;
                         }
-                        else
-                        {
-                            //TODO: calculate actual distance based on slope
-                            _spreadDistances[i] = 30f;
-                            //if not cardinal direction we go diagonally
-                            if (i % 2 != 0)
-                            {
-                                _spreadDistances[i] *= sqrt2;
-                            }
-                        }                        
                     }
                 }
             }
@@ -283,7 +285,7 @@ namespace WUIPlatform
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new BackwardsFireCell(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim, windDirection, midFlameWindspeed);
+                    fireCells[x, y] = new BackwardsFireCell(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim, windDirection, midFlameWindspeed, cellSize);
                     if (fireCells[x, y]._maxROS > maxROS)
                     {
                         maxROS = fireCells[x, y]._maxROS;
