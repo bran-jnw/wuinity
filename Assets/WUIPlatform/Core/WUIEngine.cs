@@ -69,10 +69,6 @@ namespace WUIPlatform
         {
             get
             {
-                /*if (ENGINE._runtimeData == null)
-                {
-                    ENGINE._runtimeData = new RuntimeData();
-                }*/
                 return ENGINE._runtimeData;
             }
         }
@@ -93,10 +89,6 @@ namespace WUIPlatform
         {
             get
             {
-                /*if (ENGINE._input == null)
-                {
-                    ENGINE._input = new WUInityInput();
-                }*/
                 return ENGINE._input;
             }
         }
@@ -147,7 +139,7 @@ namespace WUIPlatform
         {
             get
             {
-                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WORKING_FILE).ToString(), "output"));
+                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WORKING_FILE).ToString(), INPUT.Simulation.SimulationID + "_output"));
                 return path.ToString();
             }
         }

@@ -24,10 +24,10 @@ namespace WUIPlatform
                     int yCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
                     bw.Write(xCount);
                     bw.Write(yCount);
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.RandomIgnitionIndices));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.TriggerBufferIndices));
+                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.WuiArea));
+                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.RandomIgnition));
+                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.InitialIgnition));
+                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.TriggerBufferr));
                 }
             }
         }

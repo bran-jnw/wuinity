@@ -370,7 +370,7 @@ namespace WUIPlatform.Fire
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
-                    if (WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices[i])
+                    if (WUIEngine.RUNTIME_DATA.Fire.InitialIgnition[i])
                     {
                         FireCell f = _fireCells[i];
                         f.Ignite(currentTime);

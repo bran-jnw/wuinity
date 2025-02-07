@@ -14,10 +14,10 @@ namespace WUIPlatform.Runtime
 {
     public class FireData
     {
-        public bool[] WuiAreaIndices;
-        public bool[] RandomIgnitionIndices;
-        public bool[] InitialIgnitionIndices;
-        public bool[] TriggerBufferIndices;
+        public bool[] WuiArea;
+        public bool[] RandomIgnition;
+        public bool[] InitialIgnition;
+        public bool[] TriggerBufferr;
 
         private FireDataVisualizer _visualizer;
         public FireDataVisualizer Visualizer
@@ -223,7 +223,7 @@ namespace WUIPlatform.Runtime
             {
                 wuiAreaIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.WuiAreaIndices = wuiAreaIndices;
+            WUIEngine.RUNTIME_DATA.Fire.WuiArea = wuiAreaIndices;
         }
 
         public void UpdateRandomIgnitionIndices(bool[] randomIgnitionIndices, int xCount, int yCount)
@@ -232,7 +232,7 @@ namespace WUIPlatform.Runtime
             {
                 randomIgnitionIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.RandomIgnitionIndices = randomIgnitionIndices;
+            WUIEngine.RUNTIME_DATA.Fire.RandomIgnition = randomIgnitionIndices;
         }
 
         public void UpdateInitialIgnitionIndices(bool[] initialIgnitionIndices, int xCount, int yCount)
@@ -241,7 +241,7 @@ namespace WUIPlatform.Runtime
             {
                 initialIgnitionIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.InitialIgnitionIndices = initialIgnitionIndices;
+            WUIEngine.RUNTIME_DATA.Fire.InitialIgnition = initialIgnitionIndices;
         }
 
         public void UpdateTriggerBufferIndices(bool[] triggerBufferIndices, int xCount, int yCount)
@@ -250,7 +250,7 @@ namespace WUIPlatform.Runtime
             {
                 triggerBufferIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.TriggerBufferIndices = triggerBufferIndices;
+            WUIEngine.RUNTIME_DATA.Fire.TriggerBufferr = triggerBufferIndices;
         }
 
         public void ToggleLCPDataPlane()

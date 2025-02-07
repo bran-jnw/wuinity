@@ -472,7 +472,7 @@ namespace WUIPlatform.Fire
                 maxSpreadRateDirection = directionOfMaxSpread;
             }
 
-            double eccentricity_ = fireMesh.surfaceFire.getFireEccentricity();
+            double eccentricity = fireMesh.surfaceFire.getFireEccentricity();
 
             reactionIntensity = fireMesh.surfaceFire.getReactionIntensity(BehaveUnits.HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter);
 
@@ -514,7 +514,7 @@ namespace WUIPlatform.Fire
                 if (fabs(beta) > 0.1)
                 {
                     double radians = beta * M_PI / 180.0;
-                    spreadRates[i] = currentMaxSpreadRate * (1.0 - eccentricity_) / (1.0 - eccentricity_ * cos(radians));// * Random.Range(0.8f, 1.2f);                    
+                    spreadRates[i] = currentMaxSpreadRate * (1.0 - eccentricity) / (1.0 - eccentricity * cos(radians));// * Random.Range(0.8f, 1.2f);                    
                 }
 
                 if (spreadRates[i] > maxSpreadRates[i])

@@ -53,6 +53,11 @@ namespace WUIPlatform.Visualization
         private void CreateLCPVisuals()
         {
             Fire.LCPData _lcpData = owner.LCPData;
+            if(_lcpData == null)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Trying to create LCP data plane and texture but no LCP data exists.");
+                return;
+            }
 
             float xDim = (float)_lcpData.GetLCPSizeX();
             float yDim = (float)_lcpData.GetLCPSizeY();
@@ -126,14 +131,15 @@ namespace WUIPlatform.Visualization
             {
                 for (int x = 0; x < xPixels; x++)
                 {
-                    //PERIL has  flipped x/y for some reason
-                    float value = triggerBufferData[triggerBufferData.GetLength(0) - 1 - y, x];
-                    Color c = Color.red * value;
+                    float value = triggerBufferData[x, y];
+                    //add banding
+                    float band = (int)(value * 5) / 5f;
+                    Color c = Color.red * (0.8f * band + 0.2f);
                     c.a = 1.0f;
-                    /*if(value == 1f)
+                    if(value == 0f)
                     {
                         c.a = 0f;
-                    }*/
+                    }
                     _triggerBufferTexture.SetPixel(x, y, c);
                 }
             }
