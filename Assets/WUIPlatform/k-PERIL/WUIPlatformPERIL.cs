@@ -23,7 +23,7 @@ namespace WUIPlatform
         /// <param name="midFlameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
         public static float[,] RunPERIL(float midFlameWindspeed)
         {
-            return CalculateBackwardsFire(midFlameWindspeed, 150f);
+            return CalculateBackwardsFire(midFlameWindspeed, 330f, 30f);
 
             if (PERIL == null)
             {
@@ -90,8 +90,9 @@ namespace WUIPlatform
         }
 
         private static readonly Vector2int[] neighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
+        private static readonly float[] spreadDirections = new float[] { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
         //as all spread rates point inwards to center north becomes 180 degrees, south 0 degrees etc
-        private static readonly float[] spreadDegrees = new float[] { 180f, 225f, 270f, 315f, 0f, 45f, 90f, 135f };
+        private static readonly float[] inverseSpreadDirections = new float[] { 180f, 225f, 270f, 315f, 0f, 45f, 90f, 135f };
         //private static readonly float[] deadCell = new float[] { 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f };
         private struct CellSpreadRates
         {
@@ -113,9 +114,10 @@ namespace WUIPlatform
             float[] _flamefronts = new float[8];
             float[] _inverseSpreadRates = new float[8];
             float[] _spreadDistances = new float[8];
+            public float _maxROS;
 
 
-            public BackwardsFireCell(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim)
+            public BackwardsFireCell(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed)
             {
                 _index = new Vector2int(xIndex, yIndex);
                 _lcp = lcpData.GetCellData(_index.x, _index.y);
@@ -125,10 +127,22 @@ namespace WUIPlatform
                     return;
                 }
 
-                //TODO: calculate using BEHAVE
+                _maxROS = float.MinValue;
                 for (int i = 0; i < _inverseSpreadRates.Length; i++)
                 {
-                    _inverseSpreadRates[i] = 0.3f;
+                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
+                    double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
+
+                    surface.updateSurfaceInputs(_lcp.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
+                        midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, _lcp.slope, slopeUnits, _lcp.aspect, _lcp.canopy_cover, coverUnits, _lcp.crown_canopy_height, lengthUnits, crownRatio);
+
+                    surface.doSurfaceRunInDirectionOfInterest(inverseSpreadDirections[i]);
+                    //from m/min to m/s
+                    _inverseSpreadRates[i] = (float)surface.getSpreadRate(speedUnits) / 60f;
+                    if(_inverseSpreadRates[i] >_maxROS)
+                    {
+                        _maxROS = _inverseSpreadRates[i];
+                    }
                 }
             }
 
@@ -146,6 +160,7 @@ namespace WUIPlatform
                         }
                         else
                         {
+                            //TODO: calculate actual distance based on slope
                             _spreadDistances[i] = 30f;
                             //if not cardinal direction we go diagonally
                             if (i % 2 != 0)
@@ -239,7 +254,7 @@ namespace WUIPlatform
             return true;
         }
 
-        private static float[,] CalculateBackwardsFire(float midFlameWindspeed, float windDirection)
+        private static float[,] CalculateBackwardsFire(float midFlameWindspeed, float windDirection, float cellSize)
         {
             WUIEngine.LOG(WUIEngine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
@@ -263,11 +278,16 @@ namespace WUIPlatform
             BackwardsFireCell[,] fireCells = new BackwardsFireCell[xDim, yDim];
 
             //create
+            float maxROS = float.MinValue;
             for(int y = 0; y < yDim; ++y)
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new BackwardsFireCell(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim);
+                    fireCells[x, y] = new BackwardsFireCell(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim, windDirection, midFlameWindspeed);
+                    if (fireCells[x, y]._maxROS > maxROS)
+                    {
+                        maxROS = fireCells[x, y]._maxROS;
+                    }
                 }
             }
 
@@ -294,8 +314,9 @@ namespace WUIPlatform
             }
 
             float currentTime = 0f;
-            float deltaTime = 10f;
-            float endTime = 10000f;
+            float deltaTime = 0.5f * cellSize / maxROS;
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Backwards fire spread delta time set to: " + deltaTime);
+            float endTime = 24*3600f;
             float[,] triggerBuffer = new float[xDim, yDim];
             while (currentTime < endTime)
             {
@@ -314,14 +335,25 @@ namespace WUIPlatform
                 }
 
                 //step forward in time
+                int aliveCells = 0;
                 for (int y = 0; y < yDim; ++y)
                 {
                     for (int x = 0; x < xDim; ++x)
                     {
                         fireCells[x, y].Step(currentTime, deltaTime);
+                        if (!fireCells[x, y]._burntOut)
+                        {
+                            ++aliveCells;
+                        }
                     }
                 }
+
                 currentTime += deltaTime;
+                if (aliveCells == 0)
+                {
+                    endTime = currentTime;
+                    break;
+                }                
             }
 
             //collect time of arrival, make sure to update if any cells were ignited last time step
@@ -448,15 +480,11 @@ namespace WUIPlatform
                         continue;
                     }
                     LandscapeStruct cellData = lcpData.GetCellData(x, y);
-                    int fuelModelNumber = cellData.fuel_model;
-                    int slope = cellData.slope;
-                    int aspect = cellData.aspect;
-
-                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(fuelModelNumber);
+                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
-                    surfaceFire.updateSurfaceInputs(fuelModelNumber, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
-                        midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, slope, slopeUnits, aspect, cellData.canopy_cover, coverUnits, cellData.crown_canopy_height, lengthUnits, crownRatio);
+                    surfaceFire.updateSurfaceInputs(cellData.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
+                        midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, cellData.slope, slopeUnits, cellData.aspect, cellData.canopy_cover, coverUnits, cellData.crown_canopy_height, lengthUnits, crownRatio);
 
                     surfaceFire.doSurfaceRunInDirectionOfMaxSpread();
                     int yIndex = y;
