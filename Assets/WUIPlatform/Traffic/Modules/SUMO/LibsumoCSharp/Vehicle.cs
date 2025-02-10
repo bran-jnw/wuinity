@@ -116,6 +116,18 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
+  public static string getSegmentID(string vehID) {
+    string ret = libsumoPINVOKE.Vehicle_getSegmentID(vehID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static int getSegmentIndex(string vehID) {
+    int ret = libsumoPINVOKE.Vehicle_getSegmentIndex(vehID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static string getTypeID(string vehID) {
     string ret = libsumoPINVOKE.Vehicle_getTypeID(vehID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -296,8 +308,8 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
-  public static TraCIBestLanesVector getBestLanes(string vehID) {
-    TraCIBestLanesVector ret = new TraCIBestLanesVector(libsumoPINVOKE.Vehicle_getBestLanes(vehID), true);
+  public static TraCIBestLanesDataVector getBestLanes(string vehID) {
+    TraCIBestLanesDataVector ret = new TraCIBestLanesDataVector(libsumoPINVOKE.Vehicle_getBestLanes(vehID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -308,8 +320,8 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
-  public static TraCINextStopDataVector2 getNextStops(string vehID) {
-    TraCINextStopDataVector2 ret = new TraCINextStopDataVector2(libsumoPINVOKE.Vehicle_getNextStops(vehID), true);
+  public static TraCINextStopDataVector getNextStops(string vehID) {
+    TraCINextStopDataVector ret = new TraCINextStopDataVector(libsumoPINVOKE.Vehicle_getNextStops(vehID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -320,14 +332,14 @@ public class Vehicle : global::System.IDisposable {
     return ret;
   }
 
-  public static TraCINextStopDataVector2 getStops(string vehID, int limit) {
-    TraCINextStopDataVector2 ret = new TraCINextStopDataVector2(libsumoPINVOKE.Vehicle_getStops__SWIG_0(vehID, limit), true);
+  public static TraCINextStopDataVector getStops(string vehID, int limit) {
+    TraCINextStopDataVector ret = new TraCINextStopDataVector(libsumoPINVOKE.Vehicle_getStops__SWIG_0(vehID, limit), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
-  public static TraCINextStopDataVector2 getStops(string vehID) {
-    TraCINextStopDataVector2 ret = new TraCINextStopDataVector2(libsumoPINVOKE.Vehicle_getStops__SWIG_1(vehID), true);
+  public static TraCINextStopDataVector getStops(string vehID) {
+    TraCINextStopDataVector ret = new TraCINextStopDataVector(libsumoPINVOKE.Vehicle_getStops__SWIG_1(vehID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -615,6 +627,12 @@ public class Vehicle : global::System.IDisposable {
 
   public static double getHeight(string typeID) {
     double ret = libsumoPINVOKE.Vehicle_getHeight(typeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static double getMass(string typeID) {
+    double ret = libsumoPINVOKE.Vehicle_getMass(typeID);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
@@ -1053,13 +1071,13 @@ public class Vehicle : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public static void moveTo(string vehID, string laneID, double position, int reason) {
-    libsumoPINVOKE.Vehicle_moveTo__SWIG_0(vehID, laneID, position, reason);
+  public static void moveTo(string vehID, string laneID, double pos, int reason) {
+    libsumoPINVOKE.Vehicle_moveTo__SWIG_0(vehID, laneID, pos, reason);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public static void moveTo(string vehID, string laneID, double position) {
-    libsumoPINVOKE.Vehicle_moveTo__SWIG_1(vehID, laneID, position);
+  public static void moveTo(string vehID, string laneID, double pos) {
+    libsumoPINVOKE.Vehicle_moveTo__SWIG_1(vehID, laneID, pos);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
@@ -1205,6 +1223,11 @@ public class Vehicle : global::System.IDisposable {
 
   public static void setHeight(string typeID, double height) {
     libsumoPINVOKE.Vehicle_setHeight(typeID, height);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setMass(string typeID, double mass) {
+    libsumoPINVOKE.Vehicle_setMass(typeID, mass);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

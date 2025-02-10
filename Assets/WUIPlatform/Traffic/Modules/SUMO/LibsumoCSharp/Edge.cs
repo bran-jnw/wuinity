@@ -194,6 +194,24 @@ public class Edge : global::System.IDisposable {
     return ret;
   }
 
+  public static string getFromJunction(string edgeID) {
+    string ret = libsumoPINVOKE.Edge_getFromJunction(edgeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static string getToJunction(string edgeID) {
+    string ret = libsumoPINVOKE.Edge_getToJunction(edgeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static string getBidiEdge(string edgeID) {
+    string ret = libsumoPINVOKE.Edge_getBidiEdge(edgeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.Edge_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();

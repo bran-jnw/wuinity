@@ -236,6 +236,12 @@ public class Lane : global::System.IDisposable {
     return ret;
   }
 
+  public static string getBidiLane(string laneID) {
+    string ret = libsumoPINVOKE.Lane_getBidiLane(laneID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.Lane_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();

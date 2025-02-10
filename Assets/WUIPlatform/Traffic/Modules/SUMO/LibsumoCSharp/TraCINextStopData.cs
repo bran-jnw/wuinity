@@ -10,12 +10,12 @@
 
 namespace LIBSUMO {
 
-public class TraCINextStopData : TraCIResult {
+public class TraCINextStopData : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
-  private bool swigCMemOwnDerived;
+  private bool swigCMemOwnBase;
 
-  internal TraCINextStopData(global::System.IntPtr cPtr, bool cMemoryOwn) : base(libsumoPINVOKE.TraCINextStopData_SWIGSmartPtrUpcast(cPtr), true) {
-    swigCMemOwnDerived = cMemoryOwn;
+  internal TraCINextStopData(global::System.IntPtr cPtr, bool cMemoryOwn) {
+    swigCMemOwnBase = cMemoryOwn;
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -23,16 +23,24 @@ public class TraCINextStopData : TraCIResult {
     return (obj == null) ? new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero) : obj.swigCPtr;
   }
 
-  protected override void Dispose(bool disposing) {
+  ~TraCINextStopData() {
+    Dispose(false);
+  }
+
+  public void Dispose() {
+    Dispose(true);
+    global::System.GC.SuppressFinalize(this);
+  }
+
+  protected virtual void Dispose(bool disposing) {
     lock(this) {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
-        if (swigCMemOwnDerived) {
-          swigCMemOwnDerived = false;
+        if (swigCMemOwnBase) {
+          swigCMemOwnBase = false;
           libsumoPINVOKE.delete_TraCINextStopData(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
-      base.Dispose(disposing);
     }
   }
 
@@ -104,7 +112,7 @@ public class TraCINextStopData : TraCIResult {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public override string getString() {
+  public string getString() {
     string ret = libsumoPINVOKE.TraCINextStopData_getString(swigCPtr);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;

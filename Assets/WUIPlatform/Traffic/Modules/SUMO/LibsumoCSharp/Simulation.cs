@@ -44,6 +44,42 @@ public class Simulation : global::System.IDisposable {
     }
   }
 
+  public static IntStringPair init(int port, int numRetries, string host, string label, SWIGTYPE_p_FILE pipe) {
+    IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_init__SWIG_0(port, numRetries, host, label, SWIGTYPE_p_FILE.getCPtr(pipe)), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static IntStringPair init(int port, int numRetries, string host, string label) {
+    IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_init__SWIG_1(port, numRetries, host, label), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static IntStringPair init(int port, int numRetries, string host) {
+    IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_init__SWIG_2(port, numRetries, host), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static IntStringPair init(int port, int numRetries) {
+    IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_init__SWIG_3(port, numRetries), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static IntStringPair init(int port) {
+    IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_init__SWIG_4(port), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static IntStringPair init() {
+    IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_init__SWIG_5(), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static IntStringPair start(StringVector cmd, int port, int numRetries, string label, bool verbose, string traceFile, bool traceGetters, SWIGTYPE_p_void _stdout) {
     IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_start__SWIG_0(StringVector.getCPtr(cmd), port, numRetries, label, verbose, traceFile, traceGetters, SWIGTYPE_p_void.getCPtr(_stdout)), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -90,6 +126,28 @@ public class Simulation : global::System.IDisposable {
     IntStringPair ret = new IntStringPair(libsumoPINVOKE.Simulation_start__SWIG_7(StringVector.getCPtr(cmd)), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
+  }
+
+  public static bool isLibsumo() {
+    bool ret = libsumoPINVOKE.Simulation_isLibsumo();
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static void switchConnection(string label) {
+    libsumoPINVOKE.Simulation_switchConnection(label);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static string getLabel() {
+    string ret = libsumoPINVOKE.Simulation_getLabel();
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static void setOrder(int order) {
+    libsumoPINVOKE.Simulation_setOrder(order);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   public static void load(StringVector args) {

@@ -263,7 +263,7 @@ public class TraCIStageVector : global::System.IDisposable, global::System.Colle
   }
 
   private TraCIStage getitem(int index) {
-    TraCIStage ret = new TraCIStage(libsumoPINVOKE.TraCIStageVector_getitem(swigCPtr, index), false);
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.TraCIStageVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

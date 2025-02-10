@@ -263,7 +263,7 @@ public class TraCICollisionVector : global::System.IDisposable, global::System.C
   }
 
   private TraCICollision getitem(int index) {
-    TraCICollision ret = new TraCICollision(libsumoPINVOKE.TraCICollisionVector_getitem(swigCPtr, index), false);
+    TraCICollision ret = new TraCICollision(libsumoPINVOKE.TraCICollisionVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

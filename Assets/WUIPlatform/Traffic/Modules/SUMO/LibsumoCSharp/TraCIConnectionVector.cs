@@ -263,7 +263,7 @@ public class TraCIConnectionVector : global::System.IDisposable, global::System.
   }
 
   private TraCIConnection getitem(int index) {
-    TraCIConnection ret = new TraCIConnection(libsumoPINVOKE.TraCIConnectionVector_getitem(swigCPtr, index), false);
+    TraCIConnection ret = new TraCIConnection(libsumoPINVOKE.TraCIConnectionVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

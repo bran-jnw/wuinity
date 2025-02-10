@@ -12,10 +12,10 @@ namespace LIBSUMO {
 
 public class TraCILink : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
-  protected bool swigCMemOwn;
+  private bool swigCMemOwnBase;
 
   internal TraCILink(global::System.IntPtr cPtr, bool cMemoryOwn) {
-    swigCMemOwn = cMemoryOwn;
+    swigCMemOwnBase = cMemoryOwn;
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -35,8 +35,8 @@ public class TraCILink : global::System.IDisposable {
   protected virtual void Dispose(bool disposing) {
     lock(this) {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
-        if (swigCMemOwn) {
-          swigCMemOwn = false;
+        if (swigCMemOwnBase) {
+          swigCMemOwnBase = false;
           libsumoPINVOKE.delete_TraCILink(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
@@ -44,11 +44,7 @@ public class TraCILink : global::System.IDisposable {
     }
   }
 
-  public TraCILink() : this(libsumoPINVOKE.new_TraCILink__SWIG_0(), true) {
-    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
-  }
-
-  public TraCILink(string _from, string _via, string _to) : this(libsumoPINVOKE.new_TraCILink__SWIG_1(_from, _via, _to), true) {
+  public TraCILink(string _from, string _via, string _to) : this(libsumoPINVOKE.new_TraCILink(_from, _via, _to), true) {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

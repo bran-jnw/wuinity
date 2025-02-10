@@ -68,6 +68,12 @@ public class Junction : global::System.IDisposable {
     return ret;
   }
 
+  public static StringVector getOutgoingEdges(string junctionID) {
+    StringVector ret = new StringVector(libsumoPINVOKE.Junction_getOutgoingEdges(junctionID), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.Junction_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();

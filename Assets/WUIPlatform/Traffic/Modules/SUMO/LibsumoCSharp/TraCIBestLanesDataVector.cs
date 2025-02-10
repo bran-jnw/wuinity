@@ -10,21 +10,21 @@
 
 namespace LIBSUMO {
 
-public class TraCIBestLanesVector : global::System.IDisposable, global::System.Collections.IEnumerable, global::System.Collections.Generic.IEnumerable<TraCIBestLanesData>
+public class TraCIBestLanesDataVector : global::System.IDisposable, global::System.Collections.IEnumerable, global::System.Collections.Generic.IEnumerable<TraCIBestLanesData>
  {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
 
-  internal TraCIBestLanesVector(global::System.IntPtr cPtr, bool cMemoryOwn) {
+  internal TraCIBestLanesDataVector(global::System.IntPtr cPtr, bool cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
-  internal static global::System.Runtime.InteropServices.HandleRef getCPtr(TraCIBestLanesVector obj) {
+  internal static global::System.Runtime.InteropServices.HandleRef getCPtr(TraCIBestLanesDataVector obj) {
     return (obj == null) ? new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero) : obj.swigCPtr;
   }
 
-  ~TraCIBestLanesVector() {
+  ~TraCIBestLanesDataVector() {
     Dispose(false);
   }
 
@@ -38,14 +38,14 @@ public class TraCIBestLanesVector : global::System.IDisposable, global::System.C
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          libsumoPINVOKE.delete_TraCIBestLanesVector(swigCPtr);
+          libsumoPINVOKE.delete_TraCIBestLanesDataVector(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
     }
   }
 
-  public TraCIBestLanesVector(global::System.Collections.IEnumerable c) : this() {
+  public TraCIBestLanesDataVector(global::System.Collections.IEnumerable c) : this() {
     if (c == null)
       throw new global::System.ArgumentNullException("c");
     foreach (TraCIBestLanesData element in c) {
@@ -53,7 +53,7 @@ public class TraCIBestLanesVector : global::System.IDisposable, global::System.C
     }
   }
 
-  public TraCIBestLanesVector(global::System.Collections.Generic.IEnumerable<TraCIBestLanesData> c) : this() {
+  public TraCIBestLanesDataVector(global::System.Collections.Generic.IEnumerable<TraCIBestLanesData> c) : this() {
     if (c == null)
       throw new global::System.ArgumentNullException("c");
     foreach (TraCIBestLanesData element in c) {
@@ -140,15 +140,15 @@ public class TraCIBestLanesVector : global::System.IDisposable, global::System.C
   }
 
   global::System.Collections.Generic.IEnumerator<TraCIBestLanesData> global::System.Collections.Generic.IEnumerable<TraCIBestLanesData>.GetEnumerator() {
-    return new TraCIBestLanesVectorEnumerator(this);
+    return new TraCIBestLanesDataVectorEnumerator(this);
   }
 
   global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() {
-    return new TraCIBestLanesVectorEnumerator(this);
+    return new TraCIBestLanesDataVectorEnumerator(this);
   }
 
-  public TraCIBestLanesVectorEnumerator GetEnumerator() {
-    return new TraCIBestLanesVectorEnumerator(this);
+  public TraCIBestLanesDataVectorEnumerator GetEnumerator() {
+    return new TraCIBestLanesDataVectorEnumerator(this);
   }
 
   // Type-safe enumerator
@@ -156,15 +156,15 @@ public class TraCIBestLanesVector : global::System.IDisposable, global::System.C
   /// whenever the collection is modified. This has been done for changes in the size of the
   /// collection but not when one of the elements of the collection is modified as it is a bit
   /// tricky to detect unmanaged code that modifies the collection under our feet.
-  public sealed class TraCIBestLanesVectorEnumerator : global::System.Collections.IEnumerator
+  public sealed class TraCIBestLanesDataVectorEnumerator : global::System.Collections.IEnumerator
     , global::System.Collections.Generic.IEnumerator<TraCIBestLanesData>
   {
-    private TraCIBestLanesVector collectionRef;
+    private TraCIBestLanesDataVector collectionRef;
     private int currentIndex;
     private object currentObject;
     private int currentSize;
 
-    public TraCIBestLanesVectorEnumerator(TraCIBestLanesVector collection) {
+    public TraCIBestLanesDataVectorEnumerator(TraCIBestLanesDataVector collection) {
       collectionRef = collection;
       currentIndex = -1;
       currentObject = null;
@@ -218,112 +218,112 @@ public class TraCIBestLanesVector : global::System.IDisposable, global::System.C
   }
 
   public void Clear() {
-    libsumoPINVOKE.TraCIBestLanesVector_Clear(swigCPtr);
+    libsumoPINVOKE.TraCIBestLanesDataVector_Clear(swigCPtr);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   public void Add(TraCIBestLanesData x) {
-    libsumoPINVOKE.TraCIBestLanesVector_Add(swigCPtr, TraCIBestLanesData.getCPtr(x));
+    libsumoPINVOKE.TraCIBestLanesDataVector_Add(swigCPtr, TraCIBestLanesData.getCPtr(x));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   private uint size() {
-    uint ret = libsumoPINVOKE.TraCIBestLanesVector_size(swigCPtr);
+    uint ret = libsumoPINVOKE.TraCIBestLanesDataVector_size(swigCPtr);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private uint capacity() {
-    uint ret = libsumoPINVOKE.TraCIBestLanesVector_capacity(swigCPtr);
+    uint ret = libsumoPINVOKE.TraCIBestLanesDataVector_capacity(swigCPtr);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private void reserve(uint n) {
-    libsumoPINVOKE.TraCIBestLanesVector_reserve(swigCPtr, n);
+    libsumoPINVOKE.TraCIBestLanesDataVector_reserve(swigCPtr, n);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public TraCIBestLanesVector() : this(libsumoPINVOKE.new_TraCIBestLanesVector__SWIG_0(), true) {
+  public TraCIBestLanesDataVector() : this(libsumoPINVOKE.new_TraCIBestLanesDataVector__SWIG_0(), true) {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public TraCIBestLanesVector(TraCIBestLanesVector other) : this(libsumoPINVOKE.new_TraCIBestLanesVector__SWIG_1(TraCIBestLanesVector.getCPtr(other)), true) {
+  public TraCIBestLanesDataVector(TraCIBestLanesDataVector other) : this(libsumoPINVOKE.new_TraCIBestLanesDataVector__SWIG_1(TraCIBestLanesDataVector.getCPtr(other)), true) {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public TraCIBestLanesVector(int capacity) : this(libsumoPINVOKE.new_TraCIBestLanesVector__SWIG_2(capacity), true) {
+  public TraCIBestLanesDataVector(int capacity) : this(libsumoPINVOKE.new_TraCIBestLanesDataVector__SWIG_2(capacity), true) {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   private TraCIBestLanesData getitemcopy(int index) {
-    TraCIBestLanesData ret = new TraCIBestLanesData(libsumoPINVOKE.TraCIBestLanesVector_getitemcopy(swigCPtr, index), true);
+    TraCIBestLanesData ret = new TraCIBestLanesData(libsumoPINVOKE.TraCIBestLanesDataVector_getitemcopy(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private TraCIBestLanesData getitem(int index) {
-    TraCIBestLanesData ret = new TraCIBestLanesData(libsumoPINVOKE.TraCIBestLanesVector_getitem(swigCPtr, index), false);
+    TraCIBestLanesData ret = new TraCIBestLanesData(libsumoPINVOKE.TraCIBestLanesDataVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   private void setitem(int index, TraCIBestLanesData val) {
-    libsumoPINVOKE.TraCIBestLanesVector_setitem(swigCPtr, index, TraCIBestLanesData.getCPtr(val));
+    libsumoPINVOKE.TraCIBestLanesDataVector_setitem(swigCPtr, index, TraCIBestLanesData.getCPtr(val));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public void AddRange(TraCIBestLanesVector values) {
-    libsumoPINVOKE.TraCIBestLanesVector_AddRange(swigCPtr, TraCIBestLanesVector.getCPtr(values));
+  public void AddRange(TraCIBestLanesDataVector values) {
+    libsumoPINVOKE.TraCIBestLanesDataVector_AddRange(swigCPtr, TraCIBestLanesDataVector.getCPtr(values));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public TraCIBestLanesVector GetRange(int index, int count) {
-    global::System.IntPtr cPtr = libsumoPINVOKE.TraCIBestLanesVector_GetRange(swigCPtr, index, count);
-    TraCIBestLanesVector ret = (cPtr == global::System.IntPtr.Zero) ? null : new TraCIBestLanesVector(cPtr, true);
+  public TraCIBestLanesDataVector GetRange(int index, int count) {
+    global::System.IntPtr cPtr = libsumoPINVOKE.TraCIBestLanesDataVector_GetRange(swigCPtr, index, count);
+    TraCIBestLanesDataVector ret = (cPtr == global::System.IntPtr.Zero) ? null : new TraCIBestLanesDataVector(cPtr, true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Insert(int index, TraCIBestLanesData x) {
-    libsumoPINVOKE.TraCIBestLanesVector_Insert(swigCPtr, index, TraCIBestLanesData.getCPtr(x));
+    libsumoPINVOKE.TraCIBestLanesDataVector_Insert(swigCPtr, index, TraCIBestLanesData.getCPtr(x));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public void InsertRange(int index, TraCIBestLanesVector values) {
-    libsumoPINVOKE.TraCIBestLanesVector_InsertRange(swigCPtr, index, TraCIBestLanesVector.getCPtr(values));
+  public void InsertRange(int index, TraCIBestLanesDataVector values) {
+    libsumoPINVOKE.TraCIBestLanesDataVector_InsertRange(swigCPtr, index, TraCIBestLanesDataVector.getCPtr(values));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   public void RemoveAt(int index) {
-    libsumoPINVOKE.TraCIBestLanesVector_RemoveAt(swigCPtr, index);
+    libsumoPINVOKE.TraCIBestLanesDataVector_RemoveAt(swigCPtr, index);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   public void RemoveRange(int index, int count) {
-    libsumoPINVOKE.TraCIBestLanesVector_RemoveRange(swigCPtr, index, count);
+    libsumoPINVOKE.TraCIBestLanesDataVector_RemoveRange(swigCPtr, index, count);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public static TraCIBestLanesVector Repeat(TraCIBestLanesData value, int count) {
-    global::System.IntPtr cPtr = libsumoPINVOKE.TraCIBestLanesVector_Repeat(TraCIBestLanesData.getCPtr(value), count);
-    TraCIBestLanesVector ret = (cPtr == global::System.IntPtr.Zero) ? null : new TraCIBestLanesVector(cPtr, true);
+  public static TraCIBestLanesDataVector Repeat(TraCIBestLanesData value, int count) {
+    global::System.IntPtr cPtr = libsumoPINVOKE.TraCIBestLanesDataVector_Repeat(TraCIBestLanesData.getCPtr(value), count);
+    TraCIBestLanesDataVector ret = (cPtr == global::System.IntPtr.Zero) ? null : new TraCIBestLanesDataVector(cPtr, true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public void Reverse() {
-    libsumoPINVOKE.TraCIBestLanesVector_Reverse__SWIG_0(swigCPtr);
+    libsumoPINVOKE.TraCIBestLanesDataVector_Reverse__SWIG_0(swigCPtr);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
   public void Reverse(int index, int count) {
-    libsumoPINVOKE.TraCIBestLanesVector_Reverse__SWIG_1(swigCPtr, index, count);
+    libsumoPINVOKE.TraCIBestLanesDataVector_Reverse__SWIG_1(swigCPtr, index, count);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
-  public void SetRange(int index, TraCIBestLanesVector values) {
-    libsumoPINVOKE.TraCIBestLanesVector_SetRange(swigCPtr, index, TraCIBestLanesVector.getCPtr(values));
+  public void SetRange(int index, TraCIBestLanesDataVector values) {
+    libsumoPINVOKE.TraCIBestLanesDataVector_SetRange(swigCPtr, index, TraCIBestLanesDataVector.getCPtr(values));
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

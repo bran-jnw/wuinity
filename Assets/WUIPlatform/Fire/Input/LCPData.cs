@@ -162,9 +162,19 @@ namespace WUIPlatform.Fire
             Header.loelev = 0;
         }
 
-		public LCPData(string path)					
+		public LCPData(string path, bool readGeoTIFF = false)					
 		{
-			ReadLCP(path);
+			if(readGeoTIFF)
+			{
+                OSGeo.GDAL.Dataset geo = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly);
+				int xDim = geo.RasterXSize;
+                int yDim = geo.RasterYSize;
+            }
+			else
+			{
+                ReadLCP(path);
+            }
+			
 		}
 
 		private void ReadLCP(string path)

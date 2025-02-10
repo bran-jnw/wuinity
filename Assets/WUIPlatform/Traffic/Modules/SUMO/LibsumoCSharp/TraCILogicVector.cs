@@ -263,7 +263,7 @@ public class TraCILogicVector : global::System.IDisposable, global::System.Colle
   }
 
   private TraCILogic getitem(int index) {
-    TraCILogic ret = new TraCILogic(libsumoPINVOKE.TraCILogicVector_getitem(swigCPtr, index), false);
+    TraCILogic ret = new TraCILogic(libsumoPINVOKE.TraCILogicVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

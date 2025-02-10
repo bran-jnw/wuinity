@@ -80,6 +80,30 @@ public class ChargingStation : global::System.IDisposable {
     return ret;
   }
 
+  public static double getChargingPower(string stopID) {
+    double ret = libsumoPINVOKE.ChargingStation_getChargingPower(stopID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static double getEfficiency(string stopID) {
+    double ret = libsumoPINVOKE.ChargingStation_getEfficiency(stopID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static double getChargeDelay(string stopID) {
+    double ret = libsumoPINVOKE.ChargingStation_getChargeDelay(stopID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static int getChargeInTransit(string stopID) {
+    int ret = libsumoPINVOKE.ChargingStation_getChargeInTransit(stopID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.ChargingStation_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -214,6 +238,26 @@ public class ChargingStation : global::System.IDisposable {
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 
+  }
+
+  public static void setChargingPower(string stopID, double power) {
+    libsumoPINVOKE.ChargingStation_setChargingPower(stopID, power);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setEfficiency(string stopID, double efficiency) {
+    libsumoPINVOKE.ChargingStation_setEfficiency(stopID, efficiency);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setChargeDelay(string stopID, double delay) {
+    libsumoPINVOKE.ChargingStation_setChargeDelay(stopID, delay);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setChargeInTransit(string stopID, bool inTransit) {
+    libsumoPINVOKE.ChargingStation_setChargeInTransit(stopID, inTransit);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
 }

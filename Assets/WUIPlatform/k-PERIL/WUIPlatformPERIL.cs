@@ -23,7 +23,7 @@ namespace WUIPlatform
         /// <param name="midFlameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
         public static float[,] RunPERIL(float midFlameWindspeed)
         {
-            return CalculateBackwardsFire(midFlameWindspeed, 330f, 30f);
+            return CalculateFirespread(35f, 180f, 30f);
 
             if (PERIL == null)
             {
@@ -89,11 +89,19 @@ namespace WUIPlatform
             return combinedPerilOutput;
         }
 
+        //private const TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
+        private const BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
+        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.TenMeter;
+        private const BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
+        private const BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
+        private const BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
+        private const BehaveUnits.SpeedUnits.SpeedUnitsEnum windSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
+        private const WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
+
         private static readonly Vector2int[] neighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
         private static readonly float[] spreadDirections = new float[] { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
-        //as all spread rates point inwards to center north becomes 180 degrees, south 0 degrees etc
-        private static readonly float[] inverseSpreadDirections = new float[] { 180f, 225f, 270f, 315f, 0f, 45f, 90f, 135f };
-        //private static readonly float[] deadCell = new float[] { 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f };
+        private static bool inverseSpreadDirection = true;
+
         private struct CellSpreadRates
         {
             public float[] _spreadRates;
@@ -105,24 +113,25 @@ namespace WUIPlatform
         }
 
         static readonly float sqrt2 = Mathf.Sqrt(2f);
-        private class BackwardsFireCell
+        private class FireCell
         {
-            Vector2int _index;
-            BackwardsFireCell[] _neighbors = new BackwardsFireCell[8];
+            public Vector2int _index;
+            FireCell[] _neighbors = new FireCell[8];
             public bool _burntOut, _ignited;
             public LandscapeStruct _lcp;
             float[] _flamefronts = new float[8];
-            float[] _inverseSpreadRates = new float[8];
+            float[] _spreadRates = new float[8];
             float[] _spreadDistances = new float[8];
             public float _maxROS;
             private float _cellSize;
+            public int _linearIndex;
 
-
-            public BackwardsFireCell(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize)
+            public FireCell(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize)
             {
                 _index = new Vector2int(xIndex, yIndex);
                 _lcp = lcpData.GetCellData(_index.x, _index.y);
                 _cellSize = cellSize;
+                _linearIndex = xIndex + yIndex * xDim;
                 if (wuiArea[_index.x, _index.y] || surface.isAllFuelLoadZero(_lcp.fuel_model))
                 {
                     _burntOut = true;
@@ -130,25 +139,34 @@ namespace WUIPlatform
                 }
 
                 _maxROS = float.MinValue;
-                for (int i = 0; i < _inverseSpreadRates.Length; i++)
+                for (int i = 0; i < _spreadRates.Length; i++)
                 {
                     InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
+                    int fuelModel = _lcp.fuel_model;
+                    float slope = _lcp.slope;
+                    float aspect = _lcp.aspect;
 
-                    surface.updateSurfaceInputs(_lcp.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
-                        midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, _lcp.slope, slopeUnits, _lcp.aspect, _lcp.canopy_cover, coverUnits, _lcp.crown_canopy_height, lengthUnits, crownRatio);
+                    surface.updateSurfaceInputs(fuelModel, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
+                        midFlameWindspeed, windSpeedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, slope, slopeUnits, aspect, _lcp.canopy_cover, coverUnits, _lcp.crown_canopy_height, lengthUnits, crownRatio);
 
-                    surface.doSurfaceRunInDirectionOfInterest(inverseSpreadDirections[i]);
-                    //from m/min to m/s
-                    _inverseSpreadRates[i] = (float)surface.getSpreadRate(speedUnits) / 60f;
-                    if(_inverseSpreadRates[i] >_maxROS)
+                    float spreadDirection = spreadDirections[i];
+                    if (inverseSpreadDirection)
                     {
-                        _maxROS = _inverseSpreadRates[i];
+                        spreadDirection += 180f;
+                    }
+                    surface.doSurfaceRunInDirectionOfInterest(spreadDirection);
+
+                    //from m/min to m/s
+                    _spreadRates[i] = (float)surface.getSpreadRateInDirectionOfInterest(windSpeedUnits);
+                    if (_spreadRates[i] > _maxROS)
+                    {
+                        _maxROS = _spreadRates[i];
                     }
                 }
             }
 
-            public void SetNeighbors(int xDim, int yDim, bool[,] wuiArea, Surface surface, BackwardsFireCell[,] cells)
+            public void SetNeighbors(int xDim, int yDim, bool[,] wuiArea, Surface surface, FireCell[,] cells)
             {
                 for (int i = 0; i < _neighbors.Length; ++i)
                 {
@@ -158,6 +176,7 @@ namespace WUIPlatform
                         _neighbors[i] = cells[neighborIndex.x, neighborIndex.y];
 
                         float heightDifference = Mathf.Abs(_lcp.elevation - _neighbors[i]._lcp.elevation);
+                        //heightDifference = 0f;
                         float topViewDistance = _cellSize;
                         //if not cardinal direction we go diagonally
                         if (i % 2 != 0)
@@ -173,13 +192,13 @@ namespace WUIPlatform
                     }
                 }
             }
-
-            //returns the spreadrate in the opposite direction of who is requesting it, e.g. a neighbor north of you will have you indexed as south, so we want the north spread rate
-            public float GetSpreadrate(int fromRelativeIndex)
+                        
+            public float GetSpreadrate(int index)
             {
-                return _inverseSpreadRates[(fromRelativeIndex + 4) % 8];
+                return _spreadRates[index];
             }
 
+            //returns the flame front in the opposite direction of who is requesting it, e.g. a neighbor north of you will have you indexed as south, so we want the north spread rate
             public float GetFlamefront(int fromRelativeIndex)
             {
                 return _flamefronts[(fromRelativeIndex + 4) % 8];
@@ -197,18 +216,20 @@ namespace WUIPlatform
                 {
                     if (_flamefronts[i] < 0.5f * _spreadDistances[i])
                     {
-                        _flamefronts[i] += deltaTime * _inverseSpreadRates[i];
+                        _flamefronts[i] += deltaTime * _spreadRates[i];
                         ++spreadLeft;
                     }
                     else if (_neighbors[i] != null && !_neighbors[i]._burntOut)
                     {
                         _flamefronts[i] += deltaTime * _neighbors[i].GetSpreadrate(i);
                         //flamefronts have crossed or we have reached the center of the neighbor
-                        if (_flamefronts[i] + _neighbors[i].GetFlamefront(i) > _spreadDistances[i])
+                        if (_flamefronts[i] + _neighbors[i].GetFlamefront(i) >= _spreadDistances[i])
                         {
                             if (!_neighbors[i]._ignited)
                             {
-                                _neighbors[i].SchedurelIgnite(currentTime + deltaTime);
+                                //residual is only from this cell
+                                float residual = Mathf.Max(0, _flamefronts[i] - _spreadDistances[i]);
+                                _neighbors[i].SchedurelIgnite(currentTime + deltaTime, residual, i);
                             }
                             _neighbors[i] = null;
                         }
@@ -223,25 +244,33 @@ namespace WUIPlatform
                 if (spreadLeft == 0)
                 {
                     _burntOut = true;
+                    cellsToRemove.Push(this);
                 }
             }
 
             bool scheduleIgnition;
             public float _timeOfArrival;
-            public void SchedurelIgnite(float timeOfArrival)
+            public void SchedurelIgnite(float timeOfArrival, float residualFlamefront, int index)
             {
                 if(!_burntOut && !_ignited)
                 {
-                    scheduleIgnition = true;
-                    _timeOfArrival = timeOfArrival;
+                    if(!scheduleIgnition)
+                    {
+                        scheduleIgnition = true;
+                        cellsToIgnite.Push(this);
+                        _timeOfArrival = timeOfArrival;
+                    }     
+                    //we might be approached from more than one direction during one timestep
+                    _flamefronts[index] = Mathf.Max(_flamefronts[index], residualFlamefront);
                 }                
             }
 
             public void TryIgnite()
             {
-                if (scheduleIgnition)
+                if (scheduleIgnition && !_ignited)
                 {
                     _ignited = true;
+                    activeCells.Add(_linearIndex, this);                                        
                 }
             }            
         }
@@ -256,7 +285,11 @@ namespace WUIPlatform
             return true;
         }
 
-        private static float[,] CalculateBackwardsFire(float midFlameWindspeed, float windDirection, float cellSize)
+        private static Stack<FireCell> cellsToIgnite;
+        private static Dictionary<int, FireCell> activeCells;
+        private static Stack<FireCell> cellsToRemove;
+
+        private static float[,] CalculateFirespread(float windspeedTenMeters, float windDirection, float cellSize)
         {
             WUIEngine.LOG(WUIEngine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
@@ -277,7 +310,7 @@ namespace WUIPlatform
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
-            BackwardsFireCell[,] fireCells = new BackwardsFireCell[xDim, yDim];
+            FireCell[,] fireCells = new FireCell[xDim, yDim];
 
             //create
             float maxROS = float.MinValue;
@@ -285,7 +318,7 @@ namespace WUIPlatform
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new BackwardsFireCell(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim, windDirection, midFlameWindspeed, cellSize);
+                    fireCells[x, y] = new FireCell(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize);
                     if (fireCells[x, y]._maxROS > maxROS)
                     {
                         maxROS = fireCells[x, y]._maxROS;
@@ -302,24 +335,36 @@ namespace WUIPlatform
                 }
             }
 
+            cellsToIgnite = new Stack<FireCell>();
+            activeCells = new Dictionary<int, FireCell>();
+            cellsToRemove = new Stack<FireCell>();
+
             //initial ignition
-            for(int i = 0; i < wuiIgnitionBorder.Count; ++i)
+            for (int i = 0; i < wuiIgnitionBorder.Count; ++i)
             {
                 for (int j = 0; j < neighborIndices.Length; ++j)
                 {
                     Vector2int index = wuiIgnitionBorder[i] + neighborIndices[j];
                     if(IsInside(xDim, yDim, index))
                     {
-                        fireCells[index.x, index.y].SchedurelIgnite(0f);
+                        fireCells[index.x, index.y].SchedurelIgnite(0f, 0f, 0);
                     }
                 }
             }
 
             float currentTime = 0f;
             float deltaTime = 0.5f * cellSize / maxROS;
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Backwards fire spread delta time set to: " + deltaTime);
-            float endTime = 24*3600f;
-            float[,] triggerBuffer = new float[xDim, yDim];
+            if(deltaTime <= 0.0f)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, "Something went wrong when calculating delta time (was less then/equal to zero), please check your input.");
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, "Fire spread delta time set to: " + deltaTime);
+            }            
+            float endTime = 6*3600f;
+            float[,] triggerBuffer = new float[xDim, yDim];                       
+
             while (currentTime < endTime)
             {
                 if(currentTime + deltaTime > endTime)
@@ -328,17 +373,25 @@ namespace WUIPlatform
                 }
 
                 //handle ignitions
-                for (int y = 0; y < yDim; ++y)
+                while(cellsToIgnite.Count > 0)
+                {
+                    cellsToIgnite.Pop().TryIgnite();
+                }
+                /*for (int y = 0; y < yDim; ++y)
                 {
                     for (int x = 0; x < xDim; ++x)
                     {
                         fireCells[x, y].TryIgnite();
                     }
-                }
+                }*/
 
                 //step forward in time
-                int aliveCells = 0;
-                for (int y = 0; y < yDim; ++y)
+                foreach(FireCell f in activeCells.Values)
+                {
+                    f.Step(currentTime, deltaTime);
+                }
+                currentTime += deltaTime;
+                /*for (int y = 0; y < yDim; ++y)
                 {
                     for (int x = 0; x < xDim; ++x)
                     {
@@ -348,11 +401,15 @@ namespace WUIPlatform
                             ++aliveCells;
                         }
                     }
-                }
-
-                currentTime += deltaTime;
-                if (aliveCells == 0)
+                }*/
+                while (cellsToRemove.Count > 0)
                 {
+                    activeCells.Remove(cellsToRemove.Pop()._linearIndex);
+                }
+                
+                if (activeCells.Count == 0 && cellsToIgnite.Count == 0)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "No more active cells left, stopping fire spread simulation");
                     endTime = currentTime;
                     break;
                 }                
@@ -375,7 +432,7 @@ namespace WUIPlatform
             return triggerBuffer;
 
             float[,] rateOfSpreads, spreadDirections;
-            CalculateAllRateOfSpreadsAndDirections(out rateOfSpreads, out spreadDirections, midFlameWindspeed, windDirection, false, wuiArea);
+            CalculateAllRateOfSpreadsAndDirections(out rateOfSpreads, out spreadDirections, windspeedTenMeters, windDirection, false, wuiArea);
         }
 
         
@@ -436,16 +493,7 @@ namespace WUIPlatform
             {
                 neighborIndex = originIndex;
             }
-        }
-
-        //private const TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
-        private const BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
-        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
-        private const BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
-        private const BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
-        private const BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
-        private const BehaveUnits.SpeedUnits.SpeedUnitsEnum speedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerMinute;
-        private const WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
+        }        
 
         private static void CalculateAllRateOfSpreadsAndDirections(out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, bool[,] wuiArea = null)
         {
@@ -486,7 +534,7 @@ namespace WUIPlatform
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
                     surfaceFire.updateSurfaceInputs(cellData.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
-                        midFlameWindspeed, speedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, cellData.slope, slopeUnits, cellData.aspect, cellData.canopy_cover, coverUnits, cellData.crown_canopy_height, lengthUnits, crownRatio);
+                        midFlameWindspeed, windSpeedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, cellData.slope, slopeUnits, cellData.aspect, cellData.canopy_cover, coverUnits, cellData.crown_canopy_height, lengthUnits, crownRatio);
 
                     surfaceFire.doSurfaceRunInDirectionOfMaxSpread();
                     int yIndex = y;
@@ -494,7 +542,7 @@ namespace WUIPlatform
                     {
                         yIndex = yDim - 1 - y;
                     }
-                    rateOfSpreads[x, yIndex] = (float)surfaceFire.getSpreadRate(speedUnits);
+                    rateOfSpreads[x, yIndex] = (float)surfaceFire.getSpreadRate(windSpeedUnits);
                     spreadDirections[x, yIndex] = (float)surfaceFire.getDirectionOfMaxSpread();
 
                 }

@@ -263,7 +263,7 @@ public class TraCINextTLSVector : global::System.IDisposable, global::System.Col
   }
 
   private TraCINextTLSData getitem(int index) {
-    TraCINextTLSData ret = new TraCINextTLSData(libsumoPINVOKE.TraCINextTLSVector_getitem(swigCPtr, index), false);
+    TraCINextTLSData ret = new TraCINextTLSData(libsumoPINVOKE.TraCINextTLSVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

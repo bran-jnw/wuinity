@@ -263,7 +263,7 @@ public class TraCIVehicleDataVector : global::System.IDisposable, global::System
   }
 
   private TraCIVehicleData getitem(int index) {
-    TraCIVehicleData ret = new TraCIVehicleData(libsumoPINVOKE.TraCIVehicleDataVector_getitem(swigCPtr, index), false);
+    TraCIVehicleData ret = new TraCIVehicleData(libsumoPINVOKE.TraCIVehicleDataVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

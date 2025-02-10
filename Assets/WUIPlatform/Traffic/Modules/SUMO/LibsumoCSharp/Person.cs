@@ -289,6 +289,12 @@ public class Person : global::System.IDisposable {
     return ret;
   }
 
+  public static double getMass(string typeID) {
+    double ret = libsumoPINVOKE.Person_getMass(typeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static TraCIColor getColor(string typeID) {
     TraCIColor ret = new TraCIColor(libsumoPINVOKE.Person_getColor(typeID), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -540,6 +546,11 @@ public class Person : global::System.IDisposable {
 
   public static void setHeight(string typeID, double height) {
     libsumoPINVOKE.Person_setHeight(typeID, height);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static void setMass(string typeID, double mass) {
+    libsumoPINVOKE.Person_setMass(typeID, mass);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

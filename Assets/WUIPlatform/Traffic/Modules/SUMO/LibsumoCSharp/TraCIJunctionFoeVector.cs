@@ -263,7 +263,7 @@ public class TraCIJunctionFoeVector : global::System.IDisposable, global::System
   }
 
   private TraCIJunctionFoe getitem(int index) {
-    TraCIJunctionFoe ret = new TraCIJunctionFoe(libsumoPINVOKE.TraCIJunctionFoeVector_getitem(swigCPtr, index), false);
+    TraCIJunctionFoe ret = new TraCIJunctionFoe(libsumoPINVOKE.TraCIJunctionFoeVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

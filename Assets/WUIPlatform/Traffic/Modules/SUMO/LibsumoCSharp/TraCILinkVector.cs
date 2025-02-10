@@ -263,7 +263,7 @@ public class TraCILinkVector : global::System.IDisposable, global::System.Collec
   }
 
   private TraCILink getitem(int index) {
-    TraCILink ret = new TraCILink(libsumoPINVOKE.TraCILinkVector_getitem(swigCPtr, index), false);
+    TraCILink ret = new TraCILink(libsumoPINVOKE.TraCILinkVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

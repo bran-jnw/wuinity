@@ -104,6 +104,12 @@ public class TrafficLight : global::System.IDisposable {
     return ret;
   }
 
+  public static double getSpentDuration(string tlsID) {
+    double ret = libsumoPINVOKE.TrafficLight_getSpentDuration(tlsID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static int getServedPersonCount(string tlsID, int index) {
     int ret = libsumoPINVOKE.TrafficLight_getServedPersonCount(tlsID, index);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();

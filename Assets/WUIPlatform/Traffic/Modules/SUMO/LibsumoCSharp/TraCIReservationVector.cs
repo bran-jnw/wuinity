@@ -263,7 +263,7 @@ public class TraCIReservationVector : global::System.IDisposable, global::System
   }
 
   private TraCIReservation getitem(int index) {
-    TraCIReservation ret = new TraCIReservation(libsumoPINVOKE.TraCIReservationVector_getitem(swigCPtr, index), false);
+    TraCIReservation ret = new TraCIReservation(libsumoPINVOKE.TraCIReservationVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

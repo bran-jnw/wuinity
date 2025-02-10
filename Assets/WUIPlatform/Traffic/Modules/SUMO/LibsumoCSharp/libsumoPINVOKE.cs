@@ -1021,11 +1021,8 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCILogic_subParameter_get")]
   public static extern global::System.IntPtr TraCILogic_subParameter_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCILink__SWIG_0")]
-  public static extern global::System.IntPtr new_TraCILink__SWIG_0();
-
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCILink__SWIG_1")]
-  public static extern global::System.IntPtr new_TraCILink__SWIG_1(string jarg1, string jarg2, string jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCILink")]
+  public static extern global::System.IntPtr new_TraCILink(string jarg1, string jarg2, string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCILink")]
   public static extern void delete_TraCILink(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -1056,6 +1053,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIConnection")]
   public static extern void delete_TraCIConnection(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnection_getString")]
+  public static extern string TraCIConnection_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnection_approachedLane_set")]
   public static extern void TraCIConnection_approachedLane_set(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
@@ -1105,6 +1105,21 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnection_length_get")]
   public static extern double TraCIConnection_length_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnectionVectorWrapped_getString")]
+  public static extern string TraCIConnectionVectorWrapped_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnectionVectorWrapped_value_set")]
+  public static extern void TraCIConnectionVectorWrapped_value_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnectionVectorWrapped_value_get")]
+  public static extern global::System.IntPtr TraCIConnectionVectorWrapped_value_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIConnectionVectorWrapped")]
+  public static extern global::System.IntPtr new_TraCIConnectionVectorWrapped();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIConnectionVectorWrapped")]
+  public static extern void delete_TraCIConnectionVectorWrapped(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIVehicleData_id_set")]
   public static extern void TraCIVehicleData_id_set(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
@@ -1141,6 +1156,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIVehicleData")]
   public static extern void delete_TraCIVehicleData(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextTLSData_getString")]
+  public static extern string TraCINextTLSData_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextTLSData_id_set")]
   public static extern void TraCINextTLSData_id_set(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
@@ -1170,6 +1188,21 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextTLSData")]
   public static extern void delete_TraCINextTLSData(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextTLSDataVectorWrapped_getString")]
+  public static extern string TraCINextTLSDataVectorWrapped_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextTLSDataVectorWrapped_value_set")]
+  public static extern void TraCINextTLSDataVectorWrapped_value_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextTLSDataVectorWrapped_value_get")]
+  public static extern global::System.IntPtr TraCINextTLSDataVectorWrapped_value_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextTLSDataVectorWrapped")]
+  public static extern global::System.IntPtr new_TraCINextTLSDataVectorWrapped();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextTLSDataVectorWrapped")]
+  public static extern void delete_TraCINextTLSDataVectorWrapped(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopData__SWIG_0")]
   public static extern global::System.IntPtr new_TraCINextStopData__SWIG_0(string jarg1, double jarg2, double jarg3, string jarg4, int jarg5, double jarg6, double jarg7, double jarg8, double jarg9, double jarg10, string jarg11, string jarg12, string jarg13, string jarg14, string jarg15, double jarg16);
@@ -1324,20 +1357,23 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextStopData")]
   public static extern void delete_TraCINextStopData(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_getString")]
-  public static extern string TraCINextStopDataVector_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVectorWrapped_getString")]
+  public static extern string TraCINextStopDataVectorWrapped_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_value_set")]
-  public static extern void TraCINextStopDataVector_value_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVectorWrapped_value_set")]
+  public static extern void TraCINextStopDataVectorWrapped_value_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_value_get")]
-  public static extern global::System.IntPtr TraCINextStopDataVector_value_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVectorWrapped_value_get")]
+  public static extern global::System.IntPtr TraCINextStopDataVectorWrapped_value_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector")]
-  public static extern global::System.IntPtr new_TraCINextStopDataVector();
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVectorWrapped")]
+  public static extern global::System.IntPtr new_TraCINextStopDataVectorWrapped();
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextStopDataVector")]
-  public static extern void delete_TraCINextStopDataVector(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextStopDataVectorWrapped")]
+  public static extern void delete_TraCINextStopDataVectorWrapped(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesData_getString")]
+  public static extern string TraCIBestLanesData_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesData_laneID_set")]
   public static extern void TraCIBestLanesData_laneID_set(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
@@ -1380,6 +1416,21 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIBestLanesData")]
   public static extern void delete_TraCIBestLanesData(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVectorWrapped_getString")]
+  public static extern string TraCIBestLanesDataVectorWrapped_getString(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVectorWrapped_value_set")]
+  public static extern void TraCIBestLanesDataVectorWrapped_value_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVectorWrapped_value_get")]
+  public static extern global::System.IntPtr TraCIBestLanesDataVectorWrapped_value_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesDataVectorWrapped")]
+  public static extern global::System.IntPtr new_TraCIBestLanesDataVectorWrapped();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIBestLanesDataVectorWrapped")]
+  public static extern void delete_TraCIBestLanesDataVectorWrapped(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIStage__SWIG_0")]
   public static extern global::System.IntPtr new_TraCIStage__SWIG_0(int jarg1, string jarg2, string jarg3, string jarg4, global::System.Runtime.InteropServices.HandleRef jarg5, double jarg6, double jarg7, double jarg8, string jarg9, double jarg10, double jarg11, double jarg12, string jarg13);
@@ -1888,71 +1939,71 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIStageVector")]
   public static extern void delete_TraCIStageVector(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_Clear")]
-  public static extern void TraCINextStopDataVector2_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_Clear")]
+  public static extern void TraCINextStopDataVector_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_Add")]
-  public static extern void TraCINextStopDataVector2_Add(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_Add")]
+  public static extern void TraCINextStopDataVector_Add(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_size")]
-  public static extern uint TraCINextStopDataVector2_size(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_size")]
+  public static extern uint TraCINextStopDataVector_size(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_capacity")]
-  public static extern uint TraCINextStopDataVector2_capacity(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_capacity")]
+  public static extern uint TraCINextStopDataVector_capacity(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_reserve")]
-  public static extern void TraCINextStopDataVector2_reserve(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_reserve")]
+  public static extern void TraCINextStopDataVector_reserve(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector2__SWIG_0")]
-  public static extern global::System.IntPtr new_TraCINextStopDataVector2__SWIG_0();
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector__SWIG_0")]
+  public static extern global::System.IntPtr new_TraCINextStopDataVector__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector2__SWIG_1")]
-  public static extern global::System.IntPtr new_TraCINextStopDataVector2__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector__SWIG_1")]
+  public static extern global::System.IntPtr new_TraCINextStopDataVector__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector2__SWIG_2")]
-  public static extern global::System.IntPtr new_TraCINextStopDataVector2__SWIG_2(int jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCINextStopDataVector__SWIG_2")]
+  public static extern global::System.IntPtr new_TraCINextStopDataVector__SWIG_2(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_getitemcopy")]
-  public static extern global::System.IntPtr TraCINextStopDataVector2_getitemcopy(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_getitemcopy")]
+  public static extern global::System.IntPtr TraCINextStopDataVector_getitemcopy(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_getitem")]
-  public static extern global::System.IntPtr TraCINextStopDataVector2_getitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_getitem")]
+  public static extern global::System.IntPtr TraCINextStopDataVector_getitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_setitem")]
-  public static extern void TraCINextStopDataVector2_setitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_setitem")]
+  public static extern void TraCINextStopDataVector_setitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_AddRange")]
-  public static extern void TraCINextStopDataVector2_AddRange(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_AddRange")]
+  public static extern void TraCINextStopDataVector_AddRange(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_GetRange")]
-  public static extern global::System.IntPtr TraCINextStopDataVector2_GetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_GetRange")]
+  public static extern global::System.IntPtr TraCINextStopDataVector_GetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_Insert")]
-  public static extern void TraCINextStopDataVector2_Insert(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_Insert")]
+  public static extern void TraCINextStopDataVector_Insert(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_InsertRange")]
-  public static extern void TraCINextStopDataVector2_InsertRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_InsertRange")]
+  public static extern void TraCINextStopDataVector_InsertRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_RemoveAt")]
-  public static extern void TraCINextStopDataVector2_RemoveAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_RemoveAt")]
+  public static extern void TraCINextStopDataVector_RemoveAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_RemoveRange")]
-  public static extern void TraCINextStopDataVector2_RemoveRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_RemoveRange")]
+  public static extern void TraCINextStopDataVector_RemoveRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_Repeat")]
-  public static extern global::System.IntPtr TraCINextStopDataVector2_Repeat(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_Repeat")]
+  public static extern global::System.IntPtr TraCINextStopDataVector_Repeat(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_Reverse__SWIG_0")]
-  public static extern void TraCINextStopDataVector2_Reverse__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_Reverse__SWIG_0")]
+  public static extern void TraCINextStopDataVector_Reverse__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_Reverse__SWIG_1")]
-  public static extern void TraCINextStopDataVector2_Reverse__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_Reverse__SWIG_1")]
+  public static extern void TraCINextStopDataVector_Reverse__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector2_SetRange")]
-  public static extern void TraCINextStopDataVector2_SetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_SetRange")]
+  public static extern void TraCINextStopDataVector_SetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextStopDataVector2")]
-  public static extern void delete_TraCINextStopDataVector2(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCINextStopDataVector")]
+  public static extern void delete_TraCINextStopDataVector(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIReservationVector_Clear")]
   public static extern void TraCIReservationVector_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -2152,71 +2203,71 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCICollisionVector")]
   public static extern void delete_TraCICollisionVector(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_Clear")]
-  public static extern void TraCIBestLanesVector_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_Clear")]
+  public static extern void TraCIBestLanesDataVector_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_Add")]
-  public static extern void TraCIBestLanesVector_Add(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_Add")]
+  public static extern void TraCIBestLanesDataVector_Add(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_size")]
-  public static extern uint TraCIBestLanesVector_size(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_size")]
+  public static extern uint TraCIBestLanesDataVector_size(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_capacity")]
-  public static extern uint TraCIBestLanesVector_capacity(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_capacity")]
+  public static extern uint TraCIBestLanesDataVector_capacity(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_reserve")]
-  public static extern void TraCIBestLanesVector_reserve(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_reserve")]
+  public static extern void TraCIBestLanesDataVector_reserve(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesVector__SWIG_0")]
-  public static extern global::System.IntPtr new_TraCIBestLanesVector__SWIG_0();
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesDataVector__SWIG_0")]
+  public static extern global::System.IntPtr new_TraCIBestLanesDataVector__SWIG_0();
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesVector__SWIG_1")]
-  public static extern global::System.IntPtr new_TraCIBestLanesVector__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesDataVector__SWIG_1")]
+  public static extern global::System.IntPtr new_TraCIBestLanesDataVector__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesVector__SWIG_2")]
-  public static extern global::System.IntPtr new_TraCIBestLanesVector__SWIG_2(int jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCIBestLanesDataVector__SWIG_2")]
+  public static extern global::System.IntPtr new_TraCIBestLanesDataVector__SWIG_2(int jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_getitemcopy")]
-  public static extern global::System.IntPtr TraCIBestLanesVector_getitemcopy(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_getitemcopy")]
+  public static extern global::System.IntPtr TraCIBestLanesDataVector_getitemcopy(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_getitem")]
-  public static extern global::System.IntPtr TraCIBestLanesVector_getitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_getitem")]
+  public static extern global::System.IntPtr TraCIBestLanesDataVector_getitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_setitem")]
-  public static extern void TraCIBestLanesVector_setitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_setitem")]
+  public static extern void TraCIBestLanesDataVector_setitem(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_AddRange")]
-  public static extern void TraCIBestLanesVector_AddRange(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_AddRange")]
+  public static extern void TraCIBestLanesDataVector_AddRange(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_GetRange")]
-  public static extern global::System.IntPtr TraCIBestLanesVector_GetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_GetRange")]
+  public static extern global::System.IntPtr TraCIBestLanesDataVector_GetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_Insert")]
-  public static extern void TraCIBestLanesVector_Insert(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_Insert")]
+  public static extern void TraCIBestLanesDataVector_Insert(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_InsertRange")]
-  public static extern void TraCIBestLanesVector_InsertRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_InsertRange")]
+  public static extern void TraCIBestLanesDataVector_InsertRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_RemoveAt")]
-  public static extern void TraCIBestLanesVector_RemoveAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_RemoveAt")]
+  public static extern void TraCIBestLanesDataVector_RemoveAt(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_RemoveRange")]
-  public static extern void TraCIBestLanesVector_RemoveRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_RemoveRange")]
+  public static extern void TraCIBestLanesDataVector_RemoveRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_Repeat")]
-  public static extern global::System.IntPtr TraCIBestLanesVector_Repeat(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_Repeat")]
+  public static extern global::System.IntPtr TraCIBestLanesDataVector_Repeat(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_Reverse__SWIG_0")]
-  public static extern void TraCIBestLanesVector_Reverse__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_Reverse__SWIG_0")]
+  public static extern void TraCIBestLanesDataVector_Reverse__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_Reverse__SWIG_1")]
-  public static extern void TraCIBestLanesVector_Reverse__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_Reverse__SWIG_1")]
+  public static extern void TraCIBestLanesDataVector_Reverse__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesVector_SetRange")]
-  public static extern void TraCIBestLanesVector_SetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVector_SetRange")]
+  public static extern void TraCIBestLanesDataVector_SetRange(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, global::System.Runtime.InteropServices.HandleRef jarg3);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIBestLanesVector")]
-  public static extern void delete_TraCIBestLanesVector(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCIBestLanesDataVector")]
+  public static extern void delete_TraCIBestLanesDataVector(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnectionVector_Clear")]
   public static extern void TraCIConnectionVector_Clear(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -2881,6 +2932,15 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Edge_getAngle__SWIG_1")]
   public static extern double Edge_getAngle__SWIG_1(string jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Edge_getFromJunction")]
+  public static extern string Edge_getFromJunction(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Edge_getToJunction")]
+  public static extern string Edge_getToJunction(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Edge_getBidiEdge")]
+  public static extern string Edge_getBidiEdge(string jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Edge_getIDList")]
   public static extern global::System.IntPtr Edge_getIDList();
 
@@ -2997,6 +3057,180 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_DEFAULT_VIEW_get")]
   public static extern string DEFAULT_VIEW_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getZoom__SWIG_0")]
+  public static extern double GUI_getZoom__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getZoom__SWIG_1")]
+  public static extern double GUI_getZoom__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getAngle__SWIG_0")]
+  public static extern double GUI_getAngle__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getAngle__SWIG_1")]
+  public static extern double GUI_getAngle__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getOffset__SWIG_0")]
+  public static extern global::System.IntPtr GUI_getOffset__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getOffset__SWIG_1")]
+  public static extern global::System.IntPtr GUI_getOffset__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getSchema__SWIG_0")]
+  public static extern string GUI_getSchema__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getSchema__SWIG_1")]
+  public static extern string GUI_getSchema__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getBoundary__SWIG_0")]
+  public static extern global::System.IntPtr GUI_getBoundary__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getBoundary__SWIG_1")]
+  public static extern global::System.IntPtr GUI_getBoundary__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_hasView__SWIG_0")]
+  public static extern bool GUI_hasView__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_hasView__SWIG_1")]
+  public static extern bool GUI_hasView__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getTrackedVehicle__SWIG_0")]
+  public static extern string GUI_getTrackedVehicle__SWIG_0(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getTrackedVehicle__SWIG_1")]
+  public static extern string GUI_getTrackedVehicle__SWIG_1();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_isSelected__SWIG_0")]
+  public static extern bool GUI_isSelected__SWIG_0(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_isSelected__SWIG_1")]
+  public static extern bool GUI_isSelected__SWIG_1(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_setZoom")]
+  public static extern void GUI_setZoom(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_setAngle")]
+  public static extern void GUI_setAngle(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_setOffset")]
+  public static extern void GUI_setOffset(string jarg1, double jarg2, double jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_setSchema")]
+  public static extern void GUI_setSchema(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_setBoundary")]
+  public static extern void GUI_setBoundary(string jarg1, double jarg2, double jarg3, double jarg4, double jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_trackVehicle")]
+  public static extern void GUI_trackVehicle(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_screenshot__SWIG_0")]
+  public static extern void GUI_screenshot__SWIG_0(string jarg1, string jarg2, int jarg3, int jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_screenshot__SWIG_1")]
+  public static extern void GUI_screenshot__SWIG_1(string jarg1, string jarg2, int jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_screenshot__SWIG_2")]
+  public static extern void GUI_screenshot__SWIG_2(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_track__SWIG_0")]
+  public static extern void GUI_track__SWIG_0(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_track__SWIG_1")]
+  public static extern void GUI_track__SWIG_1(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_toggleSelection__SWIG_0")]
+  public static extern void GUI_toggleSelection__SWIG_0(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_toggleSelection__SWIG_1")]
+  public static extern void GUI_toggleSelection__SWIG_1(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_addView__SWIG_0")]
+  public static extern void GUI_addView__SWIG_0(string jarg1, string jarg2, bool jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_addView__SWIG_1")]
+  public static extern void GUI_addView__SWIG_1(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_addView__SWIG_2")]
+  public static extern void GUI_addView__SWIG_2(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_removeView")]
+  public static extern void GUI_removeView(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getIDList")]
+  public static extern global::System.IntPtr GUI_getIDList();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getIDCount")]
+  public static extern int GUI_getIDCount();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getParameter")]
+  public static extern string GUI_getParameter(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getParameterWithKey")]
+  public static extern global::System.IntPtr GUI_getParameterWithKey(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_setParameter")]
+  public static extern void GUI_setParameter(string jarg1, string jarg2, string jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribe__SWIG_0")]
+  public static extern void GUI_subscribe__SWIG_0(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3, double jarg4, global::System.Runtime.InteropServices.HandleRef jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribe__SWIG_1")]
+  public static extern void GUI_subscribe__SWIG_1(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3, double jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribe__SWIG_2")]
+  public static extern void GUI_subscribe__SWIG_2(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2, double jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribe__SWIG_3")]
+  public static extern void GUI_subscribe__SWIG_3(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribe__SWIG_4")]
+  public static extern void GUI_subscribe__SWIG_4(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_unsubscribe")]
+  public static extern void GUI_unsubscribe(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeContext__SWIG_0")]
+  public static extern void GUI_subscribeContext__SWIG_0(string jarg1, int jarg2, double jarg3, global::System.Runtime.InteropServices.HandleRef jarg4, double jarg5, double jarg6, global::System.Runtime.InteropServices.HandleRef jarg7);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeContext__SWIG_1")]
+  public static extern void GUI_subscribeContext__SWIG_1(string jarg1, int jarg2, double jarg3, global::System.Runtime.InteropServices.HandleRef jarg4, double jarg5, double jarg6);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeContext__SWIG_2")]
+  public static extern void GUI_subscribeContext__SWIG_2(string jarg1, int jarg2, double jarg3, global::System.Runtime.InteropServices.HandleRef jarg4, double jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeContext__SWIG_3")]
+  public static extern void GUI_subscribeContext__SWIG_3(string jarg1, int jarg2, double jarg3, global::System.Runtime.InteropServices.HandleRef jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeContext__SWIG_4")]
+  public static extern void GUI_subscribeContext__SWIG_4(string jarg1, int jarg2, double jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_unsubscribeContext")]
+  public static extern void GUI_unsubscribeContext(string jarg1, int jarg2, double jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getAllSubscriptionResults")]
+  public static extern global::System.IntPtr GUI_getAllSubscriptionResults();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getSubscriptionResults")]
+  public static extern global::System.IntPtr GUI_getSubscriptionResults(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getAllContextSubscriptionResults")]
+  public static extern global::System.IntPtr GUI_getAllContextSubscriptionResults();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_getContextSubscriptionResults")]
+  public static extern global::System.IntPtr GUI_getContextSubscriptionResults(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeParameterWithKey__SWIG_0")]
+  public static extern void GUI_subscribeParameterWithKey__SWIG_0(string jarg1, string jarg2, double jarg3, double jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeParameterWithKey__SWIG_1")]
+  public static extern void GUI_subscribeParameterWithKey__SWIG_1(string jarg1, string jarg2, double jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_subscribeParameterWithKey__SWIG_2")]
+  public static extern void GUI_subscribeParameterWithKey__SWIG_2(string jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_GUI_DOMAIN_ID_get")]
+  public static extern int GUI_DOMAIN_ID_get();
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_GUI")]
   public static extern void delete_GUI(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -3144,6 +3378,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Junction_getIncomingEdges")]
   public static extern global::System.IntPtr Junction_getIncomingEdges(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Junction_getOutgoingEdges")]
+  public static extern global::System.IntPtr Junction_getOutgoingEdges(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Junction_getIDList")]
   public static extern global::System.IntPtr Junction_getIDList();
@@ -3453,6 +3690,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Lane_getAngle__SWIG_1")]
   public static extern double Lane_getAngle__SWIG_1(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Lane_getBidiLane")]
+  public static extern string Lane_getBidiLane(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Lane_getIDList")]
   public static extern global::System.IntPtr Lane_getIDList();
@@ -4072,6 +4312,24 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_Route")]
   public static extern void delete_Route(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_init__SWIG_0")]
+  public static extern global::System.IntPtr Simulation_init__SWIG_0(int jarg1, int jarg2, string jarg3, string jarg4, global::System.Runtime.InteropServices.HandleRef jarg5);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_init__SWIG_1")]
+  public static extern global::System.IntPtr Simulation_init__SWIG_1(int jarg1, int jarg2, string jarg3, string jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_init__SWIG_2")]
+  public static extern global::System.IntPtr Simulation_init__SWIG_2(int jarg1, int jarg2, string jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_init__SWIG_3")]
+  public static extern global::System.IntPtr Simulation_init__SWIG_3(int jarg1, int jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_init__SWIG_4")]
+  public static extern global::System.IntPtr Simulation_init__SWIG_4(int jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_init__SWIG_5")]
+  public static extern global::System.IntPtr Simulation_init__SWIG_5();
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_start__SWIG_0")]
   public static extern global::System.IntPtr Simulation_start__SWIG_0(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2, int jarg3, string jarg4, bool jarg5, string jarg6, bool jarg7, global::System.Runtime.InteropServices.HandleRef jarg8);
 
@@ -4095,6 +4353,18 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_start__SWIG_7")]
   public static extern global::System.IntPtr Simulation_start__SWIG_7(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_isLibsumo")]
+  public static extern bool Simulation_isLibsumo();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_switchConnection")]
+  public static extern void Simulation_switchConnection(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_getLabel")]
+  public static extern string Simulation_getLabel();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_setOrder")]
+  public static extern void Simulation_setOrder(int jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Simulation_load")]
   public static extern void Simulation_load(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -5230,11 +5500,17 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ROUTING_MODE_AGGREGATED_CUSTOM_get")]
   public static extern int ROUTING_MODE_AGGREGATED_CUSTOM_get();
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS_get")]
+  public static extern int ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS_get();
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TRAFFICLIGHT_TYPE_STATIC_get")]
   public static extern int TRAFFICLIGHT_TYPE_STATIC_get();
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TRAFFICLIGHT_TYPE_ACTUATED_get")]
   public static extern int TRAFFICLIGHT_TYPE_ACTUATED_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TRAFFICLIGHT_TYPE_NEMA_get")]
+  public static extern int TRAFFICLIGHT_TYPE_NEMA_get();
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TRAFFICLIGHT_TYPE_DELAYBASED_get")]
   public static extern int TRAFFICLIGHT_TYPE_DELAYBASED_get();
@@ -5307,6 +5583,21 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_LAST_STEP_VEHICLE_HALTING_NUMBER_get")]
   public static extern int LAST_STEP_VEHICLE_HALTING_NUMBER_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_FROM_JUNCTION_get")]
+  public static extern int FROM_JUNCTION_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TO_JUNCTION_get")]
+  public static extern int TO_JUNCTION_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_INCOMING_EDGES_get")]
+  public static extern int INCOMING_EDGES_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_OUTGOING_EDGES_get")]
+  public static extern int OUTGOING_EDGES_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_BIDI_get")]
+  public static extern int VAR_BIDI_get();
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_LAST_STEP_LENGTH_get")]
   public static extern int LAST_STEP_LENGTH_get();
@@ -5482,6 +5773,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TL_CONSTRAINT_ADD_get")]
   public static extern int TL_CONSTRAINT_ADD_get();
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TL_SPENT_DURATION_get")]
+  public static extern int TL_SPENT_DURATION_get();
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_LANE_LINK_NUMBER_get")]
   public static extern int LANE_LINK_NUMBER_get();
 
@@ -5590,6 +5884,12 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_LANE_INDEX_get")]
   public static extern int VAR_LANE_INDEX_get();
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_SEGMENT_ID_get")]
+  public static extern int VAR_SEGMENT_ID_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_SEGMENT_INDEX_get")]
+  public static extern int VAR_SEGMENT_INDEX_get();
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_ROUTE_ID_get")]
   public static extern int VAR_ROUTE_ID_get();
 
@@ -5688,6 +5988,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_HEIGHT_get")]
   public static extern int VAR_HEIGHT_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_MASS_get")]
+  public static extern int VAR_MASS_get();
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_LINE_get")]
   public static extern int VAR_LINE_get();
@@ -6016,6 +6319,21 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_HAS_VIEW_get")]
   public static extern int VAR_HAS_VIEW_get();
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_CS_POWER_get")]
+  public static extern int VAR_CS_POWER_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_CS_EFFICIENCY_get")]
+  public static extern int VAR_CS_EFFICIENCY_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_CS_CHARGE_IN_TRANSIT_get")]
+  public static extern int VAR_CS_CHARGE_IN_TRANSIT_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_CS_CHARGE_DELAY_get")]
+  public static extern int VAR_CS_CHARGE_DELAY_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VAR_ACCESS_BADGE_get")]
+  public static extern int VAR_ACCESS_BADGE_get();
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TrafficLight_getRedYellowGreenState")]
   public static extern string TrafficLight_getRedYellowGreenState(string jarg1);
 
@@ -6045,6 +6363,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TrafficLight_getNextSwitch")]
   public static extern double TrafficLight_getNextSwitch(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TrafficLight_getSpentDuration")]
+  public static extern double TrafficLight_getSpentDuration(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TrafficLight_getServedPersonCount")]
   public static extern int TrafficLight_getServedPersonCount(string jarg1, int jarg2);
@@ -6250,6 +6571,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VehicleType_getHeight")]
   public static extern double VehicleType_getHeight(string jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VehicleType_getMass")]
+  public static extern double VehicleType_getMass(string jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VehicleType_getColor")]
   public static extern global::System.IntPtr VehicleType_getColor(string jarg1);
 
@@ -6333,6 +6657,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VehicleType_setHeight")]
   public static extern void VehicleType_setHeight(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VehicleType_setMass")]
+  public static extern void VehicleType_setMass(string jarg1, double jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_VehicleType_setColor")]
   public static extern void VehicleType_setColor(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
@@ -6471,6 +6798,12 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getLaneIndex")]
   public static extern int Vehicle_getLaneIndex(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getSegmentID")]
+  public static extern string Vehicle_getSegmentID(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getSegmentIndex")]
+  public static extern int Vehicle_getSegmentIndex(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getTypeID")]
   public static extern string Vehicle_getTypeID(string jarg1);
@@ -6723,6 +7056,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getHeight")]
   public static extern double Vehicle_getHeight(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getMass")]
+  public static extern double Vehicle_getMass(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_getColor")]
   public static extern global::System.IntPtr Vehicle_getColor(string jarg1);
@@ -7072,6 +7408,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_setHeight")]
   public static extern void Vehicle_setHeight(string jarg1, double jarg2);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_setMass")]
+  public static extern void Vehicle_setMass(string jarg1, double jarg2);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Vehicle_setColor")]
   public static extern void Vehicle_setColor(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
@@ -7372,6 +7711,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Person_getHeight")]
   public static extern double Person_getHeight(string jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Person_getMass")]
+  public static extern double Person_getMass(string jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Person_getColor")]
   public static extern global::System.IntPtr Person_getColor(string jarg1);
 
@@ -7518,6 +7860,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Person_setHeight")]
   public static extern void Person_setHeight(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Person_setMass")]
+  public static extern void Person_setMass(string jarg1, double jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Person_setColor")]
   public static extern void Person_setColor(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
@@ -7855,6 +8200,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ParkingArea_getVehicleIDs")]
   public static extern global::System.IntPtr ParkingArea_getVehicleIDs(string jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ParkingArea_getAcceptedBadges")]
+  public static extern global::System.IntPtr ParkingArea_getAcceptedBadges(string jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ParkingArea_getIDList")]
   public static extern global::System.IntPtr ParkingArea_getIDList();
 
@@ -7930,6 +8278,9 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ParkingArea_DOMAIN_ID_get")]
   public static extern int ParkingArea_DOMAIN_ID_get();
 
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ParkingArea_setAcceptedBadges")]
+  public static extern void ParkingArea_setAcceptedBadges(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_ParkingArea")]
   public static extern void delete_ParkingArea(global::System.Runtime.InteropServices.HandleRef jarg1);
 
@@ -7950,6 +8301,18 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_getVehicleIDs")]
   public static extern global::System.IntPtr ChargingStation_getVehicleIDs(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_getChargingPower")]
+  public static extern double ChargingStation_getChargingPower(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_getEfficiency")]
+  public static extern double ChargingStation_getEfficiency(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_getChargeDelay")]
+  public static extern double ChargingStation_getChargeDelay(string jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_getChargeInTransit")]
+  public static extern int ChargingStation_getChargeInTransit(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_getIDList")]
   public static extern global::System.IntPtr ChargingStation_getIDList();
@@ -8025,6 +8388,18 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_DOMAIN_ID_get")]
   public static extern int ChargingStation_DOMAIN_ID_get();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_setChargingPower")]
+  public static extern void ChargingStation_setChargingPower(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_setEfficiency")]
+  public static extern void ChargingStation_setEfficiency(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_setChargeDelay")]
+  public static extern void ChargingStation_setChargeDelay(string jarg1, double jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_ChargingStation_setChargeInTransit")]
+  public static extern void ChargingStation_setChargeInTransit(string jarg1, bool jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_ChargingStation")]
   public static extern void delete_ChargingStation(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -8476,11 +8851,17 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIDoubleList_SWIGSmartPtrUpcast")]
   public static extern global::System.IntPtr TraCIDoubleList_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopData_SWIGSmartPtrUpcast")]
-  public static extern global::System.IntPtr TraCINextStopData_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIConnectionVectorWrapped_SWIGSmartPtrUpcast")]
+  public static extern global::System.IntPtr TraCIConnectionVectorWrapped_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVector_SWIGSmartPtrUpcast")]
-  public static extern global::System.IntPtr TraCINextStopDataVector_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextTLSDataVectorWrapped_SWIGSmartPtrUpcast")]
+  public static extern global::System.IntPtr TraCINextTLSDataVectorWrapped_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCINextStopDataVectorWrapped_SWIGSmartPtrUpcast")]
+  public static extern global::System.IntPtr TraCINextStopDataVectorWrapped_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCIBestLanesDataVectorWrapped_SWIGSmartPtrUpcast")]
+  public static extern global::System.IntPtr TraCIBestLanesDataVectorWrapped_SWIGSmartPtrUpcast(global::System.IntPtr jarg1);
 }
 
 }

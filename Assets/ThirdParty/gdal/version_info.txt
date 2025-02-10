@@ -1,0 +1,2 @@
+GDAL 3.10.0 is required
+Windows is easiest here: https://trac.osgeo.org/osgeo4w/

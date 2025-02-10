@@ -80,6 +80,12 @@ public class ParkingArea : global::System.IDisposable {
     return ret;
   }
 
+  public static StringVector getAcceptedBadges(string stopID) {
+    StringVector ret = new StringVector(libsumoPINVOKE.ParkingArea_getAcceptedBadges(stopID), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static StringVector getIDList() {
     StringVector ret = new StringVector(libsumoPINVOKE.ParkingArea_getIDList(), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
@@ -214,6 +220,11 @@ public class ParkingArea : global::System.IDisposable {
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 
+  }
+
+  public static void setAcceptedBadges(string stopID, StringVector badges) {
+    libsumoPINVOKE.ParkingArea_setAcceptedBadges(stopID, StringVector.getCPtr(badges));
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
 }

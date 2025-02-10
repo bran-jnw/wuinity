@@ -263,7 +263,7 @@ public class TraCISignalConstraintVector : global::System.IDisposable, global::S
   }
 
   private TraCISignalConstraint getitem(int index) {
-    TraCISignalConstraint ret = new TraCISignalConstraint(libsumoPINVOKE.TraCISignalConstraintVector_getitem(swigCPtr, index), false);
+    TraCISignalConstraint ret = new TraCISignalConstraint(libsumoPINVOKE.TraCISignalConstraintVector_getitem(swigCPtr, index), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

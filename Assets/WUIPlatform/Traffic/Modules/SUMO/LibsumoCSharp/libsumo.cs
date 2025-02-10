@@ -2107,6 +2107,14 @@ public class libsumo {
     } 
   }
 
+  public static int ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS {
+    get {
+      int ret = libsumoPINVOKE.ROUTING_MODE_IGNORE_TRANSIENT_PERMISSIONS_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
   public static int TRAFFICLIGHT_TYPE_STATIC {
     get {
       int ret = libsumoPINVOKE.TRAFFICLIGHT_TYPE_STATIC_get();
@@ -2118,6 +2126,14 @@ public class libsumo {
   public static int TRAFFICLIGHT_TYPE_ACTUATED {
     get {
       int ret = libsumoPINVOKE.TRAFFICLIGHT_TYPE_ACTUATED_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int TRAFFICLIGHT_TYPE_NEMA {
+    get {
+      int ret = libsumoPINVOKE.TRAFFICLIGHT_TYPE_NEMA_get();
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 
@@ -2310,6 +2326,46 @@ public class libsumo {
   public static int LAST_STEP_VEHICLE_HALTING_NUMBER {
     get {
       int ret = libsumoPINVOKE.LAST_STEP_VEHICLE_HALTING_NUMBER_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int FROM_JUNCTION {
+    get {
+      int ret = libsumoPINVOKE.FROM_JUNCTION_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int TO_JUNCTION {
+    get {
+      int ret = libsumoPINVOKE.TO_JUNCTION_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int INCOMING_EDGES {
+    get {
+      int ret = libsumoPINVOKE.INCOMING_EDGES_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int OUTGOING_EDGES {
+    get {
+      int ret = libsumoPINVOKE.OUTGOING_EDGES_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_BIDI {
+    get {
+      int ret = libsumoPINVOKE.VAR_BIDI_get();
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 
@@ -2779,6 +2835,14 @@ public class libsumo {
     } 
   }
 
+  public static int TL_SPENT_DURATION {
+    get {
+      int ret = libsumoPINVOKE.TL_SPENT_DURATION_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
   public static int LANE_LINK_NUMBER {
     get {
       int ret = libsumoPINVOKE.LANE_LINK_NUMBER_get();
@@ -3067,6 +3131,22 @@ public class libsumo {
     } 
   }
 
+  public static int VAR_SEGMENT_ID {
+    get {
+      int ret = libsumoPINVOKE.VAR_SEGMENT_ID_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_SEGMENT_INDEX {
+    get {
+      int ret = libsumoPINVOKE.VAR_SEGMENT_INDEX_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
   public static int VAR_ROUTE_ID {
     get {
       int ret = libsumoPINVOKE.VAR_ROUTE_ID_get();
@@ -3326,6 +3406,14 @@ public class libsumo {
   public static int VAR_HEIGHT {
     get {
       int ret = libsumoPINVOKE.VAR_HEIGHT_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_MASS {
+    get {
+      int ret = libsumoPINVOKE.VAR_MASS_get();
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 
@@ -4198,6 +4286,46 @@ public class libsumo {
   public static int VAR_HAS_VIEW {
     get {
       int ret = libsumoPINVOKE.VAR_HAS_VIEW_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_CS_POWER {
+    get {
+      int ret = libsumoPINVOKE.VAR_CS_POWER_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_CS_EFFICIENCY {
+    get {
+      int ret = libsumoPINVOKE.VAR_CS_EFFICIENCY_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_CS_CHARGE_IN_TRANSIT {
+    get {
+      int ret = libsumoPINVOKE.VAR_CS_CHARGE_IN_TRANSIT_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_CS_CHARGE_DELAY {
+    get {
+      int ret = libsumoPINVOKE.VAR_CS_CHARGE_DELAY_get();
+      if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+      return ret;
+    } 
+  }
+
+  public static int VAR_ACCESS_BADGE {
+    get {
+      int ret = libsumoPINVOKE.VAR_ACCESS_BADGE_get();
       if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
       return ret;
     } 

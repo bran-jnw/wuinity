@@ -12,10 +12,10 @@ namespace LIBSUMO {
 
 public class TraCIConnection : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
-  protected bool swigCMemOwn;
+  private bool swigCMemOwnBase;
 
   internal TraCIConnection(global::System.IntPtr cPtr, bool cMemoryOwn) {
-    swigCMemOwn = cMemoryOwn;
+    swigCMemOwnBase = cMemoryOwn;
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
@@ -35,8 +35,8 @@ public class TraCIConnection : global::System.IDisposable {
   protected virtual void Dispose(bool disposing) {
     lock(this) {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
-        if (swigCMemOwn) {
-          swigCMemOwn = false;
+        if (swigCMemOwnBase) {
+          swigCMemOwnBase = false;
           libsumoPINVOKE.delete_TraCIConnection(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
@@ -50,6 +50,12 @@ public class TraCIConnection : global::System.IDisposable {
 
   public TraCIConnection(string _approachedLane, bool _hasPrio, bool _isOpen, bool _hasFoe, string _approachedInternal, string _state, string _direction, double _length) : this(libsumoPINVOKE.new_TraCIConnection__SWIG_1(_approachedLane, _hasPrio, _isOpen, _hasFoe, _approachedInternal, _state, _direction, _length), true) {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public string getString() {
+    string ret = libsumoPINVOKE.TraCIConnection_getString(swigCPtr);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
   }
 
   public string approachedLane {

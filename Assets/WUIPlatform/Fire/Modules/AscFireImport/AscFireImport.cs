@@ -180,7 +180,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Farsite time of arrival file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Time of arrival file not found.");
                 return;
             }
 
@@ -190,7 +190,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Farsite rate of spread file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Rate of spread file not found.");
                 return;
             }
 
@@ -200,7 +200,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Farsite fireline intensity file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Fireline intensity file not found.");
                 return;
             }
 
@@ -210,7 +210,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Farsite fireline intensity file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Fireline intensity file not found.");
                 return;
             }
 
