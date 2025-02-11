@@ -12,9 +12,8 @@ namespace WUIPlatform.Traffic
     public class SUMOCar : TrafficModuleCar
     {
         string sumoID;        
-        float xPos;
-        float yPos;
-        float rotation;
+        double xPos, yPos;
+        double rotation;
         bool active;
         bool directControlled;
         Vector2 lastPos;
@@ -26,18 +25,18 @@ namespace WUIPlatform.Traffic
         {
             this.carID = carID;
             this.sumoID = sumoID;
-            xPos = (float)initialPos.x;
-            yPos = (float)initialPos.y;
+            xPos = initialPos.x;
+            yPos = initialPos.y;
             active = true;
             directControlled = false;
             lastPos = new Vector2((float)initialPos.x, (float)initialPos.y);
 
-            oldVisualPos = new Vector3(xPos, 0.0f, yPos);
+            oldVisualPos = new Vector3((float)xPos, 0.0f, (float)yPos);
             newVisualPos = oldVisualPos;
             rotation = (float)angle;
         }
 
-        public string GetVehicleID()
+        public string GetSumoVehicleID()
         {
             return sumoID;
         }
@@ -52,39 +51,43 @@ namespace WUIPlatform.Traffic
             model.transform.rotation = Quaternion.Slerp(oldRotation, newRotation, lerpRatio);
         }*/
 
-        public void SetPosRot(float x, float y, float angle)
+        public void SetPosRot(double x, double y, double angle)
         {
             //position
-            lastPos.X = xPos;
-            lastPos.Y = yPos;
+            lastPos.X = (float)xPos;
+            lastPos.Y = (float)yPos;
 
             xPos = x;
             yPos = y;
 
             oldVisualPos = newVisualPos;
-            newVisualPos = new Vector3(xPos, 0.0f, yPos);
+            newVisualPos = new Vector3((float)xPos, 0.0f, (float)yPos);
 
             //rotation
-            oldRotation = rotation;
+            oldRotation = (float)rotation;
             rotation = angle;
-            newRotation = angle;
+            newRotation = (float)angle;
         }
 
-        public void SetPosRot(LIBSUMO.TraCIPosition pos, float angle)
+        public void SetLocalPosRot(LIBSUMO.TraCIPosition pos, double angle)
         {
-            SetPosRot((float)pos.x, (float)pos.y, angle);
+            SetPosRot(pos.x, pos.y, angle);
         }
 
-        Vector4 positionAndSpeed;
-        public Vector4 GetPositionAndSpeed(bool updateData)
+        Vector4 _positionAndSpeed;
+        public override Vector4 GetWorldPositionAndSpeed(bool updateData)
+        {
+            return GetPositionSpeedCarID(updateData, WUIEngine.SIM.TrafficModule.GetOriginOffset());
+        }
+        public Vector4 GetPositionSpeedCarID(bool updateData, Vector2d originOffset)
         {
             if (updateData)
             {
                 float speedRatio = (float)(LIBSUMO.Vehicle.getSpeed(sumoID) / LIBSUMO.Vehicle.getAllowedSpeed(sumoID));
-                positionAndSpeed = new Vector4(xPos, yPos, speedRatio, 0f);
+                _positionAndSpeed = new Vector4((float)(xPos + originOffset.x), (float)(yPos + originOffset.y), speedRatio, carID);
             }
 
-            return positionAndSpeed;
+            return _positionAndSpeed;
         }
 
         public bool IsActive()

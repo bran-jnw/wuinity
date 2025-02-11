@@ -139,10 +139,10 @@ namespace WUIPlatform.Traffic
                             SelectCorrectRoute(cellRoutes[i], i);
 
                             //this never draws duplicates as we continue on the loop (as in skip this part) if we copy route collection
-                            if (WUIEngine.INPUT.Visualization.drawRoads)
+                            /*if (WUIEngine.INPUT.Visualization.drawRoads)
                             {
-                                //WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
-                            }
+                                WUInity.INSTANCE.DrawRoad(cellRoutes[i], i);
+                            }*/
 
                             ++cellsWithGoalsCount;
                         }

@@ -439,7 +439,7 @@ namespace WUIPlatform.Fire
         public override void Stop()
         {
             //throw new System.NotImplementedException();
-        }        
+        }
     }
 }
 

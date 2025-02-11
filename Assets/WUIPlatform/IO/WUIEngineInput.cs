@@ -15,7 +15,7 @@ namespace WUIPlatform.IO
     {    
         public SimulationInput Simulation;
         public MapInput Map;
-        public VisualizationOptions Visualization;
+        public VisualizationInput Visualization;
         public PopulationInput Population;
         public RoutingInput Routing; 
         public EvacuationInput Evacuation;
@@ -27,7 +27,7 @@ namespace WUIPlatform.IO
         {
             Simulation = new SimulationInput();
             Map = new MapInput();
-            Visualization = new VisualizationOptions();
+            Visualization = new VisualizationInput();
             Population = new PopulationInput();
             Routing = new RoutingInput();
             Evacuation = new EvacuationInput();
@@ -162,9 +162,12 @@ namespace WUIPlatform.IO
     }
 
     [System.Serializable]
-    public class VisualizationOptions
+    public class VisualizationInput
     {
-        public bool drawRoads = false;
+        //public bool drawRoads = false;
+        public bool sendDataToWUIShow = false;
+        public string wuiShowServerIP = "127.0.0.1";
+        public int wuiShowSerPort = 9023;
     }
 
     [System.Serializable]

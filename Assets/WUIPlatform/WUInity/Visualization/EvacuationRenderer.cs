@@ -61,9 +61,9 @@ namespace WUIPlatform.WUInity.Visualization
                     carPositionsBuffer.Release();
                     carPositionsBuffer = null;
                 }
-                if(WUIEngine.SIM.TrafficModule.GetCarsInSystem() > 0)
+                if(WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() > 0)
                 {
-                    carPositionsArray = WUIEngine.SIM.TrafficModule.GetCarPositionsAndStates();
+                    carPositionsArray = WUIEngine.SIM.TrafficModule.GetCarWorldPositionsStatesCarIDs();
                     if(carPositionsBuffer == null || carPositionsArray.Length != carPositionsBuffer.count)
                     {
                         carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));

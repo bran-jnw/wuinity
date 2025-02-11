@@ -5,6 +5,8 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Numerics;
+
 namespace WUIPlatform.Traffic
 {
     public abstract class TrafficModuleCar
@@ -18,6 +20,8 @@ namespace WUIPlatform.Traffic
             this.numberOfPeopleInCar = numberOfPeopleInCar;
             this.goal = goal;
         }
+
+        public abstract Vector4 GetWorldPositionAndSpeed(bool update);
 
         public abstract void Arrive();
     }

@@ -111,7 +111,7 @@ namespace WUIPlatform.WUInity.UI
             //cars still left
             if (WUIEngine.INPUT.Simulation.RunTrafficModule && WUIEngine.SIM.TrafficModule != null)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUIEngine.SIM.TrafficModule.GetCarsInSystem() + " / " + WUIEngine.SIM.TrafficModule.GetTotalCarsSimulated());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() + " / " + WUIEngine.SIM.TrafficModule.GetTotalCarsSimulated());
                 ++buttonIndex;
             }
 

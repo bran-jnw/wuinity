@@ -1764,7 +1764,7 @@ namespace WUIPlatform.WUInity.UI
             if (WUIEngine.INPUT.Simulation.RunTrafficModule && WUIEngine.SIM.TrafficModule != null)
             {
                 Label label8 = Document.rootVisualElement.Q<Label>("TxtCarsLeft");
-                label8.text = "Cars left: " + WUIEngine.SIM.TrafficModule.GetCarsInSystem() + " (" + Math.Round((double)WUIEngine.SIM.TrafficModule.GetCarsInSystem() / (double)WUIEngine.SIM.TrafficModule.GetTotalCarsSimulated() * 100.0, 1) + "%)";
+                label8.text = "Cars left: " + WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() + " (" + Math.Round((double)WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() / (double)WUIEngine.SIM.TrafficModule.GetTotalCarsSimulated() * 100.0, 1) + "%)";
             }
 
             uint totalEvacuated = 0;
@@ -2488,7 +2488,7 @@ namespace WUIPlatform.WUInity.UI
 
                 WUIEngine.INPUT.Simulation = new SimulationInput();
                 WUIEngine.INPUT.Map = new MapInput();
-                WUIEngine.INPUT.Visualization = new VisualizationOptions();
+                WUIEngine.INPUT.Visualization = new VisualizationInput();
                 WUIEngine.INPUT.Population = new PopulationInput();
                 WUIEngine.INPUT.Routing = new RoutingInput();
                 WUIEngine.INPUT.Evacuation = new EvacuationInput();

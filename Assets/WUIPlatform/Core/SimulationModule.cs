@@ -9,10 +9,15 @@ namespace WUIPlatform
 {
     public abstract class SimulationModule
     {
+        protected Vector2d _originOffset;
+
         public abstract void Step(float currentTime, float deltaTime);
         public abstract bool IsSimulationDone();
-
         public abstract void Stop();
+        public Vector2d GetOriginOffset()
+        {
+            return _originOffset;
+        }
     }
 }
 

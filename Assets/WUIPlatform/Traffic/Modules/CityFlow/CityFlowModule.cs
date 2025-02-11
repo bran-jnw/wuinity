@@ -78,7 +78,7 @@ namespace WUIPlatform.Traffic
             throw new NotImplementedException();
         }
 
-        public override int GetCarsInSystem()
+        public override int GetNumberOfCarsInSystem()
         {
             throw new NotImplementedException();
         }
@@ -88,7 +88,7 @@ namespace WUIPlatform.Traffic
             throw new NotImplementedException();
         }
 
-        public override System.Numerics.Vector4[] GetCarPositionsAndStates()
+        public override System.Numerics.Vector4[] GetCarWorldPositionsStatesCarIDs()
         {
             throw new NotImplementedException();
         }

@@ -89,7 +89,7 @@ namespace WUIPlatform.Traffic
             return carsInSystem.Count == 0 ? true : false;
         }
 
-        public override int GetCarsInSystem()
+        public override int GetNumberOfCarsInSystem()
         {
             return carsInSystem.Count;
         }
@@ -347,13 +347,13 @@ namespace WUIPlatform.Traffic
             carsToRender = new Vector4[carsInSystem.Count];
             for (int i = 0; i < carsToRender.Length; i++)
             {
-                carsToRender[i] = carsInSystem[i].GetUnityPositionAndSpeed(true);
+                carsToRender[i] = carsInSystem[i].GetWorldPositionAndSpeed(true);
             }            
 
             //WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
         }     
         
-        public override Vector4[] GetCarPositionsAndStates()
+        public override Vector4[] GetCarWorldPositionsStatesCarIDs()
         {
             return carsToRender;
         }

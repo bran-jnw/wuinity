@@ -13,7 +13,7 @@ namespace WUIPlatform.Traffic
     public abstract class TrafficModule : SimulationModule
     {
         protected List<float> arrivalData;
-        protected LinkedList<InjectedCar> carsToInject;
+        protected List<InjectedCar> carsToInject;
         protected Vector4[] carsToRender;
 
         protected struct InjectedCar
@@ -33,7 +33,7 @@ namespace WUIPlatform.Traffic
         public TrafficModule()
         {
             arrivalData = new List<float>();
-            carsToInject = new LinkedList<InjectedCar>();
+            carsToInject = new List<InjectedCar>();
             carsToRender = new Vector4[1];
         }
 
@@ -46,19 +46,19 @@ namespace WUIPlatform.Traffic
         /// <param name="numberOfPeopleInCar"></param>
         public void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
         {
-            carsToInject.AddLast(new InjectedCar(startLatLong, evacuationGoal, numberOfPeopleInCar));
+            carsToInject.Add(new InjectedCar(startLatLong, evacuationGoal, numberOfPeopleInCar));
         }
 
         public abstract void HandleNewCars();
         
         public abstract void InsertNewTrafficEvent(TrafficEvent tE);
         public abstract int GetTotalCarsSimulated();        
-        public abstract int GetCarsInSystem();
+        public abstract int GetNumberOfCarsInSystem();
         public abstract void UpdateEvacuationGoals();
-        public abstract Vector4[] GetCarPositionsAndStates();
+        public abstract Vector4[] GetCarWorldPositionsStatesCarIDs();
         public abstract void SaveToFile(int runNumber);
 
-        static uint carCount = 0;
+        private static uint carCount = 0;
         protected static uint GetNewCarID()
         {
             ++carCount;

@@ -962,7 +962,7 @@ namespace WUIPlatform.WUInity
 
                 for (int i = 0; i < carsInSystem.Count; i++)
                 {
-                    System.Numerics.Vector4 posAndSpeed = carsInSystem[i].GetUnityPositionAndSpeed(false);
+                    System.Numerics.Vector4 posAndSpeed = carsInSystem[i].GetWorldPositionAndSpeed(false);
 
                     int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.RouteCellSize);
                     int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.RouteCellSize);
@@ -989,7 +989,7 @@ namespace WUIPlatform.WUInity
 
                 for (int i = 0; i < carsOnHold.Count; i++)
                 {
-                    System.Numerics.Vector4 posAndSpeed = carsOnHold[i].GetUnityPositionAndSpeed(false);
+                    System.Numerics.Vector4 posAndSpeed = carsOnHold[i].GetWorldPositionAndSpeed(false);
 
                     int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.RouteCellSize);
                     int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.RouteCellSize);

@@ -16,8 +16,7 @@ namespace WUIPlatform.Traffic
     public class SUMOModule : TrafficModule
     {
         private Dictionary<string, SUMOCar> cars;        
-        private Vector2d _offset;
-        Dictionary<StartGoal, string> validRouteIDs;
+        Dictionary<StartGoalPair, string> validRouteIDs;
         private double adjustX, adjustY;
 
         //output
@@ -43,9 +42,9 @@ namespace WUIPlatform.Traffic
 
                 //need to use UTM projection in SUMO and WUInity to overlay data (an dapproximate overlay with web mercator, e.g. Mapbox)
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
-                _offset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+                _originOffset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + _offset.x + ", " + _offset.y);
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + _originOffset.x + ", " + _originOffset.y);
 
                 //keep for now if we ever want to do projection corrections here
                 //https://gis.stackexchange.com/questions/14528/better-distance-measurements-in-web-mercator-projection
@@ -57,7 +56,7 @@ namespace WUIPlatform.Traffic
                 adjustY = cosLat * (1.0 - e * e) / Math.Pow(1 - e * e * Math.Sin(lat) * Math.Sin(lat), 1.5);
                 adjustY = 1.0 / adjustY;;*/
 
-                validRouteIDs = new Dictionary<StartGoal, string>();
+                validRouteIDs = new Dictionary<StartGoalPair, string>();
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people";
@@ -103,7 +102,7 @@ namespace WUIPlatform.Traffic
                     if(car != null)
                     {
                         LIBSUMO.TraCIPosition pos = LIBSUMO.Vehicle.getPosition(sumoID);
-                        car.SetPosRot(pos, (float)LIBSUMO.Vehicle.getAngle(sumoID));
+                        car.SetLocalPosRot(pos, LIBSUMO.Vehicle.getAngle(sumoID));
                         if(car.numberOfPeopleInCar > 0)
                         {
                             currentCarsInSystem++;
@@ -151,9 +150,7 @@ namespace WUIPlatform.Traffic
                     int index = 0;
                     foreach (SUMOCar car in cars.Values)
                     {
-                        buffer[index] = car.GetPositionAndSpeed(true);
-                        buffer[index].X += (float)_offset.x;
-                        buffer[index].Y += (float)_offset.y;
+                        buffer[index] = car.GetWorldPositionAndSpeed(true);
                         if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
                         {
                             buffer[index].X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
@@ -170,11 +167,12 @@ namespace WUIPlatform.Traffic
             output.Add(dataLine);
         }
 
-        private struct StartGoal
+        //just used for calculating hash of a pait of starts and ends of route
+        private struct StartGoalPair
         {
             public double startLat,startLong, goalLat, goalLong;
 
-            public StartGoal(double startLat, double startLong, double goalLat, double goalLong)
+            public StartGoalPair(double startLat, double startLong, double goalLat, double goalLong)
             {
                 this.startLat = startLat;
                 this.startLong = startLong;
@@ -192,7 +190,7 @@ namespace WUIPlatform.Traffic
                 Vector2d startLatLon = injectedCar.startLatLong;                
                 Vector2d goalLatLon = evacuationGoal.latLon;
                 //used to get a hash that represent the route
-                StartGoal startGoal = new StartGoal(startLatLon.x, startLatLon.y, goalLatLon.x, goalLatLon.y);
+                StartGoalPair startGoal = new StartGoalPair(startLatLon.x, startLatLon.y, goalLatLon.x, goalLatLon.y);
 
                 bool invalidRoute = true;
                 LIBSUMO.TraCIStage route = null;
@@ -301,7 +299,7 @@ namespace WUIPlatform.Traffic
             return false;
         }
 
-        public override Vector4[] GetCarPositionsAndStates()
+        public override Vector4[] GetCarWorldPositionsStatesCarIDs()
         {
             //safe to skip?
             /*if (!LIBSUMO.Simulation.isLoaded())
@@ -312,7 +310,7 @@ namespace WUIPlatform.Traffic
             return carsToRender;
         }
 
-        public override int GetCarsInSystem()
+        public override int GetNumberOfCarsInSystem()
         {
             return currentCarsInSystem;
         }
@@ -366,8 +364,8 @@ namespace WUIPlatform.Traffic
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
-                    int cellIndexX = (int)((nodePos.x + _offset.x) / WUIEngine.SIM.FireModule.GetCellSizeX());
-                    int cellIndexY = (int)((nodePos.y + _offset.y) / WUIEngine.SIM.FireModule.GetCellSizeY());
+                    int cellIndexX = (int)((nodePos.x + _originOffset.x) / WUIEngine.SIM.FireModule.GetCellSizeX());
+                    int cellIndexY = (int)((nodePos.y + _originOffset.y) / WUIEngine.SIM.FireModule.GetCellSizeY());
 
                     if (cellIndexX > 0 && cellIndexX < WUIEngine.SIM.FireModule.GetCellCountX() - 1 &&
                         cellIndexY > 0 && cellIndexY < WUIEngine.SIM.FireModule.GetCellCountY() - 1)
@@ -428,7 +426,7 @@ namespace WUIPlatform.Traffic
             //need to update cached routes
             try
             {
-                Dictionary<StartGoal, string> newValidRoutesIDs = new Dictionary<StartGoal, string>();
+                Dictionary<StartGoalPair, string> newValidRoutesIDs = new Dictionary<StartGoalPair, string>();
                 routeIDoffset += validRouteIDs.Count + 1;
                 int index = 0;
                 foreach (var p in validRouteIDs)
@@ -468,11 +466,11 @@ namespace WUIPlatform.Traffic
             //force update routes on all exisiting cars in system
             foreach (SUMOCar car in cars.Values)
             {
-                LIBSUMO.Vehicle.rerouteTraveltime(car.GetVehicleID());
+                LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
             }
         }
 
-        public override bool IsNetworkReachable(Vector2d startLatLong)
+        public override bool IsNetworkReachable(Vector2d pointLatLon)
         {
             throw new NotImplementedException();
         }

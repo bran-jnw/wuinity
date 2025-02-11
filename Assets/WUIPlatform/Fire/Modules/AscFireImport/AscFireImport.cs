@@ -28,7 +28,6 @@ namespace WUIPlatform.Fire
         private int ncols, nrows, _activeCells;
         private double _xllcorner, _yllcorner, _cellsize, _NODATA_VALUE;
         private FireRasterData[,] _data;
-        private Vector2d _offset;
 
         //TODO: clean this up, this is duplicate data but is needed for shaders, come up with some way of better data storage
         float[] firelineIntensityData;
@@ -45,13 +44,13 @@ namespace WUIPlatform.Fire
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
-            _offset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            _originOffset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
             firelineIntensityData = new float[ncols * nrows];
             newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _offset.x + ", " + _offset.y);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -91,7 +90,7 @@ namespace WUIPlatform.Fire
 
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
-            offset = this._offset;
+            offset = this._originOffset;
             xScale = (float)(_cellsize * ncols / WUIEngine.INPUT.Simulation.Size.x);
             yScale = (float)(_cellsize * nrows / WUIEngine.INPUT.Simulation.Size.y);
         }
@@ -270,7 +269,7 @@ namespace WUIPlatform.Fire
         public override FireCellState GetFireCellState(Vector2d latLong)
         {
             Vector2d pos = GeoConversions.GeoToWorldPosition(latLong.x, latLong.y,  WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
-            pos += _offset;
+            pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);
             int y = (int)(pos.y / _cellsize);
@@ -329,7 +328,7 @@ namespace WUIPlatform.Fire
         public override void Stop()
         {
             //throw new System.NotImplementedException();
-        }
+        }        
     }
 }
 

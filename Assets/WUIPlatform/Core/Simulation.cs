@@ -12,9 +12,6 @@ using WUIPlatform.Fire;
 using System.Threading;
 using WUIPlatform.Smoke;
 using WUIPlatform.IO;
-#if USING_UNITY
-using WUIPlatform.WUInity;
-#endif
 
 namespace WUIPlatform
 {
@@ -54,6 +51,8 @@ namespace WUIPlatform
                 
         private float _stepExecutionTime;
         public float StepExecutionTime { get => _stepExecutionTime; }
+
+        private Visualization.WUIShowCommunicator _wuiShow;
 
 
         public Simulation()
@@ -319,7 +318,6 @@ namespace WUIPlatform
                 WUIEngine.LOG(WUIEngine.LogType.Log, "No traffic module was enabled.");
             }
         }
-
         
         private void RunSimulation(int runNumber)
         {
@@ -328,6 +326,11 @@ namespace WUIPlatform
             {
                 _state = SimulationState.Error;
                 return;
+            }
+
+            if(WUIEngine.INPUT.Visualization.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
+            {
+                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.Visualization.wuiShowServerIP, WUIEngine.INPUT.Visualization.wuiShowSerPort);
             }
 
             //if we do multiple runs the goals have to be reset
@@ -411,10 +414,15 @@ namespace WUIPlatform
         private void Step()
         {  
             WUIEngine.ENGINE.StopWatch.Start();
-
             UpdateEvents();
+            //this state represents the positions at the start of the time step
+            if (WUIEngine.INPUT.Visualization.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
+            {
+                _wuiShow.SendData(_currentTime);
+            }
+
+            //step all modules forward in time
             System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepFireModule);
-            //can't be run on thread due to Unity stuff for now
             System.Threading.Tasks.Task smokeTask =  System.Threading.Tasks.Task.Run(StepSmokeModule);
             System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule);
             System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule);
@@ -423,9 +431,9 @@ namespace WUIPlatform
             smokeTask.Wait();
             pedestrianTask.Wait();
             trafficTask.Wait();
-                        
+
             //handle any fire effects on road network
-            if(WUIEngine.INPUT.Simulation.RunFireModule)
+            if (WUIEngine.INPUT.Simulation.RunFireModule)
             {
                 _trafficModule.HandleIgnitedFireCells(_fireModule.GetIgnitedFireCells());
                 _fireModule.ConsumeIgnitedFireCells();
