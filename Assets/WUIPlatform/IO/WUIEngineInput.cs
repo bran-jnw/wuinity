@@ -160,6 +160,7 @@ namespace WUIPlatform.IO
         public bool sendDataToWUIShow = false;
         public string wuiShowServerIP = "127.0.0.1";
         public int wuiShowServerPort = 9023;
+        public float wuiShowDeltaTime = 1f;
     }
 
     [System.Serializable]
