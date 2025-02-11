@@ -154,6 +154,10 @@ namespace WUIPlatform
                     if (inverseSpreadDirection)
                     {
                         spreadDirection += 180f;
+                        if(spreadDirection >= 360f)
+                        {
+                            spreadDirection -= 360f;
+                        }
                     }
                     surface.doSurfaceRunInDirectionOfInterest(spreadDirection);
 
