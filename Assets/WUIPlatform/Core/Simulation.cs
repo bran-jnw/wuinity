@@ -330,7 +330,7 @@ namespace WUIPlatform
 
             if(WUIEngine.INPUT.Visualization.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
-                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.Visualization.wuiShowServerIP, WUIEngine.INPUT.Visualization.wuiShowSerPort);
+                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.Visualization.wuiShowServerIP, WUIEngine.INPUT.Visualization.wuiShowServerPort);
             }
 
             //if we do multiple runs the goals have to be reset

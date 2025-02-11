@@ -71,7 +71,6 @@ namespace WUIPlatform.IO
         public float DeltaTime = 1f;
         public float MaxSimTime = 864000f; //10 days
         public bool StopWhenEvacuated = true;
-        //public int numberOfRuns = 1;
         public bool StopAfterConverging = true;
         public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
         public Vector2d Size = new Vector2d(3000.0, 3000.0);
@@ -117,16 +116,9 @@ namespace WUIPlatform.IO
     }
 
     [System.Serializable]
-    public class MacroHouseholdSimInput
-    {
-
-    }
-
-    [System.Serializable]
     public class RoutingInput
     {
         public string routerDbFile = "example.routerdb";
-        public string routeCollectionFile = "example.rc";
     }
 
     [System.Serializable]
@@ -167,7 +159,7 @@ namespace WUIPlatform.IO
         //public bool drawRoads = false;
         public bool sendDataToWUIShow = false;
         public string wuiShowServerIP = "127.0.0.1";
-        public int wuiShowSerPort = 9023;
+        public int wuiShowServerPort = 9023;
     }
 
     [System.Serializable]
