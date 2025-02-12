@@ -103,7 +103,11 @@ namespace WUIPlatform
                 WUIEngine.OUTPUT.AddEvacTime(CurrentTime);
                 ++actualRuns;        
 
-                trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
+                if(_trafficModule != null)
+                {
+                    trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
+                }
+                
                 //need at least 2 simulations to have valid average
                 if (i > 0)
                 {
@@ -139,8 +143,20 @@ namespace WUIPlatform
             if(!_stoppedDueToError)
             {
                 //save functional analysis
-                float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
-                SaveAverageCurve(averageCurve);
+                if(trafficArrivalDataCollection.Count > 0)
+                {
+                    float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
+                    SaveAverageCurve(averageCurve);
+                    //plot results
+                    double[] xData = new double[averageCurve.Length];
+                    double[] yData = new double[averageCurve.Length];
+                    for (int i = 0; i < averageCurve.Length; i++)
+                    {
+                        xData[i] = averageCurve[i] / 3600.0f;
+                        yData[i] = i + 1;
+                    }
+                    CreatePlotData(xData, yData);
+                }                
 
                 if (convergedInSequence >= 10)
                 {
@@ -151,17 +167,7 @@ namespace WUIPlatform
                     WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
                 }
                 
-                _haveResults = true;
-
-                //plot results
-                double[] xData = new double[averageCurve.Length];
-                double[] yData = new double[averageCurve.Length];
-                for (int i = 0; i < averageCurve.Length; i++)
-                {
-                    xData[i] = averageCurve[i] / 3600.0f;
-                    yData[i] = i + 1;
-                }
-                CreatePlotData(xData, yData);
+                _haveResults = true;                
 
                 if (WUIEngine.INPUT.Simulation.RunFireModule)
                 {
@@ -416,7 +422,7 @@ namespace WUIPlatform
             WUIEngine.ENGINE.StopWatch.Start();
             UpdateEvents();
             //this state represents the positions at the start of the time step
-            if (WUIEngine.INPUT.Visualization.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
+            if (WUIEngine.INPUT.Visualization.sendDataToWUIShow && _trafficModule != null)
             {
                 _wuiShow.SendData(_currentTime);
             }
@@ -433,14 +439,20 @@ namespace WUIPlatform
             trafficTask.Wait();
 
             //handle any fire effects on road network
-            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            if (_fireModule != null)
             {
-                _trafficModule.HandleIgnitedFireCells(_fireModule.GetIgnitedFireCells());
+                if(_trafficModule != null)
+                {
+                    _trafficModule.HandleIgnitedFireCells(_fireModule.GetIgnitedFireCells());
+                }     
                 _fireModule.ConsumeIgnitedFireCells();
             }
 
             //handle/inject cars that arrived this timestep
-            _trafficModule.HandleNewCars();
+            if (_trafficModule != null)
+            {
+                _trafficModule.HandleNewCars();
+            }                
 
             //increase time
             float deltaTime = WUIEngine.INPUT.Simulation.DeltaTime;
@@ -646,6 +658,14 @@ namespace WUIPlatform
                 _stoppedDueToError |= stoppedDueToError;
                 WUIEngine.LOG(WUIEngine.LogType.Log, stopMessage);
             }            
+        }
+
+        public void InsertNewCar(Vector2d startLatLon, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
+        {
+            if(_trafficModule != null)
+            {
+                WUIEngine.SIM.TrafficModule.InsertNewCar(startLatLon, evacuationGoal, numberOfPeopleInCar);
+            }
         }
 
         public void BlockEvacGoal(int index)

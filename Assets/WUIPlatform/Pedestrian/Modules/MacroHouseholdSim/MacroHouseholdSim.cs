@@ -240,12 +240,12 @@ namespace WUIPlatform.Pedestrian
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        WUIEngine.SIM.TrafficModule.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
+                        WUIEngine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    WUIEngine.SIM.TrafficModule.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
+                    WUIEngine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
                 }
             }
             

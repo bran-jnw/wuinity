@@ -389,7 +389,7 @@ namespace WUIPlatform.Fire
 						error += ", ";
 					}
 				}
-                WUIEngine.LOG(WUIEngine.LogType.Error, error);
+                WUIEngine.LOG(WUIEngine.LogType.Warning, error);
             }
 
 			List<int> presentFuelModelNumbers= new List<int>();
