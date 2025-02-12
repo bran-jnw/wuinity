@@ -46,7 +46,7 @@ namespace WUIPlatform.Visualization
                     i+=4;*/
 
                     //data contained in W is a uint cast to float, should be enough to identify with the amount of cars we have
-                    addBytes(BitConverter.GetBytes(carData.W));
+                    addBytes(BitConverter.GetBytes((uint)carData.W));
                     addBytes(BitConverter.GetBytes(carData.X));
                     addBytes(BitConverter.GetBytes(carData.Y));
                     addBytes(BitConverter.GetBytes(carData.Z));
