@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace WUIPlatform.Traffic
 {
@@ -64,10 +65,10 @@ namespace WUIPlatform.Traffic
 
                 SortEdgesInFireCells();
             }
-            catch
+            catch(Exception e)
             {
-                success = false; 
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting");
+                success = false;
+                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
             }
             
         }

@@ -192,7 +192,7 @@ namespace WUIPlatform.WUInity.UI
             FileBrowser.SetFilters(false, wuiFilter);
             WUIEngineInput wO = WUIEngine.INPUT;
             string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
-            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
+            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, "new.wui", "Save file", "Save");
         }                  
 
         void SaveInput(string[] paths)
