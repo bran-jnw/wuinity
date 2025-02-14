@@ -193,7 +193,6 @@ namespace WUIPlatform.WUInity
             return dataSampleString;
         }
 
-
         private void Awake()
         {
             if (Application.isEditor)
@@ -233,10 +232,7 @@ namespace WUIPlatform.WUInity
 
         private void OnApplicationQuit()
         {
-            if(WUIEngine.SIM.State == Simulation.SimulationState.Running)
-            {
-                WUIEngine.SIM.Stop("Unity is closing, ending simulation.", true);
-            }
+            WUIEngine.Exit();
         }
 
         /*public void DrawRoad(RouteCollection routeCollection, int index)

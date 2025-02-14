@@ -167,6 +167,7 @@ namespace WUIPlatform.WUInity.UI
 
             if (GUI.Button(exitMenu.rect, exitMenu.text))
             {
+                WUIEngine.Exit();
                 Application.Quit();
             }
 

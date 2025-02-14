@@ -303,6 +303,14 @@ namespace WUIPlatform
         {
             ENGINE.simLog.Clear();
         }
+
+        public static void Exit()
+        {
+            if(ENGINE._sim != null)
+            {
+                ENGINE._sim.Stop("User has requested closing.", true);
+            }
+        }
     }
 }
 
