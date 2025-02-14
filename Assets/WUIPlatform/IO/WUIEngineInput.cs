@@ -184,6 +184,13 @@ namespace WUIPlatform.IO
         public bool useInitialIgnitionMap = false;
 
         public AscInput ascData;
+
+        public bool calculateTriggerBuffer = false;
+        public enum TriggerBufferChoice { kPERIL, backwardsCell}
+        public TriggerBufferChoice triggerBufferChoice= TriggerBufferChoice.kPERIL;
+        public float kPerilMidFlameWindspeed = 0f;
+        public bool calculateROSFromBehave = true;
+
     }
 
     [System.Serializable]

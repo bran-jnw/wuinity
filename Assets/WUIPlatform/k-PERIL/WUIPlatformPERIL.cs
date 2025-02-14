@@ -23,7 +23,7 @@ namespace WUIPlatform
         /// <param name="midFlameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
         public static float[,] RunPERIL(float midFlameWindspeed)
         {
-            return CalculateFirespread(35f, 180f, 30f);
+            WUIEngine.LOG(WUIEngine.LogType.Debug, "Starting calculation of trigger buffer using k-PERIL.");
 
             if (PERIL == null)
             {
@@ -47,18 +47,17 @@ namespace WUIPlatform
 
             float[,] maxROS;
             float[,] rosAzimuth;
-            bool useFireScenarioInput = false;
-            if (useFireScenarioInput)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "Using ROS from fire.");
-                maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
-                rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
-            }
-            else
+            if (WUIEngine.INPUT.Fire.calculateROSFromBehave)
             {
                 WUIEngine.LOG(WUIEngine.LogType.Debug, "Calculating ROS with Behave.");
                 bool[,] wuiArea2D = null;// GetWUIArea2D(WUIEngine.RUNTIME_DATA.Fire.WuiArea, xDim, yDim);
                 CalculateAllRateOfSpreadsAndDirections(out maxROS, out rosAzimuth, midFlameWindspeed, 150f, true, wuiArea2D);
+            }
+            else
+            {    
+                WUIEngine.LOG(WUIEngine.LogType.Debug, "Using ROS from simulation.");
+                maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
+                rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
             }
 
             List<int[,]> perilOutput = new List<int[,]>(RSETs.Length);

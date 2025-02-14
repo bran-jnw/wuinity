@@ -170,9 +170,12 @@ namespace WUIPlatform
                 
                 _haveResults = true;                
 
-                if (WUIEngine.INPUT.Simulation.RunFireModule)
+                if (_fireModule != null && WUIEngine.INPUT.Fire.calculateTriggerBuffer)
                 {
-                    _perilOutput = WUIPlatformPERIL.RunPERIL(35f);
+                    if (WUIEngine.INPUT.Fire.triggerBufferChoice == FireInput.TriggerBufferChoice.kPERIL)
+                    {
+                        _perilOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.Fire.kPerilMidFlameWindspeed);
+                    }  
                 }
             }            
 

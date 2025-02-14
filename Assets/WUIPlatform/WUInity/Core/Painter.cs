@@ -53,6 +53,8 @@ namespace WUIPlatform.WUInity
         Texture2D populationMaskTex;
         Color[] populationMaskColorArray;
 
+        private Vector3 _offset;
+
         public PaintMode GetPaintMode()
         {
             return paintMode;
@@ -161,23 +163,23 @@ namespace WUIPlatform.WUInity
         {
             if (mode == PaintMode.EvacGroup)
             {
-                SetupPainterEvacGroups();
+                SetPainterEvacGroups();
             }
             else if (mode == PaintMode.WUIArea)
             {
-                SetupPainterWUIArea();
+                SetPainterWUIArea();
             }
             else if (mode == PaintMode.RandomIgnitionArea)
             {
-                SetupPainterRandomIgnition();
+                SetPainterRandomIgnition();
             }
             else if (mode == PaintMode.InitialIgnition)
             {
-                SetupPainterInitialIgnition();
+                SetPainterInitialIgnition();
             }
             else if (mode == PaintMode.PopulationMask)
             {
-                SetupPainterPopulationMask();
+                SetPainterPopulationMask();
             }
             else
             {
@@ -185,7 +187,7 @@ namespace WUIPlatform.WUInity
             }
         }
 
-        void SetupPainterEvacGroups()
+        void SetPainterEvacGroups()
         {
             paintMode = PaintMode.EvacGroup;
             CheckDataResources(evacGroupTex, evacGroupColorArray);
@@ -196,7 +198,7 @@ namespace WUIPlatform.WUInity
             _brushSize = 1;
         }
 
-        void SetupPainterPopulationMask()
+        void SetPainterPopulationMask()
         {
             paintMode = PaintMode.PopulationMask;
             CheckDataResources(populationMaskTex, populationMaskColorArray);
@@ -205,27 +207,30 @@ namespace WUIPlatform.WUInity
             _brushSize = 1;
         }
 
-        void SetupPainterWUIArea()
+        void SetPainterWUIArea()
         {
             paintMode = PaintMode.WUIArea;
             CheckDataResources(wuiAreaTex, wuiAreaColorArray);
             SetWUIAreaColor(true);
             _brushSize = 5;
+            _offset = new Vector3((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset.x, 0f, (float)WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset.y);
         }
 
-        void SetupPainterRandomIgnition()
+        void SetPainterRandomIgnition()
         {
             paintMode = PaintMode.RandomIgnitionArea;
             CheckDataResources(randomIgnitionTex, randomIgnitionColorArray);
             SetRandomIgnitionAreaColor(true);
             _brushSize = 5;
+            _offset = new Vector3((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset.x, 0f, (float)WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset.y);
         }
-        void SetupPainterInitialIgnition()
+        void SetPainterInitialIgnition()
         {
             paintMode = PaintMode.InitialIgnition;
             CheckDataResources(initialIgnitionTex, initialIgnitionColorArray);
             SetInitialIgnitionAreaColor(true);
             _brushSize = 3;
+            _offset = new Vector3((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset.x, 0f, (float)WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset.y);
         }
 
         void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray)
@@ -361,6 +366,7 @@ namespace WUIPlatform.WUInity
                 if (_yPlane.Raycast(ray, out enter))
                 {
                     Vector3 hitPoint = ray.GetPoint(enter);
+                    hitPoint -= _offset;
                     Vector2 pixelUV = new Vector2(activeTexture.width * hitPoint.x / (float)activeRealSize.x, activeTexture.height * hitPoint.z / (float)activeRealSize.y);
 
                     int x = (int)pixelUV.x;

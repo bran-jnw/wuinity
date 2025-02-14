@@ -78,7 +78,15 @@ namespace WUIPlatform.Runtime
                 //stream in data from OSM
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
-                    PBFOsmStreamSource source = new PBFOsmStreamSource(stream);
+                    OsmStreamSource source;
+                    if (osmFile.EndsWith("pbf"))
+                    {
+                        source = new PBFOsmStreamSource(stream);
+                    }
+                    else
+                    {
+                        source = new XmlOsmStreamSource(stream);
+                    }
 
                     // create the network for cars only.
                     LoadSettings settings = new LoadSettings();

@@ -17,6 +17,7 @@ namespace WUIPlatform.Traffic
     {
         private Dictionary<string, SUMOCar> cars;        
         Dictionary<StartGoalPair, string> validRouteIDs;
+        List<LIBSUMO.TraCIRoadPosition> validStartPositions;
         private double adjustX, adjustY;
 
         //output
@@ -56,6 +57,7 @@ namespace WUIPlatform.Traffic
                 adjustY = cosLat * (1.0 - e * e) / Math.Pow(1 - e * e * Math.Sin(lat) * Math.Sin(lat), 1.5);
                 adjustY = 1.0 / adjustY;;*/
 
+                validRouteIDs = new Dictionary<StartGoalPair, string>();
                 validRouteIDs = new Dictionary<StartGoalPair, string>();
 
                 output = new List<string>();
@@ -407,6 +409,8 @@ namespace WUIPlatform.Traffic
         int routeIDoffset = 0;
         private void FireCellIgnited(int x, int y)
         {
+            List<SUMOCar> carsToUpdate = new List<SUMOCar>();
+
             //make fire affected edges (based on junction) really slow 
             if (fireCellEdges[x, y] != null)
             {
@@ -414,14 +418,31 @@ namespace WUIPlatform.Traffic
                 for (int i = 0; i < fireCellEdges[x, y].Count; i++)
                 {
                     //https://sumo.dlr.de/docs/Simulation/Routing.html
-                    //after testing this ewems to be the best option
+                    //after testing this seems to be the best option
                     LIBSUMO.Edge.adaptTraveltime(fireCellEdges[x, y][i], double.MaxValue);
+
+                    //collect cars in system that has the edge in their route
+                    foreach (SUMOCar car in cars.Values)
+                    {
+                        LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
+                        if (route.Contains(fireCellEdges[x, y][i]))
+                        {
+                            carsToUpdate.Add(car);
+                        }                            
+                    }
                 }
             }
             else
             {
                 return;
             }
+
+            //then do update for affected cars
+            for(int i = 0; i < carsToUpdate.Count; ++i)
+            {
+                LIBSUMO.Vehicle.rerouteTraveltime(carsToUpdate[i].GetSumoVehicleID());
+            }
+            
 
             //need to update cached routes
             try
@@ -464,10 +485,12 @@ namespace WUIPlatform.Traffic
             }
 
             //force update routes on all exisiting cars in system
-            foreach (SUMOCar car in cars.Values)
+            /*foreach (SUMOCar car in cars.Values)
             {
+                LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
+                if(route.Contains)
                 LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
-            }
+            }*/
         }
 
         public override bool IsNetworkReachable(Vector2d pointLatLon)
