@@ -12,7 +12,7 @@ namespace WUIPlatform.WUInity.UI
 
         string[] routerDbFilter = new string[] { ".routerdb" };
         string[] routeCollectionFilter = new string[] { ".rc" };
-        string[] osmFilter = new string[] { ".pbf" };
+        string[] osmFilter = new string[] { ".pbf", ".osm" };
         string[] maskFilter = new string[] { ".pmk" };
 
         bool filterMenuActive = false;
