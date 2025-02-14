@@ -44,7 +44,11 @@ public class TraCILink : global::System.IDisposable {
     }
   }
 
-  public TraCILink(string _from, string _via, string _to) : this(libsumoPINVOKE.new_TraCILink(_from, _via, _to), true) {
+  public TraCILink() : this(libsumoPINVOKE.new_TraCILink__SWIG_0(), true) {
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public TraCILink(string _from, string _via, string _to) : this(libsumoPINVOKE.new_TraCILink__SWIG_1(_from, _via, _to), true) {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 

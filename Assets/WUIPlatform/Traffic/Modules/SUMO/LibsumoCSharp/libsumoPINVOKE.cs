@@ -1021,8 +1021,11 @@ class libsumoPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_TraCILogic_subParameter_get")]
   public static extern global::System.IntPtr TraCILogic_subParameter_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCILink")]
-  public static extern global::System.IntPtr new_TraCILink(string jarg1, string jarg2, string jarg3);
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCILink__SWIG_0")]
+  public static extern global::System.IntPtr new_TraCILink__SWIG_0();
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_new_TraCILink__SWIG_1")]
+  public static extern global::System.IntPtr new_TraCILink__SWIG_1(string jarg1, string jarg2, string jarg3);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_TraCILink")]
   public static extern void delete_TraCILink(global::System.Runtime.InteropServices.HandleRef jarg1);
@@ -4308,6 +4311,9 @@ class libsumoPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Route_add")]
   public static extern void Route_add(string jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_Route_remove")]
+  public static extern void Route_remove(string jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_LIBSUMO_delete_Route")]
   public static extern void delete_Route(global::System.Runtime.InteropServices.HandleRef jarg1);

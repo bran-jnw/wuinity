@@ -191,6 +191,11 @@ public class Route : global::System.IDisposable {
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
   }
 
+  public static void remove(string routeID) {
+    libsumoPINVOKE.Route_remove(routeID);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+  }
+
 }
 
 }

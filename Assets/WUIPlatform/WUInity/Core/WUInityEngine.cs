@@ -191,7 +191,8 @@ namespace WUIPlatform.WUInity
         public string GetDataSampleString()
         {
             return dataSampleString;
-        }        
+        }
+
 
         private void Awake()
         {
@@ -210,7 +211,7 @@ namespace WUIPlatform.WUInity
 
             if (_godCamera == null)
             {
-                _godCamera = FindObjectOfType<GodCamera>();
+                _godCamera = FindFirstObjectByType<GodCamera>();
             }    
         }
 
@@ -446,8 +447,7 @@ namespace WUIPlatform.WUInity
         public void StartSimulation()
         {
             _visualsExist = false;
-            SetSampleMode(WUInityEngine.DataSampleMode.TrafficDens);
-            // SetEvacDataPlane(true);   // This is turned off as we don't want to display the _evacDataPlaneMeshRenderer by default at the start of the simulation.   16/08/2023 
+            SetSampleMode(DataSampleMode.TrafficDens);
             WUIEngine.SIM.Start();
         }
 

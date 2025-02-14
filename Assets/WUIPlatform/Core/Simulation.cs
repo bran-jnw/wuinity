@@ -72,7 +72,7 @@ namespace WUIPlatform
         public async void Start()
         {
             try
-            {
+            {                
                 System.Threading.Tasks.Task simTask = System.Threading.Tasks.Task.Run(StartSimulations);
                 await simTask;
             }
@@ -100,6 +100,7 @@ namespace WUIPlatform
                 runNumber = i;                
                 CreateSubModules(i);                
                 RunSimulation(i);
+                CloseModules();
                 WUIEngine.OUTPUT.AddEvacTime(CurrentTime);
                 ++actualRuns;        
 
@@ -390,30 +391,12 @@ namespace WUIPlatform
                 {
                     Step();
                 }
-            }  
+            }
             
             if(!_stoppedDueToError)
             {
                 SaveRunOutput(runNumber);
             }
-
-            //close everything, mainly SUMO for now
-            if(_pedestrianModule != null)
-            {
-                _pedestrianModule.Stop();
-            }
-            if (_trafficModule != null)
-            {
-                _trafficModule.Stop();
-            }
-            if (_fireModule != null)
-            {
-                _fireModule.Stop();
-            }
-            if (_smokeModule != null)
-            {
-                _smokeModule.Stop();
-            }   
         }
 
         bool _runRealtime = false;
@@ -428,10 +411,10 @@ namespace WUIPlatform
             }
 
             //step all modules forward in time
-            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepFireModule);
-            System.Threading.Tasks.Task smokeTask =  System.Threading.Tasks.Task.Run(StepSmokeModule);
-            System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule);
-            System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule);
+            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepFireModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task smokeTask =  System.Threading.Tasks.Task.Run(StepSmokeModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule, _stopThreadsToken.Token);
 
             fireTask.Wait();
             smokeTask.Wait();
@@ -611,6 +594,33 @@ namespace WUIPlatform
             }
         }
 
+
+        CancellationTokenSource _stopThreadsToken = new CancellationTokenSource();
+        private void CloseModules()
+        {
+            //_stopThreadsToken.Cancel();
+
+            if (WUIEngine.INPUT.Simulation.RunPedestrianModule && _pedestrianModule != null)
+            {
+                _pedestrianModule.Stop();
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunTrafficModule && _trafficModule != null)
+            {
+                _trafficModule.Stop();
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunFireModule && _fireModule != null)
+            {
+                _fireModule.Stop();
+            }
+
+            if (WUIEngine.INPUT.Simulation.RunSmokeModule && _smokeModule != null)
+            {
+                _smokeModule.Stop();
+            }
+        }
+
         void CheckEvacuationGoalStatus()
         {
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
@@ -632,28 +642,8 @@ namespace WUIPlatform
         public void Stop(string stopMessage, bool stoppedDueToError)
         {
             if(!_stopSim)
-            {
-                _stopSim = true;
-
-                if (WUIEngine.INPUT.Simulation.RunPedestrianModule && _pedestrianModule != null)
-                {
-                    _pedestrianModule.Stop();
-                }
-
-                if (WUIEngine.INPUT.Simulation.RunTrafficModule && _trafficModule != null)
-                {
-                    _trafficModule.Stop();
-                }
-
-                if (WUIEngine.INPUT.Simulation.RunFireModule && _fireModule != null)
-                {
-                    _fireModule.Stop();
-                }
-
-                if (WUIEngine.INPUT.Simulation.RunSmokeModule && _smokeModule != null)
-                {
-                    _smokeModule.Stop();
-                }
+            {    
+                _stopSim = true;                              
 
                 _stoppedDueToError |= stoppedDueToError;
                 WUIEngine.LOG(WUIEngine.LogType.Log, stopMessage);
