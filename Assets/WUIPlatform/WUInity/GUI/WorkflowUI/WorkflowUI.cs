@@ -1879,8 +1879,8 @@ namespace WUIPlatform.WUInity.UI
             
             floatNumbers = _mapSizeXY.Split(',');
 
-            double.TryParse(floatNumbers[0], out wO.Simulation.Size.x);
-            double.TryParse(floatNumbers[1], out wO.Simulation.Size.y);
+            double.TryParse(floatNumbers[0], out wO.Simulation.DomainSize.x);
+            double.TryParse(floatNumbers[1], out wO.Simulation.DomainSize.y);
             int.TryParse(_mapZoomLevel, out wO.Map.zoomLevel);
 
             WUIEngine.ENGINE.UpdateMapResourceStatus();
@@ -1905,7 +1905,7 @@ namespace WUIPlatform.WUInity.UI
 
                 UnityEngine.UIElements.TextField tfTxTSetMapSize = root.Q<UnityEngine.UIElements.TextField>("TxTSetMapSize");
                 if (tfTxTSetMapSize != null)
-                    tfTxTSetMapSize.value = wO.Simulation.Size.x.ToString() + ", " + wO.Simulation.Size.y.ToString();
+                    tfTxTSetMapSize.value = wO.Simulation.DomainSize.x.ToString() + ", " + wO.Simulation.DomainSize.y.ToString();
 
                 UnityEngine.UIElements.TextField tfTxTSetMapZoomLevel = root.Q<UnityEngine.UIElements.TextField>("TxTSetMapZoomLevel");
                 if (tfTxTSetMapZoomLevel != null)
@@ -2488,7 +2488,7 @@ namespace WUIPlatform.WUInity.UI
 
                 WUIEngine.INPUT.Simulation = new SimulationInput();
                 WUIEngine.INPUT.Map = new MapInput();
-                WUIEngine.INPUT.Visualization = new VisualizationInput();
+                WUIEngine.INPUT.WUIShow = new WUIShowInput();
                 WUIEngine.INPUT.Population = new PopulationInput();
                 WUIEngine.INPUT.Routing = new RoutingInput();
                 WUIEngine.INPUT.Evacuation = new EvacuationInput();

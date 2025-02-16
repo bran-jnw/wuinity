@@ -57,7 +57,7 @@ namespace WUIPlatform.WUInity
                 {
                     cMode = CameraMode.twoD;
                 }
-                SetCameraStartPosition(WUIEngine.INPUT.Simulation.Size);
+                SetCameraStartPosition(WUIEngine.INPUT.Simulation.DomainSize);
             }
 
             if (cMode == CameraMode.twoD)

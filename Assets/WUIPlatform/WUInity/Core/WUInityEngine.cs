@@ -321,7 +321,7 @@ namespace WUIPlatform.WUInity
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
             //https://wiki.openstreetmap.org/wiki/Zoom_levels
             double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
-            Vector2d mapDegrees = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLon, WUIEngine.INPUT.Simulation.Size);
+            Vector2d mapDegrees = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLon, WUIEngine.INPUT.Simulation.DomainSize);
             int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
             int tilesY = (int)(mapDegrees.y / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)WUIEngine.INPUT.Simulation.LowerLeftLatLon.x))) + 1;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
@@ -409,11 +409,11 @@ namespace WUIPlatform.WUInity
                 if (_yPlane.Raycast(ray, out enter))
                 {
                     Vector3 hitPoint = ray.GetPoint(enter);
-                    float xNorm = hitPoint.x / (float)WUIEngine.INPUT.Simulation.Size.x;
+                    float xNorm = hitPoint.x / (float)WUIEngine.INPUT.Simulation.DomainSize.x;
                     //xNorm = Mathf.Clamp01(xNorm);
                     int x = (int)(WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * xNorm);
 
-                    float yNorm = hitPoint.z / (float)WUIEngine.INPUT.Simulation.Size.y;
+                    float yNorm = hitPoint.z / (float)WUIEngine.INPUT.Simulation.DomainSize.y;
                     //yNorm = Mathf.Clamp01(yNorm);
                     int y = (int)(WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y * yNorm);
                     GetCellInfo(hitPoint, x, y);
@@ -512,9 +512,9 @@ namespace WUIPlatform.WUInity
             if (_simBorder != null)
             {
                 _simBorder.SetPosition(0, Vector3.zero + upOffset);
-                _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)WUIEngine.INPUT.Simulation.Size.x);
-                _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)WUIEngine.INPUT.Simulation.Size.y);
-                _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)WUIEngine.INPUT.Simulation.Size.x);
+                _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)WUIEngine.INPUT.Simulation.DomainSize.x);
+                _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)WUIEngine.INPUT.Simulation.DomainSize.y);
+                _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)WUIEngine.INPUT.Simulation.DomainSize.x);
                 _simBorder.SetPosition(4, _simBorder.GetPosition(0));
             }        
         }
@@ -720,7 +720,7 @@ namespace WUIPlatform.WUInity
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
                 Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLon.x, eG.latLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
-                float scale = 0.02f * (float)WUIEngine.INPUT.Simulation.Size.y;
+                float scale = 0.02f * (float)WUIEngine.INPUT.Simulation.DomainSize.y;
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
                 _goalMarkers[i].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
                 MeshRenderer mR = _goalMarkers[i].GetComponentInChildren<MeshRenderer>();
@@ -897,7 +897,7 @@ namespace WUIPlatform.WUInity
             //pick needed data plane
             MeshRenderer activeMeshRenderer = _populationDataPlaneMeshRenderer;
             Vector2int cellCount = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
-            Vector2d size = WUIEngine.INPUT.Simulation.Size;
+            Vector2d size = WUIEngine.INPUT.Simulation.DomainSize;
             Vector2d offset = Vector2d.zero;
             string name = "Evac Data Plane";
             if (fireMeshMode)

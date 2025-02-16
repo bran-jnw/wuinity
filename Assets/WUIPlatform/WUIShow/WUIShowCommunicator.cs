@@ -20,7 +20,7 @@ namespace WUIPlatform.Visualization
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
             Vector4[] cars = WUIEngine.SIM.TrafficModule.GetCarWorldPositionsStatesCarIDs();
 
-            if (cars.Length > 0 && currentTime > lastTime + WUIEngine.INPUT.Visualization.wuiShowDeltaTime)
+            if (cars.Length > 0 && currentTime > lastTime + WUIEngine.INPUT.WUIShow.wuiShowDeltaTime)
             {
                 byte[] sendBytes = new byte[cars.Length * 16];
                 int i = 0;

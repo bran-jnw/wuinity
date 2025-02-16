@@ -5,8 +5,9 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using WUIPlatform.Traffic;
 using System.Numerics;
+using WUIPlatform.Traffic;
+using System.Collections.Generic;
 
 namespace WUIPlatform.IO
 {
@@ -15,7 +16,7 @@ namespace WUIPlatform.IO
     {    
         public SimulationInput Simulation;
         public MapInput Map;
-        public VisualizationInput Visualization;
+        public WUIShowInput WUIShow;
         public PopulationInput Population;
         public RoutingInput Routing; 
         public EvacuationInput Evacuation;
@@ -23,11 +24,13 @@ namespace WUIPlatform.IO
         public FireInput Fire;
         public SmokeInput Smoke;
 
+        public static readonly char[] inputSplit = { '=', '#' };
+
         public WUIEngineInput()
         {
             Simulation = new SimulationInput();
             Map = new MapInput();
-            Visualization = new VisualizationInput();
+            WUIShow = new WUIShowInput();
             Population = new PopulationInput();
             Routing = new RoutingInput();
             Evacuation = new EvacuationInput();
@@ -62,24 +65,64 @@ namespace WUIPlatform.IO
                 WUIEngine.LOG(WUIEngine.LogType.Error, " Input file " + path + " not found.");
             }
         }
+
+        private static WUIEngineInput ParseInput(string[] inputLines)
+        {
+            WUIEngineInput wuiIn = new WUIEngineInput();
+
+            for(int i = 0; i < inputLines.Length; ++i)
+            {
+                if (inputLines[i].StartsWith("[Simulation"))
+                {
+                    wuiIn.Simulation = SimulationInput.Parse(inputLines, i);
+                }
+                else if(inputLines[i].StartsWith("[WUIShow"))
+                {
+                    wuiIn.WUIShow = WUIShowInput.Parse(inputLines, i);
+                }
+            }
+
+            return wuiIn;
+        }
+
+        public static Dictionary<string, string> GetCategoryInput(string[] inputLines, int startIndex)
+        {
+            Dictionary<string, string> inputToParse = new Dictionary<string, string>();
+            //first line is header
+            int lineIndex = startIndex + 1;
+            while (true)
+            {
+                if (lineIndex >= inputLines.Length)
+                {
+                    break;
+                }
+                string line = inputLines[lineIndex].Trim();
+                //we have found next header, exit
+                if (line.StartsWith('['))
+                {
+                    break;
+                }
+                //empty or comment
+                if (line.Length == 0 || line.StartsWith('#'))
+                {
+                    continue;
+                }
+
+                string[] input = line.Split(WUIEngineInput.inputSplit);
+                if (input.Length > 1)
+                {
+                    inputToParse.Add(input[0], input[1]);
+                }
+                ++lineIndex;
+            }
+
+            return inputToParse;
+        }
     }
 
-    [System.Serializable]
-    public class SimulationInput
-    {
-        public string SimulationID = "New_sim";
-        public float DeltaTime = 1f;
-        public float MaxSimTime = 864000f; //10 days
-        public bool StopWhenEvacuated = true;
-        public bool StopAfterConverging = true;
-        public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
-        public Vector2d Size = new Vector2d(3000.0, 3000.0);
-        public bool ScaleToWebMercator = false;
-        public bool RunPedestrianModule = false;
-        public bool RunTrafficModule = false;
-        public bool RunFireModule = false;
-        public bool RunSmokeModule = false;
-    }
+    
+
+    
 
     [System.Serializable]
     public class PopulationInput
@@ -151,17 +194,7 @@ namespace WUIPlatform.IO
     {
         public string inputFile;
         public Vector2d UTMoffset;
-    }
-
-    [System.Serializable]
-    public class VisualizationInput
-    {
-        //public bool drawRoads = false;
-        public bool sendDataToWUIShow = false;
-        public string wuiShowServerIP = "127.0.0.1";
-        public int wuiShowServerPort = 9023;
-        public float wuiShowDeltaTime = 1f;
-    }
+    }    
 
     [System.Serializable]
     public class FireInput

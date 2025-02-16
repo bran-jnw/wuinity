@@ -25,8 +25,8 @@ namespace WUIPlatform.WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)WUIEngine.INPUT.Simulation.Size.x;
-            float length = (float)WUIEngine.INPUT.Simulation.Size.y;
+            float width = (float)WUIEngine.INPUT.Simulation.DomainSize.x;
+            float length = (float)WUIEngine.INPUT.Simulation.DomainSize.y;
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 

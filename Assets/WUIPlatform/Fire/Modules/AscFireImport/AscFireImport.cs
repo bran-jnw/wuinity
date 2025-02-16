@@ -91,8 +91,8 @@ namespace WUIPlatform.Fire
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
             offset = this._originOffset;
-            xScale = (float)(_cellsize * ncols / WUIEngine.INPUT.Simulation.Size.x);
-            yScale = (float)(_cellsize * nrows / WUIEngine.INPUT.Simulation.Size.y);
+            xScale = (float)(_cellsize * ncols / WUIEngine.INPUT.Simulation.DomainSize.x);
+            yScale = (float)(_cellsize * nrows / WUIEngine.INPUT.Simulation.DomainSize.y);
         }
 
         public override bool IsSimulationDone()

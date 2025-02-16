@@ -59,8 +59,8 @@ namespace WUIPlatform.WUInity.UI
             mapMenuDirty = false;
             Lat = wO.Simulation.LowerLeftLatLon.x.ToString();
             Long = wO.Simulation.LowerLeftLatLon.y.ToString();
-            sizeX = wO.Simulation.Size.x.ToString();
-            sizeY = wO.Simulation.Size.y.ToString();
+            sizeX = wO.Simulation.DomainSize.x.ToString();
+            sizeY = wO.Simulation.DomainSize.y.ToString();
             zoom = wO.Map.zoomLevel.ToString();
         }
 
@@ -73,8 +73,8 @@ namespace WUIPlatform.WUInity.UI
 
             double.TryParse(Lat, out wO.Simulation.LowerLeftLatLon.x);
             double.TryParse(Long, out wO.Simulation.LowerLeftLatLon.y);
-            double.TryParse(sizeX, out wO.Simulation.Size.x);
-            double.TryParse(sizeY, out wO.Simulation.Size.y);
+            double.TryParse(sizeX, out wO.Simulation.DomainSize.x);
+            double.TryParse(sizeY, out wO.Simulation.DomainSize.y);
             int.TryParse(zoom, out wO.Map.zoomLevel);
         }
     }

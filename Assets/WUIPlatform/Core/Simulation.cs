@@ -338,9 +338,9 @@ namespace WUIPlatform
                 return;
             }
 
-            if(WUIEngine.INPUT.Visualization.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
+            if(WUIEngine.INPUT.WUIShow.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
-                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.Visualization.wuiShowServerIP, WUIEngine.INPUT.Visualization.wuiShowServerPort);
+                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.WUIShow.wuiShowServerIP, WUIEngine.INPUT.WUIShow.wuiShowServerPort);
             }
 
             //if we do multiple runs the goals have to be reset
@@ -408,7 +408,7 @@ namespace WUIPlatform
             WUIEngine.ENGINE.StopWatch.Start();
             UpdateEvents();
             //this state represents the positions at the start of the time step
-            if (WUIEngine.INPUT.Visualization.sendDataToWUIShow && _trafficModule != null)
+            if (WUIEngine.INPUT.WUIShow.sendDataToWUIShow && _trafficModule != null)
             {
                 _wuiShow.SendData(_currentTime);
             }

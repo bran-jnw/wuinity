@@ -53,7 +53,7 @@ namespace WUIPlatform.Traffic
             //AbstractMap _map = WUInity.WUInityEngine.MAP;
             //WUInity.INSTANCE.DeleteDrawnRoads();
 
-            Vector2 size = new Vector2((float)WUIEngine.INPUT.Simulation.Size.x, (float)WUIEngine.INPUT.Simulation.Size.y);
+            Vector2 size = new Vector2((float)WUIEngine.INPUT.Simulation.DomainSize.x, (float)WUIEngine.INPUT.Simulation.DomainSize.y);
             Vector2int cells = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
             Vector2d[] startPoints;
             startPoints = new Vector2d[cells.x * cells.y];

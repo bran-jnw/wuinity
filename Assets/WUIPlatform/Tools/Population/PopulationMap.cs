@@ -74,8 +74,8 @@ namespace WUIPlatform.Population
         /// <returns></returns>
         public int GetPopulationSimulationSpace(double x, double y)
         {
-            int xInt = (int)((x / WUIEngine.INPUT.Simulation.Size.x) * _cells.x);
-            int yInt = (int)((y / WUIEngine.INPUT.Simulation.Size.y) * _cells.y);
+            int xInt = (int)((x / WUIEngine.INPUT.Simulation.DomainSize.x) * _cells.x);
+            int yInt = (int)((y / WUIEngine.INPUT.Simulation.DomainSize.y) * _cells.y);
             return GetPeopleCount(xInt, yInt);
         }
 
@@ -87,7 +87,7 @@ namespace WUIPlatform.Population
         public void CreateAndSave(LocalGPWData localGPWData, float cellSize)
         {
             _lowerLeftLatLong = WUIEngine.INPUT.Simulation.LowerLeftLatLon;
-            _size = WUIEngine.INPUT.Simulation.Size;
+            _size = WUIEngine.INPUT.Simulation.DomainSize;
             _cellSize = cellSize;
             _cells = new Vector2int((int)(0.5f + _size.x / cellSize), (int)(0.5f + _size.y / cellSize));
             _size = new Vector2d(cellSize * _cells.x, cellSize * _cells.y); 

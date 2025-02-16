@@ -28,7 +28,7 @@ namespace WUIPlatform.WUInity.Visualization
             Release();
 
             //calculate bounds here as trtaffic will need it too, not only pedestrian visualizer
-            Vector2d domainSize = WUIEngine.INPUT.Simulation.Size;
+            Vector2d domainSize = WUIEngine.INPUT.Simulation.DomainSize;
             Vector3 center = new Vector3((float)domainSize.x * 0.5f, 1f, (float)domainSize.y * 0.5f);
             Vector3 size = new Vector3((float)domainSize.x + 2f, 2f, (float)domainSize.y + 2f);
             bounds = new Bounds(center, size);

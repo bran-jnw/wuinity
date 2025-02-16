@@ -34,7 +34,7 @@ namespace WUIPlatform
             public ValidCriticalData(WUIEngineInput input)
             {
                 lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
-                size = input.Simulation.Size;
+                size = input.Simulation.DomainSize;
                 routeCellSize = input.Evacuation.RouteCellSize;
             }
         }
@@ -199,7 +199,7 @@ namespace WUIPlatform
 #if USING_UNITY
             DATA_STATUS.MapLoaded = WUInity.WUInityEngine.INSTANCE.LoadMapbox();
             WUInity.WUInityEngine.INSTANCE.UpdateSimBorders();
-            WUInity.WUInityEngine.INSTANCE.WUICamera.SetCameraStartPosition(INPUT.Simulation.Size);
+            WUInity.WUInityEngine.INSTANCE.WUICamera.SetCameraStartPosition(INPUT.Simulation.DomainSize);
 #endif
             bool coordinatesAreDirty = true;
             bool sizeIsDirty = true;
@@ -210,8 +210,8 @@ namespace WUIPlatform
                 coordinatesAreDirty = false;
             }
 
-            if (validInput.size.x == INPUT.Simulation.Size.x
-                && validInput.size.y == INPUT.Simulation.Size.y)
+            if (validInput.size.x == INPUT.Simulation.DomainSize.x
+                && validInput.size.y == INPUT.Simulation.DomainSize.y)
             {
                 sizeIsDirty = false;
             }
@@ -225,7 +225,7 @@ namespace WUIPlatform
             }
 
             //set cached data to be current data
-            validInput.size = INPUT.Simulation.Size;
+            validInput.size = INPUT.Simulation.DomainSize;
             validInput.lowerLeftLatLong = INPUT.Simulation.LowerLeftLatLon;
         }
 

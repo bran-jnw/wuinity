@@ -1,11 +1,10 @@
 [Simulation]
-id=example
+#this is a comment
+id=example #this is also a comment
 deltatime=1.0
 maxSimTime=36000.0
 lowerLeftLatLon=39.409924,-105.104505
 domainSize=10000.0,10000.0
-
-[Modules] 
 runPedestrianModule=true
 runTrafficModule=true
 runFireModule=true
@@ -30,22 +29,28 @@ pedestrianModuleChoice=MacroHouseholdSim
 evacuationOrderStart=0.0
 householdSizeMin=1
 householdSizeMax=5
+
+[MacroHouseholdSim]
 allowMoreThanOneCar=true
 maxCars=2
 maxCarsChance=0.3
 walkingDistanceModifier=1.0
 walkingSpeedModifier=1.0
-blockGoalEventFiles=
+blockGoalEvents=
 		
 [Traffic]
 trafficModuleChoice=SUMO
-routeChoice=fastest,
+routeChoice=fastest
 stallSpeed=1.0
-visibilityAffectsSpeed=false,
+visibilityAffectsSpeed=false
+
+[Visibility]
 opticalDensityFile=opticalDensity.odr
 opticalDensity=0.05
-roadTypesFile=default.roads
 saveInterval=600.0
+
+[MacroTrafficSim]
+roadTypesFile=default.roads
 trafficAccidents=example
 reverseLanes=example
 trafficInjections=example
@@ -115,30 +120,30 @@ color=1.0,1.0,0.0
 [Fire]
 fireModuleChoice=ascImport
 lcpFile=rox_big_burning_city.lcp
+graphicalFireInputFile=example.gfi
 fuelModelsFile=default.fuel
 initialFuelMoistureFile=default.fmc
 weatherFile=example.wtr
 windFile=example_seconds.wnd
-graphicalFireInputFile=example.gfi
-ignitionPointsFile=example.ign
-useInitialIgnitionMap=false
-useRandomIgnitionMap=false
-randomIgnitionPoints=0
+
+[AscImport]
+rootFolder=farsite
 
 [FireCell]
 spreadMode=sixteen
 windMultiplier=1.0
+ignitionPointsFile=example.ign
+useInitialIgnitionMap=false
+useRandomIgnitionMap=false
+randomIgnitionPoints=0
 
 [TriggerBuffer]
 calculateTriggerBuffer=false
 triggerBufferChoice=kPERIL
 
 [kPERIL]
-kPerilMidFlameWindspeed=0.0
+midFlameWindspeed=0.0
 calculateROSFromBehave=true
-
-[ascImport]
-rootFolder=farsite
 
 [Smoke]
 smokeModuleChoice=advectDiffuse

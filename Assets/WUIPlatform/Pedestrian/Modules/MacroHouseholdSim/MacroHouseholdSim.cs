@@ -294,7 +294,7 @@ namespace WUIPlatform.Pedestrian
         {
             cellsX = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
             cellsY = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y;
-            realWorldSize = WUIEngine.INPUT.Simulation.Size;            
+            realWorldSize = WUIEngine.INPUT.Simulation.DomainSize;            
             population = new int[cellsX * cellsY];
             _householdData = householdData;
 

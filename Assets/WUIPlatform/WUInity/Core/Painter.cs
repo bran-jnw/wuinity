@@ -258,7 +258,7 @@ namespace WUIPlatform.WUInity
                     //WUIEngine.SIM.UpdateNeededData();
                     evacDataCellCount = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
                     cellCount = evacDataCellCount;
-                    evacDataRealSize = WUIEngine.INPUT.Simulation.Size;
+                    evacDataRealSize = WUIEngine.INPUT.Simulation.DomainSize;
                 }
                 //painter
                 requestedColorArray = new Color[cellCount.x * cellCount.y];

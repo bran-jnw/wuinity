@@ -182,7 +182,7 @@ namespace WUIPlatform.Tools
                 {
                     float left = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.y - borderSize.x);
                     float bottom = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x - borderSize.y);
-                    Vector2d size = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLon, WUIEngine.INPUT.Simulation.Size);
+                    Vector2d size = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLon, WUIEngine.INPUT.Simulation.DomainSize);
                     float right = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.y + size.x + borderSize.x);
                     float top = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x + size.y + borderSize.y);
 

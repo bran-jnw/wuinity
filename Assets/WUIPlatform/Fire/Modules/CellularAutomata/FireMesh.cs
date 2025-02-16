@@ -76,8 +76,8 @@ namespace WUIPlatform.Fire
         {
             this.lcpData = lcpData;
             _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
-            int xCells = (int)(WUIEngine.INPUT.Simulation.Size.x / _cellSize.x);
-            int yCells = (int)(WUIEngine.INPUT.Simulation.Size.y / _cellSize.y);
+            int xCells = (int)(WUIEngine.INPUT.Simulation.DomainSize.x / _cellSize.x);
+            int yCells = (int)(WUIEngine.INPUT.Simulation.DomainSize.y / _cellSize.y);
             _cellCount = new Vector2int(xCells, yCells); //Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);           
 
             this.weather = weather;

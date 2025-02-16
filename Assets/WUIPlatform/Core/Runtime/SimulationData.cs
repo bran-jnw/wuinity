@@ -43,14 +43,14 @@ namespace WUIPlatform.Runtime
                 _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
 
                 //Calculate scaling factors to correct overlay between web mercator and UTM
-                Vector2d mercatorBounds = _centerMercator + WUIEngine.INPUT.Simulation.Size;
+                Vector2d mercatorBounds = _centerMercator + WUIEngine.INPUT.Simulation.DomainSize;
                 Vector2d wgs84Bounds = GeoConversions.MetersToLatLon(mercatorBounds);
                 LatLngUTMConverter.UTMResult utmBoundsData = LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Bounds.x, wgs84Bounds.y);
                 Vector2d utmBounds = new Vector2d(utmBoundsData.Easting, utmBoundsData.Northing);
                 Vector2d utmDistances = utmBounds - _utmOrigin;
                 Vector2d realScale;
-                realScale.x = utmDistances.x / WUIEngine.INPUT.Simulation.Size.x;
-                realScale.y = utmDistances.y / WUIEngine.INPUT.Simulation.Size.y;
+                realScale.x = utmDistances.x / WUIEngine.INPUT.Simulation.DomainSize.x;
+                realScale.y = utmDistances.y / WUIEngine.INPUT.Simulation.DomainSize.y;
 
                 double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLon.x / 180.0);
                 _mercatorToUtmScale = new Vector2d(realScale.x / mercatorCorrectionScale, realScale.y / mercatorCorrectionScale);
