@@ -20,6 +20,7 @@ namespace WUIPlatform.Traffic
         Vector3 oldVisualPos;
         Vector3 newVisualPos;
         float oldRotation, newRotation;
+        float speedRatio;
 
         public SUMOCar(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationGoal goal) : base(carID, peopleInCar, goal)
         {
@@ -75,7 +76,7 @@ namespace WUIPlatform.Traffic
         }
 
         Vector4 _positionAndSpeed;
-        public override Vector4 GetWorldPositionAndSpeed(bool updateData)
+        public override Vector4 GetWorldPositionSpeedCarID(bool updateData)
         {
             return GetPositionSpeedCarID(updateData, WUIEngine.SIM.TrafficModule.GetOriginOffset());
         }

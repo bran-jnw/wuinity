@@ -21,7 +21,7 @@ namespace WUIPlatform.Traffic
             this.goal = goal;
         }
 
-        public abstract Vector4 GetWorldPositionAndSpeed(bool update);
+        public abstract Vector4 GetWorldPositionSpeedCarID(bool update);
 
         public abstract void Arrive();
     }

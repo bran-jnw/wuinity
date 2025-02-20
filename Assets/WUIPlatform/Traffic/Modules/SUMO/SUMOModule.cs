@@ -144,18 +144,18 @@ namespace WUIPlatform.Traffic
             if(cars.Count > 0)
             {
                 //finally update visuals            
-                if (carsToRender == null || carsToRender.Length != cars.Count)
+                if (carsToRender.Length != cars.Count)
                 {
                     Vector4[] buffer = new Vector4[cars.Count];
                     int index = 0;
                     foreach (SUMOCar car in cars.Values)
                     {
-                        buffer[index] = car.GetWorldPositionAndSpeed(true);
-                        if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
+                        buffer[index] = car.GetWorldPositionSpeedCarID(true);
+                        /*if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
                         {
                             buffer[index].X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
                             buffer[index].Y *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.y;
-                        }                        
+                        }*/                        
                         ++index;
                     }
                     carsToRender = buffer;

@@ -9,16 +9,24 @@ namespace WUIPlatform.Visualization
         private int timesCarSent = 0;
         private float lastTime = 0f;
         private UdpClient udpClient;
+        private TcpClient tcpClient;
 
         public WUIShowCommunicator(string serverIP, int serverPort)
         {
             udpClient = new UdpClient(serverIP, serverPort);
+            tcpClient = new TcpClient(serverIP, serverPort);
         }
 
         public void SendData(float currentTime)
         {
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
             Vector4[] cars = WUIEngine.SIM.TrafficModule.GetCarWorldPositionsStatesCarIDs();
+
+            //we only have dummy data
+            if(cars.Length == 1 && cars[0].W < 0)
+            {
+                return;
+            }
 
             if (cars.Length > 0 && currentTime > lastTime + WUIEngine.INPUT.WUIShow.wuiShowDeltaTime)
             {
@@ -47,8 +55,21 @@ namespace WUIPlatform.Visualization
 
                     //data contained in W is a uint cast to float, should be enough to identify with the amount of cars we have
                     addBytes(BitConverter.GetBytes((uint)carData.W));
-                    addBytes(BitConverter.GetBytes(carData.X));
-                    addBytes(BitConverter.GetBytes(carData.Y));
+
+                    //sending geodata, wgs84
+                    if(true)
+                    {
+                        LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X, carData.Y, false);
+                        //lat/lon, flipped x/y since sumo gies lon/lat
+                        addBytes(BitConverter.GetBytes((float)wgs84.y));
+                        addBytes(BitConverter.GetBytes((float)wgs84.x));
+                    }
+                    else
+                    {
+                        addBytes(BitConverter.GetBytes(carData.X));
+                        addBytes(BitConverter.GetBytes(carData.Y));
+                    }
+                    
                     addBytes(BitConverter.GetBytes(carData.Z));
 
                     if (timesCarSent == 1)

@@ -35,6 +35,7 @@ namespace WUIPlatform.Traffic
             arrivalData = new List<float>();
             carsToInject = new List<InjectedCar>();
             carsToRender = new Vector4[1];
+            carsToRender[0].W = -1f;
         }
 
         /// <summary>

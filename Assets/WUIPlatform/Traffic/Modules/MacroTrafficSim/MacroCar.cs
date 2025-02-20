@@ -166,7 +166,7 @@ namespace WUIPlatform.Traffic
 
         Vector4 positionAndSpeed;
         LinearSpline2D spline;
-        public override Vector4 GetWorldPositionAndSpeed(bool updateData)
+        public override Vector4 GetWorldPositionSpeedCarID(bool updateData)
         {
             if (updateData)
             {

@@ -347,7 +347,7 @@ namespace WUIPlatform.Traffic
             carsToRender = new Vector4[carsInSystem.Count];
             for (int i = 0; i < carsToRender.Length; i++)
             {
-                carsToRender[i] = carsInSystem[i].GetWorldPositionAndSpeed(true);
+                carsToRender[i] = carsInSystem[i].GetWorldPositionSpeedCarID(true);
             }            
 
             //WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
