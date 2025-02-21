@@ -9,12 +9,12 @@ namespace WUIPlatform.Visualization
         private int timesCarSent = 0;
         private float lastTime = 0f;
         private UdpClient udpClient;
-        private TcpClient tcpClient;
+        //private TcpClient tcpClient;
 
         public WUIShowCommunicator(string serverIP, int serverPort)
         {
             udpClient = new UdpClient(serverIP, serverPort);
-            tcpClient = new TcpClient(serverIP, serverPort);
+            //tcpClient = new TcpClient(serverIP, serverPort);
         }
 
         public void SendData(float currentTime)
@@ -60,7 +60,7 @@ namespace WUIPlatform.Visualization
                     if(true)
                     {
                         LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X, carData.Y, false);
-                        //lat/lon, flipped x/y since sumo gies lon/lat
+                        //lat/lon, flipped x/y since sumo gives lon/lat
                         addBytes(BitConverter.GetBytes((float)wgs84.y));
                         addBytes(BitConverter.GetBytes((float)wgs84.x));
                     }
@@ -72,10 +72,10 @@ namespace WUIPlatform.Visualization
                     
                     addBytes(BitConverter.GetBytes(carData.Z));
 
-                    if (timesCarSent == 1)
+                    /*if (timesCarSent == 1)
                     {
                         //   Debug.Log("id: " + car.carID + ", position and speed: " + car.GetUnityPositionAndSpeed(false));
-                    }
+                    }*/
                 }
 
                 int maxChunkSize = 16 * 1024; //send max 1024 cars at a time
