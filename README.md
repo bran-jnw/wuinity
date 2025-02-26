@@ -20,7 +20,7 @@ A Mapbox access token (https://www.mapbox.com/) is needed to get the visualkizat
 A completely free source for maps is desired, but of low priority right now.
 
 ## Current status of modules
-###Pedestrian modules 
+### Pedestrian modules 
 -MacroHouseHoldSim: work as intended.
 -Jupedsim: placeholder in code, hopefully integrated at some point through SUMO. 
 
