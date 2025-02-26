@@ -21,8 +21,8 @@ A completely free source for maps is desired, but of low priority right now.
 
 ## Current status of modules
 ### Pedestrian modules 
--MacroHouseHoldSim: work as intended.
--Jupedsim: placeholder in code, hopefully integrated at some point through SUMO. 
+- MacroHouseHoldSim: work as intended.
+- Jupedsim: placeholder in code, hopefully integrated at some point through SUMO. 
 
 A lot of changes in terms of how populations work has been made, the only required input now is a *.csv-file containing
 Lat/Lon for household origin (house location), Lat/Lon of vehicle origin (this needs to be connected to the underlying road network, 
