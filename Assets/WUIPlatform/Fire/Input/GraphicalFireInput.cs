@@ -13,8 +13,8 @@ namespace WUIPlatform
     {
         public static void SaveGraphicalFireInput()
         {
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + ".gfi");
-            WUIEngine.INPUT.Fire.graphicalFireInputFile = WUIEngine.INPUT.Simulation.SimulationID + ".gfi";
+            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.Id + ".gfi");
+            WUIEngine.INPUT.Fire.graphicalFireInputFile = WUIEngine.INPUT.Simulation.Id + ".gfi";
 
             using (FileStream fs = new FileStream(path, FileMode.Create))
             {

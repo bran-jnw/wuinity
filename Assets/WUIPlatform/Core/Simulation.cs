@@ -170,18 +170,18 @@ namespace WUIPlatform
                 
                 _haveResults = true;                
 
-                if (_fireModule != null && WUIEngine.INPUT.Fire.calculateTriggerBuffer)
+                if (_fireModule != null && WUIEngine.INPUT.TriggerBuffer.calculateTriggerBuffer)
                 {
-                    if (WUIEngine.INPUT.Fire.triggerBufferChoice == FireInput.TriggerBufferChoice.kPERIL)
+                    if (WUIEngine.INPUT.TriggerBuffer.triggerBufferChoice == TriggerBufferInput.TriggerBufferChoice.kPERIL)
                     {
-                        _perilOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.Fire.kPerilMidFlameWindspeed);
+                        _perilOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.midflameWindspeed);
                     }  
                 }
             }            
 
             _state = SimulationState.Finished;
             WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation/s done.");
-            WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.SimulationID);
+            WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.Id);
         }
         
         private void CreateSubModules(int runNumber)
@@ -353,7 +353,7 @@ namespace WUIPlatform
             _currentTime = 0f;
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves.Length; i++)
             {
-                float t = WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + WUIEngine.INPUT.Evacuation.EvacuationOrderStart;
+                float t = WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + WUIEngine.INPUT.Evacuation.evacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
@@ -751,7 +751,7 @@ namespace WUIPlatform
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
             WUIEngineInput wuiIn = WUIEngine.INPUT;
-            string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.SimulationID + "_traffic_average.csv");
+            string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.Id + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }
 

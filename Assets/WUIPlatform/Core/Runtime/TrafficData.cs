@@ -32,8 +32,8 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile), false);
-            LoadOpticalDensityFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.opticalDensityFile), false);
+            //LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile), false);
+            //LoadOpticalDensityFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.opticalDensityFile), false);
         }
 
         private bool LoadRoadTypeData(string path, bool updateInputFile)
@@ -43,7 +43,7 @@ namespace WUIPlatform.Runtime
             _roadTypeData = Traffic.RoadTypeData.LoadRoadTypeData(path, out success);
             if(success && updateInputFile)
             {
-                WUIEngine.INPUT.Traffic.roadTypesFile = Path.GetFileName(path);
+                //WUIEngine.INPUT.Traffic.roadTypesFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -59,7 +59,7 @@ namespace WUIPlatform.Runtime
             WUIEngine.DATA_STATUS.OpticalDensityLoaded = success;
             if(success && updateInputFile)
             {
-                WUIEngine.INPUT.Traffic.opticalDensityFile = Path.GetFileName(path); ;
+                //WUIEngine.INPUT.Traffic.opticalDensityFile = Path.GetFileName(path); ;
                 WUIEngineInput.SaveInput();
             }
 

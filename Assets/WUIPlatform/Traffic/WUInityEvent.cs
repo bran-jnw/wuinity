@@ -50,9 +50,9 @@ namespace WUIPlatform
         {
             success = false;
             List<BlockGoalEvent> blockGoalEvents = new List<BlockGoalEvent>();
-            for (int i = 0; i < WUIEngine.INPUT.Pedestrian.BlockGoalEventFiles.Length; i++)
+            for (int i = 0; i < WUIEngine.INPUT.Events.blockGoalEvents.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Pedestrian.BlockGoalEventFiles[i] + ".bge");
+                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Events.blockGoalEvents[i] + ".bge");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);

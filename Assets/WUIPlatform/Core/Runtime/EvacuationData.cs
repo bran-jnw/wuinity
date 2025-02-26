@@ -7,7 +7,6 @@
 
 using System.Collections.Generic;
 using WUIPlatform.IO;
-using System.IO;
 
 namespace WUIPlatform.Runtime
 {
@@ -19,8 +18,8 @@ namespace WUIPlatform.Runtime
             get
             {
                 WUIEngineInput input = WUIEngine.INPUT;
-                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.PaintCellSize);
-                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.PaintCellSize);
+                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.paintCellSize);
+                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.paintCellSize);
                 return _cellCount;
             }
         }

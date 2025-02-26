@@ -133,7 +133,7 @@ namespace WUIPlatform.Population
             
             _haveData = true;
             _correctedForRoadAccess = false;
-            _fileName = WUIEngine.INPUT.Simulation.SimulationID;
+            _fileName = WUIEngine.INPUT.Simulation.Id;
             SaveToFile(_fileName);
             _populationData.Visualizer.CreatePopulationMapTexture(this);
             _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
@@ -256,7 +256,7 @@ namespace WUIPlatform.Population
 
             _haveData = true;
             _populationData.Visualizer.CreatePopulationMapTexture(this);
-            SaveToFile(WUIEngine.INPUT.Simulation.SimulationID);            
+            SaveToFile(WUIEngine.INPUT.Simulation.Id);            
         }    
 
         /// <summary>

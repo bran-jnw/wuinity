@@ -84,7 +84,7 @@ namespace WUIPlatform.WUInity.UI
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation ID:");
             ++buttonIndex;
-            wO.Simulation.SimulationID = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.Simulation.SimulationID);
+            wO.Simulation.Id = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.Simulation.Id);
             ++buttonIndex;   
             
             //dT
@@ -212,7 +212,7 @@ namespace WUIPlatform.WUInity.UI
             }
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            wO.Simulation.SimulationID = name;
+            wO.Simulation.Id = name;
 
             WUIEngineInput.SaveInput();
         }

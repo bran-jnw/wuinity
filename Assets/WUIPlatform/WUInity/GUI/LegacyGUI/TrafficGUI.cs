@@ -7,9 +7,9 @@ namespace WUIPlatform.WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string opticalDensity, stallSpeed;
+        string stallSpeed;
         bool trafficMenuDirty = true;
-        string[] opticalDensityFilter = new string[] { ".odr" };        
+        //string[] opticalDensityFilter = new string[] { ".odr" };        
 
 
         void TrafficMenu()
@@ -18,8 +18,7 @@ namespace WUIPlatform.WUInity.UI
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
-                stallSpeed = tO.stallSpeed.ToString();
-                opticalDensity = tO.opticalDensity.ToString();
+                stallSpeed = tO.macroTrafficSimInput.stallSpeed.ToString();
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
@@ -34,13 +33,8 @@ namespace WUIPlatform.WUInity.UI
             tO.visibilityAffectsSpeed = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), tO.visibilityAffectsSpeed, "Speed is affected by smoke");
             ++buttonIndex;
 
-            if(tO.visibilityAffectsSpeed)
+            /*if(tO.visibilityAffectsSpeed)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density [1/m]");
-                ++buttonIndex;
-                opticalDensity = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), opticalDensity);
-                ++buttonIndex;
-
                 if (WUIEngine.DATA_STATUS.OpticalDensityLoaded)
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density ramp loaded");
@@ -51,7 +45,7 @@ namespace WUIPlatform.WUInity.UI
                     OpenLoadOpticalDensityFile();
                 }
                 ++buttonIndex;
-            } 
+            } */
         }
 
         void ParseTrafficInput()
@@ -63,11 +57,11 @@ namespace WUIPlatform.WUInity.UI
 
             TrafficInput tO = WUIEngine.INPUT.Traffic;
 
-            float.TryParse(stallSpeed, out tO.stallSpeed);
-            float.TryParse(opticalDensity, out tO.opticalDensity);
+            float.TryParse(stallSpeed, out tO.macroTrafficSimInput.stallSpeed);
+            //float.TryParse(opticalDensity, out tO.opticalDensity);
         }        
 
-        void OpenLoadOpticalDensityFile()
+        /*void OpenLoadOpticalDensityFile()
         {
             FileBrowser.SetFilters(false, opticalDensityFilter);
             string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
@@ -77,6 +71,6 @@ namespace WUIPlatform.WUInity.UI
         void LoadOpticalDensityFile(string[] paths)
         {
             WUIEngine.RUNTIME_DATA.Traffic.LoadOpticalDensityFile(paths[0], true);
-        }
+        }*/
     }
 }

@@ -42,19 +42,19 @@ namespace WUIPlatform.WUInity.UI
             //route choice info
             ++buttonIndex;
             string routeChoice = "Route choice: ";
-            if (tO.routeChoice == TrafficInput.RouteChoice.Fastest)
+            if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Fastest)
             {
                 routeChoice += "Fastest";
             }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
+            else if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Closest)
             {
                 routeChoice += "Closest";
             }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.Random)
+            else if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Random)
             {
                 routeChoice += "Random";
             }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
+            else if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.EvacGroup)
             {
                 routeChoice += "Evac. group";
             }

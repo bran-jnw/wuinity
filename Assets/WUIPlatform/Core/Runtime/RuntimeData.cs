@@ -21,7 +21,8 @@ namespace WUIPlatform.Runtime
         public PopulationData Population;
         public RoutingData Routing;
         public TrafficData Traffic;
-        public FireData Fire;       
+        public FireData Fire;
+        public SmokeData Smoke;
 
         public RuntimeData()
         {
@@ -33,7 +34,7 @@ namespace WUIPlatform.Runtime
             Routing = new RoutingData();
             Traffic = new TrafficData();
             Fire = new FireData();
-            //Smoke = new SmokeData();
+            Smoke = new SmokeData();
         }       
     }
 }

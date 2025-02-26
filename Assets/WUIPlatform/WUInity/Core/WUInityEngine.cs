@@ -470,7 +470,7 @@ namespace WUIPlatform.WUInity
             for (int i = 0; i < inputFiles.Length; i++)
             {
                 WUIEngineInput.LoadInput(inputFiles[i]);
-                WUIEngine.INPUT.Simulation.SimulationID = Path.GetFileNameWithoutExtension(inputFiles[i]);
+                WUIEngine.INPUT.Simulation.Id = Path.GetFileNameWithoutExtension(inputFiles[i]);
                 WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations = true;
                 WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns = 100;
                 StartSimulation();
@@ -731,7 +731,7 @@ namespace WUIPlatform.WUInity
         {
             if(WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
-                int index = UnityEngine.Mathf.Max(0, (int)time / (int)WUIEngine.INPUT.Traffic.saveInterval);
+                int index = UnityEngine.Mathf.Max(0, (int)time / 600);
                 if (index > outputTextures.Count - 1)
                 {
                     index = outputTextures.Count - 1;
@@ -948,7 +948,7 @@ namespace WUIPlatform.WUInity
                 peopleInCells = new List<int[]>();
             }
             //if new data interval
-            int outputIndex = (int)(time - WUIEngine.SIM.StartTime) / (int)WUIEngine.INPUT.Traffic.saveInterval;
+            int outputIndex = (int)(time - WUIEngine.SIM.StartTime) / 600;
             if (outputIndex > trafficDensityData.Count - 1)
             {
                 trafficDensityData.Add(new TrafficCellData[WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y]);
@@ -957,8 +957,8 @@ namespace WUIPlatform.WUInity
                 {
                     System.Numerics.Vector4 posAndSpeed = carsInSystem[i].GetWorldPositionSpeedCarID(false);
 
-                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.PaintCellSize);
-                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.PaintCellSize);
+                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.paintCellSize);
+                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.paintCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x - 1 || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y - 1)
@@ -984,8 +984,8 @@ namespace WUIPlatform.WUInity
                 {
                     System.Numerics.Vector4 posAndSpeed = carsOnHold[i].GetWorldPositionSpeedCarID(false);
 
-                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.PaintCellSize);
-                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.PaintCellSize);
+                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.paintCellSize);
+                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.paintCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x - 1 || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y - 1)

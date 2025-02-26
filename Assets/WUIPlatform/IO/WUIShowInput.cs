@@ -17,10 +17,10 @@ namespace WUIPlatform.IO
         public int wuiShowServerPort = 9023;
         public float wuiShowDeltaTime = 1f;
 
-        private static readonly string sendDataString = "sendDataToWUIShow";
+        /*private static readonly string sendDataString = "sendDataToWUIShow";
         private static readonly string serverIPString = "wuiShowServerIP";
         private static readonly string serverPortString = "wuiShowServerPort";
-        private static readonly string deltaTimeString = "wuiShowDeltaTime";
+        private static readonly string deltaTimeString = "wuiShowDeltaTime";*/
 
         public static WUIShowInput Parse(string[] inputLines, int startIndex)
         {
@@ -28,37 +28,24 @@ namespace WUIPlatform.IO
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
 
             string temp;
-            if (inputToParse.TryGetValue(sendDataString, out temp))
+            if (inputToParse.TryGetValue(nameof(sendDataToWUIShow), out temp))
             {
                 bool.TryParse(temp, out newInput.sendDataToWUIShow);
             }
-            if (inputToParse.TryGetValue(serverIPString, out temp))
+            if (inputToParse.TryGetValue(nameof(wuiShowServerIP), out temp))
             {
                 newInput.wuiShowServerIP = temp;
             }
-            if (inputToParse.TryGetValue(serverPortString, out temp))
+            if (inputToParse.TryGetValue(nameof(wuiShowServerPort), out temp))
             {
                 int.TryParse(temp, out newInput.wuiShowServerPort);
             }
-            if (inputToParse.TryGetValue(deltaTimeString, out temp))
+            if (inputToParse.TryGetValue(nameof(wuiShowDeltaTime), out temp))
             {
                 float.TryParse(temp, out newInput.wuiShowDeltaTime);
             }
 
             return newInput;
-        }
-
-        public List<string> GetInputString()
-        {
-            List<string> lines = new List<string>();
-
-            lines.Add("[WUIShow]");
-            lines.Add(sendDataString + "=" + sendDataToWUIShow.ToString().ToLower());
-            lines.Add(serverIPString + "=" + wuiShowServerPort);
-            lines.Add(serverPortString + "=" + wuiShowServerPort);
-            lines.Add(deltaTimeString + "=" + wuiShowDeltaTime);
-
-            return lines;
         }
     }
 }

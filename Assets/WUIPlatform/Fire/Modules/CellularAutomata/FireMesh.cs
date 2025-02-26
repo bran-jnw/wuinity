@@ -86,7 +86,7 @@ namespace WUIPlatform.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = WUIEngine.INPUT.Fire.spreadMode;
+            spreadMode = WUIEngine.INPUT.Fire.fireCellInput.spreadMode;
 
             InitializeMesh();
         }
@@ -366,7 +366,7 @@ namespace WUIPlatform.Fire
                 return;
             }
 
-            if(WUIEngine.INPUT.Fire.useInitialIgnitionMap)
+            if(WUIEngine.INPUT.Fire.fireCellInput.useInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {

@@ -120,7 +120,7 @@ namespace WUIPlatform.Traffic
                 //creates default values
                 results = new RoadTypeData();
                 SaveRoadTypeData(results);
-                WUIEngine.INPUT.Traffic.roadTypesFile = "default";               
+                WUIEngine.INPUT.Traffic.macroTrafficSimInput.roadTypesFile = "default";               
             }            
 
             return results;

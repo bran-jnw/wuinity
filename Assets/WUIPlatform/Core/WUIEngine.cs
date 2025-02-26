@@ -35,7 +35,7 @@ namespace WUIPlatform
             {
                 lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
                 size = input.Simulation.DomainSize;
-                routeCellSize = input.Evacuation.PaintCellSize;
+                routeCellSize = input.Evacuation.paintCellSize;
             }
         }
         ValidCriticalData validInput;
@@ -139,7 +139,7 @@ namespace WUIPlatform
         {
             get
             {
-                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WORKING_FILE).ToString(), INPUT.Simulation.SimulationID + "_output"));
+                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WORKING_FILE).ToString(), INPUT.Simulation.Id + "_output"));
                 return path.ToString();
             }
         }
@@ -233,7 +233,7 @@ namespace WUIPlatform
         {
             bool cellSizeIsDirty = true;
 
-            if (validInput.routeCellSize == _input.Evacuation.PaintCellSize)
+            if (validInput.routeCellSize == _input.Evacuation.paintCellSize)
             {
                 cellSizeIsDirty = false;
             }

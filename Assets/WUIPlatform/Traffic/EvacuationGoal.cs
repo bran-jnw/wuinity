@@ -179,9 +179,9 @@ namespace WUIPlatform
             success = false;
             List<EvacuationGoal> evacuationGoals = new List<EvacuationGoal>();
 
-            for (int i = 0; i < WUIEngine.INPUT.Traffic.evacuationGoalFiles.Length; i++)
+            for (int i = 0; i < WUIEngine.INPUT.Evacuation.evacuationGoals.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.evacuationGoalFiles[i] + ".ed");
+                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.evacuationGoals[i] + ".ed");
                 bool fileExists = File.Exists(path);
                 if (fileExists)
                 {

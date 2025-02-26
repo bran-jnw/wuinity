@@ -110,7 +110,7 @@ namespace WUIPlatform.Traffic
 
             float dens = cars.Count / (length * 0.001f * laneCount);
             //added background traffic
-            dens += Random.Range(tO.backGroundDensityMinMax.X, tO.backGroundDensityMinMax.Y);
+            dens += Random.Range(tO.macroTrafficSimInput.backGroundDensityMinMax.X, tO.macroTrafficSimInput.backGroundDensityMinMax.Y);
 
             //we use the same function to check if a road is blocked due to being main road or if they reverse lanes for now
             if (mCS.stallBigRoads && CanReverseLanes(highwayType))
@@ -122,13 +122,13 @@ namespace WUIPlatform.Traffic
             {
                 dens *= 0.5f;
             }
-            float speed = Mathf.Lerp(speedLimit, tO.stallSpeed / 3.6f, dens / maxCapacity);
+            float speed = Mathf.Lerp(speedLimit, tO.macroTrafficSimInput.stallSpeed / 3.6f, dens / maxCapacity);
 
             float speed_visibilty = speed;
-            if (tO.visibilityAffectsSpeed)
+            if (tO.visibilityAffectsSpeed && WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.GlobalSmoke)
             {
                 //added Enrico & Paolo article      
-                float D_L = tO.opticalDensity;
+                float D_L = WUIEngine.RUNTIME_DATA.Smoke.GetGlobalDensity(WUIEngine.SIM.CurrentTime);
                 //get rid of any strange values of D_L, TODO: fix when checking input
                 D_L = Mathf.Clamp(D_L, 0.0f, 0.2f);
                 float beta = -101.57f * D_L * D_L * D_L + 49.43f * D_L * D_L - 9.2755f * D_L + 1.0f;
@@ -139,7 +139,7 @@ namespace WUIPlatform.Traffic
 
                 //this is probably all that is needed? since we base speed on speed limit and not direct proportion to density
                 float visibilityLimitedSpeed = beta * speedLimit;
-                float stallSpeed = tO.stallSpeed / 3.6f;
+                float stallSpeed = tO.macroTrafficSimInput.stallSpeed / 3.6f;
                 if (visibilityLimitedSpeed < stallSpeed)
                 {
                     //TODO: which approach is best ?

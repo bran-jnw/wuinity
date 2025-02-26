@@ -259,12 +259,12 @@ namespace WUIPlatform.Pedestrian
 
             if (WUIEngine.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.SUMO)
             {                
-                if (input.routeChoice == TrafficInput.RouteChoice.EvacGroup)
+                if (input.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.EvacGroup)
                 {
                     EvacGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedEvacGoal();
                 }
-                else if (input.routeChoice == TrafficInput.RouteChoice.Random)
+                else if (input.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Random)
                 {
                     int randomChoice = Random.Range(0, WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1);
                     goal = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice];
@@ -286,7 +286,7 @@ namespace WUIPlatform.Pedestrian
         public void SaveToFile(int runNumber)
         {
             WUIEngineInput wO = WUIEngine.INPUT;
-            string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wO.Simulation.SimulationID + "_pedestrian_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wO.Simulation.Id + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -389,7 +389,7 @@ namespace WUIPlatform.Pedestrian
                 if (r <= WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
+                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.evacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.evacuationOrderStart;
                     break;
                 }
             }

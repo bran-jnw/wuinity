@@ -5,10 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Numerics;
-using WUIPlatform.Traffic;
 using System.Collections.Generic;
-using System.IO;
 
 namespace WUIPlatform.IO
 {
@@ -22,9 +19,44 @@ namespace WUIPlatform.IO
 
         public static MapInput Parse(string[] inputLines, int startIndex)
         {
-            var input = new MapInput();
+            var newInput = new MapInput();
+            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            string temp;
+            int issues = 0;
 
-            return input;
+            if (inputToParse.TryGetValue(nameof(mapProvider), out temp))
+            {
+                switch (temp)
+                {
+                    case nameof(MapServiceProvider.Mapbox):
+                        newInput.mapProvider = MapServiceProvider.Mapbox;
+                        break;
+                    case nameof(MapServiceProvider.Bing):
+                        newInput.mapProvider = MapServiceProvider.Bing;
+                        break;
+                    case nameof(MapServiceProvider.OSM):
+                        newInput.mapProvider = MapServiceProvider.OSM;
+                        break;
+                    default:
+                        newInput.mapProvider = MapServiceProvider.Mapbox;
+                        break;
+                }
+            }
+            else
+            {
+            }
+
+            if (inputToParse.TryGetValue(nameof(zoomLevel), out temp))
+            {
+                int.TryParse(temp, out newInput.zoomLevel);
+            }
+            else
+            {
+            }
+
+
+
+            return newInput;
         }
     }
 }

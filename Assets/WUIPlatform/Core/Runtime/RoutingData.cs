@@ -103,7 +103,7 @@ namespace WUIPlatform.Runtime
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Router database created from OSM file.");
 
                     // write the new routerdb to disk.
-                    string internalRouterName = WUIEngine.INPUT.Simulation.SimulationID + ".routerdb";
+                    string internalRouterName = WUIEngine.INPUT.Simulation.Id + ".routerdb";
                     osmFile = Path.Combine(WUIEngine.WORKING_FOLDER, internalRouterName);
                     using (FileStream outputStream = new FileInfo(osmFile).Open(FileMode.Create))
                     {

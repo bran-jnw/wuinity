@@ -76,7 +76,7 @@ namespace WUIPlatform.Traffic
             //initialize some stuff            
             RouteCollection[] cellRoutes = new RouteCollection[cells.x * cells.y];
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
-            float cellSize = WUIEngine.INPUT.Evacuation.PaintCellSize;
+            float cellSize = WUIEngine.INPUT.Evacuation.paintCellSize;
 
             DetermineValidGoalsAndRouterPoints(true);
 
@@ -164,7 +164,7 @@ namespace WUIPlatform.Traffic
 
             Itinero.Profiles.Profile p;
 
-            if (tO.routeChoice == TrafficInput.RouteChoice.Closest || tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
+            if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Closest || tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.EvacGroup)
             {
                 p = Vehicle.Car.Shortest();
             }
@@ -323,7 +323,7 @@ namespace WUIPlatform.Traffic
         /// <returns></returns>
         public RouteData CalcTrafficRoute(Vector2d startLatLon)
         {
-            float cellSize = WUIEngine.INPUT.Evacuation.PaintCellSize;
+            float cellSize = WUIEngine.INPUT.Evacuation.paintCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
@@ -412,7 +412,7 @@ namespace WUIPlatform.Traffic
 
         public static void UpdateRouteCollectionBasedOnRouteChoice(RouteCollection rC, int cellIndex)
         {
-            if(WUIEngine.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.EvacGroup || WUIEngine.INPUT.Traffic.routeChoice == TrafficInput.RouteChoice.Random)
+            if(WUIEngine.INPUT.Traffic.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.EvacGroup || WUIEngine.INPUT.Traffic.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Random)
             {
                 SelectCorrectRoute(rC, cellIndex);
             }
@@ -430,7 +430,7 @@ namespace WUIPlatform.Traffic
             TrafficInput tO = WUIEngine.INPUT.Traffic;
             Vector2int cells = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
 
-            if (tO.routeChoice == TrafficInput.RouteChoice.EvacGroup)
+            if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.EvacGroup)
             {
                 if (cellIndex >= 0)
                 {
@@ -443,16 +443,16 @@ namespace WUIPlatform.Traffic
                     rC.SelectFastestNonBlocked();
                 }
             }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.Random)
+            else if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Random)
             {
                 int randomChoice = Random.Range(0, WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1);
                 rC.SelectForcedNonBlocked(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice]);
             }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.Closest)
+            else if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Closest)
             {
                 rC.SelectClosestNonBlocked();
             }
-            else if (tO.routeChoice == TrafficInput.RouteChoice.Fastest)
+            else if (tO.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Fastest)
             {
                 rC.SelectFastestNonBlocked();
             }

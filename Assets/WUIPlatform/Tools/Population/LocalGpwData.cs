@@ -86,7 +86,7 @@ namespace WUIPlatform.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + ".gpw");
+            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.Id + ".gpw");
             File.WriteAllLines(path, data);
         }
 

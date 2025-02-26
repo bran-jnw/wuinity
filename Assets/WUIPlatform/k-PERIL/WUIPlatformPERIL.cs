@@ -55,7 +55,7 @@ namespace WUIPlatform
 
             float[,] maxROS;
             float[,] rosAzimuth;
-            if (WUIEngine.INPUT.Fire.calculateROSFromBehave)
+            if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.calculateROSFromBehave)
             {
                 WUIEngine.LOG(WUIEngine.LogType.Debug, "Calculating ROS with Behave.");
                 bool[,] wuiArea2D = null;// GetWUIArea2D(WUIEngine.RUNTIME_DATA.Fire.WuiArea, xDim, yDim);

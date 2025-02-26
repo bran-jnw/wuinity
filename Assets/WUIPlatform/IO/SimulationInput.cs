@@ -12,7 +12,7 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class SimulationInput
     {
-        public string SimulationID = "new";
+        public string Id = "new";
         public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
         public Vector2d DomainSize = new Vector2d(3000.0, 3000.0);
         public float DeltaTime = 1f;
@@ -25,7 +25,7 @@ namespace WUIPlatform.IO
 
         public bool StopAfterConverging = true;
 
-        const string idIn = "id";
+        /*const string idIn = "id";
         const string lowerLeftLatLonIn = "lowerLeftLatLon";
         const string domainSizeIn = "domainSize";
         const string deltaTimeIn = "deltaTime";
@@ -36,7 +36,7 @@ namespace WUIPlatform.IO
         const string runFireModuleIn = "runFireModule";
         const string runSmokeModuleIn = "runSmokeModule";
 
-        const string stopAfterConvergingIn = "stopAfterConverging";
+        const string stopAfterConvergingIn = "stopAfterConverging";*/
 
         public static SimulationInput Parse(string[] inputLines, int startIndex)
         {
@@ -45,16 +45,16 @@ namespace WUIPlatform.IO
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
 
             string temp;
-            if (inputToParse.TryGetValue(idIn, out temp))
+            if (inputToParse.TryGetValue(nameof(Id), out temp))
             {
-                newInput.SimulationID = temp;
+                newInput.Id = temp;
             }
             else
             {
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(lowerLeftLatLonIn, out temp))
+            if (inputToParse.TryGetValue(nameof(LowerLeftLatLon), out temp))
             {
                 string[] data = temp.Split(',');
                 double.TryParse(data[0], out newInput.LowerLeftLatLon.x);
@@ -65,7 +65,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(domainSizeIn, out temp))
+            if (inputToParse.TryGetValue(nameof(DomainSize), out temp))
             {
                 string[] data = temp.Split(',');
                 double.TryParse(data[0], out newInput.DomainSize.x);
@@ -76,7 +76,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(deltaTimeIn, out temp))
+            if (inputToParse.TryGetValue(nameof(DeltaTime), out temp))
             {
                 float.TryParse(temp, out newInput.DeltaTime);
             }
@@ -85,7 +85,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(maxSimTimeIn, out temp))
+            if (inputToParse.TryGetValue(nameof(MaxSimTime), out temp))
             {
                 float.TryParse(temp, out newInput.MaxSimTime);
             }
@@ -94,7 +94,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(stopWhenEvacuatedIn, out temp))
+            if (inputToParse.TryGetValue(nameof(StopWhenEvacuated), out temp))
             {
                 bool.TryParse(temp, out newInput.StopWhenEvacuated);
             }
@@ -103,7 +103,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }   
 
-            if (inputToParse.TryGetValue(runPedestrianModuleIn, out temp))
+            if (inputToParse.TryGetValue(nameof(RunPedestrianModule), out temp))
             {
                 bool.TryParse(temp, out newInput.RunPedestrianModule);
             }
@@ -112,7 +112,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(runTrafficModuleIn, out temp))
+            if (inputToParse.TryGetValue(nameof(RunTrafficModule), out temp))
             {
                 bool.TryParse(temp, out newInput.RunTrafficModule);
             }
@@ -121,7 +121,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(runFireModuleIn, out temp))
+            if (inputToParse.TryGetValue(nameof(RunFireModule), out temp))
             {
                 bool.TryParse(temp, out newInput.RunFireModule);
             }
@@ -130,7 +130,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(runSmokeModuleIn, out temp))
+            if (inputToParse.TryGetValue(nameof(RunSmokeModule), out temp))
             {
                 bool.TryParse(temp, out newInput.RunSmokeModule);
             }
@@ -139,7 +139,7 @@ namespace WUIPlatform.IO
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(stopAfterConvergingIn, out temp))
+            if (inputToParse.TryGetValue(nameof(StopAfterConverging), out temp))
             {
                 bool.TryParse(temp, out newInput.StopAfterConverging);
             }

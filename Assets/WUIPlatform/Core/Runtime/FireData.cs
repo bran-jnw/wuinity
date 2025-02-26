@@ -92,12 +92,15 @@ namespace WUIPlatform.Runtime
         public void LoadAll()
         {
             LoadLCPFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.lcpFile), false);
-            LoadFuelModelsInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fuelModelsFile), false);
-            LoadIgnitionPoints(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ignitionPointsFile), false);
-            LoadInitialFuelMoistureData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.initialFuelMoistureFile), false);
-            LoadWeatherInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.weatherFile), false);
-            LoadWindInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.windFile), false);
-            LoadGraphicalFireInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.graphicalFireInputFile), false);
+            if(WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FireCell)
+            {
+                LoadFuelModelsInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile), false);
+                LoadIgnitionPoints(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile), false);
+                LoadInitialFuelMoistureData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile), false);
+                LoadWeatherInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.weatherFile), false);
+                LoadWindInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.windFile), false);
+                LoadGraphicalFireInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.graphicalFireInputFile), false);
+            }            
         }
 
         public bool LoadLCPFile(string path, bool updateInputFile)
@@ -149,7 +152,7 @@ namespace WUIPlatform.Runtime
             WUIEngine.DATA_STATUS.FuelModelsLoaded = success;
             if(success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.fuelModelsFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -162,7 +165,7 @@ namespace WUIPlatform.Runtime
             _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(path, out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.ignitionPointsFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -175,7 +178,7 @@ namespace WUIPlatform.Runtime
             _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.initialFuelMoistureFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -188,7 +191,7 @@ namespace WUIPlatform.Runtime
             _weatherInput = WeatherInput.LoadWeatherInputFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.weatherFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.fireCellInput.weatherFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -201,7 +204,7 @@ namespace WUIPlatform.Runtime
             _windInput = WindInput.LoadWindInputFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.windFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.fireCellInput.windFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 

@@ -5,8 +5,6 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Numerics;
-using WUIPlatform.Traffic;
 using System.Collections.Generic;
 using System.IO;
 
@@ -21,21 +19,24 @@ namespace WUIPlatform.IO
         public EvacuationInput Evacuation;
         public PedestrianInput Pedestrian;
         public TrafficInput Traffic;    
-        public FireInput Fire;
+        public FireInput Fire;        
         public SmokeInput Smoke;
+        public TriggerBufferInput TriggerBuffer;
         public WUIShowInput WUIShow;
+        public EventsInput Events;
 
         public WUIEngineInput()
         {
-            Simulation = new SimulationInput();
+            /*Simulation = new SimulationInput();
             Map = new MapInput();            
             Population = new PopulationInput();
             Evacuation = new EvacuationInput();
             Pedestrian = new PedestrianInput();
             Traffic = new TrafficInput();    
-            Fire = new FireInput();
+            Fire = new FireInput();            
             Smoke = new SmokeInput();
-            WUIShow = new WUIShowInput();
+            TriggerBuffer = new TriggerBufferInput();
+            WUIShow = new WUIShowInput();*/
         }
 
         public static void SaveInput()
@@ -68,7 +69,7 @@ namespace WUIPlatform.IO
         }
 
         //stuff for parsing
-        const string _simulationHeader = "Simulation";
+        /*const string _simulationHeader = "Simulation";
         const string _mapHeader = "Map";
         const string _populationHeader = "Population";
         const string _evacuationHeader = "Evacuation";
@@ -76,10 +77,11 @@ namespace WUIPlatform.IO
         const string _trafficHeader = "Traffic";
         const string _fireHeader = "Fire";
         const string _smokeHeader = "Smoke";
-        const string _wuiShowHeader = "WUIShow";
+        const string _wuiShowHeader = "WUIShow";*/
 
         public static readonly char[] inputSplit = { '=', '#' };
         static readonly char[] headerBrackets = new char[] { '[', ']' };
+        public const string pleaseCheckInput = " Please check your input file.";
 
         private static WUIEngineInput ParseInput(string[] inputLines)
         {
@@ -98,47 +100,156 @@ namespace WUIPlatform.IO
                 }
             }
 
-            //simulation
+            //now see if we have what we need
             int lineindex;
-            if (headerLineIndex.TryGetValue(_simulationHeader, out lineindex))
+            //simulation
+            if (headerLineIndex.TryGetValue(nameof(Simulation), out lineindex))
             {
                 newInput.Simulation = SimulationInput.Parse(inputLines, lineindex);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, _simulationHeader + " header not found, please check your input file.");
+                //critical
+                WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Simulation) + " header not found." + pleaseCheckInput);
                 return null;
             }
 
             //map
-            if (headerLineIndex.TryGetValue(_mapHeader, out lineindex))
+            if (headerLineIndex.TryGetValue(nameof(Map), out lineindex))
             {
                 newInput.Map = MapInput.Parse(inputLines, lineindex);
             }
             else
             {
+                //does not matter
                 newInput.Map = new MapInput();
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No [Map] header found in input file, using defaults.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(Map) + " header not found, using defaults.");
             }
 
             //population
-            if (headerLineIndex.TryGetValue(_populationHeader, out lineindex))
+            if (newInput.Simulation.RunPedestrianModule)
             {
-                newInput.Population = PopulationInput.Parse(inputLines, lineindex);
-            }
-            else
-            {
-                
+                if (headerLineIndex.TryGetValue(nameof(Population), out lineindex))
+                {
+                    newInput.Population = PopulationInput.Parse(inputLines, lineindex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Population) + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    return null;
+                }      
             }
 
             //evacuation
-            if (headerLineIndex.TryGetValue(_evacuationHeader, out lineindex))
+            if (newInput.Simulation.RunPedestrianModule || newInput.Simulation.RunTrafficModule)
             {
-                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex);
+                if (headerLineIndex.TryGetValue(nameof(Evacuation), out lineindex))
+                {
+                    newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Evacuation) + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
+                    return null;
+                }
+            }                
+
+            //pedestrian
+            if(newInput.Simulation.RunPedestrianModule)
+            {
+                if (headerLineIndex.TryGetValue(nameof(Pedestrian), out lineindex))
+                {
+                    newInput.Pedestrian = PedestrianInput.Parse(inputLines, lineindex, headerLineIndex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Pedestrian) + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    return null;
+                }
+            }
+
+            //traffic
+            if (newInput.Simulation.RunTrafficModule)
+            {
+                if (headerLineIndex.TryGetValue(nameof(Traffic), out lineindex))
+                {
+                    newInput.Traffic = TrafficInput.Parse(inputLines, lineindex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Traffic) + " header not found but user has requested traffic module." + pleaseCheckInput);
+                    return null;
+                }
+            }
+
+            //fire
+            if (newInput.Simulation.RunFireModule)
+            {
+                if (headerLineIndex.TryGetValue(nameof(Fire), out lineindex))
+                {
+                    newInput.Fire = FireInput.Parse(inputLines, lineindex);
+                }
+                else
+                {
+                    //critical                
+                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Fire) + " header not found but user has requested fire module." + pleaseCheckInput);
+                    return null;
+                }
+            }
+
+            //smoke
+            if (newInput.Simulation.RunSmokeModule)
+            {
+                if (headerLineIndex.TryGetValue(nameof(Smoke), out lineindex))
+                {
+                    newInput.Smoke = SmokeInput.Parse(inputLines, lineindex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Smoke) + " header not found but user has requested smoke module." + pleaseCheckInput);
+                    return null;
+                }
+            }
+
+            //trigger buffer
+            if (headerLineIndex.TryGetValue(nameof(TriggerBuffer), out lineindex))
+            {
+                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex);
             }
             else
             {
+                //does not matter
+                newInput.TriggerBuffer = new TriggerBufferInput();
+                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(TriggerBuffer) + " header not found, using defaults.");
+            }
 
+            //WUIShow
+            if (headerLineIndex.TryGetValue(nameof(WUIShow), out lineindex))
+            {
+                newInput.WUIShow = WUIShowInput.Parse(inputLines, lineindex);
+            }
+            else
+            {
+                //does not matter
+                newInput.WUIShow = new WUIShowInput();
+                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(WUIShow) + " header not found, using defaults.");
+            }
+
+            //events
+            if (headerLineIndex.TryGetValue(nameof(Events), out lineindex))
+            {
+                newInput.Events = EventsInput.Parse(inputLines, lineindex);
+            }
+            else
+            {
+                //does not matter
+                newInput.WUIShow = new WUIShowInput();
+                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(WUIShow) + " header not found, using defaults.");
             }
 
             return newInput;
@@ -184,87 +295,6 @@ namespace WUIPlatform.IO
 
             return inputToParse;
         }
-    }
-
-    
-
-    
-
-    
-
-    
-
-    [System.Serializable]
-    public class TrafficInput
-    {
-        public enum TrafficModuleChoice { SUMO, MacroTrafficSim }
-        public TrafficModuleChoice trafficModuleChoice = TrafficModuleChoice.SUMO;        
-        public enum RouteChoice { Fastest, Closest, Random, EvacGroup };
-        public string[] evacuationGoalFiles;
-        public RouteChoice routeChoice = RouteChoice.Closest;
-                
-        public float stallSpeed = 5f;
-        public Vector2 backGroundDensityMinMax = Vector2.Zero;
-        public bool visibilityAffectsSpeed = false;
-        public string opticalDensityFile;
-        public float opticalDensity = 0.05f;
-        public string roadTypesFile;
-        public float saveInterval = 600f;
-
-        public TrafficAccident[] trafficAccidents = TrafficAccident.GetDummy();
-        public ReverseLanes[] reverseLanes = ReverseLanes.GetDummy();
-        public TrafficInjection[] trafficInjections = TrafficInjection.GetTemplate();
-        public TrafficProbe[] trafficProbes = TrafficProbe.GetTemplate();
-
-        public SUMOInput sumoInput;
-    }
-
-    [System.Serializable]
-    public class SUMOInput
-    {
-        public string inputFile;
-        public Vector2d UTMoffset;
-    }    
-
-    [System.Serializable]
-    public class FireInput
-    {
-        public enum FireModuleChoice { AscImport, Cells, VectorCells, FarsiteDLL, PrometheusCOM }
-        public FireModuleChoice fireModuleChoice = FireModuleChoice.Cells;
-        public string lcpFile;
-        public string fuelModelsFile = "default.fuel";
-        public string initialFuelMoistureFile = "default.fmc";
-        public string weatherFile = "default.wtr";
-        public string windFile = "default.wnd";
-        public string ignitionPointsFile = "default.ign";
-        public string graphicalFireInputFile = "default.gfi";
-        public Fire.SpreadMode spreadMode = Fire.SpreadMode.SixteenDirections;
-              
-        public float windMultiplier = 1f;
-
-        public bool useRandomIgnitionMap = false;
-        public int randomIgnitionPoints = 0;
-        public bool useInitialIgnitionMap = false;
-
-        public AscImportInput ascData;
-
-        public bool calculateTriggerBuffer = false;
-        public enum TriggerBufferChoice { kPERIL, backwardsCell}
-        public TriggerBufferChoice triggerBufferChoice= TriggerBufferChoice.kPERIL;
-        public float kPerilMidFlameWindspeed = 0f;
-        public bool calculateROSFromBehave = true;
-
-    }
-
-    [System.Serializable]
-    public class AscImportInput
-    {
-        public string rootFolder;
-        public string timeOfArrival;
-        public string rateOfSpread;
-        public string spreadDirection;
-        public string firelineIntensity;
-        public string weatherStream;
     }
 }
 

@@ -16,10 +16,44 @@ namespace WUIPlatform.IO
     public class SmokeInput
     {
         public enum SmokeModuleChoice { GlobalSmoke, AdvectDiffuse, BoxModel, Lagrangian, GaussianPuff, GaussianPlume, FFD }
-        public SmokeModuleChoice smokeModuleChoice = SmokeModuleChoice.AdvectDiffuse;
+        public SmokeModuleChoice smokeModuleChoice = SmokeModuleChoice.GlobalSmoke;
 
         public GlobalSmokeInput globalSmokeInput;
         public AdvectDiffuseInput advectDiffuseInput;
+        public LagrangianInput lagrangianInput;
+
+        public static SmokeInput Parse(string[] inputLines, int startIndex)
+        {
+            int issues = 0;
+            SmokeInput newInput = new SmokeInput();
+            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            string temp;
+
+            if (inputToParse.TryGetValue(nameof(smokeModuleChoice), out temp))
+            {
+                switch (temp)
+                {
+                    case nameof(SmokeModuleChoice.GlobalSmoke):
+                        newInput.smokeModuleChoice = SmokeModuleChoice.GlobalSmoke;
+                        break;
+                    case nameof(SmokeModuleChoice.AdvectDiffuse):
+                        newInput.smokeModuleChoice = SmokeModuleChoice.AdvectDiffuse;
+                        break;
+                    case nameof(SmokeModuleChoice.Lagrangian):
+                        newInput.smokeModuleChoice = SmokeModuleChoice.Lagrangian;
+                        break;
+                    default:
+                        newInput.smokeModuleChoice = SmokeModuleChoice.GlobalSmoke;
+                        break;
+                }
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "No smoke module was selected, using " + newInput.smokeModuleChoice.ToString());
+            }
+
+            return newInput;
+        }
     }
 
     public class GlobalSmokeInput
@@ -30,6 +64,11 @@ namespace WUIPlatform.IO
     public class AdvectDiffuseInput
     {
         public float MixingLayerHeight = 250.0f;
+    }
+
+    public class LagrangianInput
+    {
+        public uint particlesPerFireCell = 50;
     }
 }
 

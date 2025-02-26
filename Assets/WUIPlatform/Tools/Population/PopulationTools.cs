@@ -126,7 +126,7 @@ namespace WUIPlatform.Tools
 
         public static void SavePopulationMask()
         {
-            WUIEngine.RUNTIME_DATA.Population.PopulationMap.SavePopulationMask(WUIEngine.INPUT.Simulation.SimulationID);
+            WUIEngine.RUNTIME_DATA.Population.PopulationMap.SavePopulationMask(WUIEngine.INPUT.Simulation.Id);
         }
 
         /*public static void LoadPopulationMask(string populationMaskFile)

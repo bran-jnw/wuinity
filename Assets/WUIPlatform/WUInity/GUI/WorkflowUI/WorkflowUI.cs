@@ -474,7 +474,7 @@ namespace WUIPlatform.WUInity.UI
 
             if (dfDfEvacutionDestination != null && WUIEngine.DATA_STATUS.HaveInput && WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
             {
-                string initialPath = Path.Combine(GetProjectPath(), WUIEngine.INPUT.Traffic.evacuationGoalFiles[dfDfEvacutionDestination.index] + ".ed");
+                string initialPath = Path.Combine(GetProjectPath(), WUIEngine.INPUT.Evacuation.evacuationGoals[dfDfEvacutionDestination.index] + ".ed");
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
@@ -554,32 +554,32 @@ namespace WUIPlatform.WUInity.UI
             //if (EditorUtility.DisplayDialog("Remove current goal", "Do you want to remove the current goal?", "Confirm","Cancel")) 
 
             UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
-            if (dfDfEvacutionDestination != null && WUIEngine.INPUT.Traffic.evacuationGoalFiles != null)
+            if (dfDfEvacutionDestination != null && WUIEngine.INPUT.Evacuation.evacuationGoals != null)
             {
                 if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
                 {
-                    string removeGoal = WUIEngine.INPUT.Traffic.evacuationGoalFiles[dfDfEvacutionDestination.index];
+                    string removeGoal = WUIEngine.INPUT.Evacuation.evacuationGoals[dfDfEvacutionDestination.index];
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Goal file " + removeGoal + " is removed.");
 
                     if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 1)
                     {
-                        string[] newGoalList = new string[WUIEngine.INPUT.Traffic.evacuationGoalFiles.Length - 1];
+                        string[] newGoalList = new string[WUIEngine.INPUT.Evacuation.evacuationGoals.Length - 1];
 
                         for (int i = 0; i < dfDfEvacutionDestination.index; i++)
                         {
-                            newGoalList[i] = WUIEngine.INPUT.Traffic.evacuationGoalFiles[i];
+                            newGoalList[i] = WUIEngine.INPUT.Evacuation.evacuationGoals[i];
                         }
 
-                        for (int i = dfDfEvacutionDestination.index; i < WUIEngine.INPUT.Traffic.evacuationGoalFiles.Length - 1; i++)
+                        for (int i = dfDfEvacutionDestination.index; i < WUIEngine.INPUT.Evacuation.evacuationGoals.Length - 1; i++)
                         {
-                            newGoalList[i] = WUIEngine.INPUT.Traffic.evacuationGoalFiles[i + 1];
+                            newGoalList[i] = WUIEngine.INPUT.Evacuation.evacuationGoals[i + 1];
                         }
 
-                        WUIEngine.INPUT.Traffic.evacuationGoalFiles = newGoalList;
+                        WUIEngine.INPUT.Evacuation.evacuationGoals = newGoalList;
                     }
                     else
                     {
-                        WUIEngine.INPUT.Traffic.evacuationGoalFiles = null;
+                        WUIEngine.INPUT.Evacuation.evacuationGoals = null;
                     }
 
                     WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.RemoveAt(dfDfEvacutionDestination.index);
@@ -713,14 +713,14 @@ namespace WUIPlatform.WUInity.UI
 
                     for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1; i++)
                     {
-                        newGoalList[i] = WUIEngine.INPUT.Traffic.evacuationGoalFiles[i];
+                        newGoalList[i] = WUIEngine.INPUT.Evacuation.evacuationGoals[i];
                     }
 
                     string fileName = Path.GetFileName(path);
                     data = fileName.Split('.');
 
                     newGoalList[WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1] = data[0];
-                    WUIEngine.INPUT.Traffic.evacuationGoalFiles = newGoalList;
+                    WUIEngine.INPUT.Evacuation.evacuationGoals = newGoalList;
 
                     WUIEngineInput.SaveInput();
 
@@ -787,11 +787,11 @@ namespace WUIPlatform.WUInity.UI
                     int.TryParse(evt.newValue, out value);
                     if (value < 1 || value > 20)    // Set the stall speed range to be [1,20]. To be confirmed later.
                     {
-                        tfTxTSetMaxCapTrafSpeed.SetValueWithoutNotify(WUIEngine.INPUT.Traffic.stallSpeed.ToString());
+                        tfTxTSetMaxCapTrafSpeed.SetValueWithoutNotify(WUIEngine.INPUT.Traffic.macroTrafficSimInput.stallSpeed.ToString());
                         WUIEngine.LOG(WUIEngine.LogType.Warning, "The vehicle speed at max roadway capacity is not valid. Please choose between 1 and 20 (km/h).");
                     }
                     else
-                        WUIEngine.INPUT.Traffic.stallSpeed = value;
+                        WUIEngine.INPUT.Traffic.macroTrafficSimInput.stallSpeed = value;
                 });
 
             UnityEngine.UIElements.TextField tfTxTBackgroundDensityMin = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMin");
@@ -803,11 +803,11 @@ namespace WUIPlatform.WUInity.UI
                     int.TryParse(evt.newValue, out value);
                     if (value < 0 || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
                     {
-                        //tfTxTBackgroundDensityMin.SetValueWithoutNotify(WUIEngine.Input.Traffic.backGroundDensityMinMax.x.ToString());
+                        //tfTxTBackgroundDensityMin.SetValueWithoutNotify(WUIEngine.Input.Traffic.macroTrafficSimInput.backGroundDensityMinMax.x.ToString());
                         WUIEngine.LOG(WUIEngine.LogType.Warning, "Please enter the minimum range of background traffic density between 0 and 75 vehicles/km/lane.");
                     }
                     else
-                        WUIEngine.INPUT.Traffic.backGroundDensityMinMax.X = value;
+                        WUIEngine.INPUT.Traffic.macroTrafficSimInput.backGroundDensityMinMax.X = value;
                 });
 
             UnityEngine.UIElements.TextField tfTxTBackgroundDensityMax = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMax");
@@ -817,13 +817,13 @@ namespace WUIPlatform.WUInity.UI
                     //UnityEngine.Debug.Log($"BackgroundDensityMax has changed to {evt.newValue}.");
                     int value;
                     int.TryParse(evt.newValue, out value);
-                    if (value < WUIEngine.INPUT.Traffic.backGroundDensityMinMax.X || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
+                    if (value < WUIEngine.INPUT.Traffic.macroTrafficSimInput.backGroundDensityMinMax.X || value > 75)    // Set the Background Density range to be [1,75]. To be confirmed later.
                     {
-                        //tfTxTBackgroundDensityMax.SetValueWithoutNotify(WUIEngine.Input.Traffic.backGroundDensityMinMax.y.ToString());
+                        //tfTxTBackgroundDensityMax.SetValueWithoutNotify(WUIEngine.Input.Traffic.macroTrafficSimInput.backGroundDensityMinMax.y.ToString());
                         WUIEngine.LOG(WUIEngine.LogType.Warning, "Please enter the maximum range of background traffic density between the minimum and 75 vehicles/km/lane.");
                     }
                     else
-                        WUIEngine.INPUT.Traffic.backGroundDensityMinMax.Y = value;
+                        WUIEngine.INPUT.Traffic.macroTrafficSimInput.backGroundDensityMinMax.Y = value;
                 });
         }
 
@@ -854,11 +854,11 @@ namespace WUIPlatform.WUInity.UI
                             newGoalList[i] = WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i + 1].name;
                         }
 
-                        WUIEngine.Input.Traffic.evacuationGoalFiles = newGoalList;
+                        WUIEngine.Input.Evacuation.evacuationGoals = newGoalList;
                     }
                     else
                     {
-                        WUIEngine.Input.Traffic.evacuationGoalFiles = null;
+                        WUIEngine.Input.Evacuation.evacuationGoals = null;
                     }
 
                     WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.RemoveAt(dfResponseCurve.index);
@@ -879,7 +879,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnAddEvacGroupButton_clicked()
         {
-            if (WUIEngine.INPUT.Evacuation.EvacGroups != null ) {
+            if (WUIEngine.INPUT.Evacuation.evacuationGroups != null ) {
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGroupFile]);
                 FileBrowser.ShowLoadDialog(LoadAEvacGroupFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation group file (.eg)", "Load");
             }
@@ -989,9 +989,9 @@ namespace WUIPlatform.WUInity.UI
 
                     List<String> evacGroupFiles = new List<String>();
 
-                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacGroups.Length; i++)
+                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.evacuationGroups.Length; i++)
                     {
-                        evacGroupFiles.Add(WUIEngine.INPUT.Evacuation.EvacGroups[i]);
+                        evacGroupFiles.Add(WUIEngine.INPUT.Evacuation.evacuationGroups[i]);
                     }
 
                     string fileName = Path.GetFileName(path);
@@ -1000,7 +1000,7 @@ namespace WUIPlatform.WUInity.UI
                     if (!evacGroupFiles.Contains(data[0])) // Check if the evacuation group file has been added already.
                     {
                         evacGroupFiles.Add(data[0]);
-                        WUIEngine.INPUT.Evacuation.EvacGroups = evacGroupFiles.ToArray();
+                        WUIEngine.INPUT.Evacuation.evacuationGroups = evacGroupFiles.ToArray();
 
                         WUIEngine.RUNTIME_DATA.Evacuation.LoadEvacuationGroups(); // Reload all evacuation groups based on updated file list.
                         WUIEngine.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices();
@@ -1023,7 +1023,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnAddRespCurveButton_clicked()
         {
-            if (WUIEngine.INPUT.Evacuation.ResponseCurves != null) {
+            if (WUIEngine.INPUT.Evacuation.responseCurves != null) {
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.responseCureveFile]);
                 FileBrowser.ShowLoadDialog(LoadAResponseCurveFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load response curve file (.rsp)", "Load");
             }
@@ -1067,9 +1067,9 @@ namespace WUIPlatform.WUInity.UI
                     //List<ResponseCurve> responseCurves = new List<ResponseCurve>();
                     List<String> responseCurveFiles= new List<String>();
 
-                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.ResponseCurves.Length; i++)
+                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.responseCurves.Length; i++)
                     {
-                        responseCurveFiles.Add(WUIEngine.INPUT.Evacuation.ResponseCurves[i]);
+                        responseCurveFiles.Add(WUIEngine.INPUT.Evacuation.responseCurves[i]);
                         //responseCurves.Add(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i]);
                     }
 
@@ -1079,7 +1079,7 @@ namespace WUIPlatform.WUInity.UI
                     if (!responseCurveFiles.Contains(data[0])) // Check if the curve file has been already added
                     {
                         responseCurveFiles.Add(data[0]);
-                        WUIEngine.INPUT.Evacuation.ResponseCurves = responseCurveFiles.ToArray();
+                        WUIEngine.INPUT.Evacuation.responseCurves = responseCurveFiles.ToArray();
 
                         // ResponseCurves could be simply updated by the following two lines, but I have to reload all curves using LoadResponseCurves();
                         //responseCurves.Add(new ResponseCurve(dataPoints, data[0]));
@@ -1110,15 +1110,15 @@ namespace WUIPlatform.WUInity.UI
             switch(fileType)
             {
                 case FileType.fuelModelsFile:
-                    fileName = WUIEngine.INPUT.Fire.fuelModelsFile;            break;
+                    fileName = WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile;            break;
                 case FileType.initialFuelMoistureFile:
-                    fileName = WUIEngine.INPUT.Fire.initialFuelMoistureFile;   break;
+                    fileName = WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile;   break;
                 case FileType.weatherFile:
-                    fileName = WUIEngine.INPUT.Fire.weatherFile;               break;
+                    fileName = WUIEngine.INPUT.Fire.fireCellInput.weatherFile;               break;
                 case FileType.windFile:
-                    fileName = WUIEngine.INPUT.Fire.windFile;                  break;
+                    fileName = WUIEngine.INPUT.Fire.fireCellInput.windFile;                  break;
                 case FileType.ignitionPointsFile:
-                    fileName = WUIEngine.INPUT.Fire.ignitionPointsFile;        break;
+                    fileName = WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile;        break;
             }
 
             if (WUIEngine.DATA_STATUS.HaveInput && fileName.Length > 0)
@@ -1164,7 +1164,7 @@ namespace WUIPlatform.WUInity.UI
 
             if (dfDfEvacuationGroup != null && WUIEngine.DATA_STATUS.HaveInput && WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups.Length > 0)
             {
-                string initialPath = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacGroups[dfDfEvacuationGroup.index] + ".eg");
+                string initialPath = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.evacuationGroups[dfDfEvacuationGroup.index] + ".eg");
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
@@ -1294,7 +1294,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 dfRouteChoice.RegisterValueChangedCallback((evt) =>
                 {
-                    WUIEngine.INPUT.Traffic.routeChoice = (TrafficInput.RouteChoice) dfRouteChoice.index;
+                    WUIEngine.INPUT.Traffic.macroTrafficSimInput.routeChoice = (MacroTrafficSimInput.RouteChoice) dfRouteChoice.index;
                 });
             }
         }
@@ -1738,7 +1738,7 @@ namespace WUIPlatform.WUInity.UI
             var root = Document.rootVisualElement;
 
             Label label1 = Document.rootVisualElement.Q<Label>("TxtEvacID");
-            label1.text = "Simulation ID: " + WUIEngine.INPUT.Simulation.SimulationID;
+            label1.text = "Simulation ID: " + WUIEngine.INPUT.Simulation.Id;
 
             Label label2 = Document.rootVisualElement.Q<Label>("TxtEvacTime");
             label2.text = "Sim. Clock: " + (int)WUIEngine.SIM.CurrentTime + " s\n\rdd:hh:mm:ss - " + TimeSpan.FromSeconds((int)WUIEngine.SIM.CurrentTime).ToString(@"dd\:hh\:mm\:ss");
@@ -1917,7 +1917,7 @@ namespace WUIPlatform.WUInity.UI
                 // 4. Evacuation goals -------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfEvacutionDestination= root.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
 
-                if (dfDfEvacutionDestination != null && WUIEngine.INPUT.Traffic.evacuationGoalFiles.Length > 0 )
+                if (dfDfEvacutionDestination != null && WUIEngine.INPUT.Evacuation.evacuationGoals.Length > 0 )
                 {
                     List<string> m_DropOptions = new List<string> {};
 
@@ -1932,7 +1932,7 @@ namespace WUIPlatform.WUInity.UI
                 // 5A. Response curve -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfResponseCurve = root.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
 
-                if (dfDfResponseCurve != null && WUIEngine.INPUT.Evacuation.ResponseCurves.Length > 0)
+                if (dfDfResponseCurve != null && WUIEngine.INPUT.Evacuation.responseCurves.Length > 0)
                 {
                     List<string> m_DropOptions = new List<string> {};
 
@@ -1947,7 +1947,7 @@ namespace WUIPlatform.WUInity.UI
                 // 5B. Evacuation group -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfEvacuationGroup = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
 
-                if (dfDfEvacuationGroup != null && WUIEngine.INPUT.Evacuation.EvacGroups.Length > 0)
+                if (dfDfEvacuationGroup != null && WUIEngine.INPUT.Evacuation.evacuationGroups.Length > 0)
                 {
                     List<string> m_DropOptions = new List<string> {};
 
@@ -2035,12 +2035,12 @@ namespace WUIPlatform.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach(string s in Enum.GetNames(typeof(TrafficInput.RouteChoice)))
+                    foreach(string s in Enum.GetNames(typeof( MacroTrafficSimInput.RouteChoice)))
                         m_DropOptions.Add(s);
 
                     dfRouteChoice.choices.Clear();
                     dfRouteChoice.choices = m_DropOptions;
-                    dfRouteChoice.index = (int)tO.routeChoice;
+                    dfRouteChoice.index = (int)tO.macroTrafficSimInput.routeChoice;
 
                     //UnityEngine.Debug.Log($"Current route choice ispppp = {(int)tO.routeChoice}");
                 }
@@ -2061,19 +2061,19 @@ namespace WUIPlatform.WUInity.UI
                 UnityEngine.UIElements.TextField tfTxTSetMaxCapTrafSpeed = root.Q<UnityEngine.UIElements.TextField>("TxTSetMaxCapTrafSpeed");
                 if (tfTxTSetMaxCapTrafSpeed != null)
                 {
-                    tfTxTSetMaxCapTrafSpeed.value = tO.stallSpeed.ToString();
+                    tfTxTSetMaxCapTrafSpeed.value = tO.macroTrafficSimInput.stallSpeed.ToString();
                 }
 
                 UnityEngine.UIElements.TextField tfTxTBackgroundDensityMin = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMin");
                 if (tfTxTBackgroundDensityMin != null)
                 {
-                    tfTxTBackgroundDensityMin.value = tO.backGroundDensityMinMax.X.ToString();
+                    tfTxTBackgroundDensityMin.value = tO.macroTrafficSimInput.backGroundDensityMinMax.X.ToString();
                 }
 
                 UnityEngine.UIElements.TextField tfTxTBackgroundDensityMax = root.Q<UnityEngine.UIElements.TextField>("TxTBackgroundDensityMax");
                 if (tfTxTBackgroundDensityMax != null)
                 {
-                    tfTxTBackgroundDensityMax.value = tO.backGroundDensityMinMax.Y.ToString();
+                    tfTxTBackgroundDensityMax.value = tO.macroTrafficSimInput.backGroundDensityMinMax.Y.ToString();
                 }
 
                 UnityEngine.UIElements.Toggle tgTogSpeedAffectedBySmoke = root.Q<UnityEngine.UIElements.Toggle>("TogSpeedAffectedBySmoke");
@@ -2097,7 +2097,7 @@ namespace WUIPlatform.WUInity.UI
                 UnityEngine.UIElements.TextField tfTxTSetSimID = root.Q<UnityEngine.UIElements.TextField>("TxTSetSimID");
                 if (tfTxTSetSimID != null)
                 {
-                    tfTxTSetSimID.value = wO.Simulation.SimulationID;
+                    tfTxTSetSimID.value = wO.Simulation.Id;
                 }
 
                 UnityEngine.UIElements.TextField tfTxTSetTimeStep = root.Q<UnityEngine.UIElements.TextField>("TxTSetTimeStep");
@@ -2220,9 +2220,9 @@ namespace WUIPlatform.WUInity.UI
                 if (txtFuelModelFile != null)
                 {
                     string filePath;
-                    if (WUIEngine.INPUT.Fire.fuelModelsFile.Length > 0)
+                    if (WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile.Length > 0)
                     {
-                        filePath = "Fuel model file: " + WUIEngine.INPUT.Fire.fuelModelsFile;
+                        filePath = "Fuel model file: " + WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile;
                         togLoadFuelModelFile.SetValueWithoutNotify(true);
                     }
                     else
@@ -2247,9 +2247,9 @@ namespace WUIPlatform.WUInity.UI
                 if (txtFuelMoistureFile != null)
                 {
                     string filePath;
-                    if (WUIEngine.INPUT.Fire.initialFuelMoistureFile.Length > 0)
+                    if (WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile.Length > 0)
                     {
-                        filePath = "Fuel moisture file: " + WUIEngine.INPUT.Fire.initialFuelMoistureFile;
+                        filePath = "Fuel moisture file: " + WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile;
                         togLoadFuelMoistureFile.SetValueWithoutNotify(true);
                     }
                     else
@@ -2274,9 +2274,9 @@ namespace WUIPlatform.WUInity.UI
                 if (txtWeatherFile != null)
                 {
                     string filePath;
-                    if (WUIEngine.INPUT.Fire.weatherFile.Length > 0)
+                    if (WUIEngine.INPUT.Fire.fireCellInput.weatherFile.Length > 0)
                     {
-                        filePath = "Weather file: " + WUIEngine.INPUT.Fire.weatherFile;
+                        filePath = "Weather file: " + WUIEngine.INPUT.Fire.fireCellInput.weatherFile;
                         togLoadWeatherFile.SetValueWithoutNotify(true);
                     }
                     else
@@ -2301,9 +2301,9 @@ namespace WUIPlatform.WUInity.UI
                 if (txtWindFile != null)
                 {
                     string filePath;
-                    if (WUIEngine.INPUT.Fire.windFile.Length > 0)
+                    if (WUIEngine.INPUT.Fire.fireCellInput.windFile.Length > 0)
                     {
-                        filePath = "Wind file: " + WUIEngine.INPUT.Fire.windFile;
+                        filePath = "Wind file: " + WUIEngine.INPUT.Fire.fireCellInput.windFile;
                         togLoadWindFile.SetValueWithoutNotify(true);
                     }
                     else
@@ -2328,9 +2328,9 @@ namespace WUIPlatform.WUInity.UI
                 if (txtIgnitionPointsFile != null)
                 {
                     string filePath;
-                    if (WUIEngine.INPUT.Fire.ignitionPointsFile.Length > 0)
+                    if (WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile.Length > 0)
                     {
-                        filePath = "Ignition points file: " + WUIEngine.INPUT.Fire.ignitionPointsFile;
+                        filePath = "Ignition points file: " + WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile;
                         togLoadIgnitionPointsFile.SetValueWithoutNotify(true);
                     }
                     else
@@ -2404,7 +2404,7 @@ namespace WUIPlatform.WUInity.UI
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.wuiFile]);
                 WUIEngineInput wO = WUIEngine.INPUT;
                 string initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FILE);
-                FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.SimulationID + ".wui", "Save file", "Save");
+                FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, wO.Simulation.Id + ".wui", "Save file", "Save");
             }
             else
             {
@@ -2428,7 +2428,7 @@ namespace WUIPlatform.WUInity.UI
                     templateText += toggle.text + " = " + toggle.value + "\n";
                 }
 
-                string initFile = Path.Combine(GetProjectPath(), WUIEngine.INPUT.Simulation.SimulationID + ".ini");
+                string initFile = Path.Combine(GetProjectPath(), WUIEngine.INPUT.Simulation.Id + ".ini");
                 System.IO.File.WriteAllText(initFile, templateText);
             }
         }
@@ -2438,7 +2438,7 @@ namespace WUIPlatform.WUInity.UI
             var toggles = Document.rootVisualElement.Query<Toggle>();
             List<Toggle> tlist = toggles.ToList();
 
-            string initFile = Path.Combine(GetProjectPath(), WUIEngine.INPUT.Simulation.SimulationID + ".ini");
+            string initFile = Path.Combine(GetProjectPath(), WUIEngine.INPUT.Simulation.Id + ".ini");
 
             if (File.Exists(initFile))
             {
@@ -2529,7 +2529,7 @@ namespace WUIPlatform.WUInity.UI
 
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            wO.Simulation.SimulationID = name;
+            wO.Simulation.Id = name;
         }
 
         void CancelSaveLoad()
@@ -2644,7 +2644,7 @@ namespace WUIPlatform.WUInity.UI
                         if (WUIEngine.DATA_STATUS.HaveInput)
                         {
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
+                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.Id);
                         }
 
                         String FilePath = initialPath;
@@ -2695,7 +2695,7 @@ namespace WUIPlatform.WUInity.UI
                         if (WUIEngine.DATA_STATUS.HaveInput)
                         {
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
+                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.Id);
                         }
 
                         String FilePath = Path.Combine(initialPath, "GPW");
@@ -2768,7 +2768,7 @@ namespace WUIPlatform.WUInity.UI
                         if (WUIEngine.DATA_STATUS.HaveInput)
                         {
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
+                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.Id);
                         }
 
                         String FilePath = Path.Combine(initialPath, "OSM");
@@ -2865,7 +2865,7 @@ namespace WUIPlatform.WUInity.UI
                         if (WUIEngine.DATA_STATUS.HaveInput)
                         {
                             initialPath = Path.GetDirectoryName(WUIEngine.WORKING_FOLDER);
-                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.SimulationID);
+                            initialPath = Path.Combine(initialPath, WUIEngine.INPUT.Simulation.Id);
                         }
 
                         //FileBrowser.ShowLoadDialog(LoadLocalGPWFile, CancelLoadLocalGPWFile, FileBrowser.PickMode.Files, false, initialPath, null, "Load GPW file", "Load");

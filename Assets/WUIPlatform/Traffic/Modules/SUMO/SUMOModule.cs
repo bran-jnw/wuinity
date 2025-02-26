@@ -263,7 +263,7 @@ namespace WUIPlatform.Traffic
         {
             try
             {
-                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.SimulationID + "_traffic_output_" + runNumber + ".csv");
+                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
                 File.WriteAllLines(path, output);
             }
             catch(Exception e)
