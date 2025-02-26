@@ -13,76 +13,144 @@ namespace WUIPlatform.IO
     public class SimulationInput
     {
         public string SimulationID = "new";
-        public float DeltaTime = 1f;
-        public float MaxSimTime = 0f;
-        public bool StopWhenEvacuated = true;
-        public bool StopAfterConverging = true;
         public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
         public Vector2d DomainSize = new Vector2d(3000.0, 3000.0);
-        public bool ScaleToWebMercator = false;
+        public float DeltaTime = 1f;
+        public float MaxSimTime = 0f;
+        public bool StopWhenEvacuated = true;        
         public bool RunPedestrianModule = false;
         public bool RunTrafficModule = false;
         public bool RunFireModule = false;
         public bool RunSmokeModule = false;
 
+        public bool StopAfterConverging = true;
+
+        const string idIn = "id";
+        const string lowerLeftLatLonIn = "lowerLeftLatLon";
+        const string domainSizeIn = "domainSize";
+        const string deltaTimeIn = "deltaTime";
+        const string maxSimTimeIn = "maxSimTime";
+        const string stopWhenEvacuatedIn = "stopWhenEvacuated";        
+        const string runPedestrianModuleIn = "runPedestrianModule";
+        const string runTrafficModuleIn = "runTrafficModule";
+        const string runFireModuleIn = "runFireModule";
+        const string runSmokeModuleIn = "runSmokeModule";
+
+        const string stopAfterConvergingIn = "stopAfterConverging";
+
         public static SimulationInput Parse(string[] inputLines, int startIndex)
         {
             int issues = 0;
             SimulationInput newInput = new SimulationInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetCategoryInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
 
             string temp;
-            if (inputToParse.TryGetValue("id", out temp))
+            if (inputToParse.TryGetValue(idIn, out temp))
             {
                 newInput.SimulationID = temp;
             }
-            if (inputToParse.TryGetValue("deltaTime", out temp))
+            else
             {
-                float.TryParse(temp, out newInput.DeltaTime);
+                ++issues;
             }
-            if (inputToParse.TryGetValue("maxSimTime", out temp))
-            {
-                float.TryParse(temp, out newInput.MaxSimTime);
-            }
-            if (inputToParse.TryGetValue("stopWhenEvacuated", out temp))
-            {
-                bool.TryParse(temp, out newInput.StopWhenEvacuated);
-            }
-            if (inputToParse.TryGetValue("stopAfterConverging", out temp))
-            {
-                bool.TryParse(temp, out newInput.StopAfterConverging);
-            }
-            if (inputToParse.TryGetValue("lowerLeftLatLon", out temp))
+
+            if (inputToParse.TryGetValue(lowerLeftLatLonIn, out temp))
             {
                 string[] data = temp.Split(',');
                 double.TryParse(data[0], out newInput.LowerLeftLatLon.x);
                 double.TryParse(data[1], out newInput.LowerLeftLatLon.y);
             }
-            if (inputToParse.TryGetValue("domainSize", out temp))
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(domainSizeIn, out temp))
             {
                 string[] data = temp.Split(',');
                 double.TryParse(data[0], out newInput.DomainSize.x);
                 double.TryParse(data[1], out newInput.DomainSize.y);
             }
-            if (inputToParse.TryGetValue("scaleToWebMercator", out temp))
+            else
             {
-                bool.TryParse(temp, out newInput.ScaleToWebMercator);
+                ++issues;
             }
-            if (inputToParse.TryGetValue("runPedestrianModule", out temp))
+
+            if (inputToParse.TryGetValue(deltaTimeIn, out temp))
+            {
+                float.TryParse(temp, out newInput.DeltaTime);
+            }
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(maxSimTimeIn, out temp))
+            {
+                float.TryParse(temp, out newInput.MaxSimTime);
+            }
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(stopWhenEvacuatedIn, out temp))
+            {
+                bool.TryParse(temp, out newInput.StopWhenEvacuated);
+            }
+            else
+            {
+                ++issues;
+            }   
+
+            if (inputToParse.TryGetValue(runPedestrianModuleIn, out temp))
             {
                 bool.TryParse(temp, out newInput.RunPedestrianModule);
             }
-            if (inputToParse.TryGetValue("RunTrafficModule", out temp))
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(runTrafficModuleIn, out temp))
             {
                 bool.TryParse(temp, out newInput.RunTrafficModule);
             }
-            if (inputToParse.TryGetValue("RunFireModule", out temp))
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(runFireModuleIn, out temp))
             {
                 bool.TryParse(temp, out newInput.RunFireModule);
             }
-            if (inputToParse.TryGetValue("RunSmokeModule", out temp))
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(runSmokeModuleIn, out temp))
             {
                 bool.TryParse(temp, out newInput.RunSmokeModule);
+            }
+            else
+            {
+                ++issues;
+            }
+
+            if (inputToParse.TryGetValue(stopAfterConvergingIn, out temp))
+            {
+                bool.TryParse(temp, out newInput.StopAfterConverging);
+            }
+            else
+            {
+                ++issues;
+            }
+
+            if (issues > 0)
+            {
+                newInput = null;
             }
 
             return newInput;

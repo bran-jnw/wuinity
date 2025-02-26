@@ -35,7 +35,7 @@ namespace WUIPlatform.Pedestrian
         /// <param name="personsInCell"></param>
         public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2d roadAccessLatLon, int personsInCell, int cellIndex)
         {
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            PopulationInput eO = WUIEngine.INPUT.Population;
 
             this.cellWorldSize = cellWorldSize;
             this.cellIndex = cellIndex;

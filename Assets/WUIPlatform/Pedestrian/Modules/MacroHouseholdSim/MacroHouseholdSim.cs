@@ -366,7 +366,7 @@ namespace WUIPlatform.Pedestrian
         /// <returns></returns>
         static public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            EvacuationInput evacIn = WUIEngine.INPUT.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
@@ -389,7 +389,7 @@ namespace WUIPlatform.Pedestrian
                 if (r <= WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + eO.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + eO.EvacuationOrderStart;
+                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }
@@ -403,7 +403,7 @@ namespace WUIPlatform.Pedestrian
         /// <returns></returns>
         static public float GetRandomWalkingSpeed()
         {
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            MacroHouseholdSimInput eO = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
             return Random.Range(eO.walkingSpeedMinMax.X, eO.walkingSpeedMinMax.Y) * eO.walkingSpeedModifier;
         }
 

@@ -53,7 +53,7 @@ LCP files are currently the only supported landscape format, GeoTIFF will come a
 In short, do not activate smoke spread module. Multiple ideas for models exists in the code (box model, advect/diffuse, lagrangian), but funding is needed the develop, verify and validate.
 
 ### Trigger buffers
-- k-PERIL (https://github.com/nikosuser/k-PERIL/tree/master) is now integrated into WUInity but has not been fully tested and ther eis currently an issue with 
+- k-PERIL (https://github.com/nikosuser/k-PERIL/tree/master) is now integrated into WUInity but has not been fully tested and there is currently an issue with 
 sending the WUI area from WUInity to k-PERIL (hopefully solved very soon).
 - One of the cellular automata models can be run in backwards mode to also generate trigger buffers, but it is not exposed for usage as it is under-developed. 
 

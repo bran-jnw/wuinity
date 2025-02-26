@@ -39,19 +39,20 @@ namespace WUIPlatform.Pedestrian
         /// <param name="responseTime"></param>
         public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
         {
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            PopulationInput popInput = WUIEngine.INPUT.Population;
+            MacroHouseholdSimInput houseInput = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
 
             _houseHoldData = householdData;
             _cellIndex = cellIndex;
             peopleInHousehold = householdData.peopleCount;
             cars = 1;
-            if (eO.allowMoreThanOneCar)
+            if (popInput.allowMoreThanOneCar)
             {
                 if (peopleInHousehold >= 2)
                 {
-                    if (Random.Range(0f, 1f) <= eO.maxCarsChance)
+                    if (Random.Range(0f, 1f) <= popInput.maxCarsChance)
                     {
-                        cars = Mathf.Min(peopleInHousehold, eO.maxCars);
+                        cars = Mathf.Min(peopleInHousehold, popInput.maxCars);
                     }
                 }
             }
@@ -61,7 +62,7 @@ namespace WUIPlatform.Pedestrian
             homePosition = new Vector2((float)temp.x, (float)temp.y);
             temp = GeoConversions.GeoToWorldPosition(householdData.roadAccessLatLon.x, householdData.roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
-            walkingDistance = Vector2.Distance(homePosition, carPosition) * eO.walkingDistanceModifier;
+            walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.walkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;
             this.responseTime = responseTime;
             if (responseTime == float.MaxValue)

@@ -1,5 +1,6 @@
-[Simulation]
 #this is a comment
+
+[Simulation]
 id=example #this is also a comment
 deltatime=1.0
 maxSimTime=36000.0
@@ -13,7 +14,6 @@ runSmokeModule=false
 [Map]
 mapProvider=Mapbox
 zoomLevel=13
-scaleToWebMercator=false
 
 [WUIShow]
 sendDataToWUIShow=false
@@ -23,69 +23,40 @@ wuiShowDeltaTime=1.0
 
 [Population]
 householdsFile=example_households.csv
-
-[Evacuation]
-pedestrianModuleChoice=MacroHouseholdSim
-evacuationOrderStart=0.0
 householdSizeMin=1
 householdSizeMax=5
-
-[MacroHouseholdSim]
 allowMoreThanOneCar=true
 maxCars=2
 maxCarsChance=0.3
+
+[Evacuation]
+evacuationOrderStart=0.0
+
+[Pedestrian]
+pedestrianModuleChoice=MacroHouseholdSim
+
+
+[MacroHouseholdSim]
 walkingDistanceModifier=1.0
 walkingSpeedModifier=1.0
-blockGoalEvents=
 		
 [Traffic]
 trafficModuleChoice=SUMO
-routeChoice=fastest
-stallSpeed=1.0
 visibilityAffectsSpeed=false
-
-[Visibility]
-opticalDensityFile=opticalDensity.odr
-opticalDensity=0.05
-saveInterval=600.0
-
-[MacroTrafficSim]
-roadTypesFile=default.roads
-trafficAccidents=example
-reverseLanes=example
-trafficInjections=example
-trafficProbes=example
 
 [SUMO]
 inputFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
 
-[TrafficAccident]
-id=example
-startTime=3.4028234663852887e38
-endTime=3.4028234663852887e38
-isActive=false
-
-[ReverseLane]
-id=example
-startTime=3.4028234663852887e38
-endTime=3.4028234663852887e38
-isActive=false
-
-[TrafficInjection]
-cars=1,
-latLon=0.0,0.0
-desiredDestination=highway
-
-[TrafficProbe]
-id=example
-nodeID=0
+[MacroTrafficSim]
+roadTypesFile=default.roads
+routeChoice=fastest
+stallSpeed=1.0
 
 [EvacuationGoal]
 id=highway
-latitude=39.5071781907873
-longitude=-105.02231033756013
-goal_type=exit
+latLon=39.5071781907873,-105.02231033756013
+goalType=exit
 max_flow=-1.0
 car_capacity=-1
 people_capacity=-1
@@ -119,23 +90,38 @@ color=1.0,1.0,0.0
 
 [Fire]
 fireModuleChoice=ascImport
+
+[AscImport]
+rootFolder=farsite
+timeOfArrival=TOA.asc
+rateOfSpread=ROS.asc
+spreadDirection=SD.asc
+firelineIntensity=FI.asc
+weatherStream=example.wxd
+
+[FireCell]
+spreadMode=sixteen
 lcpFile=rox_big_burning_city.lcp
 graphicalFireInputFile=example.gfi
 fuelModelsFile=default.fuel
 initialFuelMoistureFile=default.fmc
 weatherFile=example.wtr
 windFile=example_seconds.wnd
-
-[AscImport]
-rootFolder=farsite
-
-[FireCell]
-spreadMode=sixteen
 windMultiplier=1.0
-ignitionPointsFile=example.ign
+ignitionPoints=example,example2
 useInitialIgnitionMap=false
 useRandomIgnitionMap=false
 randomIgnitionPoints=0
+
+[IgnitionPoint]
+id=example
+latLon=39.464745, -105.046520
+ignitionTime=0.0
+
+[IgnitionPoint]
+id=example2
+latLon=39.448608, -105.061354
+ignitionTime=3600.0
 
 [TriggerBuffer]
 calculateTriggerBuffer=false
@@ -146,5 +132,42 @@ midFlameWindspeed=0.0
 calculateROSFromBehave=true
 
 [Smoke]
-smokeModuleChoice=advectDiffuse
-MixingLayerHeight=250.0
+smokeModuleChoice=GlobalSmoke
+
+[GlobalSmoke]
+0.0, 0.0
+1200.0, 0.05
+3600.0, 0.1
+7200.0, 0.2
+10800.0, 0.0
+
+[AdvectDiffuse]
+mixingLayerHeight=250.0
+
+[TrafficAccident]
+id=example
+startTime=3.4028234663852887e38
+endTime=3.4028234663852887e38
+isActive=false
+
+[ReverseLane]
+id=example
+startTime=3.4028234663852887e38
+endTime=3.4028234663852887e38
+isActive=false
+
+[BlockGoalEvent]
+id=example
+startTime=3.4028234663852887e38
+endTime=3.4028234663852887e38
+isActive=false
+
+[TrafficInjection]
+id=example
+cars=1
+latLon=0.0,0.0
+desiredDestination=highway
+
+[TrafficProbe]
+id=example
+nodeID=0

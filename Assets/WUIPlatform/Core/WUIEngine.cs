@@ -35,7 +35,7 @@ namespace WUIPlatform
             {
                 lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
                 size = input.Simulation.DomainSize;
-                routeCellSize = input.Evacuation.RouteCellSize;
+                routeCellSize = input.Evacuation.PaintCellSize;
             }
         }
         ValidCriticalData validInput;
@@ -233,7 +233,7 @@ namespace WUIPlatform
         {
             bool cellSizeIsDirty = true;
 
-            if (validInput.routeCellSize == _input.Evacuation.RouteCellSize)
+            if (validInput.routeCellSize == _input.Evacuation.PaintCellSize)
             {
                 cellSizeIsDirty = false;
             }

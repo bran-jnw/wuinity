@@ -8,6 +8,7 @@
 using System.Numerics;
 using WUIPlatform.Traffic;
 using System.Collections.Generic;
+using System.IO;
 
 namespace WUIPlatform.IO
 {
@@ -15,34 +16,32 @@ namespace WUIPlatform.IO
     public class WUIEngineInput
     {    
         public SimulationInput Simulation;
-        public MapInput Map;
-        public WUIShowInput WUIShow;
+        public MapInput Map;                
         public PopulationInput Population;
-        public RoutingInput Routing; 
         public EvacuationInput Evacuation;
+        public PedestrianInput Pedestrian;
         public TrafficInput Traffic;    
         public FireInput Fire;
         public SmokeInput Smoke;
-
-        public static readonly char[] inputSplit = { '=', '#' };
+        public WUIShowInput WUIShow;
 
         public WUIEngineInput()
         {
             Simulation = new SimulationInput();
-            Map = new MapInput();
-            WUIShow = new WUIShowInput();
+            Map = new MapInput();            
             Population = new PopulationInput();
-            Routing = new RoutingInput();
             Evacuation = new EvacuationInput();
+            Pedestrian = new PedestrianInput();
             Traffic = new TrafficInput();    
             Fire = new FireInput();
             Smoke = new SmokeInput();
+            WUIShow = new WUIShowInput();
         }
 
         public static void SaveInput()
         {
             string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
-            System.IO.File.WriteAllText(WUIEngine.WORKING_FILE, json);
+            File.WriteAllText(WUIEngine.WORKING_FILE, json);
             EvacGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
@@ -51,7 +50,7 @@ namespace WUIPlatform.IO
 
         public static void LoadInput(string path)
         {
-            string input = System.IO.File.ReadAllText(path);
+            string input = File.ReadAllText(path);
             if (input != null)
             {                
                 WUIEngineInput wui = UnityEngine.JsonUtility.FromJson<WUIEngineInput>(input);
@@ -64,28 +63,88 @@ namespace WUIPlatform.IO
             {
                 WUIEngine.LOG(WUIEngine.LogType.Error, " Input file " + path + " not found.");
             }
+
+            ParseInput(File.ReadAllLines(path));
         }
+
+        //stuff for parsing
+        const string _simulationHeader = "Simulation";
+        const string _mapHeader = "Map";
+        const string _populationHeader = "Population";
+        const string _evacuationHeader = "Evacuation";
+        const string _pedestrianHeader = "Pedestrian";
+        const string _trafficHeader = "Traffic";
+        const string _fireHeader = "Fire";
+        const string _smokeHeader = "Smoke";
+        const string _wuiShowHeader = "WUIShow";
+
+        public static readonly char[] inputSplit = { '=', '#' };
+        static readonly char[] headerBrackets = new char[] { '[', ']' };
 
         private static WUIEngineInput ParseInput(string[] inputLines)
         {
-            WUIEngineInput wuiIn = new WUIEngineInput();
+            WUIEngineInput newInput = new WUIEngineInput();
+            Dictionary<string, int> headerLineIndex = new Dictionary<string, int>();
 
+            //first index all headers
             for(int i = 0; i < inputLines.Length; ++i)
             {
-                if (inputLines[i].StartsWith("[Simulation"))
+                string line = inputLines[i].Trim();
+
+                if (line.StartsWith("["))
                 {
-                    wuiIn.Simulation = SimulationInput.Parse(inputLines, i);
-                }
-                else if(inputLines[i].StartsWith("[WUIShow"))
-                {
-                    wuiIn.WUIShow = WUIShowInput.Parse(inputLines, i);
+                    line = line.Trim(headerBrackets);
+                    headerLineIndex.Add(line, i);
                 }
             }
 
-            return wuiIn;
+            //simulation
+            int lineindex;
+            if (headerLineIndex.TryGetValue(_simulationHeader, out lineindex))
+            {
+                newInput.Simulation = SimulationInput.Parse(inputLines, lineindex);
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "No [Simulation] header found, please check your input file.");
+                return null;
+            }
+
+            //map
+            if (headerLineIndex.TryGetValue(_mapHeader, out lineindex))
+            {
+                newInput.Map = MapInput.Parse(inputLines, lineindex);
+            }
+            else
+            {
+                newInput.Map = new MapInput();
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "No [Map] header found in input file, using defaults.");
+            }
+
+            //population
+            if (headerLineIndex.TryGetValue(_populationHeader, out lineindex))
+            {
+                newInput.Population = PopulationInput.Parse(inputLines, lineindex);
+            }
+            else
+            {
+                if(newInput.Simulation.RunPedestrianModule)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Error, "No [Population] header was found, but user has requested to run pedestrian model, please check your input file.");
+                    return null;
+                }                
+            }
+
+            return newInput;
         }
 
-        public static Dictionary<string, string> GetCategoryInput(string[] inputLines, int startIndex)
+        /// <summary>
+        /// Reads all input under header until next header is found.
+        /// </summary>
+        /// <param name="inputLines"></param>
+        /// <param name="startIndex"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> GetHeaderInput(string[] inputLines, int startIndex)
         {
             Dictionary<string, string> inputToParse = new Dictionary<string, string>();
             //first line is header
@@ -96,6 +155,7 @@ namespace WUIPlatform.IO
                 {
                     break;
                 }
+
                 string line = inputLines[lineIndex].Trim();
                 //we have found next header, exit
                 if (line.StartsWith('['))
@@ -108,8 +168,8 @@ namespace WUIPlatform.IO
                     continue;
                 }
 
-                string[] input = line.Split(WUIEngineInput.inputSplit);
-                if (input.Length > 1)
+                string[] input = line.Split(inputSplit);
+                if (input.Length >= 2)
                 {
                     inputToParse.Add(input[0], input[1]);
                 }
@@ -124,45 +184,9 @@ namespace WUIPlatform.IO
 
     
 
-    [System.Serializable]
-    public class PopulationInput
-    {
-        public string HouseholdsFile;
-    }
+    
 
-    [System.Serializable]
-    public class EvacuationInput
-    {
-        public enum PedestrianModuleChoice { MacroHouseholdSim, SUMO }
-        public PedestrianModuleChoice pedestrianModuleChoice = PedestrianModuleChoice.MacroHouseholdSim;
-        
-        public float RouteCellSize = 200f;
-        public float EvacuationOrderStart = 0.0f;
-        public string[] ResponseCurveFiles;
-        public string[] EvacGroupFiles;
-
-        public int minHouseholdSize = 1;
-        public int maxHouseholdSize = 5;
-        public bool allowMoreThanOneCar = true;
-        public int maxCars = 2;
-        public float maxCarsChance = 0.3f;               
-
-        public float walkingDistanceModifier = 1.0f;
-        public Vector2 walkingSpeedMinMax = new Vector2(0.7f, 1.0f);
-        public float walkingSpeedModifier = 1.0f;
-
-        public string[] BlockGoalEventFiles;            
-
-        //TODO: fix saving these?
-        //[System.NonSerialized] public Texture2D evacuationForceTex;
-        //[System.NonSerialized] public EvacuationGoal[] paintedForcedGoals; //contains all the forced goals per cell        
-    }
-
-    [System.Serializable]
-    public class RoutingInput
-    {
-        public string routerDbFile = "example.routerdb";
-    }
+    
 
     [System.Serializable]
     public class TrafficInput
@@ -216,7 +240,7 @@ namespace WUIPlatform.IO
         public int randomIgnitionPoints = 0;
         public bool useInitialIgnitionMap = false;
 
-        public AscInput ascData;
+        public AscImportInput ascData;
 
         public bool calculateTriggerBuffer = false;
         public enum TriggerBufferChoice { kPERIL, backwardsCell}
@@ -227,26 +251,14 @@ namespace WUIPlatform.IO
     }
 
     [System.Serializable]
-    public class AscInput
+    public class AscImportInput
     {
         public string rootFolder;
-    }
-
-    [System.Serializable]
-    public class SmokeInput
-    {
-        public enum SmokeModuleChoice { AdvectDiffuse, BoxModel, Lagrangian, GaussianPuff, GaussianPlume, FFD}
-        public SmokeModuleChoice smokeModuleChoice = SmokeModuleChoice.AdvectDiffuse;
-        public float MixingLayerHeight = 250.0f;
-    }
-
-    [System.Serializable]
-    public class MapInput
-    {
-        public enum MapServiceProvider { Mapbox, Bing, OSM };
-        
-        public MapServiceProvider mapProvider = MapServiceProvider.Mapbox;
-        public int zoomLevel = 13;
+        public string timeOfArrival;
+        public string rateOfSpread;
+        public string spreadDirection;
+        public string firelineIntensity;
+        public string weatherStream;
     }
 }
 

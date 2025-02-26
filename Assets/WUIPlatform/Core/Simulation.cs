@@ -280,11 +280,11 @@ namespace WUIPlatform
 
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.SUMO)
+                if (WUIEngine.INPUT.Pedestrian.pedestrianModuleChoice == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
                 {
                     //placeholder for JupedSim
                 }
-                else if (WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.MacroHouseholdSim)
+                else if (WUIEngine.INPUT.Pedestrian.pedestrianModuleChoice == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     _pedestrianModule = new MacroHouseholdSim();
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
@@ -713,7 +713,7 @@ namespace WUIPlatform
             }
             if (input.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.INPUT.Evacuation.pedestrianModuleChoice == EvacuationInput.PedestrianModuleChoice.MacroHouseholdSim)
+                if (WUIEngine.INPUT.Pedestrian.pedestrianModuleChoice == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     MacroHouseholdSim mHS = (MacroHouseholdSim)_pedestrianModule;
                     mHS.SaveToFile(runNumber);

@@ -340,11 +340,8 @@ namespace WUIPlatform.WUInity
             MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y), WUIEngine.INPUT.Map.zoomLevel);
             WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
 
-            //generally we want to convert to UTM
-            if (!WUIEngine.INPUT.Simulation.ScaleToWebMercator)
-            {
-                MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);
-            }           
+            //do adjustement to better fit UTM
+            MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);   
 
             return true;
         }
@@ -960,8 +957,8 @@ namespace WUIPlatform.WUInity
                 {
                     System.Numerics.Vector4 posAndSpeed = carsInSystem[i].GetWorldPositionSpeedCarID(false);
 
-                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.RouteCellSize);
-                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.RouteCellSize);
+                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.PaintCellSize);
+                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.PaintCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x - 1 || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y - 1)
@@ -987,8 +984,8 @@ namespace WUIPlatform.WUInity
                 {
                     System.Numerics.Vector4 posAndSpeed = carsOnHold[i].GetWorldPositionSpeedCarID(false);
 
-                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.RouteCellSize);
-                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.RouteCellSize);
+                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.PaintCellSize);
+                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.PaintCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x - 1 || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y - 1)

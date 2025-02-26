@@ -879,7 +879,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnAddEvacGroupButton_clicked()
         {
-            if (WUIEngine.INPUT.Evacuation.EvacGroupFiles != null ) {
+            if (WUIEngine.INPUT.Evacuation.EvacGroups != null ) {
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGroupFile]);
                 FileBrowser.ShowLoadDialog(LoadAEvacGroupFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation group file (.eg)", "Load");
             }
@@ -989,9 +989,9 @@ namespace WUIPlatform.WUInity.UI
 
                     List<String> evacGroupFiles = new List<String>();
 
-                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacGroupFiles.Length; i++)
+                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacGroups.Length; i++)
                     {
-                        evacGroupFiles.Add(WUIEngine.INPUT.Evacuation.EvacGroupFiles[i]);
+                        evacGroupFiles.Add(WUIEngine.INPUT.Evacuation.EvacGroups[i]);
                     }
 
                     string fileName = Path.GetFileName(path);
@@ -1000,7 +1000,7 @@ namespace WUIPlatform.WUInity.UI
                     if (!evacGroupFiles.Contains(data[0])) // Check if the evacuation group file has been added already.
                     {
                         evacGroupFiles.Add(data[0]);
-                        WUIEngine.INPUT.Evacuation.EvacGroupFiles = evacGroupFiles.ToArray();
+                        WUIEngine.INPUT.Evacuation.EvacGroups = evacGroupFiles.ToArray();
 
                         WUIEngine.RUNTIME_DATA.Evacuation.LoadEvacuationGroups(); // Reload all evacuation groups based on updated file list.
                         WUIEngine.RUNTIME_DATA.Evacuation.LoadEvacGroupIndices();
@@ -1023,7 +1023,7 @@ namespace WUIPlatform.WUInity.UI
 
         private void BtnAddRespCurveButton_clicked()
         {
-            if (WUIEngine.INPUT.Evacuation.ResponseCurveFiles != null) {
+            if (WUIEngine.INPUT.Evacuation.ResponseCurves != null) {
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.responseCureveFile]);
                 FileBrowser.ShowLoadDialog(LoadAResponseCurveFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load response curve file (.rsp)", "Load");
             }
@@ -1067,9 +1067,9 @@ namespace WUIPlatform.WUInity.UI
                     //List<ResponseCurve> responseCurves = new List<ResponseCurve>();
                     List<String> responseCurveFiles= new List<String>();
 
-                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
+                    for (int i = 0; i < WUIEngine.INPUT.Evacuation.ResponseCurves.Length; i++)
                     {
-                        responseCurveFiles.Add(WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]);
+                        responseCurveFiles.Add(WUIEngine.INPUT.Evacuation.ResponseCurves[i]);
                         //responseCurves.Add(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i]);
                     }
 
@@ -1079,7 +1079,7 @@ namespace WUIPlatform.WUInity.UI
                     if (!responseCurveFiles.Contains(data[0])) // Check if the curve file has been already added
                     {
                         responseCurveFiles.Add(data[0]);
-                        WUIEngine.INPUT.Evacuation.ResponseCurveFiles = responseCurveFiles.ToArray();
+                        WUIEngine.INPUT.Evacuation.ResponseCurves = responseCurveFiles.ToArray();
 
                         // ResponseCurves could be simply updated by the following two lines, but I have to reload all curves using LoadResponseCurves();
                         //responseCurves.Add(new ResponseCurve(dataPoints, data[0]));
@@ -1164,7 +1164,7 @@ namespace WUIPlatform.WUInity.UI
 
             if (dfDfEvacuationGroup != null && WUIEngine.DATA_STATUS.HaveInput && WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups.Length > 0)
             {
-                string initialPath = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacGroupFiles[dfDfEvacuationGroup.index] + ".eg");
+                string initialPath = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacGroups[dfDfEvacuationGroup.index] + ".eg");
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
@@ -1893,7 +1893,7 @@ namespace WUIPlatform.WUInity.UI
         {
             var root = Document.rootVisualElement;
             WUIEngineInput wO = WUIEngine.INPUT;
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            PedestrianInput eO = WUIEngine.INPUT.Pedestrian;
             TrafficInput tO = WUIEngine.INPUT.Traffic;
 
             if (root != null)
@@ -1932,7 +1932,7 @@ namespace WUIPlatform.WUInity.UI
                 // 5A. Response curve -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfResponseCurve = root.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
 
-                if (dfDfResponseCurve != null && WUIEngine.INPUT.Evacuation.ResponseCurveFiles.Length > 0)
+                if (dfDfResponseCurve != null && WUIEngine.INPUT.Evacuation.ResponseCurves.Length > 0)
                 {
                     List<string> m_DropOptions = new List<string> {};
 
@@ -1947,7 +1947,7 @@ namespace WUIPlatform.WUInity.UI
                 // 5B. Evacuation group -------------------------------------------------------------------------------------------------------------
                 UnityEngine.UIElements.DropdownField dfDfEvacuationGroup = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
 
-                if (dfDfEvacuationGroup != null && WUIEngine.INPUT.Evacuation.EvacGroupFiles.Length > 0)
+                if (dfDfEvacuationGroup != null && WUIEngine.INPUT.Evacuation.EvacGroups.Length > 0)
                 {
                     List<string> m_DropOptions = new List<string> {};
 
@@ -1960,7 +1960,7 @@ namespace WUIPlatform.WUInity.UI
                 }
 
                 // 6. Evacuation section -------------------------------------------------------------------------------------------------------------
-                UnityEngine.UIElements.TextField tfTxTSetEvacCellSize = root.Q<UnityEngine.UIElements.TextField>("TxTSetEvacCellSize");
+                /*UnityEngine.UIElements.TextField tfTxTSetEvacCellSize = root.Q<UnityEngine.UIElements.TextField>("TxTSetEvacCellSize");
                 if (tfTxTSetEvacCellSize != null)
                 {
                     tfTxTSetEvacCellSize.value = eO.RouteCellSize.ToString();
@@ -2024,7 +2024,7 @@ namespace WUIPlatform.WUInity.UI
                 if (tfTxTEvaOrderTime != null)
                 {
                     tfTxTEvaOrderTime.value = eO.EvacuationOrderStart.ToString();
-                }
+                }*/
 
                 // 7. Routing section  ------------------------------------------------------------------------------------------------------------
 
@@ -2490,8 +2490,7 @@ namespace WUIPlatform.WUInity.UI
                 WUIEngine.INPUT.Map = new MapInput();
                 WUIEngine.INPUT.WUIShow = new WUIShowInput();
                 WUIEngine.INPUT.Population = new PopulationInput();
-                WUIEngine.INPUT.Routing = new RoutingInput();
-                WUIEngine.INPUT.Evacuation = new EvacuationInput();
+                WUIEngine.INPUT.Pedestrian = new PedestrianInput();
                 WUIEngine.INPUT.Traffic = new TrafficInput();
                 WUIEngine.INPUT.Fire = new FireInput();
                 WUIEngine.INPUT.Smoke = new SmokeInput();

@@ -22,8 +22,6 @@ namespace WUIPlatform.Runtime
         Vector2d _centerMercator;
         public Vector2d CenterMercator { get => _centerMercator; }
 
-        Vector2d _utmToMercatorScale;
-        public Vector2d UtmToMercatorScale { get => _utmToMercatorScale; }
 
         Vector2d _mercatorToUtmScale;
         public Vector2d MercatorToUtmScale { get => _mercatorToUtmScale; }
@@ -54,7 +52,6 @@ namespace WUIPlatform.Runtime
 
                 double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLon.x / 180.0);
                 _mercatorToUtmScale = new Vector2d(realScale.x / mercatorCorrectionScale, realScale.y / mercatorCorrectionScale);
-                _utmToMercatorScale = new Vector2d(1.0 / _mercatorToUtmScale.x, 1.0 / _mercatorToUtmScale.y);
 
                 double lat = Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLon.x / 180.0;
                 _mercatorCorrectionScale = (float)Mathd.Cos(lat);

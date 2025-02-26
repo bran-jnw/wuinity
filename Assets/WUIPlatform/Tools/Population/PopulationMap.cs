@@ -472,7 +472,7 @@ namespace WUIPlatform.Population
                         List<int> householdCounts = new List<int>();
                         while (peopleWithoutHouseHold > 0)
                         {
-                            int p = Random.Range(WUIEngine.INPUT.Evacuation.minHouseholdSize, WUIEngine.INPUT.Evacuation.maxHouseholdSize);
+                            int p = Random.Range(WUIEngine.INPUT.Population.minHouseholdSize, WUIEngine.INPUT.Population.maxHouseholdSize);
                             if (p > peopleWithoutHouseHold)
                             {
                                 p = peopleWithoutHouseHold;

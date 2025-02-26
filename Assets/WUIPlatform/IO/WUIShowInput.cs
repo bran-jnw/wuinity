@@ -25,7 +25,7 @@ namespace WUIPlatform.IO
         public static WUIShowInput Parse(string[] inputLines, int startIndex)
         {
             WUIShowInput newInput = new WUIShowInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetCategoryInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
 
             string temp;
             if (inputToParse.TryGetValue(sendDataString, out temp))

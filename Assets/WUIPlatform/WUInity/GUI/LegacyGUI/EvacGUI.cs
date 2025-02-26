@@ -5,25 +5,27 @@ namespace WUIPlatform.WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string totalPop, cellSize, maxCars, maxCarsProb, minHousehold, maxHousehold, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
+        string totalPop, maxCars, maxCarsProb, minHousehold, maxHousehold, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
         bool evacMenuDirty = true;        
 
         void EvacMenu()
         {
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            PopulationInput popIn = WUIEngine.INPUT.Population;
+            MacroHouseholdSimInput macroIn = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
+            EvacuationInput evacIn = WUIEngine.INPUT.Evacuation;
+
             if (evacMenuDirty)
             {
                 evacMenuDirty = false;
-                cellSize = eO.RouteCellSize.ToString();
-                maxCars = eO.maxCars.ToString();
-                maxCarsProb = eO.maxCarsChance.ToString();
-                minHousehold = eO.minHouseholdSize.ToString();
-                maxHousehold = eO.maxHouseholdSize.ToString();
-                walkSpeedMin = eO.walkingSpeedMinMax.X.ToString();
-                walkSpeedMax = eO.walkingSpeedMinMax.Y.ToString();
-                walkSpeedMod = eO.walkingSpeedModifier.ToString();
-                walkingDistMod = eO.walkingDistanceModifier.ToString();
-                evacOrderTime = eO.EvacuationOrderStart.ToString();
+                maxCars = popIn.maxCars.ToString();
+                maxCarsProb = popIn.maxCarsChance.ToString();
+                minHousehold = popIn.minHouseholdSize.ToString();
+                maxHousehold = popIn.maxHouseholdSize.ToString();
+                walkSpeedMin = macroIn.walkingSpeedMinMax.X.ToString();
+                walkSpeedMax = macroIn.walkingSpeedMinMax.Y.ToString();
+                walkSpeedMod = macroIn.walkingSpeedModifier.ToString();
+                walkingDistMod = macroIn.walkingDistanceModifier.ToString();
+                evacOrderTime = evacIn.EvacuationOrderStart.ToString();
 
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -32,13 +34,7 @@ namespace WUIPlatform.WUInity.UI
             int buttonColumnStart = 140;
 
             //
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size [m]");
-            ++buttonIndex;
-            cellSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), cellSize);
-            ++buttonIndex;
-
-            //
-            eO.allowMoreThanOneCar = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), eO.allowMoreThanOneCar, "Allow more than one car");
+            popIn.allowMoreThanOneCar = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), popIn.allowMoreThanOneCar, "Allow more than one car");
             ++buttonIndex;
 
             //
@@ -116,16 +112,6 @@ namespace WUIPlatform.WUInity.UI
                 }
                 ++buttonIndex;
             }
-
-            ++buttonIndex;
-            if (WUInityEngine.INSTANCE.DeveloperMode)
-            {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run evac verification"))
-                {
-                    WUIPlatform.Pedestrian.MacroHumanVerification.RunVerification();
-                }
-                ++buttonIndex;
-            }
         }
 
         void ParseEvacInput()
@@ -135,18 +121,19 @@ namespace WUIPlatform.WUInity.UI
                 return;
             }
 
-            EvacuationInput eO = WUIEngine.INPUT.Evacuation;
+            PopulationInput popIn = WUIEngine.INPUT.Population;
+            MacroHouseholdSimInput macroIn = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
+            EvacuationInput evacIn = WUIEngine.INPUT.Evacuation;
 
-            float.TryParse(cellSize, out eO.RouteCellSize);
-            int.TryParse(maxCars, out eO.maxCars);
-            float.TryParse(maxCarsProb, out eO.maxCarsChance);
-            int.TryParse(minHousehold, out eO.minHouseholdSize);
-            int.TryParse(maxHousehold, out eO.maxHouseholdSize);
-            float.TryParse(walkSpeedMin, out eO.walkingSpeedMinMax.X);
-            float.TryParse(walkSpeedMax, out eO.walkingSpeedMinMax.Y);
-            float.TryParse(walkSpeedMod, out eO.walkingSpeedModifier);
-            float.TryParse(walkingDistMod, out eO.walkingDistanceModifier);
-            float.TryParse(evacOrderTime, out eO.EvacuationOrderStart);
+            int.TryParse(maxCars, out popIn.maxCars);
+            float.TryParse(maxCarsProb, out popIn.maxCarsChance);
+            int.TryParse(minHousehold, out popIn.minHouseholdSize);
+            int.TryParse(maxHousehold, out popIn.maxHouseholdSize);
+            float.TryParse(walkSpeedMin, out macroIn.walkingSpeedMinMax.X);
+            float.TryParse(walkSpeedMax, out macroIn.walkingSpeedMinMax.Y);
+            float.TryParse(walkSpeedMod, out macroIn.walkingSpeedModifier);
+            float.TryParse(walkingDistMod, out macroIn.walkingDistanceModifier);
+            float.TryParse(evacOrderTime, out evacIn.EvacuationOrderStart);
         }
     }
 }

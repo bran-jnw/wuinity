@@ -76,7 +76,7 @@ namespace WUIPlatform.Traffic
             //initialize some stuff            
             RouteCollection[] cellRoutes = new RouteCollection[cells.x * cells.y];
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
-            float cellSize = WUIEngine.INPUT.Evacuation.RouteCellSize;
+            float cellSize = WUIEngine.INPUT.Evacuation.PaintCellSize;
 
             DetermineValidGoalsAndRouterPoints(true);
 
@@ -323,7 +323,7 @@ namespace WUIPlatform.Traffic
         /// <returns></returns>
         public RouteData CalcTrafficRoute(Vector2d startLatLon)
         {
-            float cellSize = WUIEngine.INPUT.Evacuation.RouteCellSize;
+            float cellSize = WUIEngine.INPUT.Evacuation.PaintCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //TODO: reasonable? maybe also check if street is same or actual distance between points?

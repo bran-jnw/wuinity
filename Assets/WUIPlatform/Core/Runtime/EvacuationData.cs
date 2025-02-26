@@ -19,8 +19,8 @@ namespace WUIPlatform.Runtime
             get
             {
                 WUIEngineInput input = WUIEngine.INPUT;
-                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.RouteCellSize);
-                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.RouteCellSize);
+                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.PaintCellSize);
+                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.PaintCellSize);
                 return _cellCount;
             }
         }
