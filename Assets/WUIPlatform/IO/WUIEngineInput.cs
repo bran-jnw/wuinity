@@ -106,7 +106,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No [Simulation] header found, please check your input file.");
+                WUIEngine.LOG(WUIEngine.LogType.Error, _simulationHeader + " header not found, please check your input file.");
                 return null;
             }
 
@@ -128,11 +128,17 @@ namespace WUIPlatform.IO
             }
             else
             {
-                if(newInput.Simulation.RunPedestrianModule)
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "No [Population] header was found, but user has requested to run pedestrian model, please check your input file.");
-                    return null;
-                }                
+                
+            }
+
+            //evacuation
+            if (headerLineIndex.TryGetValue(_evacuationHeader, out lineindex))
+            {
+                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex);
+            }
+            else
+            {
+
             }
 
             return newInput;

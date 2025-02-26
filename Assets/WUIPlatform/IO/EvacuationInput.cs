@@ -5,8 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Numerics;
-using System.IO;
+using System.Collections.Generic;
 
 namespace WUIPlatform.IO
 {
@@ -21,7 +20,31 @@ namespace WUIPlatform.IO
         public string[] EvacGroups;
         public float PaintCellSize = 200f;
 
+        const string EvacuationOrderStartIn = "EvacuationOrderStart";
+        const string ResponseCurvesIn = "ResponseCurves";
+        const string EvacGroupsIn = "EvacGroups";
+        const string PaintCellSizeIn = "PaintCellSize";
+
 
         public string[] BlockGoalEventFiles;
+
+        public static EvacuationInput Parse(string[] inputLines, int startIndex)
+        {
+            int issues = 0;
+            EvacuationInput newInput = new EvacuationInput();
+            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+
+            string temp;
+            if (inputToParse.TryGetValue(EvacuationOrderStartIn, out temp))
+            {
+                float.TryParse(temp, out newInput.EvacuationOrderStart);
+            }
+            else
+            {
+                ++issues;
+            }            
+
+            return newInput;
+        }
     }
 }
