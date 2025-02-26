@@ -61,8 +61,8 @@ namespace WUIPlatform.WUInity.Visualization
                     carPositionsBuffer.Release();
                     carPositionsBuffer = null;
                 }
-                if(WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() > 0)
-                {
+                //if(WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() > 0)
+                //{
                     carPositionsArray = WUIEngine.SIM.TrafficModule.GetCarWorldPositionsStatesCarIDs();
                     if(carPositionsBuffer == null || carPositionsArray.Length != carPositionsBuffer.count)
                     {
@@ -71,7 +71,7 @@ namespace WUIPlatform.WUInity.Visualization
                     carPositionsBuffer.SetData(carPositionsArray);
                     carsMaterial.SetBuffer("_PositionsAndState", carPositionsBuffer);
                     Graphics.DrawMeshInstancedProcedural(carMesh, 0, carsMaterial, bounds, carPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
-                }                
+                //}                
             }
         }
 

@@ -125,6 +125,10 @@ namespace WUIPlatform.Runtime
 
                 WUIEngine.LOG(WUIEngine.LogType.Log, message);
             }
+            else
+            {
+                _lcpData = null;
+            }
 
             WUIEngine.DATA_STATUS.LcpLoaded = success;
             if (success && updateInputFile)

@@ -186,6 +186,11 @@ namespace WUIPlatform.Visualization
 
         public override void ToggleLCPDataPlane()
         {
+            if (WUIEngine.RUNTIME_DATA.Fire.LCPData == null)
+            {
+                return;
+            }
+
             if (_lcpDataPlane == null)
             {
                 CreateLCPVisuals();
@@ -196,11 +201,16 @@ namespace WUIPlatform.Visualization
 
         public override void SetLCPDataPlane(bool setActive)
         {
+            if(WUIEngine.RUNTIME_DATA.Fire.LCPData == null)
+            {
+                return;
+            }
+
             if (_lcpDataPlane == null)
             {
                 CreateLCPVisuals();
             }
-
+            
             _lcpDataPlane.SetActive(setActive);
         }
     }

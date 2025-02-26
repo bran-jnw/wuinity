@@ -59,7 +59,9 @@ namespace WUIPlatform.Visualization
                     //sending geodata, wgs84
                     if(true)
                     {
-                        LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X, carData.Y, false);
+                        //need to be in Sumo space now
+                        Vector2d offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
+                        LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X + offset.x, carData.Y + offset.y, false);
                         //lat/lon, flipped x/y since sumo gives lon/lat
                         addBytes(BitConverter.GetBytes((float)wgs84.y));
                         addBytes(BitConverter.GetBytes((float)wgs84.x));

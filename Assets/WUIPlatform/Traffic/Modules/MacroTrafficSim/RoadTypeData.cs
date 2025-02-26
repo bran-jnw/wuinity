@@ -98,7 +98,7 @@ namespace WUIPlatform.Traffic
 
         private static void SaveRoadTypeData(RoadTypeData rTD)
         {
-            string path = Path.Combine("default.roads");
+            string path = Path.Combine(WUIEngine.DATA_FOLDER, "default.roads");
             string json = UnityEngine.JsonUtility.ToJson(rTD, true);
             File.WriteAllText(path, json);            
         }

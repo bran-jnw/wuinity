@@ -34,6 +34,14 @@ namespace WUIPlatform.Smoke
         const float GRAVITY = 9.81f;
         const float GRAVITY_INVERSE = 0.1019367992f;
 
+        //these are set/calculated on CPU
+        float L;// = -350.0; //Obukhov length
+        float L_inverse;// = -0.0028571429; //Obukhov length inversed
+        float u_star; //friction velocity
+        float u_star_squared; //friction velocity squared
+        float z_0;//= 1.0; //Davenport-Wierenga roughness length classification
+        float theta_zero; //ground level potential temperature
+
         public LagrangianSmokeSim(int xDim, int yDim, int particlesPerCell)
         {
             context = Context.Create(builder => builder.Default().EnableAlgorithms());

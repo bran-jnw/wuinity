@@ -20,9 +20,9 @@ namespace WUIPlatform.Traffic
         private double adjustX, adjustY;
 
         //output
-        private uint totalCarsArrived, totalPeopleArrived;
+        private uint totalCarsArrived, totalPeopleArrived, totalSumoCarsArrived;
         private int currentCarsInSystem;
-        private int totalCarsInjected;
+        private int totalCarsInjected, totalSumoCarsInjected;
         private List<string> output;
 
         public SUMOModule(out bool success)
@@ -30,11 +30,6 @@ namespace WUIPlatform.Traffic
             success = true;
             try
             {
-                /*if (LIBSUMO.Simulation.isLoaded())
-                {
-                    LIBSUMO.Simulation.close();
-                }*/
-
                 cars = new Dictionary<string, SUMOCar>();
                 string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.sumoInput.inputFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
@@ -59,7 +54,7 @@ namespace WUIPlatform.Traffic
                 validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();
-                string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people";
+                string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
                 output.Add(header);
 
                 SortEdgesInFireCells();
@@ -79,13 +74,7 @@ namespace WUIPlatform.Traffic
         }*/
 
         public override void Step(float deltaTime, float currentTime)
-        {
-            if(!LIBSUMO.Simulation.isLoaded())
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Trying to update SUMO but SUMO DLL is not loaded.");
-                return;
-            }            
-
+        {  
             //https://sumo.dlr.de/doxygen/d0/d17/classlibsumo_1_1_simulation.html#afc1f3d5c1c92f49a8bf40e42bdb333ab
             LIBSUMO.Simulation.step(currentTime + deltaTime); // advances sim up to given time
 
@@ -113,6 +102,7 @@ namespace WUIPlatform.Traffic
                     {
                         car = new SUMOCar(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null);
                         cars.Add(sumoID, car);
+                        ++totalSumoCarsInjected;
                     }
                 }
             }     
@@ -136,7 +126,11 @@ namespace WUIPlatform.Traffic
                         arrivalData.Add(currentTime + deltaTime);
                         totalCarsArrived++;
                         totalPeopleArrived += car.numberOfPeopleInCar;
-                    }                    
+                    }
+                    else
+                    {
+                        ++totalSumoCarsArrived;
+                    }
                 }
             }
 
@@ -163,7 +157,7 @@ namespace WUIPlatform.Traffic
             }
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
-            string dataLine = currentTime + "," + totalCarsInjected + "," + totalCarsArrived + "," + currentCarsInSystem + "," + totalPeopleArrived;
+            string dataLine = currentTime + "," + totalCarsInjected + "," + totalCarsArrived + "," + currentCarsInSystem + "," + totalPeopleArrived + "," + totalSumoCarsInjected + "," + totalSumoCarsArrived;
             output.Add(dataLine);
         }
 
@@ -285,6 +279,7 @@ namespace WUIPlatform.Traffic
 
         /// <summary>
         /// This method requires adding the getIncomingEdes call to SUMO, this is done in the current DLL but keep an eye on it.
+        /// UPDATE: Sumo has added these function snow, good to go.
         /// </summary>
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
@@ -304,6 +299,7 @@ namespace WUIPlatform.Traffic
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
+                    //TODO: include fire module offset here, as now we assume 0,0 is aligned with fire module origin
                     int cellIndexX = (int)((nodePos.x + _originOffset.x) / WUIEngine.SIM.FireModule.GetCellSizeX());
                     int cellIndexY = (int)((nodePos.y + _originOffset.y) / WUIEngine.SIM.FireModule.GetCellSizeY());
 

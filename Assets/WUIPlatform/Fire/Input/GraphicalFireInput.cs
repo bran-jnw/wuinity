@@ -51,6 +51,12 @@ namespace WUIPlatform
             success = false;
             string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.graphicalFireInputFile); //graphical fire input
 
+            if(WUIEngine.RUNTIME_DATA.Fire.LCPData == null)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "No LCP data has been loaded, can't try and look for GFI data.");
+                return;
+            }
+
             if(File.Exists(path))
             {
                 using (FileStream fs = new FileStream(path, FileMode.Open))
