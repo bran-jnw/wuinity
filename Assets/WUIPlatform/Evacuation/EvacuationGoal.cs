@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using WUIPlatform.Traffic;
 using System.IO;
 
-namespace WUIPlatform
+namespace WUIPlatform.Evacuation
 {
     [System.Serializable]
     public class EvacuationGoal

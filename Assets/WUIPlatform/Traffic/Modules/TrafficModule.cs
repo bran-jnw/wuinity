@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.Numerics;
+using WUIPlatform.Evacuation;
 
 namespace WUIPlatform.Traffic
 {

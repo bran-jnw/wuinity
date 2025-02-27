@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using WUIPlatform.Population;
+using WUIPlatform.Evacuation;
 using System.Numerics;
 using WUIPlatform.Visualization;
 using WUIPlatform.IO;
@@ -261,7 +261,7 @@ namespace WUIPlatform.Pedestrian
             {                
                 if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
                 {
-                    EvacGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedEvacGoal();
                 }
                 else if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)

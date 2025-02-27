@@ -296,7 +296,17 @@ namespace WUIPlatform.Smoke
             return false;
         }
 
-        public override float[] GetGroundSoot()
+        public override float[] GetGroundOpticalDensity()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override float GetGroundOpticalDensityAtWorldPos(Vector2d pos)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override float GetGroundOpticalDensityAtCoordinate(Vector2d latLon)
         {
             throw new System.NotImplementedException();
         }

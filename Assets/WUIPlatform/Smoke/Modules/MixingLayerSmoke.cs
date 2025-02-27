@@ -305,7 +305,7 @@ namespace WUIPlatform.Smoke
             return _globalData.cellsY;
         }
 
-        public override float[] GetGroundSoot()
+        public override float[] GetGroundOpticalDensity()
         {
             if(_lockOutput)
             {
@@ -313,6 +313,16 @@ namespace WUIPlatform.Smoke
             }
 
             return _sootOutput;
+        }
+
+        public override float GetGroundOpticalDensityAtWorldPos(Vector2d pos)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override float GetGroundOpticalDensityAtCoordinate(Vector2d latLon)
+        {
+            throw new System.NotImplementedException();
         }
 
         public override void Stop()

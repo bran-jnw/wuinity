@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace WUIPlatform.Traffic
+namespace WUIPlatform.Smoke
 {
     public class OpticalDensityRamp
     {

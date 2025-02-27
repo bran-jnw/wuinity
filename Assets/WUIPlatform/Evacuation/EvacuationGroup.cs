@@ -8,10 +8,10 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform
+namespace WUIPlatform.Evacuation
 {
     [System.Serializable]
-    public class EvacGroup
+    public class EvacuationGroup
     {
         public int[] GoalIndices;
         public double[] GoalsCumulativeWeights;
@@ -19,7 +19,7 @@ namespace WUIPlatform
         public string Name;
         public WUIEngineColor Color;
 
-        public EvacGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, WUIEngineColor color)
+        public EvacuationGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, WUIEngineColor color)
         {
             Name = name;
             GoalIndices = goalIndices;
@@ -28,28 +28,28 @@ namespace WUIPlatform
             Color = color;
         }
 
-        public static EvacGroup[] GetDefault()
+        public static EvacuationGroup[] GetDefault()
         {
-            EvacGroup[] evacGroups = new EvacGroup[3]; 
+            EvacuationGroup[] evacGroups = new EvacuationGroup[3]; 
 
             int[] goalIndices = new int[] { 0, 1, 2};
             double[] goalsCumulativeWeights = new double[3] { 0.4, 0.7, 1.0 };
             string name = "Group1";
             WUIEngineColor color = WUIEngineColor.magenta;
             int[] responseCurveIndices = new int[] {0};
-            evacGroups[0] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
+            evacGroups[0] = new EvacuationGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
 
             goalIndices = new int[] { 0, 1, 2 };
             goalsCumulativeWeights = new double[3] {0.4, 0.7, 1.0};
             name = "Group2";
             color = WUIEngineColor.cyan;
-            evacGroups[1] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
+            evacGroups[1] = new EvacuationGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
 
             goalIndices = new int[] { 0, 1, 2 };
             goalsCumulativeWeights = new double[] { 0.4, 0.7, 1.0 };
             name = "Group3";
             color = WUIEngineColor.yellow;
-            evacGroups[2] = new EvacGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
+            evacGroups[2] = new EvacuationGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
 
             return evacGroups;
         }
@@ -68,17 +68,17 @@ namespace WUIPlatform
             return null;
         }
 
-        public static EvacGroup[] LoadEvacGroupFiles(out bool success)
+        public static EvacuationGroup[] LoadEvacGroupFiles(out bool success)
         {
             success = false;
-            EvacGroup[] result = null;
-            List<EvacGroup> evacGroups = new List<EvacGroup>();
+            EvacuationGroup[] result = null;
+            List<EvacuationGroup> evacGroups = new List<EvacuationGroup>();
 
             for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length; i++)
             {
                 string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacuationGroupFiles[i] + ".eg");
                 bool fileExists = File.Exists(path);
-                EvacGroup eG = null;
+                EvacuationGroup eG = null;
                 if (fileExists)
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -168,7 +168,7 @@ namespace WUIPlatform
 
                         //TODO: check if input count and probabilities match
 
-                        eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
+                        eG = new EvacuationGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
                         evacGroups.Add(eG);
                     }
                     

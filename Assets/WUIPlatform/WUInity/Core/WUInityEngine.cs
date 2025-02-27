@@ -6,7 +6,8 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;       
-using UnityEngine;                
+using UnityEngine;
+using WUIPlatform.Evacuation;
 using WUIPlatform.Pedestrian;                     
 using WUIPlatform.Traffic;                          
 using System.IO;

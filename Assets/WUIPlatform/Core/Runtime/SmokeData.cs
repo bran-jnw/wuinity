@@ -11,8 +11,6 @@ namespace WUIPlatform.Runtime
 {
     public class SmokeData
     {
-        Traffic.OpticalDensityRamp _opticalDensityRamp;
-
         //private GlobalSmokeData globalSmokeData;
 
         public void LoadAll()
@@ -20,38 +18,7 @@ namespace WUIPlatform.Runtime
             if(!WUIEngine.INPUT.Simulation.RunSmokeModule)
             {
                 return;
-            }
-
-            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
-            {
-                LoadOpticalDensityFile(WUIEngine.INPUT.Smoke.GlobalSmokeInput.OpticalDensityFile, false);
-            }            
-        }
-
-        private bool LoadOpticalDensityFile(string path, bool updateInputFile)
-        {
-            bool success = false;
-
-            _opticalDensityRamp = new Traffic.OpticalDensityRamp();
-            success = _opticalDensityRamp.LoadOpticalDensityRampFile(path);
-            WUIEngine.DATA_STATUS.OpticalDensityLoaded = success;
-
-            if (success && updateInputFile)
-            {
-                WUIEngineInput.SaveInput();
-            }
-
-            return success;
-        }
-
-        public float GetOpticalDensity(Vector2d worldPos, float currentTime)
-        {
-            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
-            {
-                _opticalDensityRamp.GetOpticalDensity(currentTime);
-            }
-
-            return 0f;
+            }           
         }
     }
 

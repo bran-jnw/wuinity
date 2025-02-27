@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 using SimpleFileBrowser;
 using System.IO;
 using WUIPlatform.IO;
-using WUIPlatform;
+using WUIPlatform.Evacuation;
 
 namespace WUIPlatform.WUInity.UI
 {
@@ -982,7 +982,7 @@ namespace WUIPlatform.WUInity.UI
 
                     //TODO: check if input count and probabilities match
 
-                    EvacGroup eG = new EvacGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
+                    EvacuationGroup eG = new EvacuationGroup(name, goalIndices, goalProbabilities.ToArray(), responseCurveIndices, color);
 
                     // The code above is just to check if the group file contains valid data
                     //-----------------------------------------------------------------------------------------------------------------
@@ -1951,7 +1951,7 @@ namespace WUIPlatform.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach (EvacGroup eg in WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups)
+                    foreach (EvacuationGroup eg in WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups)
                         m_DropOptions.Add(eg.Name);
 
                     dfDfEvacuationGroup.choices.Clear();

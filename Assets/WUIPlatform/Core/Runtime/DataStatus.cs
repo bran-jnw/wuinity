@@ -16,8 +16,6 @@ namespace WUIPlatform
         private bool _populationLoaded;
         public bool PopulationLoaded { get => _populationLoaded; }
 
-        public bool OpticalDensityLoaded;
-
         public bool LcpLoaded, FuelModelsLoaded;
 
         public bool ResponseCurvesValid;

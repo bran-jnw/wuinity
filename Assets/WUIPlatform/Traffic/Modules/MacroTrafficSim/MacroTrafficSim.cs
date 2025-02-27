@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using WUIPlatform.IO;
+using WUIPlatform.Evacuation;
 
 namespace WUIPlatform.Traffic
 {

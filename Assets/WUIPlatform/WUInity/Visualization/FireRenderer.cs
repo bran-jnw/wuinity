@@ -188,7 +188,7 @@ namespace WUIPlatform.WUInity.Visualization
             {
                 if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
-                    float[] newSoot = WUIEngine.SIM.SmokeModule.GetGroundSoot();
+                    float[] newSoot = WUIEngine.SIM.SmokeModule.GetGroundOpticalDensity();
                     if(newSoot != null)
                     {
                         sootBuffer.SetData(newSoot);

@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using WUIPlatform.IO;
+using WUIPlatform.Evacuation;
 
 namespace WUIPlatform.Runtime
 {
@@ -60,8 +61,8 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        private EvacGroup[] _evacuationGroups;
-        public EvacGroup[] EvacuationGroups
+        private EvacuationGroup[] _evacuationGroups;
+        public EvacuationGroup[] EvacuationGroups
         {
             get
             {
@@ -93,7 +94,7 @@ namespace WUIPlatform.Runtime
         {
             bool success;
             //fills with first group if "failed", as in could not load but creates default
-            EvacGroup.LoadEvacGroupIndices(out success);
+            EvacuationGroup.LoadEvacGroupIndices(out success);
 
             return success;
         }
@@ -151,7 +152,7 @@ namespace WUIPlatform.Runtime
         public bool LoadEvacuationGroups()
         {
             bool success;
-            _evacuationGroups = EvacGroup.LoadEvacGroupFiles(out success);
+            _evacuationGroups = EvacuationGroup.LoadEvacGroupFiles(out success);
 
             return success;            
         }
@@ -217,7 +218,7 @@ namespace WUIPlatform.Runtime
             return index;
         }
 
-        public EvacGroup GetEvacGroup(int cellIndex)
+        public EvacuationGroup GetEvacGroup(int cellIndex)
         {
             WUIEngineInput input = WUIEngine.INPUT;
             if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
@@ -230,7 +231,7 @@ namespace WUIPlatform.Runtime
             return EvacuationGroups[cellIndex];
         }
 
-        public EvacGroup GetEvacGroup(int x, int y)
+        public EvacuationGroup GetEvacGroup(int x, int y)
         {
             WUIEngineInput input = WUIEngine.INPUT;
             if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)

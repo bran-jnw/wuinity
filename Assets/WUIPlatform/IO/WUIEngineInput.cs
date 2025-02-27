@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using WUIPlatform.Evacuation;
 
 namespace WUIPlatform.IO
 {
@@ -43,7 +44,7 @@ namespace WUIPlatform.IO
         {
             string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
             File.WriteAllText(WUIEngine.WORKING_FILE, json);
-            EvacGroup.SaveEvacGroupIndices();
+            EvacuationGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
             WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " saved.");

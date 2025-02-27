@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using WUIPlatform.Evacuation;
 
 namespace WUIPlatform
 {

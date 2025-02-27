@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform
+namespace WUIPlatform.Evacuation
 {
     [System.Serializable]
     public struct ResponseDataPoint

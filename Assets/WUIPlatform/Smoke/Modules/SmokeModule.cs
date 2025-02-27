@@ -11,7 +11,9 @@ namespace WUIPlatform.Smoke
     {
         public abstract int GetCellsX();
         public abstract int GetCellsY();
-        public abstract float[] GetGroundSoot();
+        public abstract float[] GetGroundOpticalDensity();
+        public abstract float GetGroundOpticalDensityAtWorldPos(Vector2d pos);
+        public abstract float GetGroundOpticalDensityAtCoordinate(Vector2d latLon);
     }
 
 }

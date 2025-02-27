@@ -7,9 +7,7 @@
 
 using System.Numerics;
 using System.Collections.Generic;
-using Mapbox.Unity.Map;
-using Mapbox.Utils;
-using Mapbox.Unity.Utilities;
+using WUIPlatform.Evacuation;
 using Itinero;
 using Itinero.Osm.Vehicles;
 using WUIPlatform.Population;
@@ -434,7 +432,7 @@ namespace WUIPlatform.Traffic
             {
                 if (cellIndex >= 0)
                 {
-                    EvacGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
                     EvacuationGoal goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }
