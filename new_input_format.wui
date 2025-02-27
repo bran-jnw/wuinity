@@ -1,57 +1,114 @@
-#this is a comment
-
 [Simulation]
-id=example #this is also a comment
-deltatime=1.0
-maxSimTime=36000.0
-lowerLeftLatLon=39.409924,-105.104505
-domainSize=10000.0,10000.0
-runPedestrianModule=true
-runTrafficModule=true
-runFireModule=true
-runSmokeModule=false
+Id=example #this is a comment
+LowerLeftLatLon=39.409924,-105.104505
+DomainSize=10000.0,10000.0
+Deltatime=1.0
+MaxSimTime=36000.0
+RunPedestrianModule=true
+RunTrafficModule=true
+RunFireModule=true
+RunSmokeModule=false
+StopWhenEvacuated=true
+StopAfterConverging=false
 
 [Map]
-mapProvider=Mapbox
-zoomLevel=13
-
-[WUIShow]
-sendDataToWUIShow=false
-wuiShowServerIP=127.0.0.1
-wuiShowServerPort=9023
-wuiShowDeltaTime=1.0
+MapProvider=Mapbox
+ZoomLevel=13
 
 [Population]
-householdsFile=example_households.csv
-householdSizeMin=1
-householdSizeMax=5
-allowMoreThanOneCar=true
-maxCars=2
-maxCarsChance=0.3
+PopulationFile=example_households.csv
+HouseholdSizeMin=1
+HouseholdSizeMax=5
+AllowMoreThanOneCar=true
+MaxCars=2
+MaxCarsProbability=0.3
 
 [Evacuation]
-evacuationOrderStart=0.0
+EvacuationOrderStart=0.0
+EvacuationGoalFiles=goal_highway
+ResponseCurveFiles=Observed_average
+EvacuationGroupFiles=group_highway
+PaintCellSize=200.0
 
 [Pedestrian]
-pedestrianModuleChoice=MacroHouseholdSim
-
+PedestrianModule=MacroHouseholdSim
 
 [MacroHouseholdSim]
-walkingDistanceModifier=1.0
-walkingSpeedModifier=1.0
-		
+WalkingSpeedMinMax=0.7,1.0
+WalkingSpeedModifier=1.0
+WalkingDistanceModifier=1.0
+
 [Traffic]
-trafficModuleChoice=SUMO
-visibilityAffectsSpeed=false
+TrafficModule=SUMO      
+VisibilityAffectsSpeed=false  
 
 [SUMO]
-inputFile=sumo/rox.sumocfg
+ConfigurationFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
 
 [MacroTrafficSim]
-roadTypesFile=default.roads
-routeChoice=fastest
-stallSpeed=1.0
+RoadTypesFile
+StallSpeed=5.0
+Routing=Closest
+BackGroundDensityMinMax=0.0,0.0
+TrafficAccidents=
+ReverseLanes=
+TrafficInjections=
+TrafficProbes=
+
+[Fire]
+FireModule=AscImport
+LcpFile=rox_big_burning_city.lcp
+GraphicalFireInputFile=example.gfi
+
+[AscImport]
+RootFolder=farsite
+TimeOfArrivalFile=output/TOA.asc
+RateOfSpreadFile=output/ROS.asc
+SpreadDirectionFile=output/SD.asc
+FirelineIntensityFile=output/FI.asc
+WeatherStreamFile=weather_stream.wxs
+
+[FireCell]
+SpreadMode=SixteenDirections
+RootFolder=fireCell
+FuelModelsFile=fire_cell/default.fuel
+InitialFuelMoistureFile=default.fmc
+WeatherFile=default.wtr
+WindFile=default.wnd
+IgnitionPointsFile=default.ign
+WindMultiplier=1
+UseRandomIgnitionMap=false
+RandomIgnitionPoints=0
+UseInitialIgnitionMap=false
+
+[TriggerBuffer]
+CalculateTriggerBuffer=false
+TriggerBuffer=kPERIL
+
+[kPERIL]
+MidFlameWindspeed=10.0
+CalculateROSFromBehave=true
+
+[Smoke]
+SmokeModule=GlobalSmoke
+
+[GlobalSmoke]
+OpticalDensityFile=opticalDensity.odr
+
+[AdvectDiffuse]
+mixingLayerHeight=250.0
+
+[WUIShow]
+SendDataToWUIShow=false
+WuiShowServerIP=127.0.0.1
+WuiShowServerPort=9023
+WuiShowDeltaTime=1.0
+
+
+
+
+
 
 [EvacuationGoal]
 id=highway
@@ -88,31 +145,6 @@ destinations=Goal_E,Goal_R,Goal_F
 destinationProbabilites=0.25,0.75,1.0
 color=1.0,1.0,0.0
 
-[Fire]
-fireModuleChoice=ascImport
-
-[AscImport]
-rootFolder=farsite
-timeOfArrival=TOA.asc
-rateOfSpread=ROS.asc
-spreadDirection=SD.asc
-firelineIntensity=FI.asc
-weatherStream=example.wxd
-
-[FireCell]
-spreadMode=sixteen
-lcpFile=rox_big_burning_city.lcp
-graphicalFireInputFile=example.gfi
-fuelModelsFile=default.fuel
-initialFuelMoistureFile=default.fmc
-weatherFile=example.wtr
-windFile=example_seconds.wnd
-windMultiplier=1.0
-ignitionPoints=example,example2
-useInitialIgnitionMap=false
-useRandomIgnitionMap=false
-randomIgnitionPoints=0
-
 [IgnitionPoint]
 id=example
 latLon=39.464745, -105.046520
@@ -122,27 +154,6 @@ ignitionTime=0.0
 id=example2
 latLon=39.448608, -105.061354
 ignitionTime=3600.0
-
-[TriggerBuffer]
-calculateTriggerBuffer=false
-triggerBufferChoice=kPERIL
-
-[kPERIL]
-midFlameWindspeed=0.0
-calculateROSFromBehave=true
-
-[Smoke]
-smokeModuleChoice=GlobalSmoke
-
-[GlobalSmoke]
-0.0, 0.0
-1200.0, 0.05
-3600.0, 0.1
-7200.0, 0.2
-10800.0, 0.0
-
-[AdvectDiffuse]
-mixingLayerHeight=250.0
 
 [TrafficAccident]
 id=example

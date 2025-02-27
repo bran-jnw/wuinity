@@ -17,7 +17,7 @@ namespace WUIPlatform.Runtime
         public bool[] WuiArea;
         public bool[] RandomIgnition;
         public bool[] InitialIgnition;
-        public bool[] TriggerBufferr;
+        public bool[] TriggerBuffer;
 
         private FireDataVisualizer _visualizer;
         public FireDataVisualizer Visualizer
@@ -91,15 +91,18 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            LoadLCPFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.lcpFile), false);
-            if(WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.FireCell)
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Fire data...");
+
+            LoadLCPFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.LcpFile), false);
+            LoadGraphicalFireInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.GraphicalFireInputFile), false);
+
+            if (WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
             {
-                LoadFuelModelsInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile), false);
-                LoadIgnitionPoints(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile), false);
-                LoadInitialFuelMoistureData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile), false);
-                LoadWeatherInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.weatherFile), false);
-                LoadWindInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.windFile), false);
-                LoadGraphicalFireInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.graphicalFireInputFile), false);
+                LoadFuelModelsInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.FuelModelsFile), false);
+                LoadIgnitionPoints(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.IgnitionPointsFile), false);
+                LoadInitialFuelMoistureData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile), false);
+                LoadWeatherInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.WeatherFile), false);
+                LoadWindInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.WindFile), false);                
             }            
         }
 
@@ -136,7 +139,7 @@ namespace WUIPlatform.Runtime
             WUIEngine.DATA_STATUS.LcpLoaded = success;
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.lcpFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.LcpFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -152,7 +155,7 @@ namespace WUIPlatform.Runtime
             WUIEngine.DATA_STATUS.FuelModelsLoaded = success;
             if(success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.fireCellInput.fuelModelsFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.FireCellInput.FuelModelsFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -165,7 +168,7 @@ namespace WUIPlatform.Runtime
             _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(path, out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.fireCellInput.ignitionPointsFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.FireCellInput.IgnitionPointsFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -178,7 +181,7 @@ namespace WUIPlatform.Runtime
             _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.fireCellInput.initialFuelMoistureFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -191,7 +194,7 @@ namespace WUIPlatform.Runtime
             _weatherInput = WeatherInput.LoadWeatherInputFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.fireCellInput.weatherFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.FireCellInput.WeatherFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -204,7 +207,7 @@ namespace WUIPlatform.Runtime
             _windInput = WindInput.LoadWindInputFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.fireCellInput.windFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.FireCellInput.WindFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -217,7 +220,7 @@ namespace WUIPlatform.Runtime
             GraphicalFireInput.LoadGraphicalFireInput(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.graphicalFireInputFile = Path.GetFileName(path);
+                WUIEngine.INPUT.Fire.GraphicalFireInputFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
 
@@ -257,7 +260,7 @@ namespace WUIPlatform.Runtime
             {
                 triggerBufferIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.TriggerBufferr = triggerBufferIndices;
+            WUIEngine.RUNTIME_DATA.Fire.TriggerBuffer = triggerBufferIndices;
         }
 
         public void ToggleLCPDataPlane()

@@ -37,10 +37,10 @@ namespace WUIPlatform.Fire
 
         public AscFireImport() 
         {
-            string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascImportInput.rootFolder, "output", "TOA.asc");
-            string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascImportInput.rootFolder, "output", "ROS.asc");
-            string FIFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascImportInput.rootFolder, "output", "FI.asc");
-            string SDFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.ascImportInput.rootFolder, "output", "SD.asc");
+            string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.TimeOfArrivalFile);
+            string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.RateOfSpreadFile);
+            string FIFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.FirelineIntensityFile);
+            string SDFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.SpreadDirectionFile);
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
@@ -179,7 +179,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Time of arrival file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Time of arrival file not found.");
                 return;
             }
 
@@ -189,7 +189,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Rate of spread file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Rate of spread file not found.");
                 return;
             }
 
@@ -199,7 +199,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Fireline intensity file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Fireline intensity file not found.");
                 return;
             }
 
@@ -209,7 +209,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Fireline intensity file not found.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Fireline intensity file not found.");
                 return;
             }
 

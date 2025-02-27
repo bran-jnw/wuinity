@@ -257,27 +257,27 @@ namespace WUIPlatform.Pedestrian
             TrafficInput input = WUIEngine.INPUT.Traffic;
             EvacuationGoal goal = null;
 
-            if (WUIEngine.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.SUMO)
+            if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                
-                if (input.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.EvacGroup)
+                if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
                 {
                     EvacGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedEvacGoal();
                 }
-                else if (input.macroTrafficSimInput.routeChoice == MacroTrafficSimInput.RouteChoice.Random)
+                else if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
                 {
                     int randomChoice = Random.Range(0, WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1);
                     goal = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice];
                 }
             }
-            else if(cell != null && WUIEngine.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            else if(cell != null && WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
             }
 
             return goal;
@@ -389,7 +389,7 @@ namespace WUIPlatform.Pedestrian
                 if (r <= WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.evacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.evacuationOrderStart;
+                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }
@@ -404,7 +404,7 @@ namespace WUIPlatform.Pedestrian
         static public float GetRandomWalkingSpeed()
         {
             MacroHouseholdSimInput eO = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
-            return Random.Range(eO.walkingSpeedMinMax.X, eO.walkingSpeedMinMax.Y) * eO.walkingSpeedModifier;
+            return Random.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 
         /// <summary>

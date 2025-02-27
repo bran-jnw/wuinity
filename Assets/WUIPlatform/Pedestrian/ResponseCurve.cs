@@ -50,9 +50,9 @@ namespace WUIPlatform
         {
             success = false;
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
-            for (int i = 0; i < WUIEngine.INPUT.Evacuation.responseCurves.Length; i++)
+            for (int i = 0; i < WUIEngine.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.responseCurves[i] + ".rsp");
+                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i] + ".rsp");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -79,7 +79,7 @@ namespace WUIPlatform
                     //need at least two to make a curve
                     if(dataPoints.Count >= 2)
                     {
-                        responseCurves.Add(new ResponseCurve(dataPoints, WUIEngine.INPUT.Evacuation.responseCurves[i]));
+                        responseCurves.Add(new ResponseCurve(dataPoints, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]));
                         WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
                     }                    
                 }
@@ -97,7 +97,7 @@ namespace WUIPlatform
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " No response curves could be loaded, simulation will stall.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, " No response curves could be loaded, simulation will stall.");
                 return null;
             }   
         }

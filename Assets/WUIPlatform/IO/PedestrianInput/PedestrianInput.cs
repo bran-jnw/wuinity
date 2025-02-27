@@ -6,7 +6,6 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace WUIPlatform.IO
 {
@@ -14,7 +13,7 @@ namespace WUIPlatform.IO
     public class PedestrianInput
     {
         public enum PedestrianModuleChoice { MacroHouseholdSim, JupedSimSUMO }
-        public PedestrianModuleChoice pedestrianModuleChoice = PedestrianModuleChoice.MacroHouseholdSim;
+        public PedestrianModuleChoice PedestrianModule = PedestrianModuleChoice.MacroHouseholdSim;
 
         //module inputs
         public MacroHouseholdSimInput macroHouseholdSimInput;
@@ -24,28 +23,31 @@ namespace WUIPlatform.IO
             int issues = 0;
             PedestrianInput newInput = new PedestrianInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
+            string input, userInput;
 
-            if (inputToParse.TryGetValue(nameof(pedestrianModuleChoice), out temp))
+            input = nameof(PedestrianModule);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                switch (temp)
+                switch (userInput)
                 {
                     case nameof(PedestrianModuleChoice.MacroHouseholdSim):
-                        newInput.pedestrianModuleChoice = PedestrianModuleChoice.MacroHouseholdSim;
+                        newInput.PedestrianModule = PedestrianModuleChoice.MacroHouseholdSim;
                         break;
                     case nameof(PedestrianModuleChoice.JupedSimSUMO):
-                        newInput.pedestrianModuleChoice = PedestrianModuleChoice.JupedSimSUMO;
+                        newInput.PedestrianModule = PedestrianModuleChoice.JupedSimSUMO;
                         break;
                     default:
-                        newInput.pedestrianModuleChoice = PedestrianModuleChoice.MacroHouseholdSim;
+                        ++issues;
+                        WUIEngineInput.CouldNotInterpretInputMessage(input, userInput);
                         break;
                 }
             }
             else
             {
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if(newInput.pedestrianModuleChoice == PedestrianModuleChoice.MacroHouseholdSim)
+            if(newInput.PedestrianModule == PedestrianModuleChoice.MacroHouseholdSim)
             {
                 int lineIndex;
                 if (headerLineIndex.TryGetValue(nameof(PedestrianModuleChoice.MacroHouseholdSim), out lineIndex))
@@ -60,43 +62,6 @@ namespace WUIPlatform.IO
             else
             {
                 WUIEngine.LOG(WUIEngine.LogType.Debug, "This should not happen, trying to use non-implemented pedestrian module.");
-            }
-
-            return newInput;
-        }
-    }
-
-    public class MacroHouseholdSimInput
-    {
-        public float walkingDistanceModifier = 1.0f;
-        public Vector2 walkingSpeedMinMax = new Vector2(0.7f, 1.0f);
-        public float walkingSpeedModifier = 1.0f;
-
-        public static MacroHouseholdSimInput Parse(string[] inputLines, int startIndex)
-        {
-            int issues = 0;
-            MacroHouseholdSimInput newInput = new MacroHouseholdSimInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
-
-            if (inputToParse.TryGetValue(nameof(walkingDistanceModifier), out temp))
-            {
-                float.TryParse(temp, out newInput.walkingDistanceModifier);
-            }
-
-            if (inputToParse.TryGetValue(nameof(walkingSpeedMinMax), out temp))
-            {
-                string[] data = temp.Split(',');
-                if(data.Length >= 2)
-                {
-                    float.TryParse(data[0], out newInput.walkingSpeedMinMax.X);
-                    float.TryParse(data[1], out newInput.walkingSpeedMinMax.Y);
-                }                
-            }
-
-            if (inputToParse.TryGetValue(nameof(walkingSpeedModifier), out temp))
-            {
-                float.TryParse(temp, out newInput.walkingSpeedModifier);
             }
 
             return newInput;

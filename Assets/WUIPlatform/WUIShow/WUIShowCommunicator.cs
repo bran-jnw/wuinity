@@ -28,7 +28,7 @@ namespace WUIPlatform.Visualization
                 return;
             }
 
-            if (cars.Length > 0 && currentTime > lastTime + WUIEngine.INPUT.WUIShow.wuiShowDeltaTime)
+            if (cars.Length > 0 && currentTime > lastTime + WUIEngine.INPUT.WUIShow.WuiShowDeltaTime)
             {
                 byte[] sendBytes = new byte[cars.Length * 16];
                 int i = 0;

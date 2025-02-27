@@ -45,7 +45,7 @@ namespace WUIPlatform.Pedestrian
             List<int> personsPerHousehold = new List<int>();
             while (peopleWithoutHouseHold > 0)
             {
-                int p = Random.Range(eO.minHouseholdSize, eO.maxHouseholdSize);
+                int p = Random.Range(eO.MinHouseholdSize, eO.MaxHouseholdSize);
                 if (p > peopleWithoutHouseHold)
                 {
                     p = peopleWithoutHouseHold;

@@ -16,136 +16,144 @@ namespace WUIPlatform.IO
         public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
         public Vector2d DomainSize = new Vector2d(3000.0, 3000.0);
         public float DeltaTime = 1f;
-        public float MaxSimTime = 0f;
-        public bool StopWhenEvacuated = true;        
+        public float MaxSimTime = 0f;              
         public bool RunPedestrianModule = false;
         public bool RunTrafficModule = false;
         public bool RunFireModule = false;
         public bool RunSmokeModule = false;
-
-        public bool StopAfterConverging = true;
-
-        /*const string idIn = "id";
-        const string lowerLeftLatLonIn = "lowerLeftLatLon";
-        const string domainSizeIn = "domainSize";
-        const string deltaTimeIn = "deltaTime";
-        const string maxSimTimeIn = "maxSimTime";
-        const string stopWhenEvacuatedIn = "stopWhenEvacuated";        
-        const string runPedestrianModuleIn = "runPedestrianModule";
-        const string runTrafficModuleIn = "runTrafficModule";
-        const string runFireModuleIn = "runFireModule";
-        const string runSmokeModuleIn = "runSmokeModule";
-
-        const string stopAfterConvergingIn = "stopAfterConverging";*/
+        public bool StopWhenEvacuated = true;
+        public bool StopAfterConverging = false;
 
         public static SimulationInput Parse(string[] inputLines, int startIndex)
         {
             int issues = 0;
             SimulationInput newInput = new SimulationInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            string input, userInput;
 
-            string temp;
-            if (inputToParse.TryGetValue(nameof(Id), out temp))
+            input = nameof(Id);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                newInput.Id = temp;
+                newInput.Id = userInput;
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(LowerLeftLatLon), out temp))
+            input = nameof(LowerLeftLatLon);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                string[] data = temp.Split(',');
+                string[] data = userInput.Split(',');
                 double.TryParse(data[0], out newInput.LowerLeftLatLon.x);
                 double.TryParse(data[1], out newInput.LowerLeftLatLon.y);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(DomainSize), out temp))
+            input = nameof(DomainSize);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                string[] data = temp.Split(',');
+                string[] data = userInput.Split(',');
                 double.TryParse(data[0], out newInput.DomainSize.x);
                 double.TryParse(data[1], out newInput.DomainSize.y);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(DeltaTime), out temp))
+            input = nameof(DeltaTime);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(temp, out newInput.DeltaTime);
+                float.TryParse(userInput, out newInput.DeltaTime);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(MaxSimTime), out temp))
+            input = nameof(MaxSimTime);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(temp, out newInput.MaxSimTime);
+                float.TryParse(userInput, out newInput.MaxSimTime);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(StopWhenEvacuated), out temp))
+            input = nameof(RunPedestrianModule);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.StopWhenEvacuated);
+                bool.TryParse(userInput, out newInput.RunPedestrianModule);
             }
             else
             {
                 ++issues;
-            }   
+                WUIEngineInput.InputNotFoundMessage(input);
+            }
 
-            if (inputToParse.TryGetValue(nameof(RunPedestrianModule), out temp))
+            input = nameof(RunTrafficModule);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.RunPedestrianModule);
+                bool.TryParse(userInput, out newInput.RunTrafficModule);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(RunTrafficModule), out temp))
+            input = nameof(RunFireModule);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.RunTrafficModule);
+                bool.TryParse(userInput, out newInput.RunFireModule);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(RunFireModule), out temp))
+            input = nameof(RunSmokeModule);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.RunFireModule);
+                bool.TryParse(userInput, out newInput.RunSmokeModule);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(RunSmokeModule), out temp))
+            input = nameof(StopWhenEvacuated);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.RunSmokeModule);
+                bool.TryParse(userInput, out newInput.StopWhenEvacuated);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(StopAfterConverging), out temp))
+            input = nameof(StopAfterConverging);
+            if(inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.StopAfterConverging);
+                bool.TryParse(userInput, out newInput.StopAfterConverging);
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
             if (issues > 0)

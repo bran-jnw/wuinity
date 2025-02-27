@@ -5,30 +5,57 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using WUIPlatform.IO;
 
 namespace WUIPlatform.Runtime
 {
     public class SmokeData
     {
-        private GlobalSmokeData globalSmokeData;
+        Traffic.OpticalDensityRamp _opticalDensityRamp;
 
-        public SmokeData()
+        //private GlobalSmokeData globalSmokeData;
+
+        public void LoadAll()
         {
-            if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            if(!WUIEngine.INPUT.Simulation.RunSmokeModule)
             {
-                globalSmokeData = new GlobalSmokeData();
+                return;
             }
+
+            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            {
+                LoadOpticalDensityFile(WUIEngine.INPUT.Smoke.GlobalSmokeInput.OpticalDensityFile, false);
+            }            
         }
 
-        public float GetGlobalDensity(float currentTime)
+        private bool LoadOpticalDensityFile(string path, bool updateInputFile)
         {
-            return globalSmokeData.GetGlobalDensity(currentTime);
+            bool success = false;
+
+            _opticalDensityRamp = new Traffic.OpticalDensityRamp();
+            success = _opticalDensityRamp.LoadOpticalDensityRampFile(path);
+            WUIEngine.DATA_STATUS.OpticalDensityLoaded = success;
+
+            if (success && updateInputFile)
+            {
+                WUIEngineInput.SaveInput();
+            }
+
+            return success;
+        }
+
+        public float GetOpticalDensity(Vector2d worldPos, float currentTime)
+        {
+            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            {
+                _opticalDensityRamp.GetOpticalDensity(currentTime);
+            }
+
+            return 0f;
         }
     }
 
-    public class GlobalSmokeData
+    /*public class GlobalSmokeData
     {
         Vector2[] data;
 
@@ -36,5 +63,5 @@ namespace WUIPlatform.Runtime
         {
             return 0f;
         }
-    }
+    }*/
 }

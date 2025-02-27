@@ -35,7 +35,7 @@ namespace WUIPlatform
             {
                 lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
                 size = input.Simulation.DomainSize;
-                routeCellSize = input.Evacuation.paintCellSize;
+                routeCellSize = input.Evacuation.PaintCellSize;
             }
         }
         ValidCriticalData validInput;
@@ -166,12 +166,14 @@ namespace WUIPlatform
 
             _runtimeData = new RuntimeData();
             //transform input to actual data
+            LOG(LogType.Log, "Loading referenced data from input file...");
             RUNTIME_DATA.Evacuation.LoadAll();
             RUNTIME_DATA.Population.LoadAll();
-            RUNTIME_DATA.Routing.LoadAll();
+            //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now
             //need to load evacuation goals before routing as they rely on evacuation goals
             RUNTIME_DATA.Traffic.LoadAll();
             RUNTIME_DATA.Fire.LoadAll();
+            RUNTIME_DATA.Smoke.LoadAll();
 
             UpdateMapResourceStatus();
 
@@ -233,13 +235,13 @@ namespace WUIPlatform
         {
             bool cellSizeIsDirty = true;
 
-            if (validInput.routeCellSize == _input.Evacuation.paintCellSize)
+            if (validInput.routeCellSize == _input.Evacuation.PaintCellSize)
             {
                 cellSizeIsDirty = false;
             }
         }
         
-        public enum LogType { Log, Warning, Error, Event, Debug };
+        public enum LogType { Log, Warning, SimError, InputError, Event, Debug };
         private List<string> simLog = new List<string>();
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
@@ -256,7 +258,7 @@ namespace WUIPlatform
             {
                 message = "WARNING: " + message;
             }
-            else if (logType == LogType.Error)
+            else if (logType == LogType.SimError)
             {
                 message = "ERROR: " + message;
             }
@@ -282,7 +284,7 @@ namespace WUIPlatform
             }
 #endif
 
-            if (logType == LogType.Error)
+            if (logType == LogType.SimError)
             {
                 SIM.Stop("Simulation can't run, please check log.", true);
             }           

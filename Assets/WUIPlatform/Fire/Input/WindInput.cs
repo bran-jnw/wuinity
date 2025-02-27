@@ -83,9 +83,9 @@ namespace WUIPlatform.Fire
             if(dataPoints.Length > 1)       
             {
                 w.direction = directionSpline.GetYValue(time);
-                if(WUIEngine.INPUT.Fire.fireModuleChoice == IO.FireInput.FireModuleChoice.FireCell)
+                if(WUIEngine.INPUT.Fire.FireModule == IO.FireInput.FireModuleChoice.FireCell)
                 {
-                    w.speed = speedSpline.GetYValue(time) * WUIEngine.INPUT.Fire.fireCellInput.windMultiplier;
+                    w.speed = speedSpline.GetYValue(time) * WUIEngine.INPUT.Fire.FireCellInput.WindMultiplier;
                 }                
                 w.cloudCover = cloudSpline.GetYValue(time);
             }
@@ -132,7 +132,7 @@ namespace WUIPlatform.Fire
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.fireCellInput.windFile);
+            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.WindFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {

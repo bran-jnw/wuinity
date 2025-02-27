@@ -12,72 +12,72 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class EvacuationInput
     {        
-        public float evacuationOrderStart = 0.0f;
-        public string[] evacuationGoals;
-        public string[] responseCurves;
-        public string[] evacuationGroups;
-        public float paintCellSize = 200f;
-
-        /*const string EvacuationOrderStartIn = "EvacuationOrderStart";
-        const string EvacuationGoalsIn = "EvacuationGoals";
-        const string EvacGroupsIn = "EvacGroups";
-        const string ResponseCurvesIn = "ResponseCurves";        
-        const string PaintCellSizeIn = "PaintCellSize";*/
-
+        public float EvacuationOrderStart = 0.0f;
+        public string[] EvacuationGoalFiles;
+        public string[] ResponseCurveFiles;
+        public string[] EvacuationGroupFiles;
+        public float PaintCellSize = 200f;
 
         public static EvacuationInput Parse(string[] inputLines, int startIndex)
         {
             int issues = 0;
             EvacuationInput newInput = new EvacuationInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
+            string input, userInput;
 
-            if (inputToParse.TryGetValue(nameof(evacuationOrderStart), out temp))
+            input = nameof(EvacuationOrderStart);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(temp, out newInput.evacuationOrderStart);
+                float.TryParse(userInput, out newInput.EvacuationOrderStart);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(evacuationOrderStart) + " was not found, using default of " + newInput.evacuationOrderStart + " seconds.");             
+                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(EvacuationOrderStart) + " was not found, using default of " + newInput.EvacuationOrderStart + " seconds.");             
             }
 
             //TODO: fix actual reading
-            if (inputToParse.TryGetValue(nameof(evacuationGoals), out temp))
+            input = nameof(EvacuationGoalFiles);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                string[] data = temp.Split(',');
-                newInput.evacuationGoals = data;
+                string[] data = userInput.Split(',');
+                newInput.EvacuationGoalFiles = data;
             }
             else
             {
                 ++issues;
-                WUIEngine.LOG(WUIEngine.LogType.Error, nameof(evacuationGoals) + " was not found." + WUIEngineInput.pleaseCheckInput);
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
             //TODO: fix actual reading
-            if (inputToParse.TryGetValue(nameof(evacuationGroups), out temp))
+            input = nameof(EvacuationGroupFiles);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                string[] data = temp.Split(',');
-                newInput.evacuationGroups = data;
+                string[] data = userInput.Split(',');
+                newInput.EvacuationGroupFiles = data;
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
             //TODO: fix actual reading
-            if (inputToParse.TryGetValue(nameof(responseCurves), out temp))
+            input = nameof(ResponseCurveFiles);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                string[] data = temp.Split(',');
-                newInput.responseCurves = data;
+                string[] data = userInput.Split(',');
+                newInput.ResponseCurveFiles = data;
             }
             else
             {
                 ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (inputToParse.TryGetValue(nameof(paintCellSize), out temp))
+            input = nameof(PaintCellSize);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(temp, out newInput.paintCellSize);
+                float.TryParse(userInput, out newInput.PaintCellSize);
             }
             else
             {

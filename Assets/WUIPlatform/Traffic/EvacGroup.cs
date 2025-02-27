@@ -74,9 +74,9 @@ namespace WUIPlatform
             EvacGroup[] result = null;
             List<EvacGroup> evacGroups = new List<EvacGroup>();
 
-            for (int i = 0; i < WUIEngine.INPUT.Evacuation.evacuationGroups.Length; i++)
+            for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.evacuationGroups[i] + ".eg");
+                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacuationGroupFiles[i] + ".eg");
                 bool fileExists = File.Exists(path);
                 EvacGroup eG = null;
                 if (fileExists)
@@ -209,7 +209,7 @@ namespace WUIPlatform
             //ncols
             data[1] = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y.ToString();
             //how many evac groups
-            data[2] = WUIEngine.INPUT.Evacuation.evacuationGroups.Length.ToString();
+            data[2] = WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length.ToString();
             //actual data
             data[3] = "";
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length; ++i)
@@ -242,7 +242,7 @@ namespace WUIPlatform
                     int.TryParse(header[2], out evacGroupCount);
 
                     //make sure we have the correct size
-                    if (ncols == WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x && nrows == WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y && evacGroupCount <= WUIEngine.INPUT.Evacuation.evacuationGroups.Length)
+                    if (ncols == WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x && nrows == WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y && evacGroupCount <= WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];

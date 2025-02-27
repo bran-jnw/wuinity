@@ -11,16 +11,7 @@ using WUIPlatform.IO;
 namespace WUIPlatform.Runtime
 {
     public class TrafficData
-    {         
-        Traffic.OpticalDensityRamp _opticalDensity;
-        public Traffic.OpticalDensityRamp OpticalDensity
-        {
-            get
-            {
-                return _opticalDensity;
-            }            
-        }
-
+    {       
         private Traffic.RoadTypeData _roadTypeData;
         public Traffic.RoadTypeData RoadTypeData
         {
@@ -32,8 +23,12 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            //LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.roadTypesFile), false);
-            //LoadOpticalDensityFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.opticalDensityFile), false);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Traffic data...");
+
+            if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            {
+                LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.MacroTrafficSimInput.RoadTypesFile), false);
+            }
         }
 
         private bool LoadRoadTypeData(string path, bool updateInputFile)
@@ -48,22 +43,6 @@ namespace WUIPlatform.Runtime
             }
 
             return success;
-        }
-
-        public bool LoadOpticalDensityFile(string path, bool updateInputFile)
-        {
-            bool success = false;
-
-            _opticalDensity = new Traffic.OpticalDensityRamp();
-            success = _opticalDensity.LoadOpticalDensityRampFile(path);
-            WUIEngine.DATA_STATUS.OpticalDensityLoaded = success;
-            if(success && updateInputFile)
-            {
-                //WUIEngine.INPUT.Traffic.opticalDensityFile = Path.GetFileName(path); ;
-                WUIEngineInput.SaveInput();
-            }
-
-            return success;
-        }        
+        } 
     }
 }

@@ -355,7 +355,7 @@ namespace WUIPlatform.Population
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "Not all GPW files found.");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Not all GPW files found.");
                 }
             }
             else
@@ -382,7 +382,7 @@ namespace WUIPlatform.Population
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " Global GPW data files not found. Please make sure the folder structure is correct.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, " Global GPW data files not found. Please make sure the folder structure is correct.");
                 return false;
             }
 

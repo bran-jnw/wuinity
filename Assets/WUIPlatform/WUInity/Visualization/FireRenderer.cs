@@ -99,7 +99,7 @@ namespace WUIPlatform.WUInity.Visualization
 
         void CreateSootBuffer()
         {
-            if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
             {
                 sootCellCountX = WUIEngine.SIM.SmokeModule.GetCellsX();
                 sootCellCountY = WUIEngine.SIM.SmokeModule.GetCellsY();
@@ -117,7 +117,7 @@ namespace WUIPlatform.WUInity.Visualization
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
             }
                       
         }       
@@ -186,7 +186,7 @@ namespace WUIPlatform.WUInity.Visualization
 
             if (renderSoot)
             {
-                if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
                     float[] newSoot = WUIEngine.SIM.SmokeModule.GetGroundSoot();
                     if(newSoot != null)
@@ -197,7 +197,7 @@ namespace WUIPlatform.WUInity.Visualization
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
             }
@@ -222,7 +222,7 @@ namespace WUIPlatform.WUInity.Visualization
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            if(WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.AscImport)
+            if(WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
             {
                 float xScale, yScale;
                 Vector2d offsetFire;
@@ -327,7 +327,7 @@ namespace WUIPlatform.WUInity.Visualization
 
             if(!creationCall && WUIEngine.SIM.SmokeModule != null)
             {
-                if (WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
                     AdvectDiffuseModel model = WUIEngine.SIM.SmokeModule as AdvectDiffuseModel;
                     if(model != null)
@@ -337,7 +337,7 @@ namespace WUIPlatform.WUInity.Visualization
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
                 

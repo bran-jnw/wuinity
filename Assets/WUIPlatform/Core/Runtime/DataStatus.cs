@@ -28,13 +28,13 @@ namespace WUIPlatform
             if (!MapLoaded)
             {
                 canRun = false;
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Map is not loaded.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Map is not loaded.");
             }
 
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule && !PopulationLoaded)
             {
                 canRun = false;
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Population is not loaded but user has requested pedestrian model.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Population is not loaded but user has requested pedestrian model.");
             }
 
             if (WUIEngine.INPUT.Simulation.RunFireModule)
@@ -42,7 +42,7 @@ namespace WUIPlatform
                 if (!LcpLoaded)
                 {
                     canRun = false;
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "No LCP file loaded but fire spread is activated.");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "No LCP file loaded but fire spread is activated.");
                 }
             }
 
@@ -51,7 +51,7 @@ namespace WUIPlatform
                 if (WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves == null)
                 {
                     canRun = false;
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "No valid response curves have been loaded.");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "No valid response curves have been loaded.");
                 }
 
             }

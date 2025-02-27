@@ -56,7 +56,8 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.HouseholdsFile));
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Population data...");
+            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.PopulationFile));
         }
         
         public bool LoadPopulation(string path)

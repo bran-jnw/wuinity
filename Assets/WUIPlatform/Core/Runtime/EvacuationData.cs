@@ -18,8 +18,8 @@ namespace WUIPlatform.Runtime
             get
             {
                 WUIEngineInput input = WUIEngine.INPUT;
-                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.paintCellSize);
-                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.paintCellSize);
+                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.PaintCellSize);
+                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.PaintCellSize);
                 return _cellCount;
             }
         }
@@ -70,7 +70,8 @@ namespace WUIPlatform.Runtime
         }
 
         public void LoadAll()
-        {            
+        {
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Evacuation data...");
             //need goals and curves before can load groups    
             LoadResponseCurves();
             LoadEvacuationGoals();

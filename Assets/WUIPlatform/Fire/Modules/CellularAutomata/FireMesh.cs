@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using System;
 using WUIPlatform.Fire.Behave;
+using WUIPlatform.IO;
 
 namespace WUIPlatform.Fire
 {
@@ -15,7 +16,7 @@ namespace WUIPlatform.Fire
     public class FireMesh : FireModule                        
     {
         Vector2int _cellCount;                                
-        public SpreadMode spreadMode;                               
+        public FireCellInput.SpreadModeEnum spreadMode;                               
         public IgnitionPoint[] ignitionPoints;                
         FireCell[] _fireCells;                                
         public Vector2d _cellSize;
@@ -86,7 +87,7 @@ namespace WUIPlatform.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = WUIEngine.INPUT.Fire.fireCellInput.spreadMode;
+            spreadMode = WUIEngine.INPUT.Fire.FireCellInput.SpreadMode;
 
             InitializeMesh();
         }
@@ -107,11 +108,11 @@ namespace WUIPlatform.Fire
             crownFire = new Crown(fuelModelSet);                         
 
             indexSize = 4;                                      
-            if (spreadMode == SpreadMode.EightDirections)
+            if (spreadMode == FireCellInput.SpreadModeEnum.EightDirections)
             {
                 indexSize = 8;
             }
-            else if (spreadMode == SpreadMode.SixteenDirections)
+            else if (spreadMode == FireCellInput.SpreadModeEnum.SixteenDirections)
             {
                 indexSize = 16;
             }
@@ -366,7 +367,7 @@ namespace WUIPlatform.Fire
                 return;
             }
 
-            if(WUIEngine.INPUT.Fire.fireCellInput.useInitialIgnitionMap)
+            if(WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {

@@ -18,7 +18,7 @@ namespace WUIPlatform.WUInity.UI
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
-                stallSpeed = tO.macroTrafficSimInput.stallSpeed.ToString();
+                stallSpeed = tO.MacroTrafficSimInput.StallSpeed.ToString();
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
@@ -30,7 +30,7 @@ namespace WUIPlatform.WUInity.UI
             ++buttonIndex;
 
             //smoke stuff
-            tO.visibilityAffectsSpeed = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), tO.visibilityAffectsSpeed, "Speed is affected by smoke");
+            tO.VisibilityAffectsSpeed = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), tO.VisibilityAffectsSpeed, "Speed is affected by smoke");
             ++buttonIndex;
 
             /*if(tO.visibilityAffectsSpeed)
@@ -57,7 +57,7 @@ namespace WUIPlatform.WUInity.UI
 
             TrafficInput tO = WUIEngine.INPUT.Traffic;
 
-            float.TryParse(stallSpeed, out tO.macroTrafficSimInput.stallSpeed);
+            float.TryParse(stallSpeed, out tO.MacroTrafficSimInput.StallSpeed);
             //float.TryParse(opticalDensity, out tO.opticalDensity);
         }        
 

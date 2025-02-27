@@ -12,10 +12,10 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class WUIShowInput
     {
-        public bool sendDataToWUIShow = false;
-        public string wuiShowServerIP = "127.0.0.1";
-        public int wuiShowServerPort = 9023;
-        public float wuiShowDeltaTime = 1f;
+        public bool SendDataToWUIShow = false;
+        public string WuiShowServerIP = "127.0.0.1";
+        public int WuiShowServerPort = 9023;
+        public float WuiShowDeltaTime = 1f;
 
         /*private static readonly string sendDataString = "sendDataToWUIShow";
         private static readonly string serverIPString = "wuiShowServerIP";
@@ -26,23 +26,30 @@ namespace WUIPlatform.IO
         {
             WUIShowInput newInput = new WUIShowInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            string input, userInput;
 
-            string temp;
-            if (inputToParse.TryGetValue(nameof(sendDataToWUIShow), out temp))
+            input = nameof(SendDataToWUIShow);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.sendDataToWUIShow);
+                bool.TryParse(userInput, out newInput.SendDataToWUIShow);
             }
-            if (inputToParse.TryGetValue(nameof(wuiShowServerIP), out temp))
+
+            input = nameof(WuiShowServerIP);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                newInput.wuiShowServerIP = temp;
+                newInput.WuiShowServerIP = userInput;
             }
-            if (inputToParse.TryGetValue(nameof(wuiShowServerPort), out temp))
+
+            input = nameof(WuiShowServerPort);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                int.TryParse(temp, out newInput.wuiShowServerPort);
+                int.TryParse(userInput, out newInput.WuiShowServerPort);
             }
-            if (inputToParse.TryGetValue(nameof(wuiShowDeltaTime), out temp))
+
+            input = nameof(WuiShowDeltaTime);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(temp, out newInput.wuiShowDeltaTime);
+                float.TryParse(userInput, out newInput.WuiShowDeltaTime);
             }
 
             return newInput;

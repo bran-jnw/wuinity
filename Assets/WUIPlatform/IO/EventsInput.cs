@@ -12,7 +12,12 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class EventsInput
     {
-        public string[] blockGoalEvents;
+        public string[] BlockGoalEventFiles;
+
+        public EventsInput()
+        {
+            BlockGoalEventFiles = new string[0];
+        }
 
         public static EventsInput Parse(string[] inputLines, int startIndex)
         {
@@ -21,10 +26,11 @@ namespace WUIPlatform.IO
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
             string temp;            
 
-            if (inputToParse.TryGetValue(nameof(blockGoalEvents), out temp))
+            //TODO: get actual data
+            if (inputToParse.TryGetValue(nameof(BlockGoalEventFiles), out temp))
             {
                 string[] data = temp.Split(',');
-                newInput.blockGoalEvents = data;
+                newInput.BlockGoalEventFiles = data;
             }
             else
             {

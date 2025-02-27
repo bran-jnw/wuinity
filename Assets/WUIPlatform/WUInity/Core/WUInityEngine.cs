@@ -315,7 +315,7 @@ namespace WUIPlatform.WUInity
             Mapbox.Unity.Map.MapOptions mOptions = MAP.Options; // new Mapbox.Unity.Map.MapOptions();
 
             mOptions.locationOptions.latitudeLongitude = "" + WUIEngine.INPUT.Simulation.LowerLeftLatLon.x + "," + WUIEngine.INPUT.Simulation.LowerLeftLatLon.y;
-            mOptions.locationOptions.zoom = WUIEngine.INPUT.Map.zoomLevel;
+            mOptions.locationOptions.zoom = WUIEngine.INPUT.Map.ZoomLevel;
             mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
@@ -332,12 +332,12 @@ namespace WUIPlatform.WUInity
 
             if (!MAP.IsAccessTokenValid)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Mapbox token not valid.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Mapbox token not valid.");
                 return false;
             }
 
             WUIEngine.LOG(WUIEngine.LogType.Log, "Starting to load Mapbox map.");
-            MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y), WUIEngine.INPUT.Map.zoomLevel);
+            MAP.Initialize(new Mapbox.Utils.Vector2d(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y), WUIEngine.INPUT.Map.ZoomLevel);
             WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
 
             //do adjustement to better fit UTM
@@ -957,8 +957,8 @@ namespace WUIPlatform.WUInity
                 {
                     System.Numerics.Vector4 posAndSpeed = carsInSystem[i].GetWorldPositionSpeedCarID(false);
 
-                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.paintCellSize);
-                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.paintCellSize);
+                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.PaintCellSize);
+                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.PaintCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x - 1 || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y - 1)
@@ -984,8 +984,8 @@ namespace WUIPlatform.WUInity
                 {
                     System.Numerics.Vector4 posAndSpeed = carsOnHold[i].GetWorldPositionSpeedCarID(false);
 
-                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.paintCellSize);
-                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.paintCellSize);
+                    int x = (int)(posAndSpeed.X / WUIEngine.INPUT.Evacuation.PaintCellSize);
+                    int y = (int)(posAndSpeed.Y / WUIEngine.INPUT.Evacuation.PaintCellSize);
 
                     //outside of mapped data
                     if (x < 0 || x > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x - 1 || y < 0 || y > WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y - 1)

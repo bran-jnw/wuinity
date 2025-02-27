@@ -31,12 +31,12 @@ namespace WUIPlatform.Traffic
             try
             {
                 cars = new Dictionary<string, SUMOCar>();
-                string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.sumoInput.inputFile);
+                string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
 
                 //need to use UTM projection in SUMO and WUInity to overlay data (an dapproximate overlay with web mercator, e.g. Mapbox)
-                Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.sumoInput.UTMoffset.y);
+                Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.y);
                 _originOffset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
                 WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + _originOffset.x + ", " + _originOffset.y);
@@ -62,7 +62,7 @@ namespace WUIPlatform.Traffic
             catch(Exception e)
             {
                 success = false;
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
             }
             
         }
@@ -328,7 +328,7 @@ namespace WUIPlatform.Traffic
             }
             catch (Exception e) 
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, e.Message);
+                WUIEngine.LOG(WUIEngine.LogType.SimError, e.Message);
             }            
         }
 

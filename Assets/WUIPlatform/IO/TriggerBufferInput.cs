@@ -14,54 +14,75 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class TriggerBufferInput
     {
-        public bool calculateTriggerBuffer = false;
+        public bool CalculateTriggerBuffer = false;
         public enum TriggerBufferChoice { kPERIL, BackwardsFireCell2 }
-        public TriggerBufferChoice triggerBufferChoice = TriggerBufferChoice.kPERIL;
+        public TriggerBufferChoice TriggerBuffer = TriggerBufferChoice.kPERIL;
 
         public kPERILInput kPERILInput;
 
-        public static TriggerBufferInput Parse(string[] inputLines, int startIndex)
+        public static TriggerBufferInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex)
         {
             int issues = 0;
             TriggerBufferInput newInput = new TriggerBufferInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
+            string input, userInput;
 
-            if (inputToParse.TryGetValue(nameof(calculateTriggerBuffer), out temp))
+            input = nameof(CalculateTriggerBuffer);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.calculateTriggerBuffer);
+                bool.TryParse(userInput, out newInput.CalculateTriggerBuffer);
             }
             else
             {
+                ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
             }
 
-            if (newInput.calculateTriggerBuffer)
+            if (newInput.CalculateTriggerBuffer)
             {
-                if (inputToParse.TryGetValue(nameof(triggerBufferChoice), out temp))
+                if (inputToParse.TryGetValue(nameof(TriggerBuffer), out userInput))
                 {
-                    switch (temp)
+                    switch (userInput)
                     {
                         case nameof(TriggerBufferChoice.kPERIL):
-                            newInput.triggerBufferChoice = TriggerBufferChoice.kPERIL;
+                            newInput.TriggerBuffer = TriggerBufferChoice.kPERIL;
                             break;
                         case nameof(TriggerBufferChoice.BackwardsFireCell2):
-                            newInput.triggerBufferChoice = TriggerBufferChoice.BackwardsFireCell2;
+                            newInput.TriggerBuffer = TriggerBufferChoice.BackwardsFireCell2;
                             break;
                         default:
-                            newInput.triggerBufferChoice = TriggerBufferChoice.kPERIL;
+                            ++issues;
+                            WUIEngineInput.CouldNotInterpretInputMessage(input, userInput);
                             break;
                     }
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "No trigger buffer module was set, using " + newInput.triggerBufferChoice.ToString() + ".");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "No trigger buffer module was set, using " + newInput.TriggerBuffer.ToString() + ".");
+                }
+
+                //now check modules that have been selected
+                if (newInput.TriggerBuffer == TriggerBufferChoice.kPERIL)
+                {
+                    input = nameof(TriggerBufferChoice.kPERIL);
+                    WUIEngineInput.ReadingInputMessage(input);
+                    int lineindex;
+                    if (headerLineIndex.TryGetValue(input, out lineindex))
+                    {
+                        newInput.kPERILInput = kPERILInput.Parse(inputLines, lineindex);
+                    }
+                    else
+                    {
+                        //critical
+                        ++issues;
+                        WUIEngineInput.InputNotFoundMessage(input);
+                    }
+                }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Debug, "Trying to use non-implemented trigger buffer.");
                 }
             }    
-            
-            if(newInput.triggerBufferChoice == TriggerBufferChoice.kPERIL)
-            {
-                //newInput.kPERILInput = kPERILInput.Parse()
-            }
 
             return newInput;
         }
@@ -69,8 +90,8 @@ namespace WUIPlatform.IO
 
     public class kPERILInput
     {
-        public float midflameWindspeed = 0f;
-        public bool calculateROSFromBehave = true;
+        public float MidflameWindspeed = 0f;
+        public bool CalculateROSFromBehave = true;
 
         public static kPERILInput Parse(string[] inputLines, int startIndex)
         {
@@ -79,23 +100,23 @@ namespace WUIPlatform.IO
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
             string temp;
 
-            if (inputToParse.TryGetValue(nameof(midflameWindspeed), out temp))
+            if (inputToParse.TryGetValue(nameof(MidflameWindspeed), out temp))
             {
-                float.TryParse(temp, out newInput.midflameWindspeed);
+                float.TryParse(temp, out newInput.MidflameWindspeed);
             }
             else
             {
                 ++issues;
-                WUIEngine.LOG(WUIEngine.LogType.Error, "No midflame wind speed was set." + WUIEngineInput.pleaseCheckInput);
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "No midflame wind speed was set." + WUIEngineInput.pleaseCheckInput);
             }
 
-            if (inputToParse.TryGetValue(nameof(calculateROSFromBehave), out temp))
+            if (inputToParse.TryGetValue(nameof(CalculateROSFromBehave), out temp))
             {
-                bool.TryParse(temp, out newInput.calculateROSFromBehave);
+                bool.TryParse(temp, out newInput.CalculateROSFromBehave);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(calculateROSFromBehave) + " was not found, defaulting to " + newInput.calculateROSFromBehave.ToString() + ".");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(CalculateROSFromBehave) + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
             }
 
             return newInput;

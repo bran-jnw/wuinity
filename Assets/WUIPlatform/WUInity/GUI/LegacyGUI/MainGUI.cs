@@ -132,7 +132,7 @@ namespace WUIPlatform.WUInity.UI
                 ParseMainData(wO);  
                 if (!WUIEngine.DATA_STATUS.CanRunSimulation())
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, " Could not start simulation, see error log.");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, " Could not start simulation, see error log.");
                 }
                 else
                 {

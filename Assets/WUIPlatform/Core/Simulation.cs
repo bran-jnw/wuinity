@@ -170,11 +170,11 @@ namespace WUIPlatform
                 
                 _haveResults = true;                
 
-                if (_fireModule != null && WUIEngine.INPUT.TriggerBuffer.calculateTriggerBuffer)
+                if (_fireModule != null && WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
                 {
-                    if (WUIEngine.INPUT.TriggerBuffer.triggerBufferChoice == TriggerBufferInput.TriggerBufferChoice.kPERIL)
+                    if (WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
                     {
-                        _perilOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.midflameWindspeed);
+                        _perilOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
                     }  
                 }
             }            
@@ -219,7 +219,7 @@ namespace WUIPlatform
         {            
             if (WUIEngine.INPUT.Simulation.RunFireModule)
             {
-                if (WUIEngine.INPUT.Fire.fireModuleChoice == FireInput.FireModuleChoice.AscImport)
+                if (WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
                 {
                     _fireModule = new AscFireImport();
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module AscImport initiated.");
@@ -243,7 +243,7 @@ namespace WUIPlatform
             {
                 if(!WUIEngine.INPUT.Simulation.RunFireModule)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Error, "Smoke simulation was enabled but no fire module was enabled, aborting.");
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Smoke simulation was enabled but no fire module was enabled, aborting.");
                     //input.Simulation.RunSmokeModule = false;
                 }
                 else
@@ -251,12 +251,12 @@ namespace WUIPlatform
                     //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                     if (_fireModule == null)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Error, "No fire module could be created, smoke simulation can not be performed, aborting");
+                        WUIEngine.LOG(WUIEngine.LogType.SimError, "No fire module could be created, smoke simulation can not be performed, aborting");
                         //input.Simulation.RunSmokeModule = false;
                     }
                     else
                     {
-                        if (WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                        if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                         {
                             /*if (_smokeModule != null)
                             {
@@ -280,11 +280,11 @@ namespace WUIPlatform
 
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.INPUT.Pedestrian.pedestrianModuleChoice == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
+                if (WUIEngine.INPUT.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
                 {
                     //placeholder for JupedSim
                 }
-                else if (WUIEngine.INPUT.Pedestrian.pedestrianModuleChoice == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
+                else if (WUIEngine.INPUT.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     _pedestrianModule = new MacroHouseholdSim();
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
@@ -304,7 +304,7 @@ namespace WUIPlatform
         {
             if (WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
-                if (WUIEngine.INPUT.Traffic.trafficModuleChoice == TrafficInput.TrafficModuleChoice.SUMO)
+                if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
                 {
                     bool success;
                     _trafficModule = new SUMOModule(out success);
@@ -338,9 +338,9 @@ namespace WUIPlatform
                 return;
             }
 
-            if(WUIEngine.INPUT.WUIShow.sendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
+            if(WUIEngine.INPUT.WUIShow.SendDataToWUIShow && WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
-                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.WUIShow.wuiShowServerIP, WUIEngine.INPUT.WUIShow.wuiShowServerPort);
+                _wuiShow = new Visualization.WUIShowCommunicator(WUIEngine.INPUT.WUIShow.WuiShowServerIP, WUIEngine.INPUT.WUIShow.WuiShowServerPort);
             }
 
             //if we do multiple runs the goals have to be reset
@@ -353,22 +353,22 @@ namespace WUIPlatform
             _currentTime = 0f;
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves.Length; i++)
             {
-                float t = WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + WUIEngine.INPUT.Evacuation.evacuationOrderStart;
+                float t = WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + WUIEngine.INPUT.Evacuation.EvacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
 
-            //inject any traffic effevnts into traffic module
-            if(WUIEngine.INPUT.Simulation.RunTrafficModule)
+            //inject any traffic events into traffic module
+            if(WUIEngine.INPUT.Simulation.RunTrafficModule && WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
-                for (int i = 0; i < WUIEngine.INPUT.Traffic.trafficAccidents.Length; i++)
+                for (int i = 0; i < WUIEngine.INPUT.Traffic.MacroTrafficSimInput.TrafficAccidents.Length; i++)
                 {
-                    _trafficModule.InsertNewTrafficEvent(WUIEngine.INPUT.Traffic.trafficAccidents[i]);
+                    _trafficModule.InsertNewTrafficEvent(WUIEngine.INPUT.Traffic.MacroTrafficSimInput.TrafficAccidents[i]);
                 }
 
-                for (int i = 0; i < WUIEngine.INPUT.Traffic.reverseLanes.Length; i++)
+                for (int i = 0; i < WUIEngine.INPUT.Traffic.MacroTrafficSimInput.ReverseLanes.Length; i++)
                 {
-                    _trafficModule.InsertNewTrafficEvent(WUIEngine.INPUT.Traffic.reverseLanes[i]);
+                    _trafficModule.InsertNewTrafficEvent(WUIEngine.INPUT.Traffic.MacroTrafficSimInput.ReverseLanes[i]);
                 }
             }            
 
@@ -408,7 +408,7 @@ namespace WUIPlatform
             WUIEngine.ENGINE.StopWatch.Start();
             UpdateEvents();
             //this state represents the positions at the start of the time step
-            if (WUIEngine.INPUT.WUIShow.sendDataToWUIShow && _trafficModule != null)
+            if (WUIEngine.INPUT.WUIShow.SendDataToWUIShow && _trafficModule != null)
             {
                 _wuiShow.SendData(_currentTime);
             }
@@ -567,11 +567,11 @@ namespace WUIPlatform
             //sync with fire
             if (WUIEngine.INPUT.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
             {
-                if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
                 {
                     _smokeModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
                 }
-                else if(WUIEngine.INPUT.Smoke.smokeModuleChoice == SmokeInput.SmokeModuleChoice.BoxModel)
+                else if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                 {
                     //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 }
@@ -713,7 +713,7 @@ namespace WUIPlatform
             }
             if (input.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.INPUT.Pedestrian.pedestrianModuleChoice == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
+                if (WUIEngine.INPUT.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     MacroHouseholdSim mHS = (MacroHouseholdSim)_pedestrianModule;
                     mHS.SaveToFile(runNumber);

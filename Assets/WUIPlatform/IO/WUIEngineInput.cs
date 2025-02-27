@@ -49,35 +49,47 @@ namespace WUIPlatform.IO
             WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " saved.");
         }
 
+        const bool _useNewInputFormat = true;
         public static void LoadInput(string path)
         {
-            string input = File.ReadAllText(path);
-            if (input != null)
-            {                
-                WUIEngineInput wui = UnityEngine.JsonUtility.FromJson<WUIEngineInput>(input);
-                WUIEngine.WORKING_FILE = path;
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Reading input file " + WUIEngine.WORKING_FILE + ".");
-                WUIEngine.ENGINE.SetNewInputData(wui);
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " loaded.");
+            if(!File.Exists(path))
+            {
+                WUIEngine.LOG(WUIEngine.LogType.InputError, " Input file " + path + " does not exist.");
+                return;
+            }
+
+            if(_useNewInputFormat)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, " Reading input file " + path + ".");
+                WUIEngineInput wui = ParseInput(File.ReadAllLines(path));
+                if(wui != null)
+                {
+                    WUIEngine.WORKING_FILE = path;
+                    WUIEngine.ENGINE.SetNewInputData(wui);
+                    WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " loaded.");
+                }                
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " could not be loaded, see log.");
+                }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, " Input file " + path + " not found.");
+                string input = File.ReadAllText(path);
+                if (input != null)
+                {
+                    WUIEngineInput wui = UnityEngine.JsonUtility.FromJson<WUIEngineInput>(input);
+                    WUIEngine.WORKING_FILE = path;
+                    WUIEngine.LOG(WUIEngine.LogType.Log, " Reading input file " + WUIEngine.WORKING_FILE + ".");
+                    WUIEngine.ENGINE.SetNewInputData(wui);
+                    WUIEngine.LOG(WUIEngine.LogType.Log, " Input file " + WUIEngine.WORKING_FILE + " loaded.");
+                }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, " Input file " + path + " not found.");
+                }
             }
-
-            ParseInput(File.ReadAllLines(path));
         }
-
-        //stuff for parsing
-        /*const string _simulationHeader = "Simulation";
-        const string _mapHeader = "Map";
-        const string _populationHeader = "Population";
-        const string _evacuationHeader = "Evacuation";
-        const string _pedestrianHeader = "Pedestrian";
-        const string _trafficHeader = "Traffic";
-        const string _fireHeader = "Fire";
-        const string _smokeHeader = "Smoke";
-        const string _wuiShowHeader = "WUIShow";*/
 
         public static readonly char[] inputSplit = { '=', '#' };
         static readonly char[] headerBrackets = new char[] { '[', ']' };
@@ -91,9 +103,9 @@ namespace WUIPlatform.IO
             //first index all headers
             for(int i = 0; i < inputLines.Length; ++i)
             {
-                string line = inputLines[i].Trim();
-
-                if (line.StartsWith("["))
+                inputLines[i] = inputLines[i].Trim();
+                string line = inputLines[i];
+                if (inputLines[i].StartsWith("["))
                 {
                     line = line.Trim(headerBrackets);
                     headerLineIndex.Add(line, i);
@@ -102,41 +114,53 @@ namespace WUIPlatform.IO
 
             //now see if we have what we need
             int lineindex;
+            string input;
+
             //simulation
-            if (headerLineIndex.TryGetValue(nameof(Simulation), out lineindex))
+            input = nameof(Simulation);
+            if (headerLineIndex.TryGetValue(input, out lineindex))
             {
+                ReadingInputMessage(input);                
                 newInput.Simulation = SimulationInput.Parse(inputLines, lineindex);
             }
             else
             {
                 //critical
-                WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Simulation) + " header not found." + pleaseCheckInput);
+                WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found." + pleaseCheckInput);
+                return null;
+            }
+            if(newInput.Simulation == null)
+            {
                 return null;
             }
 
             //map
-            if (headerLineIndex.TryGetValue(nameof(Map), out lineindex))
+            input = nameof(Map);
+            if (headerLineIndex.TryGetValue(input, out lineindex))
             {
+                ReadingInputMessage(input);
                 newInput.Map = MapInput.Parse(inputLines, lineindex);
             }
             else
             {
                 //does not matter
                 newInput.Map = new MapInput();
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(Map) + " header not found, using defaults.");
-            }
+                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " header not found, using defaults.");
+            }            
 
-            //population
+            //population            
             if (newInput.Simulation.RunPedestrianModule)
             {
-                if (headerLineIndex.TryGetValue(nameof(Population), out lineindex))
+                input = nameof(Population);
+                if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
+                    ReadingInputMessage(input);
                     newInput.Population = PopulationInput.Parse(inputLines, lineindex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Population) + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                     return null;
                 }      
             }
@@ -144,14 +168,16 @@ namespace WUIPlatform.IO
             //evacuation
             if (newInput.Simulation.RunPedestrianModule || newInput.Simulation.RunTrafficModule)
             {
-                if (headerLineIndex.TryGetValue(nameof(Evacuation), out lineindex))
-                {
+                input = nameof(Evacuation);
+                if (headerLineIndex.TryGetValue(input, out lineindex))
+                {                    
+                    ReadingInputMessage(input);
                     newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Evacuation) + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
                     return null;
                 }
             }                
@@ -159,14 +185,16 @@ namespace WUIPlatform.IO
             //pedestrian
             if(newInput.Simulation.RunPedestrianModule)
             {
-                if (headerLineIndex.TryGetValue(nameof(Pedestrian), out lineindex))
+                input = nameof(Pedestrian);
+                if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
+                    ReadingInputMessage(input);
                     newInput.Pedestrian = PedestrianInput.Parse(inputLines, lineindex, headerLineIndex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Pedestrian) + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -174,14 +202,16 @@ namespace WUIPlatform.IO
             //traffic
             if (newInput.Simulation.RunTrafficModule)
             {
-                if (headerLineIndex.TryGetValue(nameof(Traffic), out lineindex))
+                input = nameof(Traffic);
+                if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
-                    newInput.Traffic = TrafficInput.Parse(inputLines, lineindex);
+                    ReadingInputMessage(input);
+                    newInput.Traffic = TrafficInput.Parse(inputLines, lineindex, headerLineIndex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Traffic) + " header not found but user has requested traffic module." + pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found but user has requested traffic module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -189,14 +219,16 @@ namespace WUIPlatform.IO
             //fire
             if (newInput.Simulation.RunFireModule)
             {
-                if (headerLineIndex.TryGetValue(nameof(Fire), out lineindex))
+                input = nameof(Fire);
+                if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
-                    newInput.Fire = FireInput.Parse(inputLines, lineindex);
+                    ReadingInputMessage(input);
+                    newInput.Fire = FireInput.Parse(inputLines, lineindex, headerLineIndex);
                 }
                 else
                 {
                     //critical                
-                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Fire) + " header not found but user has requested fire module." + pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found but user has requested fire module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -204,52 +236,60 @@ namespace WUIPlatform.IO
             //smoke
             if (newInput.Simulation.RunSmokeModule)
             {
-                if (headerLineIndex.TryGetValue(nameof(Smoke), out lineindex))
+                input = nameof(Smoke);
+                if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
-                    newInput.Smoke = SmokeInput.Parse(inputLines, lineindex);
+                    ReadingInputMessage(input);
+                    newInput.Smoke = SmokeInput.Parse(inputLines, lineindex, headerLineIndex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.Error, nameof(Smoke) + " header not found but user has requested smoke module." + pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, input + " header not found but user has requested smoke module." + pleaseCheckInput);
                     return null;
                 }
             }
 
             //trigger buffer
-            if (headerLineIndex.TryGetValue(nameof(TriggerBuffer), out lineindex))
+            input = nameof(TriggerBuffer);
+            if (headerLineIndex.TryGetValue(input, out lineindex))
             {
-                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex);
+                ReadingInputMessage(input);
+                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex, headerLineIndex);
             }
             else
             {
-                //does not matter
+                //does not matter, not active per default
                 newInput.TriggerBuffer = new TriggerBufferInput();
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(TriggerBuffer) + " header not found, using defaults.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " header not found, using defaults (disabled).");
             }
 
             //WUIShow
-            if (headerLineIndex.TryGetValue(nameof(WUIShow), out lineindex))
+            input = nameof(WUIShow);
+            if (headerLineIndex.TryGetValue(input, out lineindex))
             {
+                ReadingInputMessage(input);
                 newInput.WUIShow = WUIShowInput.Parse(inputLines, lineindex);
             }
             else
             {
                 //does not matter
                 newInput.WUIShow = new WUIShowInput();
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(WUIShow) + " header not found, using defaults.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " header not found, using defaults (disabled).");
             }
 
             //events
-            if (headerLineIndex.TryGetValue(nameof(Events), out lineindex))
+            input = nameof(Events);
+            if (headerLineIndex.TryGetValue(input, out lineindex))
             {
+                ReadingInputMessage(input);
                 newInput.Events = EventsInput.Parse(inputLines, lineindex);
             }
             else
             {
                 //does not matter
-                newInput.WUIShow = new WUIShowInput();
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(WUIShow) + " header not found, using defaults.");
+                newInput.Events = new EventsInput();
+                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " header not found, will do nothing.");
             }
 
             return newInput;
@@ -266,6 +306,7 @@ namespace WUIPlatform.IO
             Dictionary<string, string> inputToParse = new Dictionary<string, string>();
             //first line is header
             int lineIndex = startIndex + 1;
+
             while (true)
             {
                 if (lineIndex >= inputLines.Length)
@@ -273,7 +314,7 @@ namespace WUIPlatform.IO
                     break;
                 }
 
-                string line = inputLines[lineIndex].Trim();
+                string line = inputLines[lineIndex];
                 //we have found next header, exit
                 if (line.StartsWith('['))
                 {
@@ -282,6 +323,7 @@ namespace WUIPlatform.IO
                 //empty or comment
                 if (line.Length == 0 || line.StartsWith('#'))
                 {
+                    ++lineIndex;
                     continue;
                 }
 
@@ -294,6 +336,20 @@ namespace WUIPlatform.IO
             }
 
             return inputToParse;
+        }
+
+        public static void ReadingInputMessage(string nameOfInput)
+        {
+            WUIEngine.LOG(WUIEngine.LogType.Log, nameOfInput + " input is being read...");
+        }
+
+        public static void InputNotFoundMessage(string nameOfInput)
+        {
+            WUIEngine.LOG(WUIEngine.LogType.SimError, nameOfInput + " was not found." + pleaseCheckInput);
+        }
+        public static void CouldNotInterpretInputMessage(string nameOfInput, string userInput)
+        {
+            WUIEngine.LOG(WUIEngine.LogType.InputError, "Could not interpret user input " + userInput + " for " + nameOfInput + ".");
         }
     }
 }

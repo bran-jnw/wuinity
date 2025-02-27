@@ -46,13 +46,13 @@ namespace WUIPlatform.Pedestrian
             _cellIndex = cellIndex;
             peopleInHousehold = householdData.peopleCount;
             cars = 1;
-            if (popInput.allowMoreThanOneCar)
+            if (popInput.AllowMoreThanOneCar)
             {
                 if (peopleInHousehold >= 2)
                 {
-                    if (Random.Range(0f, 1f) <= popInput.maxCarsChance)
+                    if (Random.Range(0f, 1f) <= popInput.MaxCarsProbability)
                     {
-                        cars = Mathf.Min(peopleInHousehold, popInput.maxCars);
+                        cars = Mathf.Min(peopleInHousehold, popInput.MaxCars);
                     }
                 }
             }
@@ -62,7 +62,7 @@ namespace WUIPlatform.Pedestrian
             homePosition = new Vector2((float)temp.x, (float)temp.y);
             temp = GeoConversions.GeoToWorldPosition(householdData.roadAccessLatLon.x, householdData.roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
-            walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.walkingDistanceModifier;
+            walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;
             this.responseTime = responseTime;
             if (responseTime == float.MaxValue)

@@ -8,6 +8,7 @@
 using static WUIPlatform.Fire.MathWrap;
 using System.Runtime.InteropServices;
 using WUIPlatform.Fire.Behave;
+using WUIPlatform.IO;
 
 namespace WUIPlatform.Fire
 {  
@@ -285,7 +286,7 @@ namespace WUIPlatform.Fire
         public int GetMaxSpreadrateInDirection(int direction)
         {
             int rate = 0;
-            if (fireMesh.spreadMode == SpreadMode.FourDirections)
+            if (fireMesh.spreadMode == FireCellInput.SpreadModeEnum.FourDirections)
             {
                 //interpolate?
             }

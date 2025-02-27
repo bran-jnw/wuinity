@@ -13,75 +13,74 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class PopulationInput
     {
-        public string HouseholdsFile;
-        public int minHouseholdSize = 1;
-        public int maxHouseholdSize = 5;
-        public bool allowMoreThanOneCar = true;
-        public int maxCars = 2;
-        public float maxCarsChance = 0.3f;
-
-        const string householdsFileIn = "householdsFile";
-        const string minHouseholdSizeIn = "minHouseholdSize";
-        const string maxHouseholdSizeIn = "maxHouseholdSize";
-        const string allowMoreThanOneCarIn = "allowMoreThanOneCar";
-        const string maxCarsIn = "maxCars";
-        const string maxCarsChanceIn = "maxCarsChance";
+        public string PopulationFile;
+        public int MinHouseholdSize = 1;
+        public int MaxHouseholdSize = 5;
+        public bool AllowMoreThanOneCar = true;
+        public int MaxCars = 2;
+        public float MaxCarsProbability = 0.3f;
 
         public static PopulationInput Parse(string[] inputLines, int startIndex)
         {
             int issues = 0;
             PopulationInput newInput = new PopulationInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            string input, userInput;
 
-            string temp;
-            if (inputToParse.TryGetValue(householdsFileIn, out temp))
+            input = nameof(PopulationFile);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                newInput.HouseholdsFile = temp;
+                newInput.PopulationFile = userInput;
             }
             else
             {
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(minHouseholdSizeIn, out temp))
+            input = nameof(MinHouseholdSize);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                int.TryParse(temp, out newInput.minHouseholdSize);
+                int.TryParse(userInput, out newInput.MinHouseholdSize);
             }
             else
             {
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(maxHouseholdSizeIn, out temp))
+            input = nameof(MaxHouseholdSize);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                int.TryParse(temp, out newInput.maxHouseholdSize);
+                int.TryParse(userInput, out newInput.MaxHouseholdSize);
             }
             else
             {
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(allowMoreThanOneCarIn, out temp))
+            input = nameof(AllowMoreThanOneCar);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                bool.TryParse(temp, out newInput.allowMoreThanOneCar);
+                bool.TryParse(userInput, out newInput.AllowMoreThanOneCar);
             }
             else
             {
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(maxCarsIn, out temp))
+            input = nameof(MaxCars);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                int.TryParse(temp, out newInput.maxCars);
+                int.TryParse(userInput, out newInput.MaxCars);
             }
             else
             {
                 ++issues;
             }
 
-            if (inputToParse.TryGetValue(maxCarsChanceIn, out temp))
+            input = nameof(MaxCarsProbability);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(temp, out newInput.maxCarsChance);
+                float.TryParse(userInput, out newInput.MaxCarsProbability);
             }
             else
             {

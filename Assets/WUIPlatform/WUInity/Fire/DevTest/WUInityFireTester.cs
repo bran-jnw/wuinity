@@ -7,6 +7,7 @@
 
 using UnityEngine;
 using WUIPlatform.Fire;
+using WUIPlatform.IO;
 
 namespace WUIPlatform.WUInity
 {
@@ -15,7 +16,7 @@ namespace WUIPlatform.WUInity
         [SerializeField] MeshFilter terrainMeshFilter;   
         [SerializeField] Material fireMaterial;
 
-        [SerializeField] SpreadMode spreadMode = SpreadMode.SixteenDirections;      //Sixteen direction spread mode
+        [SerializeField] FireCellInput.SpreadModeEnum spreadMode = FireCellInput.SpreadModeEnum.SixteenDirections;      //Sixteen direction spread mode
         [SerializeField] Vector2int cellCount = new Vector2int(128, 128);           //128 x 128 raster
         [SerializeField] Vector2d cellSize = new Vector2d(30, 30);                  //30 x 30 m cells
         [SerializeField] WindInput wind = WindInput.GetTemplate();                  //Wind data from template (default in code)

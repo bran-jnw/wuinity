@@ -14,31 +14,33 @@ namespace WUIPlatform.IO
     {
         public enum MapServiceProvider { Mapbox, Bing, OSM };
 
-        public MapServiceProvider mapProvider = MapServiceProvider.Mapbox;
-        public int zoomLevel = 13;
+        public MapServiceProvider MapProvider = MapServiceProvider.Mapbox;
+        public int ZoomLevel = 13;
 
         public static MapInput Parse(string[] inputLines, int startIndex)
         {
+            int issues = 0;
             var newInput = new MapInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
-            int issues = 0;
-
-            if (inputToParse.TryGetValue(nameof(mapProvider), out temp))
+            string input, userInput;
+            
+            input = nameof(MapProvider);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                switch (temp)
+                switch (userInput)
                 {
                     case nameof(MapServiceProvider.Mapbox):
-                        newInput.mapProvider = MapServiceProvider.Mapbox;
+                        newInput.MapProvider = MapServiceProvider.Mapbox;
                         break;
                     case nameof(MapServiceProvider.Bing):
-                        newInput.mapProvider = MapServiceProvider.Bing;
+                        newInput.MapProvider = MapServiceProvider.Bing;
                         break;
                     case nameof(MapServiceProvider.OSM):
-                        newInput.mapProvider = MapServiceProvider.OSM;
+                        newInput.MapProvider = MapServiceProvider.OSM;
                         break;
                     default:
-                        newInput.mapProvider = MapServiceProvider.Mapbox;
+                        ++issues;
+                        WUIEngine.LOG(WUIEngine.LogType.SimError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
                         break;
                 }
             }
@@ -46,15 +48,19 @@ namespace WUIPlatform.IO
             {
             }
 
-            if (inputToParse.TryGetValue(nameof(zoomLevel), out temp))
+            input = nameof(ZoomLevel);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                int.TryParse(temp, out newInput.zoomLevel);
+                int.TryParse(userInput, out newInput.ZoomLevel);
+                if(newInput.ZoomLevel < 0 || newInput.ZoomLevel > 20)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + newInput.ZoomLevel + ".");
+                    newInput.ZoomLevel = 13;                   
+                }
             }
             else
             {
             }
-
-
 
             return newInput;
         }

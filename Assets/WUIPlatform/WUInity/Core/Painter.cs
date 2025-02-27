@@ -183,7 +183,7 @@ namespace WUIPlatform.WUInity
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Desired paint mode not yet implemented.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Desired paint mode not yet implemented.");
             }
         }
 

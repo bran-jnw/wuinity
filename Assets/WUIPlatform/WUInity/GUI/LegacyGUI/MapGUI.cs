@@ -61,7 +61,7 @@ namespace WUIPlatform.WUInity.UI
             Long = wO.Simulation.LowerLeftLatLon.y.ToString();
             sizeX = wO.Simulation.DomainSize.x.ToString();
             sizeY = wO.Simulation.DomainSize.y.ToString();
-            zoom = wO.Map.zoomLevel.ToString();
+            zoom = wO.Map.ZoomLevel.ToString();
         }
 
         void ParseMapData(WUIEngineInput wO)
@@ -75,7 +75,7 @@ namespace WUIPlatform.WUInity.UI
             double.TryParse(Long, out wO.Simulation.LowerLeftLatLon.y);
             double.TryParse(sizeX, out wO.Simulation.DomainSize.x);
             double.TryParse(sizeY, out wO.Simulation.DomainSize.y);
-            int.TryParse(zoom, out wO.Map.zoomLevel);
+            int.TryParse(zoom, out wO.Map.ZoomLevel);
         }
     }
 }

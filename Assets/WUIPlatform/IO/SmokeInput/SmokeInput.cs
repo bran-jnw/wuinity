@@ -6,9 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using WUIPlatform.Traffic;
 using System.Collections.Generic;
-using System.IO;
 
 namespace WUIPlatform.IO
 {
@@ -16,49 +14,64 @@ namespace WUIPlatform.IO
     public class SmokeInput
     {
         public enum SmokeModuleChoice { GlobalSmoke, AdvectDiffuse, BoxModel, Lagrangian, GaussianPuff, GaussianPlume, FFD }
-        public SmokeModuleChoice smokeModuleChoice = SmokeModuleChoice.GlobalSmoke;
+        public SmokeModuleChoice SmokeModule = SmokeModuleChoice.GlobalSmoke;
 
-        public GlobalSmokeInput globalSmokeInput;
-        public AdvectDiffuseInput advectDiffuseInput;
-        public LagrangianInput lagrangianInput;
+        public GlobalSmokeInput GlobalSmokeInput;
+        public AdvectDiffuseInput AdvectDiffuseInput;
+        public LagrangianInput LagrangianInput;
 
-        public static SmokeInput Parse(string[] inputLines, int startIndex)
+        public static SmokeInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex)
         {
             int issues = 0;
             SmokeInput newInput = new SmokeInput();
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
+            string input, userInput;
 
-            if (inputToParse.TryGetValue(nameof(smokeModuleChoice), out temp))
+            input = nameof(SmokeModule);
+            if (inputToParse.TryGetValue(input, out userInput))
             {
-                switch (temp)
+                switch (userInput)
                 {
                     case nameof(SmokeModuleChoice.GlobalSmoke):
-                        newInput.smokeModuleChoice = SmokeModuleChoice.GlobalSmoke;
+                        newInput.SmokeModule = SmokeModuleChoice.GlobalSmoke;
                         break;
                     case nameof(SmokeModuleChoice.AdvectDiffuse):
-                        newInput.smokeModuleChoice = SmokeModuleChoice.AdvectDiffuse;
+                        newInput.SmokeModule = SmokeModuleChoice.AdvectDiffuse;
                         break;
                     case nameof(SmokeModuleChoice.Lagrangian):
-                        newInput.smokeModuleChoice = SmokeModuleChoice.Lagrangian;
+                        newInput.SmokeModule = SmokeModuleChoice.Lagrangian;
                         break;
                     default:
-                        newInput.smokeModuleChoice = SmokeModuleChoice.GlobalSmoke;
+                        ++issues;
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, input + " was not recognized." + WUIEngineInput.pleaseCheckInput);
                         break;
                 }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No smoke module was selected, using " + newInput.smokeModuleChoice.ToString());
+                ++issues;
+                WUIEngineInput.InputNotFoundMessage(input);
+            }
+
+            if(newInput.SmokeModule == SmokeModuleChoice.GlobalSmoke)
+            {
+                int lineIndex;
+                input = nameof(SmokeModuleChoice.GlobalSmoke);
+                if (headerLineIndex.TryGetValue(input, out lineIndex))
+                {
+                    WUIEngineInput.ReadingInputMessage(input);
+                    newInput.GlobalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, nameof(SmokeModuleChoice.GlobalSmoke) + " header not found but user has requested this smoke module." + WUIEngineInput.pleaseCheckInput);
+                    return null;
+                }
             }
 
             return newInput;
         }
-    }
-
-    public class GlobalSmokeInput
-    {
-        public Vector2[] timeSeries;
     }
 
     public class AdvectDiffuseInput

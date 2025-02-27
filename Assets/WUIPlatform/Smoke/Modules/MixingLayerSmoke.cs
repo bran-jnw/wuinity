@@ -78,7 +78,7 @@ namespace WUIPlatform.Smoke
             _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
-            _globalData.cellHeight = WUIEngine.INPUT.Smoke.advectDiffuseInput.MixingLayerHeight;
+            _globalData.cellHeight = WUIEngine.INPUT.Smoke.AdvectDiffuseInput.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
             _globalData.deltaTime = WUIEngine.INPUT.Simulation.DeltaTime;

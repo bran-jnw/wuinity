@@ -32,7 +32,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Error, no mCS set.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Error, no mCS set.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Error, no mCS set.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Error, no mCS set.");
+                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 

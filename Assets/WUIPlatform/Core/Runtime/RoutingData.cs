@@ -37,7 +37,7 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Routing data...");
         }
 
         public bool LoadRouterDb(string routerDbFile)
@@ -120,71 +120,6 @@ namespace WUIPlatform.Runtime
             }
 
             return success;
-        }
-
-        public void ModifyRouterDB()
-        {
-            // DO NOT CALL this method yet... need to work out the structure
-            // ... and call after each simulation loop OR if we're importing hazards, we could receive a poke as the hazard topuches the network
-            // Route analysis: thought... potentially call itinero RemoveEdges or RemoveVertex
-            // https://docs.itinero.tech/itinero/Itinero.Data.Network.RoutingNetwork.html#Itinero_Data_Network_RoutingNetwork_RemoveEdge_System_UInt32_
-            // Find the nth edge or vertex to modify
-            uint n=0;
-            _routerDb.Network.RemoveEdge(n); //..(or RemoveVertex)
-
-        }
-
-        private void SortVertices()
-        {
-            // Route analysis:
-
-            uint vCount = _routerDb.Network.VertexCount;
-            for (uint i = 0; i < vCount; ++i)
-            {
-                var vertex = _routerDb.Network.GetVertex(i);
-                var lati = vertex.Latitude;
-                var longi = vertex.Longitude;
-
-                //now find correct cell and add vertex index to list
-                //private List<uint>[] _cellSortedVertices;
-
-                _cellSortedVertices = new List<uint>[WUIEngine.SIM.FireModule.GetCellCountX() * WUIEngine.SIM.FireModule.GetCellCountY()];
-
-                // Sort the vertices of the cells, based on location... to be completed
-                // ... todo
-            }
-        }
-
-        public void CheckIfVerticesAreBlocked()
-        {
-            // Route analysis:
-            //after each fire update, check if any new burning cell has vertex
-
-            bool modifiedNetwork = false;
-            //if so, do this:
-            for (int i = 0; i < _cellSortedVertices.Length; ++i)
-            {
-                // If this cell just received fire, then execute the next loop
-                {
-                    for (int j = 0; j < _cellSortedVertices[i].Count; ++j)
-                    {
-                        //vertex must stay otherwise index will be off, but seems OK to only remove edges
-                        _routerDb.Network.RemoveEdges(_cellSortedVertices[i][j]);
-                    }
-                    modifiedNetwork = true;
-                }
-
-            }
-            if(modifiedNetwork )
-            {
-                //then do clumbsy update as there is no way of forcing update of contracted network it seems
-                var carProfile = RouterDb.GetSupportedProfile("Car");
-                _routerDb.RemoveContracted(carProfile);
-                _routerDb.AddContracted(carProfile);
-
-                //if any changes, update everyone already inside the network by re-calculating their routes
-                // code TODO
-            }
         }
     }
 }
