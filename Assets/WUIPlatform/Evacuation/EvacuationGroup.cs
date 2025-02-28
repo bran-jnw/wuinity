@@ -220,12 +220,9 @@ namespace WUIPlatform.Evacuation
             File.WriteAllLines(WUIEngine.WORKING_FOLDER + "/" + filename + ".egs", data);
         }
 
-        public static void LoadEvacGroupIndices(out bool success)
+        public static void LoadEvacGroupIndices(string path, out bool success)
         {
             success = false;
-            string filename = WUIEngine.INPUT.Simulation.Id;
-            string path = WUIEngine.WORKING_FOLDER + "/" + filename + ".egs";
-
             try
             {
                 using (StreamReader sr = new StreamReader(path))

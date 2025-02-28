@@ -16,6 +16,7 @@ namespace WUIPlatform.IO
         public string[] EvacuationGoalFiles;
         public string[] ResponseCurveFiles;
         public string[] EvacuationGroupFiles;
+        public string EvacuationGroupsMapFile;
         public float PaintCellSize = 200f;
         public bool UseTriggerBufferEvacuation = false;
         public string TriggerBufferFile;
@@ -61,6 +62,15 @@ namespace WUIPlatform.IO
             {
                 ++issues;
                 WUIEngineInput.InputNotFoundMessage(input);
+            }
+
+            input = nameof(EvacuationGroupsMapFile);
+            if (inputToParse.TryGetValue(input, out userInput))
+            {
+                newInput.EvacuationGroupsMapFile = userInput;
+            }
+            else
+            {
             }
 
             //TODO: fix actual reading

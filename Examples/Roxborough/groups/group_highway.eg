@@ -1,0 +1,6 @@
+Name: "Group_highway"
+Response curves: "Observed_average"
+Response curve probabilites: 1.0
+Destinations: "Goal_highway"
+Destination probabilites: 1.0
+Color: 1.0, 1.0, 0.0

@@ -135,7 +135,11 @@ namespace WUIPlatform
                         for (int x = 0; x < xDim; ++x)
                         {
                             //flip y to follow asc standard
-                            line += data[x, yDim - 1- y] + " ";
+                            line += data[x, yDim - 1 - y];
+                            if(x < xDim - 1)
+                            {
+                                line += " ";
+                            }
                         }
                         outputFile.WriteLine(line);
                     }

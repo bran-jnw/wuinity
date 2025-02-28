@@ -1,0 +1,9 @@
+Name: "Goal_highway"
+Latitude: 39.5071781907873
+Longitude: -105.02231033756013
+Goal type: "Exit"
+Max flow: -1.0
+Car capacity: -1
+People capacity: -1
+Initially blocked: "false"
+Color: 1.0, 1.0, 1.0

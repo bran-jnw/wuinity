@@ -98,7 +98,8 @@ namespace WUIPlatform.Runtime
         {
             bool success;
             //fills with first group if "failed", as in could not load but creates default
-            EvacuationGroup.LoadEvacGroupIndices(out success);
+            string path = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacuationGroupsMapFile);
+            EvacuationGroup.LoadEvacGroupIndices(path, out success);
 
             return success;
         }
