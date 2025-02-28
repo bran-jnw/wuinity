@@ -71,8 +71,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 #WUInity stuff
-/[Ee]xternal_data/
-/[Ee]xample/[Oo]utput/
-*.rc
+/[Ee]xamples/[Rr]oxborough/[Oo]utput/
 *.routerdb
 [Mm]apbox[Cc]onfiguration.txt

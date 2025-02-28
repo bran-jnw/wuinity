@@ -1,5 +1,5 @@
 [Simulation]
-Id=example
+Id=Roxborough_example
 LowerLeftLatLon=39.409924,-105.104505
 DomainSize=10000.0,10000.0
 DeltaTime=1.0
