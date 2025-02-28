@@ -83,7 +83,7 @@ namespace WUIPlatform
             }
         }
 
-        float[,] _perilOutput;
+        float[,] _triggerBufferOutput;
         private  void StartSimulations()
         {            
             int runNumber = 0;
@@ -137,8 +137,7 @@ namespace WUIPlatform
                     averageTotalEvacTime += CurrentTime;
                 }
 
-                //force garbage collection
-                //Resources.UnloadUnusedAssets();                
+                //force garbage collection                
                 System.GC.Collect();
             }            
 
@@ -171,11 +170,14 @@ namespace WUIPlatform
                 
                 _haveResults = true;                
 
-                if (_fireModule != null && WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
+                if (WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
                 {
                     if (WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
                     {
-                        _perilOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
+                        if(WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
+                        {
+                            _triggerBufferOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
+                        }                        
                     }  
                 }
             }            
@@ -225,10 +227,14 @@ namespace WUIPlatform
                     _fireModule = new AscFireImport();
                     WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module AscImport initiated.");
                 }
-                else
+                else if(WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
                 {
                     _fireModule = new FireMesh(WUIEngine.RUNTIME_DATA.Fire.LCPData, WUIEngine.RUNTIME_DATA.Fire.WeatherInput, WUIEngine.RUNTIME_DATA.Fire.WindInput, WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData, WUIEngine.RUNTIME_DATA.Fire.IgnitionPoints);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module Raster initiated.");
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module FireCell initiated.");
+                }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Could not initiate fire mdoule, aborting.");
                 }
             }  
             else
@@ -242,32 +248,37 @@ namespace WUIPlatform
             //can only run together
             if (WUIEngine.INPUT.Simulation.RunSmokeModule)
             {
-                if(!WUIEngine.INPUT.Simulation.RunFireModule)
+                //this module does not need the fire
+                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Smoke simulation was enabled but no fire module was enabled, aborting.");
-                    //input.Simulation.RunSmokeModule = false;
+                    string file = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Smoke.GlobalSmokeInput.OpticalDensityFile);
+                    _smokeModule = new GlobalSmoke(file);
+                    return;
+                }                
+
+                if (!WUIEngine.INPUT.Simulation.RunFireModule)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
                 }
                 else
-                {
-                    //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
-                    if (_fireModule == null)
+                {                       
+                    if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.SimError, "No fire module could be created, smoke simulation can not be performed, aborting");
-                        //input.Simulation.RunSmokeModule = false;
+                        _smokeModule = new AdvectDiffuseMixingLayer();
                     }
-                    else
+                    else if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse3D)
                     {
-                        if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                        /*if (_smokeModule != null)
                         {
-                            /*if (_smokeModule != null)
-                            {
-                                ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
-                            }
-                            //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/
-                            _smokeModule = new MixingLayerSmoke();
-                            WUIEngine.LOG(WUIEngine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
+                            ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
                         }
-                    }                    
+                        //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/                            
+                        WUIEngine.LOG(WUIEngine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
+                    }
+                    else if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                    {
+                        //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
+                    }                  
                 }
             } 
             else
@@ -556,7 +567,7 @@ namespace WUIPlatform
                 {
                     fireUpdated = true;
                     _fireModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
-                    nextFireUpdate += (float)_fireModule.GetInternalDeltaTime();
+                    nextFireUpdate += _fireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
                     // Note: we need to preprocess each cell which has a road on it
                 }
@@ -568,15 +579,14 @@ namespace WUIPlatform
             //sync with fire
             if (WUIEngine.INPUT.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
             {
-                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
-                {
-                    _smokeModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
-                }
-                else if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                 {
                     //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 }
-                
+                else
+                {
+                    _smokeModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                }                
             }
         }
 
@@ -756,11 +766,16 @@ namespace WUIPlatform
             System.IO.File.WriteAllLines(path, output);
         }
 
+        public void SetTriggerBufferOutput(float[,] data)
+        {
+            _triggerBufferOutput = data;
+        }
+
         public void DisplayTriggerBuffer()
         {
-            if(_perilOutput != null)
+            if(_triggerBufferOutput != null)
             {
-                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(_perilOutput);
+                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferOutput);
                 WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
                 WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPDataPlane(true);
             }            

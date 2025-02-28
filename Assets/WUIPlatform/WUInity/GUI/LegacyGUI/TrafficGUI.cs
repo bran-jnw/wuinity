@@ -18,7 +18,11 @@ namespace WUIPlatform.WUInity.UI
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
-                stallSpeed = tO.MacroTrafficSimInput.StallSpeed.ToString();
+                if(tO.MacroTrafficSimInput != null)
+                {
+                    stallSpeed = tO.MacroTrafficSimInput.StallSpeed.ToString();
+                }
+                
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;

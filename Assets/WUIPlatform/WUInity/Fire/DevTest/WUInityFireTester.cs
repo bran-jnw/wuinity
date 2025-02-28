@@ -21,7 +21,7 @@ namespace WUIPlatform.WUInity
         [SerializeField] Vector2d cellSize = new Vector2d(30, 30);                  //30 x 30 m cells
         [SerializeField] WindInput wind = WindInput.GetTemplate();                  //Wind data from template (default in code)
         [SerializeField] WeatherInput weather = WeatherInput.GetTemplate();         //same as above
-        [SerializeField] InitialFuelMoistureList initialMoisture = new InitialFuelMoistureList();       //same as above
+        [SerializeField] InitialFuelMoistureLibrary initialMoisture = new InitialFuelMoistureLibrary();       //same as above
         [SerializeField] int fuelModel = 1;                                         //all cells are fuel model 1 (grass I think)
         [SerializeField] float slope = 0.1f;                                        //10% slope
         

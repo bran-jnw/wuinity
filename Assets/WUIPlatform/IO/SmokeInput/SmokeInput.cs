@@ -13,7 +13,7 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class SmokeInput
     {
-        public enum SmokeModuleChoice { GlobalSmoke, AdvectDiffuse, BoxModel, Lagrangian, GaussianPuff, GaussianPlume, FFD }
+        public enum SmokeModuleChoice { GlobalSmoke, BoxModel, AdvectDiffuseMixingLayer, AdvectDiffuse3D, Lagrangian, GaussianPuff, GaussianPlume, FFD }
         public SmokeModuleChoice SmokeModule = SmokeModuleChoice.GlobalSmoke;
 
         public GlobalSmokeInput GlobalSmokeInput;
@@ -35,8 +35,11 @@ namespace WUIPlatform.IO
                     case nameof(SmokeModuleChoice.GlobalSmoke):
                         newInput.SmokeModule = SmokeModuleChoice.GlobalSmoke;
                         break;
-                    case nameof(SmokeModuleChoice.AdvectDiffuse):
-                        newInput.SmokeModule = SmokeModuleChoice.AdvectDiffuse;
+                    case nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer):
+                        newInput.SmokeModule = SmokeModuleChoice.AdvectDiffuseMixingLayer;
+                        break;
+                    case nameof(SmokeModuleChoice.AdvectDiffuse3D):
+                        newInput.SmokeModule = SmokeModuleChoice.AdvectDiffuse3D;
                         break;
                     case nameof(SmokeModuleChoice.Lagrangian):
                         newInput.SmokeModule = SmokeModuleChoice.Lagrangian;
@@ -65,18 +68,29 @@ namespace WUIPlatform.IO
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, nameof(SmokeModuleChoice.GlobalSmoke) + " header not found but user has requested this smoke module." + WUIEngineInput.pleaseCheckInput);
+                    WUIEngine.LOG(WUIEngine.LogType.InputError, input + " header not found but user has requested this smoke module." + WUIEngineInput.pleaseCheckInput);
+                    return null;
+                }
+            }
+            else if(newInput.SmokeModule == SmokeModuleChoice.AdvectDiffuseMixingLayer)
+            {
+                int lineIndex;
+                input = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
+                if (headerLineIndex.TryGetValue(input, out lineIndex))
+                {
+                    WUIEngineInput.ReadingInputMessage(input);
+                    newInput.AdvectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex);
+                }
+                else
+                {
+                    //critical
+                    WUIEngine.LOG(WUIEngine.LogType.InputError, input + " header not found but user has requested this smoke module." + WUIEngineInput.pleaseCheckInput);
                     return null;
                 }
             }
 
             return newInput;
         }
-    }
-
-    public class AdvectDiffuseInput
-    {
-        public float MixingLayerHeight = 250.0f;
     }
 
     public class LagrangianInput

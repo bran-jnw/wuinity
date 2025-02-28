@@ -99,31 +99,31 @@ namespace WUIPlatform.WUInity.UI
                 }
                 ++buttonIndex;
 
-                WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap, "Use random ignition");
-                ++buttonIndex;
-                if (WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap)
-                {
-                    WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap = false;
+                //WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap, "Use random ignition");
+                //++buttonIndex;
+                //if (WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap)
+                //{
+                    //WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap = false;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit random ignition area"))
                     {
                         fireEditMode = "Random ignition";
                         WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.RandomIgnitionArea);
                     }
                     ++buttonIndex;
-                }
+                //}
 
-                WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap, "Use initial ignition");
-                ++buttonIndex;
-                if(WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap)
-                {
-                    WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap = false;
+                //WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap, "Use initial ignition");
+                //++buttonIndex;
+                //if(WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap)
+                //{
+                    //WUIEngine.INPUT.Fire.FireCellInput.UseRandomIgnitionMap = false;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit initial ignition"))
                     {
                         fireEditMode = "Initial ignition";
                         WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.InitialIgnition);
                     }
                     ++buttonIndex;
-                }      
+                //}      
             }
             else
             {

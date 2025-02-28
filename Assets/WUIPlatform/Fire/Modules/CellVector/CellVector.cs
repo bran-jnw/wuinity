@@ -118,7 +118,7 @@ namespace WUIPlatform.Fire
         LCPData _lcpData;
         WeatherInput _weather;
         WindInput _wind;
-        InitialFuelMoistureList _initialFuelMoisture;
+        InitialFuelMoistureLibrary _initialFuelMoisture;
         FuelModelSet _fuelModelSet;
         Surface _surfaceFire;
         Crown _crownFire;

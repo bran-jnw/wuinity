@@ -5,9 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using ScottPlot.Drawing.Colormaps;
 using System.Collections.Generic;
-using static WUIPlatform.IO.FireInput;
 
 namespace WUIPlatform.IO
 {
@@ -86,42 +84,5 @@ namespace WUIPlatform.IO
 
             return newInput;
         }
-    }
-
-    public class kPERILInput
-    {
-        public float MidflameWindspeed = 0f;
-        public bool CalculateROSFromBehave = true;
-
-        public static kPERILInput Parse(string[] inputLines, int startIndex)
-        {
-            int issues = 0;
-            kPERILInput newInput = new kPERILInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
-            string temp;
-
-            if (inputToParse.TryGetValue(nameof(MidflameWindspeed), out temp))
-            {
-                float.TryParse(temp, out newInput.MidflameWindspeed);
-            }
-            else
-            {
-                ++issues;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "No midflame wind speed was set." + WUIEngineInput.pleaseCheckInput);
-            }
-
-            if (inputToParse.TryGetValue(nameof(CalculateROSFromBehave), out temp))
-            {
-                bool.TryParse(temp, out newInput.CalculateROSFromBehave);
-            }
-            else
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(CalculateROSFromBehave) + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
-            }
-
-            return newInput;
-        }
-        
-                
-    }
+    }     
 }

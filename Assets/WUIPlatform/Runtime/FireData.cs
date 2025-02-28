@@ -17,68 +17,31 @@ namespace WUIPlatform.Runtime
         public bool[] WuiArea;
         public bool[] RandomIgnition;
         public bool[] InitialIgnition;
-        public bool[] TriggerBuffer;
+        public bool[] ManualTriggerBuffer;
 
         private FireDataVisualizer _visualizer;
-        public FireDataVisualizer Visualizer
-        {
-            get{ return _visualizer; }
-        }
-
+        public FireDataVisualizer Visualizer {  get => _visualizer; } 
 
         private LCPData _lcpData;
-        public LCPData LCPData
-        {
-            get
-            {
-                return _lcpData;
-            }
-        }
+        public LCPData LCPData { get => _lcpData; }
 
         private FuelModelInput _fuelModelsData;
-        public FuelModelInput FuelModelsData
-        {
-            get
-            {
-                return _fuelModelsData;
-            }
-        }
+        public FuelModelInput FuelModelsData { get => _fuelModelsData; }
 
         private IgnitionPoint[] _ignitionPoints;
-        public IgnitionPoint[] IgnitionPoints
-        {
-            get
-            {                
-                return _ignitionPoints;
-            }
-        }
+        public IgnitionPoint[] IgnitionPoints { get => _ignitionPoints; }
 
-        private InitialFuelMoistureList _initialFuelMoistureData;
-        public InitialFuelMoistureList InitialFuelMoistureData
-        {
-            get
-            {               
-                return _initialFuelMoistureData;
-            }
-        }
+        private InitialFuelMoistureLibrary _initialFuelMoistureData;
+        public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }
 
         private WeatherInput _weatherInput;
-        public WeatherInput WeatherInput
-        {
-            get
-            {                
-                return _weatherInput;
-            }
-        }
+        public WeatherInput WeatherInput { get => _weatherInput; }
 
         private WindInput _windInput;
-        public WindInput WindInput
-        {
-            get
-            {                
-                return _windInput;
-            }
-        }
+        public WindInput WindInput { get => _windInput; }
+
+        private InitialFuelMoistureLibrary _kPERILInitialFuelMoistureData;
+        public InitialFuelMoistureLibrary kPERILInitialFuelMoistureData { get => _kPERILInitialFuelMoistureData; }
 
         public FireData()
         {
@@ -103,6 +66,14 @@ namespace WUIPlatform.Runtime
                 LoadInitialFuelMoistureData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile), false);
                 LoadWeatherInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.WeatherFile), false);
                 LoadWindInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.WindFile), false);                
+            }
+
+            if(WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer 
+                && WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL
+                && WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
+            {
+                string file = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.TriggerBuffer.kPERILInput.InitialFuelMoistureFile);
+                LoadPERILInitialFuelMoistureData(file);
             }            
         }
 
@@ -178,12 +149,21 @@ namespace WUIPlatform.Runtime
         public bool LoadInitialFuelMoistureData(string path, bool updateInputFile)
         {
             bool success;
-            _initialFuelMoistureData = InitialFuelMoistureList.LoadInitialFuelMoistureDataFile(out success);
+            _initialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(path, out success);
             if (success && updateInputFile)
             {
                 WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile = Path.GetFileName(path);
                 WUIEngineInput.SaveInput();
             }
+
+            return success;
+        }
+
+        private bool LoadPERILInitialFuelMoistureData(string path)
+        {
+            bool success;
+
+            _kPERILInitialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(path, out success);
 
             return success;
         }
@@ -254,13 +234,14 @@ namespace WUIPlatform.Runtime
             WUIEngine.RUNTIME_DATA.Fire.InitialIgnition = initialIgnitionIndices;
         }
 
+        //for painting trigger buffer manually
         public void UpdateTriggerBufferIndices(bool[] triggerBufferIndices, int xCount, int yCount)
         {
             if (triggerBufferIndices == null)
             {
                 triggerBufferIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.TriggerBuffer = triggerBufferIndices;
+            WUIEngine.RUNTIME_DATA.Fire.ManualTriggerBuffer = triggerBufferIndices;
         }
 
         public void ToggleLCPDataPlane()

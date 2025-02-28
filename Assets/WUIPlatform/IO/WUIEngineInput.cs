@@ -290,7 +290,7 @@ namespace WUIPlatform.IO
             {
                 //does not matter
                 newInput.Events = new EventsInput();
-                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " header not found, will do nothing.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " header not found, no events will be added.");
             }
 
             return newInput;

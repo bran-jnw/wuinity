@@ -14,7 +14,7 @@ namespace WUIPlatform
         public static void SaveGraphicalFireInput()
         {
             string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.Id + ".gfi");
-            WUIEngine.INPUT.Fire.GraphicalFireInputFile = WUIEngine.INPUT.Simulation.Id + ".gfi";
+            //WUIEngine.INPUT.Fire.GraphicalFireInputFile = WUIEngine.INPUT.Simulation.Id + ".gfi";
 
             using (FileStream fs = new FileStream(path, FileMode.Create))
             {
@@ -27,7 +27,7 @@ namespace WUIPlatform
                     bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.WuiArea));
                     bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.RandomIgnition));
                     bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.InitialIgnition));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.TriggerBuffer));
+                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.ManualTriggerBuffer));
                 }
             }
         }

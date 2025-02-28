@@ -347,8 +347,7 @@ namespace WUIPlatform.Traffic
 
             //make fire affect edges (based on junction)
             if (fireCellEdges[x, y] != null)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Cell " + x + "," + y + " has been ignited, handling road closure.");
+            {                
                 for (int i = 0; i < fireCellEdges[x, y].Count; i++)
                 {
                     //https://sumo.dlr.de/docs/Simulation/Routing.html
@@ -364,6 +363,15 @@ namespace WUIPlatform.Traffic
                             carsToUpdate.Add(car);
                         }                            
                     }
+                }
+
+                if(carsToUpdate.Count == 0)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+                }
+                else
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
                 }
 
                 //then do update for affected cars

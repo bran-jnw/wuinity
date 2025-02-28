@@ -13,7 +13,7 @@ namespace WUIPlatform.Fire
     [System.Serializable]
     public class InitialFuelMoisture
     {
-        public static InitialFuelMoisture DEAFULT = new InitialFuelMoisture(0, 6, 7, 8, 60, 90);
+        public static InitialFuelMoisture DEFAULT = new InitialFuelMoisture(0, 6, 7, 8, 60, 90);
 
         public int FuelModelNumber;
         public double OneHour;
@@ -32,6 +32,16 @@ namespace WUIPlatform.Fire
             LiveWoody = liveWoody;
         }
 
+        public InitialFuelMoisture(int fuelModelNumber)
+        {
+            FuelModelNumber = fuelModelNumber;
+            OneHour = DEFAULT.OneHour;
+            TenHour = DEFAULT.TenHour;
+            HundredHour = DEFAULT.HundredHour;
+            LiveHerbaceous = DEFAULT.LiveHerbaceous;
+            LiveWoody = DEFAULT.LiveWoody;
+        }
+
         public void UpdateData(double oneHour, double tenHour, double hundredHour, double liveHerbaceous, double liveWoody)
         {
             OneHour = oneHour;
@@ -43,74 +53,57 @@ namespace WUIPlatform.Fire
     }
 
     [System.Serializable]
-    public class InitialFuelMoistureList
-    {        
-        private InitialFuelMoisture[] initialFuelMoistures;
-        bool _conditioned = false;
+    public class InitialFuelMoistureLibrary
+    {
+        private Dictionary<int, InitialFuelMoisture> _initialFuelMoistures;
 
         /// <summary>
         /// Creates a new table of initial fuel moistures based on list (most likely from a *.fmc file).
         /// </summary>
         /// <param name="initialFuelMoistures"></param>
-        public InitialFuelMoistureList(List<InitialFuelMoisture> initialFuelMoistures)
+        public InitialFuelMoistureLibrary(List<InitialFuelMoisture> initialFuelMoistures)
         {
-            this.initialFuelMoistures = new InitialFuelMoisture[256];
+            _initialFuelMoistures = new Dictionary<int, InitialFuelMoisture>();
             for (int i = 0; i < initialFuelMoistures.Count; i++)
             {
-                if(initialFuelMoistures[i].FuelModelNumber > 0 && initialFuelMoistures[i].FuelModelNumber < 256)
-                {
-                    this.initialFuelMoistures[initialFuelMoistures[i].FuelModelNumber - 1] = initialFuelMoistures[i];
-                }                
+                _initialFuelMoistures.Add(initialFuelMoistures[i].FuelModelNumber, initialFuelMoistures[i]);            
             }
         }
 
         /// <summary>
         /// Creates a list filled with default values for fuel 1-13.
         /// </summary>
-        public InitialFuelMoistureList()
+        public InitialFuelMoistureLibrary()
         {
-            this.initialFuelMoistures = new InitialFuelMoisture[256];
-            for (int i = 0; i < 13; i++)
+            _initialFuelMoistures = new Dictionary<int, InitialFuelMoisture>();
+            for (int i = 1; i < 14; i++)
             {
-                this.initialFuelMoistures[i] = new InitialFuelMoisture(i + 1, 6, 7, 8, 60, 90);
+                _initialFuelMoistures.Add(i, new InitialFuelMoisture(i));
             }
-        }
-        
+        }     
 
-
-    public InitialFuelMoisture GetInitialFuelMoisture(int fuelModelNumber)
+        public InitialFuelMoisture GetInitialFuelMoisture(int fuelModelNumber)
         {
             InitialFuelMoisture result = null;
 
-            if (fuelModelNumber < 1 || fuelModelNumber > 255)
-            {                
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Tried to get initial fuel moisture for fuel number " + fuelModelNumber + " which is outside of accepted range [1-256].");
-                return InitialFuelMoisture.DEAFULT;
-            }
-
-            if(fuelModelNumber > 0 && fuelModelNumber - 1 < initialFuelMoistures.Length)
-            {
-                result = initialFuelMoistures[fuelModelNumber - 1];
-            }
-             
+            _initialFuelMoistures.TryGetValue(fuelModelNumber, out result);             
 
             if(result == null)
             {
-                result = new InitialFuelMoisture(fuelModelNumber, 6.0, 7.0, 8.0, 60.0, 90.0);
-                initialFuelMoistures[fuelModelNumber - 1] = result;
+                result = new InitialFuelMoisture(fuelModelNumber);
+                _initialFuelMoistures.Add(fuelModelNumber, result);
                 WUIEngine.LOG(WUIEngine.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
             }
 
             return result;
         }        
 
-        public static InitialFuelMoistureList LoadInitialFuelMoistureDataFile(out bool success)
+        public static InitialFuelMoistureLibrary LoadInitialFuelMoistureDataFile(string path, out bool success)
         {
             success = false;
-            InitialFuelMoistureList result = null;
+            InitialFuelMoistureLibrary result = null;
             List<InitialFuelMoisture> initialFuelMoistures = new List<InitialFuelMoisture>();
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
@@ -147,7 +140,7 @@ namespace WUIPlatform.Fire
 
             if (initialFuelMoistures.Count > 0)
             {
-                result = new InitialFuelMoistureList(initialFuelMoistures);
+                result = new InitialFuelMoistureLibrary(initialFuelMoistures);
                 success = true; 
                 WUIEngine.LOG(WUIEngine.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
             }

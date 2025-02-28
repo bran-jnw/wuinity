@@ -250,7 +250,21 @@ namespace WUIPlatform.WUInity.UI
                 ++buttonIndex;
                 ++buttonIndex;
             }
-            
+            ++buttonIndex;
+
+            //trigger buffer
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Trigger buffer tools");
+            ++buttonIndex;
+            if(WUIEngine.INPUT.TriggerBuffer.kPERILInput != null)
+            {
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run k-PERIL"))
+                {
+                    float[,] tB = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
+                    WUIEngine.SIM.SetTriggerBufferOutput(tB);
+                    WUIEngine.SIM.DisplayTriggerBuffer();
+                }
+            }   
         }        
 
         //GPW

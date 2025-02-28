@@ -117,23 +117,11 @@ namespace WUIPlatform
 
         public static string WORKING_FILE
         {
-            get
-            {
-                return ENGINE._workingFilePath;
-            }
-            set
-            {
-                ENGINE._workingFilePath = value;
-            }
+            get => ENGINE._workingFilePath;        
+            set => ENGINE._workingFilePath = value;
         }
 
-        public static string WORKING_FOLDER
-        {
-            get
-            {
-                return Path.GetDirectoryName(WORKING_FILE);
-            }
-        }
+        public static string WORKING_FOLDER { get => Path.GetDirectoryName(WORKING_FILE); }
 
         public static string OUTPUT_FOLDER
         {
@@ -173,7 +161,7 @@ namespace WUIPlatform
             //need to load evacuation goals before routing as they rely on evacuation goals
             RUNTIME_DATA.Traffic.LoadAll();
             RUNTIME_DATA.Fire.LoadAll();
-            RUNTIME_DATA.Smoke.LoadAll();
+            RUNTIME_DATA.Smoke.LoadAll(); //does nothing right now
 
             UpdateMapResourceStatus();
 
@@ -258,7 +246,7 @@ namespace WUIPlatform
             {
                 message = "WARNING: " + message;
             }
-            else if (logType == LogType.SimError)
+            else if (logType == LogType.SimError || logType == LogType.InputError)
             {
                 message = "ERROR: " + message;
             }

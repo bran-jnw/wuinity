@@ -42,7 +42,7 @@ namespace WUIPlatform.Fire
 
         private WeatherInput weather;                               
         private WindInput wind;                                     
-        public InitialFuelMoistureList initialFuelMoisture;         
+        public InitialFuelMoistureLibrary initialFuelMoisture;         
         
         public LCPData lcpData;                                     
         public FuelModelSet fuelModelSet;                           
@@ -73,7 +73,7 @@ namespace WUIPlatform.Fire
             this.ignitionPoints = ignitionPoints;
         }*/
 
-        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureList initialFuelMoisture, IgnitionPoint[] ignitionPoints)        
+        public FireMesh(LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints)        
         {
             this.lcpData = lcpData;
             _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);

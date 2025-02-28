@@ -57,7 +57,11 @@ namespace WUIPlatform.Runtime
         public void LoadAll()
         {
             WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Population data...");
-            LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.PopulationFile));
+            
+            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            {
+                LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.PopulationFile));
+            }            
         }
         
         public bool LoadPopulation(string path)
@@ -96,7 +100,7 @@ namespace WUIPlatform.Runtime
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Population file could not be found.");
+                WUIEngine.LOG(WUIEngine.LogType.InputError, "Population file " + path + " could not be found.");
             }
 
             WUIEngine.DATA_STATUS.SetPopulation(success);

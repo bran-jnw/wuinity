@@ -99,7 +99,8 @@ namespace WUIPlatform.WUInity.Visualization
 
         void CreateSootBuffer()
         {
-            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+            if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
+                || WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
             {
                 sootCellCountX = WUIEngine.SIM.SmokeModule.GetCellsX();
                 sootCellCountY = WUIEngine.SIM.SmokeModule.GetCellsY();
@@ -109,7 +110,17 @@ namespace WUIPlatform.WUInity.Visualization
                 sootMaterial.SetFloat("_LowerCutOff", 0.0f);
                 sootMaterial.SetFloat("_MinValue", lowerSootValue); //500 meters with C = 3
                 sootMaterial.SetFloat("_MaxValue", upperSootValue); //5 meters with C = 3
-                sootMaterial.SetFloat("_DataMultiplier", 4539.13f); // 1.2 * 8700.0 / 2.3 = 4539.13 for optical density
+
+                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
+                {
+                    // arrives in soot density, 1.2 kg/m3 * 8700.0 / 2.3 = 4539.13 for optical density
+                    sootMaterial.SetFloat("_DataMultiplier", 4539.13f); 
+                }
+                else
+                {
+                    sootMaterial.SetFloat("_DataMultiplier", 1f); // getting optical density directly
+                }
+                
                 if (sootMeshRenderer == null)
                 {
                     sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true);
@@ -186,7 +197,8 @@ namespace WUIPlatform.WUInity.Visualization
 
             if (renderSoot)
             {
-                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
+                    || WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
                     float[] newSoot = WUIEngine.SIM.SmokeModule.GetGroundOpticalDensity();
                     if(newSoot != null)
@@ -199,7 +211,6 @@ namespace WUIPlatform.WUInity.Visualization
                 {
                     WUIEngine.LOG(WUIEngine.LogType.Warning, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
-
             }
         }
 
@@ -327,7 +338,7 @@ namespace WUIPlatform.WUInity.Visualization
 
             if(!creationCall && WUIEngine.SIM.SmokeModule != null)
             {
-                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse)
+                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                 {
                     AdvectDiffuseModel model = WUIEngine.SIM.SmokeModule as AdvectDiffuseModel;
                     if(model != null)

@@ -17,6 +17,8 @@ namespace WUIPlatform.IO
         public string[] ResponseCurveFiles;
         public string[] EvacuationGroupFiles;
         public float PaintCellSize = 200f;
+        public bool UseTriggerBufferEvacuation = false;
+        public string TriggerBufferFile;
 
         public static EvacuationInput Parse(string[] inputLines, int startIndex)
         {
@@ -78,6 +80,24 @@ namespace WUIPlatform.IO
             if (inputToParse.TryGetValue(input, out userInput))
             {
                 float.TryParse(userInput, out newInput.PaintCellSize);
+            }
+            else
+            {
+            }
+
+            input = nameof(UseTriggerBufferEvacuation);
+            if (inputToParse.TryGetValue(input, out userInput))
+            {
+                bool.TryParse(userInput, out newInput.UseTriggerBufferEvacuation);
+            }
+            else
+            {
+            }
+
+            input = nameof(TriggerBufferFile);
+            if (inputToParse.TryGetValue(input, out userInput))
+            {
+                newInput.TriggerBufferFile = userInput;
             }
             else
             {

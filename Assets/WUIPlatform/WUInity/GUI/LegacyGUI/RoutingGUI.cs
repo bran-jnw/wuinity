@@ -39,27 +39,30 @@ namespace WUIPlatform.WUInity.UI
             }
             ++buttonIndex;
 
-            //route choice info
-            ++buttonIndex;
-            string routeChoice = "Route choice: ";
-            if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Fastest)
+            if(WUIEngine.INPUT.Traffic.MacroTrafficSimInput != null)
             {
-                routeChoice += "Fastest";
-            }
-            else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Closest)
-            {
-                routeChoice += "Closest";
-            }
-            else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Random)
-            {
-                routeChoice += "Random";
-            }
-            else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.EvacGroup)
-            {
-                routeChoice += "Evac. group";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeChoice);
-            ++buttonIndex;
+                //route choice info
+                ++buttonIndex;
+                string routeChoice = "Route choice: ";
+                if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Fastest)
+                {
+                    routeChoice += "Fastest";
+                }
+                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Closest)
+                {
+                    routeChoice += "Closest";
+                }
+                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Random)
+                {
+                    routeChoice += "Random";
+                }
+                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.EvacGroup)
+                {
+                    routeChoice += "Evac. group";
+                }
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), routeChoice);
+                ++buttonIndex;
+            }            
         }
         void ParseRoutingInput()
         {

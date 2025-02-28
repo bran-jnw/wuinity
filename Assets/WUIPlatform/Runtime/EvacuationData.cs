@@ -73,13 +73,17 @@ namespace WUIPlatform.Runtime
         public void LoadAll()
         {
             WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Evacuation data...");
-            //need goals and curves before can load groups    
-            LoadResponseCurves();
-            LoadEvacuationGoals();
-            LoadEvacuationGroups();
-            //need to load groups before indices
-            LoadEvacGroupIndices();
-            LoadBlockGoalEvents();            
+            
+            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            {
+                //need goals and curves before can load groups
+                LoadResponseCurves();
+                LoadEvacuationGoals();
+                LoadEvacuationGroups();
+                //need to load groups before indices
+                LoadEvacGroupIndices();
+                LoadBlockGoalEvents();
+            }                       
         }
 
         public bool LoadBlockGoalEvents()

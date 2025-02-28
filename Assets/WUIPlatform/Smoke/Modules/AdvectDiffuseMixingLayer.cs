@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace WUIPlatform.Smoke
 {
-    public class MixingLayerSmoke : SmokeModule, IDisposable
+    public class AdvectDiffuseMixingLayer : SmokeModule, IDisposable
     {
         const int READ = 0;
         const int WRITE = 1;
@@ -42,7 +42,8 @@ namespace WUIPlatform.Smoke
         }
         GlobalData _globalData;
 
-        public MixingLayerSmoke()
+        //TODO:convert to ILGPU
+        public AdvectDiffuseMixingLayer()
         {
             //initiate device to run on
             _context = Context.CreateDefault();
@@ -104,7 +105,7 @@ namespace WUIPlatform.Smoke
             _sootOutput = new float[bufferSize];
         }
 
-        ~MixingLayerSmoke()
+        ~AdvectDiffuseMixingLayer()
         {
             Dispose();
         }
@@ -327,7 +328,7 @@ namespace WUIPlatform.Smoke
 
         public override void Stop()
         {
-            //throw new System.NotImplementedException();
+            Dispose();
         }
     }
 }

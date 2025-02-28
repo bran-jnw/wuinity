@@ -10,7 +10,7 @@ namespace WUIPlatform.Smoke
     public class GlobalSmoke : SmokeModule
     {
         OpticalDensityRamp _opticalDensityRamp;
-        float[] _sootOutput;
+        float[] _opticalDensityOutput;
 
         public GlobalSmoke(string opticalDensityFile)
         {
@@ -19,13 +19,13 @@ namespace WUIPlatform.Smoke
             {
                 WUIEngine.LOG(WUIEngine.LogType.SimError, "Failed to initialize GlobalSmoke.");
             }
-            _sootOutput = new float[1];
+            _opticalDensityOutput = new float[1];
         }
 
 
         public override void Step(float currentTime, float deltaTime)
         {
-            _sootOutput[0] = _opticalDensityRamp.GetOpticalDensity(currentTime);
+            _opticalDensityOutput[0] = _opticalDensityRamp.GetOpticalDensity(currentTime);
         }      
 
         public override bool IsSimulationDone()
@@ -45,17 +45,17 @@ namespace WUIPlatform.Smoke
 
         public override float[] GetGroundOpticalDensity()
         {
-            return _sootOutput;
+            return _opticalDensityOutput;
         }        
 
         public override float GetGroundOpticalDensityAtWorldPos(Vector2d pos)
         {
-            return _sootOutput[0];
+            return _opticalDensityOutput[0];
         }
 
         public override float GetGroundOpticalDensityAtCoordinate(Vector2d latLon)
         {
-            return _sootOutput[0];
+            return _opticalDensityOutput[0];
         }
 
         public override void Stop()

@@ -17,7 +17,7 @@ namespace WUIPlatform
         private static kPERIL_DLL.kPERIL PERIL;
         //private const TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
         private const BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
-        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.TenMeter;
+        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.DirectMidflame;
         private const BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
         private const BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
         private const BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
@@ -28,10 +28,10 @@ namespace WUIPlatform
         /// <summary>
         /// Runs k-PERIL, should be called after a completed simulation
         /// </summary>
-        /// <param name="midFlameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
-        public static float[,] RunPERIL(float midFlameWindspeed)
+        /// <param name="midflameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
+        public static float[,] RunPERIL(float midflameWindspeed)
         {
-            WUIEngine.LOG(WUIEngine.LogType.Debug, "Starting calculation of trigger buffer using k-PERIL.");
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
 
             if (PERIL == null)
             {
@@ -47,7 +47,7 @@ namespace WUIPlatform
 
             //create multiple time buffers
             float RSET = WUIEngine.OUTPUT.TotalAverageEvacTime / 60f;
-            float[] RSETs = new float[10];
+            float[] RSETs = new float[1];
             for (int i = 0; i < RSETs.Length; ++i)
             {
                 RSETs[i] = RSET + i * 60 * 12f;
@@ -57,13 +57,13 @@ namespace WUIPlatform
             float[,] rosAzimuth;
             if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "Calculating ROS with Behave.");
+                WUIEngine.LOG(WUIEngine.LogType.Log, "k-PERIL is using ROS calculate using Behave.");
                 bool[,] wuiArea2D = null;// GetWUIArea2D(WUIEngine.RUNTIME_DATA.Fire.WuiArea, xDim, yDim);
-                CalculateAllRateOfSpreadsAndDirections(out maxROS, out rosAzimuth, midFlameWindspeed, 150f, true, wuiArea2D);
+                CalculateAllRateOfSpreadsAndDirections(out maxROS, out rosAzimuth, midflameWindspeed, 150f, true, wuiArea2D);
             }
             else
             {    
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "Using ROS from simulation.");
+                WUIEngine.LOG(WUIEngine.LogType.Log, "k-PERIL is using ROS from simulation.");
                 maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
                 rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
             }
@@ -73,7 +73,7 @@ namespace WUIPlatform
             {
                 using (StringWriter output = new StringWriter())
                 {
-                    int[,] result = PERIL.CalculateBoundary(cellSize, RSETs[i], midFlameWindspeed, perilWUIArea, maxROS, rosAzimuth, output);
+                    int[,] result = PERIL.CalculateBoundary(cellSize, RSETs[i], midflameWindspeed, perilWUIArea, maxROS, rosAzimuth, output);
                     perilOutput.Add(result);
                     WUIEngine.LOG(WUIEngine.LogType.Log, "k-PERIL output, RSET= " + RSETs[i] + " minutes.\n" + output.ToString());
                 }
@@ -93,8 +93,59 @@ namespace WUIPlatform
                 }
             }
 
+            SaveToFile(combinedPerilOutput, xDim, yDim, cellSize);
+
             return combinedPerilOutput;
         }   
+
+        private static void SaveToFile(float[,] data, int xDim, int yDim, float cellsize)
+        {
+            try
+            {
+                string file;
+                if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.OutputName == null || WUIEngine.INPUT.TriggerBuffer.kPERILInput.OutputName.Length == 0)
+                {
+                    file = "trigger_buffer.asc";
+                }
+                else
+                {
+                    file = WUIEngine.INPUT.TriggerBuffer.kPERILInput.OutputName;
+                }
+                string path = Path.Combine(WUIEngine.WORKING_FOLDER, file);
+                using (StreamWriter outputFile = new StreamWriter(path))
+                {
+                    string line;
+
+                    line = "ncols " + xDim;
+                    outputFile.WriteLine(line);
+                    line = "nrows " + yDim;
+                    outputFile.WriteLine(line);
+                    line = "xllcorner " + 0;
+                    outputFile.WriteLine(line);
+                    line = "yllcorner " + 0;
+                    outputFile.WriteLine(line);
+                    line = "cellsize " + cellsize;
+                    outputFile.WriteLine(line);
+                    line = "NODATA_value " + -9999;
+                    outputFile.WriteLine(line);
+
+                    for (int y = 0; y < yDim; ++y) 
+                    {
+                        line = "";
+                        for (int x = 0; x < xDim; ++x)
+                        {
+                            //flip y to follow asc standard
+                            line += data[x, yDim - 1- y] + " ";
+                        }
+                        outputFile.WriteLine(line);
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+            }
+        }
 
         private static void CalculateAllRateOfSpreadsAndDirections(out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, bool[,] wuiArea = null)
         {
@@ -131,7 +182,7 @@ namespace WUIPlatform
                         continue;
                     }
                     LandscapeStruct cellData = lcpData.GetCellData(x, y);
-                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
+                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.kPERILInitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
                     surfaceFire.updateSurfaceInputs(cellData.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
@@ -143,7 +194,7 @@ namespace WUIPlatform
                     {
                         yIndex = yDim - 1 - y;
                     }
-                    rateOfSpreads[x, yIndex] = (float)surfaceFire.getSpreadRate(windSpeedUnits);
+                    rateOfSpreads[x, yIndex] = (float)surfaceFire.getSpreadRate(BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerMinute);
                     spreadDirections[x, yIndex] = (float)surfaceFire.getDirectionOfMaxSpread();
 
                 }
@@ -172,7 +223,7 @@ namespace WUIPlatform
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
-                int yFlipped = WUIEngine.SIM.FireModule.GetCellCountY() - 1 - yIndex;
+                int yFlipped = yDim - 1 - yIndex;
                 if (WUIEngine.RUNTIME_DATA.Fire.WuiArea[i])
                 {
                     wuiArea[0, position] = xIndex;

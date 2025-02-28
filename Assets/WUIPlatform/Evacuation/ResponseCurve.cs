@@ -52,7 +52,7 @@ namespace WUIPlatform.Evacuation
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
             for (int i = 0; i < WUIEngine.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i] + ".rsp");
+                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]);
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -79,7 +79,9 @@ namespace WUIPlatform.Evacuation
                     //need at least two to make a curve
                     if(dataPoints.Count >= 2)
                     {
-                        responseCurves.Add(new ResponseCurve(dataPoints, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]));
+                        string file = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]);
+                        string name = Path.GetFileNameWithoutExtension(file);
+                        responseCurves.Add(new ResponseCurve(dataPoints, name));
                         WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
                     }                    
                 }
