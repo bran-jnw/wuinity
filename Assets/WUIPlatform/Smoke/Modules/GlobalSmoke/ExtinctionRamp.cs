@@ -11,11 +11,11 @@ using System.Numerics;
 
 namespace WUIPlatform.Smoke
 {
-    public class OpticalDensityRamp
+    public class ExtinctionRamp
     {
-        LinearSpline1D rampData;
+        LinearSpline1D _rampData;
 
-        public bool LoadOpticalDensityRampFile(string path)
+        public bool LoadExtinctionRampFile(string path)
         {
             string[] rampLines;
             if (File.Exists(path))
@@ -24,7 +24,7 @@ namespace WUIPlatform.Smoke
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Optical density ramp file " + path + " not found.");
+                WUIEngine.LOG(WUIEngine.LogType.Warning, "Extinction coefficient ramp file " + path + " not found.");
                 return false;
             }
 
@@ -48,7 +48,7 @@ namespace WUIPlatform.Smoke
 
             if(validRampLines.Count >= 2)
             {
-                rampData = new LinearSpline1D(validRampLines);
+                _rampData = new LinearSpline1D(validRampLines);
                 return true;
             }
             else
@@ -59,7 +59,7 @@ namespace WUIPlatform.Smoke
 
         public float GetOpticalDensity(float time)
         {
-            return rampData.GetYValue(time);
+            return _rampData.GetYValue(time);
         }
     }
 }

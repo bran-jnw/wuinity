@@ -13,7 +13,7 @@ namespace WUIPlatform.IO
     [System.Serializable]
     public class GlobalSmokeInput
     {
-        public string OpticalDensityFile;
+        public string ExtinctionFile;
 
         public static GlobalSmokeInput Parse(string[] inputLines, int startIndex)
         {
@@ -22,10 +22,10 @@ namespace WUIPlatform.IO
             Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
-            input = nameof(OpticalDensityFile);
+            input = nameof(ExtinctionFile);
             if (inputToParse.TryGetValue(input, out userInput))
             {
-                newInput.OpticalDensityFile = userInput;
+                newInput.ExtinctionFile = userInput;
             }
             else
             {

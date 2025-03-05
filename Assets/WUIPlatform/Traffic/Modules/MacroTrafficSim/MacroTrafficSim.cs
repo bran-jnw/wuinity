@@ -41,8 +41,8 @@ namespace WUIPlatform.Traffic
 
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
-                start += ", Goal: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;
-                start += ", " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name + " flow";
+                start += ", Goal: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i]._name;
+                start += ", " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i]._name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";

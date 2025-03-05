@@ -128,7 +128,7 @@ namespace WUIPlatform.Traffic
             if (tO.VisibilityAffectsSpeed)
             {
                 //added Enrico & Paolo article      
-                float D_L = WUIEngine.SIM.SmokeModule.GetGroundOpticalDensityAtCoordinate(new Vector2d(goalCoord.Latitude, goalCoord.Longitude));
+                float D_L = WUIEngine.SIM.SmokeModule.GetGroundExtinctionCoefficientAtCoordinate(new Vector2d(goalCoord.Latitude, goalCoord.Longitude));
                 //get rid of any strange values of D_L, TODO: fix when checking input
                 D_L = Mathf.Clamp(D_L, 0.0f, 0.2f);
                 float beta = -101.57f * D_L * D_L * D_L + 49.43f * D_L * D_L - 9.2755f * D_L + 1.0f;

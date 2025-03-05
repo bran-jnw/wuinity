@@ -113,12 +113,12 @@ namespace WUIPlatform.WUInity.Visualization
 
                 if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                 {
-                    // arrives in soot density, 1.2 kg/m3 * 8700.0 / 2.3 = 4539.13 for optical density
-                    sootMaterial.SetFloat("_DataMultiplier", 4539.13f); 
+                    // arrives in soot density, * 8700.0 for extinction coefficient
+                    sootMaterial.SetFloat("_DataMultiplier", 8700f); 
                 }
                 else
                 {
-                    sootMaterial.SetFloat("_DataMultiplier", 1f); // getting optical density directly
+                    sootMaterial.SetFloat("_DataMultiplier", 1f); // getting exticntion coefficient directly
                 }
                 
                 if (sootMeshRenderer == null)
@@ -200,7 +200,7 @@ namespace WUIPlatform.WUInity.Visualization
                 if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
                     || WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
-                    float[] newSoot = WUIEngine.SIM.SmokeModule.GetGroundOpticalDensity();
+                    float[] newSoot = WUIEngine.SIM.SmokeModule.GetExtinctionCoefficientDensity();
                     if(newSoot != null)
                     {
                         sootBuffer.SetData(newSoot);

@@ -14,12 +14,12 @@ namespace WUIPlatform.Evacuation
     [System.Serializable]
     public class EvacuationGoal
     {
-        public string name = "Goal_1";
+        private string _name = "Goal_1";
+        public string Name { get => _name; }
         public Vector2d latLon;
         public WUIEngineColor color;
         public bool blocked = false;
         public float maxFlow = 3600f; //cars per hour
-        //public GameObject marker;
         public EvacGoalType goalType = EvacGoalType.Refugee;
         public int maxCars = -1;
         public int maxPeople = -1;
@@ -28,27 +28,30 @@ namespace WUIPlatform.Evacuation
 
         [System.NonSerialized] public float currentFlow = 0f;
         private float firstArrivalTime, currentTimeStep = float.MinValue;
-        private int timeStepCars;        
+        private int timeStepCars;
+
+        //data for WUI-SHOW etc
+        private float _totalTravelTime, _averageTravelTime;
 
         public EvacuationGoal()
         {
-            name = "New goal";
+            _name = "New goal";
             latLon = Vector2d.zero;
             color = WUIEngineColor.white;
         }
 
         public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color)
         {
-            this.name = name;
+            this._name = name;
             this.latLon = latLong;
             this.color = color;
             maxFlow = 3600f;
         }
 
-        public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color, float maxFlow)
+        public EvacuationGoal(string name, Vector2d latLon, WUIEngineColor color, float maxFlow)
         {
-            this.name = name;
-            this.latLon = latLong;
+            this._name = name;
+            this.latLon = latLon;
             this.color = color;
             this.maxFlow = maxFlow;
         }
@@ -57,12 +60,12 @@ namespace WUIPlatform.Evacuation
         /// Checks flow and returns true if car arrives at goal safe and sound, returns false if the car have to wait.
         /// </summary>
         /// <param name="arrivingCar"></param>
-        /// <param name="timeStep"></param>
+        /// <param name="currentTime"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public bool CarArrives(TrafficModuleCar arrivingCar, float timeStep, float deltaTime)
+        public bool CarArrives(TrafficModuleCar arrivingCar, float currentTime, float deltaTime)
         {
-            UpdateFlow(timeStep, deltaTime);
+            UpdateFlow(currentTime, deltaTime);            
 
             //car can arrive
             if((maxFlow <= 0 && !blocked) || (currentFlow < maxFlow && !blocked))
@@ -72,6 +75,9 @@ namespace WUIPlatform.Evacuation
                 cars.Add(arrivingCar);
                 currentPeople += arrivingCar.numberOfPeopleInCar;
                 UpdateCapacity();
+
+                _totalTravelTime += currentTime;
+                _averageTravelTime = _totalTravelTime / cars.Count;
 
                 return true;
             }
@@ -87,24 +93,24 @@ namespace WUIPlatform.Evacuation
                 if (maxCars > 0 && cars.Count >= maxCars && !blocked)
                 {
                     blocked = true;
-                    WUIEngine.LOG(WUIEngine.LogType.Event, "Evacuation goal " + name + " has reached cars capacity, re-routing");
+                    WUIEngine.LOG(WUIEngine.LogType.Event, "Evacuation goal " + _name + " has reached cars capacity, re-routing");
                     WUIEngine.SIM.GoalBlocked();
                 }
                 else if (maxCars > 0 && cars.Count > maxCars)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Additional car arrived at " + name + ", arrived during same time step.");
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Additional car arrived at " + _name + ", arrived during same time step.");
                 }
 
                 //track and respond people
                 if (maxPeople > -1 && currentPeople >= maxPeople && !blocked)
                 {
                     blocked = true;
-                    WUIEngine.LOG(WUIEngine.LogType.Event, "Evacuation goal " + name + " has reached people capacity, re-routing");
+                    WUIEngine.LOG(WUIEngine.LogType.Event, "Evacuation goal " + _name + " has reached people capacity, re-routing");
                     WUIEngine.SIM.GoalBlocked();
                 }
                 else if (maxPeople > -1 && currentPeople > maxPeople)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Additional people arrived at " + name + ", arrived during same time step.");
+                    WUIEngine.LOG(WUIEngine.LogType.Log, "Additional people arrived at " + _name + ", arrived during same time step.");
                 }
             }
         }
@@ -151,27 +157,9 @@ namespace WUIPlatform.Evacuation
             timeStepCars = 0;
             firstArrivalTime = float.MinValue;
             currentTimeStep = float.MinValue;
-        }
 
-        public static EvacuationGoal[] GetRoxburoughGoals()
-        {
-            EvacuationGoal[] eGs = new EvacuationGoal[3];
-
-            eGs[0] = new EvacuationGoal();
-            eGs[0].name = "Rox_Goal_E";
-            eGs[0].latLon = new Vector2d(39.426692, -105.071401);
-            eGs[0].color = WUIEngineColor.red;
-
-            eGs[1] = new EvacuationGoal();
-            eGs[1].name = "Rox_Goal_R";
-            eGs[1].latLon = new Vector2d(39.473858, -105.092137);
-            eGs[1].color = WUIEngineColor.green;
-
-            eGs[2] = new EvacuationGoal();
-            eGs[2].name = "Rox_Goal_F";
-            eGs[2].latLon = new Vector2d(39.466157, -105.082197);
-            eGs[2].color = WUIEngineColor.blue;
-            return eGs;
+            _totalTravelTime = 0f;
+            _averageTravelTime = 0f;
         }
 
         public static List<EvacuationGoal> LoadEvacuationGoalFiles(out bool success)

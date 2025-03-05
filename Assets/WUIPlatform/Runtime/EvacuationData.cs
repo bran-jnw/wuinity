@@ -188,7 +188,7 @@ namespace WUIPlatform.Runtime
             int index = -1;
             for (int i = 0; i < EvacuationGoals.Count; i++)
             {
-                if (name == EvacuationGoals[i].name)
+                if (name == EvacuationGoals[i]._name)
                 {
                     index = i;
                     break;

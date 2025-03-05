@@ -9,23 +9,23 @@ namespace WUIPlatform.Smoke
 {
     public class GlobalSmoke : SmokeModule
     {
-        OpticalDensityRamp _opticalDensityRamp;
-        float[] _opticalDensityOutput;
+        ExtinctionRamp _extinctionCoefficientRamp;
+        float[] _extinctionCoefficientOutput;
 
-        public GlobalSmoke(string opticalDensityFile)
+        public GlobalSmoke(string extinctionCoefficientFile)
         {
-            _opticalDensityRamp = new OpticalDensityRamp();
-            if(!_opticalDensityRamp.LoadOpticalDensityRampFile(opticalDensityFile))
+            _extinctionCoefficientRamp = new ExtinctionRamp();
+            if(!_extinctionCoefficientRamp.LoadExtinctionRampFile(extinctionCoefficientFile))
             {
                 WUIEngine.LOG(WUIEngine.LogType.SimError, "Failed to initialize GlobalSmoke.");
             }
-            _opticalDensityOutput = new float[1];
+            _extinctionCoefficientOutput = new float[1];
         }
 
 
         public override void Step(float currentTime, float deltaTime)
         {
-            _opticalDensityOutput[0] = _opticalDensityRamp.GetOpticalDensity(currentTime);
+            _extinctionCoefficientOutput[0] = _extinctionCoefficientRamp.GetOpticalDensity(currentTime);
         }      
 
         public override bool IsSimulationDone()
@@ -43,19 +43,19 @@ namespace WUIPlatform.Smoke
             return 1;
         }
 
-        public override float[] GetGroundOpticalDensity()
+        public override float[] GetExtinctionCoefficientDensity()
         {
-            return _opticalDensityOutput;
+            return _extinctionCoefficientOutput;
         }        
 
-        public override float GetGroundOpticalDensityAtWorldPos(Vector2d pos)
+        public override float GetGroundExtinctionCoefficientAtWorldPos(Vector2d pos)
         {
-            return _opticalDensityOutput[0];
+            return _extinctionCoefficientOutput[0];
         }
 
-        public override float GetGroundOpticalDensityAtCoordinate(Vector2d latLon)
+        public override float GetGroundExtinctionCoefficientAtCoordinate(Vector2d latLon)
         {
-            return _opticalDensityOutput[0];
+            return _extinctionCoefficientOutput[0];
         }
 
         public override void Stop()

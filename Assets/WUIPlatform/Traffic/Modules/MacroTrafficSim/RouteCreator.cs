@@ -192,14 +192,14 @@ namespace WUIPlatform.Traffic
                     _validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].name);
+                        WUIEngine.LOG(WUIEngine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i]._name);
                     }
                 }
                 catch (Itinero.Exceptions.ResolveFailedException)
                 {
                     if (logMessages)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].name);
+                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i]._name);
                     }
                 }
             }

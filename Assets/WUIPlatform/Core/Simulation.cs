@@ -251,7 +251,7 @@ namespace WUIPlatform
                 //this module does not need the fire
                 if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
-                    string file = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Smoke.GlobalSmokeInput.OpticalDensityFile);
+                    string file = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Smoke.GlobalSmokeInput.ExtinctionFile);
                     _smokeModule = new GlobalSmoke(file);
                     return;
                 }                
@@ -645,7 +645,7 @@ namespace WUIPlatform
                     FireCellState cellState = _fireModule.GetFireCellState(eG.latLon);
                     if (cellState == FireCellState.Burning)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Log, " Goal blocked by fire: " + eG.name);
+                        WUIEngine.LOG(WUIEngine.LogType.Log, " Goal blocked by fire: " + eG._name);
                         BlockEvacGoal(i);
                     }
                 }                

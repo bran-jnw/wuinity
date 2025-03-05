@@ -63,7 +63,7 @@ namespace WUIPlatform.WUInity.UI
             }
             ++buttonIndex;
 
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Optical density"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Extinction coefficient"))
             {
                 WUInityEngine.INSTANCE.ToggleSootRendering();
                 WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
@@ -119,7 +119,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
                 {
-                    string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].name;
+                    string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i]._name;
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
                     ++buttonIndex;
                 }
