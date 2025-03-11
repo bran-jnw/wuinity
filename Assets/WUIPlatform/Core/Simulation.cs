@@ -645,7 +645,7 @@ namespace WUIPlatform
                     FireCellState cellState = _fireModule.GetFireCellState(eG.latLon);
                     if (cellState == FireCellState.Burning)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Log, " Goal blocked by fire: " + eG._name);
+                        WUIEngine.LOG(WUIEngine.LogType.Log, " Goal blocked by fire: " + eG.Name);
                         BlockEvacGoal(i);
                     }
                 }                

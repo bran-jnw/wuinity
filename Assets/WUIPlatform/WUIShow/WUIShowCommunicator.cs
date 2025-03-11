@@ -8,29 +8,35 @@ namespace WUIPlatform.Visualization
     {
         private int timesCarSent = 0;
         private float lastTime = 0f;
-        private UdpClient udpClient;
-        //private TcpClient tcpClient;
+        private UdpClient _udpClient;
 
         private Vector4[] previouslySentCars;
         private int numberOfBlockedCars = 0;
-        private double origoLongitude;
-        private double origoLatitude;
-        private Vector2d offset;
+        private double _originLongitude;
+        private double _originLatitude;
+        private Vector2d _offset;
         private int maxNumberOfCars;
 
-        public WUIShowCommunicator(string serverIP, int serverPort, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
+        public WUIShowCommunicator(string serverIP, int serverPort, double originatitude = 39.409924, double originLongitude = -105.104505, int maxNumberOfCars = 10000)
         {
-            udpClient = new UdpClient(serverIP, serverPort);
-            //tcpClient = new TcpClient(serverIP, serverPort);
+            _udpClient = new UdpClient(serverIP, serverPort);
 
 
-            this.origoLongitude = origoLongitude;
-            this.origoLatitude = origoLatitude;
+            _originLongitude = originLongitude;
+            _originLatitude = originatitude;
 
-            this.offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
+            _offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentCars = new Vector4[maxNumberOfCars];
             
+        }
+        public void SendTriggerBuffer(float[,] triggerBuffer)
+        {
+
+        }
+        public void SendUsageMap()
+        {
+
         }
 
         public void SendData(float currentTime)
@@ -72,12 +78,12 @@ namespace WUIPlatform.Visualization
                         if (true)
                         {
                             
-                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X - offset.x, carData.Y - offset.y, false);
+                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X - _offset.x, carData.Y - _offset.y, false);
 
                             //Make the lon/lat coordinates relative to conserve precision during cast to float
                             //SUMO defines lon as x and lat as y
-                            double longitude = wgs84.x - origoLongitude;
-                            double latitude = wgs84.y - origoLatitude;
+                            double longitude = wgs84.x - _originLongitude;
+                            double latitude = wgs84.y - _originLatitude;
                             addBytes(BitConverter.GetBytes((float)longitude));
                             addBytes(BitConverter.GetBytes((float)latitude));
                         }
@@ -115,7 +121,7 @@ namespace WUIPlatform.Visualization
                     }
                     byte[] chunk = new byte[targetSize];
                     Array.Copy(sendBytes, x, chunk, 0, targetSize);
-                    udpClient.Send(chunk, chunk.Length);
+                    _udpClient.Send(chunk, chunk.Length);
                 }
 
                 lastTime = currentTime;

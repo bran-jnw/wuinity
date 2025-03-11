@@ -64,7 +64,7 @@ FirelineIntensityFile=output/FI.asc
 WeatherStreamFile=weather_stream.wxs
 
 [TriggerBuffer]
-CalculateTriggerBuffer=true
+CalculateTriggerBuffer=false
 TriggerBuffer=kPERIL
 
 [kPERIL]

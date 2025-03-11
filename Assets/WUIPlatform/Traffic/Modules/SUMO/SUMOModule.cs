@@ -17,13 +17,15 @@ namespace WUIPlatform.Traffic
     {
         private Dictionary<string, SUMOCar> cars;        
         List<LIBSUMO.TraCIRoadPosition> validStartPositions;
-        private double adjustX, adjustY;
 
         //output
         private uint totalCarsArrived, totalPeopleArrived, totalSumoCarsArrived;
         private int currentCarsInSystem;
         private int totalCarsInjected, totalSumoCarsInjected;
         private List<string> output;
+
+        uint _maxUsage;
+        private uint[,] _usageMap;
 
         public SUMOModule(out bool success)
         {
@@ -35,7 +37,7 @@ namespace WUIPlatform.Traffic
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
 
-                //need to use UTM projection in SUMO and WUInity to overlay data (an dapproximate overlay with web mercator, e.g. Mapbox)
+                //need to use UTM projection in SUMO and WUInity to overlay data (and approximate overlay with web mercator, e.g. Mapbox)
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.y);
                 _originOffset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
@@ -56,6 +58,26 @@ namespace WUIPlatform.Traffic
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
                 output.Add(header);
+
+                const int maxSize = 128;
+                int xSize, ySize;
+                if(WUIEngine.INPUT.Simulation.DomainSize.x == WUIEngine.INPUT.Simulation.DomainSize.y)
+                {
+                    xSize = maxSize;
+                    ySize = maxSize;
+                } 
+                else if(WUIEngine.INPUT.Simulation.DomainSize.x > WUIEngine.INPUT.Simulation.DomainSize.y)
+                {
+                    xSize = maxSize;
+                    ySize = (int)(0.5 + maxSize * (WUIEngine.INPUT.Simulation.DomainSize.y / WUIEngine.INPUT.Simulation.DomainSize.x));
+                }
+                else
+                {
+                    xSize = (int)(0.5 + maxSize * (WUIEngine.INPUT.Simulation.DomainSize.x / WUIEngine.INPUT.Simulation.DomainSize.y));
+                    ySize = maxSize;
+                }
+
+                _usageMap = new uint[xSize, ySize];
 
                 SortEdgesInFireCells();
             }
@@ -104,6 +126,8 @@ namespace WUIPlatform.Traffic
                         cars.Add(sumoID, car);
                         ++totalSumoCarsInjected;
                     }
+
+                    UpdateUsageMap(car);
                 }
             }     
 
@@ -159,6 +183,33 @@ namespace WUIPlatform.Traffic
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalCarsInjected + "," + totalCarsArrived + "," + currentCarsInSystem + "," + totalPeopleArrived + "," + totalSumoCarsInjected + "," + totalSumoCarsArrived;
             output.Add(dataLine);
+        }
+
+        private void UpdateUsageMap(SUMOCar car)
+        {
+            Vector2d pos = car.GetWorldPosition();
+
+            int xIndex = (int)(_usageMap.GetLength(0) * pos.x / WUIEngine.INPUT.Simulation.DomainSize.x);
+            int yIndex = (int)(_usageMap.GetLength(1) * pos.y / WUIEngine.INPUT.Simulation.DomainSize.y);
+
+            if (xIndex >= 0 && xIndex < _usageMap.GetLength(0) && yIndex >= 0 && yIndex < _usageMap.GetLength(1))
+            {
+                _usageMap[xIndex, yIndex] += 1;
+                if (_usageMap[xIndex, yIndex] > _maxUsage)
+                {
+                    _maxUsage = _usageMap[xIndex, yIndex];
+                }
+            }
+        }
+
+        public uint[,] GetUsageMap()
+        {
+            return _usageMap;
+        }
+
+        public uint GetMaxUsage()
+        {
+            return _maxUsage;
         }
 
         public override void HandleNewCars()

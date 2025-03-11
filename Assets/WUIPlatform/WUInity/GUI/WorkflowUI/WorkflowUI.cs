@@ -694,7 +694,7 @@ namespace WUIPlatform.WUInity.UI
                 bool findDuplicate = false;
                 for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
                 {
-                    if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i]._name == name) findDuplicate = true;
+                    if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name == name) findDuplicate = true;
                 }
 
                 if (!findDuplicate) {
@@ -1222,7 +1222,7 @@ namespace WUIPlatform.WUInity.UI
 
                     if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count > 0)
                     {
-                        tfTxEvacDestName.SetValueWithoutNotify(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index]._name);
+                        tfTxEvacDestName.SetValueWithoutNotify(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].Name);
                         tfTxEvacDestLatLong.SetValueWithoutNotify(WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLon.x.ToString() + ", " +
                                                                   WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[dfDfEvacutionDestination.index].latLon.y.ToString());
 
@@ -1599,7 +1599,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 WUInityEngine.INSTANCE.DisplayClosestDensityData(time);
 
-                if (WUInityEngine.INSTANCE.ToggleEvacDataPlane())
+                if (WUInityEngine.INSTANCE.ToggleDomainDataPlane())
                     btnVewTrafficDensity.text = "Traffic density: on";
                 else
                     btnVewTrafficDensity.text = "Traffic density: off";
@@ -1772,7 +1772,7 @@ namespace WUIPlatform.WUInity.UI
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
                 totalEvacuated += WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
-                name += "\n\r" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i]._name;
+                name += "\n\r" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name;
                 name += ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " by " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count+ " cars";
             }
 
@@ -1922,7 +1922,7 @@ namespace WUIPlatform.WUInity.UI
                     List<string> m_DropOptions = new List<string> {};
 
                     foreach(EvacuationGoal eg in WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals)
-                        m_DropOptions.Add(eg._name);
+                        m_DropOptions.Add(eg.Name);
 
                     dfDfEvacutionDestination.choices.Clear();
                     dfDfEvacutionDestination.choices = m_DropOptions;

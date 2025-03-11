@@ -175,7 +175,7 @@ namespace WUIPlatform.WUInity
         private Visualization.FireRenderer _fireRenderer;
         private Visualization.EvacuationRenderer _evacuationRenderer;
 
-        MeshRenderer _populationDataPlaneMeshRenderer;
+        MeshRenderer _domainDataMeshRenderer;
         MeshRenderer _fireDataPlaneMeshRenderer;
         //List<GameObject> drawnRoad_s;
         GameObject[] _goalMarkers;
@@ -640,12 +640,12 @@ namespace WUIPlatform.WUInity
 
             if(fireEdit)
             {
-                SetPopulationDataPlane(false);
+                SetDomainDataPlane(false);
                 SetFireDataPlane(true);
             }
             else
             {
-                SetPopulationDataPlane(true);
+                SetDomainDataPlane(true);
                 SetFireDataPlane(false);
             }
         }
@@ -807,11 +807,45 @@ namespace WUIPlatform.WUInity
             SetDataPlaneTexture(Painter.GetPopulationMaskTexture());
         }
 
-        public  void SetPopulationDataPlane(bool setActive)
+        public void DisplayTrafficUsageMap()
         {
-            if (_populationDataPlaneMeshRenderer != null)
+            if(_trafficUsageMap == null)
             {
-                _populationDataPlaneMeshRenderer.gameObject.SetActive(setActive);
+                CreateTrafficUsageMapTexture();
+            }
+            SetDataPlaneTexture(_trafficUsageMap);
+            SetDomainDataPlane(true);
+        }
+
+        Texture2D _trafficUsageMap;
+        private void CreateTrafficUsageMapTexture()
+        {
+            uint[,] data = ((SUMOModule)WUIEngine.SIM.TrafficModule).GetUsageMap();
+            uint maxData = ((SUMOModule)WUIEngine.SIM.TrafficModule).GetMaxUsage();
+            _trafficUsageMap = new Texture2D(data.GetLength(0), data.GetLength(0));
+            _trafficUsageMap.filterMode = FilterMode.Bilinear;
+            for (uint y = 0; y < data.GetLength(1); ++y)
+            {
+                for (uint x = 0; x < data.GetLength(0); ++x)
+                {
+                    float ratio = (float)data[x, y] / maxData;
+                    Color color = Color.HSVToRGB(0.67f - 0.67f * ratio, 1.0f, 1.0f);
+                    color.a = 1f;
+                    if (data[x, y] == 0)
+                    {
+                        color.a = 0f;
+                    }
+                    _trafficUsageMap.SetPixel((int)x, (int)y, color);
+                }
+            }
+            _trafficUsageMap.Apply();
+        }
+
+        public  void SetDomainDataPlane(bool setActive)
+        {
+            if (_domainDataMeshRenderer != null)
+            {
+                _domainDataMeshRenderer.gameObject.SetActive(setActive);
             }
         }
 
@@ -823,12 +857,12 @@ namespace WUIPlatform.WUInity
             }
         }
 
-        public bool ToggleEvacDataPlane()
+        public bool ToggleDomainDataPlane()
         {
-            if (_populationDataPlaneMeshRenderer != null)
+            if (_domainDataMeshRenderer != null)
             {
-                _populationDataPlaneMeshRenderer.gameObject.SetActive(!_populationDataPlaneMeshRenderer.gameObject.activeSelf);
-                return _populationDataPlaneMeshRenderer.gameObject.activeSelf;
+                _domainDataMeshRenderer.gameObject.SetActive(!_domainDataMeshRenderer.gameObject.activeSelf);
+                return _domainDataMeshRenderer.gameObject.activeSelf;
             }
 
             return false;
@@ -893,7 +927,7 @@ namespace WUIPlatform.WUInity
         private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
         {
             //pick needed data plane
-            MeshRenderer activeMeshRenderer = _populationDataPlaneMeshRenderer;
+            MeshRenderer activeMeshRenderer = _domainDataMeshRenderer;
             Vector2int cellCount = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
             Vector2d size = WUIEngine.INPUT.Simulation.DomainSize;
             Vector2d offset = Vector2d.zero;
@@ -918,7 +952,7 @@ namespace WUIPlatform.WUInity
                 }
                 else
                 {
-                    _populationDataPlaneMeshRenderer = activeMeshRenderer;
+                    _domainDataMeshRenderer = activeMeshRenderer;
                     _evacDataPlane = activeMeshRenderer.gameObject;
                 }                
             }

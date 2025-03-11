@@ -76,11 +76,17 @@ namespace WUIPlatform.Traffic
             SetPosRot(pos.x, pos.y, angle);
         }
 
+        public Vector2d GetWorldPosition()
+        {
+            return new Vector2d(xPos, yPos) + WUIEngine.SIM.TrafficModule.GetOriginOffset();
+        }
+
         Vector4 _positionAndSpeed;
         public override Vector4 GetWorldPositionSpeedCarID(bool updateData)
         {
             return GetPositionSpeedCarID(updateData, WUIEngine.SIM.TrafficModule.GetOriginOffset());
         }
+
         public Vector4 GetPositionSpeedCarID(bool updateData, Vector2d originOffset)
         {
             if (updateData)

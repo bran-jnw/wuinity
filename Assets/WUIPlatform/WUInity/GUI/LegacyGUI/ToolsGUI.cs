@@ -82,7 +82,7 @@ namespace WUIPlatform.WUInity.UI
                 {
                     WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.PopulationMap);
                     WUInityEngine.INSTANCE.DisplayPopulationMap();
-                    WUInityEngine.INSTANCE.ToggleEvacDataPlane();
+                    WUInityEngine.INSTANCE.ToggleDomainDataPlane();
 
                 }
                 ++buttonIndex;
@@ -301,7 +301,7 @@ namespace WUIPlatform.WUInity.UI
         {
             Tools.PopulationTools.CreateAndSavePopulationMap(paths[0], _populationMapCellSize);
             WUInityEngine.INSTANCE.DisplayPopulationMap();
-            WUInityEngine.INSTANCE.SetPopulationDataPlane(true);           
+            WUInityEngine.INSTANCE.SetDomainDataPlane(true);           
         }
         void OpenLoadPopulationMap()
         {
@@ -313,7 +313,7 @@ namespace WUIPlatform.WUInity.UI
         {
             Tools.PopulationTools.LoadPopulationMap(paths[0]);
             WUInityEngine.INSTANCE.DisplayPopulationMap();
-            WUInityEngine.INSTANCE.SetPopulationDataPlane(true);
+            WUInityEngine.INSTANCE.SetDomainDataPlane(true);
         }
 
         //Filtering of OSM        

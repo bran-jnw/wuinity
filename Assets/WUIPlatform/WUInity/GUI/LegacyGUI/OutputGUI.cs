@@ -75,7 +75,7 @@ namespace WUIPlatform.WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
                 WUInityEngine.INSTANCE.DisplayClosestDensityData(time);
-                WUInityEngine.INSTANCE.ToggleEvacDataPlane();
+                WUInityEngine.INSTANCE.ToggleDomainDataPlane();
                 WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.TrafficDens);
             }
             ++buttonIndex;
@@ -92,7 +92,7 @@ namespace WUIPlatform.WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Hide visual data"))
             {
-                WUInityEngine.INSTANCE.SetPopulationDataPlane(false);
+                WUInityEngine.INSTANCE.SetDomainDataPlane(false);
                 WUInityEngine.INSTANCE.SetFireDataPlane(false);
             }
             ++buttonIndex;
@@ -119,7 +119,7 @@ namespace WUIPlatform.WUInity.UI
             {
                 for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
                 {
-                    string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i]._name;
+                    string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name;
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
                     ++buttonIndex;
                 }
@@ -193,7 +193,13 @@ namespace WUIPlatform.WUInity.UI
 
             if (WUIEngine.SIM.State == Simulation.SimulationState.Finished)  
             {
-                if(plotFig == null)
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Display usage map"))
+                {
+                    WUInityEngine.INSTANCE.DisplayTrafficUsageMap();
+                }
+                ++buttonIndex;
+
+                if (plotFig == null)
                 {
                     CreateArrivalTexture();
                 }

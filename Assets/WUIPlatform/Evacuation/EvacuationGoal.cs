@@ -26,6 +26,7 @@ namespace WUIPlatform.Evacuation
         [System.NonSerialized] public uint currentPeople;
         public List<TrafficModuleCar> cars = new List<TrafficModuleCar>();
 
+
         [System.NonSerialized] public float currentFlow = 0f;
         private float firstArrivalTime, currentTimeStep = float.MinValue;
         private int timeStepCars;

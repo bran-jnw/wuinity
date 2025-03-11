@@ -35,7 +35,7 @@ namespace WUIPlatform
             if(!triggered)
             {
                 triggered = true;
-                WUIEngine.LOG(WUIEngine.LogType.Event, "Goal blocked: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex]._name);
+                WUIEngine.LOG(WUIEngine.LogType.Event, "Goal blocked: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex].Name);
                 WUIEngine.SIM.BlockEvacGoal(goalIndex);
             }            
         }
