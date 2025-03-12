@@ -113,8 +113,9 @@ namespace WUIPlatform.Visualization
                     {
                         targetSize = maxChunkSize;
                     }
-                    byte[] chunk = new byte[targetSize];
-                    Array.Copy(sendBytes, x, chunk, 0, targetSize);
+                    byte[] chunk = new byte[targetSize+4]; //add 4 bytes for the currentTime
+                    Array.Copy(BitConverter.GetBytes((float)currentTime), 0, chunk, 0, 4); //add the currentTime first in the chunk
+                    Array.Copy(sendBytes, x, chunk, 4, targetSize);
                     udpClient.Send(chunk, chunk.Length);
                 }
 
