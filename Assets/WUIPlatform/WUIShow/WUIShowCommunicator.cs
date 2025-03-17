@@ -1,6 +1,11 @@
 using System;
 using System.Numerics;
 using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using UnityEditor.Experimental.GraphView;
 
 namespace WUIPlatform.Visualization
 {
@@ -9,7 +14,7 @@ namespace WUIPlatform.Visualization
         private int timesCarSent = 0;
         private float lastTime = 0f;
         private UdpClient udpClient;
-        //private TcpClient tcpClient;
+        private TcpServer tcpServer;
 
         private Vector4[] previouslySentCars;
         private int numberOfBlockedCars = 0;
@@ -18,11 +23,11 @@ namespace WUIPlatform.Visualization
         private Vector2d offset;
         private int maxNumberOfCars;
 
-        public WUIShowCommunicator(string serverIP, int serverPort, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
+        public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
-            udpClient = new UdpClient(serverIP, serverPort);
-            //tcpClient = new TcpClient(serverIP, serverPort);
+            udpClient = new UdpClient(serverIP, udpPort);
 
+            Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
 
             this.origoLongitude = origoLongitude;
             this.origoLatitude = origoLatitude;
@@ -31,6 +36,54 @@ namespace WUIPlatform.Visualization
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentCars = new Vector4[maxNumberOfCars];
             
+        }
+
+        public byte[] HandleTcpRequest(string request)
+        {
+            request = request.TrimEnd('\0');
+            string headerMessage = "UnknownRequest"; //must not exceed 24 characters
+            byte[] data = new byte[0];
+            if (request == "Hello")
+            {
+                headerMessage = "HelloResponse";
+                data = Encoding.UTF8.GetBytes("Hello WUIShow!");
+            }
+            else if (request == "GetLunch")
+            {
+                headerMessage = "LunchResponse";
+                data = Encoding.UTF8.GetBytes("Her is your lunch. It is a one ravoioli. Enjuy!");
+            }
+            else if (request == "PAUSE")
+            {
+                headerMessage = "PAUSED";
+                //do some command to pause the simulation
+            }
+            else if (request == "START")
+            {
+                headerMessage = "STARTED";
+                //do some command to start the simulation
+            }
+            byte[] header = CreateTcpHeader(headerMessage, data.Length);
+
+            byte[] combinedData = new byte[header.Length + data.Length];
+            Array.Copy(header, 0, combinedData, 0, header.Length);
+            Array.Copy(data, 0, combinedData, header.Length, data.Length);
+            return combinedData;
+        }
+
+        public byte[] CreateTcpHeader(string message, long dataLength)
+        {
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            byte[] paddedMessage = new byte[24];
+            Array.Copy(messageBytes, 0, paddedMessage, 0, Math.Min(messageBytes.Length, 24));
+
+            byte[] lengthBytes = BitConverter.GetBytes(dataLength);
+
+            byte[] header = new byte[32];
+            Array.Copy(paddedMessage, 0, header, 0, 24);
+            Array.Copy(lengthBytes, 0, header, 24, 8);
+
+            return header;
         }
 
         public void SendData(float currentTime)
@@ -121,6 +174,59 @@ namespace WUIPlatform.Visualization
 
                 lastTime = currentTime;
                 timesCarSent++;
+            }
+        }
+
+        //TcpServerStuff
+        public delegate byte[] HandleRequestDelegate(string receivedRequest);
+        class TcpServer
+        {
+            public static async Task StartServer(int port, HandleRequestDelegate handleRequestMethod)
+            {
+                TcpListener server = new TcpListener(IPAddress.Any, port);
+
+                server.Start();
+                WUIEngine.LOG(WUIEngine.LogType.Log, "TCP Server started on port: " + port);
+
+                while (true)
+                {
+                    TcpClient client = await server.AcceptTcpClientAsync();
+                    NetworkStream stream = client.GetStream();
+                    _ = HandleClientAsync(client, stream, handleRequestMethod);
+                }
+            }
+
+            static async Task HandleClientAsync(TcpClient client, NetworkStream stream, HandleRequestDelegate handleRequestMethod)
+            {
+                try {
+                    while(client.Connected)
+                    {
+                        byte[] buffer = new byte[24];//commands from wuishow cannot exceed 24 characters
+
+                        int totalBytesRead = 0;
+
+                        while (totalBytesRead < 24)
+                        {
+                            int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, 24 - totalBytesRead);
+                            if (bytesRead == 0) break;
+                            totalBytesRead += bytesRead;
+                        }
+
+                        string receivedMessage = Encoding.UTF8.GetString(buffer, 0, totalBytesRead);
+                        WUIEngine.LOG(WUIEngine.LogType.Log, "TCP server received message: " + receivedMessage);
+                        byte[] response = handleRequestMethod(receivedMessage);
+                        await stream.WriteAsync(response, 0, response.Length);
+                    }
+                }
+                catch (Exception e)
+                {
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Error handling wuishow TCP request: " + e.Message);
+                }
+                finally
+                {
+                    stream.Close();
+                    client.Close();
+                }
             }
         }
     }
