@@ -43,15 +43,12 @@ namespace WUIPlatform.Visualization
             request = request.TrimEnd('\0');
             string headerMessage = "UnknownRequest"; //must not exceed 24 characters
             byte[] data = new byte[0];
-            if (request == "Hello")
+            if (request == "GetOrigin")
             {
-                headerMessage = "HelloResponse";
-                data = Encoding.UTF8.GetBytes("Hello WUIShow!");
-            }
-            else if (request == "GetLunch")
-            {
-                headerMessage = "LunchResponse";
-                data = Encoding.UTF8.GetBytes("Her is your lunch. It is a one ravoioli. Enjuy!");
+                headerMessage = "Origin";
+                data = new byte[16];
+                Buffer.BlockCopy(BitConverter.GetBytes(origoLongitude), 0, data, 0, 8);
+                Buffer.BlockCopy(BitConverter.GetBytes(origoLatitude), 0, data, 8, 8);
             }
             else if (request == "PAUSE")
             {
