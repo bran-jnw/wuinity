@@ -18,62 +18,24 @@ namespace WUIPlatform.Visualization
 
         private Vector4[] previouslySentCars;
         private int numberOfBlockedCars = 0;
-        private double _originLongitude;
-        private double _originLatitude;
-        private Vector2d _offset;
+        private double origoLongitude;
+        private double origoLatitude;
+        private Vector2d offset;
         private int maxNumberOfCars;
 
         public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
-            WUIEngine.SIM.SetPause(true);
-
             udpClient = new UdpClient(serverIP, udpPort);
 
             Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
 
-            _originLongitude = origoLongitude;
-            _originLatitude = origoLatitude;
+            this.origoLongitude = origoLongitude;
+            this.origoLatitude = origoLatitude;
 
-            _offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
+            this.offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentCars = new Vector4[maxNumberOfCars];
             
-        }
-        private byte[] GetTriggerBufferData()
-        {
-            byte[] result = null;
-            float[,] data = WUIEngine.SIM.GetTriggerBufferData();            
-
-            if (data != null)
-            {
-                int xDim = data.GetLength(0);
-                int yDim = data.GetLength(1);
-
-                result = new byte[2 * sizeof(int) + xDim * yDim * sizeof(float)];
-
-                byte[] bytes = BitConverter.GetBytes(xDim);
-                Buffer.BlockCopy(bytes, 0, result, 0, bytes.Length);
-                bytes = BitConverter.GetBytes(yDim);
-                Buffer.BlockCopy(bytes, 0, result, sizeof(int), bytes.Length);
-
-                int offset = 2 * sizeof(int);
-                for (int y = 0; y < yDim; ++y)
-                {
-                    for (int x = 0; x < xDim; x++)
-                    {
-                        bytes = BitConverter.GetBytes(data[x, y]);
-                        Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
-                        offset += bytes.Length;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        private void GetUsageMapData()
-        {
-
         }
 
         public byte[] HandleTcpRequest(string request)
@@ -81,34 +43,23 @@ namespace WUIPlatform.Visualization
             request = request.TrimEnd('\0');
             string headerMessage = "UnknownRequest"; //must not exceed 24 characters
             byte[] data = new byte[0];
-            if (request == "Hello")
+            if (request == "GetOrigin")
             {
-                headerMessage = "HelloResponse";
-                data = Encoding.UTF8.GetBytes("Hello WUIShow!");
-            }
-            else if (request == "GetLunch")
-            {
-                headerMessage = "LunchResponse";
-                data = Encoding.UTF8.GetBytes("Her is your lunch. It is a one ravoioli. Enjoy!");
+                headerMessage = "Origin";
+                data = new byte[16];
+                Buffer.BlockCopy(BitConverter.GetBytes(origoLongitude), 0, data, 0, 8);
+                Buffer.BlockCopy(BitConverter.GetBytes(origoLatitude), 0, data, 8, 8);
             }
             else if (request == "PAUSE")
             {
                 headerMessage = "PAUSED";
-                WUIEngine.SIM.SetPause(true);
+                //do some command to pause the simulation
             }
             else if (request == "START")
             {
                 headerMessage = "STARTED";
-                WUIEngine.SIM.SetPause(false);
-            }
-            else if (request == "TriggerBuffer")
-            {
-                headerMessage = "int, int, float[]";
-                data = GetTriggerBufferData();
-
                 //do some command to start the simulation
             }
-
             byte[] header = CreateTcpHeader(headerMessage, data.Length);
 
             byte[] combinedData = new byte[header.Length + data.Length];
@@ -171,12 +122,12 @@ namespace WUIPlatform.Visualization
                         if (true)
                         {
                             
-                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X - _offset.x, carData.Y - _offset.y, false);
+                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X - offset.x, carData.Y - offset.y, false);
 
                             //Make the lon/lat coordinates relative to conserve precision during cast to float
                             //SUMO defines lon as x and lat as y
-                            double longitude = wgs84.x - _originLongitude;
-                            double latitude = wgs84.y - _originLatitude;
+                            double longitude = wgs84.x - origoLongitude;
+                            double latitude = wgs84.y - origoLatitude;
                             addBytes(BitConverter.GetBytes((float)longitude));
                             addBytes(BitConverter.GetBytes((float)latitude));
                         }
