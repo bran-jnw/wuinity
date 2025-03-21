@@ -54,6 +54,7 @@ namespace WUIPlatform
         public float StepExecutionTime { get => _stepExecutionTime; }
 
         private Visualization.WUIShowCommunicator _wuiShow;
+        float[,] _triggerBufferData;
 
 
         public Simulation()
@@ -82,8 +83,7 @@ namespace WUIPlatform
                 throw e;
             }
         }
-
-        float[,] _triggerBufferOutput;
+        
         private  void StartSimulations()
         {            
             int runNumber = 0;
@@ -176,7 +176,7 @@ namespace WUIPlatform
                     {
                         if(WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
                         {
-                            _triggerBufferOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
+                            _triggerBufferData = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
                         }                        
                     }  
                 }
@@ -524,6 +524,11 @@ namespace WUIPlatform
             }
         }
 
+        public void SetPause(bool pause)
+        {
+            _isPaused = pause;
+        }
+
         public void TogglePause()
         {
             _isPaused = !_isPaused;
@@ -766,16 +771,26 @@ namespace WUIPlatform
             System.IO.File.WriteAllLines(path, output);
         }
 
-        public void SetTriggerBufferOutput(float[,] data)
+        public float[,] GetTriggerBufferData()
         {
-            _triggerBufferOutput = data;
+            if (_triggerBufferData != null)
+            {
+                return _triggerBufferData;
+            }
+
+            else return null;
+        }
+
+        public void SetTriggerBufferData(float[,] data)
+        {
+            _triggerBufferData = data;
         }
 
         public void DisplayTriggerBuffer()
         {
-            if(_triggerBufferOutput != null)
+            if(_triggerBufferData != null)
             {
-                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferOutput);
+                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferData);
                 WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
                 WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPDataPlane(true);
             }            

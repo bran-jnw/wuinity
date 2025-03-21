@@ -13,12 +13,8 @@ namespace WUIPlatform.Visualization
     {
         private int timesCarSent = 0;
         private float lastTime = 0f;
-<<<<<<< HEAD
-        private UdpClient _udpClient;
-=======
         private UdpClient udpClient;
         private TcpServer tcpServer;
->>>>>>> origin/wuishow-relative-wgs84-prune-udp
 
         private Vector4[] previouslySentCars;
         private int numberOfBlockedCars = 0;
@@ -27,31 +23,55 @@ namespace WUIPlatform.Visualization
         private Vector2d _offset;
         private int maxNumberOfCars;
 
-<<<<<<< HEAD
-        public WUIShowCommunicator(string serverIP, int serverPort, double originatitude = 39.409924, double originLongitude = -105.104505, int maxNumberOfCars = 10000)
-        {
-            _udpClient = new UdpClient(serverIP, serverPort);
-=======
         public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
+            WUIEngine.SIM.SetPause(true);
+
             udpClient = new UdpClient(serverIP, udpPort);
->>>>>>> origin/wuishow-relative-wgs84-prune-udp
 
             Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
 
-            _originLongitude = originLongitude;
-            _originLatitude = originatitude;
+            _originLongitude = origoLongitude;
+            _originLatitude = origoLatitude;
 
             _offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentCars = new Vector4[maxNumberOfCars];
             
         }
-        public void SendTriggerBuffer(float[,] triggerBuffer)
+        private byte[] GetTriggerBufferData()
         {
+            byte[] result = null;
+            float[,] data = WUIEngine.SIM.GetTriggerBufferData();            
 
+            if (data != null)
+            {
+                int xDim = data.GetLength(0);
+                int yDim = data.GetLength(1);
+
+                result = new byte[2 * sizeof(int) + xDim * yDim * sizeof(float)];
+
+                byte[] bytes = BitConverter.GetBytes(xDim);
+                Buffer.BlockCopy(bytes, 0, result, 0, bytes.Length);
+                bytes = BitConverter.GetBytes(yDim);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(int), bytes.Length);
+
+                int offset = 2 * sizeof(int);
+                for (int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; x++)
+                    {
+                        bytes = BitConverter.GetBytes(data[x, y]);
+                        Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                        offset += bytes.Length;
+                    }
+                }
+            }
+
+            return result;
         }
-        public void SendUsageMap()
+
+        private void GetUsageMapData()
         {
 
         }
@@ -69,18 +89,26 @@ namespace WUIPlatform.Visualization
             else if (request == "GetLunch")
             {
                 headerMessage = "LunchResponse";
-                data = Encoding.UTF8.GetBytes("Her is your lunch. It is a one ravoioli. Enjuy!");
+                data = Encoding.UTF8.GetBytes("Her is your lunch. It is a one ravoioli. Enjoy!");
             }
             else if (request == "PAUSE")
             {
                 headerMessage = "PAUSED";
-                //do some command to pause the simulation
+                WUIEngine.SIM.SetPause(true);
             }
             else if (request == "START")
             {
                 headerMessage = "STARTED";
+                WUIEngine.SIM.SetPause(false);
+            }
+            else if (request == "TriggerBuffer")
+            {
+                headerMessage = "int, int, float[]";
+                data = GetTriggerBufferData();
+
                 //do some command to start the simulation
             }
+
             byte[] header = CreateTcpHeader(headerMessage, data.Length);
 
             byte[] combinedData = new byte[header.Length + data.Length];
@@ -184,16 +212,10 @@ namespace WUIPlatform.Visualization
                     {
                         targetSize = maxChunkSize;
                     }
-<<<<<<< HEAD
-                    byte[] chunk = new byte[targetSize];
-                    Array.Copy(sendBytes, x, chunk, 0, targetSize);
-                    _udpClient.Send(chunk, chunk.Length);
-=======
                     byte[] chunk = new byte[targetSize+4]; //add 4 bytes for the currentTime
                     Array.Copy(BitConverter.GetBytes((float)currentTime), 0, chunk, 0, 4); //add the currentTime first in the chunk
                     Array.Copy(sendBytes, x, chunk, 4, targetSize);
                     udpClient.Send(chunk, chunk.Length);
->>>>>>> origin/wuishow-relative-wgs84-prune-udp
                 }
 
                 lastTime = currentTime;

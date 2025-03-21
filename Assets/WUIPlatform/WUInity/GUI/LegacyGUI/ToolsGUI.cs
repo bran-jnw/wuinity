@@ -261,7 +261,7 @@ namespace WUIPlatform.WUInity.UI
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run k-PERIL"))
                 {
                     float[,] tB = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
-                    WUIEngine.SIM.SetTriggerBufferOutput(tB);
+                    WUIEngine.SIM.SetTriggerBufferData(tB);
                     WUIEngine.SIM.DisplayTriggerBuffer();
                 }
             }   

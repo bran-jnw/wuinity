@@ -1,62 +1,57 @@
-[15:26:26] LOG:  Reading input file E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\Roxborough_example.wui.
-[15:26:26] LOG: Simulation input is being read...
-[15:26:26] LOG: Map input is being read...
-[15:26:26] LOG: Population input is being read...
-[15:26:26] LOG: Evacuation input is being read...
-[15:26:26] LOG: Pedestrian input is being read...
-[15:26:26] LOG: Traffic input is being read...
-[15:26:26] LOG: SUMO input is being read...
-[15:26:26] ERROR: DestinationChoice was not recognized. Please check your input file.
-[15:26:26] LOG: Simulation can't run, please check log.
-[15:26:26] LOG: Fire input is being read...
-[15:26:26] LOG: AscImport input is being read...
-[15:26:26] LOG: Smoke input is being read...
-[15:26:26] LOG: GlobalSmoke input is being read...
-[15:26:26] LOG: TriggerBuffer input is being read...
-[15:26:26] LOG: WUIShow input is being read...
-[15:26:26] WARNING: Events header not found, no events will be added.
-[15:26:26] LOG: Loading referenced data from input file...
-[15:26:26] LOG: Loading Evacuation data...
-[15:26:26] LOG:  Loaded response curve from E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\responseCurves/Observed_average.csv named Observed_average
-[15:26:26] LOG:  1 valid evacuation goal files were succesfully loaded.
-[15:26:26] LOG:  Evacuation group files loaded, 1 valid evacuation groups were found.
-[15:26:26] WARNING: Evac groups file does not match current mesh, using default.
-[15:26:26] LOG: No valid goal blocking events were loaded.
-[15:26:26] LOG: Loading Population data...
-[15:26:26] LOG: Loaded population small_population containing 2551 people and 1000 households.
-[15:26:26] LOG: Loading Traffic data...
-[15:26:26] LOG: Loading Fire data...
-[15:26:26] LOG:  LCP found in E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\fire/rox_big_burning_city.lcp, read succesfully.
-[15:26:26] LOG: Present fuel model numbers are 1, 2, 3, 4, 5, 6, 8, 9, 10, 93, 98, 99.
-[15:26:26] LOG: Starting to load Mapbox map.
-[15:26:26] LOG: Map loaded succesfully.
-[15:26:26] LOG:  Input file E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\Roxborough_example.wui loaded.
-[15:26:27] LOG: Simulation number 1 started, please wait.
-[15:26:28] LOG: Wildfire ASCII data offset by (x/y) meters: -4.17539980873698, 6.896528609097
-[15:26:28] LOG: Fire module AscImport initiated.
-[15:26:28] LOG:  Total households: 1000
-[15:26:28] LOG:  Total cars: 1000
-[15:26:28] LOG:  Total people who will not evacuate: 0
-[15:26:28] LOG: Pedestrian module MacroPedestrianSim initiated.
-[15:26:29] !!!DEBUG!!!: SUMO origin offset [x, y]: 250.314600191254, -3034.54347139131
-[15:26:29] LOG: Number of fire cells that have road junctions and will affect traffic:974
-[15:26:29] LOG: Traffic module SUMO initiated.
-[15:26:29] LOG: All requested sub-modules initiated successfully.
-[15:26:29] LOG: [420s] Cell 278,91 has been ignited and affects roads but did not affect any vehicles.
-[15:26:32] LOG: [787s] STOP: Stopped simulation as requested by user.
-[15:26:32] LOG:  Simulation/s done.
-[15:26:36] LOG: Simulation number 1 started, please wait.
-[15:26:36] LOG: No fire module was enabled.
-[15:26:36] LOG: No smoke module was enabled.
-[15:26:36] LOG:  Total households: 1000
-[15:26:36] LOG:  Total cars: 1000
-[15:26:36] LOG:  Total people who will not evacuate: 0
-[15:26:36] LOG: Pedestrian module MacroPedestrianSim initiated.
-[15:26:36] !!!DEBUG!!!: SUMO origin offset [x, y]: 250.314600191254, -3034.54347139131
-[15:26:36] LOG: No fire module loaded, can't  sort SUMO network edges in fire cells.
-[15:26:36] LOG: Traffic module SUMO initiated.
-[15:26:36] LOG: All requested sub-modules initiated successfully.
-[15:26:57] LOG: [7255s] Both pedestrian and traffic simulations are done, stopping as per user settings.
-[15:26:57] LOG: [7255s]  Total cars in simulation: 1000
-[15:26:57] LOG: [7255s]  Average total evacuation time: 7255 seconds, ran 1 simulation/s.
-[15:26:57] LOG:  Simulation/s done.
+[11:26:15] LOG:  Reading input file E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\Roxborough_example.wui.
+[11:26:15] LOG: Simulation input is being read...
+[11:26:15] LOG: Map input is being read...
+[11:26:15] LOG: Population input is being read...
+[11:26:15] LOG: Evacuation input is being read...
+[11:26:15] LOG: Pedestrian input is being read...
+[11:26:15] LOG: Traffic input is being read...
+[11:26:15] LOG: SUMO input is being read...
+[11:26:15] LOG: Fire input is being read...
+[11:26:15] LOG: AscImport input is being read...
+[11:26:15] LOG: Smoke input is being read...
+[11:26:15] LOG: GlobalSmoke input is being read...
+[11:26:15] LOG: TriggerBuffer input is being read...
+[11:26:15] LOG: WUIShow input is being read...
+[11:26:15] WARNING: Events header not found, no events will be added.
+[11:26:15] LOG: Loading referenced data from input file...
+[11:26:15] LOG: Loading Evacuation data...
+[11:26:15] LOG:  Loaded response curve from E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\responseCurves/Observed_average.csv named Observed_average
+[11:26:15] LOG:  1 valid evacuation goal files were succesfully loaded.
+[11:26:15] LOG:  Evacuation group files loaded, 1 valid evacuation groups were found.
+[11:26:15] WARNING: Evac groups file does not match current mesh, using default.
+[11:26:15] LOG: No valid goal blocking events were loaded.
+[11:26:15] LOG: Loading Population data...
+[11:26:15] LOG: Loaded population small_population containing 2551 people and 1000 households.
+[11:26:15] LOG: Loading Traffic data...
+[11:26:15] LOG: Loading Fire data...
+[11:26:15] LOG:  LCP found in E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\fire/rox_big_burning_city.lcp, read succesfully.
+[11:26:15] LOG: Present fuel model numbers are 1, 2, 3, 4, 5, 6, 8, 9, 10, 93, 98, 99.
+[11:26:15] LOG: Starting to load Mapbox map.
+[11:26:15] LOG: Map loaded succesfully.
+[11:26:15] LOG:  Input file E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\Roxborough_example.wui loaded.
+[11:26:25] LOG: Simulation number 1 started, please wait.
+[11:26:27] LOG: Wildfire ASCII data offset by (x/y) meters: -4.17539980873698, 6.896528609097
+[11:26:27] LOG: Fire module AscImport initiated.
+[11:26:27] LOG:  Total households: 1000
+[11:26:27] LOG:  Total cars: 1000
+[11:26:27] LOG:  Total people who will not evacuate: 0
+[11:26:27] LOG: Pedestrian module MacroPedestrianSim initiated.
+[11:26:28] !!!DEBUG!!!: SUMO origin offset [x, y]: 250.314600191254, -3034.54347139131
+[11:26:28] LOG: Number of fire cells that have road junctions and will affect traffic:974
+[11:26:28] LOG: Traffic module SUMO initiated.
+[11:26:28] LOG: All requested sub-modules initiated successfully.
+[11:26:29] LOG: [420s] Cell 278,91 has been ignited and affects roads but did not affect any vehicles.
+[11:26:32] LOG: [960s] Cell 274,90 has been ignited and affects roads but did not affect any vehicles.
+[11:26:33] LOG: [1020s] Cell 286,96 has been ignited and affects roads but did not affect any vehicles.
+[11:26:45] LOG: [1500s] Cell 303,110 has been ignited and affects roads but did not affect any vehicles.
+[11:26:50] LOG: [2280s] Cell 282,100 has been ignited and affects roads but did not affect any vehicles.
+[11:26:51] LOG: [2400s] Cell 300,91 has been ignited and affects roads but did not affect any vehicles.
+[11:26:52] LOG: [2520s] Cell 284,107 has been ignited and affects roads but did not affect any vehicles.
+[11:26:55] LOG: [4200s] Cell 293,118 has been ignited and affects roads but did not affect any vehicles.
+[11:26:56] LOG: [4920s] Cell 311,123 has been ignited and affects roads but did not affect any vehicles.
+[11:26:56] LOG: [5160s] Cell 204,73 has been ignited and affects roads but did not affect any vehicles.
+[11:26:56] LOG: [5820s] Cell 268,115 has been ignited and affects roads but did not affect any vehicles.
+[11:26:57] LOG: [7382s] Both pedestrian and traffic simulations are done, stopping as per user settings.
+[11:26:57] LOG: [7382s]  Total cars in simulation: 1000
+[11:26:57] LOG: [7382s]  Average total evacuation time: 7382 seconds, ran 1 simulation/s.
+[11:26:57] LOG:  Simulation/s done.
