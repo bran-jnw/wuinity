@@ -25,8 +25,9 @@ namespace WUIPlatform.Visualization
 
         public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
-            udpClient = new UdpClient(serverIP, udpPort);
+            WUIEngine.SIM.SetPause(true);
 
+            udpClient = new UdpClient(serverIP, udpPort);
             Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
 
             this.origoLongitude = origoLongitude;
@@ -36,6 +37,43 @@ namespace WUIPlatform.Visualization
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentCars = new Vector4[maxNumberOfCars];
             
+        }
+
+        private byte[] GetTriggerBufferData()
+        {
+            byte[] result = null;
+            float[,] data = WUIEngine.SIM.GetTriggerBufferData();
+
+            if (data != null)
+            {
+                int xDim = data.GetLength(0);
+                int yDim = data.GetLength(1);
+
+                result = new byte[2 * sizeof(int) + xDim * yDim * sizeof(float)];
+
+                byte[] bytes = BitConverter.GetBytes(xDim);
+                Buffer.BlockCopy(bytes, 0, result, 0, bytes.Length);
+                bytes = BitConverter.GetBytes(yDim);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(int), bytes.Length);
+
+                int offset = 2 * sizeof(int);
+                for (int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; x++)
+                    {
+                        bytes = BitConverter.GetBytes(data[x, y]);
+                        Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                        offset += bytes.Length;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void GetUsageMapData()
+        {
+
         }
 
         public byte[] HandleTcpRequest(string request)
@@ -53,12 +91,17 @@ namespace WUIPlatform.Visualization
             else if (request == "PAUSE")
             {
                 headerMessage = "PAUSED";
-                //do some command to pause the simulation
+                WUIEngine.SIM.SetPause(true);
             }
             else if (request == "START")
             {
                 headerMessage = "STARTED";
-                //do some command to start the simulation
+                WUIEngine.SIM.SetPause(false);
+            }
+            else if (request == "TriggerBuffer")
+            {
+                headerMessage = "int, int, float[]";
+                data = GetTriggerBufferData();
             }
             byte[] header = CreateTcpHeader(headerMessage, data.Length);
 
