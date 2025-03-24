@@ -1,5 +1,5 @@
 using System;
-using System.Numerics;
+using System.Threading;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
@@ -16,11 +16,13 @@ namespace WUIPlatform.Visualization
         private TcpServer tcpServer;
 
         private Dictionary<uint, Traffic.TrafficModuleVehicle> previouslySentCars;
+        private Queue<Traffic.TrafficModuleVehicle> _newVehiclesNotSent;
         private int numberOfBlockedCars = 0;
         private double origoLongitude;
         private double origoLatitude;
         private Vector2d offset;
         private int maxNumberOfCars;
+        bool _readingData;
 
         public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
@@ -34,7 +36,8 @@ namespace WUIPlatform.Visualization
 
             this.offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
-            previouslySentCars = new Dictionary<uint, Traffic.TrafficModuleVehicle> ();
+            previouslySentCars = new Dictionary<uint, Traffic.TrafficModuleVehicle>();
+            _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
             
         }
 
@@ -75,6 +78,27 @@ namespace WUIPlatform.Visualization
 
         }
 
+        const int _maxNameLengths = 32;
+        private byte[] GetNewVehiclesData()
+        {
+            _readingData = true;
+            //vehicle Id, number of people, type of vehicle, destination name
+            byte[] result = new byte[_newVehiclesNotSent.Count + (2 * sizeof(uint) + sizeof(char) * _maxNameLengths + sizeof(char) * _maxNameLengths)];
+            List<byte> data = new List<byte>();
+            while(_newVehiclesNotSent.Count > 0)
+            {
+                Traffic.TrafficModuleVehicle vehicle = _newVehiclesNotSent.Dequeue();
+                data.AddRange(BitConverter.GetBytes(vehicle.VehicleId));
+                data.AddRange(BitConverter.GetBytes(vehicle.NumberOfPeople));
+                data.AddRange(Encoding.UTF8.GetBytes(vehicle.VehicleType.PadRight(_maxNameLengths)));
+                data.AddRange(Encoding.UTF8.GetBytes(vehicle.Destination.Name.PadRight(_maxNameLengths)));
+            }
+            result = data.ToArray();
+            _readingData = false;
+
+            return result;
+        }
+
         public byte[] HandleTcpRequest(string request)
         {
             request = request.TrimEnd('\0');
@@ -102,8 +126,13 @@ namespace WUIPlatform.Visualization
                 headerMessage = "int, int, float[]";
                 data = GetTriggerBufferData();
             }
-            byte[] header = CreateTcpHeader(headerMessage, data.Length);
+            else if(request == "GetNewVehicles")
+            {
+                headerMessage = "NewVehicles";
+                data = GetNewVehiclesData();
+            }
 
+            byte[] header = CreateTcpHeader(headerMessage, data.Length);
             byte[] combinedData = new byte[header.Length + data.Length];
             Array.Copy(header, 0, combinedData, 0, header.Length);
             Array.Copy(data, 0, combinedData, header.Length, data.Length);
@@ -127,6 +156,11 @@ namespace WUIPlatform.Visualization
 
         public void SendData(float currentTime)
         {
+            if(_readingData)
+            {
+                return;
+            }
+
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
             Dictionary<uint, Traffic.TrafficModuleVehicle> vehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
 
@@ -161,7 +195,8 @@ namespace WUIPlatform.Visualization
                         //new vehicle not sent before
                         if (v == null)
                         {
-                            previouslySentCars.Add(vehicle.VehicleId, v);
+                            previouslySentCars.Add(vehicle.VehicleId, vehicle);
+                            _newVehiclesNotSent.Enqueue(vehicle);
                             sendData = true;
                         }
                         //only send if position has changed
