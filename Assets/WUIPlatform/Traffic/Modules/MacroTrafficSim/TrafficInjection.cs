@@ -15,14 +15,14 @@ namespace WUIPlatform.Traffic
     {
         public int cars;
         public Vector2d latLong;
-        public EvacuationGoal desiredGoal;
+        public EvacuationDestination desiredGoal;
         public bool pickGoalFromMap = false;
         public Vector2[] timeFlow;
 
         private RouteCollection routeCollection;
         private float accumulatedFlow;
 
-        public TrafficInjection(int cars, Vector2d startPos, EvacuationGoal desiredGoal, Vector2[] timeFlow)
+        public TrafficInjection(int cars, Vector2d startPos, EvacuationDestination desiredGoal, Vector2[] timeFlow)
         {
             this.cars = cars;
             this.latLong = startPos;
@@ -73,9 +73,9 @@ namespace WUIPlatform.Traffic
     {
         public int cars;
         public Vector2d startPos;
-        public EvacuationGoal desiredGoal;
+        public EvacuationDestination desiredGoal;
 
-        public SimpleTrafficInjection(int cars, Vector2d startPos, EvacuationGoal desiredGoal)
+        public SimpleTrafficInjection(int cars, Vector2d startPos, EvacuationDestination desiredGoal)
         {
             this.cars = cars;
             this.startPos = startPos;

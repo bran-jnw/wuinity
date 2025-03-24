@@ -127,7 +127,7 @@ namespace WUIPlatform
             }
         }
 
-        public void SelectForcedNonBlocked(EvacuationGoal goal)
+        public void SelectForcedNonBlocked(EvacuationDestination goal)
         {
             routePriority = RoutePriority.Forced;
             selectedRouteIndex = -1;

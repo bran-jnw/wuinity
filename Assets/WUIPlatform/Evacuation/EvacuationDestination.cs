@@ -12,7 +12,7 @@ using System.IO;
 namespace WUIPlatform.Evacuation
 {
     [System.Serializable]
-    public class EvacuationGoal
+    public class EvacuationDestination
     {
         private string _name = "Goal_1";
         public string Name { get => _name; }
@@ -24,7 +24,7 @@ namespace WUIPlatform.Evacuation
         public int maxCars = -1;
         public int maxPeople = -1;
         [System.NonSerialized] public uint currentPeople;
-        public List<TrafficModuleCar> cars = new List<TrafficModuleCar>();
+        public List<TrafficModuleVehicle> cars = new List<TrafficModuleVehicle>();
 
 
         [System.NonSerialized] public float currentFlow = 0f;
@@ -34,14 +34,14 @@ namespace WUIPlatform.Evacuation
         //data for WUI-SHOW etc
         private float _totalTravelTime, _averageTravelTime;
 
-        public EvacuationGoal()
+        public EvacuationDestination()
         {
             _name = "New goal";
             latLon = Vector2d.zero;
             color = WUIEngineColor.white;
         }
 
-        public EvacuationGoal(string name, Vector2d latLong, WUIEngineColor color)
+        public EvacuationDestination(string name, Vector2d latLong, WUIEngineColor color)
         {
             this._name = name;
             this.latLon = latLong;
@@ -49,7 +49,7 @@ namespace WUIPlatform.Evacuation
             maxFlow = 3600f;
         }
 
-        public EvacuationGoal(string name, Vector2d latLon, WUIEngineColor color, float maxFlow)
+        public EvacuationDestination(string name, Vector2d latLon, WUIEngineColor color, float maxFlow)
         {
             this._name = name;
             this.latLon = latLon;
@@ -64,7 +64,7 @@ namespace WUIPlatform.Evacuation
         /// <param name="currentTime"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public bool CarArrives(TrafficModuleCar arrivingCar, float currentTime, float deltaTime)
+        public bool CarArrives(TrafficModuleVehicle arrivingCar, float currentTime, float deltaTime)
         {
             UpdateFlow(currentTime, deltaTime);            
 
@@ -74,7 +74,7 @@ namespace WUIPlatform.Evacuation
                 //add new cars and people that has arrived during timestep
                 ++timeStepCars;
                 cars.Add(arrivingCar);
-                currentPeople += arrivingCar.numberOfPeopleInCar;
+                currentPeople += arrivingCar.NumberOfPeople;
                 UpdateCapacity();
 
                 _totalTravelTime += currentTime;
@@ -163,10 +163,10 @@ namespace WUIPlatform.Evacuation
             _averageTravelTime = 0f;
         }
 
-        public static List<EvacuationGoal> LoadEvacuationGoalFiles(out bool success)
+        public static List<EvacuationDestination> LoadEvacuationGoalFiles(out bool success)
         {
             success = false;
-            List<EvacuationGoal> evacuationGoals = new List<EvacuationGoal>();
+            List<EvacuationDestination> evacuationGoals = new List<EvacuationDestination>();
 
             for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacuationGoalFiles.Length; i++)
             {
@@ -245,7 +245,7 @@ namespace WUIPlatform.Evacuation
                         color = new WUIEngineColor(r, g, b);
                     }
 
-                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2d(lati, longi), color);
+                    EvacuationDestination eG = new EvacuationDestination(name, new Vector2d(lati, longi), color);
                     eG.goalType = evacGoalType;
                     eG.maxFlow = maxFlow;
                     eG.maxCars = maxCars;

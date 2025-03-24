@@ -698,7 +698,7 @@ namespace WUIPlatform.WUInity.UI
                 }
 
                 if (!findDuplicate) {
-                    EvacuationGoal eG = new EvacuationGoal(name, new Vector2d(lati, longi), color);
+                    EvacuationDestination eG = new EvacuationDestination(name, new Vector2d(lati, longi), color);
                     eG.goalType = evacGoalType;
                     eG.maxFlow = maxFlow;
                     eG.maxCars = maxCars;
@@ -1921,7 +1921,7 @@ namespace WUIPlatform.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach(EvacuationGoal eg in WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals)
+                    foreach(EvacuationDestination eg in WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals)
                         m_DropOptions.Add(eg.Name);
 
                     dfDfEvacutionDestination.choices.Clear();

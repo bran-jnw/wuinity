@@ -88,11 +88,6 @@ namespace WUIPlatform.Traffic
             throw new NotImplementedException();
         }
 
-        public override System.Numerics.Vector4[] GetCarWorldPositionsStatesCarIDs()
-        {
-            throw new NotImplementedException();
-        }
-
         public override void SaveToFile(int runNumber)
         {
             throw new NotImplementedException();

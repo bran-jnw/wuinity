@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace WUIPlatform.Traffic
 {
-    public class MacroCar : TrafficModuleCar
+    public class MacroVehicle : TrafficModuleVehicle
     {
         public RouteData routeData;
         public int currentShapeIndex;
@@ -26,10 +26,10 @@ namespace WUIPlatform.Traffic
       
         private float latestSpeed;
 
-        public MacroCar(RouteData desiredRoute, uint numberOfPeopleInCar, uint carID) : base(carID, numberOfPeopleInCar, desiredRoute.evacGoal)
+        public MacroVehicle(RouteData desiredRoute, uint numberOfPeopleInCar, uint carID) : base(carID, numberOfPeopleInCar, desiredRoute.evacGoal)
         {
             routeData = desiredRoute;
-            this.numberOfPeopleInCar = numberOfPeopleInCar;
+            _numberOfPeople = numberOfPeopleInCar;
             //go directly to shape 1 since shape 0 is just meta data telling that we are a car
             currentShapeIndex = 1;
             currentDistanceLeft = routeData.route.ShapeMeta[currentShapeIndex].Distance;
@@ -47,7 +47,7 @@ namespace WUIPlatform.Traffic
             totalDrivingTime = 0f;
             latestSpeed = 0;
 
-            this.carID = carID;
+            this._vehicleId = carID;
         }
 
         private void UpdateHash()
@@ -166,7 +166,7 @@ namespace WUIPlatform.Traffic
 
         Vector4 positionAndSpeed;
         LinearSpline2D spline;
-        public override Vector4 GetWorldPositionSpeedCarID(bool updateData)
+        public Vector4 GetWorldPositionSpeedCarID(bool updateData)
         {
             if (updateData)
             {

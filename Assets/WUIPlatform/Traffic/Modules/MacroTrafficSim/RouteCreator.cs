@@ -22,7 +22,7 @@ namespace WUIPlatform.Traffic
         private Router _router;
         private RouterDb _routerDb;
         private List<RouterPoint> _validEvacuationGoalRouterPoints;
-        private List<EvacuationGoal> _validEvacuationGoals;
+        private List<EvacuationDestination> _validEvacuationGoals;
 
         public RouteCreator(RouterDb routerDb)
         {
@@ -176,12 +176,12 @@ namespace WUIPlatform.Traffic
 
         void DetermineValidGoalsAndRouterPoints(bool logMessages)
         {
-            List<EvacuationGoal> evacuatonGoals = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals;
+            List<EvacuationDestination> evacuatonGoals = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //check that evac goals are valid
             _validEvacuationGoalRouterPoints = new List<RouterPoint>();
-            _validEvacuationGoals = new List<EvacuationGoal>();
+            _validEvacuationGoals = new List<EvacuationDestination>();
             for (int i = 0; i < evacuatonGoals.Count; i++)
             {
                 try
@@ -280,7 +280,7 @@ namespace WUIPlatform.Traffic
         /// <param name="evacGoal"></param>
         /// <param name="routerProfile"></param>
         /// <returns></returns>
-        private RouteData TryCalcRoute(RouterPoint start, RouterPoint goal, EvacuationGoal evacGoal, Itinero.Profiles.Profile routerProfile)
+        private RouteData TryCalcRoute(RouterPoint start, RouterPoint goal, EvacuationDestination evacGoal, Itinero.Profiles.Profile routerProfile)
         {
             //still calculate for now as a goal might become accessible later in simulation
             /*//if goal is not accessible we have nothing to return
@@ -433,7 +433,7 @@ namespace WUIPlatform.Traffic
                 if (cellIndex >= 0)
                 {
                     EvacuationGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
-                    EvacuationGoal goal = group.GetWeightedEvacGoal();
+                    EvacuationDestination goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }
                 else

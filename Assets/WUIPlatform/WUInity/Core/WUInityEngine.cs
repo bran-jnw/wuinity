@@ -714,7 +714,7 @@ namespace WUIPlatform.WUInity
             _goalMarkers = new GameObject[WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count];
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                EvacuationGoal eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
+                EvacuationDestination eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
                 Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLon.x, eG.latLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
 
@@ -973,7 +973,7 @@ namespace WUIPlatform.WUInity
         List<TrafficCellData[]> trafficDensityData;
         List<int[]> peopleInCells;
         public List<Texture2D> outputTextures;
-        public void SaveTransientDensityData(float time, List<MacroCar> carsInSystem, List<MacroCar> carsOnHold)
+        public void SaveTransientDensityData(float time, List<MacroVehicle> carsInSystem, List<MacroVehicle> carsOnHold)
         {
             //first time
             if (trafficDensityData == null)
@@ -1006,12 +1006,12 @@ namespace WUIPlatform.WUInity
                     {
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsInSystem[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsInSystem[i].NumberOfPeople;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsInSystem[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsInSystem[i].NumberOfPeople;
                     }
                 }
 
@@ -1033,12 +1033,12 @@ namespace WUIPlatform.WUInity
                     {
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x] = new TrafficCellData();
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount = 1;
-                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsOnHold[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount = (int)carsOnHold[i].NumberOfPeople;
                     }
                     else
                     {
                         trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].carCount += 1;
-                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsOnHold[i].numberOfPeopleInCar;
+                        trafficDensityData[outputIndex][x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x].peopleCount += (int)carsOnHold[i].NumberOfPeople;
                     }
                 }
 

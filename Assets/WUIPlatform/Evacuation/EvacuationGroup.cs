@@ -54,7 +54,7 @@ namespace WUIPlatform.Evacuation
             return evacGroups;
         }
 
-        public EvacuationGoal GetWeightedEvacGoal()
+        public EvacuationDestination GetWeightedEvacGoal()
         {
             float randomChoice = Random.value;
             for (int i = 0; i < GoalsCumulativeWeights.Length; i++)

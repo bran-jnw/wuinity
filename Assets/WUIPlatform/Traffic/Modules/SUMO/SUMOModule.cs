@@ -9,19 +9,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using WUIPlatform.Evacuation;
-using System.Numerics;
 
 namespace WUIPlatform.Traffic
 {
     public class SUMOModule : TrafficModule
     {
-        private Dictionary<string, SUMOCar> cars;        
-        List<LIBSUMO.TraCIRoadPosition> validStartPositions;
+        private Dictionary<string, SUMOVehicle> _vehicles;        
+        List<LIBSUMO.TraCIRoadPosition> _validStartPositions;
 
         //output
-        private uint totalCarsArrived, totalPeopleArrived, totalSumoCarsArrived;
-        private int currentCarsInSystem;
-        private int totalCarsInjected, totalSumoCarsInjected;
+        private uint totalVehiclesArrived, totalPeopleArrived, totalSumoVehiclesArrived;
+        private int currentVehiclessInSystem;
+        private int totalVehiclesInjected, totalSumoVehiclesInjected;
         private List<string> output;
 
         uint _maxUsage;
@@ -32,7 +31,7 @@ namespace WUIPlatform.Traffic
             success = true;
             try
             {
-                cars = new Dictionary<string, SUMOCar>();
+                _vehicles = new Dictionary<string, SUMOVehicle>();
                 string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
@@ -53,7 +52,7 @@ namespace WUIPlatform.Traffic
                 adjustY = cosLat * (1.0 - e * e) / Math.Pow(1 - e * e * Math.Sin(lat) * Math.Sin(lat), 1.5);
                 adjustY = 1.0 / adjustY;;*/
 
-                validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
+                _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
@@ -101,93 +100,72 @@ namespace WUIPlatform.Traffic
             LIBSUMO.Simulation.step(currentTime + deltaTime); // advances sim up to given time
 
             //update positions
-            LIBSUMO.StringVector activeCars = LIBSUMO.Vehicle.getIDList();
-            currentCarsInSystem = 0;
-            if(activeCars.Count > 0)
+            LIBSUMO.StringVector activeVehicles = LIBSUMO.Vehicle.getIDList();
+            currentVehiclessInSystem = 0;
+            if(activeVehicles.Count > 0)
             {
-                for (int i = 0; i < activeCars.Count; i++)
+                for (int i = 0; i < activeVehicles.Count; i++)
                 {
-                    string sumoID = activeCars[i];
-                    SUMOCar car;
-                    cars.TryGetValue(sumoID, out car);
-                    if(car != null)
+                    string sumoID = activeVehicles[i];
+                    SUMOVehicle vehicle;
+                    _vehicles.TryGetValue(sumoID, out vehicle);
+                    if(vehicle != null)
                     {
                         LIBSUMO.TraCIPosition pos = LIBSUMO.Vehicle.getPosition(sumoID);
-                        car.SetLocalPosRot(pos, LIBSUMO.Vehicle.getAngle(sumoID));
-                        if(car.numberOfPeopleInCar > 0)
+                        vehicle.SetWorldPosItionAndRotation(pos, LIBSUMO.Vehicle.getAngle(sumoID), _originOffset);
+                        if(vehicle.NumberOfPeople > 0)
                         {
-                            currentCarsInSystem++;
+                            currentVehiclessInSystem++;
                         }
                     }
                     //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
                     else
                     {
-                        car = new SUMOCar(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null);
-                        cars.Add(sumoID, car);
-                        ++totalSumoCarsInjected;
+                        vehicle = new SUMOVehicle(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null);
+                        _vehicles.Add(sumoID, vehicle);
+                        _activeVehicles.Add(vehicle.VehicleId, vehicle);
+                        ++totalSumoVehiclesInjected;
                     }
 
-                    UpdateUsageMap(car);
+                    UpdateUsageMap(vehicle);
                 }
             }     
 
             //check if any cars have arrived
             if (LIBSUMO.Simulation.getArrivedNumber() > 0)
             {
-                LIBSUMO.StringVector arrivedCars = LIBSUMO.Simulation.getArrivedIDList();
-                for (int i = 0; i < arrivedCars.Count; i++)
+                LIBSUMO.StringVector arrivedVehicles = LIBSUMO.Simulation.getArrivedIDList();
+                for (int i = 0; i < arrivedVehicles.Count; i++)
                 {
-                    SUMOCar car;
-                    cars.TryGetValue(arrivedCars[i], out car);
+                    SUMOVehicle car;
+                    _vehicles.TryGetValue(arrivedVehicles[i], out car);
                     if(car != null)
                     {
                         car.Arrive();
                     }
-                    cars.Remove(arrivedCars[i]);
+                    _vehicles.Remove(arrivedVehicles[i]);
                     //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
-                    if(car.numberOfPeopleInCar > 0)
+                    if(car.NumberOfPeople > 0)
                     {
-                        arrivalData.Add(currentTime + deltaTime);
-                        totalCarsArrived++;
-                        totalPeopleArrived += car.numberOfPeopleInCar;
+                        _arrivalData.Add(currentTime + deltaTime);
+                        totalVehiclesArrived++;
+                        totalPeopleArrived += car.NumberOfPeople;
                     }
                     else
                     {
-                        ++totalSumoCarsArrived;
+                        ++totalSumoVehiclesArrived;
                     }
-                }
-            }
-
-            //only update if we have any cars, else we break the carsToRender buffer (default dummy of 1 car)
-            if(cars.Count > 0)
-            {
-                //finally update visuals            
-                if (carsToRender.Length != cars.Count)
-                {
-                    Vector4[] buffer = new Vector4[cars.Count];
-                    int index = 0;
-                    foreach (SUMOCar car in cars.Values)
-                    {
-                        buffer[index] = car.GetWorldPositionSpeedCarID(true);
-                        /*if(WUIEngine.INPUT.Simulation.ScaleToWebMercator)
-                        {
-                            buffer[index].X *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.x;
-                            buffer[index].Y *= (float)WUIEngine.RUNTIME_DATA.Simulation.UtmToMercatorScale.y;
-                        }*/                        
-                        ++index;
-                    }
-                    carsToRender = buffer;
                 }
             }
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
-            string dataLine = currentTime + "," + totalCarsInjected + "," + totalCarsArrived + "," + currentCarsInSystem + "," + totalPeopleArrived + "," + totalSumoCarsInjected + "," + totalSumoCarsArrived;
+            string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
             output.Add(dataLine);
         }
 
-        private void UpdateUsageMap(SUMOCar car)
+        private void UpdateUsageMap(SUMOVehicle car)
         {
-            Vector2d pos = car.GetWorldPosition();
+            Vector2d pos = car.WorldPosition;
 
             int xIndex = (int)(_usageMap.GetLength(0) * pos.x / WUIEngine.INPUT.Simulation.DomainSize.x);
             int yIndex = (int)(_usageMap.GetLength(1) * pos.y / WUIEngine.INPUT.Simulation.DomainSize.y);
@@ -214,9 +192,9 @@ namespace WUIPlatform.Traffic
 
         public override void HandleNewCars()
         {
-            foreach (InjectedCar injectedCar in carsToInject)
+            foreach (InjectedCar injectedCar in _carsToInject)
             {
-                EvacuationGoal evacuationGoal = injectedCar.evacuationGoal;
+                EvacuationDestination evacuationGoal = injectedCar.evacuationGoal;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
                 Vector2d startLatLon = injectedCar.startLatLong;                
                 Vector2d goalLatLon = evacuationGoal.latLon;
@@ -234,15 +212,15 @@ namespace WUIPlatform.Traffic
                     bool foundRoute = false;
                     if (route.edges.Count > 0)
                     {
-                        validStartPositions.Add(startRoad);
+                        _validStartPositions.Add(startRoad);
                         foundRoute = true;
                     }
                     //if we reach here we need to teleport the car to a new location as no valid route could be found
-                    else if (validStartPositions.Count > 0)
+                    else if (_validStartPositions.Count > 0)
                     {
-                        int randomStart = Random.Range(0, validStartPositions.Count - 1);   
+                        int randomStart = Random.Range(0, _validStartPositions.Count - 1);   
                         //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
-                        route = LIBSUMO.Simulation.findRoute(validStartPositions[randomStart].edgeID, goalRoad.edgeID);    
+                        route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, goalRoad.edgeID);    
                         if(route.edges.Count > 0)
                         {
                             foundRoute = true;
@@ -266,9 +244,10 @@ namespace WUIPlatform.Traffic
                         LIBSUMO.Route.add(routeID, route.edges);
                         LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
                         LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
-                        SUMOCar car = new SUMOCar(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
-                        cars.Add(sumoID, car);
-                        ++totalCarsInjected;
+                        SUMOVehicle car = new SUMOVehicle(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
+                        _vehicles.Add(sumoID, car);
+                        _activeVehicles.Add(car.VehicleId, car);
+                        ++totalVehiclesInjected;
                     }
                 }
                 catch (Exception e)
@@ -277,12 +256,12 @@ namespace WUIPlatform.Traffic
                 }              
             } 
             
-            carsToInject.Clear();
+            _carsToInject.Clear();
         }
 
         public override bool IsSimulationDone()
         {
-            if(totalCarsArrived == totalCarsInjected)
+            if(totalVehiclesArrived == totalVehiclesInjected)
             {
                 return true;
             }
@@ -290,19 +269,14 @@ namespace WUIPlatform.Traffic
             return false;
         }
 
-        public override Vector4[] GetCarWorldPositionsStatesCarIDs()
-        {            
-            return carsToRender;
-        }
-
         public override int GetNumberOfCarsInSystem()
         {
-            return currentCarsInSystem;
+            return currentVehiclessInSystem;
         }
 
         public override int GetTotalCarsSimulated()
         {
-            return totalCarsInjected;
+            return totalVehiclesInjected;
         }        
 
         public override void InsertNewTrafficEvent(TrafficEvent tE)
@@ -394,7 +368,7 @@ namespace WUIPlatform.Traffic
         private void FireCellIgnited(int x, int y)
         {
             //since we only want unique cars
-            HashSet<SUMOCar> carsToUpdate = new HashSet<SUMOCar>();
+            HashSet<SUMOVehicle> carsToUpdate = new HashSet<SUMOVehicle>();
 
             //make fire affect edges (based on junction)
             if (fireCellEdges[x, y] != null)
@@ -406,7 +380,7 @@ namespace WUIPlatform.Traffic
                     LIBSUMO.Edge.adaptTraveltime(fireCellEdges[x, y][i], double.MaxValue);
 
                     //collect cars in system that has the edge in their route
-                    foreach (SUMOCar car in cars.Values)
+                    foreach (SUMOVehicle car in _vehicles.Values)
                     {
                         LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
                         if (route.Contains(fireCellEdges[x, y][i]))
@@ -426,7 +400,7 @@ namespace WUIPlatform.Traffic
                 }
 
                 //then do update for affected cars
-                foreach (SUMOCar car in carsToUpdate)
+                foreach (SUMOVehicle car in carsToUpdate)
                 {
                     LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
                 }

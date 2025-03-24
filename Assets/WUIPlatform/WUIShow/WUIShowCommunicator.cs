@@ -4,8 +4,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
-using UnityEditor.Experimental.GraphView;
+using System.Collections.Generic;
 
 namespace WUIPlatform.Visualization
 {
@@ -16,7 +15,7 @@ namespace WUIPlatform.Visualization
         private UdpClient udpClient;
         private TcpServer tcpServer;
 
-        private Vector4[] previouslySentCars;
+        private Dictionary<uint, Traffic.TrafficModuleVehicle> previouslySentCars;
         private int numberOfBlockedCars = 0;
         private double origoLongitude;
         private double origoLatitude;
@@ -35,7 +34,7 @@ namespace WUIPlatform.Visualization
 
             this.offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
-            previouslySentCars = new Vector4[maxNumberOfCars];
+            previouslySentCars = new Dictionary<uint, Traffic.TrafficModuleVehicle> ();
             
         }
 
@@ -129,17 +128,17 @@ namespace WUIPlatform.Visualization
         public void SendData(float currentTime)
         {
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
-            Vector4[] cars = WUIEngine.SIM.TrafficModule.GetCarWorldPositionsStatesCarIDs();
+            Dictionary<uint, Traffic.TrafficModuleVehicle> vehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
 
             //we only have dummy data
-            if(cars.Length == 1 && cars[0].W < 0)
+            if(vehicles.Count == 0)
             {
                 return;
             }
 
-            if (cars.Length > 0 && currentTime > lastTime + WUIEngine.INPUT.WUIShow.WuiShowDeltaTime)
+            if (currentTime > lastTime + WUIEngine.INPUT.WUIShow.WuiShowDeltaTime)
             {
-                byte[] sendBytes = new byte[cars.Length * 16];
+                byte[] sendBytes = new byte[vehicles.Count * 16];
                 int i = 0;
                 void addBytes(byte[] bytes)
                 {
@@ -151,48 +150,48 @@ namespace WUIPlatform.Visualization
                 }
 
                 numberOfBlockedCars = 0;
-                for (int j = 0; j < cars.Length; j++)
+                uint vehicleCount = 0;
+                foreach(Traffic.TrafficModuleVehicle vehicle in vehicles.Values)
                 {
-                    Vector4 carData = cars[j];
-                    uint carId = (uint)carData.W;
-
-                    if (carId < maxNumberOfCars && carData != previouslySentCars[carId]) // only send the cars that have changed
+                    if (vehicleCount < maxNumberOfCars)
                     {
-                        previouslySentCars[carId] = carData;
-                        addBytes(BitConverter.GetBytes(carId));
-
-                        //sending geodata, wgs84
-                        if (true)
+                        bool sendData = false;
+                        Traffic.TrafficModuleVehicle v;
+                        previouslySentCars.TryGetValue(vehicle.VehicleId, out v);
+                        //new vehicle not sent before
+                        if (v == null)
                         {
-                            
-                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(carData.X - offset.x, carData.Y - offset.y, false);
+                            previouslySentCars.Add(vehicle.VehicleId, v);
+                            sendData = true;
+                        }
+                        //only send if position has changed
+                        else if (vehicle.WorldPosition != v.WorldPosition)
+                        {
+                            sendData = true;
+                        } 
 
+                        if(sendData)
+                        {
+                            addBytes(BitConverter.GetBytes(vehicle.VehicleId));
+                            //sending geodata, wgs84
+                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(vehicle.WorldPosition.x - offset.x, vehicle.WorldPosition.y - offset.y, false);
                             //Make the lon/lat coordinates relative to conserve precision during cast to float
                             //SUMO defines lon as x and lat as y
                             double longitude = wgs84.x - origoLongitude;
                             double latitude = wgs84.y - origoLatitude;
                             addBytes(BitConverter.GetBytes((float)longitude));
                             addBytes(BitConverter.GetBytes((float)latitude));
-                        }
-                        else
-                        {
-                            addBytes(BitConverter.GetBytes(carData.X));
-                            addBytes(BitConverter.GetBytes(carData.Y));
-                        }
+                            addBytes(BitConverter.GetBytes(vehicle.SpeedRatio));
 
-                        addBytes(BitConverter.GetBytes(carData.Z));
-
-                        if (timesCarSent == 1)
-                        {
-                            //   Debug.Log("id: " + car.carID + ", position and speed: " + car.GetUnityPositionAndSpeed(false));
-                        }
+                            ++vehicleCount;
+                        }   
                     }
                     else
                     {
                         numberOfBlockedCars++;
                     }
-
                 }
+
                 int numberofCarsToSend = sendBytes.Length - (numberOfBlockedCars * 16);
                 int maxChunkSize = 16 * 1024; //send max 1024 cars at a time
                 for (int x = 0; x < numberofCarsToSend; x += maxChunkSize)

@@ -17,9 +17,9 @@ namespace WUIPlatform
     {
         //public string name;
         public Itinero.Route route;
-        public EvacuationGoal evacGoal;
+        public EvacuationDestination evacGoal;
 
-        public RouteData(Itinero.Route route, EvacuationGoal evacGoal)
+        public RouteData(Itinero.Route route, EvacuationDestination evacGoal)
         {
             this.route = route;
             this.evacGoal = evacGoal;

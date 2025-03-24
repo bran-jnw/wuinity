@@ -52,8 +52,8 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        private List<EvacuationGoal> _evacuationGoals;
-        public List<EvacuationGoal> EvacuationGoals
+        private List<EvacuationDestination> _evacuationGoals;
+        public List<EvacuationDestination> EvacuationGoals
         {
             get
             {
@@ -115,21 +115,21 @@ namespace WUIPlatform.Runtime
         public bool LoadEvacuationGoals()
         {
             bool success;
-            _evacuationGoals = EvacuationGoal.LoadEvacuationGoalFiles(out success);
+            _evacuationGoals = EvacuationDestination.LoadEvacuationGoalFiles(out success);
 
             return success;
         }        
 
-        public void AddEvacuationGoal(EvacuationGoal newGoal)
+        public void AddEvacuationGoal(EvacuationDestination newGoal)
         {
             if(_evacuationGoals == null)
             {
-                _evacuationGoals = new List<EvacuationGoal>();
+                _evacuationGoals = new List<EvacuationDestination>();
             }
             _evacuationGoals.Add(newGoal);
         }
 
-        public void RemoveEvacuationGoal(EvacuationGoal goal)
+        public void RemoveEvacuationGoal(EvacuationDestination goal)
         {
             if (_evacuationGoals != null)
             {
@@ -137,11 +137,11 @@ namespace WUIPlatform.Runtime
             }
         }
 
-        public void ClearAndAddEvacuationGoals(EvacuationGoal[] evacGoals)
+        public void ClearAndAddEvacuationGoals(EvacuationDestination[] evacGoals)
         {
             if (_evacuationGoals == null)
             {
-                _evacuationGoals = new List<EvacuationGoal>();
+                _evacuationGoals = new List<EvacuationDestination>();
             }
             else
             {

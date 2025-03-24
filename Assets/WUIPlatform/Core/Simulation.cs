@@ -644,7 +644,7 @@ namespace WUIPlatform
         {
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
             {
-                EvacuationGoal eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
+                EvacuationDestination eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 if(!eG.blocked)
                 {
                     FireCellState cellState = _fireModule.GetFireCellState(eG.latLon);
@@ -669,7 +669,7 @@ namespace WUIPlatform
             }            
         }
 
-        public void InsertNewCar(Vector2d startLatLon, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
+        public void InsertNewCar(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
         {
             if(_trafficModule != null)
             {

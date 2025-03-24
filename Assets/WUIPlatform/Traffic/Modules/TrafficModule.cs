@@ -13,17 +13,17 @@ namespace WUIPlatform.Traffic
 {
     public abstract class TrafficModule : SimulationModule
     {
-        protected List<float> arrivalData;
-        protected List<InjectedCar> carsToInject;
-        protected Vector4[] carsToRender;
+        protected List<float> _arrivalData;
+        protected List<InjectedCar> _carsToInject;
+        protected Dictionary<uint, TrafficModuleVehicle> _activeVehicles;
 
         protected struct InjectedCar
         {
             public Vector2d startLatLong;
-            public EvacuationGoal evacuationGoal;
+            public EvacuationDestination evacuationGoal;
             public uint numberOfPeopleInCar;
 
-            public InjectedCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
+            public InjectedCar(Vector2d startLatLong, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
             {
                 this.startLatLong = startLatLong;
                 this.evacuationGoal = evacuationGoal;
@@ -33,10 +33,9 @@ namespace WUIPlatform.Traffic
 
         public TrafficModule()
         {
-            arrivalData = new List<float>();
-            carsToInject = new List<InjectedCar>();
-            carsToRender = new Vector4[1];
-            carsToRender[0].W = -1f;
+            _arrivalData = new List<float>();
+            _carsToInject = new List<InjectedCar>();
+            _activeVehicles = new Dictionary<uint, TrafficModuleVehicle>();
         }
 
         /// <summary>
@@ -46,9 +45,9 @@ namespace WUIPlatform.Traffic
         /// <param name="evacuationGoal"></param>
         /// <param name="routeData"></param>
         /// <param name="numberOfPeopleInCar"></param>
-        public void InsertNewCar(Vector2d startLatLong, EvacuationGoal evacuationGoal, uint numberOfPeopleInCar)
+        public void InsertNewCar(Vector2d startLatLong, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
         {
-            carsToInject.Add(new InjectedCar(startLatLong, evacuationGoal, numberOfPeopleInCar));
+            _carsToInject.Add(new InjectedCar(startLatLong, evacuationGoal, numberOfPeopleInCar));
         }
 
         public abstract void HandleNewCars();
@@ -57,7 +56,10 @@ namespace WUIPlatform.Traffic
         public abstract int GetTotalCarsSimulated();        
         public abstract int GetNumberOfCarsInSystem();
         public abstract void UpdateEvacuationGoals();
-        public abstract Vector4[] GetCarWorldPositionsStatesCarIDs();
+        public Dictionary<uint, TrafficModuleVehicle> GetActiveVehicles()
+        {
+            return _activeVehicles;
+        }
         public abstract void SaveToFile(int runNumber);
 
         private static uint carCount = 0;
@@ -68,7 +70,7 @@ namespace WUIPlatform.Traffic
         }
         public List<float> GetArrivalData()
         {
-            return arrivalData;
+            return _arrivalData;
         }
 
         public abstract void HandleIgnitedFireCells(List<Vector2int> cellIndices);

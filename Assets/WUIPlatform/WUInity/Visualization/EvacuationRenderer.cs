@@ -7,6 +7,7 @@
 
 using UnityEngine;
 using WUIPlatform.Pedestrian;
+using System.Collections.Generic;
 
 namespace WUIPlatform.WUInity.Visualization
 {
@@ -20,7 +21,7 @@ namespace WUIPlatform.WUInity.Visualization
         Bounds bounds;
         ComputeBuffer householdPositionsBuffer;        
         ComputeBuffer carPositionsBuffer;
-        System.Numerics.Vector4[] carPositionsArray;
+        Dictionary<uint, Traffic.TrafficModuleVehicle> _activeVehicles;
 
 
         public void CreateBuffers(bool renderHouseholds, bool renderTraffic)
@@ -56,22 +57,33 @@ namespace WUIPlatform.WUInity.Visualization
 
             if (renderCars)
             {
-                if (carPositionsBuffer != null)
+                Dictionary<uint, Traffic.TrafficModuleVehicle> currentVehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
+                if(currentVehicles.Count > 0)
                 {
-                    carPositionsBuffer.Release();
-                    carPositionsBuffer = null;
-                }
-                //if(WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() > 0)
-                //{
-                    carPositionsArray = WUIEngine.SIM.TrafficModule.GetCarWorldPositionsStatesCarIDs();
-                    if(carPositionsBuffer == null || carPositionsArray.Length != carPositionsBuffer.count)
+                    //need to make a copy as it might get modified during foreach
+                    _activeVehicles = new Dictionary<uint, Traffic.TrafficModuleVehicle>(currentVehicles);
+
+                    if (carPositionsBuffer == null || _activeVehicles.Count != carPositionsBuffer.count)
+                    {     
+                        if (carPositionsBuffer != null)
+                        {
+                            carPositionsBuffer.Release();
+                        }
+                        carPositionsBuffer = new ComputeBuffer(_activeVehicles.Count, 4 * sizeof(float));
+                    }
+                    
+                    List<Vector4> dataToRender = new List<Vector4>();
+                    foreach(Traffic.TrafficModuleVehicle vehicle in _activeVehicles.Values)
                     {
-                        carPositionsBuffer = new ComputeBuffer(carPositionsArray.Length, 4 * sizeof(float));
-                    }                    
-                    carPositionsBuffer.SetData(carPositionsArray);
+                        Vector2d pos = vehicle.WorldPosition;
+                        float speedRatio = vehicle.SpeedRatio;
+                        Vector4 data = new Vector4((float)pos.x, (float)pos.y, speedRatio, 0f);
+                        dataToRender.Add(data);
+                    }
+                    carPositionsBuffer.SetData(dataToRender);
                     carsMaterial.SetBuffer("_PositionsAndState", carPositionsBuffer);
                     Graphics.DrawMeshInstancedProcedural(carMesh, 0, carsMaterial, bounds, carPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
-                //}                
+                }           
             }
         }
 

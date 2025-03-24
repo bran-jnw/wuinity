@@ -202,7 +202,7 @@ namespace WUIPlatform.Pedestrian
             if(WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
-                EvacuationGoal evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
+                EvacuationDestination evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
 
                 //TODO: more sophisticated choice of new goal
                 if (evacGoal.blocked)
@@ -252,10 +252,10 @@ namespace WUIPlatform.Pedestrian
             household.reachedCar = true;
         }
 
-        private EvacuationGoal GetEvacuationGoal(HumanEvacCell cell, int cellIndex)
+        private EvacuationDestination GetEvacuationGoal(HumanEvacCell cell, int cellIndex)
         {
             TrafficInput input = WUIEngine.INPUT.Traffic;
-            EvacuationGoal goal = null;
+            EvacuationDestination goal = null;
 
             if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                

@@ -16,8 +16,8 @@ namespace WUIPlatform.Traffic
     [System.Serializable]
     public class MacroTrafficSim : TrafficModule
     {     
-        List<MacroCar> carsInSystem;
-        List<MacroCar> carsOnHold;
+        List<MacroVehicle> carsInSystem;
+        List<MacroVehicle> carsOnHold;
         int totalCarsSimulated;
         int oldTotalCars;
         List<string> output;
@@ -31,8 +31,8 @@ namespace WUIPlatform.Traffic
         {
             //TODO: make sim read router Db, then route creator
             //routeCreator = ;
-            carsInSystem = new List<MacroCar>();
-            carsOnHold = new List<MacroCar>();
+            carsInSystem = new List<MacroVehicle>();
+            carsOnHold = new List<MacroVehicle>();
             totalCarsSimulated = 0;
             oldTotalCars = 0;
 
@@ -59,14 +59,14 @@ namespace WUIPlatform.Traffic
 
         public override void HandleNewCars()
         {
-            foreach (InjectedCar injectedCar in carsToInject)
+            foreach (InjectedCar injectedCar in _carsToInject)
             {
                 RouteData routeData = GetRouteData(injectedCar);
-                MacroCar car = new MacroCar(routeData, injectedCar.numberOfPeopleInCar, GetNewCarID());
+                MacroVehicle car = new MacroVehicle(routeData, injectedCar.numberOfPeopleInCar, GetNewCarID());
                 carsOnHold.Add(car);
                 ++totalCarsSimulated;
             }
-            carsToInject.Clear();
+            _carsToInject.Clear();
         }
 
         private RouteData GetRouteData(InjectedCar car)
@@ -127,7 +127,7 @@ namespace WUIPlatform.Traffic
                 {
                     for (int i = 0; i < t.Value.cars.Count; i++)
                     {
-                        MacroCar car = t.Value.cars[i];
+                        MacroVehicle car = t.Value.cars[i];
                         //only update if goal is blocked, cars on the same road (density data) might be going different places
                         if(car.routeData.evacGoal.blocked)
                         {
@@ -141,7 +141,7 @@ namespace WUIPlatform.Traffic
             }
         }
 
-        public bool IsAnyoneGoingHere(EvacuationGoal goal)
+        public bool IsAnyoneGoingHere(EvacuationDestination goal)
         {
             for (int i = 0; i < carsInSystem.Count; i++)
             {
@@ -180,7 +180,7 @@ namespace WUIPlatform.Traffic
 
             //for each car in the system we sort them by street they are on, this is called traffic density data
             roadSegments = CollectRoadSegments();
-            List<MacroCar> carsToRemove = new List<MacroCar>();
+            List<MacroVehicle> vehiclesToRemove = new List<MacroVehicle>();
             Dictionary<int, RoadSegment> newRoadSegments = new Dictionary<int, RoadSegment>();
            
 
@@ -208,27 +208,27 @@ namespace WUIPlatform.Traffic
                         break;
                     }
 
-                    MacroCar car = roadSegment.Value.cars[j];
+                    MacroVehicle vehicle = roadSegment.Value.cars[j];
                     float speed = densitySpeed;
                     //the first car moves unimpeded
                     if(j == 0)
                     {
-                        speed = car.currentSpeedLimit;
+                        speed = vehicle.currentSpeedLimit;
                     }
                     
                     //check if we are going on to a new stretch of road (new traffic density) after this time step
-                    if(car.WillChangeRoad(deltaTime, speed))
+                    if(vehicle.WillChangeRoad(deltaTime, speed))
                     {
-                        int newHash = car.GetNextHashCode();
+                        int newHash = vehicle.GetNextHashCode();
                         RoadSegment nextSegment;
                         //if traffic density exists we have to check if we can move over there, if not we stay still and stop the entire movement on the road
                         if(roadSegments.TryGetValue(newHash, out nextSegment))
                         {
                             if(nextSegment.CanAddCar())
                             {
-                                car.MoveCar(currentTime, deltaTime, speed);
+                                vehicle.MoveCar(currentTime, deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
-                                nextSegment.AddCar(car);
+                                nextSegment.AddCar(vehicle);
                             }
                             else
                             {
@@ -241,9 +241,9 @@ namespace WUIPlatform.Traffic
                         {
                             if (nextSegment.CanAddCar())
                             {
-                                car.MoveCar(currentTime, deltaTime, speed);
+                                vehicle.MoveCar(currentTime, deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
-                                nextSegment.AddCar(car);
+                                nextSegment.AddCar(vehicle);
                             }
                             else
                             {
@@ -253,23 +253,23 @@ namespace WUIPlatform.Traffic
                         }
                         else
                         {
-                            car.MoveCar(currentTime, deltaTime, speed);
+                            vehicle.MoveCar(currentTime, deltaTime, speed);
                             //now we need to add to our temporary road segment dictionary since otherwise we might overfill any new segment
-                            int hash = car.roadSegmentHash;
-                            nextSegment = new RoadSegment(car, this);
+                            int hash = vehicle.roadSegmentHash;
+                            nextSegment = new RoadSegment(vehicle, this);
                             newRoadSegments.Add(hash, nextSegment);
                         }
                     }
                     else
                     {
-                        car.MoveCar(currentTime, deltaTime, speed);
+                        vehicle.MoveCar(currentTime, deltaTime, speed);
                     }                    
 
                     //flag cars that have arrived
-                    if (car.hasArrived)
+                    if (vehicle.hasArrived)
                     {
-                        carsToRemove.Add(car);
-                        exitingPeople += car.numberOfPeopleInCar;
+                        vehiclesToRemove.Add(vehicle);
+                        exitingPeople += vehicle.NumberOfPeople;
                     }  
                 }                
             }
@@ -277,7 +277,7 @@ namespace WUIPlatform.Traffic
             //this fixes cars waiting to get in to the system, but not cars already in the system waiting to get to a new road
             for (int i = 0; i < carsOnHold.Count; i++)
             {
-                MacroCar car = carsOnHold[i];
+                MacroVehicle car = carsOnHold[i];
                 int hash = car.roadSegmentHash;
                 RoadSegment t;
                 if (roadSegments.TryGetValue(hash, out t))
@@ -320,7 +320,7 @@ namespace WUIPlatform.Traffic
             }   
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
-            string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + carsToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
+            string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
                 newOut += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
@@ -331,33 +331,21 @@ namespace WUIPlatform.Traffic
             oldTotalCars = totalCarsSimulated;
 
             //remove cars that has arrived
-            for (int i = 0; i < carsToRemove.Count; ++i)
+            for (int i = 0; i < vehiclesToRemove.Count; ++i)
             {
-                carsInSystem.Remove(carsToRemove[i]);
+                carsInSystem.Remove(vehiclesToRemove[i]);
 
                 //save output data for funtional analysis
-                arrivalData.Add(currentTime + deltaTime);                            
+                _arrivalData.Add(currentTime + deltaTime);                            
             }
 
             if(evacGoalsDirty)
             {
                 UpdateEvacGoalsInternal();
-            }
-
-            //update rendering
-            carsToRender = new Vector4[carsInSystem.Count];
-            for (int i = 0; i < carsToRender.Length; i++)
-            {
-                carsToRender[i] = carsInSystem[i].GetWorldPositionSpeedCarID(true);
-            }            
+            }        
 
             //WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
-        }     
-        
-        public override Vector4[] GetCarWorldPositionsStatesCarIDs()
-        {
-            return carsToRender;
-        }
+        }    
 
         //add parameter for flow reduction by adding background traffic as a density
         private Dictionary<int, RoadSegment> CollectRoadSegments()
@@ -365,7 +353,7 @@ namespace WUIPlatform.Traffic
             Dictionary<int, RoadSegment> tDD = new Dictionary<int, RoadSegment>();
             for (int i = 0; i < carsInSystem.Count; ++i)
             {
-                MacroCar c = carsInSystem[i];
+                MacroVehicle c = carsInSystem[i];
 
                 int hash = c.roadSegmentHash;
 

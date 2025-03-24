@@ -20,7 +20,7 @@ namespace WUIPlatform.Traffic
         string streetName;
         public int laneCount;
         public float length;
-        public List<MacroCar> cars;
+        public List<MacroVehicle> cars;
         string highwayType;
         MacroTrafficSim mCS;
         public float maxCapacity;
@@ -29,7 +29,7 @@ namespace WUIPlatform.Traffic
         LinearSpline2D spline;
         public float speedLimit;
 
-        public RoadSegment(MacroCar car, MacroTrafficSim mCS)
+        public RoadSegment(MacroVehicle car, MacroTrafficSim mCS)
         {
             goalCoord = car.goingToCoord;
             streetName = car.drivingOnStreet;
@@ -37,7 +37,7 @@ namespace WUIPlatform.Traffic
             laneCount = GetNumberOfLanes(highwayType);
             maxCapacity = GetMaxCapacity(highwayType);
             length = car.currentShapeLength;
-            cars = new List<MacroCar>();
+            cars = new List<MacroVehicle>();
             cars.Add(car);
             this.mCS = mCS;
 
@@ -50,7 +50,7 @@ namespace WUIPlatform.Traffic
         }
 
         //new way of interpolating in GUI
-        public void CalculateSpline(MacroCar car)
+        public void CalculateSpline(MacroVehicle car)
         {
             RouteData routeData = car.routeData;
             int currentShapeIndex = car.currentShapeIndex;
@@ -90,7 +90,7 @@ namespace WUIPlatform.Traffic
             return success;
         }
 
-        public void AddCar(MacroCar car)
+        public void AddCar(MacroVehicle car)
         {
             car.SetCurrentSpeedLimit(speedLimit);
             car.SetSpline(spline);

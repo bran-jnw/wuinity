@@ -10,10 +10,9 @@ using WUIPlatform.Evacuation;
 
 namespace WUIPlatform.Traffic
 {
-    public class SUMOCar : TrafficModuleCar
+    public class SUMOVehicle : TrafficModuleVehicle
     {
-        string sumoID;        
-        double xPos, yPos;
+        string _sumoId;      
         double rotation;
         bool active;
         bool directControlled;
@@ -23,24 +22,23 @@ namespace WUIPlatform.Traffic
         float oldRotation, newRotation;
         float speedRatio;
 
-        public SUMOCar(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationGoal goal) : base(carID, peopleInCar, goal)
+        public SUMOVehicle(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationDestination goal) : base(carID, peopleInCar, goal)
         {
-            this.carID = carID;
-            this.sumoID = sumoID;
-            xPos = initialPos.x;
-            yPos = initialPos.y;
+            _vehicleId = carID;
+            _sumoId = sumoID;
+            _worldPosition = new Vector2d(initialPos.x, initialPos.y);  
             active = true;
             directControlled = false;
             lastPos = new Vector2((float)initialPos.x, (float)initialPos.y);
 
-            oldVisualPos = new Vector3((float)xPos, 0.0f, (float)yPos);
+            oldVisualPos = new Vector3((float)_worldPosition.x, 0.0f, (float)_worldPosition.y);
             newVisualPos = oldVisualPos;
             rotation = (float)angle;
         }
 
         public string GetSumoVehicleID()
         {
-            return sumoID;
+            return _sumoId;
         }
 
         /*public void UpdateVisualPosition(float lerpRatio)
@@ -53,49 +51,23 @@ namespace WUIPlatform.Traffic
             model.transform.rotation = Quaternion.Slerp(oldRotation, newRotation, lerpRatio);
         }*/
 
-        public void SetPosRot(double x, double y, double angle)
+        public void SetWorldPosItionAndRotation(LIBSUMO.TraCIPosition localPos, double angle, Vector2d offset)
         {
             //position
-            lastPos.X = (float)xPos;
-            lastPos.Y = (float)yPos;
+            lastPos.X = (float)_worldPosition.x;
+            lastPos.Y = (float)_worldPosition.y;
 
-            xPos = x;
-            yPos = y;
+            _worldPosition = new Vector2d(localPos.x, localPos.y) + offset;
 
             oldVisualPos = newVisualPos;
-            newVisualPos = new Vector3((float)xPos, 0.0f, (float)yPos);
+            newVisualPos = new Vector3((float)_worldPosition.x, 0.0f, (float)_worldPosition.y);
 
             //rotation
             oldRotation = (float)rotation;
             rotation = angle;
             newRotation = (float)angle;
-        }
 
-        public void SetLocalPosRot(LIBSUMO.TraCIPosition pos, double angle)
-        {
-            SetPosRot(pos.x, pos.y, angle);
-        }
-
-        public Vector2d GetWorldPosition()
-        {
-            return new Vector2d(xPos, yPos) + WUIEngine.SIM.TrafficModule.GetOriginOffset();
-        }
-
-        Vector4 _positionAndSpeed;
-        public override Vector4 GetWorldPositionSpeedCarID(bool updateData)
-        {
-            return GetPositionSpeedCarID(updateData, WUIEngine.SIM.TrafficModule.GetOriginOffset());
-        }
-
-        public Vector4 GetPositionSpeedCarID(bool updateData, Vector2d originOffset)
-        {
-            if (updateData)
-            {
-                float speedRatio = (float)(LIBSUMO.Vehicle.getSpeed(sumoID) / LIBSUMO.Vehicle.getAllowedSpeed(sumoID));
-                _positionAndSpeed = new Vector4((float)(xPos + originOffset.x), (float)(yPos + originOffset.y), speedRatio, carID);
-            }
-
-            return _positionAndSpeed;
+            _speedRatio = (float)(LIBSUMO.Vehicle.getSpeed(_sumoId) / LIBSUMO.Vehicle.getAllowedSpeed(_sumoId));
         }
 
         public bool IsActive()
@@ -106,9 +78,9 @@ namespace WUIPlatform.Traffic
         public override void Arrive()
         {
             active = false;
-            if(goal != null)
+            if(_destination != null)
             {
-                goal.CarArrives(this, WUIEngine.SIM.CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                _destination.CarArrives(this, WUIEngine.SIM.CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
             }            
             //TODO: send message to WUI-nity
         }
