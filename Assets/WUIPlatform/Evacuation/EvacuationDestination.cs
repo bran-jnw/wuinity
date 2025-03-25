@@ -34,6 +34,9 @@ namespace WUIPlatform.Evacuation
         //data for WUI-SHOW etc
         private float _totalTravelTime, _averageTravelTime;
 
+        public float TotalTravelTime{ get => _totalTravelTime; }
+        public float AverageTravelTime { get => _averageTravelTime; }
+
         public EvacuationDestination()
         {
             _name = "New goal";

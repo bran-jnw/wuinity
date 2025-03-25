@@ -83,7 +83,6 @@ namespace WUIPlatform.Visualization
         {
             _readingData = true;
             //vehicle Id, number of people, type of vehicle, destination name
-            byte[] result = new byte[_newVehiclesNotSent.Count + (2 * sizeof(uint) + sizeof(char) * _maxNameLengths + sizeof(char) * _maxNameLengths)];
             List<byte> data = new List<byte>();
             while(_newVehiclesNotSent.Count > 0)
             {
@@ -93,8 +92,27 @@ namespace WUIPlatform.Visualization
                 data.AddRange(Encoding.UTF8.GetBytes(vehicle.VehicleType.PadRight(_maxNameLengths)));
                 data.AddRange(Encoding.UTF8.GetBytes(vehicle.Destination.Name.PadRight(_maxNameLengths)));
             }
-            result = data.ToArray();
+            byte[] result = data.ToArray();
             _readingData = false;
+
+            return result;
+        }
+
+        private byte[] GetDestinationsData()
+        {            
+            List<Evacuation.EvacuationDestination> destinations = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals;
+            //name, type, total cars, total people, total travel time, average travel time
+            List<byte> data = new List<byte>();
+            for(int i = 0; i < destinations.Count; ++i)
+            {
+                data.AddRange(Encoding.UTF8.GetBytes(destinations[i].Name.PadRight(_maxNameLengths)));
+                data.AddRange(Encoding.UTF8.GetBytes(destinations[i].goalType.ToString().PadRight(_maxNameLengths)));
+                data.AddRange(BitConverter.GetBytes(destinations[i].cars.Count));
+                data.AddRange(BitConverter.GetBytes(destinations[i].currentPeople));
+                data.AddRange(BitConverter.GetBytes(destinations[i].TotalTravelTime));
+                data.AddRange(BitConverter.GetBytes(destinations[i].AverageTravelTime));
+            }
+            byte[] result = data.ToArray();
 
             return result;
         }
@@ -130,6 +148,11 @@ namespace WUIPlatform.Visualization
             {
                 headerMessage = "NewVehicles";
                 data = GetNewVehiclesData();
+            }
+            else if (request == "GetDestinations")
+            {
+                headerMessage = "Destinations";
+                data = GetDestinationsData();
             }
 
             byte[] header = CreateTcpHeader(headerMessage, data.Length);
