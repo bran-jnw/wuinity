@@ -15,7 +15,7 @@ namespace WUIPlatform.Visualization
         private UdpClient udpClient;
         private TcpServer tcpServer;
 
-        private Dictionary<uint, Traffic.TrafficModuleVehicle> previouslySentCars;
+        private Dictionary<uint, Vector2d> previouslySentPositions;
         private Queue<Traffic.TrafficModuleVehicle> _newVehiclesNotSent;
         private int numberOfBlockedCars = 0;
         private double origoLongitude;
@@ -36,7 +36,7 @@ namespace WUIPlatform.Visualization
 
             this.offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
-            previouslySentCars = new Dictionary<uint, Traffic.TrafficModuleVehicle>();
+            previouslySentPositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
             
         }
@@ -213,18 +213,19 @@ namespace WUIPlatform.Visualization
                     if (vehicleCount < maxNumberOfCars)
                     {
                         bool sendData = false;
-                        Traffic.TrafficModuleVehicle v;
-                        previouslySentCars.TryGetValue(vehicle.VehicleId, out v);
+                        Vector2d oldWorldPos;
+                        bool foundVehicle = previouslySentPositions.TryGetValue(vehicle.VehicleId, out oldWorldPos);
                         //new vehicle not sent before
-                        if (v == null)
+                        if (!foundVehicle)
                         {
-                            previouslySentCars.Add(vehicle.VehicleId, vehicle);
+                            previouslySentPositions.Add(vehicle.VehicleId, vehicle.WorldPosition);
                             _newVehiclesNotSent.Enqueue(vehicle);
                             sendData = true;
                         }
                         //only send if position has changed
-                        else if (vehicle.WorldPosition != v.WorldPosition)
+                        else if (vehicle.WorldPosition != oldWorldPos)
                         {
+                            previouslySentPositions[vehicle.VehicleId] = vehicle.WorldPosition;
                             sendData = true;
                         } 
 
