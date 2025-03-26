@@ -89,7 +89,7 @@ namespace WUIPlatform.Visualization
                 Traffic.TrafficModuleVehicle vehicle = _newVehiclesNotSent.Dequeue();
                 data.AddRange(BitConverter.GetBytes(vehicle.VehicleId));
                 data.AddRange(BitConverter.GetBytes(vehicle.NumberOfPeople));
-                data.AddRange(Encoding.UTF8.GetBytes(vehicle.VehicleType.PadRight(_maxNameLengths)));
+                data.AddRange(Encoding.UTF8.GetBytes(vehicle.VehicleClass.PadRight(_maxNameLengths)));
                 data.AddRange(Encoding.UTF8.GetBytes(vehicle.Destination.Name.PadRight(_maxNameLengths)));
             }
             byte[] result = data.ToArray();

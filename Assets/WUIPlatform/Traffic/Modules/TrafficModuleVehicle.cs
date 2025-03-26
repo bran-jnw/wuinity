@@ -16,7 +16,7 @@ namespace WUIPlatform.Traffic
         protected Vector2d _worldPosition;
         protected uint _numberOfPeople;
         protected float _totalTravelTime;
-        protected string _vehicleType;
+        protected string _vehicleClass;
         protected EvacuationDestination _destination;
         protected float _speedRatio;
 
@@ -24,16 +24,17 @@ namespace WUIPlatform.Traffic
         public Vector2d WorldPosition { get => _worldPosition; }
         public uint NumberOfPeople { get => _numberOfPeople; }
         public float TotalTravelTime { get => _totalTravelTime; }
-        public string VehicleType { get => _vehicleType; }
+        public string VehicleClass { get => _vehicleClass; }
         public EvacuationDestination Destination { get => _destination; }
         public float SpeedRatio { get => _speedRatio; }
 
 
-        public TrafficModuleVehicle(uint carId, uint numberOfPeopleInCar, EvacuationDestination destination)
+        public TrafficModuleVehicle(uint vehicleId, uint numberOfPeopleInCar, EvacuationDestination destination, string vehicleClass = "passenger")
         {
-            _vehicleId = carId;
+            _vehicleId = vehicleId;
             _numberOfPeople = numberOfPeopleInCar;
             _destination = destination;
+            _vehicleClass = vehicleClass;
         }
 
         public abstract void Arrive();
