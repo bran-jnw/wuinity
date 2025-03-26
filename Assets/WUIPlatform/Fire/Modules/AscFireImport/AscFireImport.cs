@@ -30,9 +30,9 @@ namespace WUIPlatform.Fire
         private FireRasterData[,] _data;
 
         //TODO: clean this up, this is duplicate data but is needed for shaders, come up with some way of better data storage
-        float[] firelineIntensityData;
+        float[] _firelineIntensityData;
 
-        List<Vector2int> newlyIgnitedCells;
+        List<Vector2int> _newlyIgnitedCells;
         float[] _sootInjection;
 
         public AscFireImport() 
@@ -46,8 +46,8 @@ namespace WUIPlatform.Fire
             Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
             _originOffset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
-            firelineIntensityData = new float[ncols * nrows];
-            newlyIgnitedCells = new List<Vector2int>();
+            _firelineIntensityData = new float[ncols * nrows];
+            _newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
             WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
@@ -67,8 +67,8 @@ namespace WUIPlatform.Fire
                         if (!_data[x, y].isActive && WUIEngine.SIM.CurrentTime > _data[x, y].TimeOfAArrival)
                         {
                             _data[x, y].isActive = true;
-                            newlyIgnitedCells.Add(new Vector2int(x, y));
-                            firelineIntensityData[index] = _data[x, y].FirelineIntensity;
+                            _newlyIgnitedCells.Add(new Vector2int(x, y));
+                            _firelineIntensityData[index] = _data[x, y].FirelineIntensity;
                             _sootInjection[index] = 1f;
                             ++_activeCells;
                         }
@@ -80,12 +80,12 @@ namespace WUIPlatform.Fire
 
         public override List<Vector2int> GetIgnitedFireCells()
         {
-            return newlyIgnitedCells;
+            return _newlyIgnitedCells;
         }
 
         public override void ConsumeIgnitedFireCells()
         {
-            newlyIgnitedCells.Clear();
+            _newlyIgnitedCells.Clear();
         }
 
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
@@ -264,11 +264,11 @@ namespace WUIPlatform.Fire
         /// <summary>
         /// Returns state of cell on mesh based on lat/long. Returns dead if outside of mesh.
         /// </summary>
-        /// <param name="latLong"></param>
+        /// <param name="latLon"></param>
         /// <returns></returns>
-        public override FireCellState GetFireCellState(Vector2d latLong)
+        public override FireCellState GetFireCellState(Vector2d latLon)
         {
-            Vector2d pos = GeoConversions.GeoToWorldPosition(latLong.x, latLong.y,  WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            Vector2d pos = GeoConversions.GeoToWorldPosition(latLon.x, latLon.y,  WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);
@@ -300,9 +300,14 @@ namespace WUIPlatform.Fire
             return WUIEngine.INPUT.Simulation.DeltaTime;
         }
 
+        public FireRasterData[,] GetCompleteFireData()
+        {
+            return _data;
+        }
+
         public override float[] GetFireLineIntensityData()
         {
-            return firelineIntensityData;
+            return _firelineIntensityData;
         }
 
         public override float[] GetFuelModelNumberData()

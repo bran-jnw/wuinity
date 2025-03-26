@@ -73,6 +73,38 @@ namespace WUIPlatform.Visualization
             return result;
         }
 
+        private byte[] GetFinalFireTimeOfArrival()
+        {
+            byte[] result = null;
+            Fire.FireRasterData[,] data = ((Fire.AscFireImport)WUIEngine.SIM.FireModule).GetCompleteFireData();
+
+            if (data != null)
+            {
+                int xDim = data.GetLength(0);
+                int yDim = data.GetLength(1);
+
+                result = new byte[2 * sizeof(int) + xDim * yDim * sizeof(float)];
+
+                byte[] bytes = BitConverter.GetBytes(xDim);
+                Buffer.BlockCopy(bytes, 0, result, 0, bytes.Length);
+                bytes = BitConverter.GetBytes(yDim);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(int), bytes.Length);
+
+                int offset = 2 * sizeof(int);
+                for (int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; x++)
+                    {
+                        bytes = BitConverter.GetBytes(data[x, y].TimeOfAArrival);
+                        Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                        offset += bytes.Length;
+                    }
+                }
+            }
+
+            return result;
+        }
+
         private void GetUsageMapData()
         {
 
@@ -82,7 +114,7 @@ namespace WUIPlatform.Visualization
         private byte[] GetNewVehiclesData()
         {
             _readingData = true;
-            //vehicle Id, number of people, type of vehicle, destination name
+            //vehicle Id, number of people, class of vehicle, destination name
             List<byte> data = new List<byte>();
             while(_newVehiclesNotSent.Count > 0)
             {
@@ -153,6 +185,11 @@ namespace WUIPlatform.Visualization
             {
                 headerMessage = "Destinations";
                 data = GetDestinationsData();
+            }
+            else if (request == "GetTimeOfArrival")
+            {
+                headerMessage = "Fire_TOA";
+                data = GetFinalFireTimeOfArrival();
             }
 
             byte[] header = CreateTcpHeader(headerMessage, data.Length);
