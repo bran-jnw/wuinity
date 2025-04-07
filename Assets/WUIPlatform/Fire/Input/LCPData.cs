@@ -147,9 +147,9 @@ namespace WUIPlatform.Fire
 		public short[] landscape;
 		static readonly int headsize = 7316; //header size taken from farsite source code
 
-		Vector2d originOffset; //offset from common origin (map lower left)
-		public Vector2d OriginOffset { get => originOffset; }
-		Vector2int originCellOffset; //cells offset from common origin
+		Vector2d _originOffset; //offset from common origin (map lower left)
+		public Vector2d OriginOffset { get => _originOffset; }
+		Vector2int _originCellOffset; //cells offset from common origin
         //public Vector2int OriginCellOffset { get => originCellOffset; }
 
 		public LCPData(Vector2d cellSize, Vector2int cellCount)								
@@ -345,8 +345,8 @@ namespace WUIPlatform.Fire
 			{
                 //WUIEngine.LOG(WUIEngine.LogType.Log, "X/Y offset cells: " + originCellOffset.x + ", " + originCellOffset.y);
                 //correct for any difference in origin
-                xIndex += originCellOffset.x;
-                yIndex += originCellOffset.y;
+                xIndex += _originCellOffset.x;
+                yIndex += _originCellOffset.y;
             }
 
             //flip y since dataset is north down
@@ -760,8 +760,8 @@ namespace WUIPlatform.Fire
 			}
 
             Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            originOffset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
-			originCellOffset = new Vector2int(-(int)(originOffset.x / GetCellResolutionX()), -(int)(originOffset.y / GetCellResolutionY()));
+            _originOffset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+			_originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));
 
             if (CantAllocLCP)
             {

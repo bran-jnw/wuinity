@@ -90,6 +90,25 @@ namespace WUIPlatform.Visualization
                 bytes = BitConverter.GetBytes(yDim);
                 Buffer.BlockCopy(bytes, 0, result, sizeof(int), bytes.Length);
 
+                //physical size
+                double xSize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetLCPSizeX();
+                bytes = BitConverter.GetBytes(xSize);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+                double ySize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetLCPSizeY();
+                bytes = BitConverter.GetBytes(ySize);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+
+                //origin WGS84
+                Vector2d lcpOriginUTM = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin + WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset;
+                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
+                var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
+                double lat = lcpOriginWgs84.Lat;
+                double lon = lcpOriginWgs84.Lng;
+                bytes = BitConverter.GetBytes(lat);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+                bytes = BitConverter.GetBytes(lon);
+                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+
                 int offset = 2 * sizeof(int);
                 for (int y = 0; y < yDim; ++y)
                 {
@@ -222,17 +241,17 @@ namespace WUIPlatform.Visualization
             }
 
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
-            Dictionary<uint, Traffic.TrafficModuleVehicle> vehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
+            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
 
             //we only have dummy data
-            if(vehicles.Count == 0)
+            if(activeVehicles.Count == 0)
             {
                 return;
             }
 
             if (currentTime > lastTime + WUIEngine.INPUT.WUIShow.WuiShowDeltaTime)
             {
-                byte[] sendBytes = new byte[vehicles.Count * 16];
+                byte[] sendBytes = new byte[activeVehicles.Count * 16];
                 int i = 0;
                 void addBytes(byte[] bytes)
                 {
@@ -245,7 +264,7 @@ namespace WUIPlatform.Visualization
 
                 numberOfBlockedCars = 0;
                 uint vehicleCount = 0;
-                foreach(Traffic.TrafficModuleVehicle vehicle in vehicles.Values)
+                foreach(Traffic.TrafficModuleVehicle vehicle in activeVehicles.Values)
                 {
                     if (vehicleCount < maxNumberOfCars)
                     {
