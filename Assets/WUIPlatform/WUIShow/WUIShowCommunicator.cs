@@ -83,20 +83,24 @@ namespace WUIPlatform.Visualization
                 int xDim = data.GetLength(0);
                 int yDim = data.GetLength(1);
 
-                result = new byte[2 * sizeof(int) + xDim * yDim * sizeof(float)];
-
+                result = new byte[40 + xDim * yDim * sizeof(float)];
+                int offset = 0;
                 byte[] bytes = BitConverter.GetBytes(xDim);
                 Buffer.BlockCopy(bytes, 0, result, 0, bytes.Length);
+                offset += sizeof(int);
                 bytes = BitConverter.GetBytes(yDim);
-                Buffer.BlockCopy(bytes, 0, result, sizeof(int), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                offset += sizeof(int);
 
                 //physical size
                 double xSize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetLCPSizeX();
                 bytes = BitConverter.GetBytes(xSize);
-                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                offset += sizeof(double);
                 double ySize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetLCPSizeY();
                 bytes = BitConverter.GetBytes(ySize);
-                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                offset += sizeof(double);
 
                 //origin WGS84
                 Vector2d lcpOriginUTM = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin + WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset;
@@ -105,11 +109,13 @@ namespace WUIPlatform.Visualization
                 double lat = lcpOriginWgs84.Lat;
                 double lon = lcpOriginWgs84.Lng;
                 bytes = BitConverter.GetBytes(lat);
-                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                offset += sizeof(double);
                 bytes = BitConverter.GetBytes(lon);
-                Buffer.BlockCopy(bytes, 0, result, sizeof(double), bytes.Length);
+                Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
+                offset += sizeof(double);
 
-                int offset = 2 * sizeof(int);
+                //    offset = 2 * sizeof(int);
                 for (int y = 0; y < yDim; ++y)
                 {
                     for (int x = 0; x < xDim; x++)
