@@ -164,11 +164,37 @@ namespace WUIPlatform.Fire
 
 		public LCPData(string path, bool readGeoTIFF = false)					
 		{
+			if(path.EndsWith("tif") || path.EndsWith("tiff"))
+			{
+				readGeoTIFF = true;
+			}
+
 			if(readGeoTIFF)
 			{
-                OSGeo.GDAL.Dataset geo = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly);
-				int xDim = geo.RasterXSize;
-                int yDim = geo.RasterYSize;
+                OSGeo.GDAL.Dataset tiff = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly);
+				Header.numeast = tiff.RasterXSize;
+                Header.numnorth = tiff.RasterYSize;
+				NumVals = tiff.RasterCount;
+                //from: https://landfire.gov/fuel/landscape
+                //Eight bands are included in a landscape file: elevation, slope, aspect, fire behavior fuel model, tree canopy cover, canopy height, canopy base height, and canopy bulk density.
+                //So should be the same as classic LCP
+                landscape = new short[Header.numeast * Header.numnorth * NumVals];
+                for (int k = 0; k < NumVals; k++)
+                {
+                    OSGeo.GDAL.Band band = tiff.GetRasterBand(k + 1);
+                    short[] bandData = new short[Header.numeast * Header.numnorth];
+                    band.ReadRaster(0, 0, Header.numeast, Header.numnorth, bandData, Header.numeast, Header.numnorth, 0, 0);
+
+                    for (int i = 0; i < Header.numnorth; i++)
+                    {
+                        for (int j = 0; j < Header.numeast; j++)
+                        {
+                            landscape[i * Header.numeast * NumVals + j * NumVals + k] = bandData[i * Header.numeast * NumVals + j * NumVals];
+                        }
+                    }                    
+                }
+
+				tiff.Close();
             }
 			else
 			{
@@ -665,8 +691,8 @@ namespace WUIPlatform.Fire
 			cols = (ViewPortEast - ViewPortWest) / Header.XResol;
 			NumViewEast = (long)cols;
 			if (modf(cols, &cols) > 0.5)
-				NumViewEast++;
-		*/
+				NumViewEast++; */
+
 			if (HaveCrownFuels() == 1)
 			{
 				if (HaveGroundFuels() == 1)

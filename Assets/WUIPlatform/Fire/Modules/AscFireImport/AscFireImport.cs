@@ -20,7 +20,7 @@ namespace WUIPlatform.Fire
     }
 
     /// <summary>
-    /// Supports/tested using only Flammap version of Farsite.
+    /// Thus far only tested using only Flammap version of Farsite.
     /// </summary>
     public class AscFireImport : FireModule
     {
@@ -278,7 +278,7 @@ namespace WUIPlatform.Fire
 
             if (!IsInside(x, y) || WUIEngine.SIM.CurrentTime < _data[x, y].TimeOfAArrival)
             {
-                return FireCellState.Dead;
+                result = FireCellState.Dead;
             }
 
             return result;
