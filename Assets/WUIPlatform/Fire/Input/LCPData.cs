@@ -171,13 +171,27 @@ namespace WUIPlatform.Fire
 
 			if(readGeoTIFF)
 			{
-                OSGeo.GDAL.Dataset tiff = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly);
-				Header.numeast = tiff.RasterXSize;
+				ReadGeoTIFF(path);
+            }
+			else
+			{
+                ReadLCP(path);
+            }			
+		}
+
+		private void ReadGeoTIFF(string path)
+		{
+            using (OSGeo.GDAL.Dataset tiff = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly))
+            {
+                Header.numeast = tiff.RasterXSize;
                 Header.numnorth = tiff.RasterYSize;
-				NumVals = tiff.RasterCount;
+                NumVals = tiff.RasterCount;
+				//TODO: rest of header, at least the essential ones
+
+
                 //from: https://landfire.gov/fuel/landscape
                 //Eight bands are included in a landscape file: elevation, slope, aspect, fire behavior fuel model, tree canopy cover, canopy height, canopy base height, and canopy bulk density.
-                //So should be the same as classic LCP
+                //So should be the same order as classic LCP it seems
                 landscape = new short[Header.numeast * Header.numnorth * NumVals];
                 for (int k = 0; k < NumVals; k++)
                 {
@@ -191,17 +205,10 @@ namespace WUIPlatform.Fire
                         {
                             landscape[i * Header.numeast * NumVals + j * NumVals + k] = bandData[i * Header.numeast * NumVals + j * NumVals];
                         }
-                    }                    
+                    }
                 }
-
-				tiff.Close();
             }
-			else
-			{
-                ReadLCP(path);
-            }
-			
-		}
+        }
 
 		private void ReadLCP(string path)
 		{
