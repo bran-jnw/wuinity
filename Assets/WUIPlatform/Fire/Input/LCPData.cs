@@ -176,11 +176,13 @@ namespace WUIPlatform.Fire
 			else
 			{
                 ReadLCP(path);
-            }			
+            }
+			CalculateOriginOffset();
 		}
 
 		private void ReadGeoTIFF(string path)
 		{
+            OSGeo.GDAL.Gdal.AllRegister();
             using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly))
             {
                 Header.numeast = tif.RasterXSize;
@@ -280,18 +282,18 @@ namespace WUIPlatform.Fire
                 //Eight bands are included in a landscape file: elevation, slope, aspect, fire behavior fuel model, tree canopy cover, canopy height, canopy base height, and canopy bulk density.
                 //So should be the same order as classic LCP it seems
                 landscape = new short[Header.numeast * Header.numnorth * NumVals];
-                for (int k = 0; k < NumVals; k++)
+                for (int rasterIndex = 0; rasterIndex < NumVals; rasterIndex++)
                 {
-                    OSGeo.GDAL.Band band = tif.GetRasterBand(k + 1);
+                    OSGeo.GDAL.Band band = tif.GetRasterBand(rasterIndex + 1);
                     short[] bandData = new short[Header.numeast * Header.numnorth];
                     band.ReadRaster(0, 0, Header.numeast, Header.numnorth, bandData, Header.numeast, Header.numnorth, 0, 0);
 
-                    for (int i = 0; i < Header.numnorth; i++)
+                    for (int j = 0; j < Header.numnorth; j++)
                     {
-                        for (int j = 0; j < Header.numeast; j++)
+                        for (int i = 0; i < Header.numeast; i++)
                         {
-							long index = i * Header.numeast * NumVals + j * NumVals + k;
-                            landscape[index] = bandData[i * Header.numeast * NumVals + j * NumVals];
+							long index = rasterIndex + i * NumVals + j * Header.numeast * NumVals;
+                            landscape[index] = bandData[i + j * Header.numeast];
 
 							if(landscape[index] == -9999)
 							{
@@ -299,56 +301,56 @@ namespace WUIPlatform.Fire
 							}
 
 							//elevation
-							if(k == 0)
+							if(rasterIndex == 0)
 							{
 								Header.loelev = Mathf.Min(landscape[index], Header.loelev);
                                 Header.hielev = Mathf.Max(landscape[index], Header.hielev);
                             }
 
                             //slope
-                            if (k == 1)
+                            if (rasterIndex == 1)
                             {
                                 Header.loslope = Mathf.Min(landscape[index], Header.loslope);
                                 Header.hislope = Mathf.Max(landscape[index], Header.hislope);
                             }
 
                             //aspect
-                            if (k == 2)
+                            if (rasterIndex == 2)
                             {
                                 Header.loaspect = Mathf.Min(landscape[index], Header.loaspect);
                                 Header.hiaspect = Mathf.Max(landscape[index], Header.hiaspect);
                             }
 
                             //fuel model
-                            if (k == 3)
+                            if (rasterIndex == 3)
                             {
                                 Header.lofuel = Mathf.Min(landscape[index], Header.lofuel);
                                 Header.hifuel = Mathf.Max(landscape[index], Header.hifuel);
                             }
 
                             //canopy cover
-                            if (k == 4)
+                            if (rasterIndex == 4)
                             {
                                 Header.locover = Mathf.Min(landscape[index], Header.locover);
                                 Header.hicover = Mathf.Max(landscape[index], Header.hicover);
                             }
 
                             //caonpy height
-                            if (k == 5)
+                            if (rasterIndex == 5)
                             {
                                 Header.loheight = Mathf.Min(landscape[index], Header.loheight);
                                 Header.hiheight = Mathf.Max(landscape[index], Header.hiheight);
                             }
 
                             //canopy base height
-                            if (k == 6)
+                            if (rasterIndex == 6)
                             {
                                 Header.lobase = Mathf.Min(landscape[index], Header.lobase);
                                 Header.hibase = Mathf.Max(landscape[index], Header.hibase);
                             }
 
                             //canopy bulk density
-                            if (k == 7)
+                            if (rasterIndex == 7)
                             {
                                 Header.lodensity = Mathf.Min(landscape[index], Header.lodensity);
                                 Header.hidensity = Mathf.Max(landscape[index], Header.hidensity);
@@ -943,20 +945,23 @@ namespace WUIPlatform.Fire
 				}
 			}
 
-            Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            _originOffset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
-			_originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));
-
+			CalculateOriginOffset();
             if (CantAllocLCP)
             {
-				WUIEngine.LOG(WUIEngine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
-			}
-			else
+                WUIEngine.LOG(WUIEngine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
+            }
+            else
             {
-				WUIEngine.LOG(WUIEngine.LogType.Log, " LCP found in " + path + ", read succesfully.");
-			}
+                WUIEngine.LOG(WUIEngine.LogType.Log, " LCP found in " + path + ", read succesfully.");
+            }
+        }
 
-		}
+		private void CalculateOriginOffset()
+		{
+            Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
+            _originOffset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            _originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));            
+        }
 
 		long HaveCrownFuels()
 		{
