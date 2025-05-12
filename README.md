@@ -16,6 +16,9 @@ This is the development branch of WUInity, and as such things are broken and und
 
 Simulations happen in UTM coordinate space, this is of importance for traffic simulation and fire spread simulations when dealing with data.
 
+GDAL has been integrated in order to enable reading landscape files from GeoTIFF, WUI-nity only contains the "glue code" (C# API and C++ wrappers), 
+the actual GDAL libraries are borrowed from the SUMO install (currently GDAL 3.9.3), and as such the correct SUMO version (see "Traffic modules") has to be installed for reading GeoTIFF.
+
 A Mapbox access token (https://www.mapbox.com/) is needed to get the visualkization of the area of interest, though strictly it is not needed to perform any simulation.
 A completely free source for maps is desired, but of low priority right now.
 
@@ -52,7 +55,8 @@ Farsite DLL (a version of Farsite source code exists in the public domain, given
 LCP files are currently the only supported landscape format, GeoTIFF will come at a later point.
 
 ### Smoke spread
-In short, do not activate smoke spread module. Multiple ideas for models exists in the code (box model, advect/diffuse, lagrangian), but funding is needed the develop, verify and validate.
+One smoke model is currently operational, the GlobalSmoke module. This allows the user to specify a global extinction coefficent that can change over time based on user specified input.
+Multiple ideas for models exists in the code (box model, advect/diffuse, lagrangian), but funding is needed the develop, verify and validate.
 
 ### Trigger buffers
 - k-PERIL (https://github.com/nikosuser/k-PERIL/tree/master) is now integrated into WUInity but has not been fully tested and there is currently an issue with 

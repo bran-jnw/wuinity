@@ -52,7 +52,7 @@ DestinationChoice=EvacGroup
 
 [Fire]
 FireModule=AscImport
-LcpFile=fire/rox_big.tif 
+LcpFile=fire/rox_big_burning_city.lcp
 GraphicalFireInputFile=fire/example.gfi
 
 [AscImport]
