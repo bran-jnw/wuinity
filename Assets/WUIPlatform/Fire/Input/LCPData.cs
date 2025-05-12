@@ -189,8 +189,10 @@ namespace WUIPlatform.Fire
 
 				if(NumVals != 8)
 				{
-					WUIEngine.LOG(WUIEngine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contyain the expected 8 raster sets, aborting.");
-					return;
+					WUIEngine.LOG(WUIEngine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contain the expected 8 raster sets, aborting.");
+					CantAllocLCP = true;
+
+                    return;
 				}
 
                 //https://gdal.org/en/stable/tutorials/geotransforms_tut.html
@@ -354,6 +356,8 @@ namespace WUIPlatform.Fire
                         }
                     }
                 }
+
+				CantAllocLCP = false;
             }
         }
 

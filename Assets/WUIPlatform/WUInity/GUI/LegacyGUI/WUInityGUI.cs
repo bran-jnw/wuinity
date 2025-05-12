@@ -65,7 +65,7 @@ namespace WUIPlatform.WUInity.UI
         MenuButton swapGUI;
 
         string[] wuiFilter = new string[] { ".wui" };
-        string[] lcpFilter = new string[] { ".lcp" };
+        string[] lcpFilter = new string[] { ".lcp", ".tif", ".tiff" };
         string[] fuelModelsFilter = new string[] { ".fuel" };
         
         string[] populationMapFilter = new string[] { ".pop" };
