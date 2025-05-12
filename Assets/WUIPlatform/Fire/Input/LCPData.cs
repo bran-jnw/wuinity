@@ -181,13 +181,98 @@ namespace WUIPlatform.Fire
 
 		private void ReadGeoTIFF(string path)
 		{
-            using (OSGeo.GDAL.Dataset tiff = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly))
+            using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly))
             {
-                Header.numeast = tiff.RasterXSize;
-                Header.numnorth = tiff.RasterYSize;
-                NumVals = tiff.RasterCount;
-				//TODO: rest of header, at least the essential ones
+                Header.numeast = tif.RasterXSize;
+                Header.numnorth = tif.RasterYSize;
+                NumVals = tif.RasterCount;
 
+				if(NumVals != 8)
+				{
+					WUIEngine.LOG(WUIEngine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contyain the expected 8 raster sets, aborting.");
+					return;
+				}
+
+                //https://gdal.org/en/stable/tutorials/geotransforms_tut.html
+				//assume these contain UTM coordinates
+                double[] transform = new double[6];
+				tif.GetGeoTransform(transform);
+                Header.WestUtm = transform[0];
+                Header.EastUtm = transform[0] + transform[1] * tif.RasterXSize;
+                Header.NorthUtm = transform[3];
+                Header.SouthUtm = transform[3] + transform[5] * tif.RasterYSize; //negative cell size when north up
+                Header.XResol = transform[1];
+                Header.YResol = -transform[5];
+
+                //https://gdal.org/en/stable/drivers/raster/lcp.html
+                Header.CrownFuels = 20; //20 if no crown fuels, 21 if crown fuels exist(crown fuels = canopy height, canopy base height, canopy bulk density)
+                switch (NumVals)
+                {
+                    case 8:
+						// 5 basic, crown fuels
+						Header.CrownFuels = 21;
+                        break;
+                    case 10:
+                        // 5 basic, crown fuels, and duff and woody
+                        Header.CrownFuels = 21;
+                        break;
+                }
+				//assume always present
+                Header.GroundFuels = 21; //20 if no ground fuels, 21 if ground fuels exist (ground fuels = duff loading, coarse woody)
+
+				//TODO: fix, but what is it used for?
+                //Header.latitude = reader.ReadInt32();
+
+                //offset to preserve coordinate precision (legacy from 16-bit OS days), ignore
+                /*Header.loeast = reader.ReadDouble();
+                Header.hieast = reader.ReadDouble();
+                Header.lonorth = reader.ReadDouble();
+                Header.hinorth = reader.ReadDouble();*/
+
+				//gets updated in loop when reading data
+                Header.loelev = int.MaxValue;
+                Header.hielev = int.MinValue;
+
+                Header.loslope = int.MaxValue;
+                Header.hislope = int.MinValue;
+
+                Header.loaspect = int.MaxValue;
+                Header.hiaspect = int.MinValue;
+
+                Header.lofuel = int.MaxValue;
+                Header.hifuel = int.MinValue;
+
+                Header.locover = int.MaxValue;
+                Header.hicover = int.MinValue;
+
+                Header.loheight = int.MaxValue;
+                Header.hiheight = int.MinValue;
+
+                Header.lobase = int.MaxValue;
+                Header.hibase = int.MinValue;
+
+                Header.lodensity = int.MaxValue;
+                Header.hidensity = int.MinValue;
+
+				//does not seem to be included in GeoTIFF from Landfire, ignore for now
+                /*Header.loduff = reader.ReadInt32();
+                Header.hiduff = reader.ReadInt32();
+
+                Header.lowoody = reader.ReadInt32();
+                Header.hiwoody = reader.ReadInt32();*/
+				                
+                Header.GridUnits = 0; //linear unit: 0 = meters, 1 = feet, 2 = kilometers
+                //SI defaults
+                Header.EUnits = 1;
+                Header.SUnits = 1;
+                Header.AUnits = 1;
+                Header.FOptions = 0;
+                Header.CUnits = 1;
+                Header.HUnits = 1;
+                Header.BUnits = 1;
+                Header.PUnits = 1;
+                Header.DUnits = 1;
+                Header.WOptions = 0; //coarse woody options(1 if coarse woody band is present)
 
                 //from: https://landfire.gov/fuel/landscape
                 //Eight bands are included in a landscape file: elevation, slope, aspect, fire behavior fuel model, tree canopy cover, canopy height, canopy base height, and canopy bulk density.
@@ -195,7 +280,7 @@ namespace WUIPlatform.Fire
                 landscape = new short[Header.numeast * Header.numnorth * NumVals];
                 for (int k = 0; k < NumVals; k++)
                 {
-                    OSGeo.GDAL.Band band = tiff.GetRasterBand(k + 1);
+                    OSGeo.GDAL.Band band = tif.GetRasterBand(k + 1);
                     short[] bandData = new short[Header.numeast * Header.numnorth];
                     band.ReadRaster(0, 0, Header.numeast, Header.numnorth, bandData, Header.numeast, Header.numnorth, 0, 0);
 
@@ -203,7 +288,64 @@ namespace WUIPlatform.Fire
                     {
                         for (int j = 0; j < Header.numeast; j++)
                         {
-                            landscape[i * Header.numeast * NumVals + j * NumVals + k] = bandData[i * Header.numeast * NumVals + j * NumVals];
+							long index = i * Header.numeast * NumVals + j * NumVals + k;
+                            landscape[index] = bandData[i * Header.numeast * NumVals + j * NumVals];
+
+							//elevation
+							if(k == 0)
+							{
+								Header.loelev = Mathf.Min(landscape[index], Header.loelev);
+                                Header.hielev = Mathf.Max(landscape[index], Header.hielev);
+                            }
+
+                            //slope
+                            if (k == 1)
+                            {
+                                Header.loslope = Mathf.Min(landscape[index], Header.loslope);
+                                Header.hislope = Mathf.Max(landscape[index], Header.hislope);
+                            }
+
+                            //aspect
+                            if (k == 2)
+                            {
+                                Header.loaspect = Mathf.Min(landscape[index], Header.loaspect);
+                                Header.hiaspect = Mathf.Max(landscape[index], Header.hiaspect);
+                            }
+
+                            //fuel model
+                            if (k == 3)
+                            {
+                                Header.lofuel = Mathf.Min(landscape[index], Header.lofuel);
+                                Header.hifuel = Mathf.Max(landscape[index], Header.hifuel);
+                            }
+
+                            //canopy cover
+                            if (k == 4)
+                            {
+                                Header.locover = Mathf.Min(landscape[index], Header.locover);
+                                Header.hicover = Mathf.Max(landscape[index], Header.hicover);
+                            }
+
+                            //caonpy height
+                            if (k == 5)
+                            {
+                                Header.loheight = Mathf.Min(landscape[index], Header.loheight);
+                                Header.hiheight = Mathf.Max(landscape[index], Header.hiheight);
+                            }
+
+                            //canopy base height
+                            if (k == 6)
+                            {
+                                Header.lobase = Mathf.Min(landscape[index], Header.lobase);
+                                Header.hibase = Mathf.Max(landscape[index], Header.hibase);
+                            }
+
+                            //canopy bulk density
+                            if (k == 7)
+                            {
+                                Header.lodensity = Mathf.Min(landscape[index], Header.lodensity);
+                                Header.hidensity = Mathf.Max(landscape[index], Header.hidensity);
+                            }
                         }
                     }
                 }
@@ -341,12 +483,12 @@ namespace WUIPlatform.Fire
             switch (NumVals)
             {
                 case 7:
-                    // 5 basic and duff and woody
+                    // 5 basic, duff and woody
                     l.ground_duff_model = gfuel.d;
                     l.ground_coarse_woody_model = gfuel.w;
                     break;
                 case 8:
-                    // 5 basic and crown fuels
+                    // 5 basic, crown fuels
                     l.crown_canopy_height = cfuel.h;
                     l.crown_base = cfuel.b;
                     l.crown_bulk_density = cfuel.p;
