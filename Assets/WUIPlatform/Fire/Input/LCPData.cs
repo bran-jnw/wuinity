@@ -291,6 +291,11 @@ namespace WUIPlatform.Fire
 							long index = i * Header.numeast * NumVals + j * NumVals + k;
                             landscape[index] = bandData[i * Header.numeast * NumVals + j * NumVals];
 
+							if(landscape[index] == -9999)
+							{
+								continue;
+							}
+
 							//elevation
 							if(k == 0)
 							{
