@@ -224,7 +224,7 @@ namespace WUIPlatform.Fire
 				//assume always present
                 Header.GroundFuels = 21; //20 if no ground fuels, 21 if ground fuels exist (ground fuels = duff loading, coarse woody)
 
-				//TODO: fix, but what is it used for?
+				//TODO: fix, probably used to determine UTM zone and when doing pre-runs for fuel moirsture content
                 //Header.latitude = reader.ReadInt32();
 
                 //offset to preserve coordinate precision (legacy from 16-bit OS days), ignore

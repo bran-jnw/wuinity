@@ -1,0 +1,4 @@
+The C# bindings can be downloaded pre-compiled here: https://www.gisinternals.com/index.html
+If the above site becomes unavailable, just compile from source (make sure to enable C# bindings in cmake settings)
+Make sure to match the GDAL version that SUMO uses as we hook into those DLLs (for user convenience, and we do not have distribute any actual GDAL libraries which is easier)
+Currently GDAL 3.9.3 is used, same as should be installed with SUMO 1.22.0 which is currebtly in use
