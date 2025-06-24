@@ -1,4 +1,4 @@
-using System.Collections;               
+ using System.Collections;               
 using System.Collections.Generic;       
 using UnityEngine;                     
 using OsmSharp.Streams;                 
@@ -11,6 +11,10 @@ using Mapbox.Utils;
 using Mapbox.Unity.Utilities;
 using WUInity.Runtime;
 using WUInity.UI;
+using System.Linq;
+using Reminiscence.Indexes;
+using System.Reflection;
+using Assets.Mapbox.Unity.MeshGeneration.Modifiers.MeshModifiers;
 
 
 namespace WUInity
@@ -517,7 +521,7 @@ namespace WUInity
             gO.transform.position = points[0];
             //gO.transform.parent = directionsGO.transform;
             LineRenderer line = gO.AddComponent<LineRenderer>();
-            line.widthMultiplier = 10f;
+            line.widthMultiplier = 6f;// 10f;
             line.positionCount = points.Count;
 
             for (int i = 0; i < points.Count; i++)
@@ -543,9 +547,54 @@ namespace WUInity
             }
         }
 
+        // Draw all route collections from each route cell to all available goals. Added by Hui 2025.04.07 
         public void DrawOSMNetwork()
         {
+            if (drawnRoad_s == null)
+            {
+                drawnRoad_s = new List<GameObject>();
+            }
 
+            int routeCell = 0, routeCount=0;
+            RouteCollection[] cellRoutes= WUInity.RUNTIME_DATA.Routing.RouteCollections;
+            
+            for (int i = 0; i < cellRoutes.Count(); i++)
+            {
+                if (_directionsGO == null)
+                {
+                    _directionsGO = new GameObject("Directions");
+                    _directionsGO.transform.parent = null;
+                }
+
+                GameObject gO=null;
+                if (cellRoutes[i] != null)
+                {
+                    routeCell++; 
+                    routeCount += cellRoutes[i].routes.Count();
+
+                    for (int j = 0; j < cellRoutes[i].routes.Count(); j++)
+                    {
+                        List<Vector3> dat = new List<Vector3>();
+
+                        foreach (Itinero.LocalGeo.Coordinate point in cellRoutes[i].routes[j].route.Shape)
+                        {
+                            Vector3 v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(point.Latitude, point.Longitude, MAP.CenterMercator, MAP.WorldRelativeScale).ToVector3xz();
+                            v.y = 10f;
+                            dat.Add(v);
+                        }
+
+                        gO = CreateLineObject(dat, i);
+
+                        if (gO != null)
+                        {
+                            drawnRoad_s.Add(gO);
+                            gO.transform.parent = _directionsGO.transform;
+                        }
+                    }
+                }
+            }
+
+            LOG(WUInity.LogType.Log, "Route collections: routeCell= " + routeCell.ToString() + " Route=" + routeCount.ToString());
         }
 
         public void LoadFarsite()
@@ -617,7 +666,7 @@ namespace WUInity
 
         public void StartSimulation()
         {
-            LOG(WUInity.LogType.Warning, "Simulation started, please wait.");            
+            LOG(WUInity.LogType.Log, "Simulation started, please wait.");            
             SetSampleMode(WUInity.DataSampleMode.TrafficDens);
             // SetEvacDataPlane(true);   // This is turned off as we don't want to display the _evacDataPlaneMeshRenderer by default at the start of the simulation.   16/08/2023 
             SIM.StartSimulation();
@@ -653,6 +702,7 @@ namespace WUInity
         {
             HideAllRuntimeVisuals();
             SIM.StopSim("STOP: Stopped simulation as requested by user.");
+            SetSampleMode(WUInity.DataSampleMode.None);
         }
 
         bool updateOSMBorder = false;

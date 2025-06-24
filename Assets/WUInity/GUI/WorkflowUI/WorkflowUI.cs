@@ -1,3 +1,10 @@
+//This file is part of WUIPlatform Copyright (C) 2025 Hui Xie, Peter Thompson, Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 using System;
 using System.Globalization;
 using System.Collections;
@@ -11,6 +18,7 @@ using SimpleFileBrowser;
 using System.IO;
 using static WUInity.TrafficInput;
 using WUInity.Population;
+using Itinero;
 
 namespace WUInity.UI
 {
@@ -19,7 +27,7 @@ namespace WUInity.UI
         public UIDocument Document;
 
         // WorkflowUI control variables
-        bool newUIMenuDirty = false;
+        bool newUIMenuDirty = false, projectLoaded = false;
         private readonly int _titleBarHeight = 29, _iMainBoxWidth = 450, _iSysLogBoxHeight=160, _iOutputBoxWidth=230, _iLogDisplayNum=6;
         bool creatingNewFile = false;
 
@@ -32,7 +40,7 @@ namespace WUInity.UI
         //string[] togLoadFireFiles = { ".lcp", ".fuel", ".fmc", ".wtr", "TogLoadWindFile" };
         //string[] txtFireFiles = { ".lcp", ".fuel", ".fmc", ".wtr", "TxtWindFile" };
 
-        private bool _bFoldout = true, _bHideOutput=false;
+        private bool _bFoldout = true, _bHideOutput=false, _showRouteCollection=false;
         private readonly int iGPWfolderLength = 42;   // Truncate the GPW folder string to display (normally the full string is too long).
 
         // Complementary variables for WUINITY scenario configuration
@@ -62,7 +70,7 @@ namespace WUInity.UI
         private void Awake()
         {
             InitialiseWorkflow();
-            RunSomeBasicTestCode();
+            //RunSomeBasicTestCode();
         }
 
         /// <summary>
@@ -70,7 +78,7 @@ namespace WUInity.UI
         /// </summary>
         void Start()
         {
-            WUInity.GUI.enabled = false;        // Turn off the original WUINITY 2.0 UI at the beginning by default
+            WUInity.GUI.enabled = false;        // Turn off the legacy WUINITY GUI at the beginning by default
             Screen.fullScreen = true;           // Enter full screen mode at the beginning
 
             WUInity.RUNTIME_DATA.Routing.BorderSize = 0; // There is no initial value for OSM border size. I set it here as 0.
@@ -169,6 +177,8 @@ namespace WUInity.UI
         /// </summary>
         void Update()
         {
+            if (WUInity.WORKING_FILE != null && projectLoaded == false) newUIMenuDirty = projectLoaded = true; // Assume WORKING_FILE is preloaded outside of WorkflowUI.
+
             if (newUIMenuDirty) UpdateMenu();
 
             // Synchronize the count of log with the log window scroller count
@@ -205,6 +215,7 @@ namespace WUInity.UI
                     float yNorm = hitPoint.z / (float)WUInity.INPUT.Simulation.Size.y;
                     //yNorm = Mathf.Clamp01(yNorm);
                     int y = (int)(WUInity.RUNTIME_DATA.Evacuation.CellCount.y * yNorm);
+
                     WUInity.INSTANCE.GetCellInfo(hitPoint, x, y);
                 }
             }
@@ -943,6 +954,10 @@ namespace WUInity.UI
             UnityEngine.UIElements.Button btnBuildRouteCollection = root.Q<UnityEngine.UIElements.Button>("BuildRouteCollection");
             if (btnBuildRouteCollection != null)
                 btnBuildRouteCollection.clicked += BtnbtnBuildRouteCollection_clicked;
+
+            UnityEngine.UIElements.Button btnViewRouteCollection = root.Q<UnityEngine.UIElements.Button>("ViewRouteCollection");
+            if (btnViewRouteCollection != null)
+                btnViewRouteCollection.clicked += BtnbtnViewRouteCollection_clicked;
         }
 
         private void SetupTrafficParameters(VisualElement root)
@@ -1314,9 +1329,10 @@ namespace WUInity.UI
                         tfTxTOSMBorderSize.SetValueWithoutNotify(_OSMBorderSize);
                         WUInity.LOG(WUInity.LogType.Warning, "The OSM board size is not valid. Please set between 0 and 200 (m).");
                     }
-                    else
+                    else {
                         _OSMBorderSize = evt.newValue;
-
+                        float.TryParse(_OSMBorderSize, out WUInity.RUNTIME_DATA.Routing.BorderSize);
+                    }
                 });
         }
 
@@ -1572,6 +1588,20 @@ namespace WUInity.UI
             {
                 WUInity.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
             }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Error, "Please load router database before building route collection.");
+            }
+        }
+
+        private void BtnbtnViewRouteCollection_clicked()
+        {
+            if (!_showRouteCollection)
+                WUInity.INSTANCE.DrawOSMNetwork();
+            else
+                WUInity.INSTANCE.DeleteDrawnRoads();
+
+            _showRouteCollection = !_showRouteCollection;
         }
 
         private void BtnViewFireFile(FileType fileType)

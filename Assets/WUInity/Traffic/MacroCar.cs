@@ -125,7 +125,7 @@ namespace WUInity.Traffic
             bool foundSpeed = Itinero.Attributes.IAttributeCollectionExtension.TryGetMaxSpeed(routeData.route.ShapeMeta[currentShapeIndex].Attributes, out speed);
             if (foundSpeed)
             {
-                speed /= 3.6f;
+                speed /= 3.6f;  // Convert from kmPerHour to [m/s]
             }
             else
             {
@@ -174,21 +174,23 @@ namespace WUInity.Traffic
 
         public void MoveCar(float timeStamp, float deltaTime, float speed)
         {
+            // Move the car one step forward.
             latestSpeed = speed;
             currentDistanceLeft -= deltaTime * speed;
             totalTravelDistance += deltaTime * speed;
             totalDrivingTime += deltaTime;
-            if (currentDistanceLeft <= 0.0f)
+
+            if (currentDistanceLeft <= 0.0f) // The car reached the end of road segment and need to get on to the next road segment.
             {
                 ++currentShapeIndex;
                 //check if we have arrived or just going to next shape/node
-                if (currentShapeIndex == routeData.route.ShapeMeta.Length)
+                if (currentShapeIndex == routeData.route.ShapeMeta.Length)  // Arrived at the final point (shape) of the route.
                 {
                     //check if we can actually arrive based on flow at goal
                     if (routeData.evacGoal.CarArrives(this, timeStamp, deltaTime))
                     {
                         hasArrived = true;
-                        //reduce anyovershooting distance
+                        //reduce any overshooting distance
                         totalTravelDistance += currentDistanceLeft;
                     }     
                     else

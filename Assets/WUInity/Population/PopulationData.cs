@@ -298,7 +298,7 @@ namespace WUInity.Population
         {
             if(cellRoutes.Length != cellPopulation.Length)
             {
-                WUInity.LOG(WUInity.LogType.Error, " Route collection and population does not have same size.");
+                WUInity.LOG(WUInity.LogType.Error, " Route collection and population do not have same size.");
                 return -1;
             }
 

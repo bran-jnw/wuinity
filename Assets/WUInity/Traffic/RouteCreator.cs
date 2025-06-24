@@ -57,11 +57,11 @@ namespace WUInity
             AbstractMap _map = WUInity.MAP;
             WUInity.INSTANCE.DeleteDrawnRoads();
 
-            Vector2D size = WUInity.INPUT.Simulation.Size;
+            Vector2D size = WUInity.INPUT.Simulation.Size;                  // Size of the modelled area
             Vector2Int cells = WUInity.RUNTIME_DATA.Evacuation.CellCount;
             Vector3[] startPoints;
             startPoints = new Vector3[cells.x * cells.y];
-            // Route analysis: create all waypoints in cells
+            // Route analysis: create all waypoints in cells - the central points of the cells 
             for (int y = 0; y < cells.y; ++y)
             {
                 for (int x = 0; x < cells.x; ++x)
@@ -72,7 +72,8 @@ namespace WUInity
                 }
             }
 
-            if (router == null)
+            // Create Itinero Router: https://docs.itinero.tech/docs/itinero/basic-concepts/router.html
+            if (router == null) 
             {
                 router = new Router(WUInity.RUNTIME_DATA.Routing.RouterDb);
             }
@@ -82,27 +83,30 @@ namespace WUInity
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
             float cellSize = WUInity.INPUT.Evacuation.RouteCellSize;
 
+            // Snapping the goals (end point) to the road network:
+            // Check the defined evacuation goals to see if they are within a certain distance (currently 200m) to the road network and assign a router point to each of them if they are.
             DetermineValidGoalsAndRouterPoints(true);
 
             int cellsWithGoalsCount = 0;
             for (int i = 0; i < startPoints.Length; i++)
             {
-                //check that the cell has actual people, else no need for calculating routes
+                //check that the cell has actual people, else no need for calculating routes.
+                //Hui: Could this causes problem when rerouting vehicles in initially non-pupolated cells? - no route was calculated for these cells. TODO: Check the .
                 int populationInCell = WUInity.POPULATION.GetPopulationUnitySpace(startPoints[i].x, startPoints[i].z);
                 if (populationInCell > 0)
                 {
                     Vector2d start = startPoints[i].GetGeoPosition(_map.CenterMercator, _map.WorldRelativeScale);
 
-                    //check if valid start was found
+                    //check if valid start was found, i.e., if the start points can be snapped to the road network winthin the cells.
                     RouterPoint startRouterPoint = CheckIfStartIsValid(new Vector2D(start.x, start.y), routerProfile, cellSize);
 
-                    //no need in calculating route when start is not resolved
+                    //no need in calculating route when start is not resolved, i.e., no road found within the cell.
                     if (startRouterPoint == null)
                     {
                         continue;
                     }
 
-                    //check if we have the same start as any neighboring cells, if so just use those calculations as they will will be the same
+                    //check if we have the same start as any neighboring cells, if so, just use those calculations as they will be the same.
                     RouteCollection rC = CheckIfNeighborsHaveSameStart(startRouterPoint, i, cellRoutes, cellSize);
                     if (rC != null)
                     {
@@ -152,10 +156,15 @@ namespace WUInity
                     }
                 }
             }
-            if(cellsWithGoalsCount == 0)
+            if (cellsWithGoalsCount == 0)
             {
                 WUInity.SIM.StopSim("ERROR: Not a single route was found, make sure OSM network is valid.");
             }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Log, "Routes are identified for " + cellsWithGoalsCount.ToString() + " cells");
+            }
+
             return cellRoutes;
         }
 
@@ -190,6 +199,7 @@ namespace WUInity
                 try
                 {
                     //TODO: hard-coded search of 200 meters, setup as option?
+                    // See https://docs.itinero.tech/docs/itinero/basic-concepts/routerpoint.html for resolving a location and generating a routerpoint.
                     RouterPoint rP = router.Resolve(routerProfile, (float)evacuatonGoals[i].latLong.x, (float)evacuatonGoals[i].latLong.y, 200f);
                     validEvacuationGoalRouterPoints.Add(rP);
                     validEvacuationGoals.Add(evacuatonGoals[i]);
@@ -413,7 +423,7 @@ namespace WUInity
         }
 
         /// <summary>
-        /// Picks the desired route froma routecollection based in inputs. 
+        /// Picks the desired route from a routecollection based on inputs. 
         /// Should only consider force map when called from a evac cell (not from a car)
         /// </summary>
         /// <param name="rC"></param>

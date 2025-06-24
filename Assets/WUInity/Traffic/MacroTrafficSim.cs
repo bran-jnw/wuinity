@@ -369,8 +369,8 @@ namespace WUInity.Traffic
                     countCarsInSystem += roadSegment.Value.cars.Count;
 
 #if DEBUG
-//                if (roadSegment.Value.cars.Count > roadSegment.Value.GetMaxCarsOnRoad())
-//                    WUInity.LOG(WUInity.LogType.Warning, "RoadSegment [" + roadSegment.Value.GetStreetName() + "] has " + roadSegment.Value.cars.Count + " cars, while MaxCar= " + roadSegment.Value.GetMaxCarsOnRoad());
+                if (roadSegment.Value.cars.Count > roadSegment.Value.GetMaxCarsOnRoad())
+                    WUInity.LOG(WUInity.LogType.Warning, "RoadSegment [" + roadSegment.Value.GetStreetName() + "] has " + roadSegment.Value.cars.Count + " cars, while MaxCar= " + roadSegment.Value.GetMaxCarsOnRoad());
 #endif
 
                 //calculate the new speed based on the local density
@@ -396,13 +396,14 @@ namespace WUInity.Traffic
 
                     MacroCar car = roadSegment.Value.cars[j];
                     float speed = densitySpeed;
-                    /*if(j == 0)
+                    //the first car moves unimpeded
+                    if(j == 0)
                     {
                         speed = car.currentSpeedLimit;
-                    }*/
-                    
+                    }
+
                     //check if we are going on to a new stretch of road (new traffic density) after this time step
-                    if(car.WillChangeRoad(deltaTime, speed))
+                    if (car.WillChangeRoad(deltaTime, speed))
                     {
                         int newHash = car.GetNextHashCode();
                         RoadSegment nextSegment;
@@ -414,6 +415,7 @@ namespace WUInity.Traffic
                                 car.MoveCar(currentTime, deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
                                 nextSegment.AddCar(car);
+                                roadSegment.Value.cars.Remove(car); j--;
                             }
                             else
                             {
@@ -429,6 +431,7 @@ namespace WUInity.Traffic
                                 car.MoveCar(currentTime, deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
                                 nextSegment.AddCar(car);
+                                roadSegment.Value.cars.Remove(car); j--;
                             }
                             else
                             {
@@ -441,8 +444,9 @@ namespace WUInity.Traffic
                             car.MoveCar(currentTime, deltaTime, speed);
                             //now we need to add to our temporary road segment dictionary since otherwise we might overfill any new segment
                             int hash = car.roadSegmentHash;
-                            nextSegment = new RoadSegment(car, this);
+                            nextSegment = new RoadSegment(car, this); if (nextSegment.cars.Count > 1) WUInity.LOG(WUInity.LogType.Error, "nextSegment count: " + nextSegment.cars.Count);
                             newRoadSegments.Add(hash, nextSegment);
+                            roadSegment.Value.cars.Remove(car); j--;
                         }
                     }
                     else
@@ -458,7 +462,7 @@ namespace WUInity.Traffic
                     }  
                 }                
             }
-
+            
             //this fixes cars waiting to get in to the system, but not cars already in the system waiting to get to a new road
             for (int i = 0; i < carsOnHold.Count; i++)
             {
@@ -473,15 +477,28 @@ namespace WUInity.Traffic
                         //next loop will this car will be used in traffic density fro real, but we add now as we need to stop other form entering if we are physically full
                         t.AddCar(car);
                         carsOnHold.Remove(car);
-                        carsInSystem.Add(car);
+                        carsInSystem.Add(car);i--;
+                    }
+                }
+                else if(newRoadSegments.TryGetValue(hash,out t))
+                {
+                    if (t.CanAddCar())
+                    {
+                        //next loop will this car will be used in traffic density fro real, but we add now as we need to stop other form entering if we are physically full
+                        t.AddCar(car);
+                        carsOnHold.Remove(car);
+                        carsInSystem.Add(car);i--;
                     }
                 }
                 else
                 {
                     //new section of road so can add without issues, create new traffic density in case any other car wants to get in on the same road
-                    roadSegments.Add(hash, new RoadSegment(car, this));
+                    //roadSegments.Add(hash, new RoadSegment(car, this));
+                    RoadSegment newSegment = new RoadSegment(car, this);
+                    newRoadSegments.Add(hash, newSegment);
+                    if (newSegment.cars.Count > 1) WUInity.LOG(WUInity.LogType.Error, "newSegment count:" + newSegment.cars.Count);
                     carsOnHold.Remove(car);
-                    carsInSystem.Add(car);
+                    carsInSystem.Add(car);i--;
                 }
             }
             
@@ -539,10 +556,10 @@ namespace WUInity.Traffic
             WUInity.INSTANCE.SaveTransientDensityData(currentTime, carsInSystem, carsOnHold);
 
 #if DEBUG
-//            if ((int)(currentTime - WUInity.SIM.StartTime) % 30 == 0 && upstreamMovementBlockedSegment > 0)
-//            {
+            if ((int)(currentTime - WUInity.SIM.StartTime) % 60 == 0 && upstreamMovementBlockedSegment > 0)
+            {
 //                WUInity.LOG(WUInity.LogType.Log, "Blocked roadSegments: " + upstreamMovementBlockedSegment + " Blocked Cars: " + blockedCars + " minRoadCapa: " + minimumMaxCarsOnRoad);
-//            }
+            }
 #endif
         }
 
@@ -667,6 +684,10 @@ namespace WUInity.Traffic
                 cars.Add(car);
             }
 
+            public void RemoveCar(MacroCar car)
+            {
+                cars.Remove(car);
+            }
             public int GetMaxCarsOnRoad()
             {
                 return maxCarsOnRoad;

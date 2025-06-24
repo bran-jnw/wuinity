@@ -124,7 +124,7 @@ namespace WUInity
                 CreateSubSims(0);
                 RunSimulation(0);
             }
-            else
+            else //Run in batch mode without gui updates.
             {
                 float averageTotalEvacTime = 0.0f;
                 int actualRuns = 0;
@@ -138,7 +138,7 @@ namespace WUInity
 
                     trafficArrivalDataCollection.Add(_macroTrafficSim.GetArrivalData());
                     ++actualRuns;    
-                    //need at least 2 simulation sto have valid average
+                    //need at least 2 simulations to have valid average
                     if (i > 0)
                     {
                         float pastAverage = (averageTotalEvacTime / i);
@@ -235,7 +235,12 @@ namespace WUInity
 
             if (input.Simulation.RunFireSim)
             {
-                CreateFireSim();                
+                CreateFireSim();
+                WUInity.LOG(WUInity.LogType.Log, "Fire mesh has been created.");
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Log, "No fire module was enabled.");
             }
 
             //can only run together
@@ -248,28 +253,34 @@ namespace WUInity
                     input.Simulation.RunSmokeSim = false;
                 }
                 else
-                {    if(_advectDiffuseSim != null)
+                {   if(_advectDiffuseSim != null)
                     {
                         _advectDiffuseSim.Release();
                     }
                     _advectDiffuseSim = new Smoke.AdvectDiffuseModel(_fireMesh, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);
+                    WUInity.LOG(WUInity.LogType.Log, "Smoke simulation has been initiated.");
                 }                
             }
             else
             {
                 input.Simulation.RunSmokeSim = false;
+                WUInity.LOG(WUInity.LogType.Log, "No smoke module was enabled.");
             }
 
             if (input.Simulation.RunEvacSim)
             {
+                WUInity.LOG(WUInity.LogType.Log, "Update population distribution based on routes.");
+
                 if (i == 0)
                 {                     
                     //we could not load from disk, so have to build all routes
                     if (WUInity.RUNTIME_DATA.Routing.RouteCollections == null)
                     {
+                        WUInity.LOG(WUInity.LogType.Log, "Route collection is not found. Build route collection now, please wait...");
                         WUInity.RUNTIME_DATA.Routing.BuildAndSaveRouteCollection();
                     }
 
+                    // In case the population distribution has been modified by users after route collection was generated - relocate people who may appear in cells without route.
                     WUInity.POPULATION.GetPopulationData().UpdatePopulationBasedOnRoutes(WUInity.RUNTIME_DATA.Routing.RouteCollections);
                 }
 
@@ -278,6 +289,12 @@ namespace WUInity
                 _macroHumanSim.PopulateCells(WUInity.RUNTIME_DATA.Routing.RouteCollections, WUInity.POPULATION.GetPopulationData());                
                 //distribute people
                 _macroHumanSim.PlaceHouseholdsInCells(i);
+
+                WUInity.LOG(WUInity.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
+            }
+            else
+            {
+                WUInity.LOG(WUInity.LogType.Log, "No pedestrian module was enabled.");
             }
 
             if (input.Simulation.RunTrafficSim)
@@ -320,7 +337,7 @@ namespace WUInity
 
                 for (int i = 0; i < WUInity.INPUT.Traffic.reverseLanes.Length; i++)
                 {
-                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.Traffic.trafficAccidents[i]);
+                    _macroTrafficSim.InsertNewTrafficEvent(WUInity.INPUT.Traffic.reverseLanes[i]);
                 }
             }            
 

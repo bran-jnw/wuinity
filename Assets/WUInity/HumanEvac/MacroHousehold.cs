@@ -1,3 +1,4 @@
+using Mapbox.Utils;
 using UnityEngine;
 
 namespace WUInity.Evac
@@ -32,11 +33,15 @@ namespace WUInity.Evac
         {
             EvacuationInput eO = WUInity.INPUT.Evacuation;
 
-            Vector2 rand = Random.insideUnitCircle;
-            Vector2D randD = new Vector2D(rand.x * humanRaster.cellWorldSize.x, rand.y * humanRaster.cellWorldSize.x);
-            Vector2D startPos = nodeCenter + randD * 0.707070;
-            //startPos.x += humanRaster.cellWorldSize.x * Random.Range(-0.5f, 0.5f); //nicer to be in circle instead of square?
-            //startPos.y += humanRaster.cellWorldSize.y * Random.Range(-0.5f, 0.5f);
+            //nicer to be in circle instead of square?
+            //Vector2 rand = Random.insideUnitCircle;
+            //Vector2D randD = new Vector2D(rand.x * humanRaster.cellWorldSize.x, rand.y * humanRaster.cellWorldSize.x);
+            //Vector2D startPos = nodeCenter + randD * 0.707070;
+
+            //Switch from circle to square 
+            Vector2D startPos = nodeCenter;
+            startPos.x += humanRaster.cellWorldSize.x * Random.Range(-0.5f, 0.5f); 
+            startPos.y += humanRaster.cellWorldSize.y * Random.Range(-0.5f, 0.5f);
             this.peopleInHousehold = peopleInHousehold;
             cars = 1;
             if (eO.allowMoreThanOneCar)

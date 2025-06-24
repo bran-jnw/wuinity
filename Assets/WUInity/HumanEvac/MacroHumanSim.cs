@@ -17,7 +17,7 @@ namespace WUInity.Evac
         int maxPop = -1;
 
         Vector2D realWorldSize;
-        public Vector2D cellWorldSize;
+        public Vector2D cellWorldSize;      // The size of the population cell in real world (in metres)
         RouteCollection[] cellRoutes;
         HumanEvacCell[] humanEvacCells;
         int totalPopulation;
@@ -367,7 +367,7 @@ namespace WUInity.Evac
                 {
                     int y = i / cellsX;
                     int x = i - y * cellsX;
-                    Vector2D worldPos = new Vector2D((x + 0.5) * cellWorldSize.x, (y + 0.5) * cellWorldSize.y);
+                    Vector2D worldPos = new Vector2D((x + 0.5) * cellWorldSize.x, (y + 0.5) * cellWorldSize.y);     // The coordinates (in metres) of the center point of each population cell in relation to the origin of the map.
                     humanEvacCells[i] = new HumanEvacCell(worldPos, cellWorldSize, cellRoutes[i], population[i], i);
                     totalHouseholds += humanEvacCells[i].macroHouseholds.Length;
                 }
@@ -414,7 +414,7 @@ namespace WUInity.Evac
 
             List<string> output_cells_households;
             output_cells_households = new List<string>();
-            output_cells_households.Add("Cell, CellX, CellY, PopInCell, NumOfHouse, -, PopInHouse/HouseRT...");
+            output_cells_households.Add("Cell, CellX, CellY, PopInCell, HouseInCell, CarInCell, -, PopInHouse, CarInHouse, HouseRT, ...");
 
             List<string> output_all_responses;
             output_all_responses = new List<string>();
@@ -431,17 +431,19 @@ namespace WUInity.Evac
 
                     //int totalPeopleInCell=0;
                     string sHouseHolds="";
+                    int carsInCell = 0;
 
                     for (int j = 0; j < hR.macroHouseholds.Length; j++)
                     {
                         MacroHousehold mH = hR.macroHouseholds[j];
                         //totalPeopleInCell += mH.peopleInHousehold;
-                        sHouseHolds += mH.peopleInHousehold.ToString() + "," + mH.responseTime.ToString() + ",";
+                        sHouseHolds += mH.peopleInHousehold.ToString() + "," + mH.cars.ToString() + ","+ mH.responseTime.ToString() + ",";
+                        carsInCell += mH.cars;
 
                         output_all_responses.Add(mH.peopleInHousehold.ToString() + "," + mH.responseTime.ToString());
                     }
 
-                    aCellLine = i.ToString() + "," +x.ToString()+ ","+ y.ToString()+ "," + population[i].ToString()+","+ hR.macroHouseholds.Length.ToString()+ ", -," +sHouseHolds;
+                    aCellLine = i.ToString()+ "," +x.ToString()+","+ y.ToString()+"," +population[i].ToString()+","+ hR.macroHouseholds.Length.ToString()+","+ carsInCell.ToString()+ ", -," + sHouseHolds;
 
                     output_cells_households.Add(aCellLine);
                 }
