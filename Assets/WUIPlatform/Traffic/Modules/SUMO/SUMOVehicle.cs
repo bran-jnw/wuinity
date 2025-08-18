@@ -7,6 +7,7 @@
 
 using System.Numerics;
 using WUIPlatform.Evacuation;
+using LIBSUMO = Eclipse.Sumo.Libsumo;
 
 namespace WUIPlatform.Traffic
 {

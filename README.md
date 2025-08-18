@@ -38,7 +38,7 @@ is now instead a tool to generate the *.csv-file needed.
 ### Traffic modules
 - MacroTrafficSim: broken due to changes in code structure, do not use, will maybe get fixed at some point again.
 - SUMO: works and should be preferred more or less all the time. The version used to compile the current libraries used in WUI-NITY is 
-SUMO 1.22 64-bit which therefore has to be installed on your system for it to run (as we do not want to re-distribute SUMO dlls).
+SUMO 1.24 64-bit which therefore has to be installed on your system for it to run (as we do not want to re-distribute SUMO dlls).
 It can be downloaded here: https://eclipse.dev/sumo/
 
 OSM data for region of interest from can be found at e.g. https://www.geofabrik.de/ or any other source, extracting from www.openstreetmap.org

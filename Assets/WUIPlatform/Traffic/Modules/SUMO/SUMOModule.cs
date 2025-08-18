@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using WUIPlatform.Evacuation;
+using LIBSUMO = Eclipse.Sumo.Libsumo;
 
 namespace WUIPlatform.Traffic
 {

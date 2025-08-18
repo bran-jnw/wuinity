@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using LIBSUMO = Eclipse.Sumo.Libsumo;
 
 namespace WUIPlatform.Visualization
 {
