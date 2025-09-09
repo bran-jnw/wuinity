@@ -22,6 +22,20 @@ the actual GDAL libraries are borrowed from the SUMO install (currently GDAL 3.9
 A Mapbox access token (https://www.mapbox.com/) is needed to get the visualization of the area of interest, though strictly it is not needed to perform any simulation.
 A completely free source for maps is desired, but of low priority right now.
 
+## Requirements
+As of now the dev branch of WUI-NITY only works on Windows due to external libraries.
+
+You will need the appropriate version of Unity installed (download the Unity Hub and add the cloned project, it will tell you which version is required).
+
+If you are using Visual Studio and C# it is likely that you have all required  libraries/frameworks, otherwise donwload and install the .NET runtime(https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481).
+
+Since installed SUMO dlls are linked, the logged in user account needs to have access to the PATH pointing to them. Being administrator of the system solves this.
+
+## How to start WUI-NITY
+Once the Unity project is cloned and loaded, the WUI-NITY scene has to be started, it is located \Assets\WUIPlatform\WUInity\Scenes and called WUInityMain.unity.
+Once the scene is loaded, press play to start the program.
+
+
 ## Current status of modules
 ### Pedestrian modules 
 - MacroHouseHoldSim: work as intended.
