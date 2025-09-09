@@ -312,7 +312,7 @@ namespace WUIPlatform.Traffic
         {
             if(!WUIEngine.INPUT.Simulation.RunFireModule)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No fire module loaded, can't  sort SUMO network edges in fire cells.");
+                WUIEngine.LOG(WUIEngine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
                 return;
             }
 

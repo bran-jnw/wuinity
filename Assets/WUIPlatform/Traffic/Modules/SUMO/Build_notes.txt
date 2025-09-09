@@ -15,3 +15,7 @@ Verify with https://github.com/lucasg/Dependencies that all dlls are found.
 - The generated SWIG glue code will be in .\out\build\x64-Release\src\libsumo\cs, this gets placed in LibsumoCSharp in WUInity.
 - In Unity, make sure all dlls are set to x64 only. Also make sure that libsumocs.dll is loaded on startup (or else it will crash).
 - That should be it.
+
+###UPDATE 2025-19-18
+As SUMO now includes all we need we rely completetly on their DLLs, libsumocs.dll is now located in the bin filder of the SUMO install.
+The only thing that is added here is the C# code from C:\Program Files (x86)\Eclipse\Sumo\include\Eclipse.Sumo.Libsumo
