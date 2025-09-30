@@ -54,6 +54,11 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
+            if(!WUIEngine.INPUT.Simulation.RunFireModule)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
+                return;
+            }
             WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Fire data...");
 
             LoadLCPFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.LcpFile), false);

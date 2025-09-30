@@ -28,7 +28,7 @@ namespace WUIPlatform.WUInity
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<WUInityEngine>();
+                    _instance = FindAnyObjectByType<WUInityEngine>();
                     if (_instance == null)
                     {
                         GameObject g = new GameObject();
@@ -146,6 +146,7 @@ namespace WUIPlatform.WUInity
 
         [Header("Options")]
         public bool DeveloperMode = false;
+        public bool SuppressMessages = false;
         public bool AutoLoadExample = true;
         [SerializeField] float _renderScale = 1.0f;
         public float RenderScale { get => _renderScale; }

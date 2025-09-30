@@ -12,6 +12,7 @@ Shader "WUInity/Households" {
 		_PaletteTex("Texture", 2D) = "white" {}
 		_Scale("Scale", Range(0,30)) = 15.0
 		_GroundOffset("Ground offset", Range(0,10)) = 1.0
+		_MaxVisualHouseholdSize("Max", Range(0,100)) = 10
 	}
 
 		SubShader{
@@ -26,6 +27,7 @@ Shader "WUInity/Households" {
 			#endif
 
 			float _Scale, _GroundOffset;
+			uint _MaxVisualHouseholdSize;
 			sampler2D _PaletteTex;
 
 			void ConfigureProcedural() 
@@ -34,7 +36,7 @@ Shader "WUInity/Households" {
 				float3 position = float3(_PositionsAndState[unity_InstanceID].x, _GroundOffset, _PositionsAndState[unity_InstanceID].y);
 				unity_ObjectToWorld = 0.0;
 				unity_ObjectToWorld._m03_m13_m23_m33 = float4(position, 1.0);
-				unity_ObjectToWorld._m00_m11_m22 = _Scale * _PositionsAndState[unity_InstanceID].z;
+				unity_ObjectToWorld._m00_m11_m22 = _Scale * min(_PositionsAndState[unity_InstanceID].z, _MaxVisualHouseholdSize);
 				#endif
 			}
 

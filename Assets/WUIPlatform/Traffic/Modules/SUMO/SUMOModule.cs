@@ -225,7 +225,7 @@ namespace WUIPlatform.Traffic
                         if(route.edges.Count > 0)
                         {
                             foundRoute = true;
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location.");
+                            WUIEngine.LOG(WUIEngine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location. Affected lat/lon: " + startLatLon.x + ", " + startLatLon.y);
                         }
                         else
                         {

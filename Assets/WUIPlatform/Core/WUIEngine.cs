@@ -266,7 +266,7 @@ namespace WUIPlatform
             ENGINE.simLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
 
 #if USING_UNITY
-            if (UnityEngine.Application.isEditor) // || UnityEngine.Debug.isDebugBuild
+            if (UnityEngine.Application.isEditor) //&& !WUInity.WUInityEngine.INSTANCE.SuppressMessages) // || UnityEngine.Debug.isDebugBuild
             {
                 UnityEngine.Debug.Log(message);
             }
