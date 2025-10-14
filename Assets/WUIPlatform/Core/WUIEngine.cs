@@ -22,8 +22,6 @@ namespace WUIPlatform
         private Simulation _sim;
         private string _workingFilePath;
         private DataStatus _dataStatus;       
-        private Stopwatch _stopWatch;
-        public Stopwatch StopWatch { get => _stopWatch; }
 
         private struct ValidCriticalData
         {
@@ -48,7 +46,6 @@ namespace WUIPlatform
         {
             //needed for proper reading of input files on all systems
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            _stopWatch = new Stopwatch();
         }
 
 

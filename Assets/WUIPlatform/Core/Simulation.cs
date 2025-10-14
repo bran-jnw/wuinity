@@ -56,6 +56,13 @@ namespace WUIPlatform
         private Visualization.WUIShowCommunicator _wuiShow;
         float[,] _triggerBufferData;
 
+        private System.Diagnostics.Stopwatch _simulationStopWatch = new System.Diagnostics.Stopwatch();
+        private System.Diagnostics.Stopwatch _trafficStopwatch = new System.Diagnostics.Stopwatch();
+        private System.Diagnostics.Stopwatch _pedestrianStopwatch = new System.Diagnostics.Stopwatch();
+        private System.Diagnostics.Stopwatch _fireStopwatch = new System.Diagnostics.Stopwatch();
+        private System.Diagnostics.Stopwatch _smokeStopwatch = new System.Diagnostics.Stopwatch();
+        private System.Diagnostics.Stopwatch _pathfindingStopwatch = new System.Diagnostics.Stopwatch();
+
 
         public Simulation()
         {
@@ -85,12 +92,17 @@ namespace WUIPlatform
         }
         
         private  void StartSimulations()
-        {            
+        {
+            _simulationStopWatch.Restart();
             int runNumber = 0;
             int actualRuns = 0;
             float averageTotalEvacTime = 0.0f;
             int convergedInSequence = 0;
             List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
+            _trafficStopwatch.Reset();
+            _pedestrianStopwatch.Reset();
+            _fireStopwatch.Reset();
+            _smokeStopwatch.Reset();
 
             for (int i = 1; i <= WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns; i++)
             {
@@ -103,48 +115,58 @@ namespace WUIPlatform
                 RunSimulation(i);
                 CloseModules();
                 WUIEngine.OUTPUT.AddEvacTime(CurrentTime);
-                ++actualRuns;        
+                ++actualRuns;
 
-                if(_trafficModule != null)
-                {
-                    trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
-                }
-                
-                //need at least 2 simulations to have valid average
-                if (i > 0)
-                {
-                    float pastAverage = (averageTotalEvacTime / i);
-                    averageTotalEvacTime += CurrentTime;
-                    float currentAverage = (averageTotalEvacTime / (i + 1));
-                    float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
-                    //if convergence met we can stop
-                    if (convergenceCriteria < WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
-                    {
-                        ++convergedInSequence;
-                        //we are done
-                        if(WUIEngine.INPUT.Simulation.StopAfterConverging && convergedInSequence > WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence)
-                        {
-                            i = WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns;
-                        }                            
-                    }
-                    else
-                    {
-                        convergedInSequence = 0;
-                    }
-                }     
-                else
-                {
-                    averageTotalEvacTime += CurrentTime;
-                }
+                CollectSimulationStatistics(ref i, trafficArrivalDataCollection, ref averageTotalEvacTime, ref convergedInSequence);
 
                 //force garbage collection                
                 System.GC.Collect();
-            }            
+            }
 
-            if(!_stoppedDueToError)
+            PostSimulation(trafficArrivalDataCollection, actualRuns, convergedInSequence, averageTotalEvacTime);           
+        }
+
+        private void CollectSimulationStatistics(ref int simulationIndex, List<List<float>> trafficArrivalDataCollection, ref float averageTotalEvacTime, ref int convergedInSequence)
+        {
+            if (_trafficModule != null)
+            {
+                trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
+            }
+
+            //need at least 2 simulations to have valid average
+            if (simulationIndex > 0)
+            {
+                float pastAverage = (averageTotalEvacTime / simulationIndex);
+                averageTotalEvacTime += CurrentTime;
+                float currentAverage = (averageTotalEvacTime / (simulationIndex + 1));
+                float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
+                //if convergence met we can stop
+                if (convergenceCriteria < WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
+                {
+                    ++convergedInSequence;
+                    //we are done
+                    if (WUIEngine.INPUT.Simulation.StopAfterConverging && convergedInSequence > WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence)
+                    {
+                        simulationIndex = WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns;
+                    }
+                }
+                else
+                {
+                    convergedInSequence = 0;
+                }
+            }
+            else
+            {
+                averageTotalEvacTime += CurrentTime;
+            }
+        }
+
+        private void PostSimulation(List<List<float>> trafficArrivalDataCollection, int actualRuns, int convergedInSequence, float averageTotalEvacTime)
+        {
+            if (!_stoppedDueToError)
             {
                 //save functional analysis
-                if(trafficArrivalDataCollection.Count > 0)
+                if (trafficArrivalDataCollection.Count > 0)
                 {
                     float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
                     SaveAverageCurve(averageCurve);
@@ -157,7 +179,7 @@ namespace WUIPlatform
                         yData[i] = i + 1;
                     }
                     CreatePlotData(xData, yData);
-                }                
+                }
 
                 if (convergedInSequence >= 10)
                 {
@@ -167,21 +189,28 @@ namespace WUIPlatform
                 {
                     WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
                 }
-                
-                _haveResults = true;                
+
+                _haveResults = true;
 
                 if (WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
                 {
                     if (WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
                     {
-                        if(WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
+                        if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
                         {
                             _triggerBufferData = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
-                        }                        
-                    }  
+                        }
+                    }
                 }
-            }            
+            }
 
+            _simulationStopWatch.Stop();
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent [s]:" + _simulationStopWatch.ElapsedMilliseconds * 0.001);
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in pedestrian module [s]:" + _pedestrianStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pedestrianStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in traffic module [s]:" + _trafficStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _trafficStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in fire module [s]:" + _fireStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _fireStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
             _state = SimulationState.Finished;
             WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation/s done.");
             WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.Id);
@@ -417,7 +446,7 @@ namespace WUIPlatform
         bool _runRealtime = false;
         private void Step()
         {  
-            WUIEngine.ENGINE.StopWatch.Start();
+            long startTime = _simulationStopWatch.ElapsedMilliseconds;
             UpdateEvents();
             //this state represents the positions at the start of the time step
             if (WUIEngine.INPUT.WUIShow.SendDataToWUIShow && _trafficModule != null)
@@ -449,7 +478,9 @@ namespace WUIPlatform
             //handle/inject cars that arrived this timestep
             if (_trafficModule != null)
             {
+                _pathfindingStopwatch.Start();
                 _trafficModule.HandleNewCars();
+                _pathfindingStopwatch.Stop();
             }                
 
             //increase time
@@ -476,18 +507,16 @@ namespace WUIPlatform
             }
 
             //just some stuff for controlling execution mode and timing performance
-            WUIEngine.ENGINE.StopWatch.Stop();
+            long timeSpent =  _simulationStopWatch.ElapsedMilliseconds - startTime;
             if(_runRealtime)
             {
-                int sleepTime = (int)deltaTime * 1000 - (int)WUIEngine.ENGINE.StopWatch.ElapsedMilliseconds;
+                int sleepTime = (int)deltaTime * 1000 - (int)timeSpent;
                 if (sleepTime > 0)
                 {
                     Thread.Sleep(sleepTime);
                 }                
             }
-            float t = WUIEngine.ENGINE.StopWatch.ElapsedMilliseconds;
-            _stepExecutionTime = 0.01f * t + 0.99f * _stepExecutionTime;
-            WUIEngine.ENGINE.StopWatch.Reset();
+            _stepExecutionTime = 0.01f * timeSpent + 0.99f * _stepExecutionTime;
         }
 
         private void CheckCompletion()
@@ -571,7 +600,9 @@ namespace WUIPlatform
                 if (CurrentTime >= nextFireUpdate && CurrentTime >= 0.0f)
                 {
                     fireUpdated = true;
+                    _fireStopwatch.Start();
                     _fireModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                    _fireStopwatch.Stop();
                     nextFireUpdate += _fireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
                     // Note: we need to preprocess each cell which has a road on it
@@ -584,14 +615,16 @@ namespace WUIPlatform
             //sync with fire
             if (WUIEngine.INPUT.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
             {
-                if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                _smokeStopwatch.Start();
+                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                 {
                     //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 }
                 else
                 {
                     _smokeModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
-                }                
+                }
+                _smokeStopwatch.Stop();
             }
         }
 
@@ -600,7 +633,9 @@ namespace WUIPlatform
             //advance pedestrian
             if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
             {
+                _pedestrianStopwatch.Start();
                 _pedestrianModule.Step(CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                _pedestrianStopwatch.Stop();
             }
         }
 
@@ -609,7 +644,9 @@ namespace WUIPlatform
             //advance traffic
             if (WUIEngine.INPUT.Simulation.RunTrafficModule)
             {
+                _trafficStopwatch.Start();
                 _trafficModule.Step(WUIEngine.INPUT.Simulation.DeltaTime, CurrentTime);
+                _trafficStopwatch.Stop();
             }
         }
 
