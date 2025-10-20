@@ -269,51 +269,6 @@ namespace WUIPlatform.WUInity
 
         public bool LoadMapbox()
         {
-            //TODO: fix so that map is loaded from center, will reduce distortion hopefully
-            /*//Mapbox: calculate the amount of grids needed based on zoom level, coord and size
-            Mapbox.Unity.Map.MapOptions mOptions = MAP.Options; // new Mapbox.Unity.Map.MapOptions();
-
-            Vector2d meters = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);            
-            meters.x += WUIEngine.INPUT.Simulation.Size.x * 0.5 / WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale;
-            meters.y += WUIEngine.INPUT.Simulation.Size.y * 0.5 / WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale;
-            Vector2d centerWGS84 = GeoConversions.MetersToLatLon(meters);
-
-            MAP.transform.position = new Vector3((float)WUIEngine.INPUT.Simulation.Size.x * 0.5f, 0f, (float)WUIEngine.INPUT.Simulation.Size.y * 0.5f);
-
-            mOptions.locationOptions.latitudeLongitude = "" + centerWGS84.x + "," + centerWGS84.y;
-            mOptions.locationOptions.zoom = WUIEngine.INPUT.Map.zoomLevel;
-            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
-            //https://wiki.openstreetmap.org/wiki/Zoom_levels
-            double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
-            Vector2d mapDegrees = new Vector2d(centerWGS84.x - WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, centerWGS84.y - WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
-            int tilesX = (int)(mapDegrees.y / degreesPerTile) + 1;
-            int tilesY = (int)(mapDegrees.x / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)centerWGS84.x))) + 1;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = tilesX;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = tilesY;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
-            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
-            mOptions.placementOptions.snapMapToZero = true;
-            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
-
-            if (!MAP.IsAccessTokenValid)
-            {
-                WUIEngine.LOG(WUIEngine.LogType.Error, "Mapbox token not valid.");
-                return false;
-            }
-
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Starting to load Mapbox map.");
-            MAP.Initialize(new Mapbox.Utils.Vector2d(centerWGS84.x, centerWGS84.y), WUIEngine.INPUT.Map.zoomLevel);
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
-
-            //generally we want to convert to UTM
-            if (!WUIEngine.INPUT.Simulation.ScaleToWebMercator)
-            {
-                MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);
-            }
-
-            return true;*/
-
             //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
             Mapbox.Unity.Map.MapOptions mOptions = MAP.Options; // new Mapbox.Unity.Map.MapOptions();
 

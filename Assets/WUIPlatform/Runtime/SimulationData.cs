@@ -19,6 +19,8 @@ namespace WUIPlatform.Runtime
         Vector2d _utmOrigin;
         public Vector2d UTMOrigin { get => _utmOrigin; }
 
+        LatLngUTMConverter.UTMResult _utmData;
+
         Vector2d _centerMercator;
         public Vector2d CenterMercator { get => _centerMercator; }
 
@@ -36,8 +38,8 @@ namespace WUIPlatform.Runtime
         {
             if(WUIEngine.INPUT != null)
             {
-                LatLngUTMConverter.UTMResult utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
-                _utmOrigin = new Vector2d(utmData.Easting, utmData.Northing);
+                _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
+                _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
                 _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
 
                 //Calculate scaling factors to correct overlay between web mercator and UTM
@@ -56,6 +58,19 @@ namespace WUIPlatform.Runtime
                 double lat = Mathd.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLon.x / 180.0;
                 _mercatorCorrectionScale = (float)Mathd.Cos(lat);
             }            
+        }
+
+        public Vector2d GetSimulationPosition(Vector2d latLon)
+        {
+            LatLngUTMConverter.UTMResult utmPos = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);  
+            return new Vector2d(utmPos.Easting, utmPos.Northing) - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+        }
+
+        public Vector2d GetWGS84FromSimulationPosition(Vector2d pos)
+        {
+            pos += UTMOrigin;
+            LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmData.ZoneLetter);
+            return new Vector2d(wgs84.Lat, wgs84.Lat);
         }
     }
 }

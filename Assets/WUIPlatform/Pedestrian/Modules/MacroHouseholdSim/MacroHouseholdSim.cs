@@ -313,10 +313,7 @@ namespace WUIPlatform.Pedestrian
             _macroHouseholds = new List<MacroHousehold>();
             for (int i = 0; i < _householdData.Length; ++i)
             {
-                double lat = _householdData[i].originLatLon.x;
-                double lon = _householdData[i].originLatLon.y;
-
-                Vector2d pos = GeoConversions.GeoToWorldPosition(lat, lon, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                Vector2d pos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(_householdData[i].originLatLon);
                 int xIndex = (int)(pos.x / cellSizeX);
                 int yIndex = (int)(pos.y / cellSizeY);
 
@@ -333,7 +330,7 @@ namespace WUIPlatform.Pedestrian
                 {
                     totalPopulation -= _householdData[i].peopleCount;
                     --totalHouseholds;
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + lat + ", " + lon + ", " + (i + 2));
+                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + _householdData[i].originLatLon.x + ", " + _householdData[i].originLatLon.y + ", " + (i + 2));
                 }
             }            
 

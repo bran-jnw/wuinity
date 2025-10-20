@@ -56,7 +56,7 @@ namespace WUIPlatform.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            closestNodeSimulationSpace = GeoConversions.GeoToWorldPosition(roadAccessLatLon.x, roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            closestNodeSimulationSpace = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(roadAccessLatLon);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
                 int evacGroupIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];

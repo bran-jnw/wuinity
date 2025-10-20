@@ -63,13 +63,13 @@ namespace WUIPlatform.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Vector2d unityPos = GeoConversions.GeoToWorldPosition(coordinate.Latitude, coordinate.Longitude, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                Vector2d simulationPos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
                 if (i > 0)
                 {
-                    distance += Vector2.Distance(new Vector2((float)unityPos.x, (float)unityPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));
+                    distance += Vector2.Distance(new Vector2((float)simulationPos.x, (float)simulationPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));
                 }
                 //segmentCoordinates[i] = new Vector3(distance / currentShapeLength, (float)unityPos.x, (float)unityPos.y); // for catmull-rom splines we need fraction of distance
-                segmentCoordinates[i] = new Vector3(distance, (float)unityPos.x, (float)unityPos.y);
+                segmentCoordinates[i] = new Vector3(distance, (float)simulationPos.x, (float)simulationPos.y);
             }
             //spline = new CatmullRomSpline2D(segmentCoordinates);
             spline = new LinearSpline2D(segmentCoordinates);

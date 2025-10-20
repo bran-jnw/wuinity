@@ -149,8 +149,8 @@ namespace WUIPlatform.Population
                 {
                     int yIndex = i / _cells.x;
                     int xIndex = i - yIndex * _cells.x;
-                    Vector2d cellCenterMercatorPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize) / WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator;
-                    Vector2d coord = GeoConversions.MetersToLatLon(cellCenterMercatorPos);
+                    Vector2d cellCenterPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize);
+                    Vector2d coord = WUIEngine.RUNTIME_DATA.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
                     Itinero.RouterPoint p = Traffic.RouteCreator.GetValidRouterPoint(router, coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), _cellSize);
                     if(p != null)
                     {
@@ -489,11 +489,11 @@ namespace WUIPlatform.Population
                             Vector2d householdStartPos = nodeCenter;
                             householdStartPos.x += _cellSize * Random.Range(-0.5f, 0.5f);
                             householdStartPos.y += _cellSize * Random.Range(-0.5f, 0.5f);
-                            Vector2d householdStartCoord = householdStartPos.GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                            Vector2d householdStartLatLon = WUIEngine.RUNTIME_DATA.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;
                             double goalLon = _cellRoadAccessLatLon[i].y;
-                            sW.WriteLine(householdStartCoord.x + "," + householdStartCoord.y + "," + _cellRoadAccessLatLon[i].x + "," + _cellRoadAccessLatLon[i].y + "," + householdCounts[j]);
+                            sW.WriteLine(householdStartLatLon.x + "," + householdStartLatLon.y + "," + _cellRoadAccessLatLon[i].x + "," + _cellRoadAccessLatLon[i].y + "," + householdCounts[j]);
                         }
                     }
                 }

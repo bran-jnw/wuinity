@@ -86,7 +86,7 @@ namespace WUIPlatform.Traffic
                 int populationInCell = 0;// WUIEngine.RUNTIME_DATA.Population.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
-                    Vector2d start = startPoints[i].GetGeoPosition(WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale); 
+                    Vector2d start = WUIEngine.RUNTIME_DATA.Simulation.GetWGS84FromSimulationPosition(startPoints[i]);
 
                     //check if valid start was found
                     RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(start.x, start.y), routerProfile, cellSize);
