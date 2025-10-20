@@ -69,15 +69,6 @@ namespace WUIPlatform
             
         }  
 
-        /// <summary>
-        /// Should only be set by traffic verification basically, otherwise it is internally created.
-        /// </summary>
-        /// <param name="mTS"></param>
-        public void SetMacroTrafficSim(MacroTrafficSim mTS)
-        {
-            _trafficModule = mTS;
-        }
-
         public async void Start()
         {
             try

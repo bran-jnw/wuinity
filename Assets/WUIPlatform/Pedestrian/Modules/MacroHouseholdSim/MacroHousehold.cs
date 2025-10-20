@@ -58,9 +58,11 @@ namespace WUIPlatform.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = GeoConversions.GeoToWorldPosition(householdData.originLatLon.x, householdData.originLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            Utility.LatLngUTMConverter.UTMResult utmPos = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(householdData.originLatLon.x, householdData.originLatLon.y); //GeoConversions.GeoToWorldPosition(householdData.originLatLon.x, householdData.originLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            Vector2d temp = new Vector2d(utmPos.Easting, utmPos.Northing) - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
             homePosition = new Vector2((float)temp.x, (float)temp.y);
-            temp = GeoConversions.GeoToWorldPosition(householdData.roadAccessLatLon.x, householdData.roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+            utmPos = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(householdData.roadAccessLatLon.x, householdData.roadAccessLatLon.y);
+            temp = new Vector2d(utmPos.Easting, utmPos.Northing) - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin; //GeoConversions.GeoToWorldPosition(householdData.roadAccessLatLon.x, householdData.roadAccessLatLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;

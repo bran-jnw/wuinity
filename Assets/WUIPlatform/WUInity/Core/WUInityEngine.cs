@@ -14,6 +14,7 @@ using System.IO;
 using WUIPlatform.IO;
 using WUIPlatform.WUInity.UI;
 using WUIPlatform.Population;
+using Mapbox.Unity.Utilities;
 
 namespace WUIPlatform.WUInity
 {    
@@ -343,7 +344,25 @@ namespace WUIPlatform.WUInity
             WUIEngine.LOG(WUIEngine.LogType.Log, "Map loaded succesfully.");
 
             //do adjustement to better fit UTM
-            MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);   
+            for (int i = 0; i < MAP.transform.childCount; ++i)
+            {
+                Mapbox.Unity.MeshGeneration.Data.UnityTile tile = MAP.transform.GetChild(i).GetComponent<Mapbox.Unity.MeshGeneration.Data.UnityTile>();
+                if(tile != null)
+                {
+                    Vector3[] vertices = tile.GetComponent<MeshFilter>().mesh.vertices;
+                    for(int v = 0; v < vertices.Length; ++v)
+                    {
+                        Vector3 worldPos = tile.transform.TransformPoint(vertices[v]);
+                        var wgs84Pos = MAP.WorldToGeoPosition(worldPos); //GeoConversions.MetersToLatLon(new Vector2d(worldPos.x, worldPos.z) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
+                        Utility.LatLngUTMConverter.UTMResult utmPos = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Pos.x, wgs84Pos.y);
+                        Vector3 newWorldPos = new Vector3((float)(utmPos.Easting - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.x), 0f, (float)(utmPos.Northing - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.y));
+                        vertices[v] = tile.transform.InverseTransformPoint(newWorldPos);
+                    }
+                    tile.GetComponent<MeshFilter>().mesh.SetVertices(vertices);
+                    tile.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                }
+            }
+            //MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);   
 
             return true;
         }
@@ -717,7 +736,8 @@ namespace WUIPlatform.WUInity
             {
                 EvacuationDestination eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
-                Vector2d pos = GeoConversions.GeoToWorldPosition(eG.latLon.x, eG.latLon.y, WUIEngine.RUNTIME_DATA.Simulation.CenterMercator, WUIEngine.RUNTIME_DATA.Simulation.MercatorCorrectionScale);
+                Utility.LatLngUTMConverter.UTMResult utmPos = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(eG.latLon.x, eG.latLon.y);
+                Vector2d pos = new Vector2d(utmPos.Easting, utmPos.Northing) - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
                 float scale = 0.02f * (float)WUIEngine.INPUT.Simulation.DomainSize.y;
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
