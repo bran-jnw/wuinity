@@ -41,18 +41,6 @@ namespace WUIPlatform.Traffic
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.y);
                 _originOffset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "SUMO origin offset [x, y]: " + _originOffset.x + ", " + _originOffset.y);
-
-                //keep for now if we ever want to do projection corrections here
-                //https://gis.stackexchange.com/questions/14528/better-distance-measurements-in-web-mercator-projection
-                /*double e = 0.081819191;
-                double lat = Math.PI * WUIEngine.INPUT.Simulation.LowerLeftLatLong.x / 180.0;
-                double cosLat = Math.Cos(lat);
-                adjustX = cosLat / Math.Sqrt(1.0 - e * e * Math.Sin(lat) * Math.Sin(lat));
-                adjustX = 1.0 / adjustX;
-                adjustY = cosLat * (1.0 - e * e) / Math.Pow(1 - e * e * Math.Sin(lat) * Math.Sin(lat), 1.5);
-                adjustY = 1.0 / adjustY;;*/
-
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();

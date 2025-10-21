@@ -275,7 +275,8 @@ namespace WUIPlatform.Pedestrian
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
             }
-            else
+
+            if(goal == null)
             {
                 WUIEngine.LOG(WUIEngine.LogType.SimError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
             }

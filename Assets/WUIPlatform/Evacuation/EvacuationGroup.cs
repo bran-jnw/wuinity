@@ -28,32 +28,6 @@ namespace WUIPlatform.Evacuation
             Color = color;
         }
 
-        public static EvacuationGroup[] GetDefault()
-        {
-            EvacuationGroup[] evacGroups = new EvacuationGroup[3]; 
-
-            int[] goalIndices = new int[] { 0, 1, 2};
-            double[] goalsCumulativeWeights = new double[3] { 0.4, 0.7, 1.0 };
-            string name = "Group1";
-            WUIEngineColor color = WUIEngineColor.magenta;
-            int[] responseCurveIndices = new int[] {0};
-            evacGroups[0] = new EvacuationGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
-
-            goalIndices = new int[] { 0, 1, 2 };
-            goalsCumulativeWeights = new double[3] {0.4, 0.7, 1.0};
-            name = "Group2";
-            color = WUIEngineColor.cyan;
-            evacGroups[1] = new EvacuationGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
-
-            goalIndices = new int[] { 0, 1, 2 };
-            goalsCumulativeWeights = new double[] { 0.4, 0.7, 1.0 };
-            name = "Group3";
-            color = WUIEngineColor.yellow;
-            evacGroups[2] = new EvacuationGroup(name, goalIndices, goalsCumulativeWeights, responseCurveIndices, color);
-
-            return evacGroups;
-        }
-
         public EvacuationDestination GetWeightedEvacGoal()
         {
             float randomChoice = Random.value;
@@ -65,7 +39,9 @@ namespace WUIPlatform.Evacuation
                 }
             }
 
-            return null;
+            //this should not happen, but keep as backup as we do not want to return null
+            WUIEngine.LOG(WUIEngine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");
+            return WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[GoalIndices[GoalIndices.Length - 1]];
         }
 
         public static EvacuationGroup[] LoadEvacGroupFiles(out bool success)
