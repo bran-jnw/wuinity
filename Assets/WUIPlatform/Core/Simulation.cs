@@ -745,7 +745,7 @@ namespace WUIPlatform
 
             //update cars already in traffic
             _trafficModule.UpdateEvacuationGoals();              
-        }
+        }        
 
         void SaveRunOutput(int runNumber)
         {

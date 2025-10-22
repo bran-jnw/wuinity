@@ -108,6 +108,7 @@ namespace WUIPlatform.WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
                 {
+                    Evacuation.EvacuationGroup.SaveEvacGroupIndices();
                     WUInityEngine.INSTANCE.StopPainter();
                 }
                 ++buttonIndex;

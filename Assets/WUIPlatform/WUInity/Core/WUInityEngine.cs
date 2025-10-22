@@ -796,10 +796,10 @@ namespace WUIPlatform.WUInity
         Texture2D _trafficUsageMap;
         private void CreateTrafficUsageMapTexture()
         {
-            uint[,] data = ((SUMOModule)WUIEngine.SIM.TrafficModule).GetUsageMap();
-            uint maxData = ((SUMOModule)WUIEngine.SIM.TrafficModule).GetMaxUsage();
-            _trafficUsageMap = new Texture2D(data.GetLength(0), data.GetLength(0));
-            _trafficUsageMap.filterMode = FilterMode.Bilinear;
+            float[,] data = ((SUMOModule)WUIEngine.SIM.TrafficModule).GetUsageMap();
+            float maxData = ((SUMOModule)WUIEngine.SIM.TrafficModule).GetMaxUsage();
+            _trafficUsageMap = new Texture2D(data.GetLength(0), data.GetLength(1));
+            _trafficUsageMap.filterMode = FilterMode.Point;
             for (uint y = 0; y < data.GetLength(1); ++y)
             {
                 for (uint x = 0; x < data.GetLength(0); ++x)

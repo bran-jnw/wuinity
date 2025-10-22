@@ -639,6 +639,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
+      propertyPath: _options.placementOptions.placementType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
       propertyPath: _imagery._layerProperty.rasterOptions.useMipMap
       value: 0
       objectReference: {fileID: 0}

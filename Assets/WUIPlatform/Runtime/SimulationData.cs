@@ -20,6 +20,7 @@ namespace WUIPlatform.Runtime
         public Vector2d UTMOrigin { get => _utmOrigin; }
 
         LatLngUTMConverter.UTMResult _utmData;
+        public LatLngUTMConverter.UTMResult UTMData { get => _utmData; }
 
         Vector2d _centerMercator;
         public Vector2d CenterMercator { get => _centerMercator; }

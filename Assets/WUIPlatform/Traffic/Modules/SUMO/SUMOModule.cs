@@ -24,8 +24,8 @@ namespace WUIPlatform.Traffic
         private int totalVehiclesInjected, totalSumoVehiclesInjected;
         private List<string> output;
 
-        uint _maxUsage;
-        private uint[,] _usageMap;
+        float _maxUsage;
+        private float[,] _usageMap;
 
         public SUMOModule(out bool success)
         {
@@ -37,7 +37,7 @@ namespace WUIPlatform.Traffic
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
 
-                //need to use UTM projection in SUMO and WUInity to overlay data (and approximate overlay with web mercator, e.g. Mapbox)
+                //need to use UTM projection in SUMO and WUInity to overlay data
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.y);
                 _originOffset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
 
@@ -47,25 +47,10 @@ namespace WUIPlatform.Traffic
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
                 output.Add(header);
 
-                const int maxSize = 128;
-                int xSize, ySize;
-                if(WUIEngine.INPUT.Simulation.DomainSize.x == WUIEngine.INPUT.Simulation.DomainSize.y)
-                {
-                    xSize = maxSize;
-                    ySize = maxSize;
-                } 
-                else if(WUIEngine.INPUT.Simulation.DomainSize.x > WUIEngine.INPUT.Simulation.DomainSize.y)
-                {
-                    xSize = maxSize;
-                    ySize = (int)(0.5 + maxSize * (WUIEngine.INPUT.Simulation.DomainSize.y / WUIEngine.INPUT.Simulation.DomainSize.x));
-                }
-                else
-                {
-                    xSize = (int)(0.5 + maxSize * (WUIEngine.INPUT.Simulation.DomainSize.x / WUIEngine.INPUT.Simulation.DomainSize.y));
-                    ySize = maxSize;
-                }
-
-                _usageMap = new uint[xSize, ySize];
+                int xDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.x / 25.0);
+                int yDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.y / 25.0);
+                _maxUsage = 0f;
+                _usageMap = new float[xDim, yDim];
 
                 SortEdgesInFireCells();
             }
@@ -116,7 +101,7 @@ namespace WUIPlatform.Traffic
                         ++totalSumoVehiclesInjected;
                     }
 
-                    UpdateUsageMap(vehicle);
+                    UpdateUsageMap(vehicle, deltaTime);
                 }
             }     
 
@@ -152,16 +137,17 @@ namespace WUIPlatform.Traffic
             output.Add(dataLine);
         }
 
-        private void UpdateUsageMap(SUMOVehicle car)
+        private void UpdateUsageMap(SUMOVehicle car, float deltaTime)
         {
             Vector2d pos = car.WorldPosition;
 
             int xIndex = (int)(_usageMap.GetLength(0) * pos.x / WUIEngine.INPUT.Simulation.DomainSize.x);
             int yIndex = (int)(_usageMap.GetLength(1) * pos.y / WUIEngine.INPUT.Simulation.DomainSize.y);
 
+            //we can be outside as sometimes roads reach beyond simulation domain
             if (xIndex >= 0 && xIndex < _usageMap.GetLength(0) && yIndex >= 0 && yIndex < _usageMap.GetLength(1))
             {
-                _usageMap[xIndex, yIndex] += 1;
+                _usageMap[xIndex, yIndex] += deltaTime;
                 if (_usageMap[xIndex, yIndex] > _maxUsage)
                 {
                     _maxUsage = _usageMap[xIndex, yIndex];
@@ -169,12 +155,12 @@ namespace WUIPlatform.Traffic
             }
         }
 
-        public uint[,] GetUsageMap()
+        public float[,] GetUsageMap()
         {
             return _usageMap;
         }
 
-        public uint GetMaxUsage()
+        public float GetMaxUsage()
         {
             return _maxUsage;
         }
@@ -196,7 +182,16 @@ namespace WUIPlatform.Traffic
                     //IMPORTANT!!! Longitude then latitude in SUMO
                     LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLon.y, startLatLon.x, true);
                     LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalLatLon.y, goalLatLon.x, true);
-                    LIBSUMO.TraCIStage route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, goalRoad.edgeID);
+                    LIBSUMO.TraCIStage route;
+                    //do we find route based on empty network/pure speed limits or do we take into account curretn state of network
+                    if(true)
+                    {
+                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, goalRoad.edgeID);
+                    }
+                    else
+                    {
+                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, goalRoad.edgeID, "", -1, 1);
+                    }
 
                     bool foundRoute = false;
                     if (route.edges.Count > 0)
@@ -275,6 +270,7 @@ namespace WUIPlatform.Traffic
 
         public override void SaveToFile(int runNumber)
         {
+            //arrival data to csv
             try
             {
                 string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
@@ -284,17 +280,65 @@ namespace WUIPlatform.Traffic
             {
                 WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
             }
+
+            SaveUsageMap(runNumber);
         }
-                
+
+        private void SaveUsageMap(int runNumber)
+        {
+            //usage map as geotiff
+            try
+            {
+                int xDim = _usageMap.GetLength(0);
+                int yDim = _usageMap.GetLength(1);
+                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_trafficUsageMap_" + runNumber + ".tiff");
+
+                OSGeo.GDAL.Gdal.AllRegister();
+                OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
+                OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 1, OSGeo.GDAL.DataType.GDT_Float32, null);
+
+                double leftX = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.x;
+                double lowerLeftY = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.y;
+                double[] geoTransform = new double[] { leftX, 25.0, 0.0, lowerLeftY, 0.0, 25.0 };
+                output.SetGeoTransform(geoTransform);
+
+                OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
+                reference.SetProjCS("UTM " + WUIEngine.RUNTIME_DATA.Simulation.UTMData.Zona + " (WGS84)");
+                reference.SetWellKnownGeogCS("WGS84");
+                reference.SetUTM(WUIEngine.RUNTIME_DATA.Simulation.UTMData.ZoneNumber, WUIEngine.INPUT.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                output.SetSpatialRef(reference);
+
+                OSGeo.GDAL.Band band = output.GetRasterBand(1); //starts from 1, not zero                
+                band.SetNoDataValue(-9999f);
+                band.SetDescription("Time spent, in seconds, on a road overlaying with the raster.");
+                float[] row = new float[xDim];
+                for (int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; ++x)
+                    {
+                        row[x] = _usageMap[x, y];
+                        if (row[x] == 0f)
+                        {
+                            row[x] = -9999f;
+                        }
+                    }
+                    band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                }
+                band.FlushCache();
+                output.FlushCache();
+                //reminder, output.Close() crashes violently, do not use or investigate further why...
+            }
+            catch (Exception e)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+            }
+        }
+
         public override void UpdateEvacuationGoals()
         {
             //throw new System.NotImplementedException();
         }
 
-        /// <summary>
-        /// This method requires adding the getIncomingEdes call to SUMO, this is done in the current DLL but keep an eye on it.
-        /// UPDATE: Sumo has added these function snow, good to go.
-        /// </summary>
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
