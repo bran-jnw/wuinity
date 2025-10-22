@@ -21,7 +21,6 @@ namespace WUIPlatform.Traffic
         Vector3 oldVisualPos;
         Vector3 newVisualPos;
         float oldRotation, newRotation;
-        float speedRatio;
 
         public SUMOVehicle(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationDestination goal) : base(carID, peopleInCar, goal)
         {

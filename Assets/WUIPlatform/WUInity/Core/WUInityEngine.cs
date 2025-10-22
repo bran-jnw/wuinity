@@ -456,7 +456,7 @@ namespace WUIPlatform.WUInity
         public void StopSimulation()
         {
             HideAllRuntimeVisuals();
-            WUIEngine.SIM.Stop("STOP: Stopped simulation as requested by user.", true);
+            WUIEngine.SIM.Stop("STOP: Stopped simulation as requested by user.", false);
         }
 
         bool updateOSMBorder = false;

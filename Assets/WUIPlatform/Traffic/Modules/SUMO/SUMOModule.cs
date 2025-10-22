@@ -26,6 +26,8 @@ namespace WUIPlatform.Traffic
 
         float _maxUsage;
         private float[,] _usageMap;
+        private float[,] _averageLevelOfServicMap;
+        private uint[,] _carCount;
 
         public SUMOModule(out bool success)
         {
@@ -49,8 +51,11 @@ namespace WUIPlatform.Traffic
 
                 int xDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.x / 25.0);
                 int yDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.y / 25.0);
+
                 _maxUsage = 0f;
                 _usageMap = new float[xDim, yDim];
+                _averageLevelOfServicMap = new float[xDim, yDim];
+                _carCount = new uint[xDim, yDim];
 
                 SortEdgesInFireCells();
             }
@@ -101,7 +106,7 @@ namespace WUIPlatform.Traffic
                         ++totalSumoVehiclesInjected;
                     }
 
-                    UpdateUsageMap(vehicle, deltaTime);
+                    UpdateOutputMaps(vehicle, deltaTime);
                 }
             }     
 
@@ -137,9 +142,9 @@ namespace WUIPlatform.Traffic
             output.Add(dataLine);
         }
 
-        private void UpdateUsageMap(SUMOVehicle car, float deltaTime)
+        private void UpdateOutputMaps(SUMOVehicle vehicle, float deltaTime)
         {
-            Vector2d pos = car.WorldPosition;
+            Vector2d pos = vehicle.WorldPosition;
 
             int xIndex = (int)(_usageMap.GetLength(0) * pos.x / WUIEngine.INPUT.Simulation.DomainSize.x);
             int yIndex = (int)(_usageMap.GetLength(1) * pos.y / WUIEngine.INPUT.Simulation.DomainSize.y);
@@ -152,6 +157,11 @@ namespace WUIPlatform.Traffic
                 {
                     _maxUsage = _usageMap[xIndex, yIndex];
                 }
+
+                float value = _averageLevelOfServicMap[xIndex, yIndex] * _carCount[xIndex, yIndex];
+                value += vehicle.SpeedRatio;
+                _carCount[xIndex, yIndex] += 1;
+                _averageLevelOfServicMap[xIndex, yIndex] = value / _carCount[xIndex, yIndex];
             }
         }
 
@@ -291,11 +301,11 @@ namespace WUIPlatform.Traffic
             {
                 int xDim = _usageMap.GetLength(0);
                 int yDim = _usageMap.GetLength(1);
-                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_trafficUsageMap_" + runNumber + ".tiff");
+                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_trafficData_" + runNumber + ".tiff");
 
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
-                OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 1, OSGeo.GDAL.DataType.GDT_Float32, null);
+                OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 2, OSGeo.GDAL.DataType.GDT_Float32, null);
 
                 double leftX = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.x;
                 double lowerLeftY = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.y;
@@ -308,6 +318,7 @@ namespace WUIPlatform.Traffic
                 reference.SetUTM(WUIEngine.RUNTIME_DATA.Simulation.UTMData.ZoneNumber, WUIEngine.INPUT.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                 output.SetSpatialRef(reference);
 
+                //heat map
                 OSGeo.GDAL.Band band = output.GetRasterBand(1); //starts from 1, not zero                
                 band.SetNoDataValue(-9999f);
                 band.SetDescription("Time spent, in seconds, on a road overlaying with the raster.");
@@ -317,6 +328,24 @@ namespace WUIPlatform.Traffic
                     for (int x = 0; x < xDim; ++x)
                     {
                         row[x] = _usageMap[x, y];
+                        if (row[x] == 0f)
+                        {
+                            row[x] = -9999f;
+                        }
+                    }
+                    band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                }
+                band.FlushCache();
+
+                // level of service
+                band = output.GetRasterBand(2);               
+                band.SetNoDataValue(-9999f);
+                band.SetDescription("Average level of service (ratio of actual speed and speed limit)");
+                for (int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; ++x)
+                    {
+                        row[x] = _averageLevelOfServicMap[x, y];
                         if (row[x] == 0f)
                         {
                             row[x] = -9999f;
