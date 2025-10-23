@@ -14,6 +14,7 @@ namespace WUIPlatform.IO
     {
         public string ConfigurationFile;
         public Vector2d UTMoffset;
+        public double OutputRasterSize = 25.0;
         public enum DestinationChoiceEnum { Random, EvacGroup };
         public DestinationChoiceEnum DestinationChoice = DestinationChoiceEnum.EvacGroup;
 
@@ -46,6 +47,16 @@ namespace WUIPlatform.IO
             {
                 ++issues;
                 WUIEngineInput.InputNotFoundMessage(input);
+            }
+
+            input = nameof(OutputRasterSize);
+            if (inputToParse.TryGetValue(input, out userInput))
+            {
+                double.TryParse(userInput, out newInput.OutputRasterSize);
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " was not found, using default value of " + newInput.OutputRasterSize + ".");
             }
 
             input = nameof(DestinationChoice);

@@ -26,8 +26,9 @@ namespace WUIPlatform.Traffic
 
         float _maxUsage;
         private float[,] _usageMap;
-        private float[,] _averageLevelOfServicMap;
         private uint[,] _carCount;
+        private float[,] _accumulatedLevelOfService;
+        private float[,] _accumulatedWatingTime;
 
         public SUMOModule(out bool success)
         {
@@ -49,13 +50,14 @@ namespace WUIPlatform.Traffic
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
                 output.Add(header);
 
-                int xDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.x / 25.0);
-                int yDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.y / 25.0);
+                int xDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.x / WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize);
+                int yDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.y / WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize);
 
                 _maxUsage = 0f;
                 _usageMap = new float[xDim, yDim];
-                _averageLevelOfServicMap = new float[xDim, yDim];
                 _carCount = new uint[xDim, yDim];
+                _accumulatedLevelOfService = new float[xDim, yDim];
+                _accumulatedWatingTime = new float[xDim, yDim];
 
                 SortEdgesInFireCells();
             }
@@ -158,10 +160,9 @@ namespace WUIPlatform.Traffic
                     _maxUsage = _usageMap[xIndex, yIndex];
                 }
 
-                float value = _averageLevelOfServicMap[xIndex, yIndex] * _carCount[xIndex, yIndex];
-                value += vehicle.SpeedRatio;
+                _accumulatedLevelOfService[xIndex, yIndex] += vehicle.SpeedRatio;
+                _accumulatedWatingTime[xIndex, yIndex] += (float)LIBSUMO.Vehicle.getWaitingTime(vehicle.GetSumoVehicleID());
                 _carCount[xIndex, yIndex] += 1;
-                _averageLevelOfServicMap[xIndex, yIndex] = value / _carCount[xIndex, yIndex];
             }
         }
 
@@ -291,10 +292,10 @@ namespace WUIPlatform.Traffic
                 WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
             }
 
-            SaveUsageMap(runNumber);
+            SaveOutputMaps(runNumber);
         }
 
-        private void SaveUsageMap(int runNumber)
+        private void SaveOutputMaps(int runNumber)
         {
             //usage map as geotiff
             try
@@ -305,11 +306,11 @@ namespace WUIPlatform.Traffic
 
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
-                OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 2, OSGeo.GDAL.DataType.GDT_Float32, null);
+                OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
 
                 double leftX = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.x;
                 double lowerLeftY = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.y;
-                double[] geoTransform = new double[] { leftX, 25.0, 0.0, lowerLeftY, 0.0, 25.0 };
+                double[] geoTransform = new double[] { leftX, WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize };
                 output.SetGeoTransform(geoTransform);
 
                 OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
@@ -321,7 +322,7 @@ namespace WUIPlatform.Traffic
                 //heat map
                 OSGeo.GDAL.Band band = output.GetRasterBand(1); //starts from 1, not zero                
                 band.SetNoDataValue(-9999f);
-                band.SetDescription("Time spent, in seconds, on a road overlaying with the raster.");
+                band.SetDescription("Heat map [s], accumulated time spent on a roads overlaying with the raster.");
                 float[] row = new float[xDim];
                 for (int y = 0; y < yDim; ++y)
                 {
@@ -337,15 +338,15 @@ namespace WUIPlatform.Traffic
                 }
                 band.FlushCache();
 
-                // level of service
+                // average level of service
                 band = output.GetRasterBand(2);               
                 band.SetNoDataValue(-9999f);
-                band.SetDescription("Average level of service (ratio of actual speed and speed limit)");
+                band.SetDescription("Average level of service (ratio of actual speed and speed limit.)");
                 for (int y = 0; y < yDim; ++y)
                 {
                     for (int x = 0; x < xDim; ++x)
                     {
-                        row[x] = _averageLevelOfServicMap[x, y];
+                        row[x] = _accumulatedLevelOfService[x, y] / _carCount[x, y];
                         if (row[x] == 0f)
                         {
                             row[x] = -9999f;
@@ -354,6 +355,25 @@ namespace WUIPlatform.Traffic
                     band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
                 }
                 band.FlushCache();
+
+                // average waiting time
+                band = output.GetRasterBand(3);
+                band.SetNoDataValue(-9999f);
+                band.SetDescription("Average waiting time [s].");
+                for (int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; ++x)
+                    {
+                        row[x] = _accumulatedWatingTime[x, y] / _carCount[x, y];
+                        if (row[x] == 0f)
+                        {
+                            row[x] = -9999f;
+                        }
+                    }
+                    band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                }
+                band.FlushCache();
+
                 output.FlushCache();
                 //reminder, output.Close() crashes violently, do not use or investigate further why...
             }

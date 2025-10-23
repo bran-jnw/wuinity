@@ -42,8 +42,9 @@ namespace WUIPlatform.IO
 
         public static void SaveInput()
         {
-            string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
-            File.WriteAllText(WUIEngine.WORKING_FILE, json);
+            //TODO: fix new format save
+            //string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
+            //File.WriteAllText(WUIEngine.WORKING_FILE, json);
             EvacuationGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
