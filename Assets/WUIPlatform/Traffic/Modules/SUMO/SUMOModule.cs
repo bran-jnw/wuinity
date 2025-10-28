@@ -38,7 +38,7 @@ namespace WUIPlatform.Traffic
                 _vehicles = new Dictionary<string, SUMOVehicle>();
                 string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
-                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() })); //, "--ignore-route-errors"
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() }));
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
                 Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.y);
@@ -47,7 +47,13 @@ namespace WUIPlatform.Traffic
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();
-                string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
+                string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
+                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
+                {
+                    header += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " people arrived";
+                    header += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " cars arrived";
+                    header += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " flow [veh./h]";
+                }
                 output.Add(header);
 
                 int xDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.x / WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize);
@@ -125,8 +131,9 @@ namespace WUIPlatform.Traffic
                         car.Arrive();
                     }
                     _vehicles.Remove(arrivedVehicles[i]);
+                    _activeVehicles.Remove(car.VehicleId);
                     //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
-                    if(car.NumberOfPeople > 0)
+                    if (car.NumberOfPeople > 0)
                     {
                         _arrivalData.Add(currentTime + deltaTime);
                         totalVehiclesArrived++;
@@ -141,6 +148,12 @@ namespace WUIPlatform.Traffic
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
+            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
+            {
+                dataLine += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
+                dataLine += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count;
+                dataLine += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentVehicleFlow;
+            }
             output.Add(dataLine);
         }
 

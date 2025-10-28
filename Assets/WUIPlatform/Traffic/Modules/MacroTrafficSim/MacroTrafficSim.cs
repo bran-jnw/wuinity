@@ -37,7 +37,7 @@ namespace WUIPlatform.Traffic
             oldTotalCars = 0;
 
             output = new List<string>();            
-            string start = "Time(s),Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
+            string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
@@ -324,7 +324,7 @@ namespace WUIPlatform.Traffic
             for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
             {
                 newOut += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
-                newOut += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentFlow;
+                newOut += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentVehicleFlow;
             }
 
             output.Add(newOut);

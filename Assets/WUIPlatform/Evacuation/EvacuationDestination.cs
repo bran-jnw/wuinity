@@ -27,7 +27,7 @@ namespace WUIPlatform.Evacuation
         public List<TrafficModuleVehicle> cars = new List<TrafficModuleVehicle>();
 
 
-        [System.NonSerialized] public float currentFlow = 0f;
+        [System.NonSerialized] public float currentVehicleFlow = 0f;
         private float firstArrivalTime, currentTimeStep = float.MinValue;
         private int timeStepCars;
 
@@ -72,7 +72,7 @@ namespace WUIPlatform.Evacuation
             UpdateFlow(currentTime, deltaTime);            
 
             //car can arrive
-            if((maxFlow <= 0 && !blocked) || (currentFlow < maxFlow && !blocked))
+            if((maxFlow <= 0 && !blocked) || (currentVehicleFlow < maxFlow && !blocked))
             {         
                 //add new cars and people that has arrived during timestep
                 ++timeStepCars;
@@ -132,20 +132,20 @@ namespace WUIPlatform.Evacuation
             if (cars.Count == 0)
             {
                 firstArrivalTime = timeStamp;
-                currentFlow = 0f;
+                currentVehicleFlow = 0f;
             }
             else
             {
                 float timestepFlow = timeStepCars / deltaTime;
                 if (timeStamp == firstArrivalTime)
                 {
-                    currentFlow = timestepFlow;
+                    currentVehicleFlow = timestepFlow;
                 }
                 else
                 {
-                    currentFlow = cars.Count / (timeStamp - firstArrivalTime);
+                    currentVehicleFlow = cars.Count / (timeStamp - firstArrivalTime);
                 }
-                currentFlow = Mathf.Max(timestepFlow, currentFlow) * 3600f;
+                currentVehicleFlow = Mathf.Max(timestepFlow, currentVehicleFlow) * 3600f;
             }
         }
 
@@ -157,7 +157,7 @@ namespace WUIPlatform.Evacuation
             cars.Clear();
 
             //reset stuff for flow calc
-            currentFlow = 0f;
+            currentVehicleFlow = 0f;
             timeStepCars = 0;
             firstArrivalTime = float.MinValue;
             currentTimeStep = float.MinValue;

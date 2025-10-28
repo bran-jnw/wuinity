@@ -67,7 +67,7 @@ namespace WUIPlatform.Traffic
             rotation = angle;
             newRotation = (float)angle;
 
-            _speedRatio = (float)(LIBSUMO.Vehicle.getSpeed(_sumoId) / LIBSUMO.Vehicle.getAllowedSpeed(_sumoId));
+            _speedRatio = (float)(LIBSUMO.Vehicle.getSpeed(_sumoId) / LIBSUMO.Vehicle.getAllowedSpeed(_sumoId)); //include? LIBSUMO.Vehicle.getSpeedFactor(_sumoId) *
         }
 
         public bool IsActive()
