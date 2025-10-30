@@ -52,7 +52,7 @@ namespace WUIPlatform.Smoke
         }
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
-        public AdvectDiffuseModel(Fire.FireModule fireModule, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, Texture2D windTex, int solutionMode = 0)
+        public AdvectDiffuseModel(Simulation simulation, Fire.FireModule fireModule, float mixingHeight, ComputeShader advectDiffuseCompute, Texture2D noiseTex, Texture2D windTex, int solutionMode = 0) : base(simulation)
         {
             _originOffset = fireModule.GetOriginOffset();
 

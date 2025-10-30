@@ -139,7 +139,7 @@ namespace WUIPlatform.Fire
         BehaveUnits.SpeedUnits.SpeedUnitsEnum speedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
         WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
 
-        public CellVector()
+        public CellVector(Simulation simulation) : base(simulation)
         {
             _lcpData = WUIEngine.RUNTIME_DATA.Fire.LCPData;
             _weather = WUIEngine.RUNTIME_DATA.Fire.WeatherInput;

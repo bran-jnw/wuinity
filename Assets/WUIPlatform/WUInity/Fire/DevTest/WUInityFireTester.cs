@@ -48,7 +48,7 @@ namespace WUIPlatform.WUInity
                 ignitionPoints[i] = new WUInityFireIgnition(UnityEngine.Random.Range(0, xCells), UnityEngine.Random.Range(0, yCells));
             }*/
 
-            mesh = new FireMesh(lcpData, weather, wind, initialMoisture, ignitionPoints);                                                  
+            mesh = new FireMesh(null, lcpData, weather, wind, initialMoisture, ignitionPoints);                                                  
             mesh.spreadMode = spreadMode;                                                              
             //start simulation and do the init
             mesh.Step(time, 1f);                                           

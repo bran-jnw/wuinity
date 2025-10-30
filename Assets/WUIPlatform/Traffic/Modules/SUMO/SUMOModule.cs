@@ -30,7 +30,7 @@ namespace WUIPlatform.Traffic
         private float[,] _accumulatedLevelOfService;
         private float[,] _accumulatedWatingTime;
 
-        public SUMOModule(out bool success)
+        public SUMOModule(Simulation simulation, out bool success) : base(simulation)
         {
             success = true;
             try

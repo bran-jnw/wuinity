@@ -10,6 +10,10 @@ namespace WUIPlatform.Pedestrian
 {
     public abstract class PedestrianModule : SimulationModule
     {
+        public PedestrianModule(Simulation simulation) : base(simulation) 
+        {
+            
+        }
         public abstract int GetTotalCars();
         public abstract int GetPeopleStaying();
         public abstract int GetPeopleLeft();

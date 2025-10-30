@@ -34,7 +34,7 @@ namespace WUIPlatform.Traffic
         [DllImport("cityflow_unity.dll")]
         private static extern void GetVehicles(IntPtr engine);
 
-        public CityFlowModule()
+        public CityFlowModule(Simulation simulation) : base(simulation)
         {
             //MonoBehaviour.print(Test());
             engine = CreateEngine("D:\\UNITY\\_PROJECTS\\CityFlow\\examples\\config.json", 1);

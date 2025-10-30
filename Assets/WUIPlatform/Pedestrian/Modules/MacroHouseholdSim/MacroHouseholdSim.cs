@@ -47,7 +47,7 @@ namespace WUIPlatform.Pedestrian
         public MacroHouseholdVisualizer Visualizer { get { return _visualizer; } }
 
 
-        public MacroHouseholdSim()
+        public MacroHouseholdSim(Simulation simulation) : base(simulation)
         {
             output = new List<string>();
             output.Add("Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total cars activated,Avg. walking dist.");

@@ -137,7 +137,7 @@ namespace WUIPlatform.WUInity.UI
                 else
                 {
                     menuChoice = ActiveMenu.Output;
-                    WUInityEngine.INSTANCE.StartSimulation();                   
+                    WUInityEngine.INSTANCE.RunSimulation();                   
                 }
             }
             ++buttonIndex;            

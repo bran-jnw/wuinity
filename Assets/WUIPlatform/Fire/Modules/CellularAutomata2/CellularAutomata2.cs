@@ -24,7 +24,7 @@ namespace WUIPlatform.Fire
         private int xDim, yDim;
         private FireCell2[,] fireCells;
 
-        private CellularAutomata2(float windspeedTenMeters, float windDirection, float cellSize)
+        private CellularAutomata2(Simulation simulation, float windspeedTenMeters, float windDirection, float cellSize) : base(simulation)
         {
             WUIEngine.LOG(WUIEngine.LogType.Log, "Beginning backwards calculation of fire spread.");
 

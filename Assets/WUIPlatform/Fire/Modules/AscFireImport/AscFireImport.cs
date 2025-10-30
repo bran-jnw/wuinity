@@ -35,7 +35,7 @@ namespace WUIPlatform.Fire
         List<Vector2int> _newlyIgnitedCells;
         float[] _sootInjection;
 
-        public AscFireImport() 
+        public AscFireImport(Simulation simulation) : base(simulation)
         {
             string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.TimeOfArrivalFile);
             string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.RateOfSpreadFile);

@@ -2595,7 +2595,7 @@ namespace WUIPlatform.WUInity.UI
                     
                     if (btnStartSimulation != null) btnStartSimulation.text = "Stop simulation";
 
-                    WUInityEngine.INSTANCE.StartSimulation();
+                    WUInityEngine.INSTANCE.RunSimulation();
                 }
             }
             else

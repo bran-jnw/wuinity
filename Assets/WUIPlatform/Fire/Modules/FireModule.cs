@@ -11,6 +11,11 @@ namespace WUIPlatform.Fire
 {
     public abstract class FireModule : SimulationModule
     {
+        public FireModule(Simulation simulation) : base(simulation)
+        {
+
+        }
+
         /// <summary>
         /// The fire module might be able to take longer time steps compared to other modules, so this information is needed if only doing fire simulation.
         /// </summary>

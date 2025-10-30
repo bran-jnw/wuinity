@@ -10,6 +10,12 @@ namespace WUIPlatform
     public abstract class SimulationModule
     {
         protected Vector2d _originOffset;
+        protected Simulation _simulation;
+
+        public SimulationModule(Simulation simulation)
+        {
+            _simulation = simulation;
+        }
 
         public abstract void Step(float currentTime, float deltaTime);
         public abstract bool IsSimulationDone();

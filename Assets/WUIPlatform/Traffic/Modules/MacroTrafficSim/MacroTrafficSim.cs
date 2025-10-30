@@ -27,7 +27,7 @@ namespace WUIPlatform.Traffic
         RouteCreator routeCreator;
         Dictionary<int, RoadSegment> roadSegments;       
 
-        public MacroTrafficSim()
+        public MacroTrafficSim(Simulation simulation) : base(simulation)
         {
             //TODO: make sim read router Db, then route creator
             //routeCreator = ;

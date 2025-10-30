@@ -12,7 +12,7 @@ namespace WUIPlatform.Smoke
         ExtinctionRamp _extinctionCoefficientRamp;
         float[] _extinctionCoefficientOutput;
 
-        public GlobalSmoke(string extinctionCoefficientFile)
+        public GlobalSmoke(Simulation simulation, string extinctionCoefficientFile) : base(simulation)
         {
             _extinctionCoefficientRamp = new ExtinctionRamp();
             if(!_extinctionCoefficientRamp.LoadExtinctionRampFile(extinctionCoefficientFile))

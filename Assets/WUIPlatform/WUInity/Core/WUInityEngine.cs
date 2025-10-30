@@ -413,11 +413,11 @@ namespace WUIPlatform.WUInity
             }                
         }
 
-        public void StartSimulation()
+        public void RunSimulation()
         {
             _visualsExist = false;
             SetSampleMode(DataSampleMode.TrafficDens);
-            WUIEngine.SIM.Start();
+            WUIEngine.ENGINE.RunSimulations();
         }
 
         bool _visualsExist = false;
@@ -449,7 +449,7 @@ namespace WUIPlatform.WUInity
                 WUIEngine.INPUT.Simulation.Id = Path.GetFileNameWithoutExtension(inputFiles[i]);
                 WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations = true;
                 WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns = 100;
-                StartSimulation();
+                RunSimulation();
             }
         }
 

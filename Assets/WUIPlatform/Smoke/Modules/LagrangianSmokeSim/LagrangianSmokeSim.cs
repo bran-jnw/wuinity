@@ -42,7 +42,7 @@ namespace WUIPlatform.Smoke
         float z_0;//= 1.0; //Davenport-Wierenga roughness length classification
         float theta_zero; //ground level potential temperature
 
-        public LagrangianSmokeSim(int xDim, int yDim, int particlesPerCell)
+        public LagrangianSmokeSim(Simulation simulation, int xDim, int yDim, int particlesPerCell) : base(simulation)
         {
             context = Context.Create(builder => builder.Default().EnableAlgorithms());
             device = context.GetPreferredDevice(preferCPU: false).CreateAccelerator(context);

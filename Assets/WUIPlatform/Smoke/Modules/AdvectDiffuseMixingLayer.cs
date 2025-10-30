@@ -43,7 +43,7 @@ namespace WUIPlatform.Smoke
         GlobalData _globalData;
 
         //TODO:convert to ILGPU
-        public AdvectDiffuseMixingLayer()
+        public AdvectDiffuseMixingLayer(Simulation simulation) : base(simulation)
         {
             //initiate device to run on
             _context = Context.CreateDefault();

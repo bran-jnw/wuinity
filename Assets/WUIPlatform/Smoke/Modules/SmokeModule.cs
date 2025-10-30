@@ -9,6 +9,10 @@ namespace WUIPlatform.Smoke
 {
     public abstract class SmokeModule : SimulationModule
     {
+        public SmokeModule(Simulation simulation) : base(simulation)
+        {
+
+        }
         public abstract int GetCellsX();
         public abstract int GetCellsY();
         public abstract float[] GetExtinctionCoefficientDensity();

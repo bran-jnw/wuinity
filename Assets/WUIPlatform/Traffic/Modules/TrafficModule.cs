@@ -31,7 +31,7 @@ namespace WUIPlatform.Traffic
             }
         }
 
-        public TrafficModule()
+        public TrafficModule(Simulation simulation) : base(simulation)
         {
             _arrivalData = new List<float>();
             _carsToInject = new List<InjectedCar>();
