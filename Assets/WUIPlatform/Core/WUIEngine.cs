@@ -126,11 +126,7 @@ namespace WUIPlatform
         private Visualization.WUIShowCommunicator _wuiShow;
         public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }
         public void RunSimulations()
-        {   
-            float averageTotalEvacTime = 0.0f;
-            int convergedInSequence = 0;
-            List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
-
+        {    
             PreSimulations();
 
             System.Threading.Tasks.Parallel.For(0, _simulations.Length, index =>
@@ -138,7 +134,6 @@ namespace WUIPlatform
                 try
                 {
                     _simulations[index].Run();
-                    CollectSimulationStatistics(ref i, trafficArrivalDataCollection, ref averageTotalEvacTime, ref convergedInSequence);
                 }
                 catch (Exception e)
                 {
@@ -146,7 +141,7 @@ namespace WUIPlatform
                 }
             });
 
-            PostSimulations(trafficArrivalDataCollection, actualRuns, convergedInSequence, averageTotalEvacTime);
+            PostSimulations();
         }
 
         private void PreSimulations()
@@ -156,6 +151,7 @@ namespace WUIPlatform
             {
                 _simulations[i] = new Simulation(this, _input, i);
             }
+            //by default simulation 0 will be the main to be displayed
             SetMainSimulation(0);
 
             if (_input.WUIShow.SendDataToWUIShow && _input.Simulation.RunTrafficModule)
@@ -176,50 +172,84 @@ namespace WUIPlatform
                 _mainSimulation.SetAsMainSimulation();
             }
         }
-
-        private void PostSimulations(Simulation simulation, List<List<float>> trafficArrivalDataCollection, int actualRuns, int convergedInSequence, float averageTotalEvacTime)
+        
+        private void PostSimulations()
         {
-            if (!simulation.StoppedDueToError)
+            //save functional analysis
+            int actualRuns = trafficArrivalDataCollection.Count;
+            if (actualRuns > 0)
             {
-                //save functional analysis
-                if (trafficArrivalDataCollection.Count > 0)
+                float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
+                SaveAverageCurve(averageCurve);
+                //plot results
+                double[] xData = new double[averageCurve.Length];
+                double[] yData = new double[averageCurve.Length];
+                for (int i = 0; i < averageCurve.Length; i++)
                 {
-                    float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
-                    SaveAverageCurve(averageCurve);
-                    //plot results
-                    double[] xData = new double[averageCurve.Length];
-                    double[] yData = new double[averageCurve.Length];
-                    for (int i = 0; i < averageCurve.Length; i++)
-                    {
-                        xData[i] = averageCurve[i] / 3600.0f;
-                        yData[i] = i + 1;
-                    }
-                    CreatePlotData(xData, yData);
+                    xData[i] = averageCurve[i] / 3600.0f;
+                    yData[i] = i + 1;
                 }
+                CreatePlotData(xData, yData);
+            }
 
-                if (convergedInSequence >= 10)
+            if (convergedInSequence >= 10)
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+
+            }
+            else
+            {
+                WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+            }
+
+            WUIEngineOutput.SaveLogToDisk(_consoleLog, _input.Simulation.Id);
+        }
+
+        float cumulativeTotalEvacTime = 0.0f;
+        int convergedInSequence = 0;
+        List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
+        /// <summary>
+        /// Each simulation calls this function when it is done to see if evacuation time has vonverged and simulations should be stopped.
+        /// </summary>
+        /// <param name="simulation"></param>
+        public void CollectSimulationStatistics(Simulation simulation)
+        {
+            if (simulation.TrafficModule != null)
+            {
+                trafficArrivalDataCollection.Add(simulation.TrafficModule.GetArrivalData());
+            }
+            else
+            {
+                return;
+            }
+
+            int resultCount = trafficArrivalDataCollection.Count;
+            //need at least 2 simulations to have valid average
+            if (resultCount > 1)
+            {
+                float pastAverage = cumulativeTotalEvacTime / (resultCount -1);
+                cumulativeTotalEvacTime += simulation.CurrentTime;
+                float currentAverage = cumulativeTotalEvacTime / resultCount;
+                float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
+                //if convergence met we can stop
+                if (convergenceCriteria < RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
-
+                    ++convergedInSequence;
+                    //we are done
+                    if (_input.Simulation.StopAfterConverging && convergedInSequence > WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence)
+                    {
+                        StopSimulations();
+                    }
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                    convergedInSequence = 0;
                 }
-
-                _haveResults = true;
-
-                if (WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
-                {
-                    if (WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
-                    {
-                        if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
-                        {
-                            _triggerBufferData = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
-                        }
-                    }
-                }
-            }            
+            }
+            else
+            {
+                cumulativeTotalEvacTime += simulation.CurrentTime;
+            }
         }
 
         private void SaveAverageCurve(float[] data)
@@ -234,6 +264,30 @@ namespace WUIPlatform
             WUIEngineInput wuiIn = INPUT;
             string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.Id + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
+        }
+
+        byte[] _plotBytes;
+        void CreatePlotData(double[] xData, double[] yData)
+        {
+            if (xData.Length > 0 && yData.Length > 0)
+            {
+                ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
+                timeTraffic.AddScatterLines(xData, yData);
+                timeTraffic.Title("Average cumulative arrival of cars");
+                timeTraffic.YLabel("Number of cars [-]");
+                timeTraffic.XLabel("Time [h]");
+                //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
+                byte[] byteData = timeTraffic.GetImageBytes();
+            }
+        }
+
+        /// <summary>
+        /// Returns bytes for bitmap to draw a plot of average curve for evacuation.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetArrivalPlotBytes()
+        {
+            return _plotBytes;
         }
 
         /// <summary>
@@ -334,7 +388,7 @@ namespace WUIPlatform
         }
         
         public enum LogType { Log, Warning, SimError, InputError, Event, Debug };
-        private List<string> simLog = new List<string>();
+        private List<string> _consoleLog = new List<string>();
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
@@ -367,7 +421,7 @@ namespace WUIPlatform
                 message = "LOG: " + message;
             }
 
-            ENGINE.simLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
+            ENGINE._consoleLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
 
 #if USING_UNITY
             if (UnityEngine.Application.isEditor) //&& !WUInity.WUInityEngine.INSTANCE.SuppressMessages) // || UnityEngine.Debug.isDebugBuild
@@ -385,9 +439,9 @@ namespace WUIPlatform
         static string[] logBuffer;
         public static string[] GetLog()
         {
-            if (logBuffer == null || logBuffer.Length != ENGINE.simLog.Count)
+            if (logBuffer == null || logBuffer.Length != ENGINE._consoleLog.Count)
             {
-                logBuffer = ENGINE.simLog.ToArray();
+                logBuffer = ENGINE._consoleLog.ToArray();
             }
 
             return logBuffer;
@@ -395,7 +449,7 @@ namespace WUIPlatform
 
         public static void ClearLog()
         {
-            ENGINE.simLog.Clear();
+            ENGINE._consoleLog.Clear();
         }
 
         public void PauseSimulations()

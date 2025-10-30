@@ -36,9 +36,8 @@ namespace WUIPlatform.IO
             _totalAverageEvacTime /= _averageEvacTimes.Count;
         }
 
-        public static void SaveOutput(string filename)
+        public static void SaveLogToDisk(List<string> log, string filename)
         {
-            string[] log = WUIEngine.GetLog();
             string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, filename + ".log");
             File.WriteAllLines(path, log);
         }
@@ -51,9 +50,6 @@ namespace WUIPlatform.IO
         public int stayingPeople;
 
         [System.NonSerialized] public int[] rawPopulation;
-
-        //[System.NonSerialized] public Texture2D relocatedPopTexture;
-        //[System.NonSerialized] public Texture2D popStuckTexture;
     }
 }
 

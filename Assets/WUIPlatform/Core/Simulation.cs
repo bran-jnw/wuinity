@@ -193,36 +193,13 @@ namespace WUIPlatform
             //}
         }
 
-        private void PostRun(List<List<float>> trafficArrivalDataCollection, int actualRuns, int convergedInSequence, float averageTotalEvacTime)
+        private void PostRun()
         {
             if (!_stoppedDueToError)
             {
-                //save functional analysis
-                if (trafficArrivalDataCollection.Count > 0)
-                {
-                    float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
-                    SaveAverageCurve(averageCurve);
-                    //plot results
-                    double[] xData = new double[averageCurve.Length];
-                    double[] yData = new double[averageCurve.Length];
-                    for (int i = 0; i < averageCurve.Length; i++)
-                    {
-                        xData[i] = averageCurve[i] / 3600.0f;
-                        yData[i] = i + 1;
-                    }
-                    CreatePlotData(xData, yData);
-                }
-
-                if (convergedInSequence >= 10)
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
-                }
-                else
-                {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + averageTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
-                }
-
                 _haveResults = true;
+
+                _engine.CollectSimulationStatistics(this);
 
                 if (WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
                 {
@@ -244,46 +221,8 @@ namespace WUIPlatform
             WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
             WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
             _state = SimulationState.Finished;
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation/s done.");
-            WUIEngineOutput.SaveOutput(WUIEngine.INPUT.Simulation.Id);
+            WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation done.");            
         }
-
-        private void CollectSimulationStatistics(ref int simulationIndex, List<List<float>> trafficArrivalDataCollection, ref float averageTotalEvacTime, ref int convergedInSequence)
-        {
-            if (_trafficModule != null)
-            {
-                trafficArrivalDataCollection.Add(_trafficModule.GetArrivalData());
-            }
-
-            //need at least 2 simulations to have valid average
-            if (simulationIndex > 0)
-            {
-                float pastAverage = (averageTotalEvacTime / simulationIndex);
-                averageTotalEvacTime += CurrentTime;
-                float currentAverage = (averageTotalEvacTime / (simulationIndex + 1));
-                float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
-                //if convergence met we can stop
-                if (convergenceCriteria < WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
-                {
-                    ++convergedInSequence;
-                    //we are done
-                    if (WUIEngine.INPUT.Simulation.StopAfterConverging && convergedInSequence > WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence)
-                    {
-                        simulationIndex = WUIEngine.RUNTIME_DATA.Simulation.NumberOfRuns;
-                    }
-                }
-                else
-                {
-                    convergedInSequence = 0;
-                }
-            }
-            else
-            {
-                averageTotalEvacTime += CurrentTime;
-            }
-        }
-
-        
         
         private void CreateSubModules()
         {
@@ -770,28 +709,6 @@ namespace WUIPlatform
                 }                    
             }                        
         }
-
-        byte[] _plotBytes;
-        void CreatePlotData(double[] xData, double[] yData)
-        {
-            if (xData.Length > 0 && yData.Length > 0)
-            {
-                ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
-                timeTraffic.AddScatterLines(xData, yData);
-                timeTraffic.Title("Average cumulative arrival of cars");
-                timeTraffic.YLabel("Number of cars [-]");
-                timeTraffic.XLabel("Time [h]");
-                //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
-                byte[] byteData = timeTraffic.GetImageBytes();
-            }
-        }
-
-        public byte[] GetArrivalPlotBytes()
-        {
-            return _plotBytes;
-        }
-
-        
 
         public float[,] GetTriggerBufferData()
         {
