@@ -235,7 +235,7 @@ namespace WUIPlatform.WUInity
 
         private void OnApplicationQuit()
         {
-            WUIEngine.Exit();
+            WUIEngine.ENGINE.Close();
         }
 
         /*public void DrawRoad(RouteCollection routeCollection, int index)
@@ -1045,7 +1045,7 @@ namespace WUIPlatform.WUInity
                 tex.Apply();
                 outputTextures.Add(tex);
                 byte[] bytes = tex.EncodeToPNG();
-                File.WriteAllBytes(Path.Combine(WUIEngine.OUTPUT_FOLDER, "trafficDens_" + (int)time + "s.png"), bytes);
+                File.WriteAllBytes(Path.Combine(WUIEngine.OutputFolder, "trafficDens_" + (int)time + "s.png"), bytes);
             }
         }
     }

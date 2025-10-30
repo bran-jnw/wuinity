@@ -19,7 +19,6 @@ namespace WUIPlatform
         private WUIEngineInput _input;
         public static WUIEngineInput INPUT { get => ENGINE._input; }
         private WUIEngineOutput _output;
-        private Simulation _sim;
         private string _workingFilePath;
         private DataStatus _dataStatus;       
 
@@ -51,11 +50,11 @@ namespace WUIPlatform
         {
             get
             {
-                if (ENGINE._sim == null)
+                if (ENGINE._mainSimulation == null)
                 {
-                    ENGINE._sim = new Simulation();
+                    ENGINE._mainSimulation = new Simulation(ENGINE, INPUT, 0);
                 }
-                return ENGINE._sim;
+                return ENGINE._mainSimulation;
             }
         }
 
@@ -78,9 +77,7 @@ namespace WUIPlatform
                 }
                 return ENGINE._dataStatus;
             }
-        }
-
-        
+        }        
 
         public static WUIEngineOutput OUTPUT
         {
@@ -94,25 +91,17 @@ namespace WUIPlatform
             }
         }
 
-        public static string DATA_FOLDER
+        public static string DATA_FOLDER { get => Directory.GetCurrentDirectory(); }
+
+        public string WORKING_FILE
         {
-            get
-            {
-#if USING_UNITY
-                return Path.Combine(Directory.GetParent(UnityEngine.Application.dataPath).ToString(), "external_data");
-#endif
-            }
+            get => _workingFilePath;        
+            set => _workingFilePath = value;
         }
 
-        public static string WORKING_FILE
-        {
-            get => ENGINE._workingFilePath;        
-            set => ENGINE._workingFilePath = value;
-        }
+        public string WORKING_FOLDER { get => Path.GetDirectoryName(WORKING_FILE); }
 
-        public static string WORKING_FOLDER { get => Path.GetDirectoryName(WORKING_FILE); }
-
-        public static string OUTPUT_FOLDER
+        public string OutputFolder
         {
             get
             {
@@ -125,10 +114,76 @@ namespace WUIPlatform
         Simulation _mainSimulation; //this one talks to any visualizer 
         private Visualization.WUIShowCommunicator _wuiShow;
         public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }
-        public void RunSimulations()
-        {    
+        public async void RunSimulations(bool runInParallel = false)
+        {
+            try
+            {
+                System.Threading.Tasks.Task task;
+                if(runInParallel)
+                {
+                    task = System.Threading.Tasks.Task.Run(RunSimulationsParallel);
+                }
+                else
+                {
+                    task = System.Threading.Tasks.Task.Run(RunSimulationsSerial);
+                }
+                await task;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        bool _stopSimulations = false;
+        private void RunSimulationsSerial()
+        {
+            PreSimulations();
+            
+            for (int i = 0; i < _simulations.Length; ++i)
+            {
+                _simulations[i] = new Simulation(this, _input, i);
+                _mainSimulation = _simulations[i];
+                _simulations[i].Run();
+                if(_stopSimulations)
+                {
+                    break;
+                }
+            }
+
+            PostSimulations();
+        }
+
+        private void RunSimulationsParalellProcesses()
+        {
+            //run one sim in this process
+            _simulations[0].Run();
+
+            //run the rest as new processes so that SUMO works
+            var tcs = new System.Threading.Tasks.TaskCompletionSource<int>();
+
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = { FileName = "wuinity.exe", Arguments= WORKING_FILE },
+                EnableRaisingEvents = true
+            };
+
+            process.Exited += (sender, args) =>
+            {
+                tcs.SetResult(process.ExitCode);
+                process.Dispose();
+            };
+
+            process.Start();
+
+            //collect the data written to disk to create output
+        }
+
+        private void RunSimulationsParallel()
+        {
             PreSimulations();
 
+            //Currently this will not work as SUMO can only run one instance per process, need to find workaround
             System.Threading.Tasks.Parallel.For(0, _simulations.Length, index =>
             {
                 try
@@ -144,15 +199,20 @@ namespace WUIPlatform
             PostSimulations();
         }
 
-        private void PreSimulations()
+        private void PreSimulations(bool parallel = false)
         {
-            _simulations = new Simulation[RUNTIME_DATA.Simulation.NumberOfRuns];
-            for (int i = 0; i < _simulations.Length; ++i)
+            _stopSimulations = false;
+
+            if (parallel)
             {
-                _simulations[i] = new Simulation(this, _input, i);
-            }
-            //by default simulation 0 will be the main to be displayed
-            SetMainSimulation(0);
+                _simulations = new Simulation[RUNTIME_DATA.Simulation.NumberOfRuns];
+                for (int i = 0; i < _simulations.Length; ++i)
+                {
+                    _simulations[i] = new Simulation(this, _input, i);
+                }
+                //by default simulation 0 will be the main to be displayed
+                SetMainSimulation(0);
+            }            
 
             if (_input.WUIShow.SendDataToWUIShow && _input.Simulation.RunTrafficModule)
             {
@@ -202,7 +262,7 @@ namespace WUIPlatform
                 WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
 
-            WUIEngineOutput.SaveLogToDisk(_consoleLog, _input.Simulation.Id);
+            WUIEngineOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Id + ".log"));
         }
 
         float cumulativeTotalEvacTime = 0.0f;
@@ -214,42 +274,46 @@ namespace WUIPlatform
         /// <param name="simulation"></param>
         public void CollectSimulationStatistics(Simulation simulation)
         {
-            if (simulation.TrafficModule != null)
+            lock(trafficArrivalDataCollection)
             {
-                trafficArrivalDataCollection.Add(simulation.TrafficModule.GetArrivalData());
-            }
-            else
-            {
-                return;
-            }
-
-            int resultCount = trafficArrivalDataCollection.Count;
-            //need at least 2 simulations to have valid average
-            if (resultCount > 1)
-            {
-                float pastAverage = cumulativeTotalEvacTime / (resultCount -1);
-                cumulativeTotalEvacTime += simulation.CurrentTime;
-                float currentAverage = cumulativeTotalEvacTime / resultCount;
-                float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
-                //if convergence met we can stop
-                if (convergenceCriteria < RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
+                if (simulation.TrafficModule != null)
                 {
-                    ++convergedInSequence;
-                    //we are done
-                    if (_input.Simulation.StopAfterConverging && convergedInSequence > WUIEngine.RUNTIME_DATA.Simulation.ConvergenceMinSequence)
+                    trafficArrivalDataCollection.Add(simulation.TrafficModule.GetArrivalData());
+                }
+                else
+                {
+                    return;
+                }
+
+                int resultCount = trafficArrivalDataCollection.Count;
+                //need at least 2 simulations to have valid average
+                if (resultCount > 1)
+                {
+                    float pastAverage = cumulativeTotalEvacTime / (resultCount - 1);
+                    cumulativeTotalEvacTime += simulation.CurrentTime;
+                    float currentAverage = cumulativeTotalEvacTime / resultCount;
+                    float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
+                    //if convergence met we can stop
+                    if (convergenceCriteria < RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
                     {
-                        StopSimulations();
+                        ++convergedInSequence;
+                        //we are done
+                        if (_input.Simulation.StopAfterConverging && convergedInSequence > RUNTIME_DATA.Simulation.ConvergenceMinSequence)
+                        {
+                            _stopSimulations = true; //needed for serial run
+                            Close(); //needed for parallel run
+                        }
+                    }
+                    else
+                    {
+                        convergedInSequence = 0;
                     }
                 }
                 else
                 {
-                    convergedInSequence = 0;
+                    cumulativeTotalEvacTime += simulation.CurrentTime;
                 }
-            }
-            else
-            {
-                cumulativeTotalEvacTime += simulation.CurrentTime;
-            }
+            }            
         }
 
         private void SaveAverageCurve(float[] data)
@@ -262,7 +326,7 @@ namespace WUIPlatform
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
             WUIEngineInput wuiIn = INPUT;
-            string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.Id + "_traffic_average.csv");
+            string path = Path.Combine(OutputFolder, wuiIn.Simulation.Id + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -460,19 +524,15 @@ namespace WUIPlatform
             }
         }
 
-        public void StopSimulations()
+        public void Close()
         {
+            _stopSimulations = true;
             for (int i = 0; i < _simulations.Length; ++i)
             {
-                _simulations[i].Stop("User requested stop.", false);
-            }
-        }
-
-        public static void Exit()
-        {
-            if(ENGINE._sim != null)
-            {
-                ENGINE._sim.Stop("User has requested closing.", true);
+                if(_simulations[i] != null)
+                {
+                    _simulations[i].Stop("User has requested closing.", false);
+                }
             }
         }
     }

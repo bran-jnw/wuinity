@@ -436,7 +436,7 @@ namespace WUIPlatform.Traffic
         public override void SaveToFile(int runNumber)
         {
             WUIEngineInput wuiIn = WUIEngine.INPUT;
-            string path = System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, wuiIn.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(WUIEngine.OutputFolder, wuiIn.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 

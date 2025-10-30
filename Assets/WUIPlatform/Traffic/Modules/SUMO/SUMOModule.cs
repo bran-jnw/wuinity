@@ -83,7 +83,7 @@ namespace WUIPlatform.Traffic
 
         public override void Step(float deltaTime, float currentTime)
         {  
-            //https://sumo.dlr.de/doxygen/d0/d17/classlibsumo_1_1_simulation.html#afc1f3d5c1c92f49a8bf40e42bdb333ab
+            //https://sumo.dlr.de/doxygen/d0/d17/classlibsumo_1_1_simulation.html
             LIBSUMO.Simulation.step(currentTime + deltaTime); // advances sim up to given time
 
             //update positions
@@ -297,7 +297,7 @@ namespace WUIPlatform.Traffic
             //arrival data to csv
             try
             {
-                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
+                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
                 File.WriteAllLines(path, output);
             }
             catch(Exception e)
@@ -315,7 +315,7 @@ namespace WUIPlatform.Traffic
             {
                 int xDim = _usageMap.GetLength(0);
                 int yDim = _usageMap.GetLength(1);
-                string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, WUIEngine.INPUT.Simulation.Id + "_trafficData_" + runNumber + ".tiff");
+                string path = Path.Combine(WUIEngine.OutputFolder, WUIEngine.INPUT.Simulation.Id + "_trafficData_" + runNumber + ".tiff");
 
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");

@@ -62,6 +62,7 @@ namespace WUIPlatform
         private System.Diagnostics.Stopwatch _pathfindingStopwatch = new System.Diagnostics.Stopwatch();
 
         WUIEngineInput _input;
+        public WUIEngineInput Input { get => _input; }
         int _simulationIndex;
         WUIEngine _engine;
 
@@ -72,19 +73,6 @@ namespace WUIPlatform
             _input = input;
             _simulationIndex = simulationId;
         }
-
-        /*public async void Start()
-        {            
-            try
-            {
-                System.Threading.Tasks.Task simTask = System.Threading.Tasks.Task.Run(RunSimulation);
-                await simTask;
-            }
-            catch (System.Exception e)
-            {
-                throw e;
-            }
-        }*/
 
         /// <summary>
         /// Starts and runs the simulation until completed or halted.

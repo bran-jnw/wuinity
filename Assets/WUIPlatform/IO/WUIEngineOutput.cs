@@ -36,9 +36,13 @@ namespace WUIPlatform.IO
             _totalAverageEvacTime /= _averageEvacTimes.Count;
         }
 
-        public static void SaveLogToDisk(List<string> log, string filename)
-        {
-            string path = Path.Combine(WUIEngine.OUTPUT_FOLDER, filename + ".log");
+        /// <summary>
+        /// Path includes filename
+        /// </summary>
+        /// <param name="log"></param>
+        /// <param name="path"></param>
+        public static void SaveLogToDisk(List<string> log, string path)
+        {            
             File.WriteAllLines(path, log);
         }
     }
