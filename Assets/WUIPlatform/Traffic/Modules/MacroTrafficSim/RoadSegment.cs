@@ -6,13 +6,13 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using static WUIPlatform.Traffic.MacroTrafficSim;
+using static PREACT.Traffic.MacroTrafficSim;
 using System.Numerics;
 using System;
-using WUIPlatform.IO;
+using PREACT.IO;
 
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public class RoadSegment
     {
@@ -63,7 +63,7 @@ namespace WUIPlatform.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Vector2d simulationPos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
+                Vector2d simulationPos = Engine.RuntimeData.Simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
                 if (i > 0)
                 {
                     distance += Vector2.Distance(new Vector2((float)simulationPos.x, (float)simulationPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));
@@ -99,7 +99,7 @@ namespace WUIPlatform.Traffic
 
         public float CalculateSpeedBasedOnDensity()
         {
-            TrafficInput tO = WUIEngine.INPUT.Traffic;
+            TrafficInput tO = Engine.Input.Traffic;
             //reasonable? not for now
             /*if(cars.Count == 1)
             {
@@ -128,7 +128,7 @@ namespace WUIPlatform.Traffic
             if (tO.VisibilityAffectsSpeed)
             {
                 //added Enrico & Paolo article      
-                float D_L = WUIEngine.SIM.SmokeModule.GetGroundExtinctionCoefficientAtCoordinate(new Vector2d(goalCoord.Latitude, goalCoord.Longitude));
+                float D_L = Engine.SIM.SmokeModule.GetGroundExtinctionCoefficientAtCoordinate(new Vector2d(goalCoord.Latitude, goalCoord.Longitude));
                 //get rid of any strange values of D_L, TODO: fix when checking input
                 D_L = Mathf.Clamp(D_L, 0.0f, 0.2f);
                 float beta = -101.57f * D_L * D_L * D_L + 49.43f * D_L * D_L - 9.2755f * D_L + 1.0f;

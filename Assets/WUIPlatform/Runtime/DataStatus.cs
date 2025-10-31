@@ -5,13 +5,11 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace WUIPlatform
+namespace PREACT
 {
     public class DataStatus
     {
         public bool HaveInput;
-
-        public bool MapLoaded;
 
         private bool _populationLoaded;
         public bool PopulationLoaded { get => _populationLoaded; }
@@ -23,33 +21,28 @@ namespace WUIPlatform
         public bool CanRunSimulation()
         {
             bool canRun = true;
-            if (!MapLoaded)
+
+            if (Engine.Input.Simulation.RunPedestrianModule && !PopulationLoaded)
             {
                 canRun = false;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Map is not loaded.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Population is not loaded but user has requested pedestrian model.");
             }
 
-            if (WUIEngine.INPUT.Simulation.RunPedestrianModule && !PopulationLoaded)
-            {
-                canRun = false;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Population is not loaded but user has requested pedestrian model.");
-            }
-
-            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            if (Engine.Input.Simulation.RunFireModule)
             {
                 if (!LcpLoaded)
                 {
                     canRun = false;
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "No LCP file loaded but fire spread is activated.");
+                    Engine.MESSAGE(null, Engine.LogType.SimError, "No LCP file loaded but fire spread is activated.");
                 }
             }
 
-            if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            if (Engine.Input.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves == null)
+                if (Engine.RuntimeData.Evacuation.ResponseCurves == null)
                 {
                     canRun = false;
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "No valid response curves have been loaded.");
+                    Engine.MESSAGE(null, Engine.LogType.SimError, "No valid response curves have been loaded.");
                 }
 
             }
@@ -60,7 +53,6 @@ namespace WUIPlatform
         public void Reset()
         {
             //haveInput = false; //can never lose input after getting it once
-            MapLoaded = false;
             _populationLoaded = false;
             LcpLoaded = false;
             FuelModelsLoaded = false;

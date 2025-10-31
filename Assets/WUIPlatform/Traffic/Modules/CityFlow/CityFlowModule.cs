@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public class CityFlowModule : TrafficModule
     {

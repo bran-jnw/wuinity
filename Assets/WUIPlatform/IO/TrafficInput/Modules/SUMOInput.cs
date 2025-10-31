@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {  
     [System.Serializable]
     public class SUMOInput
@@ -22,7 +22,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             SUMOInput newInput = new SUMOInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(ConfigurationFile);
@@ -33,7 +33,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(UTMoffset);
@@ -46,7 +46,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(OutputRasterSize);
@@ -56,7 +56,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " was not found, using default value of " + newInput.OutputRasterSize + ".");
+                Engine.MESSAGE(null, Engine.LogType.Warning, input + " was not found, using default value of " + newInput.OutputRasterSize + ".");
             }
 
             input = nameof(DestinationChoice);
@@ -72,14 +72,14 @@ namespace WUIPlatform.IO
                         break;
                     default:
                         ++issues;
-                        WUIEngine.LOG(WUIEngine.LogType.SimError, input + " was not recognized." + WUIEngineInput.pleaseCheckInput);
+                        Engine.MESSAGE(null, Engine.LogType.SimError, input + " was not recognized." + Input.pleaseCheckInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             return newInput;

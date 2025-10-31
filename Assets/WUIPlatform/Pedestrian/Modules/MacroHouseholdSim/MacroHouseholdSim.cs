@@ -6,12 +6,12 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using WUIPlatform.Evacuation;
+using PREACT.Evacuation;
 using System.Numerics;
-using WUIPlatform.Visualization;
-using WUIPlatform.IO;
+using PREACT.Visualization;
+using PREACT.IO;
 
-namespace WUIPlatform.Pedestrian
+namespace PREACT.Pedestrian
 {
     /// <summary>
     /// Simple human evacuation simulator that lumps households of people into one unit.
@@ -199,21 +199,21 @@ namespace WUIPlatform.Pedestrian
 
         private void ReachedCar(MacroHousehold household)
         {
-            if(WUIEngine.INPUT.Simulation.RunTrafficModule)
+            if(Engine.Input.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
 
                 //TODO: more sophisticated choice of new goal
-                if (evacGoal.blocked)
+                if (evacGoal._blocked)
                 {
-                    for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+                    for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; i++)
                     {
-                        if (WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i] != evacGoal)
+                        if (Engine.RuntimeData.Evacuation.Destinations[i] != evacGoal)
                         {
-                            if(!WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].blocked)
+                            if(!Engine.RuntimeData.Evacuation.Destinations[i]._blocked)
                             {
-                                evacGoal = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
+                                evacGoal = Engine.RuntimeData.Evacuation.Destinations[i];
                             }
                         }
                     }
@@ -240,12 +240,12 @@ namespace WUIPlatform.Pedestrian
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        WUIEngine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
+                        Engine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    WUIEngine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
+                    Engine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
                 }
             }
             
@@ -254,23 +254,23 @@ namespace WUIPlatform.Pedestrian
 
         private EvacuationDestination GetEvacuationGoal(HumanEvacCell cell, int cellIndex)
         {
-            TrafficInput input = WUIEngine.INPUT.Traffic;
+            TrafficInput input = Engine.Input.Traffic;
             EvacuationDestination goal = null;
 
-            if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
+            if (Engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                
                 if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
                 {
-                    EvacuationGroup group = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationGroup group = Engine.RuntimeData.Evacuation.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedEvacGoal();
                 }
                 else if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
                 {
-                    int randomChoice = Random.Range(0, WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count - 1);
-                    goal = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[randomChoice];
+                    int randomChoice = Random.Range(0, Engine.RuntimeData.Evacuation.Destinations.Count - 1);
+                    goal = Engine.RuntimeData.Evacuation.Destinations[randomChoice];
                 }
             }
-            else if(cell != null && WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            else if(cell != null && Engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
@@ -278,7 +278,7 @@ namespace WUIPlatform.Pedestrian
 
             if(goal == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
             }
 
             return goal;
@@ -286,16 +286,16 @@ namespace WUIPlatform.Pedestrian
 
         public void SaveToFile(int runNumber)
         {
-            WUIEngineInput wO = WUIEngine.INPUT;
-            string path = System.IO.Path.Combine(WUIEngine.OutputFolder, wO.Simulation.Id + "_pedestrian_output_" + runNumber + ".csv");
+            Input wO = Engine.Input;
+            string path = System.IO.Path.Combine(Engine.OutputFolder, wO.Simulation.Id + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
         public void PopulateSimulation(Runtime.PopulationData.HouseholdData[] householdData)
         {
-            cellsX = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
-            cellsY = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y;
-            realWorldSize = WUIEngine.INPUT.Simulation.DomainSize;            
+            cellsX = Engine.RuntimeData.Evacuation.CellCount.x;
+            cellsY = Engine.RuntimeData.Evacuation.CellCount.y;
+            realWorldSize = Engine.Input.Simulation.DomainSize;            
             population = new int[cellsX * cellsY];
             _householdData = householdData;
 
@@ -314,7 +314,7 @@ namespace WUIPlatform.Pedestrian
             _macroHouseholds = new List<MacroHousehold>();
             for (int i = 0; i < _householdData.Length; ++i)
             {
-                Vector2d pos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(_householdData[i].originLatLon);
+                Vector2d pos = Engine.RuntimeData.Simulation.GetSimulationPosition(_householdData[i].originLatLon);
                 int xIndex = (int)(pos.x / cellSizeX);
                 int yIndex = (int)(pos.y / cellSizeY);
 
@@ -323,7 +323,7 @@ namespace WUIPlatform.Pedestrian
                 {
                     int cellIndex = xIndex + cellsX * yIndex;
                     population[cellIndex] += _householdData[i].peopleCount;
-                    int evacGroupIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[cellIndex];
+                    int evacGroupIndex = Engine.RuntimeData.Evacuation.EvacGroupIndices[cellIndex];
                     MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), GetRandomResponseTime(evacGroupIndex), cellIndex);
                     _macroHouseholds.Add(mH);
                 }
@@ -331,7 +331,7 @@ namespace WUIPlatform.Pedestrian
                 {
                     totalPopulation -= _householdData[i].peopleCount;
                     --totalHouseholds;
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + _householdData[i].originLatLon.x + ", " + _householdData[i].originLatLon.y + ", " + (i + 2));
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + _householdData[i].originLatLon.x + ", " + _householdData[i].originLatLon.y + ", " + (i + 2));
                 }
             }            
 
@@ -353,9 +353,9 @@ namespace WUIPlatform.Pedestrian
             householdPositions = new Vector4[totalHouseholds];
             peopleLeft = totalPopulation;
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Total households: " + totalHouseholds);
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Total cars: " + totalCars);
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            Engine.MESSAGE(null, Engine.LogType.Log, " Total households: " + totalHouseholds);
+            Engine.MESSAGE(null, Engine.LogType.Log, " Total cars: " + totalCars);
+            Engine.MESSAGE(null, Engine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>
@@ -364,30 +364,30 @@ namespace WUIPlatform.Pedestrian
         /// <returns></returns>
         static public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacuationInput evacIn = WUIEngine.INPUT.Evacuation;
+            EvacuationInput evacIn = Engine.Input.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Random.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
+            for (int i = 0; i < Engine.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= Engine.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
                 {
                     randomResponseCurveIndex = i;
                     break;
                 }
             }
-            int curveIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
+            int curveIndex = Engine.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
 
             //skip first as that is always zero probability
-            for (int i = 1; i < WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
+            for (int i = 1; i < Engine.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= Engine.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
+                    responseTime = Random.Range(Engine.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, Engine.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }
@@ -401,7 +401,7 @@ namespace WUIPlatform.Pedestrian
         /// <returns></returns>
         static public float GetRandomWalkingSpeed()
         {
-            MacroHouseholdSimInput eO = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
+            MacroHouseholdSimInput eO = Engine.Input.Pedestrian.macroHouseholdSimInput;
             return Random.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 

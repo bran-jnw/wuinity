@@ -7,9 +7,9 @@
 
 using System.Collections.Generic;
 using System.IO;
-using WUIPlatform.Evacuation;
+using PREACT.Evacuation;
 
-namespace WUIPlatform
+namespace PREACT
 {
     public abstract class WUInityEvent
     {
@@ -35,8 +35,8 @@ namespace WUIPlatform
             if(!triggered)
             {
                 triggered = true;
-                WUIEngine.LOG(WUIEngine.LogType.Event, "Goal blocked: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[goalIndex].Name);
-                WUIEngine.SIM.BlockEvacGoal(goalIndex);
+                Engine.MESSAGE(null, Engine.LogType.Event, "Goal blocked: " + Engine.RuntimeData.Evacuation.Destinations[goalIndex].Name);
+                Engine.SIM.BlockEvacGoal(goalIndex);
             }            
         }
 
@@ -51,9 +51,9 @@ namespace WUIPlatform
         {
             success = false;
             List<BlockGoalEvent> blockGoalEvents = new List<BlockGoalEvent>();
-            for (int i = 0; i < WUIEngine.INPUT.Events.BlockGoalEventFiles.Length; i++)
+            for (int i = 0; i < Engine.Input.Events.BlockGoalEventFiles.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Events.BlockGoalEventFiles[i] + ".bge");
+                string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Events.BlockGoalEventFiles[i] + ".bge");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -82,12 +82,12 @@ namespace WUIPlatform
                     if (dataPoints.Count >= 2)
                     {
                         //responseCurves.Add(new ResponseCurve(dataPoints, WUIEngine.Input.Evacuation.responseCurveFiles[i]));
-                        WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded goal blocking event from " + path);
+                        Engine.MESSAGE(null, Engine.LogType.Log, " Loaded goal blocking event from " + path);
                     }
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Goal blocking event file not found in " + path + " and could not be loaded");
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "Goal blocking event file not found in " + path + " and could not be loaded");
                 }
             }
 
@@ -99,7 +99,7 @@ namespace WUIPlatform
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No valid goal blocking events were loaded.");
+                Engine.MESSAGE(null, Engine.LogType.Log, "No valid goal blocking events were loaded.");
                 return null;
             }
         }

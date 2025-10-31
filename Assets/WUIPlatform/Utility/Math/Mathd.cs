@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace WUIPlatform 
+namespace PREACT.Utility.Math
 {
     public struct Mathd 
     {
@@ -16,43 +16,48 @@ namespace WUIPlatform
         public const double Epsilon = 1.401298E-45d;
 
         public static double Sin(double d) {
-            return Math.Sin(d);
+            return System.Math.Sin(d);
         }
 
         public static double Cos(double d) {
-            return Math.Cos(d);
+            return System.Math.Cos(d);
         }
 
         public static double Tan(double d) {
-            return Math.Tan(d);
+            return System.Math.Tan(d);
         }
 
         public static double Asin(double d) {
-            return Math.Asin(d);
+            return System.Math.Asin(d);
+        }
+
+        public static double Sinh(double d)
+        {
+            return System.Math.Sinh(d);
         }
 
         public static double Acos(double d) {
-            return Math.Acos(d);
+            return System.Math.Acos(d);
         }
 
         public static double Atan(double d) {
-            return Math.Atan(d);
+            return System.Math.Atan(d);
         }
 
         public static double Atan2(double y, double x) {
-            return Math.Atan2(y, x);
+            return System.Math.Atan2(y, x);
         }
 
         public static double Sqrt(double d) {
-            return Math.Sqrt(d);
+            return System.Math.Sqrt(d);
         }
 
         public static double Abs(double d) {
-            return Math.Abs(d);
+            return System.Math.Abs(d);
         }
 
         public static int Abs(int value) {
-            return Math.Abs(value);
+            return System.Math.Abs(value);
         }
 
         public static double Min(double a, double b) {
@@ -132,47 +137,52 @@ namespace WUIPlatform
         }
 
         public static double Pow(double d, double p) {
-            return Math.Pow(d, p);
+            return System.Math.Pow(d, p);
         }
 
         public static double Exp(double power) {
-            return Math.Exp(power);
+            return System.Math.Exp(power);
         }
 
         public static double Log(double d, double p) {
-            return Math.Log(d, p);
+            return System.Math.Log(d, p);
         }
 
         public static double Log(double d) {
-            return Math.Log(d);
+            return System.Math.Log(d);
         }
 
         public static double Log10(double d) {
-            return Math.Log10(d);
+            return System.Math.Log10(d);
         }
 
         public static double Ceil(double d) {
-            return Math.Ceiling(d);
+            return System.Math.Ceiling(d);
         }
 
         public static double Floor(double d) {
-            return Math.Floor(d);
+            return System.Math.Floor(d);
         }
 
         public static double Round(double d) {
-            return Math.Round(d);
+            return System.Math.Round(d);
         }
 
         public static int CeilToInt(double d) {
-            return (int)Math.Ceiling(d);
+            return (int)System.Math.Ceiling(d);
+        }
+
+        public static int Ceiling(double d)
+        {
+            return (int)System.Math.Ceiling(d);
         }
 
         public static int FloorToInt(double d) {
-            return (int)Math.Floor(d);
+            return (int)System.Math.Floor(d);
         }
 
         public static int RoundToInt(double d) {
-            return (int)Math.Round(d);
+            return (int)System.Math.Round(d);
         }
 
         public static double Sign(double d) {

@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
 
     [System.Serializable]
@@ -24,7 +24,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             PopulationInput newInput = new PopulationInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(PopulationFile);

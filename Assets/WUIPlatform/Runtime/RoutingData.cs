@@ -12,7 +12,7 @@ using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     public class RoutingData
     {
@@ -37,7 +37,7 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Routing data...");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Routing data...");
         }
 
         public bool LoadRouterDb(string routerDbFile)
@@ -58,12 +58,12 @@ namespace WUIPlatform.Runtime
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
                 _routerDb.AddContracted(_routerDb.GetSupportedProfile("Car"));
                 _router = new Router(_routerDb);
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Router database loaded succesfully.");
+                Engine.MESSAGE(null, Engine.LogType.Log, "Router database loaded succesfully.");
                 
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database could not be found.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Router database could not be found.");
             }
 
             return success;
@@ -100,15 +100,15 @@ namespace WUIPlatform.Runtime
                         _routerDb = new RouterDb();
                     }
                     _routerDb.LoadOsmData(source, settings, Vehicle.Car);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Router database created from OSM file.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, "Router database created from OSM file.");
 
                     // write the new routerdb to disk.
-                    string internalRouterName = WUIEngine.INPUT.Simulation.Id + ".routerdb";
-                    osmFile = Path.Combine(WUIEngine.WORKING_FOLDER, internalRouterName);
+                    string internalRouterName = Engine.Input.Simulation.Id + ".routerdb";
+                    osmFile = Path.Combine(Engine.WorkingFolder, internalRouterName);
                     using (FileStream outputStream = new FileInfo(osmFile).Open(FileMode.Create))
                     {
                         _routerDb.Serialize(outputStream);
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Router database saved to file " + osmFile);
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Router database saved to file " + osmFile);
                     }
 
                     success = true;
@@ -116,7 +116,7 @@ namespace WUIPlatform.Runtime
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Router database file could not be found.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Router database file could not be found.");
             }
 
             return success;

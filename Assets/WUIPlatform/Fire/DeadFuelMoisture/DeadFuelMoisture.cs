@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using static WUIPlatform.Fire.MathWrap;
+using static PREACT.Fire.MathWrap;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     //------------------------------------------------------------------------------
     /*! \page DeadFuelMoisture Dead Fuel Moisture

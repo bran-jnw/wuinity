@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class TriggerBufferInput
@@ -22,7 +22,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             TriggerBufferInput newInput = new TriggerBufferInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(CalculateTriggerBuffer);
@@ -33,7 +33,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             if (newInput.CalculateTriggerBuffer)
@@ -50,20 +50,20 @@ namespace WUIPlatform.IO
                             break;
                         default:
                             ++issues;
-                            WUIEngineInput.CouldNotInterpretInputMessage(input, userInput);
+                            Input.CouldNotInterpretInputMessage(input, userInput);
                             break;
                     }
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "No trigger buffer module was set, using " + newInput.TriggerBuffer.ToString() + ".");
+                    Engine.MESSAGE(null, Engine.LogType.SimError, "No trigger buffer module was set, using " + newInput.TriggerBuffer.ToString() + ".");
                 }
 
                 //now check modules that have been selected
                 if (newInput.TriggerBuffer == TriggerBufferChoice.kPERIL)
                 {
                     input = nameof(TriggerBufferChoice.kPERIL);
-                    WUIEngineInput.ReadingInputMessage(input);
+                    Input.ReadingInputMessage(input);
                     int lineindex;
                     if (headerLineIndex.TryGetValue(input, out lineindex))
                     {
@@ -73,12 +73,12 @@ namespace WUIPlatform.IO
                     {
                         //critical
                         ++issues;
-                        WUIEngineInput.InputNotFoundMessage(input);
+                        Input.InputNotFoundMessage(input);
                     }
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Debug, "Trying to use non-implemented trigger buffer.");
+                    Engine.MESSAGE(null, Engine.LogType.Debug, "Trying to use non-implemented trigger buffer.");
                 }
             }    
 

@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.IO;
-using WUIPlatform.IO;
+using PREACT.IO;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     public class TrafficData
     {       
@@ -23,11 +23,11 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Traffic data...");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Traffic data...");
 
-            if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            if (Engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
-                LoadRoadTypeData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.MacroTrafficSimInput.RoadTypesFile), false);
+                LoadRoadTypeData(Path.Combine(Engine.WorkingFolder, Engine.Input.Traffic.MacroTrafficSimInput.RoadTypesFile), false);
             }
         }
 
@@ -39,7 +39,7 @@ namespace WUIPlatform.Runtime
             if(success && updateInputFile)
             {
                 //WUIEngine.INPUT.Traffic.roadTypesFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Input.SaveInput();
             }
 
             return success;

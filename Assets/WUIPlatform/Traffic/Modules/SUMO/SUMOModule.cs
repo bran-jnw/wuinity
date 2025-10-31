@@ -8,10 +8,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using WUIPlatform.Evacuation;
+using PREACT.Evacuation;
 using LIBSUMO = Eclipse.Sumo.Libsumo;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public class SUMOModule : TrafficModule
     {
@@ -36,28 +37,28 @@ namespace WUIPlatform.Traffic
             try
             {
                 _vehicles = new Dictionary<string, SUMOVehicle>();
-                string inputFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Traffic.SumoInput.ConfigurationFile);
+                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Engine.Input.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
-                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", WUIEngine.SIM.StartTime.ToString(), "-e", WUIEngine.INPUT.Simulation.MaxSimTime.ToString() }));
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Engine.Input.Simulation.MaxSimTime.ToString() }));
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
-                Vector2d sumoUTM = new Vector2d(-WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.x, -WUIEngine.INPUT.Traffic.SumoInput.UTMoffset.y);
-                _originOffset = sumoUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+                Vector2d sumoUTM = new Vector2d(-_simulation.Engine.Input.Traffic.SumoInput.UTMoffset.x, -_simulation.Engine.Input.Traffic.SumoInput.UTMoffset.y);
+                _originOffset = sumoUTM - _simulation.Engine.RuntimeData.Simulation.UTMOrigin;
 
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
+                for (int i = 0; i < _simulation.Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
                 {
-                    header += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " people arrived";
-                    header += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " cars arrived";
-                    header += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " flow [veh./h]";
+                    header += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i].Name + " people arrived";
+                    header += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i].Name + " cars arrived";
+                    header += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i].Name + " flow [veh./h]";
                 }
                 output.Add(header);
 
-                int xDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.x / WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize);
-                int yDim = Mathd.CeilToInt(WUIEngine.INPUT.Simulation.DomainSize.y / WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize);
+                int xDim = Mathd.CeilToInt(_simulation.Engine.Input.Simulation.DomainSize.x / _simulation.Engine.Input.Traffic.SumoInput.OutputRasterSize);
+                int yDim = Mathd.CeilToInt(_simulation.Engine.Input.Simulation.DomainSize.y / _simulation.Engine.Input.Traffic.SumoInput.OutputRasterSize);
 
                 _maxUsage = 0f;
                 _usageMap = new float[xDim, yDim];
@@ -70,7 +71,7 @@ namespace WUIPlatform.Traffic
             catch(Exception e)
             {
                 success = false;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
+                Engine.MESSAGE(_simulation, Engine.LogType.SimError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
             }
             
         }
@@ -148,11 +149,11 @@ namespace WUIPlatform.Traffic
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
+            for (int i = 0; i < _simulation.Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
             {
-                dataLine += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
-                dataLine += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count;
-                dataLine += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentVehicleFlow;
+                dataLine += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i]._currentPeople;
+                dataLine += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i]._cars.Count;
+                dataLine += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i]._currentVehicleFlow;
             }
             output.Add(dataLine);
         }
@@ -161,8 +162,8 @@ namespace WUIPlatform.Traffic
         {
             Vector2d pos = vehicle.WorldPosition;
 
-            int xIndex = (int)(_usageMap.GetLength(0) * pos.x / WUIEngine.INPUT.Simulation.DomainSize.x);
-            int yIndex = (int)(_usageMap.GetLength(1) * pos.y / WUIEngine.INPUT.Simulation.DomainSize.y);
+            int xIndex = (int)(_usageMap.GetLength(0) * pos.x / _simulation.Engine.Input.Simulation.DomainSize.x);
+            int yIndex = (int)(_usageMap.GetLength(1) * pos.y / _simulation.Engine.Input.Simulation.DomainSize.y);
 
             //we can be outside as sometimes roads reach beyond simulation domain
             if (xIndex >= 0 && xIndex < _usageMap.GetLength(0) && yIndex >= 0 && yIndex < _usageMap.GetLength(1))
@@ -196,7 +197,7 @@ namespace WUIPlatform.Traffic
                 EvacuationDestination evacuationGoal = injectedCar.evacuationGoal;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
                 Vector2d startLatLon = injectedCar.startLatLong;                
-                Vector2d goalLatLon = evacuationGoal.latLon;
+                Vector2d goalLatLon = evacuationGoal._latLon;
 
                 //TODO: create input for this...
                 string vehicleType = "evacuation_car";
@@ -226,22 +227,22 @@ namespace WUIPlatform.Traffic
                     //if we reach here we need to teleport the car to a new location as no valid route could be found
                     else if (_validStartPositions.Count > 0)
                     {
-                        int randomStart = Random.Range(0, _validStartPositions.Count - 1);   
+                        int randomStart = Utility.Math.Random.Range(0, _validStartPositions.Count - 1);   
                         //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
                         route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, goalRoad.edgeID);    
                         if(route.edges.Count > 0)
                         {
                             foundRoute = true;
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location. Affected lat/lon: " + startLatLon.x + ", " + startLatLon.y);
+                            Engine.MESSAGE(null, Engine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location. Affected lat/lon: " + startLatLon.x + ", " + startLatLon.y);
                         }
                         else
                         {
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, "No route could be found for the injected car, tried teleporting but no valid route could be found.");
+                            Engine.MESSAGE(null, Engine.LogType.Warning, "No route could be found for the injected car, tried teleporting but no valid route could be found.");
                         }
                     }
                     else
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
+                        Engine.MESSAGE(null, Engine.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
                     }
 
                     if(foundRoute)
@@ -260,7 +261,7 @@ namespace WUIPlatform.Traffic
                 }
                 catch (Exception e)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "SUMO: " + e.Message);
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "SUMO: " + e.Message);
                 }              
             } 
             
@@ -302,7 +303,7 @@ namespace WUIPlatform.Traffic
             }
             catch(Exception e)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+                Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
             }
 
             SaveOutputMaps(runNumber);
@@ -315,21 +316,21 @@ namespace WUIPlatform.Traffic
             {
                 int xDim = _usageMap.GetLength(0);
                 int yDim = _usageMap.GetLength(1);
-                string path = Path.Combine(WUIEngine.OutputFolder, WUIEngine.INPUT.Simulation.Id + "_trafficData_" + runNumber + ".tiff");
+                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Engine.Input.Simulation.Id + "_trafficData_" + runNumber + ".tiff");
 
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
                 OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
 
-                double leftX = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.x;
-                double lowerLeftY = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin.y;
-                double[] geoTransform = new double[] { leftX, WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, WUIEngine.INPUT.Traffic.SumoInput.OutputRasterSize };
+                double leftX = _simulation.Engine.RuntimeData.Simulation.UTMOrigin.x;
+                double lowerLeftY = _simulation.Engine.RuntimeData.Simulation.UTMOrigin.y;
+                double[] geoTransform = new double[] { leftX, _simulation.Engine.Input.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Engine.Input.Traffic.SumoInput.OutputRasterSize };
                 output.SetGeoTransform(geoTransform);
 
                 OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
-                reference.SetProjCS("UTM " + WUIEngine.RUNTIME_DATA.Simulation.UTMData.Zona + " (WGS84)");
+                reference.SetProjCS("UTM " + _simulation.Engine.RuntimeData.Simulation.UTMData.Zona + " (WGS84)");
                 reference.SetWellKnownGeogCS("WGS84");
-                reference.SetUTM(WUIEngine.RUNTIME_DATA.Simulation.UTMData.ZoneNumber, WUIEngine.INPUT.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                reference.SetUTM(_simulation.Engine.RuntimeData.Simulation.UTMData.ZoneNumber, _simulation.Engine.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                 output.SetSpatialRef(reference);
 
                 //heat map
@@ -392,7 +393,7 @@ namespace WUIPlatform.Traffic
             }
             catch (Exception e)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+                Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
             }
         }
 
@@ -404,9 +405,9 @@ namespace WUIPlatform.Traffic
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
-            if(!WUIEngine.INPUT.Simulation.RunFireModule)
+            if(!_simulation.Engine.Input.Simulation.RunFireModule)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
+                Engine.MESSAGE(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
                 return;
             }
 
@@ -414,17 +415,17 @@ namespace WUIPlatform.Traffic
             {
                 int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[WUIEngine.SIM.FireModule.GetCellCountX(), WUIEngine.SIM.FireModule.GetCellCountY()];
+                fireCellEdges = new List<string>[_simulation.FireModule.GetCellCountX(), _simulation.FireModule.GetCellCountY()];
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
                     //TODO: include fire module offset here, as now we assume 0,0 is aligned with fire module origin
-                    int cellIndexX = (int)((nodePos.x + _originOffset.x) / WUIEngine.SIM.FireModule.GetCellSizeX());
-                    int cellIndexY = (int)((nodePos.y + _originOffset.y) / WUIEngine.SIM.FireModule.GetCellSizeY());
+                    int cellIndexX = (int)((nodePos.x + _originOffset.x) / _simulation.FireModule.GetCellSizeX());
+                    int cellIndexY = (int)((nodePos.y + _originOffset.y) / _simulation.FireModule.GetCellSizeY());
 
-                    if (cellIndexX > 0 && cellIndexX < WUIEngine.SIM.FireModule.GetCellCountX() - 1 &&
-                        cellIndexY > 0 && cellIndexY < WUIEngine.SIM.FireModule.GetCellCountY() - 1)
+                    if (cellIndexX > 0 && cellIndexX < _simulation.FireModule.GetCellCountX() - 1 &&
+                        cellIndexY > 0 && cellIndexY < _simulation.FireModule.GetCellCountY() - 1)
                     {
                         LIBSUMO.StringVector incomingEdges = LIBSUMO.Junction.getIncomingEdges(junctions[i]);
                         for (int j = 0; j < incomingEdges.Count; j++)
@@ -444,11 +445,11 @@ namespace WUIPlatform.Traffic
                     }
                 }
 
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
+                Engine.MESSAGE(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
             }
             catch (Exception e) 
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, e.Message);
+                Engine.MESSAGE(null, Engine.LogType.SimError, e.Message);
             }            
         }
 
@@ -487,11 +488,11 @@ namespace WUIPlatform.Traffic
 
                 if(carsToUpdate.Count == 0)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
                 }
 
                 //then do update for affected cars

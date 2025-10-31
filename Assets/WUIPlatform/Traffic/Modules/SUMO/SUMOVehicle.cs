@@ -6,10 +6,11 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using WUIPlatform.Evacuation;
+using PREACT.Evacuation;
 using LIBSUMO = Eclipse.Sumo.Libsumo;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public class SUMOVehicle : TrafficModuleVehicle
     {
@@ -80,7 +81,7 @@ namespace WUIPlatform.Traffic
             active = false;
             if(_destination != null)
             {
-                _destination.CarArrives(this, WUIEngine.SIM.CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                _destination.CarArrives(this, Engine.SIM.CurrentTime, Engine.Input.Simulation.DeltaTime);
             }            
             //TODO: send message to WUI-nity
         }

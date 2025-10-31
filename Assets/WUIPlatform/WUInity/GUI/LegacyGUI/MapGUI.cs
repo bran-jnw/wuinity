@@ -1,7 +1,6 @@
 using UnityEngine;
-using WUIPlatform.IO;
 
-namespace WUIPlatform.WUInity.UI
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
@@ -10,7 +9,7 @@ namespace WUIPlatform.WUInity.UI
 
         void MapMenu()
         {
-            WUIEngineInput wO = WUIEngine.INPUT;
+            PREACT.IO.Input wO = _engine.Input;
 
             //whenever we load a file we need to set the new data for the GUI
             if (mapMenuDirty)
@@ -50,11 +49,11 @@ namespace WUIPlatform.WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex* (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
             {
                 ParseMapData(wO);
-                WUIEngine.ENGINE.UpdateMapResourceStatus();
+                _engine.UpdateMapResourceStatus();
             }
         }
 
-        void CleanMapMenu(WUIEngineInput wO)
+        void CleanMapMenu(PREACT.IO.Input wO)
         {
             mapMenuDirty = false;
             Lat = wO.Simulation.LowerLeftLatLon.x.ToString();
@@ -64,7 +63,7 @@ namespace WUIPlatform.WUInity.UI
             zoom = wO.Map.ZoomLevel.ToString();
         }
 
-        void ParseMapData(WUIEngineInput wO)
+        void ParseMapData(IO.Input wO)
         {
             if (mapMenuDirty)
             {

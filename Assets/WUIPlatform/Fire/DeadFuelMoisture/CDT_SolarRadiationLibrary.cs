@@ -5,9 +5,9 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using static WUIPlatform.Fire.MathWrap;
+using static PREACT.Fire.MathWrap;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     public static class CDT_SolarRadiationLibrary
     {

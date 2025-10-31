@@ -8,7 +8,7 @@
 using System.Numerics;
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class GlobalSmokeInput
@@ -19,7 +19,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             GlobalSmokeInput newInput = new GlobalSmokeInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(ExtinctionFile);
@@ -30,7 +30,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             return newInput;

@@ -7,9 +7,9 @@
 
 using System.Collections.Generic;
 using System.IO;
-using WUIPlatform.Runtime;
+using PREACT.Runtime;
 
-namespace WUIPlatform.Population
+namespace PREACT.Population
 {
     public class PopulationMap
     {
@@ -74,8 +74,8 @@ namespace WUIPlatform.Population
         /// <returns></returns>
         public int GetPopulationSimulationSpace(double x, double y)
         {
-            int xInt = (int)((x / WUIEngine.INPUT.Simulation.DomainSize.x) * _cells.x);
-            int yInt = (int)((y / WUIEngine.INPUT.Simulation.DomainSize.y) * _cells.y);
+            int xInt = (int)((x / Engine.Input.Simulation.DomainSize.x) * _cells.x);
+            int yInt = (int)((y / Engine.Input.Simulation.DomainSize.y) * _cells.y);
             return GetPeopleCount(xInt, yInt);
         }
 
@@ -86,8 +86,8 @@ namespace WUIPlatform.Population
 
         public void CreateAndSave(LocalGPWData localGPWData, float cellSize)
         {
-            _lowerLeftLatLong = WUIEngine.INPUT.Simulation.LowerLeftLatLon;
-            _size = WUIEngine.INPUT.Simulation.DomainSize;
+            _lowerLeftLatLong = Engine.Input.Simulation.LowerLeftLatLon;
+            _size = Engine.Input.Simulation.DomainSize;
             _cellSize = cellSize;
             _cells = new Vector2int((int)(0.5f + _size.x / cellSize), (int)(0.5f + _size.y / cellSize));
             _size = new Vector2d(cellSize * _cells.x, cellSize * _cells.y); 
@@ -133,11 +133,11 @@ namespace WUIPlatform.Population
             
             _haveData = true;
             _correctedForRoadAccess = false;
-            _fileName = WUIEngine.INPUT.Simulation.Id;
+            _fileName = Engine.Input.Simulation.Id;
             SaveToFile(_fileName);
             _populationData.Visualizer.CreatePopulationMapTexture(this);
             _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Created population map from local GPW data.");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
         public void UpdatePopulationMapBasedOnRoadAccess(Itinero.Router router)
@@ -150,7 +150,7 @@ namespace WUIPlatform.Population
                     int yIndex = i / _cells.x;
                     int xIndex = i - yIndex * _cells.x;
                     Vector2d cellCenterPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize);
-                    Vector2d coord = WUIEngine.RUNTIME_DATA.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
+                    Vector2d coord = Engine.RuntimeData.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
                     Itinero.RouterPoint p = Traffic.RouteCreator.GetValidRouterPoint(router, coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), _cellSize);
                     if(p != null)
                     {
@@ -256,7 +256,7 @@ namespace WUIPlatform.Population
 
             _haveData = true;
             _populationData.Visualizer.CreatePopulationMapTexture(this);
-            SaveToFile(WUIEngine.INPUT.Simulation.Id);            
+            SaveToFile(Engine.Input.Simulation.Id);            
         }    
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace WUIPlatform.Population
                 _totalActiveCells = activeCellIndices.Count;
             }
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
             _populationData.Visualizer.CreatePopulationMapTexture(this);
             if(saveWhenDone)
             {
@@ -337,9 +337,9 @@ namespace WUIPlatform.Population
                 data[8] += _cellPopulations[i] + " ";
             }
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, fileName + ".pop");
+            string path = Path.Combine(Engine.WorkingFolder, fileName + ".pop");
             File.WriteAllLines(path, data);
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Saved population map to " + path);
+            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map to " + path);
         }
 
         public void SavePopulationMask(string newFilename)
@@ -360,9 +360,9 @@ namespace WUIPlatform.Population
                 data[8] += _mask[i] == true ? 1 + " " : 0 + " ";
             }
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, newFilename + ".pmk");
+            string path = Path.Combine(Engine.WorkingFolder, newFilename + ".pmk");
             File.WriteAllLines(path, data);
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Saved population map mask to " + path);
+            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map mask to " + path);
         }
 
         public bool LoadPopulationMask(string populationMaskFile)
@@ -398,11 +398,11 @@ namespace WUIPlatform.Population
                 }
                 _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
                 success = true;
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded population map mask from file " + populationMaskFile + ".");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Loaded population map mask from file " + populationMaskFile + ".");
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " Population data not valid for current map.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " Population data not valid for current map.");
             }
 
             return success;
@@ -447,11 +447,11 @@ namespace WUIPlatform.Population
                 _correctedForRoadAccess = false;
                 success = true;           
                 _fileName = Path.GetFileNameWithoutExtension(path);
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded population from file " + path + ".");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Loaded population from file " + path + ".");
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " Population data not valid for current map.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " Population data not valid for current map.");
             }
 
             return success;
@@ -459,7 +459,7 @@ namespace WUIPlatform.Population
 
         public void CreateAndLoadPopulation()
         {
-            string file = Path.Combine(WUIEngine.WORKING_FOLDER, _fileName + "_households.csv");
+            string file = Path.Combine(Engine.WorkingFolder, _fileName + "_households.csv");
             using (StreamWriter sW = new StreamWriter(file))
             {
                 sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");
@@ -472,7 +472,7 @@ namespace WUIPlatform.Population
                         List<int> householdCounts = new List<int>();
                         while (peopleWithoutHouseHold > 0)
                         {
-                            int p = Random.Range(WUIEngine.INPUT.Population.MinHouseholdSize, WUIEngine.INPUT.Population.MaxHouseholdSize);
+                            int p = Random.Range(Engine.Input.Population.MinHouseholdSize, Engine.Input.Population.MaxHouseholdSize);
                             if (p > peopleWithoutHouseHold)
                             {
                                 p = peopleWithoutHouseHold;
@@ -489,7 +489,7 @@ namespace WUIPlatform.Population
                             Vector2d householdStartPos = nodeCenter;
                             householdStartPos.x += _cellSize * Random.Range(-0.5f, 0.5f);
                             householdStartPos.y += _cellSize * Random.Range(-0.5f, 0.5f);
-                            Vector2d householdStartLatLon = WUIEngine.RUNTIME_DATA.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
+                            Vector2d householdStartLatLon = Engine.RuntimeData.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;
                             double goalLon = _cellRoadAccessLatLon[i].y;
@@ -498,10 +498,10 @@ namespace WUIPlatform.Population
                     }
                 }
 
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Generated and saved population to file " + file);
+                Engine.MESSAGE(null, Engine.LogType.Log, "Generated and saved population to file " + file);
             }
 
-            WUIEngine.RUNTIME_DATA.Population.LoadPopulation(file);
+            Engine.RuntimeData.Population.LoadPopulation(file);
         }
     }
 }

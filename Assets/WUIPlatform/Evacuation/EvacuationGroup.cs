@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform.Evacuation
+namespace PREACT.Evacuation
 {
     [System.Serializable]
     public class EvacuationGroup
@@ -35,13 +35,13 @@ namespace WUIPlatform.Evacuation
             {
                 if (randomChoice <= GoalsCumulativeWeights[i])
                 {
-                    return WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[GoalIndices[i]];
+                    return Engine.RuntimeData.Evacuation.Destinations[GoalIndices[i]];
                 }
             }
 
             //this should not happen, but keep as backup as we do not want to return null
-            WUIEngine.LOG(WUIEngine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");
-            return WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[GoalIndices[GoalIndices.Length - 1]];
+            Engine.MESSAGE(null, Engine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");
+            return Engine.RuntimeData.Evacuation.Destinations[GoalIndices[GoalIndices.Length - 1]];
         }
 
         public static EvacuationGroup[] LoadEvacGroupFiles(out bool success)
@@ -50,9 +50,9 @@ namespace WUIPlatform.Evacuation
             EvacuationGroup[] result = null;
             List<EvacuationGroup> evacGroups = new List<EvacuationGroup>();
 
-            for (int i = 0; i < WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length; i++)
+            for (int i = 0; i < Engine.Input.Evacuation.EvacuationGroupFiles.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacuationGroupFiles[i] + ".eg");
+                string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Evacuation.EvacuationGroupFiles[i] + ".eg");
                 bool fileExists = File.Exists(path);
                 EvacuationGroup eG = null;
                 if (fileExists)
@@ -133,13 +133,13 @@ namespace WUIPlatform.Evacuation
                         int[] goalIndices = new int[destinationNames.Count];
                         for (int j = 0; j < destinationNames.Count; j++)
                         {
-                            goalIndices[j] = WUIEngine.RUNTIME_DATA.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
+                            goalIndices[j] = Engine.RuntimeData.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
                         }
 
                         int[] responseCurveIndices = new int[responseCurveNames.Count];
                         for (int j = 0; j < responseCurveNames.Count; j++)
                         {
-                            responseCurveIndices[j] =  WUIEngine.RUNTIME_DATA.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
+                            responseCurveIndices[j] =  Engine.RuntimeData.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
                         }
 
                         //TODO: check if input count and probabilities match
@@ -151,13 +151,13 @@ namespace WUIPlatform.Evacuation
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Evacuation group file " + path + " not found and could not be loaded.");
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "Evacuation group file " + path + " not found and could not be loaded.");
                 }
 
                 
                 if (fileExists && eG == null)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Evacuation group file " + path + " was found but did not contain any valid data.");
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "Evacuation group file " + path + " was found but did not contain any valid data.");
                 }
             }
 
@@ -165,11 +165,11 @@ namespace WUIPlatform.Evacuation
             {
                 result = evacGroups.ToArray();
                 success = true;
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No valid evacuation group data could be found or loaded, evacuation simulation will not run.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "No valid evacuation group data could be found or loaded, evacuation simulation will not run.");
             }
 
             return result;
@@ -177,23 +177,23 @@ namespace WUIPlatform.Evacuation
 
         public static void SaveEvacGroupIndices()
         {
-            string filename = WUIEngine.INPUT.Simulation.Id;
+            string filename = Engine.Input.Simulation.Id;
 
             string[] data = new string[4];
             //nrows
-            data[0] = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x.ToString();
+            data[0] = Engine.RuntimeData.Evacuation.CellCount.x.ToString();
             //ncols
-            data[1] = WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y.ToString();
+            data[1] = Engine.RuntimeData.Evacuation.CellCount.y.ToString();
             //how many evac groups
-            data[2] = WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length.ToString();
+            data[2] = Engine.Input.Evacuation.EvacuationGroupFiles.Length.ToString();
             //actual data
             data[3] = "";
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length; ++i)
+            for (int i = 0; i < Engine.RuntimeData.Evacuation.EvacGroupIndices.Length; ++i)
             {
-                data[3] += WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i] + " ";
+                data[3] += Engine.RuntimeData.Evacuation.EvacGroupIndices[i] + " ";
             }
 
-            File.WriteAllLines(WUIEngine.WORKING_FOLDER + "/" + filename + ".egs", data);
+            File.WriteAllLines(Engine.WorkingFolder + "/" + filename + ".egs", data);
         }
 
         public static void LoadEvacGroupIndices(string path, out bool success)
@@ -215,7 +215,7 @@ namespace WUIPlatform.Evacuation
                     int.TryParse(header[2], out evacGroupCount);
 
                     //make sure we have the correct size
-                    if (ncols == WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x && nrows == WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y && evacGroupCount <= WUIEngine.INPUT.Evacuation.EvacuationGroupFiles.Length)
+                    if (ncols == Engine.RuntimeData.Evacuation.CellCount.x && nrows == Engine.RuntimeData.Evacuation.CellCount.y && evacGroupCount <= Engine.Input.Evacuation.EvacuationGroupFiles.Length)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];
@@ -223,21 +223,21 @@ namespace WUIPlatform.Evacuation
                         {
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
-                        WUIEngine.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(eGsIndices);
-                        WUIEngine.LOG(WUIEngine.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
+                        Engine.RuntimeData.Evacuation.UpdateEvacGroupIndices(eGsIndices);
+                        Engine.MESSAGE(null, Engine.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                         success = true;
                     }
                     else
                     {
-                        WUIEngine.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(null);
-                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Evac groups file does not match current mesh, using default.");
+                        Engine.RuntimeData.Evacuation.UpdateEvacGroupIndices(null);
+                        Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file does not match current mesh, using default.");
                     }
                 }
             }
             catch (System.Exception e)
             {
-                WUIEngine.RUNTIME_DATA.Evacuation.UpdateEvacGroupIndices(null);
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Evac groups file " + path + " not found, using default.");
+                Engine.RuntimeData.Evacuation.UpdateEvacGroupIndices(null);
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file " + path + " not found, using default.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }
             

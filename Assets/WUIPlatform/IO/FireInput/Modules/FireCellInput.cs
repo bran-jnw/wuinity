@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class FireCellInput
@@ -29,7 +29,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             FireCellInput newInput = new FireCellInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(SpreadMode);
@@ -48,14 +48,14 @@ namespace WUIPlatform.IO
                         break;
                     default:
                         ++issues;
-                        WUIEngine.LOG(WUIEngine.LogType.SimError, input + " was not recognized." + WUIEngineInput.pleaseCheckInput);
+                        Engine.MESSAGE(null, Engine.LogType.SimError, input + " was not recognized." + Input.pleaseCheckInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(RootFolder);
@@ -66,7 +66,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(FuelModelsFile);
@@ -77,7 +77,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(InitialFuelMoistureFile);
@@ -88,7 +88,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(WeatherFile);
@@ -99,7 +99,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(WindFile);
@@ -110,7 +110,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(IgnitionPointsFile);
@@ -121,7 +121,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(WindMultiplier);
@@ -131,7 +131,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(UseRandomIgnitionMap);
@@ -141,7 +141,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(RandomIgnitionPoints);
@@ -151,7 +151,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(UseInitialIgnitionMap);
@@ -161,7 +161,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             return newInput;

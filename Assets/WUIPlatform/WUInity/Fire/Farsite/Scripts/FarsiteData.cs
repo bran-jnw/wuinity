@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 
-namespace WUIPlatform.Farsite
+namespace PREACT.Farsite
 {
     [System.Serializable]
     public struct FarsiteBurnPeriod

@@ -6,10 +6,10 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using WUIPlatform.IO;
+using PREACT.IO;
 using System.Numerics;
 
-namespace WUIPlatform.Pedestrian
+namespace PREACT.Pedestrian
 {
     /// <summary>
     /// Class that holds all households that are contained at the start within this cell
@@ -35,7 +35,7 @@ namespace WUIPlatform.Pedestrian
         /// <param name="personsInCell"></param>
         public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2d roadAccessLatLon, int personsInCell, int cellIndex)
         {
-            PopulationInput eO = WUIEngine.INPUT.Population;
+            PopulationInput eO = Engine.Input.Population;
 
             this.cellWorldSize = cellWorldSize;
             this.cellIndex = cellIndex;
@@ -56,10 +56,10 @@ namespace WUIPlatform.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            closestNodeSimulationSpace = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(roadAccessLatLon);
+            closestNodeSimulationSpace = Engine.RuntimeData.Simulation.GetSimulationPosition(roadAccessLatLon);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
-                int evacGroupIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[i];
+                int evacGroupIndex = Engine.RuntimeData.Evacuation.EvacGroupIndices[i];
                 //macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
             }
         }

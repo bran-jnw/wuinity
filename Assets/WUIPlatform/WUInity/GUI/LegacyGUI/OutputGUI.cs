@@ -1,7 +1,8 @@
 using System.Globalization;
 using UnityEngine;
+using PREACT;
 
-namespace WUIPlatform.WUInity.UI
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
@@ -11,7 +12,7 @@ namespace WUIPlatform.WUInity.UI
 
         void OutputMenu()
         {
-            if(WUIEngine.SIM.State == Simulation.SimulationState.Error || WUIEngine.SIM.State == Simulation.SimulationState.Initializing)
+            if(_engine.Simulation.State == Simulation.SimulationState.Error || _engine.Simulation.State == Simulation.SimulationState.Initializing)
             {
                 return;
             }
@@ -21,22 +22,22 @@ namespace WUIPlatform.WUInity.UI
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            int dummy = (int)WUIEngine.SIM.CurrentTime;
+            int dummy = (int)_engine.Simulation.CurrentTime;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
-            dummy = WUIEngine.RUNTIME_DATA.Population.TotalPopulation;
+            dummy = _engine.RuntimeData.Population.TotalPopulation;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            if(WUIEngine.SIM.PedestrianModule != null)
+            if(_engine.Simulation.PedestrianModule != null)
             {
-                dummy = WUIEngine.SIM.PedestrianModule.GetPeopleStaying();
+                dummy = _engine.Simulation.PedestrianModule.GetPeopleStaying();
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
                 ++buttonIndex;
 
                 //toatl cars
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + WUIEngine.SIM.PedestrianModule.GetTotalCars());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + _engine.Simulation.PedestrianModule.GetTotalCars());
                 ++buttonIndex;
             }         
 
@@ -46,37 +47,37 @@ namespace WUIPlatform.WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Households"))
             {
-                WUInityEngine.INSTANCE.ToggleHouseholdRendering();
+                _wuinityManager.ToggleHouseholdRendering();
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic"))
             {
-                WUInityEngine.INSTANCE.ToggleTrafficRendering();
+                _wuinityManager.ToggleTrafficRendering();
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fire spread"))
             {
-                WUInityEngine.INSTANCE.ToggleFireSpreadRendering();
-                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
+                _wuinityManager.ToggleFireSpreadRendering();
+                _wuinityManager.SetSampleMode(DataSampleMode.None);
             }
             ++buttonIndex;
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Extinction coefficient"))
             {
-                WUInityEngine.INSTANCE.ToggleSootRendering();
-                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.None);
+                _wuinityManager.ToggleSootRendering();
+                _wuinityManager.SetSampleMode(DataSampleMode.None);
             }
             ++buttonIndex;
 
-            float timeRange = WUIEngine.SIM.CurrentTime - WUIEngine.SIM.StartTime;
-            float time = sliderVtraffic * timeRange + WUIEngine.SIM.StartTime;
+            float timeRange = _engine.Simulation.CurrentTime - _engine.Simulation.StartTime;
+            float time = sliderVtraffic * timeRange + _engine.Simulation.StartTime;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
             {
-                WUInityEngine.INSTANCE.DisplayClosestDensityData(time);
-                WUInityEngine.INSTANCE.ToggleDomainDataPlane();
-                WUInityEngine.INSTANCE.SetSampleMode(WUInityEngine.DataSampleMode.TrafficDens);
+                //_wuinityManager.DisplayClosestDensityData(time);
+                _wuinityManager.ToggleDomainDataPlane();
+                _wuinityManager.SetSampleMode(DataSampleMode.TrafficDens);
             }
             ++buttonIndex;
 
@@ -84,7 +85,7 @@ namespace WUIPlatform.WUInity.UI
             ++buttonIndex;
             sliderVtraffic = GUI.HorizontalSlider(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sliderVtraffic, 0.0f, 1.0f);
             ++buttonIndex;
-            if (WUInityEngine.INSTANCE.dataSampleMode == WUInityEngine.DataSampleMode.TrafficDens)
+            if (_wuinityManager.dataSampleMode == DataSampleMode.TrafficDens)
             {
                 //WUInity.INSTANCE.DisplayClosestDensityData(time);
             }
@@ -92,49 +93,49 @@ namespace WUIPlatform.WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Hide visual data"))
             {
-                WUInityEngine.INSTANCE.SetDomainDataPlane(false);
-                WUInityEngine.INSTANCE.SetFireDataPlane(false);
+                _wuinityManager.SetDomainDataPlane(false);
+                _wuinityManager.SetFireDataPlane(false);
             }
             ++buttonIndex;
 
-            if (WUIEngine.INPUT.Simulation.RunPedestrianModule && WUIEngine.SIM.PedestrianModule != null)
+            if (_engine.Input.Simulation.RunPedestrianModule && _engine.Simulation.PedestrianModule != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + WUIEngine.SIM.PedestrianModule.GetPeopleLeft() + " / " + WUIEngine.SIM.PedestrianModule.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.PedestrianModule.GetPeopleLeft() + " / " + _engine.Simulation.PedestrianModule.GetTotalPopulation());
                 ++buttonIndex;
 
                 //cars reached by pedestrians
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + WUIEngine.SIM.PedestrianModule.GetCarsReached());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + _engine.Simulation.PedestrianModule.GetCarsReached());
                 ++buttonIndex;
             }
 
             //cars still left
-            if (WUIEngine.INPUT.Simulation.RunTrafficModule && WUIEngine.SIM.TrafficModule != null)
+            if (_engine.Input.Simulation.RunTrafficModule && _engine.Simulation.TrafficModule != null)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + WUIEngine.SIM.TrafficModule.GetNumberOfCarsInSystem() + " / " + WUIEngine.SIM.TrafficModule.GetTotalCarsSimulated());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + _engine.Simulation.TrafficModule.GetNumberOfCarsInSystem() + " / " + _engine.Simulation.TrafficModule.GetTotalCarsSimulated());
                 ++buttonIndex;
             }
 
-            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            if(_engine.Input.Simulation.RunPedestrianModule)
             {
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+                for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
                 {
-                    string name = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name;
-                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople + " (" + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].cars.Count + ")");
+                    string name = _engine.RuntimeData.Evacuation.Destinations[i].Name;
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.RuntimeData.Evacuation.Destinations[i]._currentPeople + " (" + _engine.RuntimeData.Evacuation.Destinations[i]._cars.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + WUIEngine.RUNTIME_DATA.Evacuation.GetTotalEvacuated() + " / " + (WUIEngine.SIM.PedestrianModule.GetTotalPopulation() - WUIEngine.SIM.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.RuntimeData.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 
             //fire output stuff
-            if (WUIEngine.INPUT.Simulation.RunFireModule && WUIEngine.SIM.State == Simulation.SimulationState.Running)
+            if (_engine.Input.Simulation.RunFireModule && _engine.Simulation.State == Simulation.SimulationState.Running)
             {               
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + WUIEngine.SIM.FireModule.GetCurrentWindData().speed + " m/s");
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + _engine.Simulation.FireModule.GetCurrentWindData().speed + " m/s");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + WUIEngine.SIM.FireModule.GetCurrentWindData().direction + " degrees");
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + _engine.Simulation.FireModule.GetCurrentWindData().direction + " degrees");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + WUIEngine.SIM.FireModule.GetActiveCellCount());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + _engine.Simulation.FireModule.GetActiveCellCount());
                 ++buttonIndex;
 
                 //fire visual mode
@@ -142,23 +143,23 @@ namespace WUIPlatform.WUInity.UI
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fireline intensity"))
                 {
-                    WUInityEngine.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
+                    _wuinityManager.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    WUInityEngine.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
+                    _wuinityManager.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
                 }
                 ++buttonIndex;
             }
 
-            if(WUIEngine.SIM.State == Simulation.SimulationState.Running)
+            if(_engine.Simulation.State == Simulation.SimulationState.Running)
             {
                 ++buttonIndex;
 
                 string pauseState = "Simulation running";
                 string pauseButton = "Pause simulation";
-                if (WUIEngine.SIM.IsPaused)
+                if (_engine.Simulation.IsPaused)
                 {
                     pauseState = "Simulation paused";
                     pauseButton = "Cont. simulation";
@@ -169,33 +170,33 @@ namespace WUIPlatform.WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), pauseButton))
                 {
-                    WUIEngine.SIM.TogglePause();
+                    _engine.Simulation.TogglePause();
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
                 {                    
-                    WUInityEngine.INSTANCE.StopSimulation();
+                    _wuinityManager.StopSimulation();
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle realtime"))
                 {
-                    WUIEngine.SIM.ToogleRealtime();
+                    _engine.Simulation.ToogleRealtime();
                 }
                 ++buttonIndex;
 
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Step execution time [ms]: " + WUIEngine.SIM.StepExecutionTime.ToString("F1", CultureInfo.InvariantCulture));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Step execution time [ms]: " + _engine.Simulation.StepExecutionTime.ToString("F1", CultureInfo.InvariantCulture));
                 ++buttonIndex;
 
                 LegendGUI();                
             }
 
-            if (WUIEngine.SIM.State == Simulation.SimulationState.Finished)  
+            if (_engine.Simulation.State == Simulation.SimulationState.Finished)  
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Display usage map"))
                 {
-                    WUInityEngine.INSTANCE.DisplayTrafficUsageMap();
+                    _wuinityManager.DisplayTrafficUsageMap();
                 }
                 ++buttonIndex;
 
@@ -216,7 +217,7 @@ namespace WUIPlatform.WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle k-PERIL results"))
                 {
-                    WUIEngine.SIM.DisplayTriggerBuffer();
+                    _engine.Simulation.DisplayTriggerBuffer();
                 }
                 ++buttonIndex;
             }
@@ -255,7 +256,7 @@ namespace WUIPlatform.WUInity.UI
         private void CreateArrivalTexture()
         {
             plotFig = new Texture2D(2, 2);
-            ImageConversion.LoadImage(plotFig, WUIEngine.SIM.GetArrivalPlotBytes());
+            ImageConversion.LoadImage(plotFig, _engine.GetArrivalPlotBytes());
         }
 
         void ResetOutputGUI()
@@ -265,29 +266,29 @@ namespace WUIPlatform.WUInity.UI
 
         void LegendGUI()
         {
-            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            if (_engine.Input.Simulation.RunFireModule)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f - 305, 120, 300));
 
                 GUI.Box(new Rect(0, 0, 120, 300), "Fireline int.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = WUInityEngine.FIRE_VISUALS.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                string upperLimit = _wuinityManager.FIRE_VISUALS.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = WUInityEngine.FIRE_VISUALS.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                string lowerLimit = _wuinityManager.FIRE_VISUALS.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();
             }
 
-            if (WUIEngine.INPUT.Simulation.RunSmokeModule)
+            if (_engine.Input.Simulation.RunSmokeModule)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f + 5, 120, 300));
 
                 GUI.Box(new Rect(0, 0, 120, 300), "Optical dens.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = WUInityEngine.FIRE_VISUALS.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string upperLimit = _wuinityManager.FIRE_VISUALS.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = WUInityEngine.FIRE_VISUALS.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string lowerLimit = _wuinityManager.FIRE_VISUALS.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();

@@ -27,8 +27,9 @@ SOFTWARE. */
 
 using System;
 using System.Numerics;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform
+namespace PREACT.Utility
 {  
     /// <summary>
     /// A set of Geo and Terrain Conversion utils.
@@ -38,8 +39,8 @@ namespace WUIPlatform
         private const int TileSize = 256;
         /// <summary>according to https://wiki.openstreetmap.org/wiki/Zoom_levels</summary>
         private const int EarthRadius = 6378137; //no seams with globe example
-        private const double InitialResolution = 2 * Math.PI * EarthRadius / TileSize;
-        private const double OriginShift = 2 * Math.PI * EarthRadius / 2;
+        private const double InitialResolution = 2 * Mathd.PI * EarthRadius / TileSize;
+        private const double OriginShift = 2 * Mathd.PI * EarthRadius / 2;
 
         /// <summary>
         /// Converts <see cref="Vector2d"/> struct, WGS84
@@ -62,7 +63,7 @@ namespace WUIPlatform
         public static Vector2d LatLonToMeters(double lat, double lon)
         {
             var posx = lon * OriginShift / 180;
-            var posy = Math.Log(Math.Tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+            var posy = Mathd.Log(Mathd.Tan((90 + lat) * Mathd.PI / 360)) / (Mathd.PI / 180);
             posy = posy * OriginShift / 180;
             return new Vector2d(posx, posy);
         }
@@ -85,7 +86,7 @@ namespace WUIPlatform
         public static Vector2d GeoToWorldPosition(double lat, double lon, Vector2d refPoint, float scale)
         {
             var posx = lon * OriginShift / 180;
-            var posy = Math.Log(Math.Tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+            var posy = Mathd.Log(Mathd.Tan((90 + lat) * Mathd.PI / 360)) / (Mathd.PI / 180);
             posy = posy * OriginShift / 180;
             return new Vector2d((posx - refPoint.x) * scale, (posy - refPoint.y) * scale);
         }
@@ -97,9 +98,9 @@ namespace WUIPlatform
 
         public static Vector3 GeoToWorldGlobePosition(double lat, double lon, float radius)
         {
-            double xPos = (radius) * Math.Cos(Mathf.Deg2Rad * lat) * Math.Cos(Mathf.Deg2Rad * lon);
-            double zPos = (radius) * Math.Cos(Mathf.Deg2Rad * lat) * Math.Sin(Mathf.Deg2Rad * lon);
-            double yPos = (radius) * Math.Sin(Mathf.Deg2Rad * lat);
+            double xPos = (radius) * Mathd.Cos(Mathf.Deg2Rad * lat) * Mathd.Cos(Mathf.Deg2Rad * lon);
+            double zPos = (radius) * Mathd.Cos(Mathf.Deg2Rad * lat) * Mathd.Sin(Mathf.Deg2Rad * lon);
+            double yPos = (radius) * Mathd.Sin(Mathf.Deg2Rad * lat);
 
             return new Vector3((float)xPos, (float)yPos, (float)zPos);
         }
@@ -135,7 +136,7 @@ namespace WUIPlatform
         {
             var vx = (m.x / OriginShift) * 180;
             var vy = (m.y / OriginShift) * 180;
-            vy = 180 / Math.PI * (2 * Math.Atan(Math.Exp(vy * Math.PI / 180)) - Math.PI / 2);
+            vy = 180 / Mathd.PI * (2 * Mathd.Atan(Mathd.Exp(vy * Mathd.PI / 180)) - Mathd.PI / 2);
             return new Vector2d(vy, vx);
         }
 
@@ -169,7 +170,7 @@ namespace WUIPlatform
         /// <returns> NW Longitude. </returns>
         public static double TileXToNWLongitude(int x, int zoom)
         {
-            var n = Math.Pow(2.0, zoom);
+            var n = Mathd.Pow(2.0, zoom);
             var lon_deg = x / n * 360.0 - 180.0;
             return lon_deg;
         }
@@ -183,9 +184,9 @@ namespace WUIPlatform
         /// <returns> NW Latitude. </returns>
         public static double TileYToNWLatitude(int y, int zoom)
         {
-            var n = Math.Pow(2.0, zoom);
-            var lat_rad = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * y / n)));
-            var lat_deg = lat_rad * 180.0 / Math.PI;
+            var n = Mathd.Pow(2.0, zoom);
+            var lat_rad = Mathd.Atan(Mathd.Sinh(Mathd.PI * (1 - 2 * y / n)));
+            var lat_deg = lat_rad * 180.0 / Mathd.PI;
             return lat_deg;
         }
 
@@ -198,7 +199,7 @@ namespace WUIPlatform
         /// <returns> Meters per pixel. </returns>
         public static float GetTileScaleInMeters(float latitude, int zoom)
         {
-            return (float)(40075016.685578d * Math.Cos(Mathf.Deg2Rad * latitude) / Math.Pow(2f, zoom + 8));
+            return (float)(40075016.685578d * Mathd.Cos(Mathf.Deg2Rad * latitude) / Mathd.Pow(2f, zoom + 8));
         }
 
         /// <summary>
@@ -210,7 +211,7 @@ namespace WUIPlatform
         /// <returns> Degrees per tile. </returns>
         public static float GetTileScaleInDegrees(float latitude, int zoom)
         {
-            return (float)(360.0f / Math.Pow(2f, zoom + 8));
+            return (float)(360.0f / Mathd.Pow(2f, zoom + 8));
         }
 
         /*/// <summary>
@@ -247,7 +248,7 @@ namespace WUIPlatform
 
         private static double Resolution(int zoom)
         {
-            return InitialResolution / Math.Pow(2, zoom);
+            return InitialResolution / Mathd.Pow(2, zoom);
         }
 
         private static Vector2d PixelsToMeters(Vector2d p, int zoom)
@@ -268,7 +269,7 @@ namespace WUIPlatform
 
         private static Vector2 PixelsToTile(Vector2d p)
         {
-            var t = new Vector2((int)Math.Ceiling(p.x / (double)TileSize) - 1, (int)Math.Ceiling(p.y / (double)TileSize) - 1);
+            var t = new Vector2((int)Mathd.Ceiling(p.x / (double)TileSize) - 1, (int)Mathd.Ceiling(p.y / (double)TileSize) - 1);
             return t;
         }
     }

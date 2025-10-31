@@ -6,10 +6,10 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using WUIPlatform.Fire.Behave;
+using PREACT.Fire.Behave;
 using System.Threading.Tasks;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     public class CellularAutomata2 : FireModule
     {
@@ -26,22 +26,22 @@ namespace WUIPlatform.Fire
 
         private CellularAutomata2(Simulation simulation, float windspeedTenMeters, float windDirection, float cellSize) : base(simulation)
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Beginning backwards calculation of fire spread.");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
-            xDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
-            yDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
-            bool[,] wuiArea = GetWUIArea2D(WUIEngine.RUNTIME_DATA.Fire.WuiArea, xDim, yDim);
-            float distance = (float)WUIEngine.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionX;
+            xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
+            yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
+            bool[,] wuiArea = GetWUIArea2D(Engine.RuntimeData.Fire.WuiArea, xDim, yDim);
+            float distance = (float)Engine.RuntimeData.Fire.LCPData.RasterCellResolutionX;
             float distanceDiagonal = Mathf.Sqrt(2) * distance;
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea);
 
             FuelModelSet fuelModelSet = new FuelModelSet();
-            if (WUIEngine.DATA_STATUS.FuelModelsLoaded)
+            if (Engine.DataStatus.FuelModelsLoaded)
             {
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -53,7 +53,7 @@ namespace WUIPlatform.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, WUIEngine.RUNTIME_DATA.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this);
+                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, Engine.RuntimeData.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this);
                     if (fireCells[x, y]._maxROS > maxROS)
                     {
                         maxROS = fireCells[x, y]._maxROS;
@@ -90,11 +90,11 @@ namespace WUIPlatform.Fire
             float deltaTime = 0.5f * cellSize / maxROS;
             if (deltaTime <= 0.0f)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Something went wrong when calculating delta time (was less then/equal to zero), please check your input.");
+                Engine.MESSAGE(null, Engine.LogType.Log, "Something went wrong when calculating delta time (was less then/equal to zero), please check your input.");
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Fire spread delta time set to: " + deltaTime);
+                Engine.MESSAGE(null, Engine.LogType.Log, "Fire spread delta time set to: " + deltaTime);
             }            
         }
 
@@ -146,7 +146,7 @@ namespace WUIPlatform.Fire
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
-                if (WUIEngine.RUNTIME_DATA.Fire.WuiArea[i] == true)
+                if (Engine.RuntimeData.Fire.WuiArea[i] == true)
                 {
                     result[xIndex, yIndex] = true;
                 }
@@ -159,8 +159,8 @@ namespace WUIPlatform.Fire
         {
             List<Vector2int> borderCells = new List<Vector2int>();
 
-            int xDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
-            int yDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
+            int xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
+            int yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
 
             //CellSpreadRates[,] rateOfSpreads = new CellSpreadRates[xDim, yDim];
 
@@ -308,7 +308,7 @@ namespace WUIPlatform.Fire
 
             if (activeCells.Count == 0 && cellsToIgnite.Count == 0)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No more active cells left, stopping fire spread simulation");
+                Engine.MESSAGE(null, Engine.LogType.Log, "No more active cells left, stopping fire spread simulation");
             }
         }
 
@@ -334,7 +334,7 @@ namespace WUIPlatform.Fire
                 }
             }
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Finished backwards calculation of fire spread.");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Finished backwards calculation of fire spread.");
         }
     }
 
@@ -377,7 +377,7 @@ namespace WUIPlatform.Fire
             _maxROS = float.MinValue;
             for (int i = 0; i < _spreadRates.Length; i++)
             {
-                InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
+                InitialFuelMoisture moisture = Engine.RuntimeData.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
                 double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
                 int fuelModel = _lcp.fuel_model;
                 float slope = _lcp.slope;

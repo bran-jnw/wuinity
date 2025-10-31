@@ -8,7 +8,7 @@
 using System.Numerics;
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class SmokeInput
@@ -24,7 +24,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             SmokeInput newInput = new SmokeInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(SmokeModule);
@@ -46,14 +46,14 @@ namespace WUIPlatform.IO
                         break;
                     default:
                         ++issues;
-                        WUIEngine.LOG(WUIEngine.LogType.Warning, input + " was not recognized." + WUIEngineInput.pleaseCheckInput);
+                        Engine.MESSAGE(null, Engine.LogType.Warning, input + " was not recognized." + Input.pleaseCheckInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             if(newInput.SmokeModule == SmokeModuleChoice.GlobalSmoke)
@@ -62,13 +62,13 @@ namespace WUIPlatform.IO
                 input = nameof(SmokeModuleChoice.GlobalSmoke);
                 if (headerLineIndex.TryGetValue(input, out lineIndex))
                 {
-                    WUIEngineInput.ReadingInputMessage(input);
+                    Input.ReadingInputMessage(input);
                     newInput.GlobalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.InputError, input + " header not found but user has requested this smoke module." + WUIEngineInput.pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + Input.pleaseCheckInput);
                     return null;
                 }
             }
@@ -78,13 +78,13 @@ namespace WUIPlatform.IO
                 input = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
                 if (headerLineIndex.TryGetValue(input, out lineIndex))
                 {
-                    WUIEngineInput.ReadingInputMessage(input);
+                    Input.ReadingInputMessage(input);
                     newInput.AdvectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.InputError, input + " header not found but user has requested this smoke module." + WUIEngineInput.pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + Input.pleaseCheckInput);
                     return null;
                 }
             }

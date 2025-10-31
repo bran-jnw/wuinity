@@ -1,6 +1,6 @@
 using System;
 
-namespace WUIPlatform
+namespace PREACT.Utility.Math
 {
     public class Random
     {
@@ -21,37 +21,38 @@ namespace WUIPlatform
             get{ return (float)RANDOM.NextDouble(); }
         }
     }
+
     public partial struct Mathf
     {
         // Returns the sine of angle /f/ in radians.
-        public static float Sin(float f) { return (float)Math.Sin(f); }
+        public static float Sin(float f) { return (float)System.Math.Sin(f); }
 
         // Returns the cosine of angle /f/ in radians.
-        public static float Cos(float f) { return (float)Math.Cos(f); }
+        public static float Cos(float f) { return (float)System.Math.Cos(f); }
 
         // Returns the tangent of angle /f/ in radians.
-        public static float Tan(float f) { return (float)Math.Tan(f); }
+        public static float Tan(float f) { return (float)System.Math.Tan(f); }
 
         // Returns the arc-sine of /f/ - the angle in radians whose sine is /f/.
-        public static float Asin(float f) { return (float)Math.Asin(f); }
+        public static float Asin(float f) { return (float)System.Math.Asin(f); }
 
         // Returns the arc-cosine of /f/ - the angle in radians whose cosine is /f/.
-        public static float Acos(float f) { return (float)Math.Acos(f); }
+        public static float Acos(float f) { return (float)System.Math.Acos(f); }
 
         // Returns the arc-tangent of /f/ - the angle in radians whose tangent is /f/.
-        public static float Atan(float f) { return (float)Math.Atan(f); }
+        public static float Atan(float f) { return (float)System.Math.Atan(f); }
 
         // Returns the angle in radians whose ::ref::Tan is @@y/x@@.
-        public static float Atan2(float y, float x) { return (float)Math.Atan2(y, x); }
+        public static float Atan2(float y, float x) { return (float)System.Math.Atan2(y, x); }
 
         // Returns square root of /f/.
-        public static float Sqrt(float f) { return (float)Math.Sqrt(f); }
+        public static float Sqrt(float f) { return (float)System.Math.Sqrt(f); }
 
         // Returns the absolute value of /f/.
-        public static float Abs(float f) { return Math.Abs(f); }
+        public static float Abs(float f) { return System.Math.Abs(f); }
 
         // Returns the absolute value of /value/.
-        public static int Abs(int value) { return Math.Abs(value); }
+        public static int Abs(int value) { return System.Math.Abs(value); }
 
         /// *listonly*
         public static float Min(float a, float b) { return a < b ? a : b; }
@@ -122,43 +123,43 @@ namespace WUIPlatform
         }
 
         // Returns /f/ raised to power /p/.
-        public static float Pow(float f, float p) { return (float)Math.Pow(f, p); }
+        public static float Pow(float f, float p) { return (float)System.Math.Pow(f, p); }
 
         // Returns e raised to the specified power.
-        public static float Exp(float power) { return (float)Math.Exp(power); }
+        public static float Exp(float power) { return (float)System.Math.Exp(power); }
 
         // Returns the logarithm of a specified number in a specified base.
-        public static float Log(float f, float p) { return (float)Math.Log(f, p); }
+        public static float Log(float f, float p) { return (float)System.Math.Log(f, p); }
 
         // Returns the natural (base e) logarithm of a specified number.
-        public static float Log(float f) { return (float)Math.Log(f); }
+        public static float Log(float f) { return (float)System.Math.Log(f); }
 
         // Returns the base 10 logarithm of a specified number.
-        public static float Log10(float f) { return (float)Math.Log10(f); }
+        public static float Log10(float f) { return (float)System.Math.Log10(f); }
 
         // Returns the smallest integer greater to or equal to /f/.
-        public static float Ceil(float f) { return (float)Math.Ceiling(f); }
+        public static float Ceil(float f) { return (float)System.Math.Ceiling(f); }
 
         // Returns the largest integer smaller to or equal to /f/.
-        public static float Floor(float f) { return (float)Math.Floor(f); }
+        public static float Floor(float f) { return (float)System.Math.Floor(f); }
 
         // Returns /f/ rounded to the nearest integer.
-        public static float Round(float f) { return (float)Math.Round(f); }
+        public static float Round(float f) { return (float)System.Math.Round(f); }
 
         // Returns the smallest integer greater to or equal to /f/.
-        public static int CeilToInt(float f) { return (int)Math.Ceiling(f); }
+        public static int CeilToInt(float f) { return (int)System.Math.Ceiling(f); }
 
         // Returns the largest integer smaller to or equal to /f/.
-        public static int FloorToInt(float f) { return (int)Math.Floor(f); }
+        public static int FloorToInt(float f) { return (int)System.Math.Floor(f); }
 
         // Returns /f/ rounded to the nearest integer.
-        public static int RoundToInt(float f) { return (int)Math.Round(f); }
+        public static int RoundToInt(float f) { return (int)System.Math.Round(f); }
 
         // Returns the sign of /f/.
         public static float Sign(float f) { return f >= 0F ? 1F : -1F; }
 
         // The infamous ''3.14159265358979...'' value (RO).
-        public const float PI = (float)Math.PI;
+        public const float PI = (float)System.Math.PI;
 
         // A representation of positive infinity (RO).
         public const float Infinity = Single.PositiveInfinity;

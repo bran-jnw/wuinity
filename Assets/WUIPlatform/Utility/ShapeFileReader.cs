@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.Utility
+namespace PREACT.Utility
 {
     public static class ShapeFileReader
     {        

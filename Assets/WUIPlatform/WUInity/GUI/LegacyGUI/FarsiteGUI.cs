@@ -1,4 +1,4 @@
-namespace WUIPlatform.WUInity.UI
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {

@@ -5,11 +5,11 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using WUIPlatform.Population;
+using PREACT.Population;
 using System;
-using WUIPlatform.Utility;
+using PREACT.Utility;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     /// <summary>
     /// Contains all data that gets created during runtime before simulation starts.

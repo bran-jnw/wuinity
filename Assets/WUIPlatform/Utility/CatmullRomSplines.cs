@@ -7,7 +7,7 @@
 
 using System.Numerics;
 
-namespace WUIPlatform
+namespace PREACT
 {
     public class CatmullRomSpline1D
     {

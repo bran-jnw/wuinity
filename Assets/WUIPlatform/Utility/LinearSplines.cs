@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace WUIPlatform
+namespace PREACT
 {
     public class LinearSpline1D
     {

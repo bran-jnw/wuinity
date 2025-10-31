@@ -12,7 +12,7 @@ using System;
 using System.Numerics;
 using System.Collections.Generic;
 
-namespace WUIPlatform.Smoke
+namespace PREACT.Smoke
 {
     public class AdvectDiffuseMixingLayer : SmokeModule, IDisposable
     {
@@ -65,24 +65,24 @@ namespace WUIPlatform.Smoke
             {
                 _accelerator = _context.GetPreferredDevice(false).CreateAccelerator(_context);
             }           
-            WUIEngine.LOG(WUIEngine.LogType.Log, "ILGPU is using accelerator: " + _accelerator.Device.Name);
+            Engine.MESSAGE(null, Engine.LogType.Log, "ILGPU is using accelerator: " + _accelerator.Device.Name);
 
             //set up all buffers and data containers
             _globalData = new GlobalData();
-            _globalData.cellsX = WUIEngine.SIM.FireModule.GetCellCountX();
-            _globalData.cellsY = WUIEngine.SIM.FireModule.GetCellCountY();
-            _globalData.cellSizeX = WUIEngine.SIM.FireModule.GetCellSizeX();
-            _globalData.cellSizeY = WUIEngine.SIM.FireModule.GetCellSizeY();
+            _globalData.cellsX = Engine.SIM.FireModule.GetCellCountX();
+            _globalData.cellsY = Engine.SIM.FireModule.GetCellCountY();
+            _globalData.cellSizeX = Engine.SIM.FireModule.GetCellSizeX();
+            _globalData.cellSizeY = Engine.SIM.FireModule.GetCellSizeY();
             _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
             _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
             _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
             _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
-            _globalData.cellHeight = WUIEngine.INPUT.Smoke.AdvectDiffuseInput.MixingLayerHeight;
+            _globalData.cellHeight = Engine.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
-            _globalData.deltaTime = WUIEngine.INPUT.Simulation.DeltaTime;
+            _globalData.deltaTime = Engine.Input.Simulation.DeltaTime;
 
             _allBuffers = new List<MemoryBuffer1D<float, Stride1D.Dense>>();
             bufferSize = _globalData.cellsX * _globalData.cellsY;
@@ -126,11 +126,11 @@ namespace WUIPlatform.Smoke
             bool fireHasUpdated = true;
             if (fireHasUpdated)
             {
-                _injection.CopyFromCPU(WUIEngine.SIM.FireModule.GetSootProduction());
+                _injection.CopyFromCPU(Engine.SIM.FireModule.GetSootProduction());
             }
 
             //update wind
-            Fire.WindData windData = WUIEngine.SIM.FireModule.GetCurrentWindData();
+            Fire.WindData windData = Engine.SIM.FireModule.GetCurrentWindData();
             _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;

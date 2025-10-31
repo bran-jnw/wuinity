@@ -8,7 +8,7 @@
 using System.Numerics;
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class AdvectDiffuseInput
@@ -19,7 +19,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             AdvectDiffuseInput newInput = new AdvectDiffuseInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(MixingLayerHeight);
@@ -29,7 +29,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             return newInput;

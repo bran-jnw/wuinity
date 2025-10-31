@@ -6,11 +6,11 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.IO;
-using WUIPlatform.Fire;
-using WUIPlatform.Visualization;
-using WUIPlatform.IO;
+using PREACT.Fire;
+using PREACT.Visualization;
+using PREACT.IO;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     public class FireData
     {
@@ -54,30 +54,30 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            if(!WUIEngine.INPUT.Simulation.RunFireModule)
+            if(!Engine.Input.Simulation.RunFireModule)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
+                Engine.MESSAGE(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
                 return;
             }
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Fire data...");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Fire data...");
 
-            LoadLCPFile(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.LcpFile), false);
-            LoadGraphicalFireInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.GraphicalFireInputFile), false);
+            LoadLCPFile(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.LcpFile), false);
+            LoadGraphicalFireInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.GraphicalFireInputFile), false);
 
-            if (WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
+            if (Engine.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
             {
-                LoadFuelModelsInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.FuelModelsFile), false);
-                LoadIgnitionPoints(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.IgnitionPointsFile), false);
-                LoadInitialFuelMoistureData(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile), false);
-                LoadWeatherInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.WeatherFile), false);
-                LoadWindInput(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.RootFolder, WUIEngine.INPUT.Fire.FireCellInput.WindFile), false);                
+                LoadFuelModelsInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.FuelModelsFile), false);
+                LoadIgnitionPoints(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.IgnitionPointsFile), false);
+                LoadInitialFuelMoistureData(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.InitialFuelMoistureFile), false);
+                LoadWeatherInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.WeatherFile), false);
+                LoadWindInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.WindFile), false);                
             }
 
-            if(WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer 
-                && WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL
-                && WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
+            if(Engine.Input.TriggerBuffer.CalculateTriggerBuffer 
+                && Engine.Input.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL
+                && Engine.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
             {
-                string file = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.TriggerBuffer.kPERILInput.InitialFuelMoistureFile);
+                string file = Path.Combine(Engine.WorkingFolder, Engine.Input.TriggerBuffer.kPERILInput.InitialFuelMoistureFile);
                 LoadPERILInitialFuelMoistureData(file);
             }            
         }
@@ -105,18 +105,18 @@ namespace WUIPlatform.Runtime
                     }
                 }
 
-                WUIEngine.LOG(WUIEngine.LogType.Log, message);
+                Engine.MESSAGE(null, Engine.LogType.Log, message);
             }
             else
             {
                 _lcpData = null;
             }
 
-            WUIEngine.DATA_STATUS.LcpLoaded = success;
+            Engine.DataStatus.LcpLoaded = success;
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.LcpFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.LcpFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -128,11 +128,11 @@ namespace WUIPlatform.Runtime
             _fuelModelsData = new FuelModelInput();
             success = _fuelModelsData.LoadFuelModelInputFile(path);
 
-            WUIEngine.DATA_STATUS.FuelModelsLoaded = success;
+            Engine.DataStatus.FuelModelsLoaded = success;
             if(success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.FireCellInput.FuelModelsFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.FireCellInput.FuelModelsFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -144,8 +144,8 @@ namespace WUIPlatform.Runtime
             _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(path, out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.FireCellInput.IgnitionPointsFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.FireCellInput.IgnitionPointsFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -157,8 +157,8 @@ namespace WUIPlatform.Runtime
             _initialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(path, out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.FireCellInput.InitialFuelMoistureFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.FireCellInput.InitialFuelMoistureFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -179,8 +179,8 @@ namespace WUIPlatform.Runtime
             _weatherInput = WeatherInput.LoadWeatherInputFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.FireCellInput.WeatherFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.FireCellInput.WeatherFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -192,8 +192,8 @@ namespace WUIPlatform.Runtime
             _windInput = WindInput.LoadWindInputFile(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.FireCellInput.WindFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.FireCellInput.WindFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -205,8 +205,8 @@ namespace WUIPlatform.Runtime
             GraphicalFireInput.LoadGraphicalFireInput(out success);
             if (success && updateInputFile)
             {
-                WUIEngine.INPUT.Fire.GraphicalFireInputFile = Path.GetFileName(path);
-                WUIEngineInput.SaveInput();
+                Engine.Input.Fire.GraphicalFireInputFile = Path.GetFileName(path);
+                Input.SaveInput();
             }
 
             return success;
@@ -218,7 +218,7 @@ namespace WUIPlatform.Runtime
             {
                 wuiAreaIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.WuiArea = wuiAreaIndices;
+            Engine.RuntimeData.Fire.WuiArea = wuiAreaIndices;
         }
 
         public void UpdateRandomIgnitionIndices(bool[] randomIgnitionIndices, int xCount, int yCount)
@@ -227,7 +227,7 @@ namespace WUIPlatform.Runtime
             {
                 randomIgnitionIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.RandomIgnition = randomIgnitionIndices;
+            Engine.RuntimeData.Fire.RandomIgnition = randomIgnitionIndices;
         }
 
         public void UpdateInitialIgnitionIndices(bool[] initialIgnitionIndices, int xCount, int yCount)
@@ -236,7 +236,7 @@ namespace WUIPlatform.Runtime
             {
                 initialIgnitionIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.InitialIgnition = initialIgnitionIndices;
+            Engine.RuntimeData.Fire.InitialIgnition = initialIgnitionIndices;
         }
 
         //for painting trigger buffer manually
@@ -246,7 +246,7 @@ namespace WUIPlatform.Runtime
             {
                 triggerBufferIndices = new bool[xCount * yCount];
             }
-            WUIEngine.RUNTIME_DATA.Fire.ManualTriggerBuffer = triggerBufferIndices;
+            Engine.RuntimeData.Fire.ManualTriggerBuffer = triggerBufferIndices;
         }
 
         public void ToggleLCPDataPlane()

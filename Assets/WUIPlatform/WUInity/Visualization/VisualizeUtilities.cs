@@ -7,11 +7,11 @@
 
 using UnityEngine;
 
-namespace WUIPlatform.WUInity.Visualization
+namespace WUInity.Visualization
 {
     public static class VisualizeUtilities
     {
-        static MeshRenderer CreateDataPlane(Transform parent, Material material, string name, bool setActive)
+        static MeshRenderer CreateDataPlane(float sizeX, float sizeY, Transform parent, Material material, string name, bool setActive)
         {
             GameObject gO = new GameObject(name);
             gO.transform.parent = parent;
@@ -25,12 +25,10 @@ namespace WUIPlatform.WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)WUIEngine.INPUT.Simulation.DomainSize.x;
-            float length = (float)WUIEngine.INPUT.Simulation.DomainSize.y;
             Vector3 offset = Vector3.zero;
             Vector2 maxUV = Vector2.one;
 
-            CreateSimplePlane(mesh, width, length, 0.0f, offset);
+            CreateSimplePlane(mesh, sizeX, sizeY, 0.0f, offset);
 
             mR.material = material;
             //move up one meter

@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class kPERILInput
@@ -21,7 +21,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             kPERILInput newInput = new kPERILInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(MidflameWindspeed);
@@ -32,7 +32,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(CalculateROSFromBehave);
@@ -42,7 +42,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, input + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
+                Engine.MESSAGE(null, Engine.LogType.Warning, input + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
             }
 
             input = nameof(InitialFuelMoistureFile);

@@ -5,9 +5,9 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using WUIPlatform.Evacuation;
+using PREACT.Evacuation;
 
-namespace WUIPlatform
+namespace PREACT
 {
     /// <summary>
     /// Contains route/routes calculated from a location to possibly several goals.
@@ -44,12 +44,12 @@ namespace WUIPlatform
         {
             if(selectedRouteIndex == -1)
             {
-                WUIEngine.SIM.Stop("No route selected (likely due to all routes being blocked), people will get stuck.", true);
+                Engine.SIM.Stop("No route selected (likely due to all routes being blocked), people will get stuck.", true);
                 return;
             }
 
             //nothing to update
-            if(!GetSelectedRoute().evacGoal.blocked)
+            if(!GetSelectedRoute().evacGoal._blocked)
             {
                 return;
             }
@@ -79,7 +79,7 @@ namespace WUIPlatform
             {
                 for (int i = 0; i < routes.Length; i++)
                 {
-                    if (!routes[i].evacGoal.blocked)
+                    if (!routes[i].evacGoal._blocked)
                     {
                         if (selectedRouteIndex == -1)
                         {
@@ -95,7 +95,7 @@ namespace WUIPlatform
 
             if (selectedRouteIndex == -1)
             {
-                WUIEngine.SIM.Stop("STOP: Route selection failed, no routes left that are not blocked", true);
+                Engine.SIM.Stop("STOP: Route selection failed, no routes left that are not blocked", true);
             }
         }
 
@@ -107,7 +107,7 @@ namespace WUIPlatform
             {
                 for (int i = 0; i < routes.Length; i++)
                 {
-                    if (!routes[i].evacGoal.blocked)
+                    if (!routes[i].evacGoal._blocked)
                     {
                         if (selectedRouteIndex == -1)
                         {
@@ -123,7 +123,7 @@ namespace WUIPlatform
 
             if(selectedRouteIndex == -1)
             {
-                WUIEngine.SIM.Stop("No routes left to take", true);
+                Engine.SIM.Stop("No routes left to take", true);
             }
         }
 
@@ -135,7 +135,7 @@ namespace WUIPlatform
             {
                 for (int i = 0; i < routes.Length; i++)
                 {
-                    if (!routes[i].evacGoal.blocked)
+                    if (!routes[i].evacGoal._blocked)
                     {
                         if (routes[i].evacGoal == goal)
                         {

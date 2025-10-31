@@ -10,7 +10,7 @@ using OsmSharp.Streams;
 using System.IO;
 using System.Linq;
 
-namespace WUIPlatform.Pedestrian
+namespace PREACT.Pedestrian
 {
     public class HouseHoldPlacer
     {

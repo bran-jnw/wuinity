@@ -4,11 +4,9 @@
 
 using System;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Numerics;
 
-namespace WUIPlatform
+namespace PREACT.Utility.Math
 {
     // Representation of 2D vectors and points.
     [System.Serializable]
@@ -83,7 +81,7 @@ namespace WUIPlatform
             float diff_x = a.x - b.x;
             float diff_y = a.y - b.y;
 
-            return (float)Math.Sqrt(diff_x * diff_x + diff_y * diff_y);
+            return (float)System.Math.Sqrt(diff_x * diff_x + diff_y * diff_y);
         }
 
         // Returns a vector that is made from the smallest components of two vectors.
@@ -100,10 +98,10 @@ namespace WUIPlatform
 
         public void Clamp(Vector2int min, Vector2int max)
         {
-            x = Math.Max(min.x, x);
-            x = Math.Min(max.x, x);
-            y = Math.Max(min.y, y);
-            y = Math.Min(max.y, y);
+            x = System.Math.Max(min.x, x);
+            x = System.Math.Min(max.x, x);
+            y = System.Math.Max(min.y, y);
+            y = System.Math.Min(max.y, y);
         }
 
         // Converts a Vector2int to a [[Vector2]].

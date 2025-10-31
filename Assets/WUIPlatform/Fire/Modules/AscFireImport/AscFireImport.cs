@@ -8,7 +8,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     public struct FireRasterData
     {
@@ -37,20 +37,20 @@ namespace WUIPlatform.Fire
 
         public AscFireImport(Simulation simulation) : base(simulation)
         {
-            string TOAFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.TimeOfArrivalFile);
-            string ROSFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.RateOfSpreadFile);
-            string FIFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.FirelineIntensityFile);
-            string SDFile = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.AscImportInput.RootFolder, WUIEngine.INPUT.Fire.AscImportInput.SpreadDirectionFile);
+            string TOAFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.TimeOfArrivalFile);
+            string ROSFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.RateOfSpreadFile);
+            string FIFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.FirelineIntensityFile);
+            string SDFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.SpreadDirectionFile);
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
-            _originOffset = farsiteUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            _originOffset = farsiteUTM - Engine.RuntimeData.Simulation.UTMOrigin;
 
             _firelineIntensityData = new float[ncols * nrows];
             _newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
+            Engine.MESSAGE(null, Engine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -64,7 +64,7 @@ namespace WUIPlatform.Fire
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        if (!_data[x, y].isActive && WUIEngine.SIM.CurrentTime > _data[x, y].TimeOfAArrival)
+                        if (!_data[x, y].isActive && Engine.SIM.CurrentTime > _data[x, y].TimeOfAArrival)
                         {
                             _data[x, y].isActive = true;
                             _newlyIgnitedCells.Add(new Vector2int(x, y));
@@ -91,13 +91,13 @@ namespace WUIPlatform.Fire
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
             offset = this._originOffset;
-            xScale = (float)(_cellsize * ncols / WUIEngine.INPUT.Simulation.DomainSize.x);
-            yScale = (float)(_cellsize * nrows / WUIEngine.INPUT.Simulation.DomainSize.y);
+            xScale = (float)(_cellsize * ncols / Engine.Input.Simulation.DomainSize.x);
+            yScale = (float)(_cellsize * nrows / Engine.Input.Simulation.DomainSize.y);
         }
 
         public override bool IsSimulationDone()
         {
-            return WUIEngine.SIM.CurrentTime > _maxTimeOfArrival ? true : false;
+            return Engine.SIM.CurrentTime > _maxTimeOfArrival ? true : false;
         }
 
         float[,] maxROS;
@@ -179,7 +179,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Time of arrival file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Time of arrival file not found.");
                 return;
             }
 
@@ -189,7 +189,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Rate of spread file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Rate of spread file not found.");
                 return;
             }
 
@@ -199,7 +199,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Fireline intensity file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Fireline intensity file not found.");
                 return;
             }
 
@@ -209,7 +209,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Fireline intensity file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Fireline intensity file not found.");
                 return;
             }
 
@@ -268,7 +268,7 @@ namespace WUIPlatform.Fire
         /// <returns></returns>
         public override FireCellState GetFireCellState(Vector2d latLon)
         {
-            Vector2d pos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(latLon);
+            Vector2d pos = Engine.RuntimeData.Simulation.GetSimulationPosition(latLon);
             pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);
@@ -276,7 +276,7 @@ namespace WUIPlatform.Fire
 
             FireCellState result = FireCellState.Burning;
 
-            if (!IsInside(x, y) || WUIEngine.SIM.CurrentTime < _data[x, y].TimeOfAArrival)
+            if (!IsInside(x, y) || Engine.SIM.CurrentTime < _data[x, y].TimeOfAArrival)
             {
                 result = FireCellState.Dead;
             }
@@ -297,7 +297,7 @@ namespace WUIPlatform.Fire
 
         public override float GetInternalDeltaTime()
         {
-            return WUIEngine.INPUT.Simulation.DeltaTime;
+            return Engine.Input.Simulation.DeltaTime;
         }
 
         public FireRasterData[,] GetCompleteFireData()

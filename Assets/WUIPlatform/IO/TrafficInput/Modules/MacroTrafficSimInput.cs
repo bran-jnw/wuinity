@@ -7,9 +7,9 @@
 
 using System.Collections.Generic;
 using System.Numerics;
-using WUIPlatform.Traffic;
+using PREACT.Traffic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable] 
     public class MacroTrafficSimInput

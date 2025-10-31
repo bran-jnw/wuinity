@@ -5,9 +5,9 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using WUIPlatform.IO;
+using PREACT.IO;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     public class SmokeData
     {
@@ -15,7 +15,7 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            if(!WUIEngine.INPUT.Simulation.RunSmokeModule)
+            if(!Engine.Input.Simulation.RunSmokeModule)
             {
                 return;
             }           

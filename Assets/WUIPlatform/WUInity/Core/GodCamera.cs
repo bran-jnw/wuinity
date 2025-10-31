@@ -7,7 +7,7 @@
 
 using UnityEngine;
 
-namespace WUIPlatform.WUInity
+namespace WUInity
 {
     public class GodCamera : MonoBehaviour
     {
@@ -21,8 +21,9 @@ namespace WUIPlatform.WUInity
         bool dragging = false;
         Vector3 startDragPos;
         Vector3 startMousePos;
-        WUIPlatform.Vector2d mapSize;
+        PREACT.Vector2d _mapSize;
         bool refreshClipPlanes = false;
+        private PREACT.Engine _engine;
 
         // Use this for initialization
         void OnValidate()
@@ -33,9 +34,14 @@ namespace WUIPlatform.WUInity
             }            
         }
 
-        public void SetCameraStartPosition(Vector2d mapSize)
+        public void SetEngines(PREACT.Engine engine)
         {
-            this.mapSize = mapSize;
+            _engine = engine;
+        }
+
+        public void SetCameraStartPosition(PREACT.Vector2d mapSize)
+        {
+            _mapSize = mapSize;
             float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * c.fieldOfView * 0.5f);
             maximumY = yPos * 1.5f;
 
@@ -47,6 +53,15 @@ namespace WUIPlatform.WUInity
         // Update is called once per frame
         void Update()
         {
+            if (_engine == null)
+            {
+                return;
+            }
+            if (_engine.Input == null)
+            {
+                return;
+            }
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 if (cMode == CameraMode.twoD)
@@ -57,7 +72,7 @@ namespace WUIPlatform.WUInity
                 {
                     cMode = CameraMode.twoD;
                 }
-                SetCameraStartPosition(WUIEngine.INPUT.Simulation.DomainSize);
+                SetCameraStartPosition(_engine.Input.Simulation.DomainSize);
             }
 
             if (cMode == CameraMode.twoD)
@@ -97,9 +112,9 @@ namespace WUIPlatform.WUInity
                 }
 
                 Vector3 clampedPos = transform.position;
-                clampedPos.x = Mathf.Clamp(clampedPos.x, 0f, (float)mapSize.x);
+                clampedPos.x = Mathf.Clamp(clampedPos.x, 0f, (float)_mapSize.x);
                 clampedPos.y = Mathf.Clamp(clampedPos.y, lowestY, maximumY);
-                clampedPos.z = Mathf.Clamp(clampedPos.z, 0f, (float)mapSize.y);
+                clampedPos.z = Mathf.Clamp(clampedPos.z, 0f, (float)_mapSize.y);
                 transform.position = clampedPos;
 
                 if(refreshClipPlanes)

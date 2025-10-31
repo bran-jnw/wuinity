@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     public class MacroHouseholdSimInput
     {
@@ -20,7 +20,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             MacroHouseholdSimInput newInput = new MacroHouseholdSimInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(WalkingDistanceModifier);

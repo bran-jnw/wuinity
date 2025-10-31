@@ -26,8 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
 using System.Numerics;
+using PREACT.Utility.Math;
+using PREACT.Utility;
 
-namespace WUIPlatform
+namespace PREACT
 {
     public static class VectorExtensions
     {

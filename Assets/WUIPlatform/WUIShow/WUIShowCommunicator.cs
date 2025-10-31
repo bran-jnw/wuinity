@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using LIBSUMO = Eclipse.Sumo.Libsumo;
 
-namespace WUIPlatform.Visualization
+namespace PREACT.Visualization
 {
     public class WUIShowCommunicator
     {
@@ -27,7 +27,7 @@ namespace WUIPlatform.Visualization
 
         public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
-            WUIEngine.SIM.SetPause(true);
+            Engine.SIM.SetPause(true);
 
             udpClient = new UdpClient(serverIP, udpPort);
             Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
@@ -35,7 +35,7 @@ namespace WUIPlatform.Visualization
             this.origoLongitude = origoLongitude;
             this.origoLatitude = origoLatitude;
 
-            this.offset = WUIEngine.SIM.TrafficModule.GetOriginOffset();
+            this.offset = Engine.SIM.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentPositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
@@ -45,7 +45,7 @@ namespace WUIPlatform.Visualization
         private byte[] GetTriggerBufferData()
         {
             byte[] result = null;
-            float[,] data = WUIEngine.SIM.GetTriggerBufferData();
+            float[,] data = Engine.SIM.GetTriggerBufferData();
 
             if (data != null)
             {
@@ -77,7 +77,7 @@ namespace WUIPlatform.Visualization
         private byte[] GetFinalFireTimeOfArrival()
         {
             byte[] result = null;
-            Fire.FireRasterData[,] data = ((Fire.AscFireImport)WUIEngine.SIM.FireModule).GetCompleteFireData();
+            Fire.FireRasterData[,] data = ((Fire.AscFireImport)Engine.SIM.FireModule).GetCompleteFireData();
 
             if (data != null)
             {
@@ -94,18 +94,18 @@ namespace WUIPlatform.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetLCPSizeX();
+                double xSize = Engine.RuntimeData.Fire.LCPData.GetLCPSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetLCPSizeY();
+                double ySize = Engine.RuntimeData.Fire.LCPData.GetLCPSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin + WUIEngine.RUNTIME_DATA.Fire.LCPData.OriginOffset;
-                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
+                Vector2d lcpOriginUTM = Engine.RuntimeData.Simulation.UTMOrigin + Engine.RuntimeData.Fire.LCPData.OriginOffset;
+                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(Engine.Input.Simulation.LowerLeftLatLon.x, Engine.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;
                 double lon = lcpOriginWgs84.Lng;
@@ -158,15 +158,15 @@ namespace WUIPlatform.Visualization
 
         private byte[] GetDestinationsData()
         {            
-            List<Evacuation.EvacuationDestination> destinations = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals;
+            List<Evacuation.EvacuationDestination> destinations = Engine.RuntimeData.Evacuation.Destinations;
             //name, type, total cars, total people, total travel time, average travel time
             List<byte> data = new List<byte>();
             for(int i = 0; i < destinations.Count; ++i)
             {
                 data.AddRange(Encoding.UTF8.GetBytes(destinations[i].Name.PadRight(_maxNameLengths)));
-                data.AddRange(Encoding.UTF8.GetBytes(destinations[i].goalType.ToString().PadRight(_maxNameLengths)));
-                data.AddRange(BitConverter.GetBytes(destinations[i].cars.Count));
-                data.AddRange(BitConverter.GetBytes(destinations[i].currentPeople));
+                data.AddRange(Encoding.UTF8.GetBytes(destinations[i]._goalType.ToString().PadRight(_maxNameLengths)));
+                data.AddRange(BitConverter.GetBytes(destinations[i]._cars.Count));
+                data.AddRange(BitConverter.GetBytes(destinations[i]._currentPeople));
                 data.AddRange(BitConverter.GetBytes(destinations[i].TotalTravelTime));
                 data.AddRange(BitConverter.GetBytes(destinations[i].AverageTravelTime));
             }
@@ -190,12 +190,12 @@ namespace WUIPlatform.Visualization
             else if (request == "PAUSE")
             {
                 headerMessage = "PAUSED";
-                WUIEngine.SIM.SetPause(true);
+                Engine.SIM.SetPause(true);
             }
             else if (request == "START")
             {
                 headerMessage = "STARTED";
-                WUIEngine.SIM.SetPause(false);
+                Engine.SIM.SetPause(false);
             }
             else if (request == "TriggerBuffer")
             {
@@ -248,7 +248,7 @@ namespace WUIPlatform.Visualization
             }
 
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
-            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
+            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = Engine.SIM.TrafficModule.GetActiveVehicles();
 
             //we only have dummy data
             if(activeVehicles.Count == 0)
@@ -256,7 +256,7 @@ namespace WUIPlatform.Visualization
                 return;
             }
 
-            if (currentTime > lastTime + WUIEngine.INPUT.WUIShow.WuiShowDeltaTime)
+            if (currentTime > lastTime + Engine.Input.WUIShow.WuiShowDeltaTime)
             {
                 byte[] sendBytes = new byte[activeVehicles.Count * 16];
                 int i = 0;
@@ -347,7 +347,7 @@ namespace WUIPlatform.Visualization
                 TcpListener server = new TcpListener(IPAddress.Any, port);
 
                 server.Start();
-                WUIEngine.LOG(WUIEngine.LogType.Log, "TCP Server started on port: " + port);
+                Engine.MESSAGE(null, Engine.LogType.Log, "TCP Server started on port: " + port);
 
                 while (true)
                 {
@@ -374,14 +374,14 @@ namespace WUIPlatform.Visualization
                         }
 
                         string receivedMessage = Encoding.UTF8.GetString(buffer, 0, totalBytesRead);
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "TCP server received message: " + receivedMessage);
+                        Engine.MESSAGE(null, Engine.LogType.Log, "TCP server received message: " + receivedMessage);
                         byte[] response = handleRequestMethod(receivedMessage);
                         await stream.WriteAsync(response, 0, response.Length);
                     }
                 }
                 catch (Exception e)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Error handling wuishow TCP request: " + e.Message);
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "Error handling wuishow TCP request: " + e.Message);
                 }
                 finally
                 {

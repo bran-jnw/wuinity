@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Numerics;
-using WUIPlatform.IO;
+using PREACT.IO;
 
-namespace WUIPlatform.Pedestrian
+namespace PREACT.Pedestrian
 {
     /// <summary>
     /// A unit of people (could also be just one person) that travel together to reach their goal (car).
@@ -39,8 +39,8 @@ namespace WUIPlatform.Pedestrian
         /// <param name="responseTime"></param>
         public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
         {
-            PopulationInput popInput = WUIEngine.INPUT.Population;
-            MacroHouseholdSimInput houseInput = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
+            PopulationInput popInput = Engine.Input.Population;
+            MacroHouseholdSimInput houseInput = Engine.Input.Pedestrian.macroHouseholdSimInput;
 
             _houseHoldData = householdData;
             _cellIndex = cellIndex;
@@ -58,9 +58,9 @@ namespace WUIPlatform.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(householdData.originLatLon);
+            Vector2d temp = Engine.RuntimeData.Simulation.GetSimulationPosition(householdData.originLatLon);
             homePosition = new Vector2((float)temp.x, (float)temp.y);           
-            temp = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(householdData.roadAccessLatLon);
+            temp = Engine.RuntimeData.Simulation.GetSimulationPosition(householdData.roadAccessLatLon);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;

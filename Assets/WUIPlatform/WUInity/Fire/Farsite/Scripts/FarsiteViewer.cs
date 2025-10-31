@@ -7,9 +7,9 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using static WUIPlatform.Fire.MathWrap;
+using static PREACT.Fire.MathWrap;
 
-namespace WUIPlatform.Farsite
+namespace PREACT.Farsite
 {
     public class FarsiteViewer
     {
@@ -95,7 +95,7 @@ namespace WUIPlatform.Farsite
             print("X: " + x + ", Y:" + y);
             print(y / -x);*/
 
-            Vector2d v = global::WUIPlatform.GeoConversions.LatLonToMeters(latLong);
+            Vector2d v = global::PREACT.GeoConversions.LatLonToMeters(latLong);
             //print("X: " + v.x + ", Y:" + v.y);
         }
 

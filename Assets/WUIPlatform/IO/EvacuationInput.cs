@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class EvacuationInput
@@ -25,7 +25,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             EvacuationInput newInput = new EvacuationInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(EvacuationOrderStart);
@@ -35,7 +35,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(EvacuationOrderStart) + " was not found, using default of " + newInput.EvacuationOrderStart + " seconds.");             
+                Engine.MESSAGE(null, Engine.LogType.Warning, nameof(EvacuationOrderStart) + " was not found, using default of " + newInput.EvacuationOrderStart + " seconds.");             
             }
 
             //TODO: fix actual reading
@@ -48,7 +48,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             //TODO: fix actual reading
@@ -61,7 +61,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(EvacuationGroupsMapFile);
@@ -83,7 +83,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             input = nameof(PaintCellSize);

@@ -7,7 +7,7 @@
 
 using System.IO;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     [System.Serializable]
     public class RoadData
@@ -98,7 +98,7 @@ namespace WUIPlatform.Traffic
 
         private static void SaveRoadTypeData(RoadTypeData rTD)
         {
-            string path = Path.Combine(WUIEngine.DATA_FOLDER, "default.roads");
+            string path = Path.Combine(Engine.DataFolder, "default.roads");
             string json = UnityEngine.JsonUtility.ToJson(rTD, true);
             File.WriteAllText(path, json);            
         }
@@ -120,7 +120,7 @@ namespace WUIPlatform.Traffic
                 //creates default values
                 results = new RoadTypeData();
                 SaveRoadTypeData(results);
-                WUIEngine.INPUT.Traffic.MacroTrafficSimInput.RoadTypesFile = "default";               
+                Engine.Input.Traffic.MacroTrafficSimInput.RoadTypesFile = "default";               
             }            
 
             return results;

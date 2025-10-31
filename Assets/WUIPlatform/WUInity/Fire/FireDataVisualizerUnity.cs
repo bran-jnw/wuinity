@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using WUIPlatform.Runtime;
+using PREACT.Runtime;
 
-namespace WUIPlatform.Visualization
+namespace PREACT.Visualization
 {
     public class FireDataVisualizerUnity : FireDataVisualizer
     {
@@ -55,7 +55,7 @@ namespace WUIPlatform.Visualization
             Fire.LCPData _lcpData = owner.LCPData;
             if(_lcpData == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Trying to create LCP data plane and texture but no LCP data exists.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Trying to create LCP data plane and texture but no LCP data exists.");
                 return;
             }
 
@@ -186,7 +186,7 @@ namespace WUIPlatform.Visualization
 
         public override void ToggleLCPDataPlane()
         {
-            if (WUIEngine.RUNTIME_DATA.Fire.LCPData == null)
+            if (Engine.RuntimeData.Fire.LCPData == null)
             {
                 return;
             }
@@ -201,7 +201,7 @@ namespace WUIPlatform.Visualization
 
         public override void SetLCPDataPlane(bool setActive)
         {
-            if(WUIEngine.RUNTIME_DATA.Fire.LCPData == null)
+            if(Engine.RuntimeData.Fire.LCPData == null)
             {
                 return;
             }

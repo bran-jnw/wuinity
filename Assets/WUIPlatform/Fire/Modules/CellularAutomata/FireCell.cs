@@ -5,12 +5,12 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using static WUIPlatform.Fire.MathWrap;
+using static PREACT.Fire.MathWrap;
 using System.Runtime.InteropServices;
-using WUIPlatform.Fire.Behave;
-using WUIPlatform.IO;
+using PREACT.Fire.Behave;
+using PREACT.IO;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {  
     //[System.Serializable]
     public class FireCell                

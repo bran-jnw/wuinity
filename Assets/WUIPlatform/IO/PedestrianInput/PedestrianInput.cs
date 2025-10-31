@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class PedestrianInput
@@ -22,7 +22,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             PedestrianInput newInput = new PedestrianInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(PedestrianModule);
@@ -38,13 +38,13 @@ namespace WUIPlatform.IO
                         break;
                     default:
                         ++issues;
-                        WUIEngineInput.CouldNotInterpretInputMessage(input, userInput);
+                        Input.CouldNotInterpretInputMessage(input, userInput);
                         break;
                 }
             }
             else
             {
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             if(newInput.PedestrianModule == PedestrianModuleChoice.MacroHouseholdSim)
@@ -56,12 +56,12 @@ namespace WUIPlatform.IO
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, nameof(PedestrianModuleChoice.MacroHouseholdSim) + " input was not found, using defaults.");
+                    Engine.MESSAGE(null, Engine.LogType.Warning, nameof(PedestrianModuleChoice.MacroHouseholdSim) + " input was not found, using defaults.");
                 }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Debug, "This should not happen, trying to use non-implemented pedestrian module.");
+                Engine.MESSAGE(null, Engine.LogType.Debug, "This should not happen, trying to use non-implemented pedestrian module.");
             }
 
             return newInput;

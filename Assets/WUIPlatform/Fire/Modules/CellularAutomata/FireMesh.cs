@@ -7,10 +7,10 @@
 
 using System.Collections.Generic;
 using System;
-using WUIPlatform.Fire.Behave;
-using WUIPlatform.IO;
+using PREACT.Fire.Behave;
+using PREACT.IO;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     [System.Serializable]                                           
     public class FireMesh : FireModule                        
@@ -77,8 +77,8 @@ namespace WUIPlatform.Fire
         {
             this.lcpData = lcpData;
             _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
-            int xCells = (int)(WUIEngine.INPUT.Simulation.DomainSize.x / _cellSize.x);
-            int yCells = (int)(WUIEngine.INPUT.Simulation.DomainSize.y / _cellSize.y);
+            int xCells = (int)(Engine.Input.Simulation.DomainSize.x / _cellSize.x);
+            int yCells = (int)(Engine.Input.Simulation.DomainSize.y / _cellSize.y);
             _cellCount = new Vector2int(xCells, yCells); //Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);           
 
             this.weather = weather;
@@ -87,7 +87,7 @@ namespace WUIPlatform.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = WUIEngine.INPUT.Fire.FireCellInput.SpreadMode;
+            spreadMode = Engine.Input.Fire.FireCellInput.SpreadMode;
 
             InitializeMesh();
         }
@@ -96,12 +96,12 @@ namespace WUIPlatform.Fire
         {
             fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if(WUIEngine.DATA_STATUS.FuelModelsLoaded)
+            if(Engine.DataStatus.FuelModelsLoaded)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
+                Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
+                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
                 }
             }            
             surfaceFire = new Surface(fuelModelSet);            
@@ -315,7 +315,7 @@ namespace WUIPlatform.Fire
             for (int i = 0; i < _fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
-                if(WUIEngine.INPUT.Simulation.RunSmokeModule)
+                if(Engine.Input.Simulation.RunSmokeModule)
                 {
                     sootProduction[i] = 0.0f;
                     if (_fireCells[i].cellState == FireCellState.Burning)
@@ -367,11 +367,11 @@ namespace WUIPlatform.Fire
                 return;
             }
 
-            if(WUIEngine.INPUT.Fire.FireCellInput.UseInitialIgnitionMap)
+            if(Engine.Input.Fire.FireCellInput.UseInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
-                    if (WUIEngine.RUNTIME_DATA.Fire.InitialIgnition[i])
+                    if (Engine.RuntimeData.Fire.InitialIgnition[i])
                     {
                         FireCell f = _fireCells[i];
                         f.Ignite(currentTime);
@@ -401,7 +401,7 @@ namespace WUIPlatform.Fire
                             activeCells.Add(f);
                             ignitionPoints[i].MarkAsIgnited();
 
-                            WUIEngine.LOG(WUIEngine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
+                            Engine.MESSAGE(null, Engine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                         }
                         ++activatedIgnitions;
                     }
@@ -450,7 +450,7 @@ namespace WUIPlatform.Fire
 
         public override FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Vector2d pos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = Engine.RuntimeData.Simulation.GetSimulationPosition(latLong);
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);

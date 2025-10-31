@@ -7,7 +7,7 @@
 
 using System.Numerics;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public class MacroVehicle : TrafficModuleVehicle
     {

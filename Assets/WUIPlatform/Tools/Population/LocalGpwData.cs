@@ -7,10 +7,11 @@
 
 using System.IO;
 using System;
-using WUIPlatform.IO;
-using WUIPlatform.Runtime;
+using PREACT.IO;
+using PREACT.Runtime;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform.Population
+namespace PREACT.Population
 {
     [Serializable]
     public class LocalGPWData
@@ -62,7 +63,7 @@ namespace WUIPlatform.Population
             string[] data = new string[13];
 
             //save data stamp to make sure data fits input
-            WUIEngineInput input = WUIEngine.INPUT;
+            Input input = Engine.Input;
             string dataStamp = input.Simulation.LowerLeftLatLon.x.ToString() + " " + input.Simulation.LowerLeftLatLon.y.ToString()
                     + " " + input.Simulation.DomainSize.y.ToString() + " " + input.Simulation.DomainSize.y.ToString();
             data[0] = dataStamp;
@@ -86,7 +87,7 @@ namespace WUIPlatform.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.Id + ".gpw");
+            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Simulation.Id + ".gpw");
             File.WriteAllLines(path, data);
         }
 
@@ -147,11 +148,11 @@ namespace WUIPlatform.Population
                 }
                 _haveData = true;
                 success = true;
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded local GPW data from " + localGpwFile);
+                Engine.MESSAGE(null, Engine.LogType.Log, " Loaded local GPW data from " + localGpwFile);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " No local GPW data was found, build from global GPW or create custom population.");                
+                Engine.MESSAGE(null, Engine.LogType.Warning, " No local GPW data was found, build from global GPW or create custom population.");                
             }
 
             if(success)
@@ -268,8 +269,8 @@ namespace WUIPlatform.Population
         /// </summary>
         private bool LoadRelevantGPWData(string globalGpwFolder)
         {
-            Vector2d latLong = WUIEngine.INPUT.Simulation.LowerLeftLatLon;
-            Vector2d size = WUIEngine.INPUT.Simulation.DomainSize;
+            Vector2d latLong = Engine.Input.Simulation.LowerLeftLatLon;
+            Vector2d size = Engine.Input.Simulation.DomainSize;
 
             bool success = false;
             if (IsGPWAvailable(globalGpwFolder))
@@ -285,25 +286,25 @@ namespace WUIPlatform.Population
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
                         relevantAscFile = AscFiles[0];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 1");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 1");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
                         relevantAscFile = AscFiles[1];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 2");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 2");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
                         relevantAscFile = AscFiles[2];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 3");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 3");
                     }
                     else
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
                         relevantAscFile = AscFiles[3];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 4");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 4");
                     }
                 }
                 else
@@ -312,25 +313,25 @@ namespace WUIPlatform.Population
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
                         relevantAscFile = AscFiles[4];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 5");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 5");
                     }
                     else if (latLong.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
                         relevantAscFile = AscFiles[5];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 6");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 6");
                     }
                     else if (latLong.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
                         relevantAscFile = AscFiles[6];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 7");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 7");
                     }
                     else
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
                         relevantAscFile = AscFiles[7];
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Loading GPW from sector 8");
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 8");
                     }
                 }
 
@@ -347,7 +348,7 @@ namespace WUIPlatform.Population
             if (Directory.Exists(path))
             {
                 string[] AscFiles = Directory.GetFiles(path, "*.asc");
-                WUIEngine.LOG(WUIEngine.LogType.Log, AscFiles.Length.ToString() + " GPW files found.");
+                Engine.MESSAGE(null, Engine.LogType.Log, AscFiles.Length.ToString() + " GPW files found.");
 
                 if (AscFiles.Length == 8)
                 {
@@ -355,12 +356,12 @@ namespace WUIPlatform.Population
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Not all GPW files found.");
+                    Engine.MESSAGE(null, Engine.LogType.SimError, "Not all GPW files found.");
                 }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "GPW path does NOT exist.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "GPW path does NOT exist.");
             }
 
             return isAvailable;
@@ -382,7 +383,7 @@ namespace WUIPlatform.Population
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, " Global GPW data files not found. Please make sure the folder structure is correct.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, " Global GPW data files not found. Please make sure the folder structure is correct.");
                 return false;
             }
 

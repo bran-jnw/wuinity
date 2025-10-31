@@ -8,10 +8,10 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
-    public class WUIEngineOutput
+    public class Output
     {
         private float _totalAverageEvacTime;
         public float TotalAverageEvacTime { get => _totalAverageEvacTime; }
@@ -20,7 +20,7 @@ namespace WUIPlatform.IO
         private List<float> _averageEvacTimes;
 
 
-        public WUIEngineOutput()
+        public Output()
         {
             _evac = new EvacOutput();
             _averageEvacTimes = new List<float>();

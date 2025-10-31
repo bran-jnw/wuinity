@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform.Evacuation
+namespace PREACT.Evacuation
 {
     [System.Serializable]
     public struct ResponseDataPoint
@@ -50,9 +50,9 @@ namespace WUIPlatform.Evacuation
         {
             success = false;
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
-            for (int i = 0; i < WUIEngine.INPUT.Evacuation.ResponseCurveFiles.Length; i++)
+            for (int i = 0; i < Engine.Input.Evacuation.ResponseCurveFiles.Length; i++)
             {
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]);
+                string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Evacuation.ResponseCurveFiles[i]);
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -79,15 +79,15 @@ namespace WUIPlatform.Evacuation
                     //need at least two to make a curve
                     if(dataPoints.Count >= 2)
                     {
-                        string file = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.ResponseCurveFiles[i]);
+                        string file = Path.Combine(Engine.WorkingFolder, Engine.Input.Evacuation.ResponseCurveFiles[i]);
                         string name = Path.GetFileNameWithoutExtension(file);
                         responseCurves.Add(new ResponseCurve(dataPoints, name));
-                        WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
+                        Engine.MESSAGE(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
                     }                    
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
                 }
             }
 
@@ -99,7 +99,7 @@ namespace WUIPlatform.Evacuation
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, " No response curves could be loaded, simulation will stall.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, " No response curves could be loaded, simulation will stall.");
                 return null;
             }   
         }

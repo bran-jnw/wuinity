@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     [System.Serializable]
     public struct WindData                  
@@ -83,9 +83,9 @@ namespace WUIPlatform.Fire
             if(dataPoints.Length > 1)       
             {
                 w.direction = directionSpline.GetYValue(time);
-                if(WUIEngine.INPUT.Fire.FireModule == IO.FireInput.FireModuleChoice.FireCell)
+                if(Engine.Input.Fire.FireModule == IO.FireInput.FireModuleChoice.FireCell)
                 {
-                    w.speed = speedSpline.GetYValue(time) * WUIEngine.INPUT.Fire.FireCellInput.WindMultiplier;
+                    w.speed = speedSpline.GetYValue(time) * Engine.Input.Fire.FireCellInput.WindMultiplier;
                 }                
                 w.cloudCover = cloudSpline.GetYValue(time);
             }
@@ -132,7 +132,7 @@ namespace WUIPlatform.Fire
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.WindFile);
+            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.WindFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
@@ -195,18 +195,18 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
             {
                 result = new WindInput(windData.ToArray());
                 success = true;
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

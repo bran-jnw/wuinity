@@ -28,7 +28,7 @@ Port from javascript to c#, Copyright (c) 2024 Jonathan Wahlqvist
 
 using System;
 
-namespace WUIPlatform.Utility
+namespace PREACT.Utility
 {
     //Port from javascript to c#
     //Javascript source: 

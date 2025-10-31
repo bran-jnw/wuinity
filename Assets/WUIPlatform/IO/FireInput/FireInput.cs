@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class FireInput
@@ -25,7 +25,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             FireInput newInput = new FireInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(FireModule);
@@ -44,14 +44,14 @@ namespace WUIPlatform.IO
                         break;
                     default:
                         ++issues;
-                        WUIEngine.LOG(WUIEngine.LogType.SimError, input + " input " + userInput + " was not recognized." + WUIEngineInput.pleaseCheckInput);
+                        Engine.MESSAGE(null, Engine.LogType.SimError, input + " input " + userInput + " was not recognized." + Input.pleaseCheckInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                WUIEngineInput.InputNotFoundMessage(input);
+                Input.InputNotFoundMessage(input);
             }
 
             if (inputToParse.TryGetValue(nameof(LcpFile), out userInput))
@@ -61,7 +61,7 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, nameof(LcpFile) + " was not specified." + WUIEngineInput.pleaseCheckInput);
+                Engine.MESSAGE(null, Engine.LogType.SimError, nameof(LcpFile) + " was not specified." + Input.pleaseCheckInput);
             }
 
             if (inputToParse.TryGetValue(nameof(GraphicalFireInputFile), out userInput))
@@ -71,14 +71,14 @@ namespace WUIPlatform.IO
             else
             {
                 ++issues;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, nameof(GraphicalFireInputFile) + " was not specified." + WUIEngineInput.pleaseCheckInput);
+                Engine.MESSAGE(null, Engine.LogType.SimError, nameof(GraphicalFireInputFile) + " was not specified." + Input.pleaseCheckInput);
             }
 
             //now check modules that have been selected
             if (newInput.FireModule == FireModuleChoice.AscImport)
             {
                 input = nameof(FireModuleChoice.AscImport);
-                WUIEngineInput.ReadingInputMessage(input);
+                Input.ReadingInputMessage(input);
                 int lineindex;
                 if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
@@ -87,14 +87,14 @@ namespace WUIPlatform.IO
                 else
                 {
                     //critical
-                    WUIEngineInput.InputNotFoundMessage(input);
+                    Input.InputNotFoundMessage(input);
                     return null;
                 }
             }
             else if (newInput.FireModule == FireModuleChoice.FireCell)
             {
                 input = nameof(FireModuleChoice.FireCell);
-                WUIEngineInput.ReadingInputMessage(input);
+                Input.ReadingInputMessage(input);
                 int lineindex;
                 if (headerLineIndex.TryGetValue(input, out lineindex))
                 {
@@ -103,7 +103,7 @@ namespace WUIPlatform.IO
                 else
                 {
                     //critical
-                    WUIEngineInput.InputNotFoundMessage(input);
+                    Input.InputNotFoundMessage(input);
                     return null;
                 }
             }

@@ -5,115 +5,73 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using WUIPlatform.Population;
-using WUIPlatform.Runtime;
-using WUIPlatform.IO;
+using PREACT.Runtime;
+using PREACT.IO;
 using System.IO;
 using System.Collections.Generic;
 using System;
+using PREACT.Utility.Math;
+using PREACT.Utility.Analysis;
 
-namespace WUIPlatform
+namespace PREACT
 {    
-    public class WUIEngine
-    {        
-        private WUIEngineInput _input;
-        public static WUIEngineInput INPUT { get => ENGINE._input; }
-        private WUIEngineOutput _output;
-        private string _workingFilePath;
-        private DataStatus _dataStatus;       
+    public class Engine
+    {
+        private static Engine _ENGINE;
+        private ExternalManager _externalManager;
+        private Scenario _scenario;
+        private Simulation[] _simulations;
+        private Simulation _mainSimulation; //this one talks to any visualizer         
+        private Input _input;
+        private RuntimeData _runtimeData;
+        private DataStatus _dataStatus;
+        private Output _output;        
+        private string _workingFile;
+        private Visualization.WUIShowCommunicator _wuiShow;
 
+        public Scenario Scenario { get => _scenario; }
+        public Simulation Simulation { get => _mainSimulation; }
+        public Input Input { get => _input; }
+        public DataStatus DataStatus { get => _dataStatus; }        
+        public string WorkingFile { get => _workingFile; }
+        public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
+        public RuntimeData RuntimeData { get => _runtimeData; }
+        public Output Output { get => _output; }
+        public string DataFolder { get => Directory.GetCurrentDirectory(); }
+        public string WorkingFolder { get => Path.GetDirectoryName(WorkingFile); }
+        public string OutputFolder
+        {
+            get
+            {
+                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WorkingFile).ToString(), Input.Simulation.Id + "_output"));
+                return path.ToString();
+            }
+        }
+
+        public Engine(ExternalManager externalManager)
+        {
+            //needed for proper reading of input files on all systems
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            _output = new Output();
+            _externalManager = externalManager;
+            _ENGINE = this;
+        }      
+       
         private struct ValidCriticalData
         {
             public Vector2d lowerLeftLatLong;
             public Vector2d size;
             public float routeCellSize;
 
-            public ValidCriticalData(WUIEngineInput input)
+            public ValidCriticalData(Input input)
             {
                 lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
                 size = input.Simulation.DomainSize;
                 routeCellSize = input.Evacuation.PaintCellSize;
             }
         }
-        ValidCriticalData validInput;
-          
-        private static readonly WUIEngine _ENGINE = new WUIEngine();
-        public static WUIEngine ENGINE { get => _ENGINE; }
+        ValidCriticalData _validInput;
 
-        private WUIEngine()
-        {
-            //needed for proper reading of input files on all systems
-            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-        }
-
-        public static Simulation SIM
-        {
-            get
-            {
-                if (ENGINE._mainSimulation == null)
-                {
-                    ENGINE._mainSimulation = new Simulation(ENGINE, INPUT, 0);
-                }
-                return ENGINE._mainSimulation;
-            }
-        }
-
-        RuntimeData _runtimeData;
-        public static RuntimeData RUNTIME_DATA
-        {
-            get
-            {
-                return ENGINE._runtimeData;
-            }
-        }
-
-        public static DataStatus DATA_STATUS
-        {
-            get
-            {
-                if (ENGINE._dataStatus == null)
-                {
-                    ENGINE._dataStatus = new DataStatus();
-                }
-                return ENGINE._dataStatus;
-            }
-        }        
-
-        public static WUIEngineOutput OUTPUT
-        {
-            get
-            {
-                if (ENGINE._output == null)
-                {
-                    ENGINE._output = new WUIEngineOutput();
-                }
-                return ENGINE._output;
-            }
-        }
-
-        public static string DATA_FOLDER { get => Directory.GetCurrentDirectory(); }
-
-        public string WORKING_FILE
-        {
-            get => _workingFilePath;        
-            set => _workingFilePath = value;
-        }
-
-        public string WORKING_FOLDER { get => Path.GetDirectoryName(WORKING_FILE); }
-
-        public string OutputFolder
-        {
-            get
-            {
-                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WORKING_FILE).ToString(), INPUT.Simulation.Id + "_output"));
-                return path.ToString();
-            }
-        }
-
-        Simulation[] _simulations;
-        Simulation _mainSimulation; //this one talks to any visualizer 
-        private Visualization.WUIShowCommunicator _wuiShow;
-        public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }
         public async void RunSimulations(bool runInParallel = false)
         {
             try
@@ -145,7 +103,8 @@ namespace WUIPlatform
                 _simulations[i] = new Simulation(this, _input, i);
                 _mainSimulation = _simulations[i];
                 _simulations[i].Run();
-                if(_stopSimulations)
+                CollectSimulationStatistics(_simulations[i]);
+                if (_stopSimulations)
                 {
                     break;
                 }
@@ -154,7 +113,7 @@ namespace WUIPlatform
             PostSimulations();
         }
 
-        private void RunSimulationsParalellProcesses()
+        private void RunSimulationsParalellProcess()
         {
             //run one sim in this process
             _simulations[0].Run();
@@ -164,7 +123,7 @@ namespace WUIPlatform
 
             var process = new System.Diagnostics.Process
             {
-                StartInfo = { FileName = "wuinity.exe", Arguments= WORKING_FILE },
+                StartInfo = { FileName = "wuinity.exe", Arguments= WorkingFile },
                 EnableRaisingEvents = true
             };
 
@@ -179,22 +138,38 @@ namespace WUIPlatform
             //collect the data written to disk to create output
         }
 
+        const int _parallellRunCount = 4;        
         private void RunSimulationsParallel()
         {
             PreSimulations();
 
             //Currently this will not work as SUMO can only run one instance per process, need to find workaround
-            System.Threading.Tasks.Parallel.For(0, _simulations.Length, index =>
+            int batches = RuntimeData.Simulation.NumberOfRuns / _parallellRunCount + RuntimeData.Simulation.NumberOfRuns % _parallellRunCount > 0 ? 1 : 0;
+            for (int i = 0; i < batches; ++i)
             {
-                try
+                int startIndex = batches * _parallellRunCount;
+                int endIndex = Math.Min(startIndex + _parallellRunCount, RuntimeData.Simulation.NumberOfRuns);
+                System.Threading.Tasks.Parallel.For(startIndex, endIndex, index =>
                 {
-                    _simulations[index].Run();
-                }
-                catch (Exception e)
+                    try
+                    {
+                        _simulations[index].Run();
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+                });
+
+                for(int j = startIndex; j < endIndex; ++j)
                 {
-                    throw e;
+                    CollectSimulationStatistics(_simulations[j]);
                 }
-            });
+                if(_stopSimulations)
+                {
+                    break;
+                }
+            }                
 
             PostSimulations();
         }
@@ -205,7 +180,7 @@ namespace WUIPlatform
 
             if (parallel)
             {
-                _simulations = new Simulation[RUNTIME_DATA.Simulation.NumberOfRuns];
+                _simulations = new Simulation[RuntimeData.Simulation.NumberOfRuns];
                 for (int i = 0; i < _simulations.Length; ++i)
                 {
                     _simulations[i] = new Simulation(this, _input, i);
@@ -254,15 +229,15 @@ namespace WUIPlatform
 
             if (convergedInSequence >= 10)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
 
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
 
-            WUIEngineOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Id + ".log"));
+            Output.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Id + ".log"));
         }
 
         float cumulativeTotalEvacTime = 0.0f;
@@ -272,7 +247,7 @@ namespace WUIPlatform
         /// Each simulation calls this function when it is done to see if evacuation time has vonverged and simulations should be stopped.
         /// </summary>
         /// <param name="simulation"></param>
-        public void CollectSimulationStatistics(Simulation simulation)
+        private void CollectSimulationStatistics(Simulation simulation)
         {
             lock(trafficArrivalDataCollection)
             {
@@ -294,14 +269,14 @@ namespace WUIPlatform
                     float currentAverage = cumulativeTotalEvacTime / resultCount;
                     float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
                     //if convergence met we can stop
-                    if (convergenceCriteria < RUNTIME_DATA.Simulation.ConvergenceMaxDifference)
+                    if (convergenceCriteria < RuntimeData.Simulation.ConvergenceMaxDifference)
                     {
                         ++convergedInSequence;
                         //we are done
-                        if (_input.Simulation.StopAfterConverging && convergedInSequence > RUNTIME_DATA.Simulation.ConvergenceMinSequence)
+                        if (_input.Simulation.StopAfterConverging && convergedInSequence > RuntimeData.Simulation.ConvergenceMinSequence)
                         {
                             _stopSimulations = true; //needed for serial run
-                            Close(); //needed for parallel run
+                            Close(false); //needed for parallel run
                         }
                     }
                     else
@@ -325,7 +300,7 @@ namespace WUIPlatform
             {
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
-            WUIEngineInput wuiIn = INPUT;
+            Input wuiIn = Input;
             string path = Path.Combine(OutputFolder, wuiIn.Simulation.Id + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }
@@ -354,76 +329,68 @@ namespace WUIPlatform
             return _plotBytes;
         }
 
-        /// <summary>
-        /// Load an existing file and try to validate all of the associated data.
-        /// If data is valid it is also loaded.
-        /// </summary>
-        /// <param name="input"></param>
-        public void SetNewInputData(WUIEngineInput input)
-        {      
-            DATA_STATUS.Reset();
-            DATA_STATUS.HaveInput = true;
-            if (input == null)
-            {
-                _input = new WUIEngineInput();
-            }
-            else
-            {
-                _input = input;
-            }
-
-            validInput = new ValidCriticalData(_input);
-
-            _runtimeData = new RuntimeData();
-            //transform input to actual data
-            LOG(LogType.Log, "Loading referenced data from input file...");
-            RUNTIME_DATA.Evacuation.LoadAll();
-            RUNTIME_DATA.Population.LoadAll();
-            //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now
-            //need to load evacuation goals before routing as they rely on evacuation goals
-            RUNTIME_DATA.Traffic.LoadAll();
-            RUNTIME_DATA.Fire.LoadAll();
-            RUNTIME_DATA.Smoke.LoadAll(); //does nothing right now
-
-            UpdateMapResourceStatus();
-
-#if USING_UNITY
-            WUInity.WUInityEngine.GUI.SetDirty();
-            //this needs map and evac goals
-            WUInity.WUInityEngine.INSTANCE.SpawnEvacuationGoalMarkers();
-#endif
-
-
-        }
-
-        /// <summary>
-        /// Called when the user want to create a new file from scratch in the GUI.
-        /// </summary>
-        /// <param name="input"></param>
-        public void CreateNewInputData()
+        public void SetInput(Input input)
         {
-            SetNewInputData(null);
+            _input = input;
         }
 
+        public void LoadInputFromFile(string path)
+        {
+            Input input = Input.LoadFromDisk(this, path);
+
+            if(input != null)
+            {
+                _workingFile = path;
+                _dataStatus.Reset();
+                _dataStatus.HaveInput = true;
+                if (input == null)
+                {
+                    _input = new Input();
+                }
+                else
+                {
+                    _input = input;
+                }
+
+                _validInput = new ValidCriticalData(_input);
+
+                _runtimeData = new RuntimeData();
+                //transform input to actual data
+                Message(null, LogType.Log, "Loading referenced data from input file...");
+                _runtimeData.Evacuation.LoadAll();
+                _runtimeData.Population.LoadAll();
+                //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now
+                //need to load evacuation goals before routing as they rely on evacuation goals
+                _runtimeData.Traffic.LoadAll();
+                _runtimeData.Fire.LoadAll();
+                _runtimeData.Smoke.LoadAll(); //does nothing right now
+
+                UpdateMapResourceStatus();
+
+                if(_externalManager != null)
+                {
+                    _externalManager.InputHasChanged();
+                }
+            }
+        }
 
         public void UpdateMapResourceStatus()
         {
-#if USING_UNITY
-            DATA_STATUS.MapLoaded = WUInity.WUInityEngine.INSTANCE.LoadMapbox();
-            WUInity.WUInityEngine.INSTANCE.UpdateSimBorders();
-            WUInity.WUInityEngine.INSTANCE.WUICamera.SetCameraStartPosition(INPUT.Simulation.DomainSize);
-#endif
+            if(_externalManager != null)
+            {
+                _externalManager.UpdateMap();
+            }
             bool coordinatesAreDirty = true;
             bool sizeIsDirty = true;
 
-            if (validInput.lowerLeftLatLong.x == INPUT.Simulation.LowerLeftLatLon.x
-                && validInput.lowerLeftLatLong.y == INPUT.Simulation.LowerLeftLatLon.y)
+            if (_validInput.lowerLeftLatLong.x == Input.Simulation.LowerLeftLatLon.x
+                && _validInput.lowerLeftLatLong.y == Input.Simulation.LowerLeftLatLon.y)
             {
                 coordinatesAreDirty = false;
             }
 
-            if (validInput.size.x == INPUT.Simulation.DomainSize.x
-                && validInput.size.y == INPUT.Simulation.DomainSize.y)
+            if (_validInput.size.x == Input.Simulation.DomainSize.x
+                && _validInput.size.y == Input.Simulation.DomainSize.y)
             {
                 sizeIsDirty = false;
             }
@@ -432,22 +399,29 @@ namespace WUIPlatform
             if (coordinatesAreDirty || sizeIsDirty)
             {
                 //basically mark all data as not valid anymore
-                DATA_STATUS.Reset();
-                DATA_STATUS.MapLoaded = true;
+                DataStatus.Reset();
             }
 
             //set cached data to be current data
-            validInput.size = INPUT.Simulation.DomainSize;
-            validInput.lowerLeftLatLong = INPUT.Simulation.LowerLeftLatLon;
+            _validInput.size = Input.Simulation.DomainSize;
+            _validInput.lowerLeftLatLong = Input.Simulation.LowerLeftLatLon;
         }
 
         public void UpdateEvacResourceStatus()
         {
             bool cellSizeIsDirty = true;
 
-            if (validInput.routeCellSize == _input.Evacuation.PaintCellSize)
+            if (_validInput.routeCellSize == _input.Evacuation.PaintCellSize)
             {
                 cellSizeIsDirty = false;
+            }
+        }
+
+        public static void MESSAGE(Simulation simulation, LogType logType, string message)
+        {
+            if(_ENGINE != null)
+            {
+                _ENGINE.Message(simulation, logType, message);
             }
         }
         
@@ -457,11 +431,11 @@ namespace WUIPlatform
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
         /// <param name="message"></param>
-        public static void LOG(LogType logType, string message)
+        public void Message(Simulation simulation, LogType logType, string message)
         {
-            if (SIM.State == Simulation.SimulationState.Running)
+            if (simulation != null && simulation.State == Simulation.SimulationState.Running)
             {
-                message = "[" + (int)SIM.CurrentTime + "s] " + message;
+                message = "[Simulation# " + simulation.SimulationIndex + ", " +(int)simulation.CurrentTime + "s] " + message;
             }
 
             if (logType == LogType.Warning)
@@ -485,7 +459,7 @@ namespace WUIPlatform
                 message = "LOG: " + message;
             }
 
-            ENGINE._consoleLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
+            _consoleLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
 
 #if USING_UNITY
             if (UnityEngine.Application.isEditor) //&& !WUInity.WUInityEngine.INSTANCE.SuppressMessages) // || UnityEngine.Debug.isDebugBuild
@@ -496,24 +470,24 @@ namespace WUIPlatform
 
             if (logType == LogType.SimError)
             {
-                SIM.Stop("Simulation can't run, please check log.", true);
+                Close(true);
             }           
         }
 
         static string[] logBuffer;
-        public static string[] GetLog()
+        public string[] GetMessageLog()
         {
-            if (logBuffer == null || logBuffer.Length != ENGINE._consoleLog.Count)
+            if (logBuffer == null || logBuffer.Length != _consoleLog.Count)
             {
-                logBuffer = ENGINE._consoleLog.ToArray();
+                logBuffer = _consoleLog.ToArray();
             }
 
             return logBuffer;
         }
 
-        public static void ClearLog()
+        public void ClearLog()
         {
-            ENGINE._consoleLog.Clear();
+            _consoleLog.Clear();
         }
 
         public void PauseSimulations()
@@ -524,14 +498,21 @@ namespace WUIPlatform
             }
         }
 
-        public void Close()
+        public void Close(bool stoppedDueToError)
         {
             _stopSimulations = true;
             for (int i = 0; i < _simulations.Length; ++i)
             {
                 if(_simulations[i] != null)
                 {
-                    _simulations[i].Stop("User has requested closing.", false);
+                    if(stoppedDueToError)
+                    {
+                        _simulations[i].Stop("Critical error in simulation, aborting.", true);
+                    }
+                    else
+                    {
+                        _simulations[i].Stop("User has requested closing.", false);
+                    }
                 }
             }
         }

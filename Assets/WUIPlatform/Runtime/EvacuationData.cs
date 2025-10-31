@@ -6,19 +6,27 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using WUIPlatform.IO;
-using WUIPlatform.Evacuation;
+using PREACT.IO;
+using PREACT.Evacuation;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     public class EvacuationData
     {
+        private Engine _engine;
+
+        public EvacuationData(Engine engine)
+        {
+            _engine = engine;
+        }
+
         private Vector2int _cellCount;
         public Vector2int CellCount
         {
             get
             {
-                WUIEngineInput input = WUIEngine.INPUT;
+                Input input = _engine.Input;
                 _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.PaintCellSize);
                 _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.PaintCellSize);
                 return _cellCount;
@@ -53,7 +61,7 @@ namespace WUIPlatform.Runtime
         }
 
         private List<EvacuationDestination> _evacuationGoals;
-        public List<EvacuationDestination> EvacuationGoals
+        public List<EvacuationDestination> Destinations
         {
             get
             {
@@ -62,19 +70,13 @@ namespace WUIPlatform.Runtime
         }
 
         private EvacuationGroup[] _evacuationGroups;
-        public EvacuationGroup[] EvacuationGroups
-        {
-            get
-            {
-                return _evacuationGroups;
-            }
-        }
+        public EvacuationGroup[] EvacuationGroups { get=> _evacuationGroups; }
 
         public void LoadAll()
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Evacuation data...");
+            _engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
             
-            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            if(_engine.Input.Simulation.RunPedestrianModule)
             {
                 //need goals and curves before can load groups
                 LoadResponseCurves();
@@ -98,7 +100,7 @@ namespace WUIPlatform.Runtime
         {
             bool success;
             //fills with first group if "failed", as in could not load but creates default
-            string path = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Evacuation.EvacuationGroupsMapFile);
+            string path = System.IO.Path.Combine(_engine.WorkingFolder, _engine.Input.Evacuation.EvacuationGroupsMapFile);
             EvacuationGroup.LoadEvacGroupIndices(path, out success);
 
             return success;
@@ -115,7 +117,7 @@ namespace WUIPlatform.Runtime
         public bool LoadEvacuationGoals()
         {
             bool success;
-            _evacuationGoals = EvacuationDestination.LoadEvacuationGoalFiles(out success);
+            _evacuationGoals = EvacuationDestination.LoadEvacuationGoalFiles(_engine, out success);
 
             return success;
         }        
@@ -186,9 +188,9 @@ namespace WUIPlatform.Runtime
         public int GetEvacGoalIndexFromName(string name)
         {
             int index = -1;
-            for (int i = 0; i < EvacuationGoals.Count; i++)
+            for (int i = 0; i < Destinations.Count; i++)
             {
-                if (name == EvacuationGoals[i].Name)
+                if (name == Destinations[i].Name)
                 {
                     index = i;
                     break;
@@ -197,7 +199,7 @@ namespace WUIPlatform.Runtime
 
             if (index < 0)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                _engine.Message(null, Engine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -217,7 +219,7 @@ namespace WUIPlatform.Runtime
 
             if (index < 0)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " User has specified a response curve named " + name + " but no such response curve has been defined.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " User has specified a response curve named " + name + " but no such response curve has been defined.");
             }
 
             return index;
@@ -225,36 +227,35 @@ namespace WUIPlatform.Runtime
 
         public EvacuationGroup GetEvacGroup(int cellIndex)
         {
-            WUIEngineInput input = WUIEngine.INPUT;
-            if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
+            if (EvacGroupIndices.Length < CellCount.x * CellCount.y)
             {
                 return null;
             }
 
-            cellIndex = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[cellIndex];
+            cellIndex = EvacGroupIndices[cellIndex];
 
             return EvacuationGroups[cellIndex];
         }
 
         public EvacuationGroup GetEvacGroup(int x, int y)
         {
-            WUIEngineInput input = WUIEngine.INPUT;
-            if (WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices.Length < WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.y)
+            if (EvacGroupIndices.Length < CellCount.x * CellCount.y)
             {
                 return null;
             }
 
-            int index = x + y * WUIEngine.RUNTIME_DATA.Evacuation.CellCount.x;
-            index = WUIEngine.RUNTIME_DATA.Evacuation.EvacGroupIndices[index];
+            int index = x + y * CellCount.x;
+            index = EvacGroupIndices[index];
+
             return EvacuationGroups[index];
         }
 
         public uint GetTotalEvacuated()
         {
             uint result = 0;
-            for (int i = 0; i < EvacuationGoals.Count; i++)
+            for (int i = 0; i < Destinations.Count; i++)
             {
-                result += EvacuationGoals[i].currentPeople;
+                result += Destinations[i].CurrentPeople;
             }
 
             return result;

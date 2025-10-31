@@ -7,9 +7,9 @@
 
 using System.Collections.Generic;
 using System.IO;
-using WUIPlatform.Population;
+using PREACT.Population;
 
-namespace WUIPlatform.Runtime
+namespace PREACT.Runtime
 {
     public class PopulationData
     {    
@@ -56,11 +56,11 @@ namespace WUIPlatform.Runtime
 
         public void LoadAll()
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Loading Population data...");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Population data...");
             
-            if(WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            if(Engine.Input.Simulation.RunPedestrianModule)
             {
-                LoadPopulation(Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Population.PopulationFile));
+                LoadPopulation(Path.Combine(Engine.WorkingFolder, Engine.Input.Population.PopulationFile));
             }            
         }
         
@@ -95,15 +95,15 @@ namespace WUIPlatform.Runtime
                     }
 
                     success = true;
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(path) + " containing " + _totalPopulation + " people and " + _householdData.Length + " households.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(path) + " containing " + _totalPopulation + " people and " + _householdData.Length + " households.");
                 }                
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.InputError, "Population file " + path + " could not be found.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, "Population file " + path + " could not be found.");
             }
 
-            WUIEngine.DATA_STATUS.SetPopulation(success);
+            Engine.DataStatus.SetPopulation(success);
             return success;
         }        
     }

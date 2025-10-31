@@ -5,16 +5,16 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using WUIPlatform.Evacuation;
-using WUIPlatform.Pedestrian;
-using WUIPlatform.Traffic;
-using WUIPlatform.Fire;
-using WUIPlatform.Smoke;
-using WUIPlatform.IO;
+using PREACT.Utility.Math;
+using PREACT.Evacuation;
+using PREACT.Pedestrian;
+using PREACT.Traffic;
+using PREACT.Fire;
+using PREACT.Smoke;
+using PREACT.IO;
 using System.Threading;
 
-namespace WUIPlatform
+namespace PREACT
 {
     [System.Serializable]
     public class Simulation
@@ -61,13 +61,15 @@ namespace WUIPlatform
         private System.Diagnostics.Stopwatch _smokeStopwatch = new System.Diagnostics.Stopwatch();
         private System.Diagnostics.Stopwatch _pathfindingStopwatch = new System.Diagnostics.Stopwatch();
 
-        WUIEngineInput _input;
-        public WUIEngineInput Input { get => _input; }
+        Input _input;
+        public Input Input { get => _input; }
         int _simulationIndex;
-        WUIEngine _engine;
+        public int SimulationIndex { get => _simulationIndex; }
+        private Engine _engine;
+        public Engine Engine { get => _engine; }
 
 
-        public Simulation(WUIEngine engine, WUIEngineInput input, int simulationId)
+        public Simulation(Engine engine, Input input, int simulationId)
         {
             _engine = engine;
             _input = input;
@@ -95,7 +97,7 @@ namespace WUIPlatform
             }
 
             StopModules();
-            WUIEngine.OUTPUT.AddEvacTime(CurrentTime);
+            _engine.Output.AddEvacTime(CurrentTime);
 
             if (!_stoppedDueToError)
             {
@@ -131,7 +133,7 @@ namespace WUIPlatform
             _stopRun = false;
             _stoppedDueToError = false;
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
+            Message(Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
             CreateSubModules();
             //when creating modules we migth have found an issue
             if (_stopRun)
@@ -141,31 +143,31 @@ namespace WUIPlatform
             }            
 
             //if we do multiple runs the goals have to be reset
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+            /*for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
             {
-                WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].ResetPeopleAndCars();
-            }
+                _engine.RuntimeData.Evacuation.Destinations[i].ResetPeopleAndCars();
+            }*/
 
             //pick start time based on curve or 0 (fire start)
             _currentTime = 0f;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves.Length; i++)
+            for (int i = 0; i < _engine.RuntimeData.Evacuation.ResponseCurves.Length; i++)
             {
-                float t = WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves[i].dataPoints[0].time + WUIEngine.INPUT.Evacuation.EvacuationOrderStart;
+                float t = _engine.RuntimeData.Evacuation.ResponseCurves[i].dataPoints[0].time + _engine.Input.Evacuation.EvacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
 
             //inject any traffic events into traffic module
-            if (WUIEngine.INPUT.Simulation.RunTrafficModule && WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            if (_engine.Input.Simulation.RunTrafficModule && _engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
-                for (int i = 0; i < WUIEngine.INPUT.Traffic.MacroTrafficSimInput.TrafficAccidents.Length; i++)
+                for (int i = 0; i < _engine.Input.Traffic.MacroTrafficSimInput.TrafficAccidents.Length; i++)
                 {
-                    _trafficModule.InsertNewTrafficEvent(WUIEngine.INPUT.Traffic.MacroTrafficSimInput.TrafficAccidents[i]);
+                    _trafficModule.InsertNewTrafficEvent(_engine.Input.Traffic.MacroTrafficSimInput.TrafficAccidents[i]);
                 }
 
-                for (int i = 0; i < WUIEngine.INPUT.Traffic.MacroTrafficSimInput.ReverseLanes.Length; i++)
+                for (int i = 0; i < _engine.Input.Traffic.MacroTrafficSimInput.ReverseLanes.Length; i++)
                 {
-                    _trafficModule.InsertNewTrafficEvent(WUIEngine.INPUT.Traffic.MacroTrafficSimInput.ReverseLanes[i]);
+                    _trafficModule.InsertNewTrafficEvent(_engine.Input.Traffic.MacroTrafficSimInput.ReverseLanes[i]);
                 }
             }
 
@@ -175,7 +177,7 @@ namespace WUIPlatform
             nextFireUpdate = 0f; //fire start is always 0 seconds
 
             //only update visuals if doing single run
-            //if (!WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations)
+            //if (!WUI_engine.RUNTIME_DATA.Simulation.MultipleSimulations)
             //{
             _haveResults = true;
             //}
@@ -187,29 +189,27 @@ namespace WUIPlatform
             {
                 _haveResults = true;
 
-                _engine.CollectSimulationStatistics(this);
-
-                if (WUIEngine.INPUT.TriggerBuffer.CalculateTriggerBuffer)
+                if (_engine.Input.TriggerBuffer.CalculateTriggerBuffer)
                 {
-                    if (WUIEngine.INPUT.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
+                    if (_engine.Input.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
                     {
-                        if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
+                        if (_engine.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
                         {
-                            _triggerBufferDataOutput = WUIPlatformPERIL.RunPERIL(WUIEngine.INPUT.TriggerBuffer.kPERILInput.MidflameWindspeed);
+                            _triggerBufferDataOutput = WUIPlatformPERIL.RunPERIL(_engine.Input.TriggerBuffer.kPERILInput.MidflameWindspeed);
                         }
                     }
                 }
             }
 
             _simulationStopWatch.Stop();
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent [s]:" + _simulationStopWatch.ElapsedMilliseconds * 0.001);
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in pedestrian module [s]:" + _pedestrianStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pedestrianStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in traffic module [s]:" + _trafficStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _trafficStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in fire module [s]:" + _fireStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _fireStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Message(Engine.LogType.Log, "Total time spent [s]:" + _simulationStopWatch.ElapsedMilliseconds * 0.001);
+            Message(Engine.LogType.Log, "Total time spent in pedestrian module [s]:" + _pedestrianStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pedestrianStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Message(Engine.LogType.Log, "Total time spent in traffic module [s]:" + _trafficStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _trafficStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Message(Engine.LogType.Log, "Total time spent in fire module [s]:" + _fireStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _fireStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Message(Engine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Message(Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
             _state = SimulationState.Finished;
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Simulation done.");            
+            Message(Engine.LogType.Log, " Simulation done.");            
         }
         
         private void CreateSubModules()
@@ -240,67 +240,67 @@ namespace WUIPlatform
                 return;
             }
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "All requested sub-modules initiated successfully.");
+            Message(Engine.LogType.Log, "All requested sub-modules initiated successfully.");
         }
 
         private void CreateFireModule()
         {            
-            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            if (_engine.Input.Simulation.RunFireModule)
             {
-                if (WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
+                if (_engine.Input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
                 {
                     _fireModule = new AscFireImport(this);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module AscImport initiated.");
+                    Message(Engine.LogType.Log, "Fire module AscImport initiated.");
                 }
-                else if(WUIEngine.INPUT.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
+                else if(_engine.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
                 {
-                    _fireModule = new FireMesh(this, WUIEngine.RUNTIME_DATA.Fire.LCPData, WUIEngine.RUNTIME_DATA.Fire.WeatherInput, WUIEngine.RUNTIME_DATA.Fire.WindInput, WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData, WUIEngine.RUNTIME_DATA.Fire.IgnitionPoints);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Fire module FireCell initiated.");
+                    _fireModule = new FireMesh(this, _engine.RuntimeData.Fire.LCPData, _engine.RuntimeData.Fire.WeatherInput, _engine.RuntimeData.Fire.WindInput, _engine.RuntimeData.Fire.InitialFuelMoistureData, _engine.RuntimeData.Fire.IgnitionPoints);
+                    Message(Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
                 else
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Could not initiate fire mdoule, aborting.");
+                    Message(Engine.LogType.SimError, "Could not initiate fire mdoule, aborting.");
                 }
             }  
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No fire module was enabled.");
+                Message(Engine.LogType.Log, "No fire module was enabled.");
             }
         }
 
         private void CreateSmokeModule()
         {
             //can only run together
-            if (WUIEngine.INPUT.Simulation.RunSmokeModule)
+            if (_engine.Input.Simulation.RunSmokeModule)
             {
                 //this module does not need the fire
-                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+                if (_engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
-                    string file = System.IO.Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Smoke.GlobalSmokeInput.ExtinctionFile);
+                    string file = System.IO.Path.Combine(_engine.WorkingFolder, _engine.Input.Smoke.GlobalSmokeInput.ExtinctionFile);
                     _smokeModule = new GlobalSmoke(this, file);
                     return;
                 }                
 
-                if (!WUIEngine.INPUT.Simulation.RunFireModule)
+                if (!_engine.Input.Simulation.RunFireModule)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
+                    Message(Engine.LogType.SimError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
                 }
                 else
                 {                       
-                    if(WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
+                    if(_engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                     {
                         _smokeModule = new AdvectDiffuseMixingLayer(this);
                     }
-                    else if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse3D)
+                    else if (_engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse3D)
                     {
                         /*if (_smokeModule != null)
                         {
                             ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
                         }
                         //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/                            
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
+                        Message(Engine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
                     }
-                    else if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                    else if (_engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                     {
                         //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                     }                  
@@ -308,7 +308,7 @@ namespace WUIPlatform
             } 
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No smoke module was enabled.");
+                Message(Engine.LogType.Log, "No smoke module was enabled.");
             }
         }
 
@@ -317,7 +317,7 @@ namespace WUIPlatform
 
             if (_input.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.INPUT.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
+                if (_engine.Input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
                 {
                     //placeholder for JupedSim
                 }
@@ -326,28 +326,28 @@ namespace WUIPlatform
                     _pedestrianModule = new MacroHouseholdSim(this);
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
-                    //macroHouseholdSim.PopulateCells(WUIEngine.RUNTIME_DATA.Routing.RouteCollections, WUIEngine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateSimulation(WUIEngine.RUNTIME_DATA.Population.Households);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
+                    //macroHouseholdSim.PopulateCells(WUI_engine.RUNTIME_DATA.Routing.RouteCollections, WUI_engine.POPULATION.GetPopulationData());
+                    macroHouseholdSim.PopulateSimulation(_engine.RuntimeData.Population.Households);
+                    Message(Engine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No pedestrian module was enabled.");
+                Message(Engine.LogType.Log, "No pedestrian module was enabled.");
             }
         }
 
         private void CreateTrafficModule()
         {
-            if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+            if (_engine.Input.Simulation.RunTrafficModule)
             {
-                if (WUIEngine.INPUT.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
+                if (_engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
                 {
                     bool success;
                     _trafficModule = new SUMOModule(this, out success);
                     if(success)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Log, "Traffic module SUMO initiated.");
+                        Message(Engine.LogType.Log, "Traffic module SUMO initiated.");
                     }  
                     else
                     {
@@ -357,12 +357,12 @@ namespace WUIPlatform
                 else
                 {
                     _trafficModule = new MacroTrafficSim(this);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "Traffic module MacroTrafficSim initiated.");
+                    Message(Engine.LogType.Log, "Traffic module MacroTrafficSim initiated.");
                 }
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "No traffic module was enabled.");
+                Message(Engine.LogType.Log, "No traffic module was enabled.");
             }
         }
         
@@ -383,10 +383,7 @@ namespace WUIPlatform
             System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule, _stopThreadsToken.Token);
             System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule, _stopThreadsToken.Token);
 
-            fireTask.Wait();
-            smokeTask.Wait();
-            pedestrianTask.Wait();
-            trafficTask.Wait();
+            System.Threading.Tasks.Task.WaitAll(fireTask, smokeTask,pedestrianTask, trafficTask);
 
             //handle any fire effects on road network
             if (_fireModule != null)
@@ -407,9 +404,9 @@ namespace WUIPlatform
             }                
 
             //increase time
-            float deltaTime = WUIEngine.INPUT.Simulation.DeltaTime;
+            float deltaTime = _engine.Input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (WUIEngine.INPUT.Simulation.RunFireModule && !WUIEngine.INPUT.Simulation.RunPedestrianModule && !WUIEngine.INPUT.Simulation.RunTrafficModule && !WUIEngine.INPUT.Simulation.RunSmokeModule)
+            if (_engine.Input.Simulation.RunFireModule && !_engine.Input.Simulation.RunPedestrianModule && !_engine.Input.Simulation.RunTrafficModule && !_engine.Input.Simulation.RunSmokeModule)
             {
                 deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
@@ -418,7 +415,7 @@ namespace WUIPlatform
             //see if we are done or not
             CheckCompletion();
 
-            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            if (_engine.Input.Simulation.RunFireModule)
             {
                 //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
                 CheckEvacuationGoalStatus();
@@ -449,22 +446,22 @@ namespace WUIPlatform
                 return;
             }
 
-            bool endTimeReached = CurrentTime <= WUIEngine.INPUT.Simulation.MaxSimTime ? false : true;
+            bool endTimeReached = CurrentTime <= _engine.Input.Simulation.MaxSimTime ? false : true;
 
             if(endTimeReached)
             {
                 Stop("Simulation has reached specified end time.", false);
             }
 
-            if (!_stopRun && WUIEngine.INPUT.Simulation.StopWhenEvacuated)
+            if (!_stopRun && _engine.Input.Simulation.StopWhenEvacuated)
             {
                 bool pedestrianDone = true;
-                if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
+                if (_engine.Input.Simulation.RunPedestrianModule)
                 {
                     pedestrianDone = _pedestrianModule.IsSimulationDone();
                 }
                 bool trafficDone = true;
-                if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+                if (_engine.Input.Simulation.RunTrafficModule)
                 {
                     trafficDone = _trafficModule.IsSimulationDone();
                 }
@@ -493,16 +490,16 @@ namespace WUIPlatform
 
         private void UpdateEvents()
         {
-            WUIEngineInput input = WUIEngine.INPUT;
+            Input input = _engine.Input;
 
             if (input.Simulation.RunTrafficModule)
             {
                 //check for global events
-                if (WUIEngine.RUNTIME_DATA.Evacuation.BlockGoalEvents != null)
+                if (_engine.RuntimeData.Evacuation.BlockGoalEvents != null)
                 {
-                    for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.BlockGoalEvents.Length; i++)
+                    for (int i = 0; i < _engine.RuntimeData.Evacuation.BlockGoalEvents.Length; i++)
                     {
-                        BlockGoalEvent bGE = WUIEngine.RUNTIME_DATA.Evacuation.BlockGoalEvents[i];
+                        BlockGoalEvent bGE = _engine.RuntimeData.Evacuation.BlockGoalEvents[i];
                         if (CurrentTime >= bGE.startTime && !bGE.triggered)
                         {
                             bGE.ApplyEffects();
@@ -518,13 +515,13 @@ namespace WUIPlatform
         {
             //update fire mesh if needed
             fireUpdated = false;
-            if (WUIEngine.INPUT.Simulation.RunFireModule)
+            if (_engine.Input.Simulation.RunFireModule)
             {
                 if (CurrentTime >= nextFireUpdate && CurrentTime >= 0.0f)
                 {
                     fireUpdated = true;
                     _fireStopwatch.Start();
-                    _fireModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                    _fireModule.Step(_currentTime, _engine.Input.Simulation.DeltaTime);
                     _fireStopwatch.Stop();
                     nextFireUpdate += _fireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
@@ -536,16 +533,16 @@ namespace WUIPlatform
         private void StepSmokeModule()
         {
             //sync with fire
-            if (WUIEngine.INPUT.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
+            if (_engine.Input.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
             {
                 _smokeStopwatch.Start();
-                if (WUIEngine.INPUT.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                if (_engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                 {
                     //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 }
                 else
                 {
-                    _smokeModule.Step(_currentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                    _smokeModule.Step(_currentTime, _engine.Input.Simulation.DeltaTime);
                 }
                 _smokeStopwatch.Stop();
             }
@@ -554,10 +551,10 @@ namespace WUIPlatform
         private void StepPedestrianModule()
         {
             //advance pedestrian
-            if (WUIEngine.INPUT.Simulation.RunPedestrianModule)
+            if (_engine.Input.Simulation.RunPedestrianModule)
             {
                 _pedestrianStopwatch.Start();
-                _pedestrianModule.Step(CurrentTime, WUIEngine.INPUT.Simulation.DeltaTime);
+                _pedestrianModule.Step(CurrentTime, _engine.Input.Simulation.DeltaTime);
                 _pedestrianStopwatch.Stop();
             }
         }
@@ -565,10 +562,10 @@ namespace WUIPlatform
         private void StepTrafficModule()
         {
             //advance traffic
-            if (WUIEngine.INPUT.Simulation.RunTrafficModule)
+            if (_engine.Input.Simulation.RunTrafficModule)
             {
                 _trafficStopwatch.Start();
-                _trafficModule.Step(WUIEngine.INPUT.Simulation.DeltaTime, CurrentTime);
+                _trafficModule.Step(_engine.Input.Simulation.DeltaTime, CurrentTime);
                 _trafficStopwatch.Stop();
             }
         }
@@ -579,22 +576,22 @@ namespace WUIPlatform
         {
             //_stopThreadsToken.Cancel();
 
-            if (WUIEngine.INPUT.Simulation.RunPedestrianModule && _pedestrianModule != null)
+            if (_engine.Input.Simulation.RunPedestrianModule && _pedestrianModule != null)
             {
                 _pedestrianModule.Stop();
             }
 
-            if (WUIEngine.INPUT.Simulation.RunTrafficModule && _trafficModule != null)
+            if (_engine.Input.Simulation.RunTrafficModule && _trafficModule != null)
             {
                 _trafficModule.Stop();
             }
 
-            if (WUIEngine.INPUT.Simulation.RunFireModule && _fireModule != null)
+            if (_engine.Input.Simulation.RunFireModule && _fireModule != null)
             {
                 _fireModule.Stop();
             }
 
-            if (WUIEngine.INPUT.Simulation.RunSmokeModule && _smokeModule != null)
+            if (_engine.Input.Simulation.RunSmokeModule && _smokeModule != null)
             {
                 _smokeModule.Stop();
             }
@@ -602,15 +599,15 @@ namespace WUIPlatform
 
         void CheckEvacuationGoalStatus()
         {
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+            for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
             {
-                EvacuationDestination eG = WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i];
-                if(!eG.blocked)
+                EvacuationDestination eG = _engine.RuntimeData.Evacuation.Destinations[i];
+                if(!eG.Blocked)
                 {
-                    FireCellState cellState = _fireModule.GetFireCellState(eG.latLon);
+                    FireCellState cellState = _fireModule.GetFireCellState(eG.LatLon);
                     if (cellState == FireCellState.Burning)
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Log, " Goal blocked by fire: " + eG.Name);
+                        Message(Engine.LogType.Log, " Goal blocked by fire: " + eG.Name);
                         BlockEvacGoal(i);
                     }
                 }                
@@ -626,7 +623,7 @@ namespace WUIPlatform
                 _stopRun = true;                              
 
                 _stoppedDueToError |= stoppedDueToError;
-                WUIEngine.LOG(WUIEngine.LogType.Log, stopMessage);
+                Message(Engine.LogType.Log, stopMessage);
             }            
         }
 
@@ -634,15 +631,15 @@ namespace WUIPlatform
         {
             if(_trafficModule != null)
             {
-                WUIEngine.SIM.TrafficModule.InsertNewCar(startLatLon, evacuationGoal, numberOfPeopleInCar);
+                _trafficModule.InsertNewCar(startLatLon, evacuationGoal, numberOfPeopleInCar);
             }
         }
 
         public void BlockEvacGoal(int index)
         {
-            if (!WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[index].blocked)
+            if (!_engine.RuntimeData.Evacuation.Destinations[index].Blocked)
             {
-                WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[index].blocked = true;
+                _engine.RuntimeData.Evacuation.Destinations[index].Blocked = true;
                 UpdateRoutes();
             }
         }        
@@ -659,9 +656,9 @@ namespace WUIPlatform
         {
             //check that we have at least one goal left
             bool allBlocked = true;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; i++)
+            for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
             {
-                if(!WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].blocked)
+                if(!_engine.RuntimeData.Evacuation.Destinations[i]._blocked)
                 {
                     allBlocked = false;
                     break;
@@ -682,20 +679,28 @@ namespace WUIPlatform
 
         void SaveOutput()
         {
-            WUIEngineInput input = WUIEngine.INPUT;
+            Input input = _engine.Input;
             if (input.Simulation.RunTrafficModule)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
+                Message(Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
                 _trafficModule.SaveToFile(_simulationIndex);
             }
             if (input.Simulation.RunPedestrianModule)
             {
-                if (WUIEngine.INPUT.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
+                if (_engine.Input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     MacroHouseholdSim mHS = (MacroHouseholdSim)_pedestrianModule;
                     mHS.SaveToFile(_simulationIndex);
                 }                    
             }                        
+        }
+
+        public void Message(Engine.LogType logType, string message)
+        {
+            if(_engine != null)
+            {
+                _engine.Message(this, logType, message);
+            }   
         }
 
         public float[,] GetTriggerBufferData()
@@ -717,9 +722,9 @@ namespace WUIPlatform
         {
             if(_triggerBufferDataOutput != null)
             {
-                WUIEngine.RUNTIME_DATA.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferDataOutput);
-                WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
-                WUIEngine.RUNTIME_DATA.Fire.Visualizer.SetLCPDataPlane(true);
+                _engine.RuntimeData.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferDataOutput);
+                _engine.RuntimeData.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
+                _engine.RuntimeData.Fire.Visualizer.SetLCPDataPlane(true);
             }            
         }
 

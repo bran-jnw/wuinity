@@ -8,10 +8,10 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using WUIPlatform.IO;
-using WUIPlatform.Evacuation;
+using PREACT.IO;
+using PREACT.Evacuation;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     [System.Serializable]
     public class MacroTrafficSim : TrafficModule
@@ -39,10 +39,10 @@ namespace WUIPlatform.Traffic
             output = new List<string>();            
             string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
+            for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
             {
-                start += ", Goal: " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name;
-                start += ", " + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].Name + " flow";
+                start += ", Goal: " + Engine.RuntimeData.Evacuation.Destinations[i].Name;
+                start += ", " + Engine.RuntimeData.Evacuation.Destinations[i].Name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -54,7 +54,7 @@ namespace WUIPlatform.Traffic
 
             
 
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Macro traffic sim initiated.");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Macro traffic sim initiated.");
         }
 
         public override void HandleNewCars()
@@ -112,7 +112,7 @@ namespace WUIPlatform.Traffic
                 RouteData r = routeCreator.CalcTrafficRoute(startPos);
                 if (r == null)
                 {
-                    WUIEngine.SIM.Stop("Null re-route returned to car, should not happen.", true);
+                    Engine.SIM.Stop("Null re-route returned to car, should not happen.", true);
                 }
                 //special case where start is almost same as end
                 else if (r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
@@ -129,7 +129,7 @@ namespace WUIPlatform.Traffic
                     {
                         MacroVehicle car = t.Value.cars[i];
                         //only update if goal is blocked, cars on the same road (density data) might be going different places
-                        if(car.routeData.evacGoal.blocked)
+                        if(car.routeData.evacGoal._blocked)
                         {
                             if (!car.hasArrived)
                             {
@@ -321,10 +321,10 @@ namespace WUIPlatform.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals.Count; ++i)
+            for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
             {
-                newOut += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentPeople;
-                newOut += "," + WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGoals[i].currentVehicleFlow;
+                newOut += "," + Engine.RuntimeData.Evacuation.Destinations[i]._currentPeople;
+                newOut += "," + Engine.RuntimeData.Evacuation.Destinations[i]._currentVehicleFlow;
             }
 
             output.Add(newOut);
@@ -374,7 +374,7 @@ namespace WUIPlatform.Traffic
         public static float GetMaxCapacity(string highway)
         {
             float capacity = 50.0f;
-            RoadData[] r = WUIEngine.RUNTIME_DATA.Traffic.RoadTypeData.roadData;
+            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -390,7 +390,7 @@ namespace WUIPlatform.Traffic
         public static float GetSpeedLimit(string highway)
         {
             float speed = RoadTypeData.default_value.speedLimit;
-            RoadData[] r = WUIEngine.RUNTIME_DATA.Traffic.RoadTypeData.roadData;
+            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -406,7 +406,7 @@ namespace WUIPlatform.Traffic
         public static int GetNumberOfLanes(string highway)
         {
             int lanes = RoadTypeData.default_value.lanes;
-            RoadData[] r = WUIEngine.RUNTIME_DATA.Traffic.RoadTypeData.roadData;
+            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -421,7 +421,7 @@ namespace WUIPlatform.Traffic
         public static bool CanReverseLanes(string highway)
         {
             bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
-            RoadData[] r = WUIEngine.RUNTIME_DATA.Traffic.RoadTypeData.roadData;
+            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -435,8 +435,8 @@ namespace WUIPlatform.Traffic
 
         public override void SaveToFile(int runNumber)
         {
-            WUIEngineInput wuiIn = WUIEngine.INPUT;
-            string path = System.IO.Path.Combine(WUIEngine.OutputFolder, wuiIn.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
+            Input wuiIn = Engine.Input;
+            string path = System.IO.Path.Combine(Engine.OutputFolder, wuiIn.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 

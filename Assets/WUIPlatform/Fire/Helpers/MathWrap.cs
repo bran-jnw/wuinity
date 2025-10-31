@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     public static class MathWrap                        //Define a "wrapper class" that contains helpful math functions (possibly to avoid including the entire of System.math?). Static since we want it to work irrespective of instantiated object. 
     {

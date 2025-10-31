@@ -4,7 +4,7 @@
 using System;
 using System.Numerics;
 
-namespace WUIPlatform 
+namespace PREACT.Utility.Math 
 {
     [System.Serializable]
     public struct Vector3d 
@@ -52,7 +52,7 @@ namespace WUIPlatform
 
         public double magnitude {
             get {
-                return Math.Sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+                return System.Math.Sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
             }
         }
 
@@ -334,7 +334,7 @@ namespace WUIPlatform
 
         public static double Distance(Vector3d a, Vector3d b) {
             Vector3d vector3d = new Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
-            return Math.Sqrt(vector3d.x * vector3d.x + vector3d.y * vector3d.y + vector3d.z * vector3d.z);
+            return System.Math.Sqrt(vector3d.x * vector3d.x + vector3d.y * vector3d.y + vector3d.z * vector3d.z);
         }
 
         public static Vector3d ClampMagnitude(Vector3d vector, double maxLength) {
@@ -345,7 +345,7 @@ namespace WUIPlatform
         }
 
         public static double Magnitude(Vector3d a) {
-            return Math.Sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+            return System.Math.Sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
         }
 
         public static double SqrMagnitude(Vector3d a) {

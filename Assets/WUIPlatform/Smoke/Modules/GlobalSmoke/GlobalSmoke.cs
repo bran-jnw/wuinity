@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace WUIPlatform.Smoke
+namespace PREACT.Smoke
 {
     public class GlobalSmoke : SmokeModule
     {
@@ -17,7 +17,7 @@ namespace WUIPlatform.Smoke
             _extinctionCoefficientRamp = new ExtinctionRamp();
             if(!_extinctionCoefficientRamp.LoadExtinctionRampFile(extinctionCoefficientFile))
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Failed to initialize GlobalSmoke.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Failed to initialize GlobalSmoke.");
             }
             _extinctionCoefficientOutput = new float[1];
         }

@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using WUIPlatform.Runtime;
+using PREACT.Runtime;
 
-namespace WUIPlatform.Population
+namespace PREACT.Population
 {
     public class PopulationVisualizerUnity : PopulationVisualizer
     {
@@ -45,13 +45,13 @@ namespace WUIPlatform.Population
             {
                 if (_LocalGPWDataPlane == null)
                 {
-                    if(WUIEngine.RUNTIME_DATA.Population.LocalGPWData != null)
+                    if(Engine.RuntimeData.Population.LocalGPWData != null)
                     {
-                        CreateLocalGPWDataPlane(WUIEngine.RUNTIME_DATA.Population.LocalGPWData);
+                        CreateLocalGPWDataPlane(Engine.RuntimeData.Population.LocalGPWData);
                     }
                     else
                     {
-                        WUIEngine.LOG(WUIEngine.LogType.Warning, "Local GPW data not loaded.");
+                        Engine.MESSAGE(null, Engine.LogType.Warning, "Local GPW data not loaded.");
                     }
                 }
 

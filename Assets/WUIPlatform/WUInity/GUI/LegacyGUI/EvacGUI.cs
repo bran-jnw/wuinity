@@ -1,18 +1,20 @@
 using UnityEngine;
-using WUIPlatform.IO;
+using PREACT.IO;
+using PREACT;
+using PREACT.Evacuation;
 
-namespace WUIPlatform.WUInity.UI
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
         string totalPop, maxCars, maxCarsProb, minHousehold, maxHousehold, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
-        bool evacMenuDirty = true;        
+        bool evacMenuDirty = true;
 
         void EvacMenu()
         {
-            PopulationInput popIn = WUIEngine.INPUT.Population;
-            MacroHouseholdSimInput macroIn = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
-            EvacuationInput evacIn = WUIEngine.INPUT.Evacuation;
+            PopulationInput popIn = _engine.Input.Population;
+            MacroHouseholdSimInput macroIn = _engine.Input.Pedestrian.macroHouseholdSimInput;
+            EvacuationInput evacIn = _engine.Input.Evacuation;
 
             if (evacMenuDirty)
             {
@@ -87,29 +89,29 @@ namespace WUIPlatform.WUInity.UI
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
             ++buttonIndex;            
 
-            if (!WUInityEngine.INSTANCE.IsPainterActive())
+            if (!WUInityManager.INSTANCE.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
-                    WUInityEngine.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
+                    WUInityManager.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
                 }
                 ++buttonIndex;                
             }
             else
             {
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups.Length; i++)
+                for (int i = 0; i < _engine.RuntimeData.Evacuation.EvacuationGroups.Length; i++)
                 {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), WUIEngine.RUNTIME_DATA.Evacuation.EvacuationGroups[i].Name))
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.RuntimeData.Evacuation.EvacuationGroups[i].Name))
                     {
-                        WUInityEngine.Painter.SetEvacGroupColor(i);
+                        WUInityManager.Painter.SetEvacGroupColor(i);
                     }
                     ++buttonIndex;
                 }
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
                 {
-                    Evacuation.EvacuationGroup.SaveEvacGroupIndices();
-                    WUInityEngine.INSTANCE.StopPainter();
+                    EvacuationGroup.SaveEvacGroupIndices();
+                    WUInityManager.INSTANCE.StopPainter();
                 }
                 ++buttonIndex;
             }
@@ -122,9 +124,9 @@ namespace WUIPlatform.WUInity.UI
                 return;
             }
 
-            PopulationInput popIn = WUIEngine.INPUT.Population;
-            MacroHouseholdSimInput macroIn = WUIEngine.INPUT.Pedestrian.macroHouseholdSimInput;
-            EvacuationInput evacIn = WUIEngine.INPUT.Evacuation;
+            PopulationInput popIn = _engine.Input.Population;
+            MacroHouseholdSimInput macroIn = _engine.Input.Pedestrian.macroHouseholdSimInput;
+            EvacuationInput evacIn = _engine.Input.Evacuation;
 
             int.TryParse(maxCars, out popIn.MaxCars);
             float.TryParse(maxCarsProb, out popIn.MaxCarsProbability);

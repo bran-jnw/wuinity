@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace WUIPlatform.Farsite
+namespace PREACT.Farsite
 {   
     public class FireVertex
     {

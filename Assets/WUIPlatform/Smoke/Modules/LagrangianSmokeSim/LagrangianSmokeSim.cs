@@ -14,7 +14,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace WUIPlatform.Smoke
+namespace PREACT.Smoke
 {
     public class LagrangianSmokeSim : SmokeModule
     {

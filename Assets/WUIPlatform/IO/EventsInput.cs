@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class EventsInput
@@ -23,7 +23,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             EventsInput newInput = new EventsInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string temp;            
 
             //TODO: get actual data

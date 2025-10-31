@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {   
     public class FuelModelInput
     {
@@ -51,7 +51,7 @@ namespace WUIPlatform.Fire
 
         public bool LoadFuelModelInputFile(string path)
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, " Attempting to load fuel model file.");
+            Engine.MESSAGE(null, Engine.LogType.Log, " Attempting to load fuel model file.");
             bool success = false;
 
             string[] fuelLines;
@@ -61,7 +61,7 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Fuel model file " + path + " not found." );
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Fuel model file " + path + " not found." );
                 return false;
             }
 
@@ -113,7 +113,7 @@ namespace WUIPlatform.Fire
                     isDynamic, isReserved);
 
                     Fuels.Add(newFuel);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
+                    Engine.MESSAGE(null, Engine.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
                 }
             }
 

@@ -23,9 +23,9 @@
  *  - randthread.cpp
  *  - randthread.h
  */
-using static WUIPlatform.Fire.MathWrap;
+using static PREACT.Fire.MathWrap;
 
-namespace WUIPlatform.Fire.Behave
+namespace PREACT.Fire.Behave
 {
     public struct PathStruct
     {

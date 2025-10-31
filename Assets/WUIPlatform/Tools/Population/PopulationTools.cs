@@ -5,93 +5,87 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using WUIPlatform.Population;
-using Itinero;
+using PREACT.Population;
+using PREACT.Utility.Math;
 using OsmSharp.Streams;
 using System.IO;
 
-namespace WUIPlatform.Tools
+namespace PREACT.Tools
 {
     public static class PopulationTools
     {
-        public static bool HaveLocalGPW { get => WUIEngine.RUNTIME_DATA.Population.LocalGPWData.HavedData; }
-        public static bool HavePopulationMap { get => WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData; }
-        public static bool PopulationMapCorrectedForRoadAccess { get => WUIEngine.RUNTIME_DATA.Population.PopulationMap.CorrectedForRoadAccess; }
-        public static bool HaveRouterDb { get => WUIEngine.RUNTIME_DATA.Routing.RouterDb == null ? false : true; }
-
-
-        public static bool CreateAndSaveLocalGPWData(string globalGpwFolder)
+        public static bool CreateAndSaveLocalGPWData(Engine engine, string globalGpwFolder)
         {
             bool success = false;
 
-            success = WUIEngine.RUNTIME_DATA.Population.LocalGPWData.CreateLocalGPWData(globalGpwFolder);
+            success = engine.RuntimeData.Population.LocalGPWData.CreateLocalGPWData(globalGpwFolder);
 
             return success;
         }
 
-        public static bool LoadLocalGPWData(string localGpwFile)
+        public static bool LoadLocalGPWData(Engine engine, string localGpwFile)
         {            
-            bool success = WUIEngine.RUNTIME_DATA.Population.LocalGPWData.LoadFromFile(localGpwFile);            
+            bool success = engine.RuntimeData.Population.LocalGPWData.LoadFromFile(localGpwFile);            
             return success;
         }
 
-        public static void CreateAndSavePopulationMap(string localGPWFile, string cellSize)
+        public static void CreateAndSavePopulationMap(Engine engine, string localGPWFile, string cellSize)
         {
             float c;
             if(float.TryParse(cellSize, out c))
             {
-                CreateAndSavePopulationMap(localGPWFile, c);
+                CreateAndSavePopulationMap(engine, localGPWFile, c);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Population map cell size is not a valid number, please check your input.");
+                engine.Message(null, Engine.LogType.Warning, "Population map cell size is not a valid number, please check your input.");
             }
         }
 
-        private static void CreateAndSavePopulationMap(string localGpwFile, float cellSize)
+        private static void CreateAndSavePopulationMap(Engine engine, string localGpwFile, float cellSize)
         {
-            if (WUIEngine.RUNTIME_DATA.Population.LocalGPWData.LoadFromFile(localGpwFile))
+            if (engine.RuntimeData.Population.LocalGPWData.LoadFromFile(localGpwFile))
             {
-                WUIEngine.RUNTIME_DATA.Population.PopulationMap.CreateAndSave(WUIEngine.RUNTIME_DATA.Population.LocalGPWData, cellSize);
+                engine.RuntimeData.Population.PopulationMap.CreateAndSave(engine.RuntimeData.Population.LocalGPWData, cellSize);
             }
         }
 
-        public static bool LoadPopulationMap(string populationMapFile)
+        public static bool LoadPopulationMap(Engine engine, string populationMapFile)
         {
             bool success = false;
 
-            success = WUIEngine.RUNTIME_DATA.Population.PopulationMap.LoadFromFile(populationMapFile);
+            success = engine.RuntimeData.Population.PopulationMap.LoadFromFile(populationMapFile);
 
             return success;
         }
 
-        public static bool ScaleTotalPopulation(string desiredPopulation)
+        public static bool ScaleTotalPopulation(Engine engine, string desiredPopulation)
         {
             bool success = false;
             int newPop;
             if (int.TryParse(desiredPopulation, out newPop))
             {
-                success = ScaleTotalPopulation(newPop);
+                success = ScaleTotalPopulation(engine, newPop);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " New population count not a number, please check your input.");
+                engine.Message(null, Engine.LogType.Warning, " New population count not a number, please check your input.");
             }
 
             return success;
         }
 
-        public static bool ScaleTotalPopulation(int desiredPopulation)
+        public static bool ScaleTotalPopulation(Engine engine, int desiredPopulation)
         {
             bool success = false;
 
-            if(WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData)
+            if(engine.RuntimeData.Population.PopulationMap.HaveData)
             {
-                WUIEngine.RUNTIME_DATA.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation, true);
+                engine.RuntimeData.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation, true);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No population map loaded, cannot scale.");
+                engine.Message(null, Engine.LogType.Warning, "No population map loaded, cannot scale.");
             }
 
             return success;
@@ -100,79 +94,79 @@ namespace WUIPlatform.Tools
         /// <summary>
         /// Filters the interpolated GPW data set to account for the user created population mask as well as checking for road access.
         /// </summary>
-        public static void RoadAccessCorrectPopulationMap(string routerDbFile)
+        public static void RoadAccessCorrectPopulationMap(Engine engine, string routerDbFile)
         {
             
-            if (WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData)
+            if (engine.RuntimeData.Population.PopulationMap.HaveData)
             {
-                if(WUIEngine.RUNTIME_DATA.Routing.LoadRouterDb(routerDbFile))
+                if(engine.RuntimeData.Routing.LoadRouterDb(routerDbFile))
                 {
-                    WUIEngine.RUNTIME_DATA.Population.PopulationMap.UpdatePopulationMapBasedOnRoadAccess(WUIEngine.RUNTIME_DATA.Routing.Router);
+                    engine.RuntimeData.Population.PopulationMap.UpdatePopulationMapBasedOnRoadAccess(engine.RuntimeData.Routing.Router);
                 }                
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No population map loaded, can't correct it for road access.");
+                engine.Message(null, Engine.LogType.Warning, "No population map loaded, can't correct it for road access.");
             }
         }
 
-        public static void ApplyPopulationMapMask(string populationMaskFile)
+        public static void ApplyPopulationMapMask(Engine engine, string populationMaskFile)
         {
-            if(WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData && WUIEngine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile))
+            if(engine.RuntimeData.Population.PopulationMap.HaveData && engine.RuntimeData.Population.PopulationMap.LoadPopulationMask(populationMaskFile))
             {
-                WUIEngine.RUNTIME_DATA.Population.PopulationMap.ApplyMaskToPopulation();
+                engine.RuntimeData.Population.PopulationMap.ApplyMaskToPopulation();
             }            
         }
 
-        public static void SavePopulationMask()
+        public static void SavePopulationMask(Engine engine)
         {
-            WUIEngine.RUNTIME_DATA.Population.PopulationMap.SavePopulationMask(WUIEngine.INPUT.Simulation.Id);
+            engine.RuntimeData.Population.PopulationMap.SavePopulationMask(engine.Input.Simulation.Id);
         }
 
         /*public static void LoadPopulationMask(string populationMaskFile)
         {
-            WUIEngine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
+            WUIengine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
         }*/ 
 
-        public static void CreateAndLoadPopulation()
+        public static void CreateAndLoadPopulation(Engine engine)
         {
-            if (WUIEngine.RUNTIME_DATA.Population.PopulationMap.HaveData && WUIEngine.RUNTIME_DATA.Population.PopulationMap.CorrectedForRoadAccess)
+            if (engine.RuntimeData.Population.PopulationMap.HaveData && engine.RuntimeData.Population.PopulationMap.CorrectedForRoadAccess)
             {
-                WUIEngine.RUNTIME_DATA.Population.PopulationMap.CreateAndLoadPopulation();
+                engine.RuntimeData.Population.PopulationMap.CreateAndLoadPopulation();
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Need population map that is corrected for road access, cannot create population.");
+                engine.Message(null, Engine.LogType.Warning, "Need population map that is corrected for road access, cannot create population.");
             }                     
         }
 
-        public static bool CreateAndSaveRouterDb(string osmFile)
+        public static bool CreateAndSaveRouterDb(Engine engine, string osmFile)
         {
-            return WUIEngine.RUNTIME_DATA.Routing.CreateAndSaveRouterDb(osmFile);
+            return engine.RuntimeData.Routing.CreateAndSaveRouterDb(osmFile);
         }
 
-        public static bool LoadRouterDb(string routerDbFile)
+        public static bool LoadRouterDb(Engine engine, string routerDbFile)
         {
 
-            return WUIEngine.RUNTIME_DATA.Routing.LoadRouterDb(routerDbFile);
+            return engine.RuntimeData.Routing.LoadRouterDb(routerDbFile);
         }
 
-        public static bool FilterOsmData(string osmFile, string xBorder, string yBorder)
+        public static bool FilterOsmData(Engine engine, string osmFile, string xBorder, string yBorder)
         {
             Vector2d osmFilterBorder;
             if (double.TryParse(xBorder, out osmFilterBorder.x) && double.TryParse(yBorder, out osmFilterBorder.y))
             {
-                return FilterOsmData(osmFile, osmFilterBorder);
+                return FilterOsmData(engine, osmFile, osmFilterBorder);
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Border is not a valid number, please check your input.");
+                engine.Message(null, Engine.LogType.Warning, "Border is not a valid number, please check your input.");
             }
 
             return false;
         }
 
-        private static bool FilterOsmData(string osmFile, Vector2d borderSize)
+        private static bool FilterOsmData(Engine engine, string osmFile, Vector2d borderSize)
         {
             bool success = false;
 
@@ -180,11 +174,11 @@ namespace WUIPlatform.Tools
             {
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
-                    float left = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.y - borderSize.x);
-                    float bottom = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x - borderSize.y);
-                    Vector2d size = LocalGPWData.SizeToDegrees(WUIEngine.INPUT.Simulation.LowerLeftLatLon, WUIEngine.INPUT.Simulation.DomainSize);
-                    float right = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.y + size.x + borderSize.x);
-                    float top = (float)(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x + size.y + borderSize.y);
+                    float left = (float)(engine.Input.Simulation.LowerLeftLatLon.y - borderSize.x);
+                    float bottom = (float)(engine.Input.Simulation.LowerLeftLatLon.x - borderSize.y);
+                    Vector2d size = LocalGPWData.SizeToDegrees(engine.Input.Simulation.LowerLeftLatLon, engine.Input.Simulation.DomainSize);
+                    float right = (float)(engine.Input.Simulation.LowerLeftLatLon.y + size.x + borderSize.x);
+                    float top = (float)(engine.Input.Simulation.LowerLeftLatLon.x + size.y + borderSize.y);
 
                     OsmStreamSource source;                    
                     if (osmFile.EndsWith("pbf"))
@@ -210,16 +204,16 @@ namespace WUIPlatform.Tools
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " Could not find the selected OSM file.");
+                engine.Message(null, Engine.LogType.Warning, " Could not find the selected OSM file.");
             }
 
             if (success)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Succesfully filtered OSM data to user selected boundary. Use this filtered data to build your router database.");
+                engine.Message(null, Engine.LogType.Log, " Succesfully filtered OSM data to user selected boundary. Use this filtered data to build your router database.");
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, " Could not filter the selected OSM file.");
+                engine.Message(null, Engine.LogType.Warning, " Could not filter the selected OSM file.");
             }
 
             return success;

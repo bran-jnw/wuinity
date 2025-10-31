@@ -6,10 +6,10 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Numerics;
-using WUIPlatform.Evacuation;
+using PREACT.Utility.Math;
+using PREACT.Evacuation;
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public abstract class TrafficModule : SimulationModule
     {

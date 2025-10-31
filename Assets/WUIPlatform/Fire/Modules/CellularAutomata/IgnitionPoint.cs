@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     [System.Serializable]                           
     public struct IgnitionPoint
@@ -76,7 +76,7 @@ namespace WUIPlatform.Fire
         {
             this.LatLong = latLong;
 
-            Vector2d pos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = Engine.RuntimeData.Simulation.GetSimulationPosition(latLong);
 
             x = (int)(pos.x / mesh._cellSize.x);
             y = (int)(pos.y / mesh._cellSize.y);
@@ -94,7 +94,7 @@ namespace WUIPlatform.Fire
         {
             if(x < 0 && y < 0)
             {
-                Vector2d pos = WUIEngine.RUNTIME_DATA.Simulation.GetSimulationPosition(LatLong);
+                Vector2d pos = Engine.RuntimeData.Simulation.GetSimulationPosition(LatLong);
 
                 x = (int)(pos.x / mesh._cellSize.x);
                 y = (int)(pos.y / mesh._cellSize.y);
@@ -156,18 +156,18 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Ignition points data file " + path + " not found and could not be loaded, fire and smoke spread will have to rely on other ignition methods (painted map).");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Ignition points data file " + path + " not found and could not be loaded, fire and smoke spread will have to rely on other ignition methods (painted map).");
             }
 
             if (ignitionPoints.Count > 0)
             {
                 result = ignitionPoints.ToArray();
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Ignition points data file " + path + " was found, " + ignitionPoints.Count + " valid data points were succesfully loaded.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Ignition points data file " + path + " was found, " + ignitionPoints.Count + " valid data points were succesfully loaded.");
                 success = true;
             }
             else if (fileExists)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Ignition points data file " + path + " was found but did not contain any valid data, fire and smoke spread will have to rely on other ignition methods (painted map).");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Ignition points data file " + path + " was found but did not contain any valid data, fire and smoke spread will have to rely on other ignition methods (painted map).");
             }
 
             return result;

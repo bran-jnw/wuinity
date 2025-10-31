@@ -6,10 +6,11 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using WUIPlatform.Fire;
-using WUIPlatform.IO;
+using PREACT.Fire;
+using PREACT.IO;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform.WUInity
+namespace WUInity
 {
     public class WUInityFireTester : MonoBehaviour                                  //create class with standard unity class inheritance
     {
@@ -96,12 +97,12 @@ namespace WUIPlatform.WUInity
         float GetElevation(int yPos)
         {
             //reverse order on y axis due to how LCP format is made
-            return Mathf.Lerp(southElevation, northElevation, (cellCount.y - 1 - yPos) / (float)(cellCount.y - 1));
+            return UnityEngine.Mathf.Lerp(southElevation, northElevation, (cellCount.y - 1 - yPos) / (float)(cellCount.y - 1));
         }
 
         void Update()                                                                           
         {
-            if (Input.GetKeyDown(KeyCode.Space))                                                
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Space))                                                
             {
                 simulate = !simulate;
             }

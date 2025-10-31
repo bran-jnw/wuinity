@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class MapInput
@@ -21,7 +21,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             var newInput = new MapInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
             
             input = nameof(MapProvider);
@@ -40,7 +40,7 @@ namespace WUIPlatform.IO
                         break;
                     default:
                         ++issues;
-                        WUIEngine.LOG(WUIEngine.LogType.SimError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
+                        Engine.MESSAGE(null, Engine.LogType.SimError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
                         break;
                 }
             }
@@ -54,7 +54,7 @@ namespace WUIPlatform.IO
                 int.TryParse(userInput, out newInput.ZoomLevel);
                 if(newInput.ZoomLevel < 0 || newInput.ZoomLevel > 20)
                 {
-                    WUIEngine.LOG(WUIEngine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + newInput.ZoomLevel + ".");
+                    Engine.MESSAGE(null, Engine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + newInput.ZoomLevel + ".");
                     newInput.ZoomLevel = 13;                   
                 }
             }

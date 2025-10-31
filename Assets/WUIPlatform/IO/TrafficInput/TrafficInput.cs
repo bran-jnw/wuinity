@@ -7,9 +7,9 @@
 
 using System.Collections.Generic;
 using System.Numerics;
-using WUIPlatform.Traffic;
+using PREACT.Traffic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class TrafficInput
@@ -26,7 +26,7 @@ namespace WUIPlatform.IO
         {
             int issues = 0;
             TrafficInput newInput = new TrafficInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(TrafficModule);
@@ -41,14 +41,14 @@ namespace WUIPlatform.IO
                         newInput.TrafficModule = TrafficModuleChoice.MacroTrafficSim;
                         break;
                     default:
-                        WUIEngineInput.CouldNotInterpretInputMessage(input, userInput);
+                        Input.CouldNotInterpretInputMessage(input, userInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "No traffic module choice was set.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "No traffic module choice was set.");
             }
 
             input = nameof(VisibilityAffectsSpeed);
@@ -67,13 +67,13 @@ namespace WUIPlatform.IO
                 input = nameof(TrafficModuleChoice.SUMO);
                 if (headerLineIndex.TryGetValue(input, out lineIndex))
                 {
-                    WUIEngineInput.ReadingInputMessage(input);
+                    Input.ReadingInputMessage(input);
                     newInput.SumoInput = SUMOInput.Parse(inputLines, lineIndex);
                 }
                 else
                 {
                     //critical
-                    WUIEngine.LOG(WUIEngine.LogType.SimError, nameof(Simulation) + " header not found." + WUIEngineInput.pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, nameof(Simulation) + " header not found." + Input.pleaseCheckInput);
                     return null;
                 }
             }
@@ -83,7 +83,7 @@ namespace WUIPlatform.IO
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Unknown traffic module has been specified.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Unknown traffic module has been specified.");
             }
 
 

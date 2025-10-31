@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace WUIPlatform.Traffic
+namespace PREACT.Traffic
 {
     public abstract class TrafficEvent
     {
@@ -32,7 +32,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace WUIPlatform.Traffic
         {
             if (mTS == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
                 return;
             }
 

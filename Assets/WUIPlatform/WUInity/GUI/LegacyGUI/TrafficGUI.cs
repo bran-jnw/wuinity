@@ -1,9 +1,9 @@
 using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
-using WUIPlatform.IO;
+using PREACT.IO;
 
-namespace WUIPlatform.WUInity.UI
+namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
@@ -14,7 +14,7 @@ namespace WUIPlatform.WUInity.UI
 
         void TrafficMenu()
         {
-            TrafficInput tO = WUIEngine.INPUT.Traffic;
+            TrafficInput tO = _engine.Input.Traffic;
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
@@ -59,7 +59,7 @@ namespace WUIPlatform.WUInity.UI
                 return;
             }
 
-            TrafficInput tO = WUIEngine.INPUT.Traffic;
+            TrafficInput tO = _engine.Input.Traffic;
 
             float.TryParse(stallSpeed, out tO.MacroTrafficSimInput.StallSpeed);
             //float.TryParse(opticalDensity, out tO.opticalDensity);

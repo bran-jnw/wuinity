@@ -6,10 +6,10 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using static WUIPlatform.InterpolationLibrary;
+using static PREACT.InterpolationLibrary;
 using System.IO;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     /// <summary>
     /// Precipitation is the daily rain amount specified in hundredths of an inch or millimeters (integer).
@@ -186,7 +186,7 @@ namespace WUIPlatform.Fire
             WeatherInput result = null;
             List<WeatherData> weatherData = new List<WeatherData>();
 
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.FireCellInput.WeatherFile);
+            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.WeatherFile);
             bool fileExists = File.Exists(path);
             if (fileExists)
             {
@@ -221,18 +221,18 @@ namespace WUIPlatform.Fire
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Weather data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (weatherData.Count > 0)
             {
                 result = new WeatherInput(weatherData.ToArray());
                 success = true;
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Weather input file " + path + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Weather input file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

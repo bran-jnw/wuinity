@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace WUIPlatform.IO
+namespace PREACT.IO
 {
     [System.Serializable]
     public class WUIShowInput
@@ -25,7 +25,7 @@ namespace WUIPlatform.IO
         public static WUIShowInput Parse(string[] inputLines, int startIndex)
         {
             WUIShowInput newInput = new WUIShowInput();
-            Dictionary<string, string> inputToParse = WUIEngineInput.GetHeaderInput(inputLines, startIndex);
+            Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(SendDataToWUIShow);

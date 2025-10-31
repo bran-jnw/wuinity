@@ -7,10 +7,10 @@
 
 using System.Collections.Generic;
 using System.Numerics;
-using static WUIPlatform.Fire.MathWrap;
-using WUIPlatform.Fire.Behave;
+using static PREACT.Fire.MathWrap;
+using PREACT.Fire.Behave;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     public class CellVector : FireModule
     {
@@ -141,11 +141,11 @@ namespace WUIPlatform.Fire
 
         public CellVector(Simulation simulation) : base(simulation)
         {
-            _lcpData = WUIEngine.RUNTIME_DATA.Fire.LCPData;
-            _weather = WUIEngine.RUNTIME_DATA.Fire.WeatherInput;
-            _wind = WUIEngine.RUNTIME_DATA.Fire.WindInput;
-            _initialFuelMoisture = WUIEngine.RUNTIME_DATA.Fire.InitialFuelMoistureData;
-            _ignitionPoints = WUIEngine.RUNTIME_DATA.Fire.IgnitionPoints;
+            _lcpData = Engine.RuntimeData.Fire.LCPData;
+            _weather = Engine.RuntimeData.Fire.WeatherInput;
+            _wind = Engine.RuntimeData.Fire.WindInput;
+            _initialFuelMoisture = Engine.RuntimeData.Fire.InitialFuelMoistureData;
+            _ignitionPoints = Engine.RuntimeData.Fire.IgnitionPoints;
 
             _cellSizeX = (float)_lcpData.RasterCellResolutionX;
             _cellSizeY = (float)_lcpData.RasterCellResolutionY;
@@ -153,7 +153,7 @@ namespace WUIPlatform.Fire
             _cellsY = _lcpData.GetCellCountY();
 
             Vector2d lcpUTM = _lcpData.GetLowerLeftUTM();
-            offset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            offset = lcpUTM - Engine.RuntimeData.Simulation.UTMOrigin;
 
             bufferSize = _cellsX * _cellsY;
             _cells = new CellVectorCell[bufferSize];
@@ -183,12 +183,12 @@ namespace WUIPlatform.Fire
         {
             _fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if (WUIEngine.DATA_STATUS.FuelModelsLoaded)
+            if (Engine.DataStatus.FuelModelsLoaded)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
+                Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
+                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    _fuelModelSet.setFuelModelRecord(WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
+                    _fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             _surfaceFire = new Surface(_fuelModelSet);

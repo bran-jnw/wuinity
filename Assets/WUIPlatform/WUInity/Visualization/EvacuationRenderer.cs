@@ -6,10 +6,12 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using WUIPlatform.Pedestrian;
+using PREACT.Pedestrian;
 using System.Collections.Generic;
+using PREACT;
+using PREACT.Traffic;
 
-namespace WUIPlatform.WUInity.Visualization
+namespace WUInity.Visualization
 {
     public class EvacuationRenderer : MonoBehaviour
     {
@@ -21,7 +23,7 @@ namespace WUIPlatform.WUInity.Visualization
         Bounds bounds;
         ComputeBuffer householdPositionsBuffer;        
         ComputeBuffer carPositionsBuffer;
-        Dictionary<uint, Traffic.TrafficModuleVehicle> _activeVehicles;
+        Dictionary<uint, TrafficModuleVehicle> _activeVehicles;
 
 
         public void CreateBuffers(bool renderHouseholds, bool renderTraffic)
@@ -29,14 +31,14 @@ namespace WUIPlatform.WUInity.Visualization
             Release();
 
             //calculate bounds here as traffic will need it too, not only pedestrian visualizer
-            Vector2d domainSize = WUIEngine.INPUT.Simulation.DomainSize;
+            Vector2d domainSize = Engine.Input.Simulation.DomainSize;
             Vector3 center = new Vector3((float)domainSize.x * 0.5f, 1f, (float)domainSize.y * 0.5f);
             Vector3 size = new Vector3((float)domainSize.x + 2f, 2f, (float)domainSize.y + 2f);
             bounds = new Bounds(center, size);
 
             if (renderHouseholds)
             {
-                CreateHouseholdsBuffer(((MacroHouseholdSim)WUIEngine.SIM.PedestrianModule).GetHouseholdPositions().Length);
+                CreateHouseholdsBuffer(((MacroHouseholdSim)Engine.SIM.PedestrianModule).GetHouseholdPositions().Length);
             }            
         }
 
@@ -49,7 +51,7 @@ namespace WUIPlatform.WUInity.Visualization
         {
             if (renderHouseholds)
             {
-                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)WUIEngine.SIM.PedestrianModule).GetHouseholdPositions();
+                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)Engine.SIM.PedestrianModule).GetHouseholdPositions();
                 householdPositionsBuffer.SetData(newPositions);
                 householdsMaterial.SetBuffer("_PositionsAndState", householdPositionsBuffer);
                 Graphics.DrawMeshInstancedProcedural(householdMesh, 0, householdsMaterial, bounds, householdPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
@@ -57,11 +59,11 @@ namespace WUIPlatform.WUInity.Visualization
 
             if (renderCars)
             {
-                Dictionary<uint, Traffic.TrafficModuleVehicle> currentVehicles = WUIEngine.SIM.TrafficModule.GetActiveVehicles();
+                Dictionary<uint, TrafficModuleVehicle> currentVehicles = Engine.SIM.TrafficModule.GetActiveVehicles();
                 if(currentVehicles.Count > 0)
                 {
                     //need to make a copy as it might get modified during foreach
-                    _activeVehicles = new Dictionary<uint, Traffic.TrafficModuleVehicle>(currentVehicles);
+                    _activeVehicles = new Dictionary<uint, TrafficModuleVehicle>(currentVehicles);
 
                     if (carPositionsBuffer == null || _activeVehicles.Count != carPositionsBuffer.count)
                     {     
@@ -73,7 +75,7 @@ namespace WUIPlatform.WUInity.Visualization
                     }
                     
                     List<Vector4> dataToRender = new List<Vector4>();
-                    foreach(Traffic.TrafficModuleVehicle vehicle in _activeVehicles.Values)
+                    foreach(TrafficModuleVehicle vehicle in _activeVehicles.Values)
                     {
                         Vector2d pos = vehicle.WorldPosition;
                         float speedRatio = vehicle.SpeedRatio;

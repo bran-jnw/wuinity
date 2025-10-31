@@ -7,27 +7,27 @@
 
 using System.IO;
 
-namespace WUIPlatform
+namespace PREACT
 {
     public static class GraphicalFireInput
     {
         public static void SaveGraphicalFireInput()
         {
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Simulation.Id + ".gfi");
+            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Simulation.Id + ".gfi");
             //WUIEngine.INPUT.Fire.GraphicalFireInputFile = WUIEngine.INPUT.Simulation.Id + ".gfi";
 
             using (FileStream fs = new FileStream(path, FileMode.Create))
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    int xCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
-                    int yCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
+                    int xCount = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
+                    int yCount = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
                     bw.Write(xCount);
                     bw.Write(yCount);
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.WuiArea));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.RandomIgnition));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.InitialIgnition));
-                    bw.Write(GetBytes(WUIEngine.RUNTIME_DATA.Fire.ManualTriggerBuffer));
+                    bw.Write(GetBytes(Engine.RuntimeData.Fire.WuiArea));
+                    bw.Write(GetBytes(Engine.RuntimeData.Fire.RandomIgnition));
+                    bw.Write(GetBytes(Engine.RuntimeData.Fire.InitialIgnition));
+                    bw.Write(GetBytes(Engine.RuntimeData.Fire.ManualTriggerBuffer));
                 }
             }
         }
@@ -49,11 +49,11 @@ namespace WUIPlatform
         public static void LoadGraphicalFireInput(out bool success)
         {
             success = false;
-            string path = Path.Combine(WUIEngine.WORKING_FOLDER, WUIEngine.INPUT.Fire.GraphicalFireInputFile); //graphical fire input
+            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.GraphicalFireInputFile); //graphical fire input
 
-            if(WUIEngine.RUNTIME_DATA.Fire.LCPData == null)
+            if(Engine.RuntimeData.Fire.LCPData == null)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "No LCP data has been loaded, can't try and look for GFI data.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "No LCP data has been loaded, can't try and look for GFI data.");
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace WUIPlatform
                     {
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
-                        if(ncols == WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX() && nrows == WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY())
+                        if(ncols == Engine.RuntimeData.Fire.LCPData.GetCellCountX() && nrows == Engine.RuntimeData.Fire.LCPData.GetCellCountY())
                         {
                             int dataSize = ncols * nrows;
 
@@ -81,15 +81,15 @@ namespace WUIPlatform
                             b = br.ReadBytes(dataSize * sizeof(bool));
                             bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
-                            WUIEngine.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
+                            Engine.RuntimeData.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
+                            Engine.RuntimeData.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
+                            Engine.RuntimeData.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
+                            Engine.RuntimeData.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
                             success = true;
                         }
                         else
                         {
-                            WUIEngine.LOG(WUIEngine.LogType.Warning, "Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.");
+                            Engine.MESSAGE(null, Engine.LogType.Warning, "Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.");
                             br.Close();
                             CreateDefaultInputs();
                         }
@@ -98,7 +98,7 @@ namespace WUIPlatform
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Could not find GFI data, creating empty default.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Could not find GFI data, creating empty default.");
                 CreateDefaultInputs();                
             }
         }
@@ -106,13 +106,13 @@ namespace WUIPlatform
         private static void CreateDefaultInputs()
         {
             //LCP file has already been read, use that for dimensions
-            int xCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
-            int yCount = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
+            int xCount = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
+            int yCount = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
 
-            WUIEngine.RUNTIME_DATA.Fire.UpdateWUIArea(null, xCount, yCount);
-            WUIEngine.RUNTIME_DATA.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);
-            WUIEngine.RUNTIME_DATA.Fire.UpdateInitialIgnitionIndices(null, xCount, yCount);
-            WUIEngine.RUNTIME_DATA.Fire.UpdateTriggerBufferIndices(null, xCount, yCount);
+            Engine.RuntimeData.Fire.UpdateWUIArea(null, xCount, yCount);
+            Engine.RuntimeData.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);
+            Engine.RuntimeData.Fire.UpdateInitialIgnitionIndices(null, xCount, yCount);
+            Engine.RuntimeData.Fire.UpdateTriggerBufferIndices(null, xCount, yCount);
             SaveGraphicalFireInput();
         }
     }

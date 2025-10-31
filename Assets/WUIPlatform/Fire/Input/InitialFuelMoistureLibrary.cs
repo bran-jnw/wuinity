@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
     [System.Serializable]
     public class InitialFuelMoisture
@@ -92,7 +92,7 @@ namespace WUIPlatform.Fire
             {
                 result = new InitialFuelMoisture(fuelModelNumber);
                 _initialFuelMoistures.Add(fuelModelNumber, result);
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
             }
 
             return result;
@@ -128,25 +128,25 @@ namespace WUIPlatform.Fire
                         {
                             InitialFuelMoisture iFM = new InitialFuelMoisture(fuelMod, oneHour, tenHour, hundredHour, liveH, liveW);
                             initialFuelMoistures.Add(iFM);
-                            WUIEngine.LOG(WUIEngine.LogType.Log, "Loaded initial fuel moistures for fuel model " + fuelMod + ".");
+                            Engine.MESSAGE(null, Engine.LogType.Log, "Loaded initial fuel moistures for fuel model " + fuelMod + ".");
                         }
                     }                    
                 }                              
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
             }
 
             if (initialFuelMoistures.Count > 0)
             {
                 result = new InitialFuelMoistureLibrary(initialFuelMoistures);
                 success = true; 
-                WUIEngine.LOG(WUIEngine.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
             }
             else if(fileExists)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
             }
 
             return result;

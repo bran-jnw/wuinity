@@ -7,8 +7,9 @@
 
 using System.Collections.Generic;
 using System.IO;
+using PREACT.Utility.Math;
 
-namespace WUIPlatform.Fire
+namespace PREACT.Fire
 {
 	public struct LandscapeStruct
 	{
@@ -191,7 +192,7 @@ namespace WUIPlatform.Fire
 
 				if(NumVals != 8)
 				{
-					WUIEngine.LOG(WUIEngine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contain the expected 8 raster sets, aborting.");
+					Engine.MESSAGE(null, Engine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contain the expected 8 raster sets, aborting.");
 					CantAllocLCP = true;
 
                     return;
@@ -575,7 +576,7 @@ namespace WUIPlatform.Fire
 						error += ", ";
 					}
 				}
-                WUIEngine.LOG(WUIEngine.LogType.Warning, error);
+                Engine.MESSAGE(null, Engine.LogType.Warning, error);
             }
 
 			List<int> presentFuelModelNumbers= new List<int>();
@@ -680,7 +681,7 @@ namespace WUIPlatform.Fire
         {
 			if (!File.Exists(path))
 			{
-				WUIEngine.LOG(WUIEngine.LogType.Warning, " LCP file not found in " + path + ".");
+				Engine.MESSAGE(null, Engine.LogType.Warning, " LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -948,18 +949,18 @@ namespace WUIPlatform.Fire
 			CalculateOriginOffset();
             if (CantAllocLCP)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, " LCP found in " + path + ", read succesfully.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " LCP found in " + path + ", read succesfully.");
             }
         }
 
 		private void CalculateOriginOffset()
 		{
             Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            _originOffset = lcpUTM - WUIEngine.RUNTIME_DATA.Simulation.UTMOrigin;
+            _originOffset = lcpUTM - Engine.RuntimeData.Simulation.UTMOrigin;
             _originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));            
         }
 

@@ -7,10 +7,10 @@
 
 using System.IO;
 using System.Collections.Generic;
-using WUIPlatform.Fire.Behave;
-using WUIPlatform.Fire;
+using PREACT.Fire.Behave;
+using PREACT.Fire;
 
-namespace WUIPlatform
+namespace PREACT
 {
     public static class WUIPlatformPERIL
     {
@@ -31,22 +31,22 @@ namespace WUIPlatform
         /// <param name="midflameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
         public static float[,] RunPERIL(float midflameWindspeed)
         {
-            WUIEngine.LOG(WUIEngine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
 
             if (PERIL == null)
             {
                 PERIL = new kPERIL_DLL.kPERIL();
             }
 
-            int xDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
-            int yDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
+            int xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
+            int yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
             //assume cell/raster is square
-            int cellSize = Mathf.RoundToInt((float)WUIEngine.RUNTIME_DATA.Fire.LCPData.RasterCellResolutionX);
+            int cellSize = Mathf.RoundToInt((float)Engine.RuntimeData.Fire.LCPData.RasterCellResolutionX);
             //get wuiarea from a user defined map painted in wuinity
             int[,] perilWUIArea = GetPerilWUIArea();
 
             //create multiple time buffers
-            float RSET = WUIEngine.OUTPUT.TotalAverageEvacTime / 60f;
+            float RSET = Engine.Output.TotalAverageEvacTime / 60f;
             float[] RSETs = new float[1];
             for (int i = 0; i < RSETs.Length; ++i)
             {
@@ -55,17 +55,17 @@ namespace WUIPlatform
 
             float[,] maxROS;
             float[,] rosAzimuth;
-            if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
+            if (Engine.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Log, "k-PERIL is using ROS calculate using Behave.");
+                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is using ROS calculate using Behave.");
                 bool[,] wuiArea2D = null;// GetWUIArea2D(WUIEngine.RUNTIME_DATA.Fire.WuiArea, xDim, yDim);
                 CalculateAllRateOfSpreadsAndDirections(out maxROS, out rosAzimuth, midflameWindspeed, 150f, true, wuiArea2D);
             }
             else
             {    
-                WUIEngine.LOG(WUIEngine.LogType.Log, "k-PERIL is using ROS from simulation.");
-                maxROS = WUIEngine.SIM.FireModule.GetMaxROS();
-                rosAzimuth = WUIEngine.SIM.FireModule.GetMaxROSAzimuth();
+                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is using ROS from simulation.");
+                maxROS = Engine.SIM.FireModule.GetMaxROS();
+                rosAzimuth = Engine.SIM.FireModule.GetMaxROSAzimuth();
             }
 
             List<int[,]> perilOutput = new List<int[,]>(RSETs.Length);
@@ -75,7 +75,7 @@ namespace WUIPlatform
                 {
                     int[,] result = PERIL.CalculateBoundary(cellSize, RSETs[i], midflameWindspeed, perilWUIArea, maxROS, rosAzimuth, output);
                     perilOutput.Add(result);
-                    WUIEngine.LOG(WUIEngine.LogType.Log, "k-PERIL output, RSET= " + RSETs[i] + " minutes.\n" + output.ToString());
+                    Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL output, RSET= " + RSETs[i] + " minutes.\n" + output.ToString());
                 }
             }
 
@@ -103,15 +103,15 @@ namespace WUIPlatform
             try
             {
                 string file;
-                if (WUIEngine.INPUT.TriggerBuffer.kPERILInput.OutputName == null || WUIEngine.INPUT.TriggerBuffer.kPERILInput.OutputName.Length == 0)
+                if (Engine.Input.TriggerBuffer.kPERILInput.OutputName == null || Engine.Input.TriggerBuffer.kPERILInput.OutputName.Length == 0)
                 {
                     file = "trigger_buffer.asc";
                 }
                 else
                 {
-                    file = WUIEngine.INPUT.TriggerBuffer.kPERILInput.OutputName;
+                    file = Engine.Input.TriggerBuffer.kPERILInput.OutputName;
                 }
-                string path = Path.Combine(WUIEngine.WORKING_FOLDER, file);
+                string path = Path.Combine(Engine.WorkingFolder, file);
                 using (StreamWriter outputFile = new StreamWriter(path))
                 {
                     string line;
@@ -147,13 +147,13 @@ namespace WUIPlatform
             }
             catch (System.Exception e)
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, e.Message);
+                Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
             }
         }
 
         private static void CalculateAllRateOfSpreadsAndDirections(out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, bool[,] wuiArea = null)
         {
-            LCPData lcpData = WUIEngine.RUNTIME_DATA.Fire.LCPData;
+            LCPData lcpData = Engine.RuntimeData.Fire.LCPData;
             int xDim = lcpData.GetCellCountX();
             int yDim = lcpData.GetCellCountY();
             rateOfSpreads = new float[xDim, yDim];
@@ -161,11 +161,11 @@ namespace WUIPlatform
 
             //we need to create and fill the fuel model set. TODO: create this data globally in RUNTIME_DATA.Fire
             FuelModelSet fuelModelSet = new FuelModelSet();
-            if (WUIEngine.DATA_STATUS.FuelModelsLoaded)
+            if (Engine.DataStatus.FuelModelsLoaded)
             {
-                for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(WUIEngine.RUNTIME_DATA.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -186,7 +186,7 @@ namespace WUIPlatform
                         continue;
                     }
                     LandscapeStruct cellData = lcpData.GetCellData(x, y);
-                    InitialFuelMoisture moisture = WUIEngine.RUNTIME_DATA.Fire.kPERILInitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
+                    InitialFuelMoisture moisture = Engine.RuntimeData.Fire.kPERILInitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
                     surfaceFire.updateSurfaceInputs(cellData.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
@@ -207,14 +207,14 @@ namespace WUIPlatform
 
         private static int[,] GetPerilWUIArea()
         {
-            int xDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountX();
-            int yDim = WUIEngine.RUNTIME_DATA.Fire.LCPData.GetCellCountY();
+            int xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
+            int yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
 
             //first count how many cells we have to add to array
             int count = 0;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.WuiArea.Length; i++)
+            for (int i = 0; i < Engine.RuntimeData.Fire.WuiArea.Length; i++)
             {
-                if (WUIEngine.RUNTIME_DATA.Fire.WuiArea[i] == true)
+                if (Engine.RuntimeData.Fire.WuiArea[i] == true)
                 {
                     ++count;
                 }
@@ -223,12 +223,12 @@ namespace WUIPlatform
             //then create array of correct size and fill it
             int[,] wuiArea = new int[2, count];
             int position = 0;
-            for (int i = 0; i < WUIEngine.RUNTIME_DATA.Fire.WuiArea.Length; i++)
+            for (int i = 0; i < Engine.RuntimeData.Fire.WuiArea.Length; i++)
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
                 int yFlipped = yDim - 1 - yIndex;
-                if (WUIEngine.RUNTIME_DATA.Fire.WuiArea[i])
+                if (Engine.RuntimeData.Fire.WuiArea[i])
                 {
                     wuiArea[0, position] = xIndex;
                     wuiArea[1, position] = yFlipped;

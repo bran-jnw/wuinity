@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace WUIPlatform.Smoke
+namespace PREACT.Smoke
 {
     public class ExtinctionRamp
     {
@@ -24,7 +24,7 @@ namespace WUIPlatform.Smoke
             }
             else
             {
-                WUIEngine.LOG(WUIEngine.LogType.Warning, "Extinction coefficient ramp file " + path + " not found.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Extinction coefficient ramp file " + path + " not found.");
                 return false;
             }
 

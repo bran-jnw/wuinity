@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using WUIPlatform.Pedestrian;
+using PREACT.Pedestrian;
 
-namespace WUIPlatform.Visualization
+namespace PREACT.Visualization
 {
     public class MacroHouseholdVisualizerUnity : MacroHouseholdVisualizer
     {
