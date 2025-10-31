@@ -4,5 +4,6 @@ namespace PREACT
     {
         public void InputHasChanged();
         public void UpdateMap();
+        public void NewLogMessage(string message);
     }
 }

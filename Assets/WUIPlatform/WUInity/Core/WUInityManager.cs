@@ -1061,5 +1061,13 @@ namespace WUInity
             UpdateSimBorders();
             WUICamera.SetCameraStartPosition(_engine.Input.Simulation.DomainSize);
         }
+
+        public void NewLogMessage(string message)
+        {
+            if (Application.isEditor) //&& !WUInity.WUInityEngine.INSTANCE.SuppressMessages) // || UnityEngine.Debug.isDebugBuild
+            {
+                Debug.Log(message);
+            }
+        }
     }
 }

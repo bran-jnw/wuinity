@@ -40,14 +40,6 @@ namespace PREACT.IO
             WUIShow = new WUIShowInput();*/
         }
 
-        private void Message(Engine engine, Engine.LogType type, string message)
-        {
-            if(engine != null)
-            {
-                engine.Message(null, Engine.LogType.Log, message);
-            }            
-        }
-
         public void SaveToDisk(Engine engine)
         {
             //TODO: fix new format save
@@ -56,7 +48,7 @@ namespace PREACT.IO
             EvacuationGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
-            Message(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " saved.");       
+            Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " saved.");       
         }
 
         public static Input LoadFromDisk(Engine engine, string path)
@@ -64,19 +56,19 @@ namespace PREACT.IO
             Input result = null;
             if(!File.Exists(path))
             {
-                Message(Engine.LogType.InputError, " Input file " + path + " does not exist.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, " Input file " + path + " does not exist.");
             }
             else
             {
-                engine.Message(null, Engine.LogType.Log, " Reading input file " + path + ".");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Reading input file " + path + ".");
                 Input input = ParseInput(File.ReadAllLines(path));
                 if (input != null)
                 {      
-                    eng ine.Message(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " loaded.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " loaded.");
                 }
                 else
                 {
-                    engine.Message(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " could not be loaded, see log.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " could not be loaded, see log.");
                 }
             }               
 
@@ -118,7 +110,7 @@ namespace PREACT.IO
             else
             {
                 //critical
-                engine.Message(null, Engine.LogType.SimError, input + " header not found." + pleaseCheckInput);
+                Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found." + pleaseCheckInput);
                 return null;
             }
             if(newInput.Simulation == null)
@@ -137,7 +129,7 @@ namespace PREACT.IO
             {
                 //does not matter
                 newInput.Map = new MapInput();
-                engine.Message(null, Engine.LogType.Warning, input + " header not found, using defaults.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, input + " header not found, using defaults.");
             }            
 
             //population            
@@ -152,7 +144,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    engine.Message(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                     return null;
                 }      
             }
@@ -169,7 +161,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    engine.Message(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
                     return null;
                 }
             }                
@@ -186,7 +178,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    engine.Message(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -203,7 +195,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    engine.Message(null, Engine.LogType.SimError, input + " header not found but user has requested traffic module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested traffic module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -220,7 +212,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical                
-                    engine.Message(null, Engine.LogType.SimError, input + " header not found but user has requested fire module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested fire module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -237,7 +229,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    engine.Message(null, Engine.LogType.SimError, input + " header not found but user has requested smoke module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested smoke module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -253,7 +245,7 @@ namespace PREACT.IO
             {
                 //does not matter, not active per default
                 newInput.TriggerBuffer = new TriggerBufferInput();
-                engine.Message(null, Engine.LogType.Warning, input + " header not found, using defaults (disabled).");
+                Engine.MESSAGE(null, Engine.LogType.Warning, input + " header not found, using defaults (disabled).");
             }
 
             //WUIShow
@@ -267,7 +259,7 @@ namespace PREACT.IO
             {
                 //does not matter
                 newInput.WUIShow = new WUIShowInput();
-                engine.Message(null, Engine.LogType.Warning, input + " header not found, using defaults (disabled).");
+                Engine.MESSAGE(null, Engine.LogType.Warning, input + " header not found, using defaults (disabled).");
             }
 
             //events
@@ -281,7 +273,7 @@ namespace PREACT.IO
             {
                 //does not matter
                 newInput.Events = new EventsInput();
-                engine.Message(null, Engine.LogType.Warning, input + " header not found, no events will be added.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, input + " header not found, no events will be added.");
             }
 
             return newInput;
@@ -330,18 +322,18 @@ namespace PREACT.IO
             return inputToParse;
         }
 
-        public void ReadingInputMessage(string nameOfInput)
+        public static void ReadingInputMessage(string nameOfInput)
         {
-            engine.Message(null, Engine.LogType.Log, nameOfInput + " input is being read...");
+            Engine.MESSAGE(null, Engine.LogType.Log, nameOfInput + " input is being read...");
         }
 
-        public void InputNotFoundMessage(string nameOfInput)
+        public static void InputNotFoundMessage(string nameOfInput)
         {
-            engine.Message(null, Engine.LogType.SimError, nameOfInput + " was not found." + pleaseCheckInput);
+            Engine.MESSAGE(null, Engine.LogType.SimError, nameOfInput + " was not found." + pleaseCheckInput);
         }
-        public void CouldNotInterpretInputMessage(string nameOfInput, string userInput)
+        public static void CouldNotInterpretInputMessage(string nameOfInput, string userInput)
         {
-            engine.Message(null, Engine.LogType.InputError, "Could not interpret user input " + userInput + " for " + nameOfInput + ".");
+            Engine.MESSAGE(null, Engine.LogType.InputError, "Could not interpret user input " + userInput + " for " + nameOfInput + ".");
         }
     }
 }

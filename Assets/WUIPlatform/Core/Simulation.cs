@@ -133,7 +133,7 @@ namespace PREACT
             _stopRun = false;
             _stoppedDueToError = false;
 
-            Message(Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
+            Engine.MESSAGE(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
             CreateSubModules();
             //when creating modules we migth have found an issue
             if (_stopRun)
@@ -202,14 +202,14 @@ namespace PREACT
             }
 
             _simulationStopWatch.Stop();
-            Message(Engine.LogType.Log, "Total time spent [s]:" + _simulationStopWatch.ElapsedMilliseconds * 0.001);
-            Message(Engine.LogType.Log, "Total time spent in pedestrian module [s]:" + _pedestrianStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pedestrianStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Message(Engine.LogType.Log, "Total time spent in traffic module [s]:" + _trafficStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _trafficStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Message(Engine.LogType.Log, "Total time spent in fire module [s]:" + _fireStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _fireStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Message(Engine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Message(Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Engine.MESSAGE(this, Engine.LogType.Log, "Total time spent [s]:" + _simulationStopWatch.ElapsedMilliseconds * 0.001);
+            Engine.MESSAGE(this, Engine.LogType.Log, "Total time spent in pedestrian module [s]:" + _pedestrianStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pedestrianStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Engine.MESSAGE(this, Engine.LogType.Log, "Total time spent in traffic module [s]:" + _trafficStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _trafficStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Engine.MESSAGE(this, Engine.LogType.Log, "Total time spent in fire module [s]:" + _fireStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _fireStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Engine.MESSAGE(this, Engine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            Engine.MESSAGE(this, Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
             _state = SimulationState.Finished;
-            Message(Engine.LogType.Log, " Simulation done.");            
+            Engine.MESSAGE(this, Engine.LogType.Log, " Simulation done.");            
         }
         
         private void CreateSubModules()
@@ -240,7 +240,7 @@ namespace PREACT
                 return;
             }
 
-            Message(Engine.LogType.Log, "All requested sub-modules initiated successfully.");
+            Engine.MESSAGE(this, Engine.LogType.Log, "All requested sub-modules initiated successfully.");
         }
 
         private void CreateFireModule()
@@ -250,21 +250,21 @@ namespace PREACT
                 if (_engine.Input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
                 {
                     _fireModule = new AscFireImport(this);
-                    Message(Engine.LogType.Log, "Fire module AscImport initiated.");
+                    Engine.MESSAGE(this, Engine.LogType.Log, "Fire module AscImport initiated.");
                 }
                 else if(_engine.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
                 {
                     _fireModule = new FireMesh(this, _engine.RuntimeData.Fire.LCPData, _engine.RuntimeData.Fire.WeatherInput, _engine.RuntimeData.Fire.WindInput, _engine.RuntimeData.Fire.InitialFuelMoistureData, _engine.RuntimeData.Fire.IgnitionPoints);
-                    Message(Engine.LogType.Log, "Fire module FireCell initiated.");
+                    Engine.MESSAGE(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
                 else
                 {
-                    Message(Engine.LogType.SimError, "Could not initiate fire mdoule, aborting.");
+                    Engine.MESSAGE(this, Engine.LogType.SimError, "Could not initiate fire mdoule, aborting.");
                 }
             }  
             else
             {
-                Message(Engine.LogType.Log, "No fire module was enabled.");
+                Engine.MESSAGE(this, Engine.LogType.Log, "No fire module was enabled.");
             }
         }
 
@@ -283,7 +283,7 @@ namespace PREACT
 
                 if (!_engine.Input.Simulation.RunFireModule)
                 {
-                    Message(Engine.LogType.SimError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
+                    Engine.MESSAGE(this, Engine.LogType.SimError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
                 }
                 else
                 {                       
@@ -298,7 +298,7 @@ namespace PREACT
                             ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
                         }
                         //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/                            
-                        Message(Engine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
+                        Engine.MESSAGE(this, Engine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
                     }
                     else if (_engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                     {
@@ -308,7 +308,7 @@ namespace PREACT
             } 
             else
             {
-                Message(Engine.LogType.Log, "No smoke module was enabled.");
+                Engine.MESSAGE(this, Engine.LogType.Log, "No smoke module was enabled.");
             }
         }
 
@@ -328,12 +328,12 @@ namespace PREACT
                     //place people
                     //macroHouseholdSim.PopulateCells(WUI_engine.RUNTIME_DATA.Routing.RouteCollections, WUI_engine.POPULATION.GetPopulationData());
                     macroHouseholdSim.PopulateSimulation(_engine.RuntimeData.Population.Households);
-                    Message(Engine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
+                    Engine.MESSAGE(this, Engine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
             else
             {
-                Message(Engine.LogType.Log, "No pedestrian module was enabled.");
+                Engine.MESSAGE(this, Engine.LogType.Log, "No pedestrian module was enabled.");
             }
         }
 
@@ -347,7 +347,7 @@ namespace PREACT
                     _trafficModule = new SUMOModule(this, out success);
                     if(success)
                     {
-                        Message(Engine.LogType.Log, "Traffic module SUMO initiated.");
+                        Engine.MESSAGE(this, Engine.LogType.Log, "Traffic module SUMO initiated.");
                     }  
                     else
                     {
@@ -357,12 +357,12 @@ namespace PREACT
                 else
                 {
                     _trafficModule = new MacroTrafficSim(this);
-                    Message(Engine.LogType.Log, "Traffic module MacroTrafficSim initiated.");
+                    Engine.MESSAGE(this, Engine.LogType.Log, "Traffic module MacroTrafficSim initiated.");
                 }
             }
             else
             {
-                Message(Engine.LogType.Log, "No traffic module was enabled.");
+                Engine.MESSAGE(this, Engine.LogType.Log, "No traffic module was enabled.");
             }
         }
         
@@ -607,7 +607,7 @@ namespace PREACT
                     FireCellState cellState = _fireModule.GetFireCellState(eG.LatLon);
                     if (cellState == FireCellState.Burning)
                     {
-                        Message(Engine.LogType.Log, " Goal blocked by fire: " + eG.Name);
+                        Engine.MESSAGE(this, Engine.LogType.Log, " Goal blocked by fire: " + eG.Name);
                         BlockEvacGoal(i);
                     }
                 }                
@@ -623,7 +623,7 @@ namespace PREACT
                 _stopRun = true;                              
 
                 _stoppedDueToError |= stoppedDueToError;
-                Message(Engine.LogType.Log, stopMessage);
+                Engine.MESSAGE(this, Engine.LogType.Log, stopMessage);
             }            
         }
 
@@ -658,7 +658,7 @@ namespace PREACT
             bool allBlocked = true;
             for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
             {
-                if(!_engine.RuntimeData.Evacuation.Destinations[i]._blocked)
+                if(!_engine.RuntimeData.Evacuation.Destinations[i].Blocked)
                 {
                     allBlocked = false;
                     break;
@@ -682,7 +682,7 @@ namespace PREACT
             Input input = _engine.Input;
             if (input.Simulation.RunTrafficModule)
             {
-                Message(Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
+                Engine.MESSAGE(this, Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
                 _trafficModule.SaveToFile(_simulationIndex);
             }
             if (input.Simulation.RunPedestrianModule)
@@ -693,14 +693,6 @@ namespace PREACT
                     mHS.SaveToFile(_simulationIndex);
                 }                    
             }                        
-        }
-
-        public void Message(Engine.LogType logType, string message)
-        {
-            if(_engine != null)
-            {
-                _engine.Message(this, logType, message);
-            }   
         }
 
         public float[,] GetTriggerBufferData()

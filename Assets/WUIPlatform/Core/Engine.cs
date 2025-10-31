@@ -229,12 +229,12 @@ namespace PREACT
 
             if (convergedInSequence >= 10)
             {
-                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                MESSAGE(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
 
             }
             else
             {
-                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                MESSAGE(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
 
             Output.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Id + ".log"));
@@ -356,7 +356,7 @@ namespace PREACT
 
                 _runtimeData = new RuntimeData();
                 //transform input to actual data
-                Message(null, LogType.Log, "Loading referenced data from input file...");
+                MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
                 _runtimeData.Evacuation.LoadAll();
                 _runtimeData.Population.LoadAll();
                 //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now
@@ -416,23 +416,20 @@ namespace PREACT
                 cellSizeIsDirty = false;
             }
         }
-
-        public static void MESSAGE(Simulation simulation, LogType logType, string message)
-        {
-            if(_ENGINE != null)
-            {
-                _ENGINE.Message(simulation, logType, message);
-            }
-        }
-        
+                
         public enum LogType { Log, Warning, SimError, InputError, Event, Debug };
         private List<string> _consoleLog = new List<string>();
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
         /// <param name="message"></param>
-        public void Message(Simulation simulation, LogType logType, string message)
+        public static void MESSAGE(Simulation simulation, LogType logType, string message)
         {
+            if (_ENGINE == null)
+            {
+                return;
+            }
+
             if (simulation != null && simulation.State == Simulation.SimulationState.Running)
             {
                 message = "[Simulation# " + simulation.SimulationIndex + ", " +(int)simulation.CurrentTime + "s] " + message;
@@ -459,18 +456,16 @@ namespace PREACT
                 message = "LOG: " + message;
             }
 
-            _consoleLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
+            _ENGINE._consoleLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
 
-#if USING_UNITY
-            if (UnityEngine.Application.isEditor) //&& !WUInity.WUInityEngine.INSTANCE.SuppressMessages) // || UnityEngine.Debug.isDebugBuild
+            if(_ENGINE._externalManager != null)
             {
-                UnityEngine.Debug.Log(message);
+                _ENGINE._externalManager.NewLogMessage(message);
             }
-#endif
 
             if (logType == LogType.SimError)
             {
-                Close(true);
+                _ENGINE.Close(true);
             }           
         }
 
