@@ -13,60 +13,64 @@ using PREACT.Fire;
 using PREACT.Smoke;
 using PREACT.IO;
 using System.Threading;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace PREACT
 {
     [System.Serializable]
     public class Simulation
-    {    
-        public enum SimulationState { Initializing, Running, Finished, Error};
-        private SimulationState _state;
-        public SimulationState State { get => _state; }
+    {
+        public enum SimulationState { Initializing, Running, Finished, Error };
 
-        private bool _isPaused = false;
-        public bool IsPaused { get => _isPaused; }
-
-        bool _haveResults = false;
-        public bool HaveResults { get => _haveResults; }
-
-        private bool _stopRun;
-
-        private TrafficModule _trafficModule;
-        public TrafficModule TrafficModule { get => _trafficModule; }
-
-        private PedestrianModule _pedestrianModule;
-        public PedestrianModule PedestrianModule { get => _pedestrianModule; }
-
-        private FireModule _fireModule;
-        public FireModule FireModule { get => _fireModule; }
-
-        private SmokeModule _smokeModule;
-        public SmokeModule SmokeModule { get =>_smokeModule; }
-
-        private float _startTime;
-        public float StartTime { get => _startTime; }
-
-        private float _currentTime;
-        public float CurrentTime { get => _currentTime; } 
-                
-        private float _stepExecutionTime;
-        public float StepExecutionTime { get => _stepExecutionTime; }
-                
-        float[,] _triggerBufferDataOutput;
-
-        private System.Diagnostics.Stopwatch _simulationStopWatch = new System.Diagnostics.Stopwatch();
-        private System.Diagnostics.Stopwatch _trafficStopwatch = new System.Diagnostics.Stopwatch();
-        private System.Diagnostics.Stopwatch _pedestrianStopwatch = new System.Diagnostics.Stopwatch();
-        private System.Diagnostics.Stopwatch _fireStopwatch = new System.Diagnostics.Stopwatch();
-        private System.Diagnostics.Stopwatch _smokeStopwatch = new System.Diagnostics.Stopwatch();
-        private System.Diagnostics.Stopwatch _pathfindingStopwatch = new System.Diagnostics.Stopwatch();
-
-        Input _input;
-        public Input Input { get => _input; }
-        int _simulationIndex;
-        public int SimulationIndex { get => _simulationIndex; }
+        //References
         private Engine _engine;
+        private Scenario.ScenarioData _scenario;
+        private Input _input;
+        private SimulationState _state;
+        private TrafficModule _trafficModule;
+        private PedestrianModule _pedestrianModule;
+        private FireModule _fireModule;
+        private SmokeModule _smokeModule;
+        private Stopwatch _simulationStopWatch = new Stopwatch();
+        private Stopwatch _trafficStopwatch = new Stopwatch();
+        private Stopwatch _pedestrianStopwatch = new Stopwatch();
+        private Stopwatch _fireStopwatch = new Stopwatch();
+        private Stopwatch _smokeStopwatch = new Stopwatch();
+        private Stopwatch _pathfindingStopwatch = new Stopwatch();
+
+        //Data
+        private int _simulationIndex;
+        private float _startTime;
+        private float _currentTime;
+        private bool _isPaused = false;
+        private bool _stopRun;
+        private bool _haveResults = false;
+        private float _stepExecutionTime;   
+
+        private float[,] _triggerBufferDataOutput;//TODO:move to somewhere else
+        
+        //References
         public Engine Engine { get => _engine; }
+        public Scenario.ScenarioData Scenario { get => _scenario; }
+        public SimulationState State { get => _state; }
+        public PedestrianModule PedestrianModule { get => _pedestrianModule; }
+        public TrafficModule TrafficModule { get => _trafficModule; }
+        public FireModule FireModule { get => _fireModule; }
+        public SmokeModule SmokeModule { get => _smokeModule; }
+        public Input Input { get => _input; }
+
+        //Data
+        public int SimulationIndex { get => _simulationIndex; }        
+        public bool IsPaused { get => _isPaused; }        
+        public bool HaveResults { get => _haveResults; }          
+        public float StartTime { get => _startTime; }        
+        public float CurrentTime { get => _currentTime; }  
+        public float StepExecutionTime { get => _stepExecutionTime; }
+
+
+        private List<EvacuationDestination> _evacuationDestinations;
+        public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
 
 
         public Simulation(Engine engine, Input input, int simulationId)
@@ -134,25 +138,27 @@ namespace PREACT
             _stoppedDueToError = false;
 
             Engine.MESSAGE(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
+
+            _evacuationDestinations = EvacuationDestination.CreateEvacacuationDestinations(this, _input.Evacuation.EvacuationDestinationInputs);
+            if (_stopRun)
+            {
+                _state = SimulationState.Error;
+                return;
+            }
+
             CreateSubModules();
             //when creating modules we migth have found an issue
             if (_stopRun)
             {
                 _state = SimulationState.Error;
                 return;
-            }            
-
-            //if we do multiple runs the goals have to be reset
-            /*for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
-            {
-                _engine.RuntimeData.Evacuation.Destinations[i].ResetPeopleAndCars();
-            }*/
+            }
 
             //pick start time based on curve or 0 (fire start)
             _currentTime = 0f;
-            for (int i = 0; i < _engine.RuntimeData.Evacuation.ResponseCurves.Length; i++)
+            for (int i = 0; i < _engine.ScenarioData.Evacuation.ResponseCurves.Length; i++)
             {
-                float t = _engine.RuntimeData.Evacuation.ResponseCurves[i].dataPoints[0].time + _engine.Input.Evacuation.EvacuationOrderStart;
+                float t = _engine.ScenarioData.Evacuation.ResponseCurves[i].dataPoints[0].time + _engine.Input.Evacuation.EvacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
@@ -254,7 +260,7 @@ namespace PREACT
                 }
                 else if(_engine.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
                 {
-                    _fireModule = new FireMesh(this, _engine.RuntimeData.Fire.LCPData, _engine.RuntimeData.Fire.WeatherInput, _engine.RuntimeData.Fire.WindInput, _engine.RuntimeData.Fire.InitialFuelMoistureData, _engine.RuntimeData.Fire.IgnitionPoints);
+                    _fireModule = new FireMesh(this, _engine.ScenarioData.Fire.LCPData, _engine.ScenarioData.Fire.WeatherInput, _engine.ScenarioData.Fire.WindInput, _engine.ScenarioData.Fire.InitialFuelMoistureData, _engine.ScenarioData.Fire.IgnitionPoints);
                     Engine.MESSAGE(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
                 else
@@ -327,7 +333,7 @@ namespace PREACT
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
                     //macroHouseholdSim.PopulateCells(WUI_engine.RUNTIME_DATA.Routing.RouteCollections, WUI_engine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateSimulation(_engine.RuntimeData.Population.Households);
+                    macroHouseholdSim.PopulateSimulation(_engine.ScenarioData.Population.Households);
                     Engine.MESSAGE(this, Engine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
@@ -495,11 +501,11 @@ namespace PREACT
             if (input.Simulation.RunTrafficModule)
             {
                 //check for global events
-                if (_engine.RuntimeData.Evacuation.BlockGoalEvents != null)
+                if (_engine.ScenarioData.Evacuation.BlockGoalEvents != null)
                 {
-                    for (int i = 0; i < _engine.RuntimeData.Evacuation.BlockGoalEvents.Length; i++)
+                    for (int i = 0; i < _engine.ScenarioData.Evacuation.BlockGoalEvents.Length; i++)
                     {
-                        BlockGoalEvent bGE = _engine.RuntimeData.Evacuation.BlockGoalEvents[i];
+                        BlockDestinationEvent bGE = _engine.ScenarioData.Evacuation.BlockGoalEvents[i];
                         if (CurrentTime >= bGE.startTime && !bGE.triggered)
                         {
                             bGE.ApplyEffects();
@@ -599,9 +605,9 @@ namespace PREACT
 
         void CheckEvacuationGoalStatus()
         {
-            for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
+            for (int i = 0; i < _evacuationDestinations.Count; i++)
             {
-                EvacuationDestination eG = _engine.RuntimeData.Evacuation.Destinations[i];
+                EvacuationDestination eG = _evacuationDestinations[i];
                 if(!eG.Blocked)
                 {
                     FireCellState cellState = _fireModule.GetFireCellState(eG.LatLon);
@@ -637,9 +643,9 @@ namespace PREACT
 
         public void BlockEvacGoal(int index)
         {
-            if (!_engine.RuntimeData.Evacuation.Destinations[index].Blocked)
+            if (!_evacuationDestinations[index].Blocked)
             {
-                _engine.RuntimeData.Evacuation.Destinations[index].Blocked = true;
+                _evacuationDestinations[index].BlockDestination(this);
                 UpdateRoutes();
             }
         }        
@@ -656,9 +662,9 @@ namespace PREACT
         {
             //check that we have at least one goal left
             bool allBlocked = true;
-            for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
+            for (int i = 0; i < _evacuationDestinations.Count; i++)
             {
-                if(!_engine.RuntimeData.Evacuation.Destinations[i].Blocked)
+                if(!_evacuationDestinations[i].Blocked)
                 {
                     allBlocked = false;
                     break;
@@ -714,11 +720,21 @@ namespace PREACT
         {
             if(_triggerBufferDataOutput != null)
             {
-                _engine.RuntimeData.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferDataOutput);
-                _engine.RuntimeData.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
-                _engine.RuntimeData.Fire.Visualizer.SetLCPDataPlane(true);
+                _engine.ScenarioData.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferDataOutput);
+                _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
+                _engine.ScenarioData.Fire.Visualizer.SetLCPDataPlane(true);
             }            
         }
 
+        public uint GetTotalEvacuated()
+        {
+            uint result = 0;
+            for (int i = 0; i < _evacuationDestinations.Count; i++)
+            {
+                result += _evacuationDestinations[i].CurrentPeople;
+            }
+
+            return result;
+        }
     }    
 }

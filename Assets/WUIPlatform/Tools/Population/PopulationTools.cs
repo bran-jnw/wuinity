@@ -18,14 +18,14 @@ namespace PREACT.Tools
         {
             bool success = false;
 
-            success = engine.RuntimeData.Population.LocalGPWData.CreateLocalGPWData(globalGpwFolder);
+            success = engine.ScenarioData.Population.LocalGPWData.CreateLocalGPWData(globalGpwFolder);
 
             return success;
         }
 
         public static bool LoadLocalGPWData(Engine engine, string localGpwFile)
         {            
-            bool success = engine.RuntimeData.Population.LocalGPWData.LoadFromFile(localGpwFile);            
+            bool success = engine.ScenarioData.Population.LocalGPWData.LoadFromFile(localGpwFile);            
             return success;
         }
 
@@ -44,9 +44,9 @@ namespace PREACT.Tools
 
         private static void CreateAndSavePopulationMap(Engine engine, string localGpwFile, float cellSize)
         {
-            if (engine.RuntimeData.Population.LocalGPWData.LoadFromFile(localGpwFile))
+            if (engine.ScenarioData.Population.LocalGPWData.LoadFromFile(localGpwFile))
             {
-                engine.RuntimeData.Population.PopulationMap.CreateAndSave(engine.RuntimeData.Population.LocalGPWData, cellSize);
+                engine.ScenarioData.Population.PopulationMap.CreateAndSave(engine.ScenarioData.Population.LocalGPWData, cellSize);
             }
         }
 
@@ -54,7 +54,7 @@ namespace PREACT.Tools
         {
             bool success = false;
 
-            success = engine.RuntimeData.Population.PopulationMap.LoadFromFile(populationMapFile);
+            success = engine.ScenarioData.Population.PopulationMap.LoadFromFile(populationMapFile);
 
             return success;
         }
@@ -79,9 +79,9 @@ namespace PREACT.Tools
         {
             bool success = false;
 
-            if(engine.RuntimeData.Population.PopulationMap.HaveData)
+            if(engine.ScenarioData.Population.PopulationMap.HaveData)
             {
-                engine.RuntimeData.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation, true);
+                engine.ScenarioData.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation, true);
             }
             else
             {
@@ -97,11 +97,11 @@ namespace PREACT.Tools
         public static void RoadAccessCorrectPopulationMap(Engine engine, string routerDbFile)
         {
             
-            if (engine.RuntimeData.Population.PopulationMap.HaveData)
+            if (engine.ScenarioData.Population.PopulationMap.HaveData)
             {
-                if(engine.RuntimeData.Routing.LoadRouterDb(routerDbFile))
+                if(engine.ScenarioData.Routing.LoadRouterDb(routerDbFile))
                 {
-                    engine.RuntimeData.Population.PopulationMap.UpdatePopulationMapBasedOnRoadAccess(engine.RuntimeData.Routing.Router);
+                    engine.ScenarioData.Population.PopulationMap.UpdatePopulationMapBasedOnRoadAccess(engine.ScenarioData.Routing.Router);
                 }                
             }
             else
@@ -112,15 +112,15 @@ namespace PREACT.Tools
 
         public static void ApplyPopulationMapMask(Engine engine, string populationMaskFile)
         {
-            if(engine.RuntimeData.Population.PopulationMap.HaveData && engine.RuntimeData.Population.PopulationMap.LoadPopulationMask(populationMaskFile))
+            if(engine.ScenarioData.Population.PopulationMap.HaveData && engine.ScenarioData.Population.PopulationMap.LoadPopulationMask(populationMaskFile))
             {
-                engine.RuntimeData.Population.PopulationMap.ApplyMaskToPopulation();
+                engine.ScenarioData.Population.PopulationMap.ApplyMaskToPopulation();
             }            
         }
 
         public static void SavePopulationMask(Engine engine)
         {
-            engine.RuntimeData.Population.PopulationMap.SavePopulationMask(engine.Input.Simulation.Id);
+            engine.ScenarioData.Population.PopulationMap.SavePopulationMask(engine.Input.Simulation.Id);
         }
 
         /*public static void LoadPopulationMask(string populationMaskFile)
@@ -130,9 +130,9 @@ namespace PREACT.Tools
 
         public static void CreateAndLoadPopulation(Engine engine)
         {
-            if (engine.RuntimeData.Population.PopulationMap.HaveData && engine.RuntimeData.Population.PopulationMap.CorrectedForRoadAccess)
+            if (engine.ScenarioData.Population.PopulationMap.HaveData && engine.ScenarioData.Population.PopulationMap.CorrectedForRoadAccess)
             {
-                engine.RuntimeData.Population.PopulationMap.CreateAndLoadPopulation();
+                engine.ScenarioData.Population.PopulationMap.CreateAndLoadPopulation();
             }
             else
             {
@@ -142,13 +142,13 @@ namespace PREACT.Tools
 
         public static bool CreateAndSaveRouterDb(Engine engine, string osmFile)
         {
-            return engine.RuntimeData.Routing.CreateAndSaveRouterDb(osmFile);
+            return engine.ScenarioData.Routing.CreateAndSaveRouterDb(osmFile);
         }
 
         public static bool LoadRouterDb(Engine engine, string routerDbFile)
         {
 
-            return engine.RuntimeData.Routing.LoadRouterDb(routerDbFile);
+            return engine.ScenarioData.Routing.LoadRouterDb(routerDbFile);
         }
 
         public static bool FilterOsmData(Engine engine, string osmFile, string xBorder, string yBorder)

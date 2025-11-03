@@ -12,7 +12,7 @@ using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
 
-namespace PREACT.Runtime
+namespace PREACT.Scenario
 {
     public class RoutingData
     {

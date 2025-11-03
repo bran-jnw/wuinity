@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.Runtime;
+using PREACT.Scenario;
 using PREACT.IO;
 using System.IO;
 using System.Collections.Generic;
@@ -19,23 +19,21 @@ namespace PREACT
     {
         private static Engine _ENGINE;
         private ExternalManager _externalManager;
-        private Scenario _scenario;
         private Simulation[] _simulations;
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private Input _input;
-        private RuntimeData _runtimeData;
+        private ScenarioData _scenarioData;
         private DataStatus _dataStatus;
         private Output _output;        
         private string _workingFile;
         private Visualization.WUIShowCommunicator _wuiShow;
 
-        public Scenario Scenario { get => _scenario; }
         public Simulation Simulation { get => _mainSimulation; }
         public Input Input { get => _input; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
         public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
-        public RuntimeData RuntimeData { get => _runtimeData; }
+        public ScenarioData ScenarioData { get => _scenarioData; }
         public Output Output { get => _output; }
         public string DataFolder { get => Directory.GetCurrentDirectory(); }
         public string WorkingFolder { get => Path.GetDirectoryName(WorkingFile); }
@@ -144,11 +142,11 @@ namespace PREACT
             PreSimulations();
 
             //Currently this will not work as SUMO can only run one instance per process, need to find workaround
-            int batches = RuntimeData.Simulation.NumberOfRuns / _parallellRunCount + RuntimeData.Simulation.NumberOfRuns % _parallellRunCount > 0 ? 1 : 0;
+            int batches = ScenarioData.Simulation.NumberOfRuns / _parallellRunCount + ScenarioData.Simulation.NumberOfRuns % _parallellRunCount > 0 ? 1 : 0;
             for (int i = 0; i < batches; ++i)
             {
                 int startIndex = batches * _parallellRunCount;
-                int endIndex = Math.Min(startIndex + _parallellRunCount, RuntimeData.Simulation.NumberOfRuns);
+                int endIndex = Math.Min(startIndex + _parallellRunCount, ScenarioData.Simulation.NumberOfRuns);
                 System.Threading.Tasks.Parallel.For(startIndex, endIndex, index =>
                 {
                     try
@@ -180,7 +178,7 @@ namespace PREACT
 
             if (parallel)
             {
-                _simulations = new Simulation[RuntimeData.Simulation.NumberOfRuns];
+                _simulations = new Simulation[ScenarioData.Simulation.NumberOfRuns];
                 for (int i = 0; i < _simulations.Length; ++i)
                 {
                     _simulations[i] = new Simulation(this, _input, i);
@@ -269,11 +267,11 @@ namespace PREACT
                     float currentAverage = cumulativeTotalEvacTime / resultCount;
                     float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
                     //if convergence met we can stop
-                    if (convergenceCriteria < RuntimeData.Simulation.ConvergenceMaxDifference)
+                    if (convergenceCriteria < ScenarioData.Simulation.ConvergenceMaxDifference)
                     {
                         ++convergedInSequence;
                         //we are done
-                        if (_input.Simulation.StopAfterConverging && convergedInSequence > RuntimeData.Simulation.ConvergenceMinSequence)
+                        if (_input.Simulation.StopAfterConverging && convergedInSequence > ScenarioData.Simulation.ConvergenceMinSequence)
                         {
                             _stopSimulations = true; //needed for serial run
                             Close(false); //needed for parallel run
@@ -336,7 +334,7 @@ namespace PREACT
 
         public void LoadInputFromFile(string path)
         {
-            Input input = Input.LoadFromDisk(this, path);
+            Input input = Input.LoadFromDisk(path);
 
             if(input != null)
             {
@@ -354,16 +352,16 @@ namespace PREACT
 
                 _validInput = new ValidCriticalData(_input);
 
-                _runtimeData = new RuntimeData();
+                _scenarioData = new ScenarioData(this);
                 //transform input to actual data
                 MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
-                _runtimeData.Evacuation.LoadAll();
-                _runtimeData.Population.LoadAll();
+                _scenarioData.Evacuation.LoadAll(input, WorkingFolder);
+                _scenarioData.Population.LoadAll(input, WorkingFolder);
                 //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now
                 //need to load evacuation goals before routing as they rely on evacuation goals
-                _runtimeData.Traffic.LoadAll();
-                _runtimeData.Fire.LoadAll();
-                _runtimeData.Smoke.LoadAll(); //does nothing right now
+                _scenarioData.Traffic.LoadAll(input, WorkingFolder);
+                _scenarioData.Fire.LoadAll(input, WorkingFolder);
+                _scenarioData.Smoke.LoadAll(input, WorkingFolder); //does nothing right now
 
                 UpdateMapResourceStatus();
 

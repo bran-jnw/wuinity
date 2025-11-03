@@ -18,17 +18,17 @@ namespace PREACT
 
         public bool ResponseCurvesValid;
 
-        public bool CanRunSimulation()
+        public bool CanRunSimulation(IO.Input input)
         {
             bool canRun = true;
 
-            if (Engine.Input.Simulation.RunPedestrianModule && !PopulationLoaded)
+            if (input.Simulation.RunPedestrianModule && !PopulationLoaded)
             {
                 canRun = false;
                 Engine.MESSAGE(null, Engine.LogType.SimError, "Population is not loaded but user has requested pedestrian model.");
             }
 
-            if (Engine.Input.Simulation.RunFireModule)
+            if (input.Simulation.RunFireModule)
             {
                 if (!LcpLoaded)
                 {
@@ -37,9 +37,9 @@ namespace PREACT
                 }
             }
 
-            if (Engine.Input.Simulation.RunPedestrianModule)
+            if (input.Simulation.RunPedestrianModule)
             {
-                if (Engine.RuntimeData.Evacuation.ResponseCurves == null)
+                if (Engine.ScenarioData.Evacuation.ResponseCurves == null)
                 {
                     canRun = false;
                     Engine.MESSAGE(null, Engine.LogType.SimError, "No valid response curves have been loaded.");

@@ -32,43 +32,43 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if(_engine.RuntimeData.Fire.LCPData != null)
+            if(_engine.ScenarioData.Fire.LCPData != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP DATA");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _engine.RuntimeData.Fire.LCPData.GetCellCountX() + ", " + _engine.RuntimeData.Fire.LCPData.GetCellCountY());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _engine.ScenarioData.Fire.LCPData.GetCellCountX() + ", " + _engine.ScenarioData.Fire.LCPData.GetCellCountY());
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_engine.RuntimeData.Fire.LCPData.RasterCellResolutionX) + ", " + Unity_engine.Mathf.RoundToInt((float)_engine.RuntimeData.Fire.LCPData.RasterCellResolutionY));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_engine.ScenarioData.Fire.LCPData.RasterCellResolutionX) + ", " + Unity_engine.Mathf.RoundToInt((float)_engine.ScenarioData.Fire.LCPData.RasterCellResolutionY));
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle LCP display"))
                 {
-                    _engine.RuntimeData.Fire.ToggleLCPDataPlane();   
+                    _engine.ScenarioData.Fire.ToggleLCPDataPlane();   
                 }
                 ++buttonIndex;
 
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    _engine.RuntimeData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.FuelModel);
+                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.FuelModel);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
-                    _engine.RuntimeData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Elevation);
-                    lcpCurrentInfo = "Elevation range: " + _engine.RuntimeData.Fire.LCPData.GetElevationMin() + "-" + _engine.RuntimeData.Fire.LCPData.GetElevationMax() + " [m]";
+                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Elevation);
+                    lcpCurrentInfo = "Elevation range: " + _engine.ScenarioData.Fire.LCPData.GetElevationMin() + "-" + _engine.ScenarioData.Fire.LCPData.GetElevationMax() + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
-                    _engine.RuntimeData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Slope);
-                    lcpCurrentInfo = "Slope range: " + _engine.RuntimeData.Fire.LCPData.GetSlopeMin() + "-" + _engine.RuntimeData.Fire.LCPData.GetSlopeMax() + " [-]";
+                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Slope);
+                    lcpCurrentInfo = "Slope range: " + _engine.ScenarioData.Fire.LCPData.GetSlopeMin() + "-" + _engine.ScenarioData.Fire.LCPData.GetSlopeMax() + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
-                    _engine.RuntimeData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Aspect);
-                    lcpCurrentInfo = "Aspect range: " + _engine.RuntimeData.Fire.LCPData.GetAspectMin() + "-" + _engine.RuntimeData.Fire.LCPData.GetAspectMax() + " [°]";
+                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Aspect);
+                    lcpCurrentInfo = "Aspect range: " + _engine.ScenarioData.Fire.LCPData.GetAspectMin() + "-" + _engine.ScenarioData.Fire.LCPData.GetAspectMax() + " [°]";
                 }
                 ++buttonIndex;
 
@@ -167,7 +167,7 @@ namespace WUInity.UI
 
         void LoadLCP(string[] paths)
         {
-            _engine.RuntimeData.Fire.LoadLCPFile(paths[0], true);
+            _engine.ScenarioData.Fire.LoadLCPFile(paths[0], true);
         }
 
         void OpenLoadFuelsModelFile()
@@ -179,12 +179,12 @@ namespace WUInity.UI
 
         void LoadFuelModelsFile(string[] paths)
         {
-            _engine.RuntimeData.Fire.LoadFuelModelsInput(paths[0], true);
+            _engine.ScenarioData.Fire.LoadFuelModelsInput(paths[0], true);
         }
 
         void ResetFireGUI()
         {
-            _engine.RuntimeData.Fire.SetLCPDataPlane(false);
+            _engine.ScenarioData.Fire.SetLCPDataPlane(false);
         }
     }
 }

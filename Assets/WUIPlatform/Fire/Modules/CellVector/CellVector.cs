@@ -141,11 +141,11 @@ namespace PREACT.Fire
 
         public CellVector(Simulation simulation) : base(simulation)
         {
-            _lcpData = Engine.RuntimeData.Fire.LCPData;
-            _weather = Engine.RuntimeData.Fire.WeatherInput;
-            _wind = Engine.RuntimeData.Fire.WindInput;
-            _initialFuelMoisture = Engine.RuntimeData.Fire.InitialFuelMoistureData;
-            _ignitionPoints = Engine.RuntimeData.Fire.IgnitionPoints;
+            _lcpData = Engine.ScenarioData.Fire.LCPData;
+            _weather = Engine.ScenarioData.Fire.WeatherInput;
+            _wind = Engine.ScenarioData.Fire.WindInput;
+            _initialFuelMoisture = Engine.ScenarioData.Fire.InitialFuelMoistureData;
+            _ignitionPoints = Engine.ScenarioData.Fire.IgnitionPoints;
 
             _cellSizeX = (float)_lcpData.RasterCellResolutionX;
             _cellSizeY = (float)_lcpData.RasterCellResolutionY;
@@ -153,7 +153,7 @@ namespace PREACT.Fire
             _cellsY = _lcpData.GetCellCountY();
 
             Vector2d lcpUTM = _lcpData.GetLowerLeftUTM();
-            offset = lcpUTM - Engine.RuntimeData.Simulation.UTMOrigin;
+            offset = lcpUTM - Engine.ScenarioData.Simulation.UTMOrigin;
 
             bufferSize = _cellsX * _cellsY;
             _cells = new CellVectorCell[bufferSize];
@@ -186,9 +186,9 @@ namespace PREACT.Fire
             if (Engine.DataStatus.FuelModelsLoaded)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    _fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
+                    _fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             _surfaceFire = new Surface(_fuelModelSet);

@@ -94,17 +94,17 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = Engine.RuntimeData.Fire.LCPData.GetLCPSizeX();
+                double xSize = Engine.ScenarioData.Fire.LCPData.GetLCPSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = Engine.RuntimeData.Fire.LCPData.GetLCPSizeY();
+                double ySize = Engine.ScenarioData.Fire.LCPData.GetLCPSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = Engine.RuntimeData.Simulation.UTMOrigin + Engine.RuntimeData.Fire.LCPData.OriginOffset;
+                Vector2d lcpOriginUTM = Engine.ScenarioData.Simulation.UTMOrigin + Engine.ScenarioData.Fire.LCPData.OriginOffset;
                 var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(Engine.Input.Simulation.LowerLeftLatLon.x, Engine.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;
@@ -158,7 +158,7 @@ namespace PREACT.Visualization
 
         private byte[] GetDestinationsData()
         {            
-            List<Evacuation.EvacuationDestination> destinations = Engine.RuntimeData.Evacuation.Destinations;
+            List<Evacuation.EvacuationDestination> destinations = Engine.ScenarioData.Evacuation.Destinations;
             //name, type, total cars, total people, total travel time, average travel time
             List<byte> data = new List<byte>();
             for(int i = 0; i < destinations.Count; ++i)

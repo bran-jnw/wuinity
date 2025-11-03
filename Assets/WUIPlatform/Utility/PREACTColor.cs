@@ -5,13 +5,15 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using PREACT.Utility.Math;
+
 namespace PREACT
 {
-    public struct WUIEngineColor
+    public struct PREACTColor
     {
         public float r, g, b, a;
 
-        public WUIEngineColor(float r, float g, float b)
+        public PREACTColor(float r, float g, float b)
         {
             this.r = r; 
             this.g = g; 
@@ -19,7 +21,7 @@ namespace PREACT
             this.a = 0f;
         }
 
-        public WUIEngineColor(float r, float g, float b, float a)
+        public PREACTColor(float r, float g, float b, float a)
         {
             this.r = r;
             this.g = g;
@@ -27,37 +29,43 @@ namespace PREACT
             this.a = a;
         }
 
-        public WUIEngineColor(int r, int g, int b, int a)
+        public PREACTColor(int r, int g, int b, int a)
         {
             this.r = r / 255.0f;
             this.g = g / 255.0f;
             this.b = b / 255.0f;
             this.a = a / 255.0f;
         }
-        public static WUIEngineColor operator *(WUIEngineColor c, float f) => new WUIEngineColor(c.r * f, c.g * f, c.b * f, c.a * f );
-        public static WUIEngineColor operator /(WUIEngineColor c, float f) => new WUIEngineColor(c.r / f, c.g / f, c.b / f, c.a / f);
 
-        public static WUIEngineColor red { get { return new WUIEngineColor(1F, 0F, 0F, 1F); } }
-        public static WUIEngineColor green { get { return new WUIEngineColor(0F, 1F, 0F, 1F); } }
-        public static WUIEngineColor blue { get { return new WUIEngineColor(0F, 0F, 1F, 1F); } }
-        public static WUIEngineColor white { get { return new WUIEngineColor(1F, 1F, 1F, 1F); } }
-        public static WUIEngineColor black { get { return new WUIEngineColor(0F, 0F, 0F, 1F); } }
-        public static WUIEngineColor yellow { get { return new WUIEngineColor(1F, 235F / 255F, 4F / 255F, 1F); } }
-        public static WUIEngineColor cyan { get { return new WUIEngineColor(0F, 1F, 1F, 1F); } }
-        public static WUIEngineColor magenta { get { return new WUIEngineColor(1F, 0F, 1F, 1F); } }
-        public static WUIEngineColor gray { get { return new WUIEngineColor(.5F, .5F, .5F, 1F); } }
-        public static WUIEngineColor grey { get { return new WUIEngineColor(.5F, .5F, .5F, 1F); } }
-        public static WUIEngineColor clear { get { return new WUIEngineColor(0F, 0F, 0F, 0F); } }
+        public static PREACTColor Random()
+        {
+            return new PREACTColor(Randomf.value, Randomf.value, Randomf.value);
+        }
 
-        public static WUIEngineColor HSVToRGB(float H, float S, float V)
+        public static PREACTColor operator *(PREACTColor c, float f) => new PREACTColor(c.r * f, c.g * f, c.b * f, c.a * f );
+        public static PREACTColor operator /(PREACTColor c, float f) => new PREACTColor(c.r / f, c.g / f, c.b / f, c.a / f);
+
+        public static PREACTColor red { get { return new PREACTColor(1F, 0F, 0F, 1F); } }
+        public static PREACTColor green { get { return new PREACTColor(0F, 1F, 0F, 1F); } }
+        public static PREACTColor blue { get { return new PREACTColor(0F, 0F, 1F, 1F); } }
+        public static PREACTColor white { get { return new PREACTColor(1F, 1F, 1F, 1F); } }
+        public static PREACTColor black { get { return new PREACTColor(0F, 0F, 0F, 1F); } }
+        public static PREACTColor yellow { get { return new PREACTColor(1F, 235F / 255F, 4F / 255F, 1F); } }
+        public static PREACTColor cyan { get { return new PREACTColor(0F, 1F, 1F, 1F); } }
+        public static PREACTColor magenta { get { return new PREACTColor(1F, 0F, 1F, 1F); } }
+        public static PREACTColor gray { get { return new PREACTColor(.5F, .5F, .5F, 1F); } }
+        public static PREACTColor grey { get { return new PREACTColor(.5F, .5F, .5F, 1F); } }
+        public static PREACTColor clear { get { return new PREACTColor(0F, 0F, 0F, 0F); } }
+
+        public static PREACTColor HSVToRGB(float H, float S, float V)
         {
             return HSVToRGB(H, S, V, true);
         }
 
         // Convert a set of HSV values to an RGB Color.
-        public static WUIEngineColor HSVToRGB(float H, float S, float V, bool hdr)
+        public static PREACTColor HSVToRGB(float H, float S, float V, bool hdr)
         {
-            WUIEngineColor retval = WUIEngineColor.white;
+            PREACTColor retval = PREACTColor.white;
             if (S == 0)
             {
                 retval.r = V;

@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using PREACT.Runtime;
+using PREACT.Scenario;
 
 namespace PREACT.Population
 {
@@ -45,9 +45,9 @@ namespace PREACT.Population
             {
                 if (_LocalGPWDataPlane == null)
                 {
-                    if(Engine.RuntimeData.Population.LocalGPWData != null)
+                    if(Engine.ScenarioData.Population.LocalGPWData != null)
                     {
-                        CreateLocalGPWDataPlane(Engine.RuntimeData.Population.LocalGPWData);
+                        CreateLocalGPWDataPlane(Engine.ScenarioData.Population.LocalGPWData);
                     }
                     else
                     {
@@ -84,7 +84,7 @@ namespace PREACT.Population
                 for (int x = 0; x < data._cells.x; x++)
                 {
                     double density = data.GetPeopleCount(x, y) / data._cellArea;
-                    WUIEngineColor color = GetGPWColor((float)density);
+                    PREACTColor color = GetGPWColor((float)density);
                     if(density == 0)
                     {
                         color.a = 0f;
@@ -176,7 +176,7 @@ namespace PREACT.Population
                 for (int x = 0; x < data._cells.x; x++)
                 {
                     double density = data.GetDensity(x, y);
-                    WUIEngineColor color = GetGPWColor((float)density);
+                    PREACTColor color = GetGPWColor((float)density);
 
                     densityTexture.SetPixel(x, y, color.UnityColor);
                 }

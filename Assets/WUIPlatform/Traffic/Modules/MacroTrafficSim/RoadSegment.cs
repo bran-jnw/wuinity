@@ -20,7 +20,7 @@ namespace PREACT.Traffic
         string streetName;
         public int laneCount;
         public float length;
-        public List<MacroVehicle> cars;
+        public List<MacroVehicle> vehicles;
         string highwayType;
         MacroTrafficSim mCS;
         public float maxCapacity;
@@ -37,8 +37,8 @@ namespace PREACT.Traffic
             laneCount = GetNumberOfLanes(highwayType);
             maxCapacity = GetMaxCapacity(highwayType);
             length = car.currentShapeLength;
-            cars = new List<MacroVehicle>();
-            cars.Add(car);
+            vehicles = new List<MacroVehicle>();
+            vehicles.Add(car);
             this.mCS = mCS;
 
             maxCarsOnRoad = Math.Max(1, (int)(length * 0.2f * laneCount)); //each car takes about 5 meters
@@ -63,7 +63,7 @@ namespace PREACT.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Vector2d simulationPos = Engine.RuntimeData.Simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
+                Vector2d simulationPos = Engine.ScenarioData.Simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
                 if (i > 0)
                 {
                     distance += Vector2.Distance(new Vector2((float)simulationPos.x, (float)simulationPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));
@@ -82,7 +82,7 @@ namespace PREACT.Traffic
         public bool CanAddCar()
         {
             bool success = false;
-            if (cars.Count < maxCarsOnRoad)
+            if (vehicles.Count < maxCarsOnRoad)
             {
                 success = true;
             }
@@ -94,7 +94,7 @@ namespace PREACT.Traffic
         {
             car.SetCurrentSpeedLimit(speedLimit);
             car.SetSpline(spline);
-            cars.Add(car);
+            vehicles.Add(car);
         }
 
         public float CalculateSpeedBasedOnDensity()
@@ -106,9 +106,9 @@ namespace PREACT.Traffic
                 return Random.Range(0.8f, 0.9f) * SpeedLimit;
             }*/
 
-            float speedLimit = cars[0].currentSpeedLimit;
+            float speedLimit = vehicles[0].currentSpeedLimit;
 
-            float dens = cars.Count / (length * 0.001f * laneCount);
+            float dens = vehicles.Count / (length * 0.001f * laneCount);
             //added background traffic
             dens += Random.Range(tO.MacroTrafficSimInput.BackGroundDensityMinMax.X, tO.MacroTrafficSimInput.BackGroundDensityMinMax.Y);
 

@@ -38,10 +38,10 @@ namespace PREACT
                 PERIL = new kPERIL_DLL.kPERIL();
             }
 
-            int xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
-            int yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
+            int xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
+            int yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
             //assume cell/raster is square
-            int cellSize = Mathf.RoundToInt((float)Engine.RuntimeData.Fire.LCPData.RasterCellResolutionX);
+            int cellSize = Mathf.RoundToInt((float)Engine.ScenarioData.Fire.LCPData.RasterCellResolutionX);
             //get wuiarea from a user defined map painted in wuinity
             int[,] perilWUIArea = GetPerilWUIArea();
 
@@ -153,7 +153,7 @@ namespace PREACT
 
         private static void CalculateAllRateOfSpreadsAndDirections(out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, bool[,] wuiArea = null)
         {
-            LCPData lcpData = Engine.RuntimeData.Fire.LCPData;
+            LCPData lcpData = Engine.ScenarioData.Fire.LCPData;
             int xDim = lcpData.GetCellCountX();
             int yDim = lcpData.GetCellCountY();
             rateOfSpreads = new float[xDim, yDim];
@@ -163,9 +163,9 @@ namespace PREACT
             FuelModelSet fuelModelSet = new FuelModelSet();
             if (Engine.DataStatus.FuelModelsLoaded)
             {
-                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -186,7 +186,7 @@ namespace PREACT
                         continue;
                     }
                     LandscapeStruct cellData = lcpData.GetCellData(x, y);
-                    InitialFuelMoisture moisture = Engine.RuntimeData.Fire.kPERILInitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
+                    InitialFuelMoisture moisture = Engine.ScenarioData.Fire.kPERILInitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
                     surfaceFire.updateSurfaceInputs(cellData.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
@@ -207,14 +207,14 @@ namespace PREACT
 
         private static int[,] GetPerilWUIArea()
         {
-            int xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
-            int yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
+            int xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
+            int yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
 
             //first count how many cells we have to add to array
             int count = 0;
-            for (int i = 0; i < Engine.RuntimeData.Fire.WuiArea.Length; i++)
+            for (int i = 0; i < Engine.ScenarioData.Fire.WuiArea.Length; i++)
             {
-                if (Engine.RuntimeData.Fire.WuiArea[i] == true)
+                if (Engine.ScenarioData.Fire.WuiArea[i] == true)
                 {
                     ++count;
                 }
@@ -223,12 +223,12 @@ namespace PREACT
             //then create array of correct size and fill it
             int[,] wuiArea = new int[2, count];
             int position = 0;
-            for (int i = 0; i < Engine.RuntimeData.Fire.WuiArea.Length; i++)
+            for (int i = 0; i < Engine.ScenarioData.Fire.WuiArea.Length; i++)
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
                 int yFlipped = yDim - 1 - yIndex;
-                if (Engine.RuntimeData.Fire.WuiArea[i])
+                if (Engine.ScenarioData.Fire.WuiArea[i])
                 {
                     wuiArea[0, position] = xIndex;
                     wuiArea[1, position] = yFlipped;

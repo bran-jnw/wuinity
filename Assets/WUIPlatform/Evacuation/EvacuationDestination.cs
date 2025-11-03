@@ -9,21 +9,25 @@ using System.Collections.Generic;
 using PREACT.Traffic;
 using System.IO;
 using PREACT.Utility.Math;
+using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
     [System.Serializable]
     public class EvacuationDestination
     {
-        Simulation _simulation;
+        //properties
         private Vector2d _latLon;
-        private WUIEngineColor _color;
-        private bool _blocked = false;
+        private PREACTColor _color;
         private float _maxFlow = 3600f; //cars per hour
         private string _name = "Destination";
         private EvacGoalType _goalType = EvacGoalType.Refugee;
         private int _maxCars = -1;
         private int _maxPeople = -1;
+        private bool _blocked = false; 
+
+        //data
+        Simulation _simulation;    
         private uint _currentPeople;
         private List<TrafficModuleVehicle> _vehicles = new List<TrafficModuleVehicle>();
         private float _currentVehicleFlow = 0f;
@@ -35,7 +39,7 @@ namespace PREACT.Evacuation
         private float _averageTravelTime;
 
         public Vector2d LatLon { get => _latLon; }
-        public WUIEngineColor Color { get => _color; }
+        public PREACTColor Color { get => _color; }
         public bool Blocked { get => _blocked; }
         public float MaxFlow { get => _maxFlow; }
         public string Name { get => _name; }
@@ -44,35 +48,41 @@ namespace PREACT.Evacuation
         public int MaxPeople { get => _maxPeople; }
         public uint CurrentPeople { get => _currentPeople; }
         public List<TrafficModuleVehicle> Vehicles { get => _vehicles; }
-        public float CurrenVehicleFlow { get => _currentVehicleFlow; }
+        public float CurrentVehicleFlow { get => _currentVehicleFlow; }
         public float FirstArrivalTime { get => _firstArrivalTime; }
         public float CurrentTimeStep { get => CurrentTimeStep; }
         public int TimeStepCars { get => TimeStepCars; }
         public float TotalTravelTime { get => _totalTravelTime; }
         public float AverageTravelTime { get => _averageTravelTime; }
         
-
-        public EvacuationDestination()
+        private EvacuationDestination(Simulation simulation, EvacuationInput.EvacuationDestinationInput input)
         {
-            _name = "New goal";
-            _latLon = Vector2d.zero;
-            _color = WUIEngineColor.white;
+            _simulation = simulation;
+            _latLon = input.LatLon;
+            _color = input.Color;
+            _maxFlow = input.MaxFlow;
+            _name = input.Name;
+            _goalType = input.Type;
+            _maxCars = input.MaxVehicles;
+            _maxPeople = input.MaxPeople;
+            _blocked = input.Blocked; 
         }
 
-        public EvacuationDestination(string name, Vector2d latLon, WUIEngineColor color)
+        public static List<EvacuationDestination> CreateEvacacuationDestinations(Simulation simulation, List<EvacuationInput.EvacuationDestinationInput> destinationsInput)
         {
-            _name = name;
-            _latLon = latLon;
-            _color = color;
-            _maxFlow = 3600f;
+            List<EvacuationDestination> destinations = new List<EvacuationDestination>(destinationsInput.Count);
+
+            foreach (EvacuationInput.EvacuationDestinationInput e in destinationsInput)
+            {
+                destinations.Add(new EvacuationDestination(simulation, e));
+            }
+
+            return destinations;
         }
 
-        public EvacuationDestination(string name, Vector2d latLon, WUIEngineColor color, float maxFlow)
+        public void BlockDestination(Simulation simulation)
         {
-            _name = name;
-            _latLon = latLon;
-            _color = color;
-            _maxFlow = maxFlow;
+            _blocked = true;
         }
 
         /// <summary>
@@ -162,129 +172,6 @@ namespace PREACT.Evacuation
                 }
                 _currentVehicleFlow = Mathf.Max(timestepFlow, _currentVehicleFlow) * 3600f;
             }
-        }
-
-        /*public void ResetPeopleAndCars()
-        {
-            _blocked = false; 
-
-            _currentPeople = 0;
-            _vehicles.Clear();
-
-            //reset stuff for flow calc
-            _currentVehicleFlow = 0f;
-            _timeStepCars = 0;
-            _firstArrivalTime = float.MinValue;
-            _currentTimeStep = float.MinValue;
-
-            _totalTravelTime = 0f;
-            _averageTravelTime = 0f;
-        }*/
-
-        public static List<EvacuationDestination> LoadEvacuationGoalFiles(Engine engine, out bool success)
-        {
-            success = false;
-            List<EvacuationDestination> evacuationGoals = new List<EvacuationDestination>();
-
-            for (int i = 0; i < engine.Input.Evacuation.EvacuationGoalFiles.Length; i++)
-            {
-                string path = Path.Combine(engine.WorkingFolder, engine.Input.Evacuation.EvacuationGoalFiles[i] + ".ed");
-                bool fileExists = File.Exists(path);
-                if (fileExists)
-                {
-                    string[] dataLines = File.ReadAllLines(path);
-
-                    string name, exitType, blocked;
-                    double lati, longi;
-                    float maxFlow, r, g, b;
-                    int maxCars, maxPeople;
-                    bool initiallyBlocked;
-                    EvacGoalType evacGoalType;
-                    WUIEngineColor color = WUIEngineColor.white;
-
-                    //name
-                    string[] data = dataLines[0].Split(':');
-                    name = data[1].Trim();
-                    name = name.Trim('"');
-
-                    //lat, long
-                    data = dataLines[1].Split(':');
-                    double.TryParse(data[1], out lati);
-
-                    data = dataLines[2].Split(':');
-                    double.TryParse(data[1], out longi);
-
-                    //goal type
-                    data = dataLines[3].Split(':');
-                    exitType = data[1].Trim();
-                    exitType = exitType.Trim('"');
-                    if (exitType == "Refugee")
-                    {
-                        evacGoalType = EvacGoalType.Refugee;
-                    }
-                    else
-                    {
-                        evacGoalType = EvacGoalType.Exit;
-                    }
-
-                    //max flow
-                    data = dataLines[4].Split(':');
-                    float.TryParse(data[1], out maxFlow);
-
-                    //car capacity
-                    data = dataLines[5].Split(':');
-                    int.TryParse(data[1], out maxCars);
-
-                    //max people
-                    data = dataLines[6].Split(':');
-                    int.TryParse(data[1], out maxPeople);
-
-                    //blocked initially?
-                    data = dataLines[7].Split(':');
-                    blocked = data[1].Trim();
-                    blocked = blocked.Trim('"');
-                    if (blocked == "false")
-                    {
-                        initiallyBlocked = false;
-                    }
-                    else
-                    {
-                        initiallyBlocked = true;
-                    }
-
-                    //color on marker
-                    data = dataLines[8].Split(':');
-                    data = data[1].Split(',');
-                    if (data.Length >= 3)
-                    {
-                        float.TryParse(data[0], out r);
-                        float.TryParse(data[1], out g);
-                        float.TryParse(data[2], out b);
-                        color = new WUIEngineColor(r, g, b);
-                    }
-
-                    EvacuationDestination eG = new EvacuationDestination(name, new Vector2d(lati, longi), color);
-                    eG._goalType = evacGoalType;
-                    eG._maxFlow = maxFlow;
-                    eG._maxCars = maxCars;
-                    eG._maxPeople = maxPeople;
-                    eG._blocked = initiallyBlocked;
-
-                    evacuationGoals.Add(eG);
-                }
-                else
-                {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
-                }
-            }            
-
-            if (evacuationGoals.Count > 0)
-            {
-                success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " " + evacuationGoals.Count + " valid evacuation goal files were succesfully loaded.");               
-            }
-
-            return evacuationGoals;
         }
     }
 }

@@ -93,9 +93,9 @@ namespace WUInity.UI
             dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
             ++buttonIndex;
 
-            _engine.RuntimeData.Simulation.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.RuntimeData.Simulation.MultipleSimulations, "Multiple runs");
+            _engine.ScenarioData.Simulation.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.ScenarioData.Simulation.MultipleSimulations, "Multiple runs");
             ++buttonIndex;
-            if (_engine.RuntimeData.Simulation.MultipleSimulations)
+            if (_engine.ScenarioData.Simulation.MultipleSimulations)
             {
                 //number of runs
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
@@ -155,11 +155,11 @@ namespace WUInity.UI
                 dT = "-1.0";
             }
             
-            if(_engine.RuntimeData != null)
+            if(_engine.ScenarioData != null)
             {
-                nrRuns = _engine.RuntimeData.Simulation.NumberOfRuns.ToString();
-                convergenceMaxDifference = _engine.RuntimeData.Simulation.ConvergenceMaxDifference.ToString();
-                convergenceMinSequence = _engine.RuntimeData.Simulation.ConvergenceMinSequence.ToString();
+                nrRuns = _engine.ScenarioData.Simulation.NumberOfRuns.ToString();
+                convergenceMaxDifference = _engine.ScenarioData.Simulation.ConvergenceMaxDifference.ToString();
+                convergenceMinSequence = _engine.ScenarioData.Simulation.ConvergenceMinSequence.ToString();
             }
             else
             {
@@ -182,9 +182,9 @@ namespace WUInity.UI
             }
 
             float.TryParse(dT, out wO.Simulation.DeltaTime);
-            int.TryParse(nrRuns, out _engine.RuntimeData.Simulation.NumberOfRuns);
-            float.TryParse(convergenceMaxDifference, out _engine.RuntimeData.Simulation.ConvergenceMaxDifference);
-            int.TryParse(convergenceMinSequence, out _engine.RuntimeData.Simulation.ConvergenceMinSequence);
+            int.TryParse(nrRuns, out _engine.ScenarioData.Simulation.NumberOfRuns);
+            float.TryParse(convergenceMaxDifference, out _engine.ScenarioData.Simulation.ConvergenceMaxDifference);
+            int.TryParse(convergenceMinSequence, out _engine.ScenarioData.Simulation.ConvergenceMinSequence);
         }
 
         /*void OpenSaveInput()

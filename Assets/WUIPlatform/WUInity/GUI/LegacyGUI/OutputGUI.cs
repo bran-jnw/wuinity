@@ -26,7 +26,7 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
-            dummy = _engine.RuntimeData.Population.TotalPopulation;
+            dummy = _engine.ScenarioData.Population.TotalPopulation;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
@@ -118,13 +118,13 @@ namespace WUInity.UI
 
             if(_engine.Input.Simulation.RunPedestrianModule)
             {
-                for (int i = 0; i < _engine.RuntimeData.Evacuation.Destinations.Count; i++)
+                for (int i = 0; i < _engine.ScenarioData.Evacuation.Destinations.Count; i++)
                 {
-                    string name = _engine.RuntimeData.Evacuation.Destinations[i].Name;
-                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.RuntimeData.Evacuation.Destinations[i]._currentPeople + " (" + _engine.RuntimeData.Evacuation.Destinations[i]._cars.Count + ")");
+                    string name = _engine.ScenarioData.Evacuation.Destinations[i].Name;
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.ScenarioData.Evacuation.Destinations[i]._currentPeople + " (" + _engine.ScenarioData.Evacuation.Destinations[i]._cars.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.RuntimeData.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.ScenarioData.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 

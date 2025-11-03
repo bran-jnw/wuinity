@@ -7,7 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Numerics;
+using PREACT.Utility.Math;
 using PREACT.IO;
 using PREACT.Evacuation;
 
@@ -39,10 +39,10 @@ namespace PREACT.Traffic
             output = new List<string>();            
             string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
-            for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
+            for (int i = 0; i < _simulation.Scenario.Evacuation.Destinations.Count; ++i)
             {
-                start += ", Goal: " + Engine.RuntimeData.Evacuation.Destinations[i].Name;
-                start += ", " + Engine.RuntimeData.Evacuation.Destinations[i].Name + " flow";
+                start += ", Goal: " + _simulation.Scenario.Evacuation.Destinations[i].Name;
+                start += ", " + _simulation.Scenario.Evacuation.Destinations[i].Name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -112,7 +112,7 @@ namespace PREACT.Traffic
                 RouteData r = routeCreator.CalcTrafficRoute(startPos);
                 if (r == null)
                 {
-                    Engine.SIM.Stop("Null re-route returned to car, should not happen.", true);
+                    _simulation.Stop("Null re-route returned to car, should not happen.", true);
                 }
                 //special case where start is almost same as end
                 else if (r.route.TotalDistance == 0 || r.route.Shape.Length == 1)
@@ -125,15 +125,15 @@ namespace PREACT.Traffic
                 //everything is as expected
                 else
                 {
-                    for (int i = 0; i < t.Value.cars.Count; i++)
+                    for (int i = 0; i < t.Value.vehicles.Count; i++)
                     {
-                        MacroVehicle car = t.Value.cars[i];
+                        MacroVehicle vehicle = t.Value.vehicles[i];
                         //only update if goal is blocked, cars on the same road (density data) might be going different places
-                        if(car.routeData.evacGoal._blocked)
+                        if(vehicle.routeData.evacGoal.Blocked)
                         {
-                            if (!car.hasArrived)
+                            if (!vehicle.hasArrived)
                             {
-                                car.ChangeRoute(r);
+                                vehicle.ChangeRoute(r);
                             }
                         }                                               
                     }
@@ -196,10 +196,10 @@ namespace PREACT.Traffic
                 minSpeed = densitySpeed < minSpeed ? densitySpeed : minSpeed;
 
                 //sort the cars in distance left, shortest distance goes first https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object
-                roadSegment.Value.cars.Sort((x, y) => x.currentDistanceLeft.CompareTo(y.currentDistanceLeft));
+                roadSegment.Value.vehicles.Sort((x, y) => x.currentDistanceLeft.CompareTo(y.currentDistanceLeft));
 
                 //go through all cars on road segment
-                for (int j = 0; j < roadSegment.Value.cars.Count; ++j)
+                for (int j = 0; j < roadSegment.Value.vehicles.Count; ++j)
                 {
                     //our traffic density is flagged as stopped upstreams so no car should move
                     if(roadSegment.Value.upstreamMovementBlocked)
@@ -208,7 +208,7 @@ namespace PREACT.Traffic
                         break;
                     }
 
-                    MacroVehicle vehicle = roadSegment.Value.cars[j];
+                    MacroVehicle vehicle = roadSegment.Value.vehicles[j];
                     float speed = densitySpeed;
                     //the first car moves unimpeded
                     if(j == 0)
@@ -321,10 +321,10 @@ namespace PREACT.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
+            for (int i = 0; i < _simulation.Scenario.Evacuation.Destinations.Count; ++i)
             {
-                newOut += "," + Engine.RuntimeData.Evacuation.Destinations[i]._currentPeople;
-                newOut += "," + Engine.RuntimeData.Evacuation.Destinations[i]._currentVehicleFlow;
+                newOut += "," + _simulation.Scenario.Evacuation.Destinations[i].CurrentPeople;
+                newOut += "," + _simulation.Scenario.Evacuation.Destinations[i].CurrentVehicleFlow;
             }
 
             output.Add(newOut);
@@ -371,10 +371,10 @@ namespace PREACT.Traffic
         }
                
 
-        public static float GetMaxCapacity(string highway)
+        public float GetMaxCapacity(string highway)
         {
             float capacity = 50.0f;
-            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -387,10 +387,10 @@ namespace PREACT.Traffic
         }
 
         //based on https://github.com/itinero/routing/blob/1764afc75db43a1459789592de175283f642123f/test/Itinero.Test/test-data/profiles/osm/car.lua
-        public static float GetSpeedLimit(string highway)
+        public float GetSpeedLimit(string highway)
         {
             float speed = RoadTypeData.default_value.speedLimit;
-            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -403,10 +403,10 @@ namespace PREACT.Traffic
         }
 
         //https://wiki.openstreetmap.org/wiki/Key:lanes#Assumptions
-        public static int GetNumberOfLanes(string highway)
+        public int GetNumberOfLanes(string highway)
         {
             int lanes = RoadTypeData.default_value.lanes;
-            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -418,10 +418,10 @@ namespace PREACT.Traffic
             return lanes;
         }
 
-        public static bool CanReverseLanes(string highway)
+        public bool CanReverseLanes(string highway)
         {
             bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
-            RoadData[] r = Engine.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)

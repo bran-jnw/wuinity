@@ -8,8 +8,9 @@
 using System.Collections.Generic;
 using System.IO;
 using PREACT.Population;
+using PREACT.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.Scenario
 {
     public class PopulationData
     {    
@@ -54,13 +55,13 @@ namespace PREACT.Runtime
             #endif
         }
 
-        public void LoadAll()
+        public void LoadAll(Input input, string rootFolder)
         {
             Engine.MESSAGE(null, Engine.LogType.Log, "Loading Population data...");
             
-            if(Engine.Input.Simulation.RunPedestrianModule)
+            if(input.Simulation.RunPedestrianModule)
             {
-                LoadPopulation(Path.Combine(Engine.WorkingFolder, Engine.Input.Population.PopulationFile));
+                LoadPopulation(Path.Combine(rootFolder, input.Population.PopulationFile));
             }            
         }
         

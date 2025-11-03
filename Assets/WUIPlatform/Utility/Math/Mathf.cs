@@ -2,27 +2,7 @@ using System;
 
 namespace PREACT.Utility.Math
 {
-    public class Random
-    {
-        private static System.Random RANDOM = new System.Random();
-        public static float Range(float minInclusive, float maxExlusive)
-        {
-            return (float)(minInclusive + RANDOM.NextDouble() * (maxExlusive - minInclusive));
-        }
-
-        public static int Range(int minInclusive, int maxInclusive)
-        {
-            //adding 1 as Next has exclusive upper bound
-            return RANDOM.Next(minInclusive, maxInclusive + 1);
-        }
-
-        public static float value
-        {
-            get{ return (float)RANDOM.NextDouble(); }
-        }
-    }
-
-    public partial struct Mathf
+    public struct Mathf
     {
         // Returns the sine of angle /f/ in radians.
         public static float Sin(float f) { return (float)System.Math.Sin(f); }
@@ -564,5 +544,5 @@ namespace PREACT.Utility.Math
             return (value & (value - 1)) == 0;
         }
     }
-
 }
+

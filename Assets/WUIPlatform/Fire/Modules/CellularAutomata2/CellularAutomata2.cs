@@ -28,10 +28,10 @@ namespace PREACT.Fire
         {
             Engine.MESSAGE(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
-            xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
-            yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
-            bool[,] wuiArea = GetWUIArea2D(Engine.RuntimeData.Fire.WuiArea, xDim, yDim);
-            float distance = (float)Engine.RuntimeData.Fire.LCPData.RasterCellResolutionX;
+            xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
+            yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
+            bool[,] wuiArea = GetWUIArea2D(Engine.ScenarioData.Fire.WuiArea, xDim, yDim);
+            float distance = (float)Engine.ScenarioData.Fire.LCPData.RasterCellResolutionX;
             float distanceDiagonal = Mathf.Sqrt(2) * distance;
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea);
@@ -39,9 +39,9 @@ namespace PREACT.Fire
             FuelModelSet fuelModelSet = new FuelModelSet();
             if (Engine.DataStatus.FuelModelsLoaded)
             {
-                for (int i = 0; i < Engine.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(Engine.RuntimeData.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -53,7 +53,7 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, Engine.RuntimeData.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this);
+                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, Engine.ScenarioData.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this);
                     if (fireCells[x, y]._maxROS > maxROS)
                     {
                         maxROS = fireCells[x, y]._maxROS;
@@ -146,7 +146,7 @@ namespace PREACT.Fire
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
-                if (Engine.RuntimeData.Fire.WuiArea[i] == true)
+                if (Engine.ScenarioData.Fire.WuiArea[i] == true)
                 {
                     result[xIndex, yIndex] = true;
                 }
@@ -159,8 +159,8 @@ namespace PREACT.Fire
         {
             List<Vector2int> borderCells = new List<Vector2int>();
 
-            int xDim = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
-            int yDim = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
+            int xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
+            int yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
 
             //CellSpreadRates[,] rateOfSpreads = new CellSpreadRates[xDim, yDim];
 
@@ -377,7 +377,7 @@ namespace PREACT.Fire
             _maxROS = float.MinValue;
             for (int i = 0; i < _spreadRates.Length; i++)
             {
-                InitialFuelMoisture moisture = Engine.RuntimeData.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
+                InitialFuelMoisture moisture = Engine.ScenarioData.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
                 double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
                 int fuelModel = _lcp.fuel_model;
                 float slope = _lcp.slope;

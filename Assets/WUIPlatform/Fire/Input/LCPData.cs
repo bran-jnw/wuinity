@@ -960,7 +960,7 @@ namespace PREACT.Fire
 		private void CalculateOriginOffset()
 		{
             Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            _originOffset = lcpUTM - Engine.RuntimeData.Simulation.UTMOrigin;
+            _originOffset = lcpUTM - Engine.ScenarioData.Simulation.UTMOrigin;
             _originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));            
         }
 

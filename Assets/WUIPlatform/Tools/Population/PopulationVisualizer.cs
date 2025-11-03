@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.Runtime;
+using PREACT.Scenario;
 
 namespace PREACT.Population
 {
@@ -28,17 +28,17 @@ namespace PREACT.Population
         public abstract bool ToggleLocalGPWVisibility();
 
         //colors from GPW website
-        static WUIEngineColor c0 = new WUIEngineColor(190f / 255f, 232f / 255f, 255f / 255f);
-        static WUIEngineColor c1 = new WUIEngineColor(1.0f, 241f / 255f, 208f / 255f);
-        static WUIEngineColor c2 = new WUIEngineColor(1.0f, 218f / 255f, 165f / 255f);
-        static WUIEngineColor c3 = new WUIEngineColor(252f / 255f, 183f / 255f, 82f / 255f);
-        static WUIEngineColor c4 = new WUIEngineColor(1.0f, 137f / 255f, 63f / 255f);
-        static WUIEngineColor c5 = new WUIEngineColor(238f / 255f, 60f / 255f, 30f / 255f);
-        static WUIEngineColor c6 = new WUIEngineColor(191f / 255f, 1f / 255f, 39f / 255f);
+        static PREACTColor c0 = new PREACTColor(190f / 255f, 232f / 255f, 255f / 255f);
+        static PREACTColor c1 = new PREACTColor(1.0f, 241f / 255f, 208f / 255f);
+        static PREACTColor c2 = new PREACTColor(1.0f, 218f / 255f, 165f / 255f);
+        static PREACTColor c3 = new PREACTColor(252f / 255f, 183f / 255f, 82f / 255f);
+        static PREACTColor c4 = new PREACTColor(1.0f, 137f / 255f, 63f / 255f);
+        static PREACTColor c5 = new PREACTColor(238f / 255f, 60f / 255f, 30f / 255f);
+        static PREACTColor c6 = new PREACTColor(191f / 255f, 1f / 255f, 39f / 255f);
 
-        public static WUIEngineColor GetGPWColor(float density)
+        public static PREACTColor GetGPWColor(float density)
         {
-            WUIEngineColor color;
+            PREACTColor color;
             if (density < 0.0f)
             {
                 color = c0;

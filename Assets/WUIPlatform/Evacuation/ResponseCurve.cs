@@ -46,13 +46,13 @@ namespace PREACT.Evacuation
             this.dataPoints = dataPoints.ToArray();
         }
 
-        public static ResponseCurve[] LoadResponseCurves(out bool success)
+        public static List<ResponseCurve> LoadResponseCurves(string rootFolder, string[] responseCurveFiles, out bool success)
         {
             success = false;
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
-            for (int i = 0; i < Engine.Input.Evacuation.ResponseCurveFiles.Length; i++)
+            for (int i = 0; i < responseCurveFiles.Length; i++)
             {
-                string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Evacuation.ResponseCurveFiles[i]);
+                string path = Path.Combine(rootFolder, responseCurveFiles[i]);
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);
@@ -79,7 +79,7 @@ namespace PREACT.Evacuation
                     //need at least two to make a curve
                     if(dataPoints.Count >= 2)
                     {
-                        string file = Path.Combine(Engine.WorkingFolder, Engine.Input.Evacuation.ResponseCurveFiles[i]);
+                        string file = Path.Combine(rootFolder, responseCurveFiles[i]);
                         string name = Path.GetFileNameWithoutExtension(file);
                         responseCurves.Add(new ResponseCurve(dataPoints, name));
                         Engine.MESSAGE(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
@@ -93,13 +93,12 @@ namespace PREACT.Evacuation
 
             if(responseCurves.Count > 0)
             {
-                ResponseCurve[] rCurves = responseCurves.ToArray();
                 success = true;
-                return rCurves;
+                return responseCurves;
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, " No response curves could be loaded, simulation will stall.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, " No response curves could be loaded, simulation will stall.");
                 return null;
             }   
         }

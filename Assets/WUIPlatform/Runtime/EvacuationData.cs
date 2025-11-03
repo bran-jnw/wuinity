@@ -10,15 +10,12 @@ using PREACT.IO;
 using PREACT.Evacuation;
 using PREACT.Utility.Math;
 
-namespace PREACT.Runtime
+namespace PREACT.Scenario
 {
     public class EvacuationData
     {
-        private Engine _engine;
-
-        public EvacuationData(Engine engine)
+        public EvacuationData()
         {
-            _engine = engine;
         }
 
         private Vector2int _cellCount;
@@ -33,8 +30,8 @@ namespace PREACT.Runtime
             }
         }
 
-        BlockGoalEvent[] _blockGoalEvents;
-        public BlockGoalEvent[] BlockGoalEvents
+        BlockDestinationEvent[] _blockGoalEvents;
+        public BlockDestinationEvent[] BlockGoalEvents
         {
             get
             {                
@@ -60,108 +57,38 @@ namespace PREACT.Runtime
             }
         }
 
-        private List<EvacuationDestination> _evacuationGoals;
-        public List<EvacuationDestination> Destinations
-        {
-            get
-            {
-                return _evacuationGoals;
-            }
-        }
-
         private EvacuationGroup[] _evacuationGroups;
         public EvacuationGroup[] EvacuationGroups { get=> _evacuationGroups; }
 
-        public void LoadAll()
+        public void LoadAll(Input input, string rootFolder)
         {
-            _engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
+            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Evacuation data...");
             
-            if(_engine.Input.Simulation.RunPedestrianModule)
+            if(input.Simulation.RunPedestrianModule)
             {
                 //need goals and curves before can load groups
-                LoadResponseCurves();
-                LoadEvacuationGoals();
-                LoadEvacuationGroups();
                 //need to load groups before indices
-                LoadEvacGroupIndices();
-                LoadBlockGoalEvents();
+                LoadEvacGroupIndices(input, rootFolder);
+                LoadBlockGoalEvents(input, rootFolder);
             }                       
         }
 
-        public bool LoadBlockGoalEvents()
+        public bool LoadBlockGoalEvents(Input input, string workingFolder)
         {
             bool success;
-            _blockGoalEvents = BlockGoalEvent.LoadBlockGoalEvents(out success);
+            _blockGoalEvents = BlockDestinationEvent.LoadBlockGoalEvents(out success);
 
             return success;
         }
 
-        public bool LoadEvacGroupIndices()
+        public bool LoadEvacGroupIndices(Input input, string workingFolder)
         {
             bool success;
             //fills with first group if "failed", as in could not load but creates default
-            string path = System.IO.Path.Combine(_engine.WorkingFolder, _engine.Input.Evacuation.EvacuationGroupsMapFile);
+            string path = System.IO.Path.Combine(workingFolder, input.Evacuation.EvacuationGroupsMapFile);
             EvacuationGroup.LoadEvacGroupIndices(path, out success);
 
             return success;
-        }
-
-        public bool LoadResponseCurves()
-        {
-            bool success;
-            _responseCurves = ResponseCurve.LoadResponseCurves(out success);
-
-            return success;
-        }
-
-        public bool LoadEvacuationGoals()
-        {
-            bool success;
-            _evacuationGoals = EvacuationDestination.LoadEvacuationGoalFiles(_engine, out success);
-
-            return success;
-        }        
-
-        public void AddEvacuationGoal(EvacuationDestination newGoal)
-        {
-            if(_evacuationGoals == null)
-            {
-                _evacuationGoals = new List<EvacuationDestination>();
-            }
-            _evacuationGoals.Add(newGoal);
-        }
-
-        public void RemoveEvacuationGoal(EvacuationDestination goal)
-        {
-            if (_evacuationGoals != null)
-            {
-                _evacuationGoals.Remove(goal);
-            }
-        }
-
-        public void ClearAndAddEvacuationGoals(EvacuationDestination[] evacGoals)
-        {
-            if (_evacuationGoals == null)
-            {
-                _evacuationGoals = new List<EvacuationDestination>();
-            }
-            else
-            {
-                _evacuationGoals.Clear();
-            }
-
-            for (int i = 0; i < evacGoals.Length; i++)
-            {
-                _evacuationGoals.Add(evacGoals[i]);
-            }            
-        }
-
-        public bool LoadEvacuationGroups()
-        {
-            bool success;
-            _evacuationGroups = EvacuationGroup.LoadEvacGroupFiles(out success);
-
-            return success;            
         }
 
         public void UpdateEvacGroupIndices(int[] indices)
@@ -199,7 +126,7 @@ namespace PREACT.Runtime
 
             if (index < 0)
             {
-                _engine.Message(null, Engine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -248,17 +175,6 @@ namespace PREACT.Runtime
             index = EvacGroupIndices[index];
 
             return EvacuationGroups[index];
-        }
-
-        public uint GetTotalEvacuated()
-        {
-            uint result = 0;
-            for (int i = 0; i < Destinations.Count; i++)
-            {
-                result += Destinations[i].CurrentPeople;
-            }
-
-            return result;
-        }
+        }        
     }
 }

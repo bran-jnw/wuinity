@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using PREACT.Runtime;
+using PREACT.Scenario;
 
 namespace PREACT.Visualization
 {
@@ -92,19 +92,19 @@ namespace PREACT.Visualization
                 {
                     Fire.LandscapeStruct l = _lcpData.GetCellDataSimulationIndex(x, y, false);
 
-                    WUIEngineColor c = FuelModelColors.GetFuelColor((int)l.fuel_model);
+                    PREACTColor c = FuelModelColors.GetFuelColor((int)l.fuel_model);
                     c.a = alpha;
                     _fuelModelsTexture.SetPixel(x, y, c.UnityColor);
 
-                    c = WUIEngineColor.white * ((l.elevation - (float)elevationMinMax.x) / elevationRange);
+                    c = PREACTColor.white * ((l.elevation - (float)elevationMinMax.x) / elevationRange);
                     c.a = alpha;
                     _elevationTexture.SetPixel(x, y, c.UnityColor);
 
-                    c = WUIEngineColor.white * ((l.slope - (float)slopeMinMax.x) / slopeRange);
+                    c = PREACTColor.white * ((l.slope - (float)slopeMinMax.x) / slopeRange);
                     c.a = alpha;
                     _slopeTexture.SetPixel(x, y, c.UnityColor);
 
-                    c = WUIEngineColor.white * ((l.aspect - (float)aspectMinMax.x) / aspectRange);
+                    c = PREACTColor.white * ((l.aspect - (float)aspectMinMax.x) / aspectRange);
                     c.a = alpha;
                     _aspectTexture.SetPixel(x, y, c.UnityColor);
                 }
@@ -186,7 +186,7 @@ namespace PREACT.Visualization
 
         public override void ToggleLCPDataPlane()
         {
-            if (Engine.RuntimeData.Fire.LCPData == null)
+            if (Engine.ScenarioData.Fire.LCPData == null)
             {
                 return;
             }
@@ -201,7 +201,7 @@ namespace PREACT.Visualization
 
         public override void SetLCPDataPlane(bool setActive)
         {
-            if(Engine.RuntimeData.Fire.LCPData == null)
+            if(Engine.ScenarioData.Fire.LCPData == null)
             {
                 return;
             }

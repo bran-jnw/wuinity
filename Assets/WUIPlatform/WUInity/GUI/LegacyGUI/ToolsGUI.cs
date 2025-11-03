@@ -12,10 +12,10 @@ namespace WUInity.UI
         private bool _reScaling = false, _filteringOSM = false, _creatingPopulationMap = false;
         private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize;
 
-        private bool HaveLocalGPW { get => _engine.RuntimeData.Population.LocalGPWData.HavedData; }
-        private bool HavePopulationMap { get => _engine.RuntimeData.Population.PopulationMap.HaveData; }
-        private bool PopulationMapCorrectedForRoadAccess { get => _engine.RuntimeData.Population.PopulationMap.CorrectedForRoadAccess; }
-        private bool HaveRouterDb { get => _engine.RuntimeData.Routing.RouterDb == null ? false : true; }
+        private bool HaveLocalGPW { get => _engine.ScenarioData.Population.LocalGPWData.HavedData; }
+        private bool HavePopulationMap { get => _engine.ScenarioData.Population.PopulationMap.HaveData; }
+        private bool PopulationMapCorrectedForRoadAccess { get => _engine.ScenarioData.Population.PopulationMap.CorrectedForRoadAccess; }
+        private bool HaveRouterDb { get => _engine.ScenarioData.Routing.RouterDb == null ? false : true; }
 
         void ToolsMenu()
         {
@@ -39,14 +39,14 @@ namespace WUInity.UI
             //GPW stuff
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW tools");
             ++buttonIndex;
-            if(_engine.RuntimeData.Population.LocalGPWData.HavedData)
+            if(_engine.ScenarioData.Population.LocalGPWData.HavedData)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _engine.RuntimeData.Population.LocalGPWData.totalPopulation);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _engine.ScenarioData.Population.LocalGPWData.totalPopulation);
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
                 {
                     _wuinityManager.SetSampleMode(DataSampleMode.LocalGPW);
-                    _engine.RuntimeData.Population.Visualizer.ToggleLocalGPWVisibility();
+                    _engine.ScenarioData.Population.Visualizer.ToggleLocalGPWVisibility();
                 }
                 ++buttonIndex;
             }
@@ -82,7 +82,7 @@ namespace WUInity.UI
             ++buttonIndex;
             if (HavePopulationMap)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _engine.RuntimeData.Population.PopulationMap._totalPopulation);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _engine.ScenarioData.Population.PopulationMap._totalPopulation);
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide population map"))
                 {
@@ -282,7 +282,7 @@ namespace WUInity.UI
         void CreateAndSaveLocalGPW(string[] paths)
         {
             PopulationTools.CreateAndSaveLocalGPWData(_engine, paths[0]);
-            _engine.RuntimeData.Population.Visualizer.SetDataPlane(true);
+            _engine.ScenarioData.Population.Visualizer.SetDataPlane(true);
         }
         void OpenLoadLocalGPW()
         {
@@ -293,7 +293,7 @@ namespace WUInity.UI
         void LoadLocalGPW(string[] paths)
         {
             PopulationTools.LoadLocalGPWData(_engine, paths[0]);
-            _engine.RuntimeData.Population.Visualizer.SetDataPlane(true);
+            _engine.ScenarioData.Population.Visualizer.SetDataPlane(true);
         }
 
         //Interpolated GPW

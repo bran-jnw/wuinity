@@ -40,7 +40,7 @@ namespace PREACT.IO
             WUIShow = new WUIShowInput();*/
         }
 
-        public void SaveToDisk(Engine engine)
+        public void SaveToDisk(string file)
         {
             //TODO: fix new format save
             //string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
@@ -48,27 +48,28 @@ namespace PREACT.IO
             EvacuationGroup.SaveEvacGroupIndices();
             GraphicalFireInput.SaveGraphicalFireInput();
 
-            Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " saved.");       
+            Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + file + " saved.");       
         }
 
-        public static Input LoadFromDisk(Engine engine, string path)
+        public static Input LoadFromDisk(string file)
         {
+            string rootFolder = Path.GetDirectoryName(file);
             Input result = null;
-            if(!File.Exists(path))
+            if(!File.Exists(file))
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, " Input file " + path + " does not exist.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, " Input file " + file + " does not exist.");
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, " Reading input file " + path + ".");
-                Input input = ParseInput(File.ReadAllLines(path));
+                Engine.MESSAGE(null, Engine.LogType.Log, " Reading input file " + file + ".");
+                Input input = ParseInput(rootFolder, File.ReadAllLines(file));
                 if (input != null)
                 {      
-                    Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " loaded.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + file + " loaded.");
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + engine.WorkingFile + " could not be loaded, see log.");
+                    Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + file + " could not be loaded, see log.");
                 }
             }               
 
@@ -79,7 +80,7 @@ namespace PREACT.IO
         static readonly char[] headerBrackets = new char[] { '[', ']' };
         public const string pleaseCheckInput = " Please check your input file.";
 
-        private static Input ParseInput(string[] inputLines)
+        private static Input ParseInput(string rootFolder, string[] inputLines)
         {
             Input newInput = new Input();
             Dictionary<string, int> headerLineIndex = new Dictionary<string, int>();
@@ -156,7 +157,7 @@ namespace PREACT.IO
                 if (headerLineIndex.TryGetValue(input, out lineindex))
                 {                    
                     ReadingInputMessage(input);
-                    newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex);
+                    newInput.Evacuation = EvacuationInput.Parse(rootFolder, inputLines, lineindex);
                 }
                 else
                 {
@@ -285,7 +286,7 @@ namespace PREACT.IO
         /// <param name="inputLines"></param>
         /// <param name="startIndex"></param>
         /// <returns></returns>
-        public Dictionary<string, string> GetHeaderInput(string[] inputLines, int startIndex)
+        public static Dictionary<string, string> GetHeaderInput(string[] inputLines, int startIndex)
         {
             Dictionary<string, string> inputToParse = new Dictionary<string, string>();
             //first line is header

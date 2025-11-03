@@ -10,7 +10,7 @@ using PREACT.Fire;
 using PREACT.Visualization;
 using PREACT.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.Scenario
 {
     public class FireData
     {
@@ -52,40 +52,40 @@ namespace PREACT.Runtime
             #endif
         }
 
-        public void LoadAll()
+        public void LoadAll(Input input, string rootFolder)
         {
-            if(!Engine.Input.Simulation.RunFireModule)
+            if(!input.Simulation.RunFireModule)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
                 return;
             }
             Engine.MESSAGE(null, Engine.LogType.Log, "Loading Fire data...");
 
-            LoadLCPFile(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.LcpFile), false);
-            LoadGraphicalFireInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.GraphicalFireInputFile), false);
+            LoadLCPFile(input, Path.Combine(rootFolder, input.Fire.LcpFile), false);
+            LoadGraphicalFireInput(input, Path.Combine(rootFolder, input.Fire.GraphicalFireInputFile), false);
 
-            if (Engine.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
+            if (input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
             {
-                LoadFuelModelsInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.FuelModelsFile), false);
-                LoadIgnitionPoints(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.IgnitionPointsFile), false);
-                LoadInitialFuelMoistureData(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.InitialFuelMoistureFile), false);
-                LoadWeatherInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.WeatherFile), false);
-                LoadWindInput(Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.RootFolder, Engine.Input.Fire.FireCellInput.WindFile), false);                
+                LoadFuelModelsInput(input, Path.Combine(rootFolder, input.Fire.FireCellInput.RootFolder, input.Fire.FireCellInput.FuelModelsFile), false);
+                LoadIgnitionPoints(input, Path.Combine(rootFolder, input.Fire.FireCellInput.RootFolder, input.Fire.FireCellInput.IgnitionPointsFile), false);
+                LoadInitialFuelMoistureData(input, Path.Combine(rootFolder, input.Fire.FireCellInput.RootFolder, input.Fire.FireCellInput.InitialFuelMoistureFile), false);
+                LoadWeatherInput(input, Path.Combine(rootFolder, input.Fire.FireCellInput.RootFolder, input.Fire.FireCellInput.WeatherFile), false);
+                LoadWindInput(input, Path.Combine(rootFolder, input.Fire.FireCellInput.RootFolder, input.Fire.FireCellInput.WindFile), false);                
             }
 
-            if(Engine.Input.TriggerBuffer.CalculateTriggerBuffer 
-                && Engine.Input.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL
-                && Engine.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
+            if(input.TriggerBuffer.CalculateTriggerBuffer 
+                && input.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL
+                && input.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
             {
-                string file = Path.Combine(Engine.WorkingFolder, Engine.Input.TriggerBuffer.kPERILInput.InitialFuelMoistureFile);
+                string file = Path.Combine(rootFolder, input.TriggerBuffer.kPERILInput.InitialFuelMoistureFile);
                 LoadPERILInitialFuelMoistureData(file);
             }            
         }
 
-        public bool LoadLCPFile(string path, bool updateInputFile)
+        public bool LoadLCPFile(Input input, string file, bool updateInputFile)
         {
             bool success;
-            _lcpData = new LCPData(path);
+            _lcpData = new LCPData(file);
             success = !_lcpData.CantAllocLCP;
 
             if (success)
@@ -112,101 +112,100 @@ namespace PREACT.Runtime
                 _lcpData = null;
             }
 
-            Engine.DataStatus.LcpLoaded = success;
             if (success && updateInputFile)
             {
-                Engine.Input.Fire.LcpFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.LcpFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
         }
 
-        public bool LoadFuelModelsInput(string path, bool updateInputFile)
+        public bool LoadFuelModelsInput(Input input, string file, bool updateInputFile)
         {
             bool success;
             _fuelModelsData = new FuelModelInput();
-            success = _fuelModelsData.LoadFuelModelInputFile(path);
+            success = _fuelModelsData.LoadFuelModelInputFile(file);
 
-            Engine.DataStatus.FuelModelsLoaded = success;
+            //Engine.DataStatus.FuelModelsLoaded = success;
             if(success && updateInputFile)
             {
-                Engine.Input.Fire.FireCellInput.FuelModelsFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.FireCellInput.FuelModelsFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
         }
 
-        public bool LoadIgnitionPoints(string path, bool updateInputFile)
+        public bool LoadIgnitionPoints(Input input, string file, bool updateInputFile)
         {
             bool success;
-            _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(path, out success);
+            _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(file, out success);
             if (success && updateInputFile)
             {
-                Engine.Input.Fire.FireCellInput.IgnitionPointsFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.FireCellInput.IgnitionPointsFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
         }
 
-        public bool LoadInitialFuelMoistureData(string path, bool updateInputFile)
+        public bool LoadInitialFuelMoistureData(Input input, string file, bool updateInputFile)
         {
             bool success;
-            _initialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(path, out success);
+            _initialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(file, out success);
             if (success && updateInputFile)
             {
-                Engine.Input.Fire.FireCellInput.InitialFuelMoistureFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.FireCellInput.InitialFuelMoistureFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
         }
 
-        private bool LoadPERILInitialFuelMoistureData(string path)
+        private bool LoadPERILInitialFuelMoistureData(string file)
         {
             bool success;
 
-            _kPERILInitialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(path, out success);
+            _kPERILInitialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(file, out success);
 
             return success;
         }
 
-        public bool LoadWeatherInput(string path, bool updateInputFile)
+        public bool LoadWeatherInput(Input input, string file, bool updateInputFile)
         {
             bool success;
             _weatherInput = WeatherInput.LoadWeatherInputFile(out success);
             if (success && updateInputFile)
             {
-                Engine.Input.Fire.FireCellInput.WeatherFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.FireCellInput.WeatherFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
         }
 
-        public bool LoadWindInput(string path, bool updateInputFile)
+        public bool LoadWindInput(Input input, string file, bool updateInputFile)
         {
             bool success;
             _windInput = WindInput.LoadWindInputFile(out success);
             if (success && updateInputFile)
             {
-                Engine.Input.Fire.FireCellInput.WindFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.FireCellInput.WindFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
         }
 
-        public bool LoadGraphicalFireInput(string path, bool updateInputFile)
+        public bool LoadGraphicalFireInput(Input input, string file, bool updateInputFile)
         {
             bool success;
             GraphicalFireInput.LoadGraphicalFireInput(out success);
             if (success && updateInputFile)
             {
-                Engine.Input.Fire.GraphicalFireInputFile = Path.GetFileName(path);
-                Input.SaveInput();
+                input.Fire.GraphicalFireInputFile = Path.GetFileName(file);
+                //Input.SaveInput();
             }
 
             return success;
@@ -218,7 +217,7 @@ namespace PREACT.Runtime
             {
                 wuiAreaIndices = new bool[xCount * yCount];
             }
-            Engine.RuntimeData.Fire.WuiArea = wuiAreaIndices;
+            WuiArea = wuiAreaIndices;
         }
 
         public void UpdateRandomIgnitionIndices(bool[] randomIgnitionIndices, int xCount, int yCount)
@@ -227,7 +226,7 @@ namespace PREACT.Runtime
             {
                 randomIgnitionIndices = new bool[xCount * yCount];
             }
-            Engine.RuntimeData.Fire.RandomIgnition = randomIgnitionIndices;
+            RandomIgnition = randomIgnitionIndices;
         }
 
         public void UpdateInitialIgnitionIndices(bool[] initialIgnitionIndices, int xCount, int yCount)
@@ -236,7 +235,7 @@ namespace PREACT.Runtime
             {
                 initialIgnitionIndices = new bool[xCount * yCount];
             }
-            Engine.RuntimeData.Fire.InitialIgnition = initialIgnitionIndices;
+            InitialIgnition = initialIgnitionIndices;
         }
 
         //for painting trigger buffer manually
@@ -246,7 +245,7 @@ namespace PREACT.Runtime
             {
                 triggerBufferIndices = new bool[xCount * yCount];
             }
-            Engine.RuntimeData.Fire.ManualTriggerBuffer = triggerBufferIndices;
+            ManualTriggerBuffer = triggerBufferIndices;
         }
 
         public void ToggleLCPDataPlane()

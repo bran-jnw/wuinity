@@ -8,7 +8,7 @@
 using System.IO;
 using PREACT.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.Scenario
 {
     public class TrafficData
     {       
@@ -21,26 +21,21 @@ namespace PREACT.Runtime
             }
         }
 
-        public void LoadAll()
+        public void LoadAll(Input input, string workingFolder)
         {
             Engine.MESSAGE(null, Engine.LogType.Log, "Loading Traffic data...");
 
-            if (Engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            if (input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
-                LoadRoadTypeData(Path.Combine(Engine.WorkingFolder, Engine.Input.Traffic.MacroTrafficSimInput.RoadTypesFile), false);
+                LoadRoadTypeData(Path.Combine(workingFolder, input.Traffic.MacroTrafficSimInput.RoadTypesFile));
             }
         }
 
-        private bool LoadRoadTypeData(string path, bool updateInputFile)
+        private bool LoadRoadTypeData(string path)
         {
             //success in this case means that we loaded a file and not defaults
             bool success;
             _roadTypeData = Traffic.RoadTypeData.LoadRoadTypeData(path, out success);
-            if(success && updateInputFile)
-            {
-                //WUIEngine.INPUT.Traffic.roadTypesFile = Path.GetFileName(path);
-                Input.SaveInput();
-            }
 
             return success;
         } 

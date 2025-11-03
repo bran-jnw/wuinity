@@ -74,7 +74,7 @@ namespace WUInity
         {
             if (populationMaskTex == null)
             {
-                Texture2D tex = (Texture2D)Engine.RuntimeData.Population.Visualizer.GetPopulationMaskTexture();
+                Texture2D tex = (Texture2D)Engine.ScenarioData.Population.Visualizer.GetPopulationMaskTexture();
                 if (tex != null)
                 {
                     populationMaskTex = tex;
@@ -155,7 +155,7 @@ namespace WUInity
             else if(paintMode == PaintMode.EvacGroup)
             {
                 evacGroupIndex = arrayIndex;
-                currentColor = Engine.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
+                currentColor = Engine.ScenarioData.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
                 currentColor.a = transparency;
             }
         }
@@ -194,7 +194,7 @@ namespace WUInity
             CheckDataResources(evacGroupTex, evacGroupColorArray);
             //select first zone
             evacGroupIndex = 0;
-            currentColor = Engine.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
+            currentColor = Engine.ScenarioData.Evacuation.EvacuationGroups[evacGroupIndex].Color.UnityColor;
             currentColor.a = 0.5f;
             _brushSize = 1;
         }
@@ -214,7 +214,7 @@ namespace WUInity
             CheckDataResources(wuiAreaTex, wuiAreaColorArray);
             SetWUIAreaColor(true);
             _brushSize = 5;
-            _offset = new Vector3((float)Engine.RuntimeData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.RuntimeData.Fire.LCPData.OriginOffset.y);
+            _offset = new Vector3((float)Engine.ScenarioData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.ScenarioData.Fire.LCPData.OriginOffset.y);
         }
 
         void SetPainterRandomIgnition()
@@ -223,7 +223,7 @@ namespace WUInity
             CheckDataResources(randomIgnitionTex, randomIgnitionColorArray);
             SetRandomIgnitionAreaColor(true);
             _brushSize = 5;
-            _offset = new Vector3((float)Engine.RuntimeData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.RuntimeData.Fire.LCPData.OriginOffset.y);
+            _offset = new Vector3((float)Engine.ScenarioData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.ScenarioData.Fire.LCPData.OriginOffset.y);
         }
         void SetPainterInitialIgnition()
         {
@@ -231,7 +231,7 @@ namespace WUInity
             CheckDataResources(initialIgnitionTex, initialIgnitionColorArray);
             SetInitialIgnitionAreaColor(true);
             _brushSize = 3;
-            _offset = new Vector3((float)Engine.RuntimeData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.RuntimeData.Fire.LCPData.OriginOffset.y);
+            _offset = new Vector3((float)Engine.ScenarioData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.ScenarioData.Fire.LCPData.OriginOffset.y);
         }
 
         void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray)
@@ -242,11 +242,11 @@ namespace WUInity
                 //get correct size, fire mesh or evac mesh
                 if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
                 {
-                    if(Engine.RuntimeData.Fire.LCPData != null)
+                    if(Engine.ScenarioData.Fire.LCPData != null)
                     {
-                        fireDataCellCount = Engine.RuntimeData.Fire.LCPData.GetCellCount();
+                        fireDataCellCount = Engine.ScenarioData.Fire.LCPData.GetCellCount();
                         cellCount = fireDataCellCount;
-                        fireDataRealSize = Engine.RuntimeData.Fire.LCPData.GetSize();
+                        fireDataRealSize = Engine.ScenarioData.Fire.LCPData.GetSize();
                     }
                     else
                     {
@@ -257,7 +257,7 @@ namespace WUInity
                 else
                 {
                     //WUIEngine.SIM.UpdateNeededData();
-                    evacDataCellCount = Engine.RuntimeData.Evacuation.CellCount;
+                    evacDataCellCount = Engine.ScenarioData.Evacuation.CellCount;
                     cellCount = evacDataCellCount;
                     evacDataRealSize = Engine.Input.Simulation.DomainSize;
                 }
@@ -272,24 +272,24 @@ namespace WUInity
                         Color c = Color.white;
                         if (paintMode == PaintMode.WUIArea)
                         {
-                            c = Engine.RuntimeData.Fire.WuiArea[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
+                            c = Engine.ScenarioData.Fire.WuiArea[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.RandomIgnitionArea)
                         {
-                            c = Engine.RuntimeData.Fire.RandomIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
+                            c = Engine.ScenarioData.Fire.RandomIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.InitialIgnition)
                         {
-                            c = Engine.RuntimeData.Fire.InitialIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
+                            c = Engine.ScenarioData.Fire.InitialIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.EvacGroup)
                         {
-                            c = Engine.RuntimeData.Evacuation.GetEvacGroup(x, y).Color.UnityColor;
+                            c = Engine.ScenarioData.Evacuation.GetEvacGroup(x, y).Color.UnityColor;
                             c.a = transparency;
                         }
                         else if (paintMode == PaintMode.PopulationMask)
                         {
-                            c = Engine.RuntimeData.Population.PopulationMap.Mask[x + y * evacDataCellCount.x] == true ? activeAreaColor : inactiveAreaColor;
+                            c = Engine.ScenarioData.Population.PopulationMap.Mask[x + y * evacDataCellCount.x] == true ? activeAreaColor : inactiveAreaColor;
                         }
                         requestedColorArray[x + y * cellCount.x] = c;
                         requestedTexture.SetPixel(x, y, c);
@@ -443,23 +443,23 @@ namespace WUInity
 
             if(paintMode == PaintMode.EvacGroup)
             {
-                Engine.RuntimeData.Evacuation.EvacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
+                Engine.ScenarioData.Evacuation.EvacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
             }
             else if(paintMode == PaintMode.WUIArea)
             {
-                Engine.RuntimeData.Fire.WuiArea[x + y * activeCellCount.x] = addingArea;
+                Engine.ScenarioData.Fire.WuiArea[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.RandomIgnitionArea)
             {
-                Engine.RuntimeData.Fire.RandomIgnition[x + y * activeCellCount.x] = addingArea;
+                Engine.ScenarioData.Fire.RandomIgnition[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.InitialIgnition)
             {
-                Engine.RuntimeData.Fire.InitialIgnition[x + y * activeCellCount.x] = addingArea;
+                Engine.ScenarioData.Fire.InitialIgnition[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.PopulationMask)
             {
-                Engine.RuntimeData.Population.PopulationMap.Mask[x + y * activeCellCount.x] = addingArea;
+                Engine.ScenarioData.Population.PopulationMap.Mask[x + y * activeCellCount.x] = addingArea;
             }
         }
 

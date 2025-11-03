@@ -21,7 +21,7 @@ namespace WUInity
         bool dragging = false;
         Vector3 startDragPos;
         Vector3 startMousePos;
-        PREACT.Vector2d _mapSize;
+        PREACT.Utility.Math.Vector2d _mapSize;
         bool refreshClipPlanes = false;
         private PREACT.Engine _engine;
 
@@ -39,7 +39,7 @@ namespace WUInity
             _engine = engine;
         }
 
-        public void SetCameraStartPosition(PREACT.Vector2d mapSize)
+        public void SetCameraStartPosition(PREACT.Utility.Math.Vector2d mapSize)
         {
             _mapSize = mapSize;
             float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * c.fieldOfView * 0.5f);

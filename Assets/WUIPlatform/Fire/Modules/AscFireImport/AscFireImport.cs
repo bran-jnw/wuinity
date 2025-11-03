@@ -44,7 +44,7 @@ namespace PREACT.Fire
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
-            _originOffset = farsiteUTM - Engine.RuntimeData.Simulation.UTMOrigin;
+            _originOffset = farsiteUTM - Engine.ScenarioData.Simulation.UTMOrigin;
 
             _firelineIntensityData = new float[ncols * nrows];
             _newlyIgnitedCells = new List<Vector2int>();
@@ -268,7 +268,7 @@ namespace PREACT.Fire
         /// <returns></returns>
         public override FireCellState GetFireCellState(Vector2d latLon)
         {
-            Vector2d pos = Engine.RuntimeData.Simulation.GetSimulationPosition(latLon);
+            Vector2d pos = Engine.ScenarioData.Simulation.GetSimulationPosition(latLon);
             pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);

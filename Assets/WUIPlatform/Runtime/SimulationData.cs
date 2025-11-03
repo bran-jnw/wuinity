@@ -6,8 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using PREACT.Utility;
+using PREACT.Utility.Math;
 
-namespace PREACT.Runtime
+namespace PREACT.Scenario
 {
     public class SimulationData
     {
@@ -26,45 +27,27 @@ namespace PREACT.Runtime
         public Vector2d CenterMercator { get => _centerMercator; }
 
 
-        Vector2d _mercatorToUtmScale;
-        public Vector2d MercatorToUtmScale { get => _mercatorToUtmScale; }
-
-        float _mercatorCorrectionScale;
-        /// <summary>
-        /// As we move away from the equator the mercator projection streteches distances, this is the correction applied by e.g. Mapbox to give reasonable distance assessment and match with UTM etc.
-        /// </summary>
-        public float MercatorCorrectionScale{ get => _mercatorCorrectionScale; }
-
-        public SimulationData() 
+        public SimulationData(IO.Input input) 
         {
-            if(Engine.Input != null)
-            {
-                _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(Engine.Input.Simulation.LowerLeftLatLon.x, Engine.Input.Simulation.LowerLeftLatLon.y);
-                _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
-                _centerMercator = GeoConversions.LatLonToMeters(Engine.Input.Simulation.LowerLeftLatLon.x, Engine.Input.Simulation.LowerLeftLatLon.y);
+            _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y);
+            _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
+            _centerMercator = GeoConversions.LatLonToMeters(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y);
 
-                //Calculate scaling factors to correct overlay between web mercator and UTM
-                Vector2d mercatorBounds = _centerMercator + Engine.Input.Simulation.DomainSize;
-                Vector2d wgs84Bounds = GeoConversions.MetersToLatLon(mercatorBounds);
-                LatLngUTMConverter.UTMResult utmBoundsData = LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Bounds.x, wgs84Bounds.y);
-                Vector2d utmBounds = new Vector2d(utmBoundsData.Easting, utmBoundsData.Northing);
-                Vector2d utmDistances = utmBounds - _utmOrigin;
-                Vector2d realScale;
-                realScale.x = utmDistances.x / Engine.Input.Simulation.DomainSize.x;
-                realScale.y = utmDistances.y / Engine.Input.Simulation.DomainSize.y;
-
-                double mercatorCorrectionScale = Mathd.Cos(Mathd.PI * Engine.Input.Simulation.LowerLeftLatLon.x / 180.0);
-                _mercatorToUtmScale = new Vector2d(realScale.x / mercatorCorrectionScale, realScale.y / mercatorCorrectionScale);
-
-                double lat = Mathd.PI * Engine.Input.Simulation.LowerLeftLatLon.x / 180.0;
-                _mercatorCorrectionScale = (float)Mathd.Cos(lat);
-            }            
+            //Calculate scaling factors to correct overlay between web mercator and UTM
+            Vector2d mercatorBounds = _centerMercator + input.Simulation.DomainSize;
+            Vector2d wgs84Bounds = GeoConversions.MetersToLatLon(mercatorBounds);
+            LatLngUTMConverter.UTMResult utmBoundsData = LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Bounds.x, wgs84Bounds.y);
+            Vector2d utmBounds = new Vector2d(utmBoundsData.Easting, utmBoundsData.Northing);
+            Vector2d utmDistances = utmBounds - _utmOrigin;
+            Vector2d realScale;
+            realScale.x = utmDistances.x / input.Simulation.DomainSize.x;
+            realScale.y = utmDistances.y / input.Simulation.DomainSize.y;       
         }
 
         public Vector2d GetSimulationPosition(Vector2d latLon)
         {
             LatLngUTMConverter.UTMResult utmPos = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);  
-            return new Vector2d(utmPos.Easting, utmPos.Northing) - Engine.RuntimeData.Simulation.UTMOrigin;
+            return new Vector2d(utmPos.Easting, utmPos.Northing) - _utmOrigin;
         }
 
         public Vector2d GetWGS84FromSimulationPosition(Vector2d pos)

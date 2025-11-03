@@ -173,7 +173,7 @@ namespace PREACT.Farsite
                 for (int x = 0; x < farsiteData.ncols; x++)
                 {
                     float tOA = farsiteData.GetTimeOfArrival(x, y);                    
-                    WUIEngineColor color = WUIEngineColor.red * tOA / (float)farsiteData.maxTimeOfArrivalRaster;
+                    PREACTColor color = PREACTColor.red * tOA / (float)farsiteData.maxTimeOfArrivalRaster;
                     color.a = 1.0f;
                     if (tOA < 0.0f)
                     {
@@ -192,10 +192,10 @@ namespace PREACT.Farsite
                 for (int x = 0; x < farsiteData.ncols; x++)
                 {
                     float fuel = farsiteData.GetFuelModel(x, y);
-                    WUIEngineColor color = WUIEngineColor.green * (0.1f + 0.9f * fuel);
+                    PREACTColor color = PREACTColor.green * (0.1f + 0.9f * fuel);
                     if(fuel < 0.0f)
                     {
-                        color = WUIEngineColor.grey;
+                        color = PREACTColor.grey;
                     }
                     fuelModelTex.SetPixel(x, y, color.UnityColor);
                 }
@@ -211,7 +211,7 @@ namespace PREACT.Farsite
                 {
                     float f = farsiteData.GetFirelineIntensity(x, y);
                     f = (f - (float)farsiteData.minFireLineIntensity) / (float)(farsiteData.maxFireLineIntensity - farsiteData.minFireLineIntensity);
-                    WUIEngineColor color = WUIEngineColor.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
+                    PREACTColor color = PREACTColor.HSVToRGB(0.67f - 0.67f * f, 1.0f, 1.0f);
                     firelineIntensityTex.SetPixel(x, y, color.UnityColor);
                 }
             }
@@ -403,7 +403,7 @@ namespace PREACT.Farsite
                 if(g == 0)
                 {
                     fireGrid[xPos, yPos] = fireNumber;
-                    burntTex.SetPixel(xPos, yPos, WUIEngineColor.red.UnityColor);
+                    burntTex.SetPixel(xPos, yPos, PREACTColor.red.UnityColor);
                 }
                 /*else if(g != 0 && fireNumber != g)
                 {

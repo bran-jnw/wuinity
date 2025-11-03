@@ -20,14 +20,14 @@ namespace PREACT
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    int xCount = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
-                    int yCount = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
+                    int xCount = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
+                    int yCount = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
                     bw.Write(xCount);
                     bw.Write(yCount);
-                    bw.Write(GetBytes(Engine.RuntimeData.Fire.WuiArea));
-                    bw.Write(GetBytes(Engine.RuntimeData.Fire.RandomIgnition));
-                    bw.Write(GetBytes(Engine.RuntimeData.Fire.InitialIgnition));
-                    bw.Write(GetBytes(Engine.RuntimeData.Fire.ManualTriggerBuffer));
+                    bw.Write(GetBytes(Engine.ScenarioData.Fire.WuiArea));
+                    bw.Write(GetBytes(Engine.ScenarioData.Fire.RandomIgnition));
+                    bw.Write(GetBytes(Engine.ScenarioData.Fire.InitialIgnition));
+                    bw.Write(GetBytes(Engine.ScenarioData.Fire.ManualTriggerBuffer));
                 }
             }
         }
@@ -51,7 +51,7 @@ namespace PREACT
             success = false;
             string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.GraphicalFireInputFile); //graphical fire input
 
-            if(Engine.RuntimeData.Fire.LCPData == null)
+            if(Engine.ScenarioData.Fire.LCPData == null)
             {
                 Engine.MESSAGE(null, Engine.LogType.Warning, "No LCP data has been loaded, can't try and look for GFI data.");
                 return;
@@ -65,7 +65,7 @@ namespace PREACT
                     {
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
-                        if(ncols == Engine.RuntimeData.Fire.LCPData.GetCellCountX() && nrows == Engine.RuntimeData.Fire.LCPData.GetCellCountY())
+                        if(ncols == Engine.ScenarioData.Fire.LCPData.GetCellCountX() && nrows == Engine.ScenarioData.Fire.LCPData.GetCellCountY())
                         {
                             int dataSize = ncols * nrows;
 
@@ -81,10 +81,10 @@ namespace PREACT
                             b = br.ReadBytes(dataSize * sizeof(bool));
                             bool[] triggerBufferIndices = GetBools(b, dataSize);
 
-                            Engine.RuntimeData.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
-                            Engine.RuntimeData.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
-                            Engine.RuntimeData.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
-                            Engine.RuntimeData.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
+                            Engine.ScenarioData.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
+                            Engine.ScenarioData.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
+                            Engine.ScenarioData.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
+                            Engine.ScenarioData.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
                             success = true;
                         }
                         else
@@ -106,13 +106,13 @@ namespace PREACT
         private static void CreateDefaultInputs()
         {
             //LCP file has already been read, use that for dimensions
-            int xCount = Engine.RuntimeData.Fire.LCPData.GetCellCountX();
-            int yCount = Engine.RuntimeData.Fire.LCPData.GetCellCountY();
+            int xCount = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
+            int yCount = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
 
-            Engine.RuntimeData.Fire.UpdateWUIArea(null, xCount, yCount);
-            Engine.RuntimeData.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);
-            Engine.RuntimeData.Fire.UpdateInitialIgnitionIndices(null, xCount, yCount);
-            Engine.RuntimeData.Fire.UpdateTriggerBufferIndices(null, xCount, yCount);
+            Engine.ScenarioData.Fire.UpdateWUIArea(null, xCount, yCount);
+            Engine.ScenarioData.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);
+            Engine.ScenarioData.Fire.UpdateInitialIgnitionIndices(null, xCount, yCount);
+            Engine.ScenarioData.Fire.UpdateTriggerBufferIndices(null, xCount, yCount);
             SaveGraphicalFireInput();
         }
     }

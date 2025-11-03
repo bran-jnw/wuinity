@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using PREACT.Runtime;
+using PREACT.Scenario;
 
 namespace PREACT.Population
 {
@@ -150,7 +150,7 @@ namespace PREACT.Population
                     int yIndex = i / _cells.x;
                     int xIndex = i - yIndex * _cells.x;
                     Vector2d cellCenterPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize);
-                    Vector2d coord = Engine.RuntimeData.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
+                    Vector2d coord = Engine.ScenarioData.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
                     Itinero.RouterPoint p = Traffic.RouteCreator.GetValidRouterPoint(router, coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), _cellSize);
                     if(p != null)
                     {
@@ -489,7 +489,7 @@ namespace PREACT.Population
                             Vector2d householdStartPos = nodeCenter;
                             householdStartPos.x += _cellSize * Random.Range(-0.5f, 0.5f);
                             householdStartPos.y += _cellSize * Random.Range(-0.5f, 0.5f);
-                            Vector2d householdStartLatLon = Engine.RuntimeData.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
+                            Vector2d householdStartLatLon = Engine.ScenarioData.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;
                             double goalLon = _cellRoadAccessLatLon[i].y;
@@ -501,7 +501,7 @@ namespace PREACT.Population
                 Engine.MESSAGE(null, Engine.LogType.Log, "Generated and saved population to file " + file);
             }
 
-            Engine.RuntimeData.Population.LoadPopulation(file);
+            Engine.ScenarioData.Population.LoadPopulation(file);
         }
     }
 }

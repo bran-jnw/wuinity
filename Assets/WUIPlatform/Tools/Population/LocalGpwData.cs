@@ -8,7 +8,7 @@
 using System.IO;
 using System;
 using PREACT.IO;
-using PREACT.Runtime;
+using PREACT.Scenario;
 using PREACT.Utility.Math;
 
 namespace PREACT.Population

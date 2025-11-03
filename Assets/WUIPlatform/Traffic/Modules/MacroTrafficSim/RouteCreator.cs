@@ -12,13 +12,13 @@ using Itinero;
 using Itinero.Osm.Vehicles;
 using PREACT.Population;
 using PREACT.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Traffic
 {
     [System.Serializable]
     public class RouteCreator
     {
-
         private Router _router;
         private RouterDb _routerDb;
         private List<RouterPoint> _validEvacuationGoalRouterPoints;
@@ -52,7 +52,7 @@ namespace PREACT.Traffic
             //WUInity.INSTANCE.DeleteDrawnRoads();
 
             Vector2 size = new Vector2((float)Engine.Input.Simulation.DomainSize.x, (float)Engine.Input.Simulation.DomainSize.y);
-            Vector2int cells = Engine.RuntimeData.Evacuation.CellCount;
+            Vector2int cells = Engine.ScenarioData.Evacuation.CellCount;
             Vector2d[] startPoints;
             startPoints = new Vector2d[cells.x * cells.y];
             // Route analysis: create all waypoints in cells
@@ -86,7 +86,7 @@ namespace PREACT.Traffic
                 int populationInCell = 0;// WUIEngine.RUNTIME_DATA.Population.GetPopulationSimulationSpace(startPoints[i].x, startPoints[i].y);
                 if (populationInCell > 0)
                 {
-                    Vector2d start = Engine.RuntimeData.Simulation.GetWGS84FromSimulationPosition(startPoints[i]);
+                    Vector2d start = Engine.ScenarioData.Simulation.GetWGS84FromSimulationPosition(startPoints[i]);
 
                     //check if valid start was found
                     RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(start.x, start.y), routerProfile, cellSize);
@@ -176,7 +176,7 @@ namespace PREACT.Traffic
 
         void DetermineValidGoalsAndRouterPoints(bool logMessages)
         {
-            List<EvacuationDestination> evacuatonGoals = Engine.RuntimeData.Evacuation.Destinations;
+            List<EvacuationDestination> evacuatonGoals = Engine.ScenarioData.Evacuation.Destinations;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile();
 
             //check that evac goals are valid
@@ -365,7 +365,7 @@ namespace PREACT.Traffic
                 }*/
 
                 //skip blocked goals
-                if (_validEvacuationGoals[i]._blocked)
+                if (_validEvacuationGoals[i].Blocked)
                 {
                     continue;
                 }
@@ -426,13 +426,13 @@ namespace PREACT.Traffic
         public static void SelectCorrectRoute(RouteCollection rC, int cellIndex)
         {
             TrafficInput tO = Engine.Input.Traffic;
-            Vector2int cells = Engine.RuntimeData.Evacuation.CellCount;
+            Vector2int cells = Engine.ScenarioData.Evacuation.CellCount;
 
             if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.EvacGroup)
             {
                 if (cellIndex >= 0)
                 {
-                    EvacuationGroup group = Engine.RuntimeData.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationGroup group = Engine.ScenarioData.Evacuation.GetEvacGroup(cellIndex);
                     EvacuationDestination goal = group.GetWeightedEvacGoal();
                     rC.SelectForcedNonBlocked(goal);
                 }
@@ -443,8 +443,8 @@ namespace PREACT.Traffic
             }
             else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Random)
             {
-                int randomChoice = Random.Range(0, Engine.RuntimeData.Evacuation.Destinations.Count - 1);
-                rC.SelectForcedNonBlocked(Engine.RuntimeData.Evacuation.Destinations[randomChoice]);
+                int randomChoice = Randomf.Range(0, Engine.ScenarioData.Evacuation.Destinations.Count - 1);
+                rC.SelectForcedNonBlocked(Engine.ScenarioData.Evacuation.Destinations[randomChoice]);
             }
             else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Closest)
             {

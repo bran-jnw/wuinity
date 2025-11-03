@@ -43,17 +43,17 @@ namespace PREACT.Traffic
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
                 Vector2d sumoUTM = new Vector2d(-_simulation.Engine.Input.Traffic.SumoInput.UTMoffset.x, -_simulation.Engine.Input.Traffic.SumoInput.UTMoffset.y);
-                _originOffset = sumoUTM - _simulation.Engine.RuntimeData.Simulation.UTMOrigin;
+                _originOffset = sumoUTM - _simulation.Engine.ScenarioData.Simulation.UTMOrigin;
 
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
-                for (int i = 0; i < _simulation.Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
+                for (int i = 0; i < _simulation.Engine.ScenarioData.Evacuation.Destinations.Count; ++i)
                 {
-                    header += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i].Name + " people arrived";
-                    header += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i].Name + " cars arrived";
-                    header += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i].Name + " flow [veh./h]";
+                    header += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i].Name + " people arrived";
+                    header += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i].Name + " cars arrived";
+                    header += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i].Name + " flow [veh./h]";
                 }
                 output.Add(header);
 
@@ -149,11 +149,11 @@ namespace PREACT.Traffic
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
-            for (int i = 0; i < _simulation.Engine.RuntimeData.Evacuation.Destinations.Count; ++i)
+            for (int i = 0; i < _simulation.Engine.ScenarioData.Evacuation.Destinations.Count; ++i)
             {
-                dataLine += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i]._currentPeople;
-                dataLine += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i]._cars.Count;
-                dataLine += "," + _simulation.Engine.RuntimeData.Evacuation.Destinations[i]._currentVehicleFlow;
+                dataLine += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i]._currentPeople;
+                dataLine += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i]._cars.Count;
+                dataLine += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i]._currentVehicleFlow;
             }
             output.Add(dataLine);
         }
@@ -227,7 +227,7 @@ namespace PREACT.Traffic
                     //if we reach here we need to teleport the car to a new location as no valid route could be found
                     else if (_validStartPositions.Count > 0)
                     {
-                        int randomStart = Utility.Math.Random.Range(0, _validStartPositions.Count - 1);   
+                        int randomStart = Utility.Math.Randomf.Range(0, _validStartPositions.Count - 1);   
                         //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
                         route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, goalRoad.edgeID);    
                         if(route.edges.Count > 0)
@@ -322,15 +322,15 @@ namespace PREACT.Traffic
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
                 OSGeo.GDAL.Dataset output = driver.Create(path, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
 
-                double leftX = _simulation.Engine.RuntimeData.Simulation.UTMOrigin.x;
-                double lowerLeftY = _simulation.Engine.RuntimeData.Simulation.UTMOrigin.y;
+                double leftX = _simulation.Engine.ScenarioData.Simulation.UTMOrigin.x;
+                double lowerLeftY = _simulation.Engine.ScenarioData.Simulation.UTMOrigin.y;
                 double[] geoTransform = new double[] { leftX, _simulation.Engine.Input.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Engine.Input.Traffic.SumoInput.OutputRasterSize };
                 output.SetGeoTransform(geoTransform);
 
                 OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
-                reference.SetProjCS("UTM " + _simulation.Engine.RuntimeData.Simulation.UTMData.Zona + " (WGS84)");
+                reference.SetProjCS("UTM " + _simulation.Engine.ScenarioData.Simulation.UTMData.Zona + " (WGS84)");
                 reference.SetWellKnownGeogCS("WGS84");
-                reference.SetUTM(_simulation.Engine.RuntimeData.Simulation.UTMData.ZoneNumber, _simulation.Engine.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                reference.SetUTM(_simulation.Engine.ScenarioData.Simulation.UTMData.ZoneNumber, _simulation.Engine.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                 output.SetSpatialRef(reference);
 
                 //heat map

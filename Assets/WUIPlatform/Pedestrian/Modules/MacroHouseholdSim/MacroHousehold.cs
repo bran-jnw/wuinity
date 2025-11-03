@@ -24,7 +24,7 @@ namespace PREACT.Pedestrian
         public bool isMoving;
         public float walkingDistance;
 
-        Runtime.PopulationData.HouseholdData _houseHoldData;
+        Scenario.PopulationData.HouseholdData _houseHoldData;
         Vector2 homePosition, carPosition;
         int _cellIndex;
 
@@ -37,7 +37,7 @@ namespace PREACT.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
+        public MacroHousehold(Scenario.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
         {
             PopulationInput popInput = Engine.Input.Population;
             MacroHouseholdSimInput houseInput = Engine.Input.Pedestrian.macroHouseholdSimInput;
@@ -58,9 +58,9 @@ namespace PREACT.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = Engine.RuntimeData.Simulation.GetSimulationPosition(householdData.originLatLon);
+            Vector2d temp = Engine.ScenarioData.Simulation.GetSimulationPosition(householdData.originLatLon);
             homePosition = new Vector2((float)temp.x, (float)temp.y);           
-            temp = Engine.RuntimeData.Simulation.GetSimulationPosition(householdData.roadAccessLatLon);
+            temp = Engine.ScenarioData.Simulation.GetSimulationPosition(householdData.roadAccessLatLon);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;

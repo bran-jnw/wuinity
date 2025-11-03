@@ -472,7 +472,7 @@ namespace PREACT.WUInity.UI
         {
             UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
 
-            if (dfDfEvacutionDestination != null && Engine.DataStatus.HaveInput && Engine.RuntimeData.Evacuation.Destinations.Count > 0)
+            if (dfDfEvacutionDestination != null && Engine.DataStatus.HaveInput && Engine.ScenarioData.Evacuation.Destinations.Count > 0)
             {
                 string initialPath = Path.Combine(GetProjectPath(), Engine.Input.Evacuation.EvacuationGoalFiles[dfDfEvacutionDestination.index] + ".ed");
 
@@ -556,12 +556,12 @@ namespace PREACT.WUInity.UI
             UnityEngine.UIElements.DropdownField dfDfEvacutionDestination = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacutionDestination");
             if (dfDfEvacutionDestination != null && Engine.Input.Evacuation.EvacuationGoalFiles != null)
             {
-                if (Engine.RuntimeData.Evacuation.Destinations.Count > 0)
+                if (Engine.ScenarioData.Evacuation.Destinations.Count > 0)
                 {
                     string removeGoal = Engine.Input.Evacuation.EvacuationGoalFiles[dfDfEvacutionDestination.index];
                     Engine.MESSAGE(null, Engine.LogType.Log, "Goal file " + removeGoal + " is removed.");
 
-                    if (Engine.RuntimeData.Evacuation.Destinations.Count > 1)
+                    if (Engine.ScenarioData.Evacuation.Destinations.Count > 1)
                     {
                         string[] newGoalList = new string[Engine.Input.Evacuation.EvacuationGoalFiles.Length - 1];
 
@@ -582,7 +582,7 @@ namespace PREACT.WUInity.UI
                         Engine.Input.Evacuation.EvacuationGoalFiles = null;
                     }
 
-                    Engine.RuntimeData.Evacuation.Destinations.RemoveAt(dfDfEvacutionDestination.index);
+                    Engine.ScenarioData.Evacuation.Destinations.RemoveAt(dfDfEvacutionDestination.index);
                     IO.Input.SaveInput();
 
                     dfDfEvacutionDestination.choices.RemoveAt(dfDfEvacutionDestination.index);
@@ -599,7 +599,7 @@ namespace PREACT.WUInity.UI
 
         private void BtnAddGoalButton_clicked()
         {
-            if (Engine.RuntimeData.Evacuation.Destinations != null) // Test to see if a project is opened. I need to find a better way!
+            if (Engine.ScenarioData.Evacuation.Destinations != null) // Test to see if a project is opened. I need to find a better way!
             {
                 FileBrowser.SetFilters(false, fileFilter[(int)FileType.evacuationGoalFile]);
                 FileBrowser.ShowLoadDialog(LoadAEvacGoalFile, null, FileBrowser.PickMode.Files, false, GetProjectPath(), null, "Load evacuation goal file (.ed)", "Load");
@@ -628,7 +628,7 @@ namespace PREACT.WUInity.UI
                 int maxCars, maxPeople;
                 bool initiallyBlocked;
                 EvacGoalType evacGoalType;
-                WUIEngineColor color = WUIEngineColor.white;
+                PREACTColor color = PREACTColor.white;
 
                 //name
                 string[] data = dataLines[0].Split(':');
@@ -688,13 +688,13 @@ namespace PREACT.WUInity.UI
                     float.TryParse(data[0], out r);
                     float.TryParse(data[1], out g);
                     float.TryParse(data[2], out b);
-                    color = new WUIEngineColor(r, g, b);
+                    color = new PREACTColor(r, g, b);
                 }
 
                 bool findDuplicate = false;
-                for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; i++)
+                for (int i = 0; i < Engine.ScenarioData.Evacuation.Destinations.Count; i++)
                 {
-                    if (Engine.RuntimeData.Evacuation.Destinations[i].Name == name) findDuplicate = true;
+                    if (Engine.ScenarioData.Evacuation.Destinations[i].Name == name) findDuplicate = true;
                 }
 
                 if (!findDuplicate) {
@@ -705,13 +705,13 @@ namespace PREACT.WUInity.UI
                     eG._maxPeople = maxPeople;
                     eG._blocked = initiallyBlocked;
 
-                    Engine.RuntimeData.Evacuation.Destinations.Add(eG);
+                    Engine.ScenarioData.Evacuation.Destinations.Add(eG);
                     // Code from EvacuationGoal.cs ends ----------------------------------------------------------------------------------
 
                     //Save changes
-                    string[] newGoalList = new string[Engine.RuntimeData.Evacuation.Destinations.Count];
+                    string[] newGoalList = new string[Engine.ScenarioData.Evacuation.Destinations.Count];
 
-                    for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count - 1; i++)
+                    for (int i = 0; i < Engine.ScenarioData.Evacuation.Destinations.Count - 1; i++)
                     {
                         newGoalList[i] = Engine.Input.Evacuation.EvacuationGoalFiles[i];
                     }
@@ -719,7 +719,7 @@ namespace PREACT.WUInity.UI
                     string fileName = Path.GetFileName(path);
                     data = fileName.Split('.');
 
-                    newGoalList[Engine.RuntimeData.Evacuation.Destinations.Count - 1] = data[0];
+                    newGoalList[Engine.ScenarioData.Evacuation.Destinations.Count - 1] = data[0];
                     Engine.Input.Evacuation.EvacuationGoalFiles = newGoalList;
 
                     IO.Input.SaveInput();
@@ -904,7 +904,7 @@ namespace PREACT.WUInity.UI
                     List<float> responseCurveProbabilities = new List<float>();
                     List<double> goalProbabilities = new List<double>();
                     float r, g, b;
-                    WUIEngineColor color = WUIEngineColor.white;
+                    PREACTColor color = PREACTColor.white;
 
                     //get name
                     string[] data = dataLines[0].Split(':');
@@ -965,19 +965,19 @@ namespace PREACT.WUInity.UI
                         float.TryParse(data[0], out r);
                         float.TryParse(data[1], out g);
                         float.TryParse(data[2], out b);
-                        color = new WUIEngineColor(r, g, b);
+                        color = new PREACTColor(r, g, b);
                     }
 
                     int[] goalIndices = new int[destinationNames.Count];
                     for (int j = 0; j < destinationNames.Count; j++)
                     {
-                        goalIndices[j] = Engine.RuntimeData.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
+                        goalIndices[j] = Engine.ScenarioData.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
                     }
 
                     int[] responseCurveIndices = new int[responseCurveNames.Count];
                     for (int j = 0; j < responseCurveNames.Count; j++)
                     {
-                        responseCurveIndices[j] = Engine.RuntimeData.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
+                        responseCurveIndices[j] = Engine.ScenarioData.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
                     }
 
                     //TODO: check if input count and probabilities match
@@ -1002,8 +1002,8 @@ namespace PREACT.WUInity.UI
                         evacGroupFiles.Add(data[0]);
                         Engine.Input.Evacuation.EvacuationGroupFiles = evacGroupFiles.ToArray();
 
-                        Engine.RuntimeData.Evacuation.LoadEvacuationGroups(); // Reload all evacuation groups based on updated file list.
-                        Engine.RuntimeData.Evacuation.LoadEvacGroupIndices();
+                        Engine.ScenarioData.Evacuation.LoadEvacuationGroups(); // Reload all evacuation groups based on updated file list.
+                        Engine.ScenarioData.Evacuation.LoadEvacGroupIndices();
 
                         Engine.MESSAGE(null, Engine.LogType.Log, "Loaded evacuation group from " + path + " named " + data[0]);
 
@@ -1085,7 +1085,7 @@ namespace PREACT.WUInity.UI
                         //responseCurves.Add(new ResponseCurve(dataPoints, data[0]));
                         //WUIEngine.RUNTIME_DATA.Evacuation.ResponseCurves = responseCurves.ToArray();
 
-                        Engine.RuntimeData.Evacuation.LoadResponseCurves(); // Reload all response curves based on updated file list.
+                        Engine.ScenarioData.Evacuation.LoadResponseCurves(); // Reload all response curves based on updated file list.
 
                         Engine.MESSAGE(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + data[0]);
 
@@ -1141,9 +1141,9 @@ namespace PREACT.WUInity.UI
         {
             UnityEngine.UIElements.DropdownField dfDfResponseCurve = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfResponseCurve");
 
-            if (dfDfResponseCurve != null && Engine.DataStatus.HaveInput && Engine.RuntimeData.Evacuation.ResponseCurves.Length > 0)
+            if (dfDfResponseCurve != null && Engine.DataStatus.HaveInput && Engine.ScenarioData.Evacuation.ResponseCurves.Length > 0)
             {
-                string initialPath = Path.Combine(Engine.WorkingFolder, Engine.RuntimeData.Evacuation.ResponseCurves[dfDfResponseCurve.index].name + ".rsp");
+                string initialPath = Path.Combine(Engine.WorkingFolder, Engine.ScenarioData.Evacuation.ResponseCurves[dfDfResponseCurve.index].name + ".rsp");
 
                 System.Diagnostics.Process.Start("Notepad.exe", initialPath);
 
@@ -1162,7 +1162,7 @@ namespace PREACT.WUInity.UI
         {
             UnityEngine.UIElements.DropdownField dfDfEvacuationGroup = Document.rootVisualElement.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
 
-            if (dfDfEvacuationGroup != null && Engine.DataStatus.HaveInput && Engine.RuntimeData.Evacuation.EvacuationGroups.Length > 0)
+            if (dfDfEvacuationGroup != null && Engine.DataStatus.HaveInput && Engine.ScenarioData.Evacuation.EvacuationGroups.Length > 0)
             {
                 string initialPath = Path.Combine(Engine.WorkingFolder, Engine.Input.Evacuation.EvacuationGroupFiles[dfDfEvacuationGroup.index] + ".eg");
 
@@ -1186,7 +1186,7 @@ namespace PREACT.WUInity.UI
             UnityEngine.UIElements.DropdownField dfDfEvacuationGroup = root.Q<UnityEngine.UIElements.DropdownField>("DfEvacuationGroup");
             UnityEngine.UIElements.Button btnEditEvacGroupOnMap = root.Q<UnityEngine.UIElements.Button>("EditEvacGroupOnMapButton");
 
-            if (dfDfEvacuationGroup != null && Engine.DataStatus.HaveInput && Engine.RuntimeData.Evacuation.EvacuationGroups.Length > 0)
+            if (dfDfEvacuationGroup != null && Engine.DataStatus.HaveInput && Engine.ScenarioData.Evacuation.EvacuationGroups.Length > 0)
             {
                 if (!WUInityEngine.INSTANCE.IsPainterActive())
                 {
@@ -1220,13 +1220,13 @@ namespace PREACT.WUInity.UI
                     UnityEngine.UIElements.TextField tfTxEvacDestLatLong = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestLatLong");
                     UnityEngine.UIElements.TextField tfTxEvacDestType = root.Q<UnityEngine.UIElements.TextField>("TxEvacDestType");
 
-                    if (Engine.RuntimeData.Evacuation.Destinations.Count > 0)
+                    if (Engine.ScenarioData.Evacuation.Destinations.Count > 0)
                     {
-                        tfTxEvacDestName.SetValueWithoutNotify(Engine.RuntimeData.Evacuation.Destinations[dfDfEvacutionDestination.index].Name);
-                        tfTxEvacDestLatLong.SetValueWithoutNotify(Engine.RuntimeData.Evacuation.Destinations[dfDfEvacutionDestination.index]._latLon.x.ToString() + ", " +
-                                                                  Engine.RuntimeData.Evacuation.Destinations[dfDfEvacutionDestination.index]._latLon.y.ToString());
+                        tfTxEvacDestName.SetValueWithoutNotify(Engine.ScenarioData.Evacuation.Destinations[dfDfEvacutionDestination.index].Name);
+                        tfTxEvacDestLatLong.SetValueWithoutNotify(Engine.ScenarioData.Evacuation.Destinations[dfDfEvacutionDestination.index]._latLon.x.ToString() + ", " +
+                                                                  Engine.ScenarioData.Evacuation.Destinations[dfDfEvacutionDestination.index]._latLon.y.ToString());
 
-                        EvacGoalType evacGoalType = Engine.RuntimeData.Evacuation.Destinations[dfDfEvacutionDestination.index]._goalType;
+                        EvacGoalType evacGoalType = Engine.ScenarioData.Evacuation.Destinations[dfDfEvacutionDestination.index]._goalType;
 
                         if (evacGoalType == EvacGoalType.Refugee)
                             tfTxEvacDestType.SetValueWithoutNotify("Refugee");
@@ -1315,19 +1315,19 @@ namespace PREACT.WUInity.UI
 
                     UnityEngine.UIElements.TextField tfTxSpeedLimit = root.Q<UnityEngine.UIElements.TextField>("TxSpeedLimit");
                     if (tfTxSpeedLimit != null)
-                        tfTxSpeedLimit.SetValueWithoutNotify(Engine.RuntimeData.Traffic.RoadTypeData.roadData[dfRoadType.index].speedLimit.ToString());
+                        tfTxSpeedLimit.SetValueWithoutNotify(Engine.ScenarioData.Traffic.RoadTypeData.roadData[dfRoadType.index].speedLimit.ToString());
 
                     UnityEngine.UIElements.TextField tfTxLanes = root.Q<UnityEngine.UIElements.TextField>("TxLanes");
                     if (tfTxLanes != null)
-                        tfTxLanes.SetValueWithoutNotify(Engine.RuntimeData.Traffic.RoadTypeData.roadData[dfRoadType.index].lanes.ToString());
+                        tfTxLanes.SetValueWithoutNotify(Engine.ScenarioData.Traffic.RoadTypeData.roadData[dfRoadType.index].lanes.ToString());
 
                     UnityEngine.UIElements.TextField tfTxMaxCapacity = root.Q<UnityEngine.UIElements.TextField>("TxMaxCapacity");
                     if (tfTxMaxCapacity != null)
-                        tfTxMaxCapacity.SetValueWithoutNotify(Engine.RuntimeData.Traffic.RoadTypeData.roadData[dfRoadType.index].maxCapacity.ToString());
+                        tfTxMaxCapacity.SetValueWithoutNotify(Engine.ScenarioData.Traffic.RoadTypeData.roadData[dfRoadType.index].maxCapacity.ToString());
 
                     UnityEngine.UIElements.TextField tfTxCanBeReversed = root.Q<UnityEngine.UIElements.TextField>("TxCanBeReversed");
                     if (tfTxCanBeReversed != null)
-                        tfTxCanBeReversed.SetValueWithoutNotify(Engine.RuntimeData.Traffic.RoadTypeData.roadData[dfRoadType.index].canBeReversed.ToString());
+                        tfTxCanBeReversed.SetValueWithoutNotify(Engine.ScenarioData.Traffic.RoadTypeData.roadData[dfRoadType.index].canBeReversed.ToString());
              
                 });
             }
@@ -1396,7 +1396,7 @@ namespace PREACT.WUInity.UI
                 if (togTogMultipleSim != null)
                     togTogMultipleSim.RegisterValueChangedCallback(evt =>
                     {
-                        Engine.RuntimeData.Simulation.MultipleSimulations = evt.newValue;
+                        Engine.ScenarioData.Simulation.MultipleSimulations = evt.newValue;
                         tfTxTSetNumSims.ToggleInClassList("hide");
 
                         UnityEngine.Debug.Log($"TogMultipleSim = {evt.newValue}");
@@ -1744,7 +1744,7 @@ namespace PREACT.WUInity.UI
             label2.text = "Sim. Clock: " + (int)Engine.SIM.CurrentTime + " s\n\rdd:hh:mm:ss - " + TimeSpan.FromSeconds((int)Engine.SIM.CurrentTime).ToString(@"dd\:hh\:mm\:ss");
 
             Label label3 = Document.rootVisualElement.Q<Label>("TxtTotalPop");
-            label3.text = "Total population: " + Engine.RuntimeData.Population.TotalPopulation;
+            label3.text = "Total population: " + Engine.ScenarioData.Population.TotalPopulation;
 
             Label label4 = Document.rootVisualElement.Q<Label>("TxtPeopleStaying");
             label4.text = "People staying: " + Engine.SIM.PedestrianModule.GetPeopleStaying();
@@ -1755,7 +1755,7 @@ namespace PREACT.WUInity.UI
             if (Engine.Input.Simulation.RunPedestrianModule && Engine.SIM.PedestrianModule != null)
             {
                 Label label6 = Document.rootVisualElement.Q<Label>("TxtPedLeft");
-                label6.text = "Pedestrians left: " + Engine.SIM.PedestrianModule.GetPeopleLeft() + " (" + Math.Round((double)Engine.SIM.PedestrianModule.GetPeopleLeft() / (double)Engine.RuntimeData.Population.TotalPopulation * 100.0, 1) + "%)";
+                label6.text = "Pedestrians left: " + Engine.SIM.PedestrianModule.GetPeopleLeft() + " (" + Math.Round((double)Engine.SIM.PedestrianModule.GetPeopleLeft() / (double)Engine.ScenarioData.Population.TotalPopulation * 100.0, 1) + "%)";
 
                 Label label7 = Document.rootVisualElement.Q<Label>("TxtCarsReached");
                 label7.text = "Cars reached by Peds: " + Engine.SIM.PedestrianModule.GetCarsReached();
@@ -1769,11 +1769,11 @@ namespace PREACT.WUInity.UI
 
             uint totalEvacuated = 0;
             string name="Evacuation goals reached:";
-            for (int i = 0; i < Engine.RuntimeData.Evacuation.Destinations.Count; i++)
+            for (int i = 0; i < Engine.ScenarioData.Evacuation.Destinations.Count; i++)
             {
-                totalEvacuated += Engine.RuntimeData.Evacuation.Destinations[i]._currentPeople;
-                name += "\n\r" + Engine.RuntimeData.Evacuation.Destinations[i].Name;
-                name += ": " + Engine.RuntimeData.Evacuation.Destinations[i]._currentPeople + " by " + Engine.RuntimeData.Evacuation.Destinations[i]._cars.Count+ " cars";
+                totalEvacuated += Engine.ScenarioData.Evacuation.Destinations[i]._currentPeople;
+                name += "\n\r" + Engine.ScenarioData.Evacuation.Destinations[i].Name;
+                name += ": " + Engine.ScenarioData.Evacuation.Destinations[i]._currentPeople + " by " + Engine.ScenarioData.Evacuation.Destinations[i]._cars.Count+ " cars";
             }
 
             Label label9 = Document.rootVisualElement.Q<Label>("TxtEvacGoalsReached");
@@ -1921,7 +1921,7 @@ namespace PREACT.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach(EvacuationDestination eg in Engine.RuntimeData.Evacuation.Destinations)
+                    foreach(EvacuationDestination eg in Engine.ScenarioData.Evacuation.Destinations)
                         m_DropOptions.Add(eg.Name);
 
                     dfDfEvacutionDestination.choices.Clear();
@@ -1936,7 +1936,7 @@ namespace PREACT.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach(ResponseCurve rc in Engine.RuntimeData.Evacuation.ResponseCurves)
+                    foreach(ResponseCurve rc in Engine.ScenarioData.Evacuation.ResponseCurves)
                         m_DropOptions.Add(rc.name);
 
                     dfDfResponseCurve.choices.Clear();
@@ -1951,7 +1951,7 @@ namespace PREACT.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach (EvacuationGroup eg in Engine.RuntimeData.Evacuation.EvacuationGroups)
+                    foreach (EvacuationGroup eg in Engine.ScenarioData.Evacuation.EvacuationGroups)
                         m_DropOptions.Add(eg.Name);
 
                     dfDfEvacuationGroup.choices.Clear();
@@ -2050,7 +2050,7 @@ namespace PREACT.WUInity.UI
                 {
                     List<string> m_DropOptions = new List<string> {};
 
-                    foreach(PREACT.Traffic.RoadData rd in Engine.RuntimeData.Traffic.RoadTypeData.roadData)
+                    foreach(PREACT.Traffic.RoadData rd in Engine.ScenarioData.Traffic.RoadTypeData.roadData)
                         m_DropOptions.Add(rd.name);
 
                     dfRoadType.choices.Clear();
@@ -2115,14 +2115,14 @@ namespace PREACT.WUInity.UI
                 UnityEngine.UIElements.TextField tfTxTSetNumSims = root.Q<UnityEngine.UIElements.TextField>("TxTSetNumSims");
                 if (tfTxTSetNumSims != null)
                 {
-                    tfTxTSetNumSims.value = Engine.RuntimeData.Simulation.NumberOfRuns.ToString();
+                    tfTxTSetNumSims.value = Engine.ScenarioData.Simulation.NumberOfRuns.ToString();
           
                     UnityEngine.UIElements.Toggle tgTogMultipleSim = root.Q<UnityEngine.UIElements.Toggle>("TogMultipleSim");
                     if (tgTogMultipleSim != null)
                     {
-                        tgTogMultipleSim.SetValueWithoutNotify(Engine.RuntimeData.Simulation.MultipleSimulations);
+                        tgTogMultipleSim.SetValueWithoutNotify(Engine.ScenarioData.Simulation.MultipleSimulations);
 
-                        if(Engine.RuntimeData.Simulation.MultipleSimulations)
+                        if(Engine.ScenarioData.Simulation.MultipleSimulations)
                         {
                             tfTxTSetNumSims.ToggleInClassList("hide");
                         }
@@ -2908,7 +2908,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "LCP file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadLCPFile(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadLCPFile(paths[0], true))
             {
                 loadStatus = "LCP file: " + Path.GetFileName(paths[0])+ " is loaded successfully.";
             }
@@ -2955,7 +2955,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "Fuel model file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadFuelModelsInput(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadFuelModelsInput(paths[0], true))
             {
                 loadStatus = "Fuel model file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
             }
@@ -3001,7 +3001,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "Fuel moisture file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadInitialFuelMoistureData(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadInitialFuelMoistureData(paths[0], true))
             {
                 loadStatus = "Fuel moisture file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
             }
@@ -3048,7 +3048,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "Weather file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadWeatherInput(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadWeatherInput(paths[0], true))
             {
                 loadStatus = "Weather file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
             }
@@ -3095,7 +3095,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "Wind file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadWindInput(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadWindInput(paths[0], true))
             {
                 loadStatus = "Wind file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
             }
@@ -3142,7 +3142,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "Ignition points file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadIgnitionPoints(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadIgnitionPoints(paths[0], true))
             {
                 loadStatus = "Ignition points file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
             }
@@ -3188,7 +3188,7 @@ namespace PREACT.WUInity.UI
         {
             string loadStatus = "Graphical fire input file load error.";
 
-            if (Engine.RuntimeData.Fire.LoadGraphicalFireInput(paths[0], true))
+            if (Engine.ScenarioData.Fire.LoadGraphicalFireInput(paths[0], true))
             {
                 loadStatus = "Graphical fire input file: " + Path.GetFileName(paths[0]) + " is loaded successfully.";
             }
@@ -3235,7 +3235,7 @@ namespace PREACT.WUInity.UI
 
         void BtnDisplayLCPFile()
         {
-            Engine.RuntimeData.Fire.ToggleLCPDataPlane();
+            Engine.ScenarioData.Fire.ToggleLCPDataPlane();
         }
 
         /// <summary>

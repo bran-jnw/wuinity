@@ -56,10 +56,10 @@ namespace PREACT.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            closestNodeSimulationSpace = Engine.RuntimeData.Simulation.GetSimulationPosition(roadAccessLatLon);
+            closestNodeSimulationSpace = Engine.ScenarioData.Simulation.GetSimulationPosition(roadAccessLatLon);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
-                int evacGroupIndex = Engine.RuntimeData.Evacuation.EvacGroupIndices[i];
+                int evacGroupIndex = Engine.ScenarioData.Evacuation.EvacGroupIndices[i];
                 //macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
             }
         }
