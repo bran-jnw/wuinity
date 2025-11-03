@@ -7,6 +7,7 @@
 
 using UnityEngine;
 using PREACT;
+using PREACT.Utility.Math;
 
 namespace WUInity
 {

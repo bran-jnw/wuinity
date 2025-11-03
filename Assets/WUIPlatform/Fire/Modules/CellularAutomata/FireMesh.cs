@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System;
 using PREACT.Fire.Behave;
 using PREACT.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Fire
 {
@@ -75,10 +76,11 @@ namespace PREACT.Fire
 
         public FireMesh(Simulation simulation, LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints) : base(simulation)        
         {
+
             this.lcpData = lcpData;
             _cellSize = new Vector2d(lcpData.RasterCellResolutionX, lcpData.RasterCellResolutionY);
-            int xCells = (int)(Engine.Input.Simulation.DomainSize.x / _cellSize.x);
-            int yCells = (int)(Engine.Input.Simulation.DomainSize.y / _cellSize.y);
+            int xCells = lcpData.GetCellCountX();
+            int yCells = lcpData.GetCellCountY();
             _cellCount = new Vector2int(xCells, yCells); //Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);           
 
             this.weather = weather;
@@ -87,7 +89,7 @@ namespace PREACT.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = Engine.Input.Fire.FireCellInput.SpreadMode;
+            spreadMode = _simulation.Input.Fire.FireCellInput.SpreadMode;
 
             InitializeMesh();
         }
@@ -96,14 +98,14 @@ namespace PREACT.Fire
         {
             fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if(Engine.DataStatus.FuelModelsLoaded)
+            if (_simulation.Scenario.Fire.FuelModelsData != null)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < _simulation.Scenario.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(_simulation.Scenario.Fire.FuelModelsData.Fuels[i]);
                 }
-            }            
+            }                    
             surfaceFire = new Surface(fuelModelSet);            
             crownFire = new Crown(fuelModelSet);                         
 
@@ -315,7 +317,7 @@ namespace PREACT.Fire
             for (int i = 0; i < _fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
-                if(Engine.Input.Simulation.RunSmokeModule)
+                if(_simulation.Input.Simulation.RunSmokeModule)
                 {
                     sootProduction[i] = 0.0f;
                     if (_fireCells[i].cellState == FireCellState.Burning)
@@ -367,11 +369,11 @@ namespace PREACT.Fire
                 return;
             }
 
-            if(Engine.Input.Fire.FireCellInput.UseInitialIgnitionMap)
+            if(_simulation.Input.Fire.FireCellInput.UseInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
-                    if (Engine.ScenarioData.Fire.InitialIgnition[i])
+                    if (_simulation.Scenario.Fire.InitialIgnition[i])
                     {
                         FireCell f = _fireCells[i];
                         f.Ignite(currentTime);
@@ -391,7 +393,7 @@ namespace PREACT.Fire
                 {
                     if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
                     {
-                        ignitionPoints[i].CalculateMeshIndex(this);
+                        ignitionPoints[i].CalculateMeshIndex(_simulation, this);
                         if (ignitionPoints[i].IsInsideFire(_cellCount))
                         {
                             int x = ignitionPoints[i].GetX();
@@ -450,7 +452,7 @@ namespace PREACT.Fire
 
         public override FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Vector2d pos = Engine.ScenarioData.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = _simulation.Scenario.Simulation.GetSimulationPosition(latLong);
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);

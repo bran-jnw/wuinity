@@ -7,6 +7,7 @@
 
 using System.IO;
 using System.Collections.Generic;
+using PREACT.Utility.Math;
 
 namespace PREACT.Fire
 {

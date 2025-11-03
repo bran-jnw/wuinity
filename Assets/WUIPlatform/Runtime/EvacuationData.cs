@@ -14,8 +14,11 @@ namespace PREACT.Scenario
 {
     public class EvacuationData
     {
-        public EvacuationData()
+        Input _input;
+
+        public EvacuationData(Input input)
         {
+            _input = input;
         }
 
         private Vector2int _cellCount;
@@ -23,9 +26,8 @@ namespace PREACT.Scenario
         {
             get
             {
-                Input input = _engine.Input;
-                _cellCount.x = Mathf.CeilToInt((float)input.Simulation.DomainSize.x / input.Evacuation.PaintCellSize);
-                _cellCount.y = Mathf.CeilToInt((float)input.Simulation.DomainSize.y / input.Evacuation.PaintCellSize);
+                _cellCount.x = Mathf.CeilToInt((float)_input.Simulation.DomainSize.x / _input.Evacuation.PaintCellSize);
+                _cellCount.y = Mathf.CeilToInt((float)_input.Simulation.DomainSize.y / _input.Evacuation.PaintCellSize);
                 return _cellCount;
             }
         }
@@ -73,10 +75,10 @@ namespace PREACT.Scenario
             }                       
         }
 
-        public bool LoadBlockGoalEvents(Input input, string workingFolder)
+        public bool LoadBlockGoalEvents(Input input, string rootFolder)
         {
             bool success;
-            _blockGoalEvents = BlockDestinationEvent.LoadBlockGoalEvents(out success);
+            _blockGoalEvents = BlockDestinationEvent.LoadBlockGoalEvents(input, rootFolder, out success);
 
             return success;
         }
@@ -112,12 +114,12 @@ namespace PREACT.Scenario
             }
         }
 
-        public int GetEvacGoalIndexFromName(string name)
+        public int GetEvacGoalIndexFromName(string name, Simulation simulation)
         {
             int index = -1;
-            for (int i = 0; i < Destinations.Count; i++)
+            for (int i = 0; i < simulation.Destinations.Count; i++)
             {
-                if (name == Destinations[i].Name)
+                if (name == simulation.Destinations[i].Name)
                 {
                     index = i;
                     break;

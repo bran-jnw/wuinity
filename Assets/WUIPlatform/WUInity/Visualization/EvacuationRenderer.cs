@@ -10,6 +10,7 @@ using PREACT.Pedestrian;
 using System.Collections.Generic;
 using PREACT;
 using PREACT.Traffic;
+using PREACT.Utility.Math;
 
 namespace WUInity.Visualization
 {

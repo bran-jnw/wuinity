@@ -15,6 +15,7 @@ namespace WUInity.UI
         string[] routeCollectionFilter = new string[] { ".rc" };
         string[] osmFilter = new string[] { ".pbf", ".osm" };
         string[] maskFilter = new string[] { ".pmk" };
+        string[] csvFilter = new string[] { ".csv" };
 
         bool filterMenuActive = false;
 

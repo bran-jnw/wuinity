@@ -506,7 +506,7 @@ namespace PREACT
                     for (int i = 0; i < _engine.ScenarioData.Evacuation.BlockGoalEvents.Length; i++)
                     {
                         BlockDestinationEvent bGE = _engine.ScenarioData.Evacuation.BlockGoalEvents[i];
-                        if (CurrentTime >= bGE.startTime && !bGE.triggered)
+                        if (CurrentTime >= bGE.StartTime && !bGE.Triggered)
                         {
                             bGE.ApplyEffects();
                         }
@@ -685,7 +685,7 @@ namespace PREACT
 
         void SaveOutput()
         {
-            Input input = _engine.Input;
+            Input input = _input;
             if (input.Simulation.RunTrafficModule)
             {
                 Engine.MESSAGE(this, Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());

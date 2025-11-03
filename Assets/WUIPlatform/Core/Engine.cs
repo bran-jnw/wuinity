@@ -36,7 +36,21 @@ namespace PREACT
         public ScenarioData ScenarioData { get => _scenarioData; }
         public Output Output { get => _output; }
         public string DataFolder { get => Directory.GetCurrentDirectory(); }
-        public string WorkingFolder { get => Path.GetDirectoryName(WorkingFile); }
+        public string WorkingFolder
+        {
+            get
+            {
+                if (WorkingFile != null)
+                {
+                    return Path.GetDirectoryName(WorkingFile);
+                }
+                else
+                {
+                    return Environment.CurrentDirectory;
+                }
+            }
+        }
+                
         public string OutputFolder
         {
             get
@@ -189,7 +203,7 @@ namespace PREACT
 
             if (_input.WUIShow.SendDataToWUIShow && _input.Simulation.RunTrafficModule)
             {
-                _wuiShow = new Visualization.WUIShowCommunicator(_input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
+                _wuiShow = new Visualization.WUIShowCommunicator(this, _input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
             }
         }   
         
@@ -352,7 +366,7 @@ namespace PREACT
 
                 _validInput = new ValidCriticalData(_input);
 
-                _scenarioData = new ScenarioData(this);
+                _scenarioData = new ScenarioData(_input);
                 //transform input to actual data
                 MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
                 _scenarioData.Evacuation.LoadAll(input, WorkingFolder);

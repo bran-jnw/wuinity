@@ -14,8 +14,9 @@ namespace PREACT
 {
     public abstract class WUInityEvent
     {
-        public float startTime;
-        [System.NonSerialized] public bool triggered;
+        public float StartTime;
+        public bool Triggered;
+        protected Simulation _simulation;
 
         public abstract void ApplyEffects();
     }
@@ -23,38 +24,31 @@ namespace PREACT
     [System.Serializable]
     public class BlockDestinationEvent : WUInityEvent
     {
-        public int goalIndex;
+        public int GoalIndex;
         public BlockDestinationEvent(float startTime, int goalIndex)
         {
-            this.startTime = startTime;
-            this.goalIndex = goalIndex;
-            triggered = false;
+            StartTime = startTime;
+            GoalIndex = goalIndex;
+            Triggered = false;
         }
 
         public override void ApplyEffects()
         {
-            if(!triggered)
+            if(!Triggered)
             {
-                triggered = true;
-                Engine.MESSAGE(null, Engine.LogType.Event, "Goal blocked: " + Engine.ScenarioData.Evacuation.Destinations[goalIndex].Name);
-                Engine.SIM.BlockEvacGoal(goalIndex);
+                Triggered = true;
+                Engine.MESSAGE(null, Engine.LogType.Event, "Goal blocked: " + _simulation.Destinations[GoalIndex].Name);
+                _simulation.BlockEvacGoal(GoalIndex);
             }            
-        }
-
-        public static BlockDestinationEvent[] GetDummy()
-        {
-            BlockDestinationEvent[] wE = new BlockDestinationEvent[1];
-            wE[0] = new BlockDestinationEvent(float.MaxValue, 0);
-            return wE;
         }
 
         public static BlockDestinationEvent[] LoadBlockGoalEvents(Input input, string rootFolder, out bool success)
         {
             success = false;
             List<BlockDestinationEvent> blockGoalEvents = new List<BlockDestinationEvent>();
-            for (int i = 0; i < Engine.Input.Events.BlockGoalEventFiles.Length; i++)
+            for (int i = 0; i < input.Events.BlockGoalEventFiles.Length; i++)
             {
-                string path = Path.Combine(rorkingFolder, Engine.Input.Events.BlockGoalEventFiles[i] + ".bge");
+                string path = Path.Combine(rootFolder, input.Events.BlockGoalEventFiles[i] + ".bge");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);

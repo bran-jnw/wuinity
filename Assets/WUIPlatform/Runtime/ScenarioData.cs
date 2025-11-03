@@ -16,7 +16,6 @@ namespace PREACT.Scenario
     /// </summary>
     public class ScenarioData
     {
-        Engine _engine;
         public SimulationData Simulation;
         public EvacuationData Evacuation;
         public PopulationData Population;
@@ -25,12 +24,11 @@ namespace PREACT.Scenario
         public FireData Fire;
         public SmokeData Smoke;
 
-        public ScenarioData(Engine engine)
+        public ScenarioData(IO.Input input)
         {
-            _engine = engine;
-            Simulation = new SimulationData();
+            Simulation = new SimulationData(input);
             //Visualization = new VisualizationData();         
-            Evacuation = new EvacuationData(_engine);
+            Evacuation = new EvacuationData(input);
             Population = new PopulationData();
             Routing = new RoutingData();
             Traffic = new TrafficData();

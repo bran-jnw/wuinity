@@ -7,6 +7,7 @@
 
 using System.Numerics;
 using PREACT.Evacuation;
+using PREACT.Utility.Math;
 
 namespace PREACT.Traffic
 {

@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Fire
 {
@@ -72,11 +73,11 @@ namespace PREACT.Fire
         /// </summary>
         /// <param name="latLong"></param>
         /// <param name="mesh"></param>
-        public IgnitionPoint(Vector2d latLong, FireMesh mesh, float ignitionTime)      
+        public IgnitionPoint(Simulation simulation, Vector2d latLong, FireMesh mesh, float ignitionTime)      
         {
             this.LatLong = latLong;
 
-            Vector2d pos = Engine.ScenarioData.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = simulation.Scenario.Simulation.GetSimulationPosition(latLong);
 
             x = (int)(pos.x / mesh._cellSize.x);
             y = (int)(pos.y / mesh._cellSize.y);
@@ -90,11 +91,11 @@ namespace PREACT.Fire
         /// Called when starting fire since we only specify lat/long in input file
         /// </summary>
         /// <param name="mesh"></param>
-        public void CalculateMeshIndex(FireMesh mesh)        
+        public void CalculateMeshIndex(Simulation simulation, FireMesh mesh)        
         {
             if(x < 0 && y < 0)
             {
-                Vector2d pos = Engine.ScenarioData.Simulation.GetSimulationPosition(LatLong);
+                Vector2d pos = simulation.Scenario.Simulation.GetSimulationPosition(LatLong);
 
                 x = (int)(pos.x / mesh._cellSize.x);
                 y = (int)(pos.y / mesh._cellSize.y);

@@ -193,7 +193,7 @@ namespace WUInity.UI
 
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Close & save"))
                     {
-                        PopulationTools.SavePopulationMask(_engine);
+                        
                         _wuinityManager.StopPainter();
                     }
                     ++buttonIndex;
@@ -213,9 +213,9 @@ namespace WUInity.UI
             ++buttonIndex;
             if(HavePopulationMap && PopulationMapCorrectedForRoadAccess)
             {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create & load population"))
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population"))
                 {
-                    CreateAndLoadPopulation();
+                    OpenCreatePopulation();
                 }
                 ++buttonIndex;
             }
@@ -386,9 +386,27 @@ namespace WUInity.UI
             string initialPath = Path.GetDirectoryName(WUI_engine.WORKING_FOLDER);
             FileBrowser.ShowLoadDialog(CreatePopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select routerDb to use for road access correction", "Set");
         }*/
-        void CreateAndLoadPopulation() //string[] paths
+        private void OpenCreatePopulation() //string[] paths
         {
-            PopulationTools.CreateAndLoadPopulation(_engine); //paths[0]
+            FileBrowser.SetFilters(false, csvFilter);
+            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            FileBrowser.ShowLoadDialog(CreatePopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify population output file", "Create");
         }
+        private void CreatePopulation(string[] paths) //string[] paths
+        {
+            PopulationTools.CreatePopulation(_engine, paths[0]);
+        }
+
+        private void OpenSavePopulationMask() //string[] paths
+        {
+            FileBrowser.SetFilters(false, maskFilter);
+            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            FileBrowser.ShowLoadDialog(SavePopulationMask, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify population output file", "Create");
+        }
+        private void SavePopulationMask(string[] paths) //string[] paths
+        {
+            PopulationTools.SavePopulationMask(_engine, paths[0]);
+        }
+        
     }
 }

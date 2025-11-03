@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using PREACT.IO;
-using System.Numerics;
+using PREACT.Utility.Math;
 
 namespace PREACT.Pedestrian
 {

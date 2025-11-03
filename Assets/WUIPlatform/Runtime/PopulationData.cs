@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using PREACT.Population;
 using PREACT.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Scenario
 {
@@ -104,7 +105,7 @@ namespace PREACT.Scenario
                 Engine.MESSAGE(null, Engine.LogType.InputError, "Population file " + path + " could not be found.");
             }
 
-            Engine.DataStatus.SetPopulation(success);
+            //Engine.DataStatus.SetPopulation(success);
             return success;
         }        
     }

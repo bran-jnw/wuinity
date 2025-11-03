@@ -13,9 +13,9 @@ namespace PREACT.Scenario
     {
         //private GlobalSmokeData globalSmokeData;
 
-        public void LoadAll()
+        public void LoadAll(Input input, string rootFolder)
         {
-            if(!Engine.Input.Simulation.RunSmokeModule)
+            if(!input.Simulation.RunSmokeModule)
             {
                 return;
             }           

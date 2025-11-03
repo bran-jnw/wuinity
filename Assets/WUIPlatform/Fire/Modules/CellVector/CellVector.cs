@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using static PREACT.Fire.MathWrap;
 using PREACT.Fire.Behave;
+using PREACT.Utility.Math;
 
 namespace PREACT.Fire
 {

@@ -10,6 +10,8 @@ using PREACT.Fire;
 using PREACT.Smoke;
 using PREACT.IO;
 using PREACT.Visualization;
+using PREACT.Utility.Math;
+using PREACT;
 
 namespace WUInity.Visualization
 {

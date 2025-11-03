@@ -18,7 +18,7 @@ namespace PREACT.Tools
         {
             bool success = false;
 
-            success = engine.ScenarioData.Population.LocalGPWData.CreateLocalGPWData(globalGpwFolder);
+            success = engine.ScenarioData.Population.LocalGPWData.CreateLocalGPWData(engine.Input, globalGpwFolder);
 
             return success;
         }
@@ -38,7 +38,7 @@ namespace PREACT.Tools
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, "Population map cell size is not a valid number, please check your input.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Population map cell size is not a valid number, please check your input.");
             }
         }
 
@@ -46,7 +46,7 @@ namespace PREACT.Tools
         {
             if (engine.ScenarioData.Population.LocalGPWData.LoadFromFile(localGpwFile))
             {
-                engine.ScenarioData.Population.PopulationMap.CreateAndSave(engine.ScenarioData.Population.LocalGPWData, cellSize);
+                engine.ScenarioData.Population.PopulationMap.CreateFromLocalGPW(engine.Input, engine.ScenarioData.Population.LocalGPWData, cellSize);
             }
         }
 
@@ -69,7 +69,7 @@ namespace PREACT.Tools
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, " New population count not a number, please check your input.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " New population count not a number, please check your input.");
             }
 
             return success;
@@ -81,11 +81,11 @@ namespace PREACT.Tools
 
             if(engine.ScenarioData.Population.PopulationMap.HaveData)
             {
-                engine.ScenarioData.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation, true);
+                engine.ScenarioData.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation);
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, "No population map loaded, cannot scale.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "No population map loaded, cannot scale.");
             }
 
             return success;
@@ -101,12 +101,12 @@ namespace PREACT.Tools
             {
                 if(engine.ScenarioData.Routing.LoadRouterDb(routerDbFile))
                 {
-                    engine.ScenarioData.Population.PopulationMap.UpdatePopulationMapBasedOnRoadAccess(engine.ScenarioData.Routing.Router);
+                    engine.ScenarioData.Population.PopulationMap.UpdatePopulationMapBasedOnRoadAccess(engine.ScenarioData, engine.ScenarioData.Routing.Router);
                 }                
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, "No population map loaded, can't correct it for road access.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "No population map loaded, can't correct it for road access.");
             }
         }
 
@@ -118,9 +118,9 @@ namespace PREACT.Tools
             }            
         }
 
-        public static void SavePopulationMask(Engine engine)
+        public static void SavePopulationMask(Engine engine, string file)
         {
-            engine.ScenarioData.Population.PopulationMap.SavePopulationMask(engine.Input.Simulation.Id);
+            engine.ScenarioData.Population.PopulationMap.SavePopulationMask(file);
         }
 
         /*public static void LoadPopulationMask(string populationMaskFile)
@@ -128,15 +128,15 @@ namespace PREACT.Tools
             WUIengine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
         }*/ 
 
-        public static void CreateAndLoadPopulation(Engine engine)
+        public static void CreatePopulation(Engine engine, string file)
         {
             if (engine.ScenarioData.Population.PopulationMap.HaveData && engine.ScenarioData.Population.PopulationMap.CorrectedForRoadAccess)
             {
-                engine.ScenarioData.Population.PopulationMap.CreateAndLoadPopulation();
+                engine.ScenarioData.Population.PopulationMap.CreateAndLoadPopulation(engine.Input, engine.ScenarioData, file);
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, "Need population map that is corrected for road access, cannot create population.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Need population map that is corrected for road access, cannot create population.");
             }                     
         }
 
@@ -160,7 +160,7 @@ namespace PREACT.Tools
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, "Border is not a valid number, please check your input.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Border is not a valid number, please check your input.");
             }
 
             return false;
@@ -204,16 +204,16 @@ namespace PREACT.Tools
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, " Could not find the selected OSM file.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " Could not find the selected OSM file.");
             }
 
             if (success)
             {
-                engine.Message(null, Engine.LogType.Log, " Succesfully filtered OSM data to user selected boundary. Use this filtered data to build your router database.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Succesfully filtered OSM data to user selected boundary. Use this filtered data to build your router database.");
             }
             else
             {
-                engine.Message(null, Engine.LogType.Warning, " Could not filter the selected OSM file.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, " Could not filter the selected OSM file.");
             }
 
             return success;

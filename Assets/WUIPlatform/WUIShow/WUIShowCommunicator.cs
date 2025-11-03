@@ -6,11 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using LIBSUMO = Eclipse.Sumo.Libsumo;
+using PREACT.Utility.Math;
 
 namespace PREACT.Visualization
 {
     public class WUIShowCommunicator
     {
+        Engine _engine; 
         private int timesCarSent = 0;
         private float lastTime = 0f;
         private UdpClient udpClient;
@@ -25,9 +27,10 @@ namespace PREACT.Visualization
         private int maxNumberOfCars;
         bool _readingData;
 
-        public WUIShowCommunicator(string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
+        public WUIShowCommunicator(Engine engine, string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
-            Engine.SIM.SetPause(true);
+            _engine = engine;
+            _engine.Simulation.SetPause(true);
 
             udpClient = new UdpClient(serverIP, udpPort);
             Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
@@ -35,7 +38,7 @@ namespace PREACT.Visualization
             this.origoLongitude = origoLongitude;
             this.origoLatitude = origoLatitude;
 
-            this.offset = Engine.SIM.TrafficModule.GetOriginOffset();
+            this.offset = _engine.Simulation.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentPositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
@@ -45,7 +48,7 @@ namespace PREACT.Visualization
         private byte[] GetTriggerBufferData()
         {
             byte[] result = null;
-            float[,] data = Engine.SIM.GetTriggerBufferData();
+            float[,] data = _engine.Simulation.GetTriggerBufferData();
 
             if (data != null)
             {
@@ -77,7 +80,7 @@ namespace PREACT.Visualization
         private byte[] GetFinalFireTimeOfArrival()
         {
             byte[] result = null;
-            Fire.FireRasterData[,] data = ((Fire.AscFireImport)Engine.SIM.FireModule).GetCompleteFireData();
+            Fire.FireRasterData[,] data = ((Fire.AscFireImport)_engine.Simulation.FireModule).GetCompleteFireData();
 
             if (data != null)
             {
@@ -94,18 +97,18 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = Engine.ScenarioData.Fire.LCPData.GetLCPSizeX();
+                double xSize = _engine.ScenarioData.Fire.LCPData.GetLCPSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = Engine.ScenarioData.Fire.LCPData.GetLCPSizeY();
+                double ySize = _engine.ScenarioData.Fire.LCPData.GetLCPSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = Engine.ScenarioData.Simulation.UTMOrigin + Engine.ScenarioData.Fire.LCPData.OriginOffset;
-                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(Engine.Input.Simulation.LowerLeftLatLon.x, Engine.Input.Simulation.LowerLeftLatLon.y);
+                Vector2d lcpOriginUTM = _engine.ScenarioData.Simulation.UTMOrigin + _engine.ScenarioData.Fire.LCPData.OriginOffset;
+                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Input.Simulation.LowerLeftLatLon.x, _engine.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;
                 double lon = lcpOriginWgs84.Lng;
@@ -158,15 +161,15 @@ namespace PREACT.Visualization
 
         private byte[] GetDestinationsData()
         {            
-            List<Evacuation.EvacuationDestination> destinations = Engine.ScenarioData.Evacuation.Destinations;
+            List<Evacuation.EvacuationDestination> destinations = _engine.Simulation.Destinations;
             //name, type, total cars, total people, total travel time, average travel time
             List<byte> data = new List<byte>();
             for(int i = 0; i < destinations.Count; ++i)
             {
                 data.AddRange(Encoding.UTF8.GetBytes(destinations[i].Name.PadRight(_maxNameLengths)));
-                data.AddRange(Encoding.UTF8.GetBytes(destinations[i]._goalType.ToString().PadRight(_maxNameLengths)));
-                data.AddRange(BitConverter.GetBytes(destinations[i]._cars.Count));
-                data.AddRange(BitConverter.GetBytes(destinations[i]._currentPeople));
+                data.AddRange(Encoding.UTF8.GetBytes(destinations[i].GoalType.ToString().PadRight(_maxNameLengths)));
+                data.AddRange(BitConverter.GetBytes(destinations[i].Vehicles.Count));
+                data.AddRange(BitConverter.GetBytes(destinations[i].CurrentPeople));
                 data.AddRange(BitConverter.GetBytes(destinations[i].TotalTravelTime));
                 data.AddRange(BitConverter.GetBytes(destinations[i].AverageTravelTime));
             }
@@ -190,12 +193,12 @@ namespace PREACT.Visualization
             else if (request == "PAUSE")
             {
                 headerMessage = "PAUSED";
-                Engine.SIM.SetPause(true);
+                _engine.Simulation.SetPause(true);
             }
             else if (request == "START")
             {
                 headerMessage = "STARTED";
-                Engine.SIM.SetPause(false);
+                _engine.Simulation.SetPause(false);
             }
             else if (request == "TriggerBuffer")
             {
@@ -248,7 +251,7 @@ namespace PREACT.Visualization
             }
 
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
-            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = Engine.SIM.TrafficModule.GetActiveVehicles();
+            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = _engine.Simulation.TrafficModule.GetActiveVehicles();
 
             //we only have dummy data
             if(activeVehicles.Count == 0)
@@ -256,7 +259,7 @@ namespace PREACT.Visualization
                 return;
             }
 
-            if (currentTime > lastTime + Engine.Input.WUIShow.WuiShowDeltaTime)
+            if (currentTime > lastTime + _engine.Input.WUIShow.WuiShowDeltaTime)
             {
                 byte[] sendBytes = new byte[activeVehicles.Count * 16];
                 int i = 0;

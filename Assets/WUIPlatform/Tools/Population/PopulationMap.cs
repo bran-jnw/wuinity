@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 using PREACT.Scenario;
+using PREACT.Utility.Math;
 
 namespace PREACT.Population
 {
@@ -74,8 +75,8 @@ namespace PREACT.Population
         /// <returns></returns>
         public int GetPopulationSimulationSpace(double x, double y)
         {
-            int xInt = (int)((x / Engine.Input.Simulation.DomainSize.x) * _cells.x);
-            int yInt = (int)((y / Engine.Input.Simulation.DomainSize.y) * _cells.y);
+            int xInt = (int)((x / _size.x) * _cells.x);
+            int yInt = (int)((y / _size.y) * _cells.y);
             return GetPeopleCount(xInt, yInt);
         }
 
@@ -84,10 +85,10 @@ namespace PREACT.Population
             return _mask[x + y * _cells.x];
         }
 
-        public void CreateAndSave(LocalGPWData localGPWData, float cellSize)
+        public void CreateFromLocalGPW(IO.Input input, LocalGPWData localGPWData, float cellSize)
         {
-            _lowerLeftLatLong = Engine.Input.Simulation.LowerLeftLatLon;
-            _size = Engine.Input.Simulation.DomainSize;
+            _lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
+            _size = input.Simulation.DomainSize;
             _cellSize = cellSize;
             _cells = new Vector2int((int)(0.5f + _size.x / cellSize), (int)(0.5f + _size.y / cellSize));
             _size = new Vector2d(cellSize * _cells.x, cellSize * _cells.y); 
@@ -125,22 +126,21 @@ namespace PREACT.Population
             }
             
             //the bilinear interpolation might not have conserved the amount of people correctly, or we have masked off some people
-            //UPDATE: maybe issue to do this as the area of thje GPW piece might be much larger than the are aof interest
+            //UPDATE: maybe issue to do this as the area of the GPW piece might be much larger than the area of interest
             if (localGPWData.totalPopulation < _totalPopulation)
             {
-                ScaleTotalPopulation(localGPWData.totalPopulation, false);
+                ScaleTotalPopulation(localGPWData.totalPopulation);
             }     
             
             _haveData = true;
             _correctedForRoadAccess = false;
-            _fileName = Engine.Input.Simulation.Id;
-            SaveToFile(_fileName);
+            _fileName = input.Simulation.Id;
             _populationData.Visualizer.CreatePopulationMapTexture(this);
             _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
             Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
-        public void UpdatePopulationMapBasedOnRoadAccess(Itinero.Router router)
+        public void UpdatePopulationMapBasedOnRoadAccess(ScenarioData scenario, Itinero.Router router)
         {
             int stuckPeople = 0;
             for (int i = 0; i < _cellPopulations.Length; ++i)
@@ -150,7 +150,7 @@ namespace PREACT.Population
                     int yIndex = i / _cells.x;
                     int xIndex = i - yIndex * _cells.x;
                     Vector2d cellCenterPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize);
-                    Vector2d coord = Engine.ScenarioData.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
+                    Vector2d coord = scenario.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
                     Itinero.RouterPoint p = Traffic.RouteCreator.GetValidRouterPoint(router, coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), _cellSize);
                     if(p != null)
                     {
@@ -172,7 +172,7 @@ namespace PREACT.Population
             }
 
             _correctedForRoadAccess = true;
-            SaveToFile(_fileName);
+            //SaveToFile(_fileName);
         }
 
         public void ApplyMaskToPopulation()
@@ -188,7 +188,6 @@ namespace PREACT.Population
             }
 
             RelocateStuckPeople(stuckPeople);
-            SaveToFile(_fileName);
         }
 
         /// <summary>
@@ -217,7 +216,7 @@ namespace PREACT.Population
 
                 if (_totalPopulation != oldTotalPopulation)
                 {
-                    ScaleTotalPopulation(oldTotalPopulation, false);
+                    ScaleTotalPopulation(oldTotalPopulation);
                 }
             }
         }        
@@ -251,12 +250,11 @@ namespace PREACT.Population
 
             if(newTotalPopulation != _totalPopulation)
             {
-                ScaleTotalPopulation(newTotalPopulation, false);
+                ScaleTotalPopulation(newTotalPopulation);
             }
 
             _haveData = true;
-            _populationData.Visualizer.CreatePopulationMapTexture(this);
-            SaveToFile(Engine.Input.Simulation.Id);            
+            _populationData.Visualizer.CreatePopulationMapTexture(this);            
         }    
 
         /// <summary>
@@ -264,7 +262,7 @@ namespace PREACT.Population
         /// </summary>
         /// <param name="desiredPopulation"></param>
         /// <returns></returns>
-        public void ScaleTotalPopulation(int desiredPopulation, bool saveWhenDone)
+        public void ScaleTotalPopulation(int desiredPopulation)
         {
             int newTotalPop = 0;
             List<int> activeCellIndices = new List<int>();
@@ -289,7 +287,7 @@ namespace PREACT.Population
                 int loopCount = desiredPopulation - _totalPopulation;
                 for (int i = 0; i < loopCount; i++)
                 {
-                    int randomIndex = Random.Range(0, activeCellIndices.Count - 1);
+                    int randomIndex = Randomf.Range(0, activeCellIndices.Count - 1);
                     ++_cellPopulations[activeCellIndices[randomIndex]];
                     ++_totalPopulation;
                 }
@@ -300,7 +298,7 @@ namespace PREACT.Population
                 int loopCount = _totalPopulation - desiredPopulation;
                 for (int i = 0; i < loopCount; i++)
                 {
-                    int randomIndex = Random.Range(0, activeCellIndices.Count - 1);
+                    int randomIndex = Randomf.Range(0, activeCellIndices.Count - 1);
                     --_cellPopulations[activeCellIndices[randomIndex]];
                     --_totalPopulation;
                     if(_cellPopulations[activeCellIndices[randomIndex]] < 1)
@@ -312,14 +310,10 @@ namespace PREACT.Population
             }
 
             Engine.MESSAGE(null, Engine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
-            _populationData.Visualizer.CreatePopulationMapTexture(this);
-            if(saveWhenDone)
-            {
-                SaveToFile(_fileName);
-            }            
+            _populationData.Visualizer.CreatePopulationMapTexture(this);          
         }
 
-        private void SaveToFile(string fileName)
+        private void SaveToFile(string fileName, string rootFolder)
         {
             string[] data = new string[9];
 
@@ -337,12 +331,12 @@ namespace PREACT.Population
                 data[8] += _cellPopulations[i] + " ";
             }
 
-            string path = Path.Combine(Engine.WorkingFolder, fileName + ".pop");
+            string path = Path.Combine(rootFolder, fileName + ".pop");
             File.WriteAllLines(path, data);
             Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map to " + path);
         }
 
-        public void SavePopulationMask(string newFilename)
+        public void SavePopulationMask(string file)
         {
             string[] data = new string[9];
 
@@ -360,9 +354,8 @@ namespace PREACT.Population
                 data[8] += _mask[i] == true ? 1 + " " : 0 + " ";
             }
 
-            string path = Path.Combine(Engine.WorkingFolder, newFilename + ".pmk");
-            File.WriteAllLines(path, data);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map mask to " + path);
+            File.WriteAllLines(file, data);
+            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map mask to " + file);
         }
 
         public bool LoadPopulationMask(string populationMaskFile)
@@ -457,9 +450,8 @@ namespace PREACT.Population
             return success;
         }
 
-        public void CreateAndLoadPopulation()
+        public void CreateAndLoadPopulation(IO.Input input, ScenarioData scenario, string file)
         {
-            string file = Path.Combine(Engine.WorkingFolder, _fileName + "_households.csv");
             using (StreamWriter sW = new StreamWriter(file))
             {
                 sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");
@@ -472,7 +464,7 @@ namespace PREACT.Population
                         List<int> householdCounts = new List<int>();
                         while (peopleWithoutHouseHold > 0)
                         {
-                            int p = Random.Range(Engine.Input.Population.MinHouseholdSize, Engine.Input.Population.MaxHouseholdSize);
+                            int p = Randomf.Range(input.Population.MinHouseholdSize, input.Population.MaxHouseholdSize);
                             if (p > peopleWithoutHouseHold)
                             {
                                 p = peopleWithoutHouseHold;
@@ -487,9 +479,9 @@ namespace PREACT.Population
                         for (int j = 0; j < householdCounts.Count; ++j)
                         {
                             Vector2d householdStartPos = nodeCenter;
-                            householdStartPos.x += _cellSize * Random.Range(-0.5f, 0.5f);
-                            householdStartPos.y += _cellSize * Random.Range(-0.5f, 0.5f);
-                            Vector2d householdStartLatLon = Engine.ScenarioData.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
+                            householdStartPos.x += _cellSize * Randomf.Range(-0.5f, 0.5f);
+                            householdStartPos.y += _cellSize * Randomf.Range(-0.5f, 0.5f);
+                            Vector2d householdStartLatLon = scenario.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;
                             double goalLon = _cellRoadAccessLatLon[i].y;
@@ -501,7 +493,7 @@ namespace PREACT.Population
                 Engine.MESSAGE(null, Engine.LogType.Log, "Generated and saved population to file " + file);
             }
 
-            Engine.ScenarioData.Population.LoadPopulation(file);
+            scenario.Population.LoadPopulation(file);
         }
     }
 }

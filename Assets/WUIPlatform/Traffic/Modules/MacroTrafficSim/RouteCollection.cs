@@ -79,7 +79,7 @@ namespace PREACT
             {
                 for (int i = 0; i < routes.Length; i++)
                 {
-                    if (!routes[i].evacGoal._blocked)
+                    if (!routes[i].evacGoal.Blocked)
                     {
                         if (selectedRouteIndex == -1)
                         {
@@ -107,7 +107,7 @@ namespace PREACT
             {
                 for (int i = 0; i < routes.Length; i++)
                 {
-                    if (!routes[i].evacGoal._blocked)
+                    if (!routes[i].evacGoal.Blocked)
                     {
                         if (selectedRouteIndex == -1)
                         {
@@ -135,7 +135,7 @@ namespace PREACT
             {
                 for (int i = 0; i < routes.Length; i++)
                 {
-                    if (!routes[i].evacGoal._blocked)
+                    if (!routes[i].evacGoal.Blocked)
                     {
                         if (routes[i].evacGoal == goal)
                         {

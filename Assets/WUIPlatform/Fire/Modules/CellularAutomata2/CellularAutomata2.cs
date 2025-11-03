@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using PREACT.Fire.Behave;
 using System.Threading.Tasks;
+using PREACT.Utility.Math;
 
 namespace PREACT.Fire
 {

@@ -58,12 +58,11 @@ namespace PREACT.Population
             return new Vector2d(xSize, ySize);
         }
 
-        private void SaveLocalGPWData()
+        private void SaveLocalGPWData(Input input, string rootFolder)
         {            
             string[] data = new string[13];
 
             //save data stamp to make sure data fits input
-            Input input = Engine.Input;
             string dataStamp = input.Simulation.LowerLeftLatLon.x.ToString() + " " + input.Simulation.LowerLeftLatLon.y.ToString()
                     + " " + input.Simulation.DomainSize.y.ToString() + " " + input.Simulation.DomainSize.y.ToString();
             data[0] = dataStamp;
@@ -87,7 +86,7 @@ namespace PREACT.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Simulation.Id + ".gpw");
+            string path = Path.Combine(rootFolder, input.Simulation.Id + ".gpw");
             File.WriteAllLines(path, data);
         }
 
@@ -167,13 +166,14 @@ namespace PREACT.Population
             return success;
         }
 
-        public bool CreateLocalGPWData(string globalGpwFolder)
+        public bool CreateLocalGPWData(Input input, string globalGpwFolder)
         {
-            bool success = LoadRelevantGPWData(globalGpwFolder);
+            bool success = LoadRelevantGPWData(input, globalGpwFolder);
 
             if (success)
-            {
-                if(_populationData != null)
+            {                
+                CalculateTotalPopulation();
+                if (_populationData != null)
                 {
                     _populationData.Visualizer.CreateGPWTexture(this);
                 }                
@@ -267,10 +267,10 @@ namespace PREACT.Population
         /// <summary>
         /// Returns the density data at a gridpoint based on polar coordinates.
         /// </summary>
-        private bool LoadRelevantGPWData(string globalGpwFolder)
+        private bool LoadRelevantGPWData(Input input, string globalGpwFolder)
         {
-            Vector2d latLong = Engine.Input.Simulation.LowerLeftLatLon;
-            Vector2d size = Engine.Input.Simulation.DomainSize;
+            Vector2d latLong = input.Simulation.LowerLeftLatLon;
+            Vector2d size = input.Simulation.DomainSize;
 
             bool success = false;
             if (IsGPWAvailable(globalGpwFolder))
@@ -457,10 +457,7 @@ namespace PREACT.Population
                     }
                 }
             }
-            sr.Close();
-
-            CalculateTotalPopulation();
-            SaveLocalGPWData();
+            sr.Close();                       
 
             return true;
         }
