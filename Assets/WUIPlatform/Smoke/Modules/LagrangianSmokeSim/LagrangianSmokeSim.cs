@@ -9,7 +9,7 @@ using ILGPU;
 using ILGPU.Algorithms;
 using ILGPU.Runtime;
 using System;
-using System.Numerics;
+using PREACT.Utility.Math;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;

@@ -8,6 +8,7 @@
 using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
+using PREACT.Utility.Math;
 
 namespace PREACT.Traffic
 {

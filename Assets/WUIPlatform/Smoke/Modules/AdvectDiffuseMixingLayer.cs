@@ -11,6 +11,7 @@ using ILGPU.Runtime;
 using System;
 using System.Numerics;
 using System.Collections.Generic;
+using PREACT.Utility.Math;
 
 namespace PREACT.Smoke
 {

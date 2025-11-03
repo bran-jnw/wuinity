@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using PREACT.Utility.Math;
 
 namespace PREACT.Farsite
 {   
@@ -204,7 +205,7 @@ namespace PREACT.Farsite
             //blow from opposite direction since it makes more sense to go from mouse pos to center
             angle -= 180.0f;            
             //Debug.Log("Angle: " + angle);
-            angle = 2.0f * Mathf.PI * angle / 360.0f;
+            angle = 2.0f * UnityEngine.Mathf.PI * angle / 360.0f;
 
             //fetch wind data from raster
             //Vector2 windData = fR.GetWind(fireVertices[index].pos);

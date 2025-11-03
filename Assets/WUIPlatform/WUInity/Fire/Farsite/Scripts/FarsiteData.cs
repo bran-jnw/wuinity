@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System;
+using PREACT.Utility.Math;
 
 namespace PREACT.Farsite
 {
