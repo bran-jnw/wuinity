@@ -10,6 +10,7 @@ using PREACT.Evacuation;
 using System.Numerics;
 using PREACT.Visualization;
 using PREACT.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Pedestrian
 {
@@ -199,21 +200,21 @@ namespace PREACT.Pedestrian
 
         private void ReachedCar(MacroHousehold household)
         {
-            if(Engine.Input.Simulation.RunTrafficModule)
+            if(_simulation.Input.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
 
                 //TODO: more sophisticated choice of new goal
-                if (evacGoal._blocked)
+                if (evacGoal.Blocked)
                 {
-                    for (int i = 0; i < Engine.ScenarioData.Evacuation.Destinations.Count; i++)
+                    for (int i = 0; i < _simulation.Destinations.Count; i++)
                     {
-                        if (Engine.ScenarioData.Evacuation.Destinations[i] != evacGoal)
+                        if (_simulation.Destinations[i] != evacGoal)
                         {
-                            if(!Engine.ScenarioData.Evacuation.Destinations[i]._blocked)
+                            if(!_simulation.Destinations[i].Blocked)
                             {
-                                evacGoal = Engine.ScenarioData.Evacuation.Destinations[i];
+                                evacGoal = _simulation.Destinations[i];
                             }
                         }
                     }
@@ -240,12 +241,12 @@ namespace PREACT.Pedestrian
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        Engine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
+                        _simulation.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    Engine.SIM.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
+                    _simulation.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
                 }
             }
             
@@ -254,23 +255,22 @@ namespace PREACT.Pedestrian
 
         private EvacuationDestination GetEvacuationGoal(HumanEvacCell cell, int cellIndex)
         {
-            TrafficInput input = Engine.Input.Traffic;
             EvacuationDestination goal = null;
 
-            if (Engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
+            if (_simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                
-                if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
+                if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
                 {
                     EvacuationGroup group = Engine.ScenarioData.Evacuation.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedEvacGoal();
                 }
-                else if (input.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
+                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
                 {
-                    int randomChoice = Random.Range(0, Engine.ScenarioData.Evacuation.Destinations.Count - 1);
+                    int randomChoice = Randomf.Range(0, _simulation.Destinations.Count - 1);
                     goal = Engine.ScenarioData.Evacuation.Destinations[randomChoice];
                 }
             }
-            else if(cell != null && Engine.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            else if(cell != null && _simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
@@ -284,10 +284,10 @@ namespace PREACT.Pedestrian
             return goal;
         }
 
-        public void SaveToFile(int runNumber)
+        public void SaveToFile(string folder, int runNumber)
         {
-            Input wO = Engine.Input;
-            string path = System.IO.Path.Combine(Engine.OutputFolder, wO.Simulation.Id + "_pedestrian_output_" + runNumber + ".csv");
+            Input wO = _simulation.Input;
+            string path = System.IO.Path.Combine(folder, wO.Simulation.Id + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
@@ -295,7 +295,7 @@ namespace PREACT.Pedestrian
         {
             cellsX = Engine.ScenarioData.Evacuation.CellCount.x;
             cellsY = Engine.ScenarioData.Evacuation.CellCount.y;
-            realWorldSize = Engine.Input.Simulation.DomainSize;            
+            realWorldSize = _simulation.Input.Simulation.DomainSize;            
             population = new int[cellsX * cellsY];
             _householdData = householdData;
 
@@ -362,12 +362,12 @@ namespace PREACT.Pedestrian
         /// Pulls random response time along a response time curve
         /// </summary>
         /// <returns></returns>
-        static public float GetRandomResponseTime(int evacGroupIndex)
+        public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacuationInput evacIn = Engine.Input.Evacuation;
+            EvacuationInput evacIn = _simulation.Input.Evacuation;
 
             float responseTime = float.MaxValue;
-            float r = Random.Range(0f, 1f);
+            float r = Randomf.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
             for (int i = 0; i < Engine.ScenarioData.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
@@ -387,7 +387,7 @@ namespace PREACT.Pedestrian
                 if (r <= Engine.ScenarioData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(Engine.ScenarioData.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, Engine.ScenarioData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
+                    responseTime = Randomf.Range(Engine.ScenarioData.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, Engine.ScenarioData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }
@@ -399,10 +399,10 @@ namespace PREACT.Pedestrian
         /// Gets random walking speed based on user input range
         /// </summary>
         /// <returns></returns>
-        static public float GetRandomWalkingSpeed()
+        public float GetRandomWalkingSpeed()
         {
-            MacroHouseholdSimInput eO = Engine.Input.Pedestrian.macroHouseholdSimInput;
-            return Random.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
+            MacroHouseholdSimInput eO = _simulation.Input.Pedestrian.macroHouseholdSimInput;
+            return Randomf.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 
         /// <summary>
