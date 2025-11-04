@@ -21,6 +21,7 @@ namespace WUIPlatform.Runtime
 
         LatLngUTMConverter.UTMResult _utmData;
         public LatLngUTMConverter.UTMResult UTMData { get => _utmData; }
+        string _utmHemisphere;
 
         Vector2d _centerMercator;
         public Vector2d CenterMercator { get => _centerMercator; }
@@ -40,7 +41,9 @@ namespace WUIPlatform.Runtime
             if(WUIEngine.INPUT != null)
             {
                 _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
+                WUIEngine.LOG(WUIEngine.LogType.Log, "UTM zone: " + _utmData.ZoneNumber.ToString() + _utmData.ZoneLetter.ToString());
                 _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
+                _utmHemisphere = WUIEngine.INPUT.Simulation.LowerLeftLatLon.x > 0 ? "N" : "S"; 
                 _centerMercator = GeoConversions.LatLonToMeters(WUIEngine.INPUT.Simulation.LowerLeftLatLon.x, WUIEngine.INPUT.Simulation.LowerLeftLatLon.y);
 
                 //Calculate scaling factors to correct overlay between web mercator and UTM
@@ -70,8 +73,8 @@ namespace WUIPlatform.Runtime
         public Vector2d GetWGS84FromSimulationPosition(Vector2d pos)
         {
             pos += UTMOrigin;
-            LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmData.ZoneLetter);
-            return new Vector2d(wgs84.Lat, wgs84.Lat);
+            LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmHemisphere);
+            return new Vector2d(wgs84.Lat, wgs84.Lng);
         }
     }
 }
