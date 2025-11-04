@@ -10,12 +10,12 @@ using System.Collections.Generic;
 namespace PREACT.IO
 {
     [System.Serializable]
-    public class MapInput
+    public struct MapInput
     {
         public enum MapServiceProvider { Mapbox, Bing, OSM };
 
-        public MapServiceProvider MapProvider = MapServiceProvider.Mapbox;
-        public int ZoomLevel = 13;
+        public MapServiceProvider MapProvider;
+        public int ZoomLevel;
 
         public static MapInput Parse(string[] inputLines, int startIndex)
         {
@@ -40,7 +40,7 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        Engine.MESSAGE(null, Engine.LogType.SimError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
+                        Engine.MESSAGE(null, Engine.LogType.SimulationError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
                         break;
                 }
             }

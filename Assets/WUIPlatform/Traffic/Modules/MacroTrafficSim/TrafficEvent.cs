@@ -32,7 +32,7 @@ namespace PREACT.Traffic
         {
             if (mTS == null)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Error, no mCS set.");
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace PREACT.Traffic
         {
             if (mTS == null)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Error, no mCS set.");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace PREACT.Traffic
         {
             if (mTS == null)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Error, no mCS set.");
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace PREACT.Traffic
         {
             if (mTS == null)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Error, no mCS set.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Error, no mCS set.");
                 return;
             }
 

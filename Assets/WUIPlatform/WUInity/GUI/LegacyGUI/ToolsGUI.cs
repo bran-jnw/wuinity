@@ -348,7 +348,7 @@ namespace WUInity.UI
         /*void OpenLoadRouterDb()
         {
             FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(WUI_engine.WORKING_FOLDER);
+            string initialPath = Path.GetDirectoryName(WUI_engine.WorkingFolder);
             FileBrowser.ShowLoadDialog(LoadRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select local GPW data", "Set");
         }
         void LoadRouterDb(string[] paths)
@@ -383,7 +383,7 @@ namespace WUInity.UI
         /*void OpenCreatePopulation()
         {
             FileBrowser.SetFilters(false, populationMapFilter);
-            string initialPath = Path.GetDirectoryName(WUI_engine.WORKING_FOLDER);
+            string initialPath = Path.GetDirectoryName(WUI_engine.WorkingFolder);
             FileBrowser.ShowLoadDialog(CreatePopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select routerDb to use for road access correction", "Set");
         }*/
         private void OpenCreatePopulation() //string[] paths

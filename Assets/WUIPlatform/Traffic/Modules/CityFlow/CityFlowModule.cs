@@ -89,7 +89,7 @@ namespace PREACT.Traffic
             throw new NotImplementedException();
         }
 
-        public override void SaveToFile(int runNumber)
+        public override void SaveToFile(int simulationIdentifier)
         {
             throw new NotImplementedException();
         }

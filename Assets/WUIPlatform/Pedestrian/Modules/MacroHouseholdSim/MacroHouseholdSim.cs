@@ -28,7 +28,7 @@ namespace PREACT.Pedestrian
         Vector2d realWorldSize;
         public Vector2d cellWorldSize;
 
-        Scenario.PopulationData.HouseholdData[] _householdData;
+        Runtime.PopulationData.HouseholdData[] _householdData;
         List<MacroHousehold> _macroHouseholds;
         int totalPopulation;
         int totalCars;
@@ -278,7 +278,7 @@ namespace PREACT.Pedestrian
 
             if(goal == null)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
             }
 
             return goal;
@@ -287,11 +287,11 @@ namespace PREACT.Pedestrian
         public void SaveToFile(string folder, int runNumber)
         {
             Input wO = _simulation.Input;
-            string path = System.IO.Path.Combine(folder, wO.Simulation.Id + "_pedestrian_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(folder, wO.Simulation.Name + "_pedestrian_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 
-        public void PopulateSimulation(Scenario.PopulationData.HouseholdData[] householdData)
+        public void PopulateSimulation(Runtime.PopulationData.HouseholdData[] householdData)
         {
             cellsX = _simulation.Scenario.Evacuation.CellCount.x;
             cellsY = _simulation.Scenario.Evacuation.CellCount.y;

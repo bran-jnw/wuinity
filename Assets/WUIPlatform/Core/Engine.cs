@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.Scenario;
+using PREACT.Runtime;
 using PREACT.IO;
 using System.IO;
 using System.Collections.Generic;
@@ -22,80 +22,55 @@ namespace PREACT
         private Simulation[] _simulations;
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private Input _input;
-        private ScenarioData _scenarioData;
+        private LoadedData _scenarioData;
         private DataStatus _dataStatus;
         private Output _output;        
         private string _workingFile;
+        private string _workingFolder;
         private Visualization.WUIShowCommunicator _wuiShow;
 
         public Simulation Simulation { get => _mainSimulation; }
         public Input Input { get => _input; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
+        public string WorkingFolder { get => _workingFolder; }
         public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
-        public ScenarioData ScenarioData { get => _scenarioData; }
-        public Output Output { get => _output; }
-        public string DataFolder { get => Directory.GetCurrentDirectory(); }
-        public string WorkingFolder
-        {
-            get
-            {
-                if (WorkingFile != null)
-                {
-                    return Path.GetDirectoryName(WorkingFile);
-                }
-                else
-                {
-                    return Environment.CurrentDirectory;
-                }
-            }
-        }
+        public LoadedData ScenarioData { get => _scenarioData; }
+        public Output Output { get => _output; }     
                 
         public string OutputFolder
         {
             get
             {
-                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WorkingFile).ToString(), Input.Simulation.Id + "_output"));
+                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WorkingFile).ToString(), Input.Simulation.Name + "_output"));
                 return path.ToString();
             }
         }
 
-        public Engine(ExternalManager externalManager)
+        public Engine(ExternalManager externalManager, bool mainEngine = true)
         {
             //needed for proper reading of input files on all systems
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             _output = new Output();
             _externalManager = externalManager;
-            _ENGINE = this;
+            if(mainEngine)
+            {
+                _ENGINE = this;
+            }            
         }      
        
-        private struct ValidCriticalData
-        {
-            public Vector2d lowerLeftLatLong;
-            public Vector2d size;
-            public float routeCellSize;
-
-            public ValidCriticalData(Input input)
-            {
-                lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
-                size = input.Simulation.DomainSize;
-                routeCellSize = input.Evacuation.PaintCellSize;
-            }
-        }
-        ValidCriticalData _validInput;
-
-        public async void RunSimulations(bool runInParallel = false)
+        public async void RunSimulations(EngineTask engineTask, bool runInParallel = false)
         {
             try
-            {
+            {    
                 System.Threading.Tasks.Task task;
                 if(runInParallel)
                 {
-                    task = System.Threading.Tasks.Task.Run(RunSimulationsParallel);
+                    task = System.Threading.Tasks.Task.Run(() => RunSimulationsParallel(engineTask));
                 }
                 else
                 {
-                    task = System.Threading.Tasks.Task.Run(RunSimulationsSerial);
+                    task = System.Threading.Tasks.Task.Run(() => RunSimulationsSerial(engineTask));
                 }
                 await task;
             }
@@ -106,16 +81,16 @@ namespace PREACT
         }
 
         bool _stopSimulations = false;
-        private void RunSimulationsSerial()
+        private void RunSimulationsSerial(EngineTask engineTask)
         {
-            PreSimulations();
+            PreSimulations(engineTask);
             
             for (int i = 0; i < _simulations.Length; ++i)
             {
                 _simulations[i] = new Simulation(this, _input, i);
                 _mainSimulation = _simulations[i];
                 _simulations[i].Run();
-                CollectSimulationStatistics(_simulations[i]);
+                CollectSimulationStatistics(_simulations[i], engineTask);
                 if (_stopSimulations)
                 {
                     break;
@@ -151,16 +126,16 @@ namespace PREACT
         }
 
         const int _parallellRunCount = 4;        
-        private void RunSimulationsParallel()
+        private void RunSimulationsParallel(EngineTask engineTask)
         {
-            PreSimulations();
+            PreSimulations(engineTask);
 
             //Currently this will not work as SUMO can only run one instance per process, need to find workaround
-            int batches = ScenarioData.Simulation.NumberOfRuns / _parallellRunCount + ScenarioData.Simulation.NumberOfRuns % _parallellRunCount > 0 ? 1 : 0;
+            int batches = engineTask.NumberOfRuns / _parallellRunCount + engineTask.NumberOfRuns % _parallellRunCount > 0 ? 1 : 0;
             for (int i = 0; i < batches; ++i)
             {
                 int startIndex = batches * _parallellRunCount;
-                int endIndex = Math.Min(startIndex + _parallellRunCount, ScenarioData.Simulation.NumberOfRuns);
+                int endIndex = Math.Min(startIndex + _parallellRunCount, engineTask.NumberOfRuns);
                 System.Threading.Tasks.Parallel.For(startIndex, endIndex, index =>
                 {
                     try
@@ -175,7 +150,7 @@ namespace PREACT
 
                 for(int j = startIndex; j < endIndex; ++j)
                 {
-                    CollectSimulationStatistics(_simulations[j]);
+                    CollectSimulationStatistics(_simulations[j], engineTask);
                 }
                 if(_stopSimulations)
                 {
@@ -186,13 +161,22 @@ namespace PREACT
             PostSimulations();
         }
 
-        private void PreSimulations(bool parallel = false)
+        private void PreSimulations(EngineTask engineTask, bool parallel = false)
         {
             _stopSimulations = false;
 
+            if (trafficArrivalDataCollection != null)
+            {
+                trafficArrivalDataCollection.Clear();
+            }
+            else
+            {
+                trafficArrivalDataCollection = new List<List<float>>();
+            }
+
             if (parallel)
             {
-                _simulations = new Simulation[ScenarioData.Simulation.NumberOfRuns];
+                _simulations = new Simulation[engineTask.NumberOfRuns];
                 for (int i = 0; i < _simulations.Length; ++i)
                 {
                     _simulations[i] = new Simulation(this, _input, i);
@@ -249,17 +233,17 @@ namespace PREACT
                 MESSAGE(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
 
-            Output.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Id + ".log"));
+            Output.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
         }
 
         float cumulativeTotalEvacTime = 0.0f;
         int convergedInSequence = 0;
-        List<List<float>> trafficArrivalDataCollection = new List<List<float>>();
+        List<List<float>> trafficArrivalDataCollection;
         /// <summary>
         /// Each simulation calls this function when it is done to see if evacuation time has vonverged and simulations should be stopped.
         /// </summary>
         /// <param name="simulation"></param>
-        private void CollectSimulationStatistics(Simulation simulation)
+        private void CollectSimulationStatistics(Simulation simulation, EngineTask engineTask)
         {
             lock(trafficArrivalDataCollection)
             {
@@ -281,11 +265,11 @@ namespace PREACT
                     float currentAverage = cumulativeTotalEvacTime / resultCount;
                     float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
                     //if convergence met we can stop
-                    if (convergenceCriteria < ScenarioData.Simulation.ConvergenceMaxDifference)
+                    if (convergenceCriteria < engineTask.ConvergenceMaxDifference)
                     {
                         ++convergedInSequence;
                         //we are done
-                        if (_input.Simulation.StopAfterConverging && convergedInSequence > ScenarioData.Simulation.ConvergenceMinSequence)
+                        if (engineTask.StopAfterConverging && convergedInSequence > engineTask.ConvergenceMinSequence)
                         {
                             _stopSimulations = true; //needed for serial run
                             Close(false); //needed for parallel run
@@ -301,135 +285,53 @@ namespace PREACT
                     cumulativeTotalEvacTime += simulation.CurrentTime;
                 }
             }            
-        }
-
-        private void SaveAverageCurve(float[] data)
-        {
-            string[] output = new string[data.Length + 2];
-            output[0] = "Time [s],ArrivalIndex [-]";
-            output[1] = "0.0, 0";
-            for (int i = 0; i < data.Length; i++)
-            {
-                output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
-            }
-            Input wuiIn = Input;
-            string path = Path.Combine(OutputFolder, wuiIn.Simulation.Id + "_traffic_average.csv");
-            System.IO.File.WriteAllLines(path, output);
-        }
-
-        byte[] _plotBytes;
-        void CreatePlotData(double[] xData, double[] yData)
-        {
-            if (xData.Length > 0 && yData.Length > 0)
-            {
-                ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
-                timeTraffic.AddScatterLines(xData, yData);
-                timeTraffic.Title("Average cumulative arrival of cars");
-                timeTraffic.YLabel("Number of cars [-]");
-                timeTraffic.XLabel("Time [h]");
-                //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
-                byte[] byteData = timeTraffic.GetImageBytes();
-            }
-        }
-
-        /// <summary>
-        /// Returns bytes for bitmap to draw a plot of average curve for evacuation.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] GetArrivalPlotBytes()
-        {
-            return _plotBytes;
-        }
+        }       
 
         public void SetInput(Input input)
         {
+            _dataStatus.HaveInput = true;
+            _workingFile = null;
+            _workingFolder = null;
             _input = input;
+            CreateDataFromInput();
         }
 
-        public void LoadInputFromFile(string path)
+        public void LoadInputFromFile(string file)
         {
-            Input input = Input.LoadFromDisk(path);
+            Input input = Input.LoadFromDisk(file);
 
             if(input != null)
             {
-                _workingFile = path;
+                _workingFile = file;
+                _workingFolder = Path.GetDirectoryName(file);
                 _dataStatus.Reset();
                 _dataStatus.HaveInput = true;
-                if (input == null)
-                {
-                    _input = new Input();
-                }
-                else
-                {
-                    _input = input;
-                }
-
-                _validInput = new ValidCriticalData(_input);
-
-                _scenarioData = new ScenarioData(_input);
-                //transform input to actual data
-                MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
-                _scenarioData.Evacuation.LoadAll(input, WorkingFolder);
-                _scenarioData.Population.LoadAll(input, WorkingFolder);
-                //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now
-                //need to load evacuation goals before routing as they rely on evacuation goals
-                _scenarioData.Traffic.LoadAll(input, WorkingFolder);
-                _scenarioData.Fire.LoadAll(input, WorkingFolder);
-                _scenarioData.Smoke.LoadAll(input, WorkingFolder); //does nothing right now
-
-                UpdateMapResourceStatus();
-
-                if(_externalManager != null)
-                {
-                    _externalManager.InputHasChanged();
-                }
+                _input = input;  
+                CreateDataFromInput();
             }
         }
 
-        public void UpdateMapResourceStatus()
+        private void CreateDataFromInput()
         {
-            if(_externalManager != null)
+            _scenarioData = new LoadedData(_input);
+            //transform input to actual data
+            MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
+            //need to load evacuation goals before routing as they rely on evacuation goals
+            _scenarioData.Population.LoadAll(_input, _workingFolder);
+            _scenarioData.Evacuation.LoadAll(_input, _workingFolder);
+            //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now                
+            _scenarioData.Traffic.LoadAll(_input, _workingFolder);
+            _scenarioData.Fire.LoadAll(_input, _workingFolder);
+            _scenarioData.Smoke.LoadAll(_input, _workingFolder); //does nothing right now
+
+            if (_externalManager != null)
             {
                 _externalManager.UpdateMap();
-            }
-            bool coordinatesAreDirty = true;
-            bool sizeIsDirty = true;
-
-            if (_validInput.lowerLeftLatLong.x == Input.Simulation.LowerLeftLatLon.x
-                && _validInput.lowerLeftLatLong.y == Input.Simulation.LowerLeftLatLon.y)
-            {
-                coordinatesAreDirty = false;
-            }
-
-            if (_validInput.size.x == Input.Simulation.DomainSize.x
-                && _validInput.size.y == Input.Simulation.DomainSize.y)
-            {
-                sizeIsDirty = false;
-            }
-
-            //fix any problems
-            if (coordinatesAreDirty || sizeIsDirty)
-            {
-                //basically mark all data as not valid anymore
-                DataStatus.Reset();
-            }
-
-            //set cached data to be current data
-            _validInput.size = Input.Simulation.DomainSize;
-            _validInput.lowerLeftLatLong = Input.Simulation.LowerLeftLatLon;
-        }
-
-        public void UpdateEvacResourceStatus()
-        {
-            bool cellSizeIsDirty = true;
-
-            if (_validInput.routeCellSize == _input.Evacuation.PaintCellSize)
-            {
-                cellSizeIsDirty = false;
+                _externalManager.InputHasChanged();
             }
         }
                 
-        public enum LogType { Log, Warning, SimError, InputError, Event, Debug };
+        public enum LogType { Log, Warning, SimulationError, InputError, Event, Debug };
         private List<string> _consoleLog = new List<string>();
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
@@ -437,6 +339,7 @@ namespace PREACT
         /// <param name="message"></param>
         public static void MESSAGE(Simulation simulation, LogType logType, string message)
         {
+            //TODO: ReaderWriteLock
             if (_ENGINE == null)
             {
                 return;
@@ -451,7 +354,7 @@ namespace PREACT
             {
                 message = "WARNING: " + message;
             }
-            else if (logType == LogType.SimError || logType == LogType.InputError)
+            else if (logType == LogType.SimulationError || logType == LogType.InputError)
             {
                 message = "ERROR: " + message;
             }
@@ -475,7 +378,7 @@ namespace PREACT
                 _ENGINE._externalManager.NewLogMessage(message);
             }
 
-            if (logType == LogType.SimError)
+            if (logType == LogType.SimulationError)
             {
                 _ENGINE.Close(true);
             }           
@@ -522,6 +425,45 @@ namespace PREACT
                     }
                 }
             }
+        }
+
+        //TODO: these below here are misplaced, but need to figure out where they fit better
+        private void SaveAverageCurve(float[] data)
+        {
+            string[] output = new string[data.Length + 2];
+            output[0] = "Time [s],ArrivalIndex [-]";
+            output[1] = "0.0, 0";
+            for (int i = 0; i < data.Length; i++)
+            {
+                output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
+            }
+            Input wuiIn = Input;
+            string path = Path.Combine(OutputFolder, wuiIn.Simulation.Name + "_traffic_average.csv");
+            System.IO.File.WriteAllLines(path, output);
+        }
+
+        byte[] _plotBytes;
+        void CreatePlotData(double[] xData, double[] yData)
+        {
+            if (xData.Length > 0 && yData.Length > 0)
+            {
+                ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
+                timeTraffic.AddScatterLines(xData, yData);
+                timeTraffic.Title("Average cumulative arrival of cars");
+                timeTraffic.YLabel("Number of cars [-]");
+                timeTraffic.XLabel("Time [h]");
+                //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
+                byte[] byteData = timeTraffic.GetImageBytes();
+            }
+        }
+
+        /// <summary>
+        /// Returns bytes for bitmap to draw a plot of average curve for evacuation.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetArrivalPlotBytes()
+        {
+            return _plotBytes;
         }
     }
 }

@@ -40,37 +40,37 @@ namespace PREACT
             }            
         }
 
-        public void CheckAndUpdateRoute()
+        public void CheckAndUpdateRoute(Simulation simulation)
         {
             if(selectedRouteIndex == -1)
             {
-                Engine.SIM.Stop("No route selected (likely due to all routes being blocked), people will get stuck.", true);
+                simulation.Stop("No route selected (likely due to all routes being blocked), people will get stuck.", true);
                 return;
             }
 
             //nothing to update
-            if(!GetSelectedRoute().evacGoal._blocked)
+            if(!GetSelectedRoute().evacGoal.Blocked)
             {
                 return;
             }
 
             if(routePriority == RoutePriority.Closest)
             {
-                SelectClosestNonBlocked();
+                SelectClosestNonBlocked(simulation);
             }
             else if(routePriority == RoutePriority.Fastest)
             {
-                SelectFastestNonBlocked();
+                SelectFastestNonBlocked(simulation);
             }
             else if (routePriority == RoutePriority.Forced)
             {
                 //SelectForcedNonBlocked(selectedRoute.evacGoal);
                 //shortcut, we will be thrown here anyway as if we are changing our forced goal has been blocked
-                SelectFastestNonBlocked();
+                SelectFastestNonBlocked(simulation);
             }
         }
                 
-        public void SelectClosestNonBlocked()
+        public void SelectClosestNonBlocked(Simulation simulation)
         {
             routePriority = RoutePriority.Closest;
             int oldSelectedRouteIndex = selectedRouteIndex;
@@ -95,11 +95,11 @@ namespace PREACT
 
             if (selectedRouteIndex == -1)
             {
-                Engine.SIM.Stop("STOP: Route selection failed, no routes left that are not blocked", true);
+                simulation.Stop("Route selection failed, no routes left that are not blocked", true);
             }
         }
 
-        public void SelectFastestNonBlocked()
+        public void SelectFastestNonBlocked(Simulation simulation)
         {
             routePriority = RoutePriority.Fastest;
             selectedRouteIndex = -1;
@@ -123,11 +123,11 @@ namespace PREACT
 
             if(selectedRouteIndex == -1)
             {
-                Engine.SIM.Stop("No routes left to take", true);
+                simulation.Stop("No routes left to take", true);
             }
         }
 
-        public void SelectForcedNonBlocked(EvacuationDestination goal)
+        public void SelectForcedNonBlocked(EvacuationDestination goal, Simulation simulation)
         {
             routePriority = RoutePriority.Forced;
             selectedRouteIndex = -1;
@@ -149,7 +149,7 @@ namespace PREACT
             //if the desired evac goal is not present, select fastest
             if (selectedRouteIndex == -1)
             {
-                SelectFastestNonBlocked();
+                SelectFastestNonBlocked(simulation);
             }
         }
     }

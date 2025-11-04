@@ -100,21 +100,22 @@ namespace PREACT.IO
             //now see if we have what we need
             int lineindex;
             string input;
+            uint criticalIssues;
 
             //simulation
             input = nameof(Simulation);
             if (headerLineIndex.TryGetValue(input, out lineindex))
             {
                 ReadingInputMessage(input);                
-                newInput.Simulation = SimulationInput.Parse(inputLines, lineindex);
+                newInput.Simulation = SimulationInput.Parse(inputLines, lineindex, out criticalIssues);
             }
             else
             {
                 //critical
-                Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found." + pleaseCheckInput);
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found." + pleaseCheckInput);
                 return null;
             }
-            if(newInput.Simulation == null)
+            if(criticalIssues > 0)
             {
                 return null;
             }
@@ -145,7 +146,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                     return null;
                 }      
             }
@@ -162,7 +163,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
                     return null;
                 }
             }                
@@ -179,7 +180,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -196,7 +197,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested traffic module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found but user has requested traffic module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -213,7 +214,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical                
-                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested fire module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found but user has requested fire module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -230,7 +231,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    Engine.MESSAGE(null, Engine.LogType.SimError, input + " header not found but user has requested smoke module." + pleaseCheckInput);
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " header not found but user has requested smoke module." + pleaseCheckInput);
                     return null;
                 }
             }
@@ -330,7 +331,7 @@ namespace PREACT.IO
 
         public static void InputNotFoundMessage(string nameOfInput)
         {
-            Engine.MESSAGE(null, Engine.LogType.SimError, nameOfInput + " was not found." + pleaseCheckInput);
+            Engine.MESSAGE(null, Engine.LogType.SimulationError, nameOfInput + " was not found." + pleaseCheckInput);
         }
         public static void CouldNotInterpretInputMessage(string nameOfInput, string userInput)
         {

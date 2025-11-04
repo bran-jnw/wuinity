@@ -12,7 +12,7 @@ using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
 
-namespace PREACT.Scenario
+namespace PREACT.Runtime
 {
     public class RoutingData
     {
@@ -103,8 +103,8 @@ namespace PREACT.Scenario
                     Engine.MESSAGE(null, Engine.LogType.Log, "Router database created from OSM file.");
 
                     // write the new routerdb to disk.
-                    string internalRouterName = Engine.Input.Simulation.Id + ".routerdb";
-                    osmFile = Path.Combine(Engine.WorkingFolder, internalRouterName);
+                    string internalRouterName = Engine.Input.Simulation.Name + ".routerdb";
+                    osmFile = Path.Combine(Engine.WORKING_FOLDER, internalRouterName);
                     using (FileStream outputStream = new FileInfo(osmFile).Open(FileMode.Create))
                     {
                         _routerDb.Serialize(outputStream);

@@ -10,7 +10,7 @@ using PREACT.Fire;
 using PREACT.Visualization;
 using PREACT.IO;
 
-namespace PREACT.Scenario
+namespace PREACT.Runtime
 {
     public class FireData
     {

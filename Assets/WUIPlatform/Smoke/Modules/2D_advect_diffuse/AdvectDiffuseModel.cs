@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+//using PREACT.Utility.Math;
 
 namespace PREACT.Smoke
 {
@@ -72,7 +73,7 @@ namespace PREACT.Smoke
             invertedCellVolume = 1f / cellVolume;   
 
             //set compute shader and create buffers
-            this._advectDiffuseCompute = advectDiffuseCompute;
+            _advectDiffuseCompute = advectDiffuseCompute;
             _sootConcentration = new ComputeBuffer[2];
             _sootConcentration[0] = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
             _sootConcentration[1] = new ComputeBuffer(cellCountX * cellCountY, sizeof(float));
@@ -301,12 +302,12 @@ namespace PREACT.Smoke
             throw new System.NotImplementedException();
         }
 
-        public override float GetGroundExtinctionCoefficientAtWorldPos(Vector2d pos)
+        public override float GetGroundExtinctionCoefficientAtWorldPos(Utility.Math.Vector2d pos)
         {
             throw new System.NotImplementedException();
         }
 
-        public override float GetGroundExtinctionCoefficientAtCoordinate(Vector2d latLon)
+        public override float GetGroundExtinctionCoefficientAtCoordinate(Utility.Math.Vector2d latLon)
         {
             throw new System.NotImplementedException();
         }

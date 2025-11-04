@@ -185,7 +185,7 @@ namespace WUInity
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Desired paint mode not yet implemented.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Desired paint mode not yet implemented.");
             }
         }
 

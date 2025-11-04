@@ -7,31 +7,23 @@
 
 using PREACT.Utility;
 using PREACT.Utility.Math;
+using PREACT.IO;
 
-namespace PREACT.Scenario
+namespace PREACT.Runtime
 {
-    public class SimulationData
-    {
-        public bool MultipleSimulations;
-        public int NumberOfRuns = 1;
-        public int ConvergenceMinSequence = 10;
-        public float ConvergenceMaxDifference = 0.02f;
-
+    public class GeoData
+    {       
         Vector2d _utmOrigin;
-        public Vector2d UTMOrigin { get => _utmOrigin; }
-
         LatLngUTMConverter.UTMResult _utmData;
+
+        public Vector2d UTMOrigin { get => _utmOrigin; }        
         public LatLngUTMConverter.UTMResult UTMData { get => _utmData; }
 
-        Vector2d _centerMercator;
-        public Vector2d CenterMercator { get => _centerMercator; }
 
-
-        public SimulationData(IO.Input input) 
+        public GeoData(SimulationInput scenarioInput) 
         {
-            _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y);
+            _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(scenarioInput.LowerLeftLatLon.x, scenarioInput.LowerLeftLatLon.y);
             _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
-            _centerMercator = GeoConversions.LatLonToMeters(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y);
 
             //Calculate scaling factors to correct overlay between web mercator and UTM
             /*Vector2d mercatorBounds = _centerMercator + input.Simulation.DomainSize;

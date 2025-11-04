@@ -10,36 +10,34 @@ using PREACT.Utility.Math;
 
 namespace PREACT.IO
 {
-    [System.Serializable]
-    public class SimulationInput
+    public struct SimulationInput
     {
-        public string Id = "new";
-        public Vector2d LowerLeftLatLon = new Vector2d(55.697354, 13.173808);
-        public Vector2d DomainSize = new Vector2d(3000.0, 3000.0);
-        public float DeltaTime = 1f;
-        public float MaxSimTime = 0f;              
-        public bool RunPedestrianModule = false;
-        public bool RunTrafficModule = false;
-        public bool RunFireModule = false;
-        public bool RunSmokeModule = false;
-        public bool StopWhenEvacuated = true;
-        public bool StopAfterConverging = false;
+        public string Name;
+        public Vector2d LowerLeftLatLon;
+        public Vector2d DomainSize;
+        public float DeltaTime;
+        public float MaxSimTime;              
+        public bool RunPedestrianModule;
+        public bool RunTrafficModule;
+        public bool RunFireModule;
+        public bool RunSmokeModule;
+        public bool StopWhenEvacuated;        
 
-        public static SimulationInput Parse(string[] inputLines, int startIndex)
+        public static SimulationInput Parse(string[] inputLines, int startIndex, out uint criticalIssues)
         {
-            int issues = 0;
+            criticalIssues = 0;
             SimulationInput newInput = new SimulationInput();
             Dictionary<string, string> inputToParse = Input.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
-            input = nameof(Id);
+            input = nameof(Name);
             if(inputToParse.TryGetValue(input, out userInput))
             {
-                newInput.Id = userInput;
+                newInput.Name = userInput;
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -52,7 +50,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -65,7 +63,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -76,7 +74,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -87,7 +85,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -98,7 +96,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -109,7 +107,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -120,7 +118,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -131,7 +129,7 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
@@ -142,11 +140,11 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
+                ++criticalIssues;
                 Input.InputNotFoundMessage(input);
             }
 
-            input = nameof(StopAfterConverging);
+            /*input = nameof(StopAfterConverging);
             if(inputToParse.TryGetValue(input, out userInput))
             {
                 bool.TryParse(userInput, out newInput.StopAfterConverging);
@@ -155,12 +153,7 @@ namespace PREACT.IO
             {
                 ++issues;
                 Input.InputNotFoundMessage(input);
-            }
-
-            if (issues > 0)
-            {
-                newInput = null;
-            }
+            }*/
 
             return newInput;
         }

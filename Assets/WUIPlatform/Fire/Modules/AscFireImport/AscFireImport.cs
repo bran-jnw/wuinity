@@ -38,14 +38,14 @@ namespace PREACT.Fire
 
         public AscFireImport(Simulation simulation) : base(simulation)
         {
-            string TOAFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.TimeOfArrivalFile);
-            string ROSFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.RateOfSpreadFile);
-            string FIFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.FirelineIntensityFile);
-            string SDFile = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.AscImportInput.RootFolder, Engine.Input.Fire.AscImportInput.SpreadDirectionFile);
+            string TOAFile = Path.Combine(_simulation.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.TimeOfArrivalFile);
+            string ROSFile = Path.Combine(_simulation.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.RateOfSpreadFile);
+            string FIFile = Path.Combine(_simulation.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.FirelineIntensityFile);
+            string SDFile = Path.Combine(_simulation.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.SpreadDirectionFile);
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d farsiteUTM = new Vector2d(_xllcorner, _yllcorner);
-            _originOffset = farsiteUTM - Engine.ScenarioData.Simulation.UTMOrigin;
+            _originOffset = farsiteUTM - _simulation.Scenario.Simulation.UTMOrigin;
 
             _firelineIntensityData = new float[ncols * nrows];
             _newlyIgnitedCells = new List<Vector2int>();
@@ -65,7 +65,7 @@ namespace PREACT.Fire
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        if (!_data[x, y].isActive && Engine.SIM.CurrentTime > _data[x, y].TimeOfAArrival)
+                        if (!_data[x, y].isActive && _simulation.CurrentTime > _data[x, y].TimeOfAArrival)
                         {
                             _data[x, y].isActive = true;
                             _newlyIgnitedCells.Add(new Vector2int(x, y));
@@ -92,13 +92,13 @@ namespace PREACT.Fire
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
             offset = this._originOffset;
-            xScale = (float)(_cellsize * ncols / Engine.Input.Simulation.DomainSize.x);
-            yScale = (float)(_cellsize * nrows / Engine.Input.Simulation.DomainSize.y);
+            xScale = (float)(_cellsize * ncols / _simulation.Input.Simulation.DomainSize.x);
+            yScale = (float)(_cellsize * nrows / _simulation.Input.Simulation.DomainSize.y);
         }
 
         public override bool IsSimulationDone()
         {
-            return Engine.SIM.CurrentTime > _maxTimeOfArrival ? true : false;
+            return _simulation.CurrentTime > _maxTimeOfArrival ? true : false;
         }
 
         float[,] maxROS;
@@ -180,7 +180,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Time of arrival file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Time of arrival file not found.");
                 return;
             }
 
@@ -190,7 +190,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Rate of spread file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Rate of spread file not found.");
                 return;
             }
 
@@ -200,7 +200,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Fireline intensity file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
                 return;
             }
 
@@ -210,7 +210,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Fireline intensity file not found.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
                 return;
             }
 
@@ -269,7 +269,7 @@ namespace PREACT.Fire
         /// <returns></returns>
         public override FireCellState GetFireCellState(Vector2d latLon)
         {
-            Vector2d pos = Engine.ScenarioData.Simulation.GetSimulationPosition(latLon);
+            Vector2d pos = _simulation.Scenario.Simulation.GetSimulationPosition(latLon);
             pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);
@@ -277,7 +277,7 @@ namespace PREACT.Fire
 
             FireCellState result = FireCellState.Burning;
 
-            if (!IsInside(x, y) || Engine.SIM.CurrentTime < _data[x, y].TimeOfAArrival)
+            if (!IsInside(x, y) || _simulation.CurrentTime < _data[x, y].TimeOfAArrival)
             {
                 result = FireCellState.Dead;
             }
@@ -298,7 +298,7 @@ namespace PREACT.Fire
 
         public override float GetInternalDeltaTime()
         {
-            return Engine.Input.Simulation.DeltaTime;
+            return _simulation.Input.Simulation.DeltaTime;
         }
 
         public FireRasterData[,] GetCompleteFireData()

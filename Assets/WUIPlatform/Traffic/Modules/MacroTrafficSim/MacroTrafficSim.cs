@@ -39,10 +39,10 @@ namespace PREACT.Traffic
             output = new List<string>();            
             string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
-            for (int i = 0; i < _simulation.Scenario.Evacuation.Destinations.Count; ++i)
+            for (int i = 0; i < _simulation.Destinations.Count; ++i)
             {
-                start += ", Goal: " + _simulation.Scenario.Evacuation.Destinations[i].Name;
-                start += ", " + _simulation.Scenario.Evacuation.Destinations[i].Name + " flow";
+                start += ", Goal: " + _simulation.Destinations[i].Name;
+                start += ", " + _simulation.Destinations[i].Name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -109,7 +109,7 @@ namespace PREACT.Traffic
             foreach (KeyValuePair<int, RoadSegment> t in roadSegments)
             {
                 Vector2d startPos = new Vector2d(t.Value.goalCoord.Latitude, t.Value.goalCoord.Longitude);
-                RouteData r = routeCreator.CalcTrafficRoute(startPos);
+                RouteData r = routeCreator.CalcTrafficRoute(_simulation, startPos);
                 if (r == null)
                 {
                     _simulation.Stop("Null re-route returned to car, should not happen.", true);
@@ -191,7 +191,7 @@ namespace PREACT.Traffic
             foreach (KeyValuePair<int, RoadSegment> roadSegment in roadSegments)
             {
                 //calculate the new speed based on the local density
-                float densitySpeed = roadSegment.Value.CalculateSpeedBasedOnDensity(); 
+                float densitySpeed = roadSegment.Value.CalculateSpeedBasedOnDensity(this, _simulation); 
                 averageSpeed += densitySpeed;
                 minSpeed = densitySpeed < minSpeed ? densitySpeed : minSpeed;
 
@@ -256,7 +256,7 @@ namespace PREACT.Traffic
                             vehicle.MoveCar(currentTime, deltaTime, speed);
                             //now we need to add to our temporary road segment dictionary since otherwise we might overfill any new segment
                             int hash = vehicle.roadSegmentHash;
-                            nextSegment = new RoadSegment(vehicle, this);
+                            nextSegment = new RoadSegment(vehicle, this, _simulation);
                             newRoadSegments.Add(hash, nextSegment);
                         }
                     }
@@ -321,10 +321,10 @@ namespace PREACT.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < _simulation.Scenario.Evacuation.Destinations.Count; ++i)
+            for (int i = 0; i < _simulation.Destinations.Count; ++i)
             {
-                newOut += "," + _simulation.Scenario.Evacuation.Destinations[i].CurrentPeople;
-                newOut += "," + _simulation.Scenario.Evacuation.Destinations[i].CurrentVehicleFlow;
+                newOut += "," + _simulation.Destinations[i].CurrentPeople;
+                newOut += "," + _simulation.Destinations[i].CurrentVehicleFlow;
             }
 
             output.Add(newOut);
@@ -436,7 +436,7 @@ namespace PREACT.Traffic
         public override void SaveToFile(int runNumber)
         {
             Input wuiIn = Engine.Input;
-            string path = System.IO.Path.Combine(Engine.OutputFolder, wuiIn.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
+            string path = System.IO.Path.Combine(Engine.OutputFolder, wuiIn.Simulation.Name + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }
 

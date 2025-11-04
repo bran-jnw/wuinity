@@ -19,10 +19,10 @@ namespace PREACT.IO
         public enum RoutingChoice { Fastest, Closest, Random, EvacGroup };
         public RoutingChoice Routing = RoutingChoice.Closest;
         public Vector2 BackGroundDensityMinMax = Vector2.Zero;
-        public TrafficAccident[] TrafficAccidents;// = TrafficAccident.GetDummy();
-        public ReverseLanes[] ReverseLanes;// = Traffic.ReverseLanes.GetDummy();
-        public TrafficInjection[] TrafficInjections;// = TrafficInjection.GetTemplate();
-        public TrafficProbe[] TrafficProbes;// = TrafficProbe.GetTemplate();
+        public TrafficAccident[] TrafficAccidents;
+        public ReverseLanes[] ReverseLanes;
+        public TrafficInjection[] TrafficInjections;
+        public TrafficProbe[] TrafficProbes;
 
         //TODO: write parser
     }

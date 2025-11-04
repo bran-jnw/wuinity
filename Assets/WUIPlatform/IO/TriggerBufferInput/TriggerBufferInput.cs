@@ -56,7 +56,7 @@ namespace PREACT.IO
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.SimError, "No trigger buffer module was set, using " + newInput.TriggerBuffer.ToString() + ".");
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "No trigger buffer module was set, using " + newInput.TriggerBuffer.ToString() + ".");
                 }
 
                 //now check modules that have been selected

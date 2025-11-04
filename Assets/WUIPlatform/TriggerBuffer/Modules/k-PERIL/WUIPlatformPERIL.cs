@@ -9,6 +9,7 @@ using System.IO;
 using System.Collections.Generic;
 using PREACT.Fire.Behave;
 using PREACT.Fire;
+using PREACT.Utility.Math;
 
 namespace PREACT
 {
@@ -29,7 +30,7 @@ namespace PREACT
         /// Runs k-PERIL, should be called after a completed simulation
         /// </summary>
         /// <param name="midflameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
-        public static float[,] RunPERIL(float midflameWindspeed)
+        public static float[,] RunPERIL(LCPData lcpData, bool[] wuiArea, float midflameWindspeed, float windDirection, float RSET, string outputFile, InitialFuelMoistureLibrary fuelMoisture, FuelModelInput fuelModel, float[,] maxROS = null, float[,] rosAzimuth = null)
         {
             Engine.MESSAGE(null, Engine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
 
@@ -38,34 +39,29 @@ namespace PREACT
                 PERIL = new kPERIL_DLL.kPERIL();
             }
 
-            int xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
-            int yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
+            int xDim = lcpData.GetCellCountX();
+            int yDim = lcpData.GetCellCountY();
             //assume cell/raster is square
-            int cellSize = Mathf.RoundToInt((float)Engine.ScenarioData.Fire.LCPData.RasterCellResolutionX);
+            int cellSize = Mathf.RoundToInt((float)lcpData.RasterCellResolutionX);
             //get wuiarea from a user defined map painted in wuinity
-            int[,] perilWUIArea = GetPerilWUIArea();
+            int[,] perilWUIArea = GetPerilWUIArea(xDim, yDim, wuiArea);
 
             //create multiple time buffers
-            float RSET = Engine.Output.TotalAverageEvacTime / 60f;
             float[] RSETs = new float[1];
             for (int i = 0; i < RSETs.Length; ++i)
             {
                 RSETs[i] = RSET + i * 60 * 12f;
             }
 
-            float[,] maxROS;
-            float[,] rosAzimuth;
-            if (Engine.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave)
+            if (maxROS == null)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is using ROS calculate using Behave.");
                 bool[,] wuiArea2D = null;// GetWUIArea2D(WUIEngine.RUNTIME_DATA.Fire.WuiArea, xDim, yDim);
-                CalculateAllRateOfSpreadsAndDirections(out maxROS, out rosAzimuth, midflameWindspeed, 150f, true, wuiArea2D);
+                CalculateAllRateOfSpreadsAndDirections(lcpData, out maxROS, out rosAzimuth, midflameWindspeed, windDirection, true, fuelMoisture, wuiArea2D, fuelModel);
             }
             else
             {    
-                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is using ROS from simulation.");
-                maxROS = Engine.SIM.FireModule.GetMaxROS();
-                rosAzimuth = Engine.SIM.FireModule.GetMaxROSAzimuth();
+                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is using ROS (and azimuth) from provided data.");
             }
 
             List<int[,]> perilOutput = new List<int[,]>(RSETs.Length);
@@ -93,55 +89,45 @@ namespace PREACT
                 }
             }
 
-            SaveToFile(combinedPerilOutput, xDim, yDim, cellSize);
+            SaveToFile(combinedPerilOutput, xDim, yDim, cellSize, outputFile);
 
             return combinedPerilOutput;
         }   
 
-        private static void SaveToFile(float[,] data, int xDim, int yDim, float cellsize)
+        private static void SaveToFile(float[,] data, int xDim, int yDim, float cellsize, string outputFile)
         {
             try
             {
-                string file;
-                if (Engine.Input.TriggerBuffer.kPERILInput.OutputName == null || Engine.Input.TriggerBuffer.kPERILInput.OutputName.Length == 0)
-                {
-                    file = "trigger_buffer.asc";
-                }
-                else
-                {
-                    file = Engine.Input.TriggerBuffer.kPERILInput.OutputName;
-                }
-                string path = Path.Combine(Engine.WorkingFolder, file);
-                using (StreamWriter outputFile = new StreamWriter(path))
+                using (StreamWriter outputWriter = new StreamWriter(outputFile))
                 {
                     string line;
 
                     line = "ncols " + xDim;
-                    outputFile.WriteLine(line);
+                    outputWriter.WriteLine(line);
                     line = "nrows " + yDim;
-                    outputFile.WriteLine(line);
+                    outputWriter.WriteLine(line);
                     line = "xllcorner " + 0;
-                    outputFile.WriteLine(line);
+                    outputWriter.WriteLine(line);
                     line = "yllcorner " + 0;
-                    outputFile.WriteLine(line);
+                    outputWriter.WriteLine(line);
                     line = "cellsize " + cellsize;
-                    outputFile.WriteLine(line);
+                    outputWriter.WriteLine(line);
                     line = "NODATA_value " + -9999;
-                    outputFile.WriteLine(line);
+                    outputWriter.WriteLine(line);
 
-                    for (int y = 0; y < yDim; ++y) 
+                    for (int y = 0; y < yDim; ++y)
                     {
                         line = "";
                         for (int x = 0; x < xDim; ++x)
                         {
                             //flip y to follow asc standard
                             line += data[x, yDim - 1 - y];
-                            if(x < xDim - 1)
+                            if (x < xDim - 1)
                             {
                                 line += " ";
                             }
                         }
-                        outputFile.WriteLine(line);
+                        outputWriter.WriteLine(line);
                     }
                 }
             }
@@ -151,9 +137,8 @@ namespace PREACT
             }
         }
 
-        private static void CalculateAllRateOfSpreadsAndDirections(out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, bool[,] wuiArea = null)
+        private static void CalculateAllRateOfSpreadsAndDirections(LCPData lcpData, out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, InitialFuelMoistureLibrary initialFuelMoistureLibrary, bool[,] wuiArea = null, FuelModelInput fuelModelInputs = null)
         {
-            LCPData lcpData = Engine.ScenarioData.Fire.LCPData;
             int xDim = lcpData.GetCellCountX();
             int yDim = lcpData.GetCellCountY();
             rateOfSpreads = new float[xDim, yDim];
@@ -161,11 +146,11 @@ namespace PREACT
 
             //we need to create and fill the fuel model set. TODO: create this data globally in RUNTIME_DATA.Fire
             FuelModelSet fuelModelSet = new FuelModelSet();
-            if (Engine.DataStatus.FuelModelsLoaded)
+            if (fuelModelInputs != null)
             {
-                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < fuelModelInputs.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(fuelModelInputs.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -186,7 +171,7 @@ namespace PREACT
                         continue;
                     }
                     LandscapeStruct cellData = lcpData.GetCellData(x, y);
-                    InitialFuelMoisture moisture = Engine.ScenarioData.Fire.kPERILInitialFuelMoistureData.GetInitialFuelMoisture(cellData.fuel_model);
+                    InitialFuelMoisture moisture = initialFuelMoistureLibrary.GetInitialFuelMoisture(cellData.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
                     surfaceFire.updateSurfaceInputs(cellData.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
@@ -205,37 +190,34 @@ namespace PREACT
             }
         }
 
-        private static int[,] GetPerilWUIArea()
+        private static int[,] GetPerilWUIArea(int xDim, int yDim, bool[] wuiArea)
         {
-            int xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
-            int yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
-
             //first count how many cells we have to add to array
             int count = 0;
-            for (int i = 0; i < Engine.ScenarioData.Fire.WuiArea.Length; i++)
+            for (int i = 0; i < wuiArea.Length; i++)
             {
-                if (Engine.ScenarioData.Fire.WuiArea[i] == true)
+                if (wuiArea[i] == true)
                 {
                     ++count;
                 }
             }
 
             //then create array of correct size and fill it
-            int[,] wuiArea = new int[2, count];
+            int[,] newWuiArea = new int[2, count];
             int position = 0;
-            for (int i = 0; i < Engine.ScenarioData.Fire.WuiArea.Length; i++)
+            for (int i = 0; i < wuiArea.Length; i++)
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
                 int yFlipped = yDim - 1 - yIndex;
-                if (Engine.ScenarioData.Fire.WuiArea[i])
+                if (wuiArea[i])
                 {
-                    wuiArea[0, position] = xIndex;
-                    wuiArea[1, position] = yFlipped;
+                    newWuiArea[0, position] = xIndex;
+                    newWuiArea[1, position] = yFlipped;
                     ++position;    
                 }
             }
-            return wuiArea;
+            return newWuiArea;
         }
     }    
 }

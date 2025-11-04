@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.Scenario;
+using PREACT.Runtime;
 
 namespace PREACT.Visualization
 {
@@ -13,7 +13,7 @@ namespace PREACT.Visualization
     {
         public enum LcpViewMode { FuelModel, Elevation, Slope, Aspect, TriggerBuffer }
 
-        public Scenario.FireData owner;
+        public Runtime.FireData owner;
 
         public FireDataVisualizer(FireData owner)
         {

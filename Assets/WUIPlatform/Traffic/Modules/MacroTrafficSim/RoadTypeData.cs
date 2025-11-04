@@ -95,14 +95,7 @@ namespace PREACT.Traffic
         {
             this.roadData = roadData;
         }
-
-        private static void SaveRoadTypeData(RoadTypeData rTD)
-        {
-            string path = Path.Combine(Engine.DataFolder, "default.roads");
-            string json = UnityEngine.JsonUtility.ToJson(rTD, true);
-            File.WriteAllText(path, json);            
-        }
-
+                
         public static RoadTypeData LoadRoadTypeData(string path, out bool loadedDefaults)
         {
             RoadTypeData results = null;
@@ -118,9 +111,7 @@ namespace PREACT.Traffic
             if(results == null)
             {
                 //creates default values
-                results = new RoadTypeData();
-                SaveRoadTypeData(results);
-                Engine.Input.Traffic.MacroTrafficSimInput.RoadTypesFile = "default";               
+                results = new RoadTypeData();           
             }            
 
             return results;

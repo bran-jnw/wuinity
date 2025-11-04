@@ -37,7 +37,7 @@ namespace PREACT.Traffic
             try
             {
                 _vehicles = new Dictionary<string, SUMOVehicle>();
-                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Engine.Input.Traffic.SumoInput.ConfigurationFile);
+                string inputFile = Path.Combine(_simulation.WorkingFolder, _simulation.Input.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Engine.Input.Simulation.MaxSimTime.ToString() }));
 
@@ -71,7 +71,7 @@ namespace PREACT.Traffic
             catch(Exception e)
             {
                 success = false;
-                Engine.MESSAGE(_simulation, Engine.LogType.SimError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
+                Engine.MESSAGE(_simulation, Engine.LogType.SimulationError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
             }
             
         }
@@ -129,7 +129,7 @@ namespace PREACT.Traffic
                     _vehicles.TryGetValue(arrivedVehicles[i], out car);
                     if(car != null)
                     {
-                        car.Arrive();
+                        car.Arrive(deltaTime, currentTime);
                     }
                     _vehicles.Remove(arrivedVehicles[i]);
                     _activeVehicles.Remove(car.VehicleId);
@@ -293,7 +293,7 @@ namespace PREACT.Traffic
             //throw new System.NotImplementedException();
         }
 
-        public override void SaveToFile(string folder, string scenarioId, int simulationNumber)
+        public override void SaveToFile(int simulationIndentifer)
         {
             //arrival data to csv
             try
@@ -316,7 +316,7 @@ namespace PREACT.Traffic
             {
                 int xDim = _usageMap.GetLength(0);
                 int yDim = _usageMap.GetLength(1);
-                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Engine.Input.Simulation.Id + "_trafficData_" + simulationNumber + ".tiff");
+                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Engine.Input.Simulation.Name + "_trafficData_" + simulationNumber + ".tiff");
 
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
@@ -449,7 +449,7 @@ namespace PREACT.Traffic
             }
             catch (Exception e) 
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, e.Message);
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, e.Message);
             }            
         }
 

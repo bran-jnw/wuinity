@@ -10,7 +10,7 @@ using PREACT.IO;
 using PREACT.Evacuation;
 using PREACT.Utility.Math;
 
-namespace PREACT.Scenario
+namespace PREACT.Runtime
 {
     public class EvacuationData
     {
@@ -49,18 +49,6 @@ namespace PREACT.Scenario
                 return _evacGroupIndices;
             }
         }               
-
-        private ResponseCurve[] _responseCurves;
-        public ResponseCurve[] ResponseCurves
-        {
-            get
-            {                
-                return _responseCurves;
-            }
-        }
-
-        private EvacuationGroup[] _evacuationGroups;
-        public EvacuationGroup[] EvacuationGroups { get=> _evacuationGroups; }
 
         public void LoadAll(Input input, string rootFolder)
         {

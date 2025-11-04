@@ -289,7 +289,7 @@ namespace WUInity
 
             if (!Map.IsAccessTokenValid)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, "Mapbox token not valid.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Mapbox token not valid.");
                 return false;
             }
 
@@ -412,11 +412,11 @@ namespace WUInity
             }                
         }
 
-        public void RunSimulation()
+        public void RunSimulation(EngineTask engineTask)
         {
             _visualsExist = false;
             SetSampleMode(DataSampleMode.TrafficDens);
-            _engine.RunSimulations();
+            _engine.RunSimulations(engineTask);
         }
 
         bool _visualsExist = false;
@@ -439,16 +439,13 @@ namespace WUInity
             ActivateSuitableVisuals();
         }
 
-        public void RunAllCasesInFolder(string folder)
+        public void RunAllCasesInFolder(string folder, EngineTask engineTask)
         {
             string[] inputFiles = Directory.GetFiles(folder, "*.wui");
             for (int i = 0; i < inputFiles.Length; i++)
             {
                 _engine.LoadInputFromFile(inputFiles[i]);
-                _engine.Input.Simulation.Id = Path.GetFileNameWithoutExtension(inputFiles[i]);
-                _engine.ScenarioData.Simulation.MultipleSimulations = true;
-                _engine.ScenarioData.Simulation.NumberOfRuns = 100;
-                RunSimulation();
+                RunSimulation(engineTask);
             }
         }
 

@@ -17,11 +17,11 @@ namespace WUInity.Visualization
 {
     public class FireRenderer : MonoBehaviour
     {
-        [SerializeField] private Material fireMaterial;
+        [SerializeField] private Material _fireMaterial;
         [SerializeField] private Material sootMaterial;
-        int fireCellCountX, fireCellCountY, sootCellCountX, sootCellCountY;
+        int _fireCellCountX, _fireCellCountY, sootCellCountX, sootCellCountY;
 
-        ComputeBuffer fireBuffer, sootBuffer;
+        ComputeBuffer _fireBuffer, sootBuffer;
         MeshRenderer fireMeshRenderer, sootMeshRenderer;
         float lowerSootValue = 0.002608695f; //500 meters with C = 3
         float upperSootValue = 0.260869565f; //5 meters with C = 3
@@ -34,7 +34,7 @@ namespace WUInity.Visualization
 
         public Material GetFireMaterial()
         {
-            return fireMaterial;
+            return _fireMaterial;
         }
 
         public Material GetSootMaterial()
@@ -83,29 +83,29 @@ namespace WUInity.Visualization
             }            
         }
 
-        void CreateFireBuffer()
+        void CreateFireBuffer(int cellsX, int cellsY)
         {            
-            fireCellCountX = Engine.SIM.FireModule.GetCellCountX();
-            fireCellCountY = Engine.SIM.FireModule.GetCellCountY();
-            fireBuffer = new ComputeBuffer(fireCellCountX * fireCellCountY, sizeof(float));
-            fireMaterial.SetInteger("_CellsX", fireCellCountX);
-            fireMaterial.SetInteger("_CellsY", fireCellCountY);
+            _fireCellCountX = cellsX;
+            _fireCellCountY = cellsY;
+            _fireBuffer = new ComputeBuffer(_fireCellCountX * _fireCellCountY, sizeof(float));
+            _fireMaterial.SetInteger("_CellsX", _fireCellCountX);
+            _fireMaterial.SetInteger("_CellsY", _fireCellCountY);
             SetFireDisplayMode(FireDisplayMode.FirelineIntensity);
             if (fireMeshRenderer == null)
             {
-                fireMeshRenderer = CreateDataPlane(fireMaterial, "FireSpread", true);
+                fireMeshRenderer = CreateDataPlane(_fireMaterial, "FireSpread", true);
             }
 
             SetFireOffsetAndScale();
         }
 
-        void CreateSootBuffer()
+        void CreateSootBuffer(SmokeInput smokeInput, int cellsX, int cellsY)
         {
-            if(Engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
-                || Engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            if(smokeInput.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
+                || smokeInput.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
             {
-                sootCellCountX = Engine.SIM.SmokeModule.GetCellsX();
-                sootCellCountY = Engine.SIM.SmokeModule.GetCellsY();
+                sootCellCountX = cellsX;
+                sootCellCountY = cellsY;
                 sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);
@@ -113,7 +113,7 @@ namespace WUInity.Visualization
                 sootMaterial.SetFloat("_MinValue", lowerSootValue); //500 meters with C = 3
                 sootMaterial.SetFloat("_MaxValue", upperSootValue); //5 meters with C = 3
 
-                if(Engine.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
+                if(smokeInput.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                 {
                     // arrives in soot density, * 8700.0 for extinction coefficient
                     sootMaterial.SetFloat("_DataMultiplier", 8700f); 
@@ -143,36 +143,36 @@ namespace WUInity.Visualization
             _fireDisplayMode = mode;
             if(_fireDisplayMode == FireDisplayMode.FirelineIntensity)
             {
-                fireMaterial.SetFloat("_LowerCutOff", 0.01f);
-                fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
-                fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
-                fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+                _fireMaterial.SetFloat("_LowerCutOff", 0.01f);
+                _fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+                _fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+                _fireMaterial.SetFloat("_DataMultiplier", 1.0f);
 
                 if(horizontalRandomLegend == null)
                 {
-                    horizontalRandomLegend = (Texture2D)fireMaterial.GetTexture("_ScaleGradient");
+                    horizontalRandomLegend = (Texture2D)_fireMaterial.GetTexture("_ScaleGradient");
                 }
-                fireMaterial.SetTexture("_ScaleGradient", horizontalRandomLegend);
+                _fireMaterial.SetTexture("_ScaleGradient", horizontalRandomLegend);
             }
             else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
             {
-                fireMaterial.SetFloat("_LowerCutOff", 0.0f);
-                fireMaterial.SetFloat("_MinValue", 0);
-                fireMaterial.SetFloat("_MaxValue", 256);
-                fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+                _fireMaterial.SetFloat("_LowerCutOff", 0.0f);
+                _fireMaterial.SetFloat("_MinValue", 0);
+                _fireMaterial.SetFloat("_MaxValue", 256);
+                _fireMaterial.SetFloat("_DataMultiplier", 1.0f);
 
                 if(fuelModelLegendTexture == null)
                 {
                     CreateRandomFuelModelLegend();
                 }
-                fireMaterial.SetTexture("_ScaleGradient", fuelModelLegendTexture);
+                _fireMaterial.SetTexture("_ScaleGradient", fuelModelLegendTexture);
             }
             else if(_fireDisplayMode == FireDisplayMode.TimeOfArrival)
             {
-                fireMaterial.SetFloat("_LowerCutOff", 0.01f);
-                fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
-                fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
-                fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+                _fireMaterial.SetFloat("_LowerCutOff", 0.01f);
+                _fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+                _fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+                _fireMaterial.SetFloat("_DataMultiplier", 1.0f);
             }
         }
 
@@ -192,8 +192,8 @@ namespace WUInity.Visualization
                 
                 if (fireData != null)
                 {
-                    fireBuffer.SetData(fireData);
-                    fireMaterial.SetBuffer("_Data", fireBuffer);
+                    _fireBuffer.SetData(fireData);
+                    _fireMaterial.SetBuffer("_Data", _fireBuffer);
                 }                
             }
 
@@ -280,7 +280,7 @@ namespace WUInity.Visualization
 
         public void SetUpperFirelineIntensityLimit(float value)
         {
-            fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+            _fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
         }
 
         public float GetLowerFirelineIntensityLimit()
@@ -290,7 +290,7 @@ namespace WUInity.Visualization
 
         public void SetLowerFirelineIntensityLimit(float value)
         {
-            fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
+            _fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
         }
 
         public float GetUpperOpticalDensityLimit()
@@ -326,10 +326,10 @@ namespace WUInity.Visualization
 
         void Release(bool creationCall = false)
         {
-            if (fireBuffer != null)
+            if (_fireBuffer != null)
             {
-                fireBuffer.Release();
-                fireBuffer = null;
+                _fireBuffer.Release();
+                _fireBuffer = null;
             }
 
             if (sootBuffer != null)
@@ -350,7 +350,7 @@ namespace WUInity.Visualization
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.SimError, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
                 }
 
                 

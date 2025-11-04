@@ -49,7 +49,7 @@ namespace WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex* (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
             {
                 ParseMapData(wO);
-                _engine.UpdateMapResourceStatus();
+                _wuinityManager.UpdateMap();
             }
         }
 
@@ -63,7 +63,7 @@ namespace WUInity.UI
             zoom = wO.Map.ZoomLevel.ToString();
         }
 
-        void ParseMapData(IO.Input wO)
+        void ParseMapData(PREACT.IO.Input wO)
         {
             if (mapMenuDirty)
             {

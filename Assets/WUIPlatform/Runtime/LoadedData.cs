@@ -9,14 +9,14 @@ using PREACT.Population;
 using System;
 using PREACT.Utility;
 
-namespace PREACT.Scenario
+namespace PREACT.Runtime
 {
     /// <summary>
     /// Contains all static data that is derived from input and needed for the simulation.
     /// </summary>
-    public class ScenarioData
+    public class LoadedData
     {
-        public SimulationData Simulation;
+        public GeoData Simulation;
         public EvacuationData Evacuation;
         public PopulationData Population;
         public RoutingData Routing;
@@ -24,9 +24,9 @@ namespace PREACT.Scenario
         public FireData Fire;
         public SmokeData Smoke;
 
-        public ScenarioData(IO.Input input)
+        public LoadedData(IO.Input input)
         {
-            Simulation = new SimulationData(input);
+            Simulation = new GeoData(input.Simulation);
             //Visualization = new VisualizationData();         
             Evacuation = new EvacuationData(input);
             Population = new PopulationData();

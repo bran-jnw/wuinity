@@ -223,7 +223,7 @@ namespace PREACT.Traffic
             }
         }
 
-        public override void Arrive()
+        public override void Arrive(float deltaTime, float currentTime)
         {
             throw new System.NotImplementedException();
         }

@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using PREACT.Scenario;
+using PREACT.Runtime;
 using PREACT.Utility.Math;
 
 namespace PREACT.Population
@@ -134,13 +134,13 @@ namespace PREACT.Population
             
             _haveData = true;
             _correctedForRoadAccess = false;
-            _fileName = input.Simulation.Id;
+            _fileName = input.Simulation.Name;
             _populationData.Visualizer.CreatePopulationMapTexture(this);
             _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
             Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
-        public void UpdatePopulationMapBasedOnRoadAccess(ScenarioData scenario, Itinero.Router router)
+        public void UpdatePopulationMapBasedOnRoadAccess(LoadedData scenario, Itinero.Router router)
         {
             int stuckPeople = 0;
             for (int i = 0; i < _cellPopulations.Length; ++i)
@@ -450,7 +450,7 @@ namespace PREACT.Population
             return success;
         }
 
-        public void CreateAndLoadPopulation(IO.Input input, ScenarioData scenario, string file)
+        public void CreateAndLoadPopulation(IO.Input input, LoadedData scenario, string file)
         {
             using (StreamWriter sW = new StreamWriter(file))
             {

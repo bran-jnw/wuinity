@@ -8,7 +8,7 @@
 using System.IO;
 using System;
 using PREACT.IO;
-using PREACT.Scenario;
+using PREACT.Runtime;
 using PREACT.Utility.Math;
 
 namespace PREACT.Population
@@ -86,7 +86,7 @@ namespace PREACT.Population
             data[11] = realWorldSize.x + " " + realWorldSize.y;
             data[12] = totalPopulation.ToString();
 
-            string path = Path.Combine(rootFolder, input.Simulation.Id + ".gpw");
+            string path = Path.Combine(rootFolder, input.Simulation.Name + ".gpw");
             File.WriteAllLines(path, data);
         }
 
@@ -356,7 +356,7 @@ namespace PREACT.Population
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.SimError, "Not all GPW files found.");
+                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "Not all GPW files found.");
                 }
             }
             else
@@ -383,7 +383,7 @@ namespace PREACT.Population
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimError, " Global GPW data files not found. Please make sure the folder structure is correct.");
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, " Global GPW data files not found. Please make sure the folder structure is correct.");
                 return false;
             }
 

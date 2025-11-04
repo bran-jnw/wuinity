@@ -126,17 +126,16 @@ namespace PREACT.Fire
             return wI;
         }
 
-        public static WindInput LoadWindInputFile(out bool success)
+        public static WindInput LoadWindInputFile(string file, out bool success)
         {
             success = false;
             WindInput result = null;
             List<WindData> windData = new List<WindData>();
 
-            string path = Path.Combine(Engine.WorkingFolder, Engine.Input.Fire.FireCellInput.WindFile);
-            bool fileExists = File.Exists(path);
+            bool fileExists = File.Exists(file);
             if (fileExists)
             {
-                string[] dataLines = File.ReadAllLines(path);
+                string[] dataLines = File.ReadAllLines(file);
 
                 string[] header = dataLines[0].Split(',');
                 header[0].Trim(' ');
@@ -195,18 +194,18 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind data file " + path + " not found, will not be able to do fire or smoke spread simulations.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind data file " + file + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
             {
                 result = new WindInput(windData.ToArray());
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " Wind input data file " + path + " was found, " + windData.Count + " valid data points were succesfully loaded.");
+                Engine.MESSAGE(null, Engine.LogType.Log, " Wind input data file " + file + " was found, " + windData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind input data file " + path + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind input data file " + file + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

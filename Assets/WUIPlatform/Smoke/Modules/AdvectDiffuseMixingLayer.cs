@@ -70,20 +70,20 @@ namespace PREACT.Smoke
 
             //set up all buffers and data containers
             _globalData = new GlobalData();
-            _globalData.cellsX = Engine.SIM.FireModule.GetCellCountX();
-            _globalData.cellsY = Engine.SIM.FireModule.GetCellCountY();
-            _globalData.cellSizeX = Engine.SIM.FireModule.GetCellSizeX();
-            _globalData.cellSizeY = Engine.SIM.FireModule.GetCellSizeY();
+            _globalData.cellsX = _simulation.FireModule.GetCellCountX();
+            _globalData.cellsY = _simulation.FireModule.GetCellCountY();
+            _globalData.cellSizeX = _simulation.FireModule.GetCellSizeX();
+            _globalData.cellSizeY = _simulation.FireModule.GetCellSizeY();
             _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
             _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
             _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
             _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
-            _globalData.cellHeight = Engine.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
+            _globalData.cellHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
-            _globalData.deltaTime = Engine.Input.Simulation.DeltaTime;
+            _globalData.deltaTime = _simulation.Input.Simulation.DeltaTime;
 
             _allBuffers = new List<MemoryBuffer1D<float, Stride1D.Dense>>();
             bufferSize = _globalData.cellsX * _globalData.cellsY;
@@ -127,11 +127,11 @@ namespace PREACT.Smoke
             bool fireHasUpdated = true;
             if (fireHasUpdated)
             {
-                _injection.CopyFromCPU(Engine.SIM.FireModule.GetSootProduction());
+                _injection.CopyFromCPU(_simulation.FireModule.GetSootProduction());
             }
 
             //update wind
-            Fire.WindData windData = Engine.SIM.FireModule.GetCurrentWindData();
+            Fire.WindData windData = _simulation.FireModule.GetCurrentWindData();
             _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;

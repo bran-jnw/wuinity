@@ -44,7 +44,7 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        Engine.MESSAGE(null, Engine.LogType.SimError, input + " input " + userInput + " was not recognized." + Input.pleaseCheckInput);
+                        Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " input " + userInput + " was not recognized." + Input.pleaseCheckInput);
                         break;
                 }
             }
@@ -61,7 +61,7 @@ namespace PREACT.IO
             else
             {
                 ++issues;
-                Engine.MESSAGE(null, Engine.LogType.SimError, nameof(LcpFile) + " was not specified." + Input.pleaseCheckInput);
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, nameof(LcpFile) + " was not specified." + Input.pleaseCheckInput);
             }
 
             if (inputToParse.TryGetValue(nameof(GraphicalFireInputFile), out userInput))
@@ -71,7 +71,7 @@ namespace PREACT.IO
             else
             {
                 ++issues;
-                Engine.MESSAGE(null, Engine.LogType.SimError, nameof(GraphicalFireInputFile) + " was not specified." + Input.pleaseCheckInput);
+                Engine.MESSAGE(null, Engine.LogType.SimulationError, nameof(GraphicalFireInputFile) + " was not specified." + Input.pleaseCheckInput);
             }
 
             //now check modules that have been selected
