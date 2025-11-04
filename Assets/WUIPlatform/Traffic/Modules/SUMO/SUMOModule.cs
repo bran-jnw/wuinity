@@ -49,11 +49,11 @@ namespace PREACT.Traffic
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
-                for (int i = 0; i < _simulation.Engine.ScenarioData.Evacuation.Destinations.Count; ++i)
+                for (int i = 0; i < _simulation.Destinations.Count; ++i)
                 {
-                    header += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i].Name + " people arrived";
-                    header += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i].Name + " cars arrived";
-                    header += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i].Name + " flow [veh./h]";
+                    header += "," + _simulation.Destinations[i].Name + " people arrived";
+                    header += "," + _simulation.Destinations[i].Name + " cars arrived";
+                    header += "," + _simulation.Destinations[i].Name + " flow [veh./h]";
                 }
                 output.Add(header);
 
@@ -149,11 +149,11 @@ namespace PREACT.Traffic
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
-            for (int i = 0; i < _simulation.Engine.ScenarioData.Evacuation.Destinations.Count; ++i)
+            for (int i = 0; i < _simulation.Destinations.Count; ++i)
             {
-                dataLine += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i]._currentPeople;
-                dataLine += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i]._cars.Count;
-                dataLine += "," + _simulation.Engine.ScenarioData.Evacuation.Destinations[i]._currentVehicleFlow;
+                dataLine += "," + _simulation.Destinations[i].CurrentPeople;
+                dataLine += "," + _simulation.Destinations[i].Vehicles.Count;
+                dataLine += "," + _simulation.Destinations[i].CurrentVehicleFlow;
             }
             output.Add(dataLine);
         }
@@ -197,7 +197,7 @@ namespace PREACT.Traffic
                 EvacuationDestination evacuationGoal = injectedCar.evacuationGoal;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
                 Vector2d startLatLon = injectedCar.startLatLong;                
-                Vector2d goalLatLon = evacuationGoal._latLon;
+                Vector2d goalLatLon = evacuationGoal.LatLon;
 
                 //TODO: create input for this...
                 string vehicleType = "evacuation_car";
@@ -293,12 +293,12 @@ namespace PREACT.Traffic
             //throw new System.NotImplementedException();
         }
 
-        public override void SaveToFile(int runNumber)
+        public override void SaveToFile(string folder, string scenarioId, int simulationNumber)
         {
             //arrival data to csv
             try
             {
-                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Id + "_traffic_output_" + runNumber + ".csv");
+                string path = Path.Combine(folder, scenarioId + "_traffic_output_" + simulationNumber + ".csv");
                 File.WriteAllLines(path, output);
             }
             catch(Exception e)
@@ -306,17 +306,17 @@ namespace PREACT.Traffic
                 Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
             }
 
-            SaveOutputMaps(runNumber);
+            SaveOutputMaps(folder, scenarioId, simulationNumber);
         }
 
-        private void SaveOutputMaps(int runNumber)
+        private void SaveOutputMaps(string folder, string scenarioId, int simulationNumber)
         {
             //usage map as geotiff
             try
             {
                 int xDim = _usageMap.GetLength(0);
                 int yDim = _usageMap.GetLength(1);
-                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Engine.Input.Simulation.Id + "_trafficData_" + runNumber + ".tiff");
+                string path = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Engine.Input.Simulation.Id + "_trafficData_" + simulationNumber + ".tiff");
 
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
