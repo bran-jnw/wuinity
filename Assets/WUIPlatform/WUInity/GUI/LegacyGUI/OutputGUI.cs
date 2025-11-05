@@ -124,7 +124,7 @@ namespace WUInity.UI
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.Simulation.Destinations[i].CurrentPeople + " (" + _engine.Simulation.Destinations[i].Vehicles.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.Scenario.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.RuntimeData.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 

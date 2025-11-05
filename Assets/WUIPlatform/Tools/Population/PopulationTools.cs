@@ -140,9 +140,9 @@ namespace PREACT.Tools
             }                     
         }
 
-        public static bool CreateAndSaveRouterDb(Engine engine, string osmFile)
+        public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFile)
         {
-            return engine.ScenarioData.Routing.CreateAndSaveRouterDb(osmFile);
+            return Runtime.RoutingData.CreateAndSaveRouterDb(osmInputFile, outputFile);
         }
 
         public static bool LoadRouterDb(Engine engine, string routerDbFile)

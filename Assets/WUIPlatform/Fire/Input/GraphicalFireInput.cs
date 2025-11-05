@@ -11,7 +11,7 @@ namespace PREACT
 {
     public static class GraphicalFireInput
     {
-        public static void SaveGraphicalFireInput(string rootFolder, IO.Input input, Runtime.LoadedData scenario)
+        public static void SaveGraphicalFireInput(string rootFolder, IO.Input input, Runtime.RuntimeData scenario)
         {
             string path = Path.Combine(rootFolder, input.Simulation.Name + ".gfi");
             //WUIinput.Fire.GraphicalFireInputFile = WUIinput.Simulation.Id + ".gfi";
@@ -46,7 +46,7 @@ namespace PREACT
             return result;
         }
 
-        public static void LoadGraphicalFireInput(string rootFolder, IO.Input input, Runtime.LoadedData scenario, out bool success)
+        public static void LoadGraphicalFireInput(string rootFolder, IO.Input input, Runtime.RuntimeData scenario, out bool success)
         {
             success = false;
             string path = Path.Combine(rootFolder, input.Fire.GraphicalFireInputFile); //graphical fire input
@@ -103,7 +103,7 @@ namespace PREACT
             }
         }
 
-        private static void CreateDefaultInputs(string rootFolder, IO.Input input, Runtime.LoadedData scenario)
+        private static void CreateDefaultInputs(string rootFolder, IO.Input input, Runtime.RuntimeData scenario)
         {
             //LCP file has already been read, use that for dimensions
             int xCount = scenario.Fire.LCPData.GetCellCountX();

@@ -374,7 +374,7 @@ namespace PREACT.Traffic
         public float GetMaxCapacity(string highway)
         {
             float capacity = 50.0f;
-            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -390,7 +390,7 @@ namespace PREACT.Traffic
         public float GetSpeedLimit(string highway)
         {
             float speed = RoadTypeData.default_value.speedLimit;
-            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -406,7 +406,7 @@ namespace PREACT.Traffic
         public int GetNumberOfLanes(string highway)
         {
             int lanes = RoadTypeData.default_value.lanes;
-            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -421,7 +421,7 @@ namespace PREACT.Traffic
         public bool CanReverseLanes(string highway)
         {
             bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
-            RoadData[] r = _simulation.Scenario.Traffic.RoadTypeData.roadData;
+            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)

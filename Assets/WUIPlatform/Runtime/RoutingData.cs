@@ -69,17 +69,17 @@ namespace PREACT.Runtime
             return success;
         }
 
-        public bool CreateAndSaveRouterDb(string osmFile)
+        public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFile)
         {
             bool success = false;
 
-            if (File.Exists(osmFile))
+            if (File.Exists(osmInputFile))
             {
                 //stream in data from OSM
-                using (FileStream stream = new FileInfo(osmFile).OpenRead())
+                using (FileStream stream = new FileInfo(osmInputFile).OpenRead())
                 {
                     OsmStreamSource source;
-                    if (osmFile.EndsWith("pbf"))
+                    if (osmInputFile.EndsWith("pbf"))
                     {
                         source = new PBFOsmStreamSource(stream);
                     }
@@ -94,21 +94,15 @@ namespace PREACT.Runtime
                     settings.KeepWayIds = true; //can be used to calc density easier?
                     settings.OptimizeNetwork = true;
 
-                    //build db from OSM betwork
-                    if (_routerDb == null)
-                    {
-                        _routerDb = new RouterDb();
-                    }
-                    _routerDb.LoadOsmData(source, settings, Vehicle.Car);
-                    Engine.MESSAGE(null, Engine.LogType.Log, "Router database created from OSM file.");
+                    //build db from OSM betwork, TODO: allocate och heap instead? keep track                    
+                    RouterDb routerDb = new RouterDb();
+                    routerDb.LoadOsmData(source, settings, Vehicle.Car);
 
                     // write the new routerdb to disk.
-                    string internalRouterName = Engine.Input.Simulation.Name + ".routerdb";
-                    osmFile = Path.Combine(Engine.WORKING_FOLDER, internalRouterName);
-                    using (FileStream outputStream = new FileInfo(osmFile).Open(FileMode.Create))
+                    using (FileStream outputStream = new FileInfo(outputFile).Open(FileMode.Create))
                     {
-                        _routerDb.Serialize(outputStream);
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Router database saved to file " + osmFile);
+                        routerDb.Serialize(outputStream);
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Router database saved to file " + outputFile);
                     }
 
                     success = true;

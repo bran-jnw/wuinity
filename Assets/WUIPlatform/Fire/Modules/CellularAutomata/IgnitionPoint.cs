@@ -77,7 +77,7 @@ namespace PREACT.Fire
         {
             this.LatLong = latLong;
 
-            Vector2d pos = simulation.Scenario.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = simulation.RuntimeData.Simulation.GetSimulationPosition(latLong);
 
             x = (int)(pos.x / mesh._cellSize.x);
             y = (int)(pos.y / mesh._cellSize.y);
@@ -95,7 +95,7 @@ namespace PREACT.Fire
         {
             if(x < 0 && y < 0)
             {
-                Vector2d pos = simulation.Scenario.Simulation.GetSimulationPosition(LatLong);
+                Vector2d pos = simulation.RuntimeData.Simulation.GetSimulationPosition(LatLong);
 
                 x = (int)(pos.x / mesh._cellSize.x);
                 y = (int)(pos.y / mesh._cellSize.y);

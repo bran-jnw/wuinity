@@ -38,14 +38,14 @@ namespace PREACT.IO
                 Blocked = blocked;
             }
 
-            public static List<EvacuationDestinationInput> LoadEvacuationDestinationFiles(string workingFolder, string[] evacuationGoalFiles, out bool success)
+            public static List<EvacuationDestinationInput> LoadEvacuationDestinationFiles(string rootFolder, string[] evacuationGoalFiles, out bool success)
             {
                 success = false;
                 List<EvacuationDestinationInput> evacDestinations = new List<EvacuationDestinationInput>();
 
                 for (int i = 0; i < evacuationGoalFiles.Length; i++)
                 {
-                    string path = Path.Combine(workingFolder, evacuationGoalFiles[i] + ".ed");
+                    string path = Path.Combine(rootFolder, evacuationGoalFiles[i] + ".ed");
                     bool fileExists = File.Exists(path);
                     if (fileExists)
                     {

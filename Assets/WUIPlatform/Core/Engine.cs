@@ -22,7 +22,7 @@ namespace PREACT
         private Simulation[] _simulations;
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private Input _input;
-        private LoadedData _scenarioData;
+        private RuntimeData _scenarioData;
         private DataStatus _dataStatus;
         private Output _output;        
         private string _workingFile;
@@ -33,19 +33,53 @@ namespace PREACT
         public Input Input { get => _input; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
-        public string WorkingFolder { get => _workingFolder; }
-        public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
-        public LoadedData ScenarioData { get => _scenarioData; }
-        public Output Output { get => _output; }     
-                
+        public string WorkingFolder
+        {
+            get
+            {
+                if(_workingFolder != null)
+                {
+                    return _workingFolder;
+                }
+                else if (_workingFile != null)
+                {
+                    return Path.GetDirectoryName(_workingFile);
+                }
+                else
+                {
+                    return Environment.CurrentDirectory;
+                }
+            }
+        }
         public string OutputFolder
         {
             get
             {
-                DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WorkingFile).ToString(), Input.Simulation.Name + "_output"));
-                return path.ToString();
+                //DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WorkingFile).ToString(), Input.Simulation.Name + "_output"));
+                //return path.ToString();
+                if(_input != null)
+                {
+                    string path = Path.Combine(WorkingFolder, _input.Simulation.Name + "_output");
+                    if(!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    return Path.Combine(WorkingFolder, _input.Simulation.Name + "_output");
+                }
+                else
+                {
+                    string path = Path.Combine(WorkingFolder, "_output");
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    return path;
+                }
             }
         }
+        public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
+        public RuntimeData ScenarioData { get => _scenarioData; }
+        public Output Output { get => _output; }     
 
         public Engine(ExternalManager externalManager, bool mainEngine = true)
         {
@@ -313,7 +347,7 @@ namespace PREACT
 
         private void CreateDataFromInput()
         {
-            _scenarioData = new LoadedData(_input);
+            _scenarioData = new RuntimeData(_input);
             //transform input to actual data
             MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
             //need to load evacuation goals before routing as they rely on evacuation goals

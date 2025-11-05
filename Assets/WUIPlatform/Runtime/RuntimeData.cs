@@ -14,7 +14,7 @@ namespace PREACT.Runtime
     /// <summary>
     /// Contains all static data that is derived from input and needed for the simulation.
     /// </summary>
-    public class LoadedData
+    public class RuntimeData
     {
         public GeoData Simulation;
         public EvacuationData Evacuation;
@@ -24,7 +24,7 @@ namespace PREACT.Runtime
         public FireData Fire;
         public SmokeData Smoke;
 
-        public LoadedData(IO.Input input)
+        public RuntimeData(IO.Input input)
         {
             Simulation = new GeoData(input.Simulation);
             //Visualization = new VisualizationData();         

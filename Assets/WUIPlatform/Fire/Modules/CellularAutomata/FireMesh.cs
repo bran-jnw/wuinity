@@ -98,12 +98,12 @@ namespace PREACT.Fire
         {
             fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if (_simulation.Scenario.Fire.FuelModelsData != null)
+            if (_simulation.RuntimeData.Fire.FuelModelsData != null)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < _simulation.Scenario.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < _simulation.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(_simulation.Scenario.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(_simulation.RuntimeData.Fire.FuelModelsData.Fuels[i]);
                 }
             }                    
             surfaceFire = new Surface(fuelModelSet);            
@@ -373,7 +373,7 @@ namespace PREACT.Fire
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
-                    if (_simulation.Scenario.Fire.InitialIgnition[i])
+                    if (_simulation.RuntimeData.Fire.InitialIgnition[i])
                     {
                         FireCell f = _fireCells[i];
                         f.Ignite(currentTime);
@@ -452,7 +452,7 @@ namespace PREACT.Fire
 
         public override FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Vector2d pos = _simulation.Scenario.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = _simulation.RuntimeData.Simulation.GetSimulationPosition(latLong);
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);

@@ -341,9 +341,16 @@ namespace WUInity.UI
             string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
             FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
         }
+        void OpenSelectNewRouterDbFile()
+        {
+            FileBrowser.SetFilters(false, routerDbFilter);
+            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
+        }
+
         void CreateAndSaveRouterDb(string[] paths)
         {
-            PopulationTools.CreateAndSaveRouterDb(_engine, paths[0]);
+            PopulationTools.CreateAndSaveRouterDb(, paths[0]);
         }
         /*void OpenLoadRouterDb()
         {
