@@ -76,12 +76,12 @@ namespace PREACT.Traffic
             return active;
         }
 
-        public override void Arrive()
+        public override void Arrive(float deltaTime, float currentTime)
         {
             active = false;
             if(_destination != null)
             {
-                _destination.CarArrives(this, Engine.SIM.CurrentTime, Engine.Input.Simulation.DeltaTime);
+                _destination.CarArrives(this, deltaTime, currentTime);
             }            
             //TODO: send message to WUI-nity
         }

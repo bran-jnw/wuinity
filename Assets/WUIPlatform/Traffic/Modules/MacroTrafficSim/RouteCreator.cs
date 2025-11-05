@@ -79,17 +79,17 @@ namespace PREACT.Traffic
         /// <summary>
         /// Checks if any valid point on the network can be found within the cell, returns null if not, else a point with Lat/Lon that is valid.
         /// </summary>
-        /// <param name="coordinate"></param>
+        /// <param name="latLon"></param>
         /// <param name="p"></param>
         /// <param name="cellSize"></param>
         /// <returns></returns>
-        public static RouterPoint GetValidRouterPoint(Router router, Vector2d coordinate, Itinero.Profiles.Profile p, float cellSize)
+        public static RouterPoint GetValidRouterPoint(Router router, Vector2d latLon, Itinero.Profiles.Profile p, float cellSize)
         {
             //check within the radius of the diagonal of the cell (so complete cell plus some parts of neighboring cells)
             RouterPoint start = null;
             try
             {
-                start = router.Resolve(p, (float)coordinate.x, (float)coordinate.y, cellSize * 0.70711f); //half cell size * sqrt 2
+                start = router.Resolve(p, (float)latLon.x, (float)latLon.y, cellSize * 0.70711f); //half cell size * sqrt 2
                 //for some reason Itinero does not return the actual point on the network, so we have to get it and overwrite
                 Itinero.LocalGeo.Coordinate temp = start.LocationOnNetwork(router.Db);
                 start = new RouterPoint(temp.Latitude, temp.Longitude, start.EdgeId, start.Offset);

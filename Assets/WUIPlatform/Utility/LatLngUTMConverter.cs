@@ -31,7 +31,6 @@ using static System.Math;
 
 namespace PREACT.Utility
 {
-    //Port from javascript to c#
     //Javascript source: 
     //https://github.com/shahid28/utm-latlng/blob/master/UTMLatLng.js
     public class LatLngUTMConverter
@@ -325,7 +324,8 @@ namespace PREACT.Utility
             var ZoneLetter = UTMZoneLetter;
             int NorthernHemisphere;
 
-            if ("N" == ZoneLetter)
+            //ASCII of N is 78, all letters after N is in northern hemisphere
+            if (UTMZoneLetter[0] >  77)
             {
                 NorthernHemisphere = 1;
             }

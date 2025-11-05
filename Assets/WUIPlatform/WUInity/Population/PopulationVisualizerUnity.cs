@@ -106,7 +106,7 @@ namespace PREACT.Population
 
             for (int y = 0; y < data._cells.y; y++)
             {
-                for (int x = 0; x < data._cells.y; x++)
+                for (int x = 0; x < data._cells.x; x++)
                 {
                     if(data.GetMaskValue(x, y))
                     {

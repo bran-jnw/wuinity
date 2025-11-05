@@ -46,7 +46,7 @@ namespace PREACT.Runtime
         {
             pos += UTMOrigin;
             LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmData.ZoneLetter);
-            return new Vector2d(wgs84.Lat, wgs84.Lat);
+            return new Vector2d(wgs84.Lat, wgs84.Lng);
         }
     }
 }
