@@ -42,13 +42,13 @@ namespace PREACT
             }            
         }
 
-        public static BlockDestinationEvent[] LoadBlockGoalEvents(Input input, string rootFolder, out bool success)
+        public static BlockDestinationEvent[] LoadBlockGoalEvents(string rootFolder, string[] blockGoalEventFiles, out bool success)
         {
             success = false;
             List<BlockDestinationEvent> blockGoalEvents = new List<BlockDestinationEvent>();
-            for (int i = 0; i < input.Events.BlockGoalEventFiles.Length; i++)
+            for (int i = 0; i < blockGoalEventFiles.Length; i++)
             {
-                string path = Path.Combine(rootFolder, input.Events.BlockGoalEventFiles[i] + ".bge");
+                string path = Path.Combine(rootFolder, blockGoalEventFiles[i] + ".bge");
                 if (File.Exists(path))
                 {
                     string[] dataLines = File.ReadAllLines(path);

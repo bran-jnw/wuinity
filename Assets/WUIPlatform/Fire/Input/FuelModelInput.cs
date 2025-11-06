@@ -12,7 +12,7 @@ namespace PREACT.Fire
 {   
     public class FuelModelInput
     {
-        public class FuelModel
+        public struct FuelModel
         {
             public int fuelModelNumber;
             public string code, name;
@@ -49,23 +49,28 @@ namespace PREACT.Fire
 
         public List<FuelModel> Fuels;
 
-        public bool LoadFuelModelInputFile(string path)
+        public FuelModelInput(List<FuelModel> fuels)
+        {
+            Fuels = fuels;
+        }
+
+        public static FuelModelInput LoadFuelModelInputFile(string file, out bool success)
         {
             Engine.MESSAGE(null, Engine.LogType.Log, " Attempting to load fuel model file.");
-            bool success = false;
+            success = false;
 
             string[] fuelLines;
-            if (File.Exists(path))
+            if (File.Exists(file))
             {
-                fuelLines = File.ReadAllLines(path);
+                fuelLines = File.ReadAllLines(file);
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Fuel model file " + path + " not found." );
-                return false;
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Fuel model file " + file + " not found." );
+                return null;
             }
 
-            Fuels = new List<FuelModel>();
+            List<FuelModel> fuels = new List<FuelModel>();
 
             //skip first line as that is just the header
             for (int i = 1; i < fuelLines.Length; i++)
@@ -112,14 +117,14 @@ namespace PREACT.Fire
                     fuelLoadLiveWoody, savrOneHour, savrLiveHerbaceous, savrLiveWoody,
                     isDynamic, isReserved);
 
-                    Fuels.Add(newFuel);
+                    fuels.Add(newFuel);
                     Engine.MESSAGE(null, Engine.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
                 }
             }
 
-            if(Fuels.Count == 0)
+            if(fuels.Count == 0)
             {
-                Fuels = null;
+                fuels = null;
                 success = false;
             }
             else
@@ -127,7 +132,7 @@ namespace PREACT.Fire
                 success = true;
             }            
 
-            return success;
+            return new FuelModelInput(fuels);
         }
     }
 }

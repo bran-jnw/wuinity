@@ -27,8 +27,8 @@ namespace PREACT
 
         //References
         private Engine _engine;
-        private Runtime.RuntimeData _runtimeData;
-        private Input _input;
+        private Runtime.PREACTData _runtimeData;
+        private PREACTScenario _scenario;
         private SimulationState _state;
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
@@ -55,13 +55,13 @@ namespace PREACT
         
         //References
         public Engine Engine { get => _engine; }
-        public Runtime.RuntimeData RuntimeData { get => _runtimeData; }
+        public Runtime.PREACTData RuntimeData { get => _runtimeData; }
         public SimulationState State { get => _state; }
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
         public FireModule FireModule { get => _fireModule; }
         public SmokeModule SmokeModule { get => _smokeModule; }
-        public Input Input { get => _input; }
+        public PREACTScenario Scenario { get => _scenario; }
 
         //Data
         public int SimulationIndex { get => _simulationIndex; }        
@@ -72,10 +72,10 @@ namespace PREACT
         public float StepExecutionTime { get => _stepExecutionTime; }        
         public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
 
-        public Simulation(Engine engine, Input input, int simulationId)
+        public Simulation(Engine engine, PREACTScenario scenario, int simulationId)
         {
             _engine = engine;
-            _input = input;
+            _scenario = scenario;
             _simulationIndex = simulationId;
         }
 
@@ -128,7 +128,7 @@ namespace PREACT
 
             Engine.MESSAGE(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
 
-            _evacuationDestinations = EvacuationDestination.CreateEvacacuationDestinations(this, _input.Evacuation.EvacuationDestinationInputs);
+            _evacuationDestinations = EvacuationDestination.CreateEvacacuationDestinations(this, _scenario.Data.Evacuation.EvacuationDestinationInputs);
             if (_stopRun)
             {
                 _state = SimulationState.Error;
@@ -145,24 +145,24 @@ namespace PREACT
 
             //pick start time based on curve or 0 (fire start)
             _currentTime = 0f;
-            for (int i = 0; i < _input.Evacuation.ResponseCurves.Count; i++)
+            for (int i = 0; i < _scenario.Data.Evacuation.ResponseCurves.Count; i++)
             {
-                float t = _input.Evacuation.ResponseCurves[i].dataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
+                float t = _scenario.Data.Evacuation.ResponseCurves[i].dataPoints[0].time + _scenario.Input.Evacuation.EvacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
 
             //inject any traffic events into traffic module
-            if (_input.Simulation.RunTrafficModule && _input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            if (_scenario.Input.Simulation.RunTrafficModule && _scenario.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
-                for (int i = 0; i < _input.Traffic.MacroTrafficSimInput.TrafficAccidents.Length; i++)
+                for (int i = 0; i < _scenario.Input.Traffic.MacroTrafficSimInput.TrafficAccidents.Length; i++)
                 {
-                    _trafficModule.InsertNewTrafficEvent(_input.Traffic.MacroTrafficSimInput.TrafficAccidents[i]);
+                    _trafficModule.InsertNewTrafficEvent(_scenario.Input.Traffic.MacroTrafficSimInput.TrafficAccidents[i]);
                 }
 
-                for (int i = 0; i < _input.Traffic.MacroTrafficSimInput.ReverseLanes.Length; i++)
+                for (int i = 0; i < _scenario.Input.Traffic.MacroTrafficSimInput.ReverseLanes.Length; i++)
                 {
-                    _trafficModule.InsertNewTrafficEvent(_input.Traffic.MacroTrafficSimInput.ReverseLanes[i]);
+                    _trafficModule.InsertNewTrafficEvent(_scenario.Input.Traffic.MacroTrafficSimInput.ReverseLanes[i]);
                 }
             }
 
@@ -195,14 +195,14 @@ namespace PREACT
             {
                 _haveResults = true;
 
-                if (_input.TriggerBuffer.CalculateTriggerBuffer)
+                if (_scenario.Input.TriggerBuffer.CalculateTriggerBuffer)
                 {
-                    if (_input.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
+                    if (_scenario.Input.TriggerBuffer.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL)
                     {
-                        if (_input.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
+                        if (_scenario.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
                         {
-                            string outputFile = Path.Combine(_engine.OutputFolder, _input.Simulation.Name + _simulationIndex + ".tiff");
-                            _triggerBufferDataOutput = WUIPlatformPERIL.RunPERIL(_runtimeData.Fire.LCPData, _runtimeData.Fire.WuiArea, _input.TriggerBuffer.kPERILInput.MidflameWindspeed, 0f, _currentTime, outputFile, _runtimeData.Fire.InitialFuelMoistureData, _runtimeData.Fire.FuelModelsData);
+                            string outputFile = Path.Combine(_engine.OutputFolder, _scenario.Input.Simulation.Name + _simulationIndex + ".tiff");
+                            _triggerBufferDataOutput = WUIPlatformPERIL.RunPERIL(_runtimeData.Fire.LCPData, _runtimeData.Fire.WuiArea, _scenario.Input.TriggerBuffer.kPERILInput.MidflameWindspeed, 0f, _currentTime, outputFile, _runtimeData.Fire.InitialFuelMoistureData, _runtimeData.Fire.FuelModelsData);
                         }
                     }
                 }
@@ -252,14 +252,14 @@ namespace PREACT
 
         private void CreateFireModule()
         {            
-            if (_input.Simulation.RunFireModule)
+            if (_scenario.Input.Simulation.RunFireModule)
             {
-                if (_input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
+                if (_scenario.Input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
                 {
                     _fireModule = new AscFireImport(this);
                     Engine.MESSAGE(this, Engine.LogType.Log, "Fire module AscImport initiated.");
                 }
-                else if(_input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
+                else if(_scenario.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
                 {
                     _fireModule = new FireMesh(this, _runtimeData.Fire.LCPData, _runtimeData.Fire.WeatherInput, _runtimeData.Fire.WindInput, _runtimeData.Fire.InitialFuelMoistureData, _runtimeData.Fire.IgnitionPoints);
                     Engine.MESSAGE(this, Engine.LogType.Log, "Fire module FireCell initiated.");
@@ -278,27 +278,27 @@ namespace PREACT
         private void CreateSmokeModule()
         {
             //can only run together
-            if (_input.Simulation.RunSmokeModule)
+            if (_scenario.Input.Simulation.RunSmokeModule)
             {
                 //this module does not need the fire
-                if (_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+                if (_scenario.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
-                    string file = Path.Combine(_engine.WorkingFolder, _input.Smoke.GlobalSmokeInput.ExtinctionFile);
+                    string file = Path.Combine(_engine.WorkingFolder, _scenario.Input.Smoke.GlobalSmokeInput.ExtinctionFile);
                     _smokeModule = new GlobalSmoke(this, file);
                     return;
                 }                
 
-                if (!_input.Simulation.RunFireModule)
+                if (!_scenario.Input.Simulation.RunFireModule)
                 {
                     Engine.MESSAGE(this, Engine.LogType.SimulationError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
                 }
                 else
                 {                       
-                    if(_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
+                    if(_scenario.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                     {
                         _smokeModule = new AdvectDiffuseMixingLayer(this);
                     }
-                    else if (_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse3D)
+                    else if (_scenario.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse3D)
                     {
                         /*if (_smokeModule != null)
                         {
@@ -307,7 +307,7 @@ namespace PREACT
                         //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/                            
                         Engine.MESSAGE(this, Engine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
                     }
-                    else if (_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                    else if (_scenario.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                     {
                         //smokeBoxDispersionModel = new Smoke.BoxDispersionModel(fireMesh);
                     }                  
@@ -322,13 +322,13 @@ namespace PREACT
         private void CreatePedestrianModule()
         {
 
-            if (_input.Simulation.RunPedestrianModule)
+            if (_scenario.Input.Simulation.RunPedestrianModule)
             {
-                if (_input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
+                if (_scenario.Input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.JupedSimSUMO)
                 {
                     //placeholder for JupedSim
                 }
-                else if (_input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
+                else if (_scenario.Input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     _pedestrianModule = new MacroHouseholdSim(this);
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
@@ -346,9 +346,9 @@ namespace PREACT
 
         private void CreateTrafficModule()
         {
-            if (_input.Simulation.RunTrafficModule)
+            if (_scenario.Input.Simulation.RunTrafficModule)
             {
-                if (_input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
+                if (_scenario.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
                 {
                     bool success;
                     _trafficModule = new SUMOModule(this, out success);
@@ -379,7 +379,7 @@ namespace PREACT
             long startTime = _simulationStopWatch.ElapsedMilliseconds;
             UpdateEvents();
             //this state represents the positions at the start of the time step
-            if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _trafficModule != null)
+            if (_talkToWUIShow && _scenario.Input.WUIShow.SendDataToWUIShow && _trafficModule != null)
             {
                 _engine.WUIShow.SendData(_currentTime);
             }
@@ -411,9 +411,9 @@ namespace PREACT
             }                
 
             //increase time
-            float deltaTime = _input.Simulation.DeltaTime;
+            float deltaTime = _scenario.Input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (_input.Simulation.RunFireModule && !_input.Simulation.RunPedestrianModule && !_input.Simulation.RunTrafficModule && !_input.Simulation.RunSmokeModule)
+            if (_scenario.Input.Simulation.RunFireModule && !_scenario.Input.Simulation.RunPedestrianModule && !_scenario.Input.Simulation.RunTrafficModule && !_scenario.Input.Simulation.RunSmokeModule)
             {
                 deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
@@ -422,7 +422,7 @@ namespace PREACT
             //see if we are done or not
             CheckCompletion();
 
-            if (_input.Simulation.RunFireModule)
+            if (_scenario.Input.Simulation.RunFireModule)
             {
                 //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
                 CheckEvacuationGoalStatus();
@@ -453,22 +453,22 @@ namespace PREACT
                 return;
             }
 
-            bool endTimeReached = CurrentTime <= _input.Simulation.MaxSimTime ? false : true;
+            bool endTimeReached = CurrentTime <= _scenario.Input.Simulation.MaxSimTime ? false : true;
 
             if(endTimeReached)
             {
                 Stop("Simulation has reached specified end time.", false);
             }
 
-            if (!_stopRun && _input.Simulation.StopWhenEvacuated)
+            if (!_stopRun && _scenario.Input.Simulation.StopWhenEvacuated)
             {
                 bool pedestrianDone = true;
-                if (_input.Simulation.RunPedestrianModule)
+                if (_scenario.Input.Simulation.RunPedestrianModule)
                 {
                     pedestrianDone = _pedestrianModule.IsSimulationDone();
                 }
                 bool trafficDone = true;
-                if (_input.Simulation.RunTrafficModule)
+                if (_scenario.Input.Simulation.RunTrafficModule)
                 {
                     trafficDone = _trafficModule.IsSimulationDone();
                 }
@@ -497,9 +497,7 @@ namespace PREACT
 
         private void UpdateEvents()
         {
-            Input input = _engine.Input;
-
-            if (input.Simulation.RunTrafficModule)
+            if (_scenario.Input.Simulation.RunTrafficModule)
             {
                 //check for global events
                 if (_runtimeData.Evacuation.BlockGoalEvents != null)
@@ -522,13 +520,13 @@ namespace PREACT
         {
             //update fire mesh if needed
             fireUpdated = false;
-            if (_input.Simulation.RunFireModule)
+            if (_scenario.Input.Simulation.RunFireModule)
             {
                 if (CurrentTime >= nextFireUpdate && CurrentTime >= 0.0f)
                 {
                     fireUpdated = true;
                     _fireStopwatch.Start();
-                    _fireModule.Step(_currentTime, _input.Simulation.DeltaTime);
+                    _fireModule.Step(_currentTime, _scenario.Input.Simulation.DeltaTime);
                     _fireStopwatch.Stop();
                     nextFireUpdate += _fireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
@@ -540,16 +538,16 @@ namespace PREACT
         private void StepSmokeModule()
         {
             //sync with fire
-            if (_input.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
+            if (_scenario.Input.Simulation.RunSmokeModule && CurrentTime >= 0.0f)
             {
                 _smokeStopwatch.Start();
-                if (_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
+                if (_scenario.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                 {
                     //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
                 }
                 else
                 {
-                    _smokeModule.Step(_currentTime, _input.Simulation.DeltaTime);
+                    _smokeModule.Step(_currentTime, _scenario.Input.Simulation.DeltaTime);
                 }
                 _smokeStopwatch.Stop();
             }
@@ -558,10 +556,10 @@ namespace PREACT
         private void StepPedestrianModule()
         {
             //advance pedestrian
-            if (_input.Simulation.RunPedestrianModule)
+            if (_scenario.Input.Simulation.RunPedestrianModule)
             {
                 _pedestrianStopwatch.Start();
-                _pedestrianModule.Step(CurrentTime, _input.Simulation.DeltaTime);
+                _pedestrianModule.Step(CurrentTime, _scenario.Input.Simulation.DeltaTime);
                 _pedestrianStopwatch.Stop();
             }
         }
@@ -569,10 +567,10 @@ namespace PREACT
         private void StepTrafficModule()
         {
             //advance traffic
-            if (_input.Simulation.RunTrafficModule)
+            if (_scenario.Input.Simulation.RunTrafficModule)
             {
                 _trafficStopwatch.Start();
-                _trafficModule.Step(_input.Simulation.DeltaTime, CurrentTime);
+                _trafficModule.Step(_scenario.Input.Simulation.DeltaTime, CurrentTime);
                 _trafficStopwatch.Stop();
             }
         }
@@ -583,22 +581,22 @@ namespace PREACT
         {
             //_stopThreadsToken.Cancel();
 
-            if (_input.Simulation.RunPedestrianModule && _pedestrianModule != null)
+            if (_scenario.Input.Simulation.RunPedestrianModule && _pedestrianModule != null)
             {
                 _pedestrianModule.Stop();
             }
 
-            if (_input.Simulation.RunTrafficModule && _trafficModule != null)
+            if (_scenario.Input.Simulation.RunTrafficModule && _trafficModule != null)
             {
                 _trafficModule.Stop();
             }
 
-            if (_input.Simulation.RunFireModule && _fireModule != null)
+            if (_scenario.Input.Simulation.RunFireModule && _fireModule != null)
             {
                 _fireModule.Stop();
             }
 
-            if (_input.Simulation.RunSmokeModule && _smokeModule != null)
+            if (_scenario.Input.Simulation.RunSmokeModule && _smokeModule != null)
             {
                 _smokeModule.Stop();
             }
@@ -686,18 +684,17 @@ namespace PREACT
 
         private void SaveOutput()
         {
-            Input input = _input;
-            if (input.Simulation.RunTrafficModule)
+            if (_scenario.Input.Simulation.RunTrafficModule)
             {
                 Engine.MESSAGE(this, Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
                 _trafficModule.SaveToFile(_simulationIndex);
             }
-            if (input.Simulation.RunPedestrianModule)
+            if (_scenario.Input.Simulation.RunPedestrianModule)
             {
-                if (_input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
+                if (_scenario.Input.Pedestrian.PedestrianModule == PedestrianInput.PedestrianModuleChoice.MacroHouseholdSim)
                 {
                     MacroHouseholdSim mHS = (MacroHouseholdSim)_pedestrianModule;
-                    string file = Path.Combine(_engine.OutputFolder, _input.Simulation.Name + "_pedestrian_output_" + _simulationIndex + ".csv");
+                    string file = Path.Combine(_engine.OutputFolder, _scenario.Input.Simulation.Name + "_pedestrian_output_" + _simulationIndex + ".csv");
                     mHS.SaveToFile(file);
                 }                    
             }                        

@@ -55,7 +55,7 @@ namespace PREACT.Evacuation
         public float TotalTravelTime { get => _totalTravelTime; }
         public float AverageTravelTime { get => _averageTravelTime; }
         
-        private EvacuationDestination(Simulation simulation, EvacuationInput.EvacuationDestinationInput input)
+        private EvacuationDestination(Simulation simulation, EvacuationDestinationInput input)
         {
             _simulation = simulation;
             _latLon = input.LatLon;
@@ -68,11 +68,11 @@ namespace PREACT.Evacuation
             _blocked = input.Blocked; 
         }
 
-        public static List<EvacuationDestination> CreateEvacacuationDestinations(Simulation simulation, List<EvacuationInput.EvacuationDestinationInput> destinationsInput)
+        public static List<EvacuationDestination> CreateEvacacuationDestinations(Simulation simulation, List<EvacuationDestinationInput> destinationsInput)
         {
             List<EvacuationDestination> destinations = new List<EvacuationDestination>(destinationsInput.Count);
 
-            foreach (EvacuationInput.EvacuationDestinationInput e in destinationsInput)
+            foreach (EvacuationDestinationInput e in destinationsInput)
             {
                 destinations.Add(new EvacuationDestination(simulation, e));
             }

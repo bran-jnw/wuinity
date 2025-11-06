@@ -10,11 +10,10 @@ using System.IO;
 
 namespace PREACT.Evacuation
 {
-    [System.Serializable]
     public class EvacuationGroup
     {
-        public int[] GoalIndices;
-        public double[] GoalsCumulativeWeights;
+        public int[] DestinationIndices;
+        public double[] DestinationCumulativeWeights;
         public int[] ResponseCurveIndices;
         public string Name;
         public PREACTColor Color;
@@ -22,29 +21,29 @@ namespace PREACT.Evacuation
         public EvacuationGroup(string name, int[] goalIndices, double[] goalsCumulativeWeight, int[] responseCurveIndices, PREACTColor color)
         {
             Name = name;
-            GoalIndices = goalIndices;
-            GoalsCumulativeWeights = goalsCumulativeWeight;
+            DestinationIndices = goalIndices;
+            DestinationCumulativeWeights = goalsCumulativeWeight;
             ResponseCurveIndices = responseCurveIndices;
             Color = color;
         }
 
-        public EvacuationDestination GetWeightedEvacGoal()
+        public EvacuationDestination GetWeightedRandomDestination(List<EvacuationDestination> destinations)
         {
             float randomChoice = Utility.Math.Randomf.value;
-            for (int i = 0; i < GoalsCumulativeWeights.Length; i++)
+            for (int i = 0; i < DestinationCumulativeWeights.Length; i++)
             {
-                if (randomChoice <= GoalsCumulativeWeights[i])
+                if (randomChoice <= DestinationCumulativeWeights[i])
                 {
-                    return Engine.ScenarioData.Evacuation.Destinations[GoalIndices[i]];
+                    return destinations[DestinationIndices[i]];
                 }
             }
 
             //this should not happen, but keep as backup as we do not want to return null
             Engine.MESSAGE(null, Engine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");
-            return Engine.ScenarioData.Evacuation.Destinations[GoalIndices[GoalIndices.Length - 1]];
+            return destinations[DestinationIndices[DestinationIndices.Length - 1]];
         }
 
-        public static List<EvacuationGroup> LoadEvacGroupFiles(string rootFolder, string[] evacuationGroupFiles, out bool success)
+        public static List<EvacuationGroup> LoadEvacGroupFiles(string rootFolder, Runtime.EvacuationData evacuationData, string[] evacuationGroupFiles, out bool success)
         {
             success = false;
             List<EvacuationGroup> evacGroups = new List<EvacuationGroup>();
@@ -95,7 +94,7 @@ namespace PREACT.Evacuation
                             }
                         }
 
-                        //goal names
+                        //destination names
                         data = dataLines[3].Split(':');
                         data = data[1].Split(',');
                         for (int j = 0; j < data.Length; j++)
@@ -105,7 +104,7 @@ namespace PREACT.Evacuation
                             destinationNames.Add(value);
                         }
 
-                        //goal probabilities
+                        //destination probabilities
                         data = dataLines[4].Split(':');
                         data = data[1].Split(',');
                         for (int j = 0; j < data.Length; j++)
@@ -118,7 +117,7 @@ namespace PREACT.Evacuation
                             }
                         }
 
-                        //colors
+                        //color
                         data = dataLines[5].Split(':');
                         data = data[1].Split(',');
                         if(data.Length >= 3)
@@ -132,13 +131,13 @@ namespace PREACT.Evacuation
                         int[] goalIndices = new int[destinationNames.Count];
                         for (int j = 0; j < destinationNames.Count; j++)
                         {
-                            goalIndices[j] = Engine.ScenarioData.Evacuation.GetEvacGoalIndexFromName(destinationNames[j]);
+                            goalIndices[j] = evacuationData.GetEvacGoalIndexFromName(destinationNames[j]);
                         }
 
                         int[] responseCurveIndices = new int[responseCurveNames.Count];
                         for (int j = 0; j < responseCurveNames.Count; j++)
                         {
-                            responseCurveIndices[j] =  Engine.ScenarioData.Evacuation.GetResponseCurveIndexFromName(responseCurveNames[j]);
+                            responseCurveIndices[j] =  evacuationData.GetResponseCurveIndexFromName(responseCurveNames[j]);
                         }
 
                         //TODO: check if input count and probabilities match
@@ -193,7 +192,7 @@ namespace PREACT.Evacuation
             File.WriteAllLines(rootFolder + "/" + filename + ".egs", data);
         }
 
-        public static void LoadEvacGroupIndices(string file, out bool success)
+        public static void LoadEvacGroupIndices(string file, Runtime.EvacuationData evacuationData, out int[] evacGroupIndices, out bool success)
         {
             success = false;
             try
@@ -212,7 +211,7 @@ namespace PREACT.Evacuation
                     int.TryParse(header[2], out evacGroupCount);
 
                     //make sure we have the correct size
-                    if (ncols == Engine.ScenarioData.Evacuation.CellCount.x && nrows == Engine.ScenarioData.Evacuation.CellCount.y && evacGroupCount <= Engine.Input.Evacuation.EvacuationGroupFiles.Length)
+                    if (ncols == evacuationData.CellCount.x && nrows == evacuationData.CellCount.y && evacGroupCount <= evacuationData.EvacuationGroups.Count)
                     {
                         string[] data = header[3].Split(' ');
                         int[] eGsIndices = new int[ncols * nrows];
@@ -220,24 +219,23 @@ namespace PREACT.Evacuation
                         {
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
-                        Engine.ScenarioData.Evacuation.UpdateEvacGroupIndices(eGsIndices);
+                        evacGroupIndices = eGsIndices;
                         Engine.MESSAGE(null, Engine.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                         success = true;
                     }
                     else
                     {
-                        Engine.ScenarioData.Evacuation.UpdateEvacGroupIndices(null);
-                        Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file does not match current mesh, using default.");
+                        evacGroupIndices = null;
+                        Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file does not match current mesh.");
                     }
                 }
             }
             catch (System.Exception e)
             {
-                Engine.ScenarioData.Evacuation.UpdateEvacGroupIndices(null);
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file " + file + " not found, using default.");
+                evacGroupIndices = null;
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file " + file + " not found.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
-            }
-            
+            }            
         }
     }
 }

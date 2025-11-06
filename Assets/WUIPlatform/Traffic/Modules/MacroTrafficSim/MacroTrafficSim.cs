@@ -435,7 +435,7 @@ namespace PREACT.Traffic
 
         public override void SaveToFile(int runNumber)
         {
-            Input wuiIn = Engine.Input;
+            PREACTInput wuiIn = Engine.Input;
             string path = System.IO.Path.Combine(Engine.OutputFolder, wuiIn.Simulation.Name + "_traffic_output_" + runNumber + ".csv");
             System.IO.File.WriteAllLines(path, output);
         }

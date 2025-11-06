@@ -200,7 +200,7 @@ namespace PREACT.Pedestrian
 
         private void ReachedCar(MacroHousehold household)
         {
-            if(_simulation.Input.Simulation.RunTrafficModule)
+            if(_simulation.Scenario.Input.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
@@ -257,20 +257,20 @@ namespace PREACT.Pedestrian
         {
             EvacuationDestination goal = null;
 
-            if (_simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
+            if (_simulation.Scenario.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                
-                if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
+                if (_simulation.Scenario.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
                 {
                     EvacuationGroup group = _simulation.RuntimeData.Evacuation.GetEvacGroup(cellIndex);
-                    goal = group.GetWeightedEvacGoal();
+                    goal = group.GetWeightedRandomDestination(_simulation.Destinations);
                 }
-                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
+                else if (_simulation.Scenario.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
                 {
                     int randomChoice = Randomf.Range(0, _simulation.Destinations.Count - 1);
                     goal = _simulation.Destinations[randomChoice];
                 }
             }
-            else if(cell != null && _simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            else if(cell != null && _simulation.Scenario.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
                 Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
@@ -293,7 +293,7 @@ namespace PREACT.Pedestrian
         {
             cellsX = _simulation.RuntimeData.Evacuation.CellCount.x;
             cellsY = _simulation.RuntimeData.Evacuation.CellCount.y;
-            realWorldSize = _simulation.Input.Simulation.DomainSize;            
+            realWorldSize = _simulation.Scenario.Input.Simulation.DomainSize;            
             population = new int[cellsX * cellsY];
             _householdData = householdData;
 
@@ -312,7 +312,7 @@ namespace PREACT.Pedestrian
             _macroHouseholds = new List<MacroHousehold>();
             for (int i = 0; i < _householdData.Length; ++i)
             {
-                Vector2d pos = _simulation.RuntimeData.Simulation.GetSimulationPosition(_householdData[i].originLatLon);
+                Vector2d pos = _simulation.RuntimeData.Geo.GetSimulationPosition(_householdData[i].originLatLon);
                 int xIndex = (int)(pos.x / cellSizeX);
                 int yIndex = (int)(pos.y / cellSizeY);
 
@@ -322,7 +322,7 @@ namespace PREACT.Pedestrian
                     int cellIndex = xIndex + cellsX * yIndex;
                     population[cellIndex] += _householdData[i].peopleCount;
                     int evacGroupIndex = _simulation.RuntimeData.Evacuation.EvacGroupIndices[cellIndex];
-                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), GetRandomResponseTime(evacGroupIndex), cellIndex);
+                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), GetRandomResponseTime(evacGroupIndex), cellIndex, _simulation);
                     _macroHouseholds.Add(mH);
                 }
                 else
@@ -362,7 +362,7 @@ namespace PREACT.Pedestrian
         /// <returns></returns>
         public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacuationInput evacIn = _simulation.Input.Evacuation;
+            EvacuationInput evacIn = _simulation.Scenario.Input.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Randomf.Range(0f, 1f);
@@ -370,7 +370,7 @@ namespace PREACT.Pedestrian
             int randomResponseCurveIndex = 0;
             for (int i = 0; i < _simulation.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= _simulation.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].GoalsCumulativeWeights[i])
+                if(r <= _simulation.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].DestinationCumulativeWeights[i])
                 {
                     randomResponseCurveIndex = i;
                     break;
@@ -399,7 +399,7 @@ namespace PREACT.Pedestrian
         /// <returns></returns>
         public float GetRandomWalkingSpeed()
         {
-            MacroHouseholdSimInput eO = _simulation.Input.Pedestrian.macroHouseholdSimInput;
+            MacroHouseholdSimInput eO = _simulation.Scenario.Input.Pedestrian.macroHouseholdSimInput;
             return Randomf.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 

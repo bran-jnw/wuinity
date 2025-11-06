@@ -14,8 +14,8 @@ namespace PREACT.Fire
 {
     public class CellularAutomata2 : FireModule
     {
-        public static readonly Vector2int[] neighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
-        public static readonly float[] spreadDirections = new float[] { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
+        public static readonly Vector2int[] NeighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
+        public static readonly float[] SpreadDirections = new float[] { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
         public static bool inverseSpreadDirection = true;
         public static  readonly float sqrt2 = Mathf.Sqrt(2f);
 
@@ -29,20 +29,20 @@ namespace PREACT.Fire
         {
             Engine.MESSAGE(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
-            xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
-            yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
-            bool[,] wuiArea = GetWUIArea2D(Engine.ScenarioData.Fire.WuiArea, xDim, yDim);
-            float distance = (float)Engine.ScenarioData.Fire.LCPData.RasterCellResolutionX;
+            xDim = _simulation.RuntimeData.Fire.LCPData.GetCellCountX();
+            yDim = _simulation.RuntimeData.Fire.LCPData.GetCellCountY();
+            bool[,] wuiArea = GetWUIArea2D(_simulation.RuntimeData.Fire.WuiArea, xDim, yDim);
+            float distance = (float)_simulation.RuntimeData.Fire.LCPData.RasterCellResolutionX;
             float distanceDiagonal = Mathf.Sqrt(2) * distance;
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea);
 
             FuelModelSet fuelModelSet = new FuelModelSet();
-            if (Engine.DataStatus.FuelModelsLoaded)
+            if (_simulation.RuntimeData.Fire.FuelModelsData != null)
             {
-                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < _simulation.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(_simulation.RuntimeData.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -54,7 +54,7 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, Engine.ScenarioData.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this);
+                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, _simulation.RuntimeData.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this, simulation.RuntimeData.Fire.InitialFuelMoistureData);
                     if (fireCells[x, y]._maxROS > maxROS)
                     {
                         maxROS = fireCells[x, y]._maxROS;
@@ -78,9 +78,9 @@ namespace PREACT.Fire
             //initial ignition
             for (int i = 0; i < wuiIgnitionBorder.Count; ++i)
             {
-                for (int j = 0; j < neighborIndices.Length; ++j)
+                for (int j = 0; j < NeighborIndices.Length; ++j)
                 {
-                    Vector2int index = wuiIgnitionBorder[i] + neighborIndices[j];
+                    Vector2int index = wuiIgnitionBorder[i] + NeighborIndices[j];
                     if (IsInside(xDim, yDim, index))
                     {
                         fireCells[index.x, index.y].SchedurelIgnite(0f, 0f, 0);
@@ -103,9 +103,9 @@ namespace PREACT.Fire
         {
             bool hasNonWUINeighbors = false;
 
-            for (int i = 0; i < neighborIndices.Length; ++i)
+            for (int i = 0; i < NeighborIndices.Length; ++i)
             {
-                Vector2int neighborIndex = cellIndex + neighborIndices[i];
+                Vector2int neighborIndex = cellIndex + NeighborIndices[i];
                 CorrectForEdges(xDim, yDim, ref neighborIndex, cellIndex);
                 //if we were outside of our area we get the same value back
                 if (neighborIndex != cellIndex)
@@ -147,7 +147,7 @@ namespace PREACT.Fire
             {
                 int xIndex = i % xDim;
                 int yIndex = i / xDim;
-                if (Engine.ScenarioData.Fire.WuiArea[i] == true)
+                if (wuiArea[i] == true)
                 {
                     result[xIndex, yIndex] = true;
                 }
@@ -160,8 +160,8 @@ namespace PREACT.Fire
         {
             List<Vector2int> borderCells = new List<Vector2int>();
 
-            int xDim = Engine.ScenarioData.Fire.LCPData.GetCellCountX();
-            int yDim = Engine.ScenarioData.Fire.LCPData.GetCellCountY();
+            int xDim = wuiArea.GetLength(0);
+            int yDim = wuiArea.GetLength(1);
 
             //CellSpreadRates[,] rateOfSpreads = new CellSpreadRates[xDim, yDim];
 
@@ -362,7 +362,7 @@ namespace PREACT.Fire
         public int _linearIndex;
         private CellularAutomata2 _owner;
 
-        public FireCell2(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize, CellularAutomata2 owner)
+        public FireCell2(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize, CellularAutomata2 owner, InitialFuelMoistureLibrary initialFuelMoistures)
         {
             _owner = owner;
             _index = new Vector2int(xIndex, yIndex);
@@ -378,7 +378,7 @@ namespace PREACT.Fire
             _maxROS = float.MinValue;
             for (int i = 0; i < _spreadRates.Length; i++)
             {
-                InitialFuelMoisture moisture = Engine.ScenarioData.Fire.InitialFuelMoistureData.GetInitialFuelMoisture(_lcp.fuel_model);
+                InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_lcp.fuel_model);
                 double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
                 int fuelModel = _lcp.fuel_model;
                 float slope = _lcp.slope;
@@ -387,7 +387,7 @@ namespace PREACT.Fire
                 surface.updateSurfaceInputs(fuelModel, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
                     midFlameWindspeed, windSpeedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, slope, slopeUnits, aspect, _lcp.canopy_cover, coverUnits, _lcp.crown_canopy_height, lengthUnits, crownRatio);
 
-                float spreadDirection = CellularAutomata2.spreadDirections[i];
+                float spreadDirection = CellularAutomata2.SpreadDirections[i];
                 if (CellularAutomata2.inverseSpreadDirection)
                 {
                     spreadDirection += 180f;
@@ -411,7 +411,7 @@ namespace PREACT.Fire
         {
             for (int i = 0; i < _neighbors.Length; ++i)
             {
-                Vector2int neighborIndex = _index + CellularAutomata2.neighborIndices[i];
+                Vector2int neighborIndex = _index + CellularAutomata2.NeighborIndices[i];
                 if (CellularAutomata2.IsInside(xDim, yDim, neighborIndex))
                 {
                     _neighbors[i] = cells[neighborIndex.x, neighborIndex.y];

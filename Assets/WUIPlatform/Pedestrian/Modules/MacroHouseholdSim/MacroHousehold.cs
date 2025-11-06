@@ -38,10 +38,10 @@ namespace PREACT.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex)
+        public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
         {
-            PopulationInput popInput = Engine.Input.Population;
-            MacroHouseholdSimInput houseInput = Engine.Input.Pedestrian.macroHouseholdSimInput;
+            PopulationInput popInput = simulation.Scenario.Input.Population;
+            MacroHouseholdSimInput houseInput = simulation.Scenario.Input.Pedestrian.macroHouseholdSimInput;
 
             _houseHoldData = householdData;
             _cellIndex = cellIndex;
@@ -51,7 +51,7 @@ namespace PREACT.Pedestrian
             {
                 if (peopleInHousehold >= 2)
                 {
-                    if (Random.Range(0f, 1f) <= popInput.MaxCarsProbability)
+                    if (Randomf.Range(0f, 1f) <= popInput.MaxCarsProbability)
                     {
                         cars = Mathf.Min(peopleInHousehold, popInput.MaxCars);
                     }
@@ -59,9 +59,9 @@ namespace PREACT.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = Engine.ScenarioData.Simulation.GetSimulationPosition(householdData.originLatLon);
+            Vector2d temp = simulation.Scenario.Data.Geo.GetSimulationPosition(householdData.originLatLon);
             homePosition = new Vector2((float)temp.x, (float)temp.y);           
-            temp = Engine.ScenarioData.Simulation.GetSimulationPosition(householdData.roadAccessLatLon);
+            temp = simulation.Scenario.Data.Geo.GetSimulationPosition(householdData.roadAccessLatLon);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;

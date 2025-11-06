@@ -163,28 +163,29 @@ namespace PREACT.Fire
             Header.loelev = 0;
         }
 
-		public LCPData(string path, bool readGeoTIFF = false)					
+		public LCPData(string filePath, Vector2d utmOrigin)					
 		{
-			if(path.EndsWith("tif") || path.EndsWith("tiff"))
+			bool readGeoTIFF = false;
+            if (filePath.EndsWith("tif") || filePath.EndsWith("tiff"))
 			{
 				readGeoTIFF = true;
 			}
 
 			if(readGeoTIFF)
 			{
-				ReadGeoTIFF(path);
+				ReadGeoTIFF(filePath);
             }
 			else
 			{
-                ReadLCP(path);
+                ReadLCP(filePath);
             }
-			CalculateOriginOffset();
+			CalculateOriginOffset(utmOrigin);
 		}
 
-		private void ReadGeoTIFF(string path)
+		private void ReadGeoTIFF(string filePath)
 		{
             OSGeo.GDAL.Gdal.AllRegister();
-            using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(path, OSGeo.GDAL.Access.GA_ReadOnly))
+            using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(filePath, OSGeo.GDAL.Access.GA_ReadOnly))
             {
                 Header.numeast = tif.RasterXSize;
                 Header.numnorth = tif.RasterYSize;
@@ -946,7 +947,6 @@ namespace PREACT.Fire
 				}
 			}
 
-			CalculateOriginOffset();
             if (CantAllocLCP)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
@@ -957,10 +957,10 @@ namespace PREACT.Fire
             }
         }
 
-		private void CalculateOriginOffset()
+		private void CalculateOriginOffset(Vector2d utmOrigin)
 		{
             Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            _originOffset = lcpUTM - Engine.ScenarioData.Simulation.UTMOrigin;
+            _originOffset = lcpUTM - utmOrigin;
             _originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));            
         }
 

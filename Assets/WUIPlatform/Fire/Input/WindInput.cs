@@ -71,7 +71,7 @@ namespace PREACT.Fire
             this.dataPoints = dataPoints;
         }
 
-        public WindData GetWindDataAtTime(float time)           
+        public WindData GetWindDataAtTime(float time, IO.FireInput fireInput)           
         {
             if(dataPoints.Length > 1 && (directionSpline == null || speedSpline == null || cloudSpline == null))
             {
@@ -83,9 +83,9 @@ namespace PREACT.Fire
             if(dataPoints.Length > 1)       
             {
                 w.direction = directionSpline.GetYValue(time);
-                if(Engine.Input.Fire.FireModule == IO.FireInput.FireModuleChoice.FireCell)
+                if(fireInput.FireModule == IO.FireInput.FireModuleChoice.FireCell)
                 {
-                    w.speed = speedSpline.GetYValue(time) * Engine.Input.Fire.FireCellInput.WindMultiplier;
+                    w.speed = speedSpline.GetYValue(time) * fireInput.FireCellInput.WindMultiplier;
                 }                
                 w.cloudCover = cloudSpline.GetYValue(time);
             }

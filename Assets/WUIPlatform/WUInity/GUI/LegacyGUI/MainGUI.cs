@@ -13,7 +13,7 @@ namespace WUInity.UI
 
         void MainMenu()
         {
-            PREACT.IO.Input wO = _engine.Input;
+            PREACT.IO.PREACTInput wO = _engine.Input;
 
             //whenever we load a file we need to set the new data for the GUI
             if (mainMenuDirty)
@@ -137,7 +137,7 @@ namespace WUInity.UI
             ++buttonIndex;            
         }
 
-        void CleanMainMenu(PREACT.IO.Input wO)
+        void CleanMainMenu(PREACT.IO.PREACTInput wO)
         {
             mainMenuDirty = false;
             if(wO != null)
@@ -165,7 +165,7 @@ namespace WUInity.UI
                       
         }
 
-        public void ParseMainData(PREACT.IO.Input wO)
+        public void ParseMainData(PREACT.IO.PREACTInput wO)
         {
             ParseEvacInput();
             ParseTrafficInput();
@@ -220,8 +220,12 @@ namespace WUInity.UI
 
         void LoadInput(string[] paths)
         {
-            PREACT.IO.Input.LoadFromDisk(paths[0]);
-            mainMenuDirty = true;
+            bool success;
+            PREACT.IO.PREACTInput.LoadFromDisk(paths[0], out success);
+            if(success)
+            {
+                mainMenuDirty = true;
+            }            
         }            
 
         void CancelSaveLoad()

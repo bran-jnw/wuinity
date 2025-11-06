@@ -10,7 +10,6 @@ using PREACT.IO;
 using System.IO;
 using System.Collections.Generic;
 using System;
-using PREACT.Utility.Math;
 using PREACT.Utility.Analysis;
 
 namespace PREACT
@@ -21,16 +20,15 @@ namespace PREACT
         private ExternalManager _externalManager;
         private Simulation[] _simulations;
         private Simulation _mainSimulation; //this one talks to any visualizer         
-        private Input _input;
-        private RuntimeData _scenarioData;
+        private PREACTScenario _scenario;
         private DataStatus _dataStatus;
-        private Output _output;        
+        private PREACTOutput _output;        
         private string _workingFile;
         private string _workingFolder;
         private Visualization.WUIShowCommunicator _wuiShow;
 
         public Simulation Simulation { get => _mainSimulation; }
-        public Input Input { get => _input; }
+        public PREACTScenario Scenario { get => _scenario; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
         public string WorkingFolder
@@ -57,14 +55,14 @@ namespace PREACT
             {
                 //DirectoryInfo path = Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(WorkingFile).ToString(), Input.Simulation.Name + "_output"));
                 //return path.ToString();
-                if(_input != null)
+                if(_scenario != null && _scenario.Input != null)
                 {
-                    string path = Path.Combine(WorkingFolder, _input.Simulation.Name + "_output");
+                    string path = Path.Combine(WorkingFolder, _scenario.Input.Simulation.Name + "_output");
                     if(!Directory.Exists(path))
                     {
                         Directory.CreateDirectory(path);
                     }
-                    return Path.Combine(WorkingFolder, _input.Simulation.Name + "_output");
+                    return Path.Combine(WorkingFolder, _scenario.Input.Simulation.Name + "_output");
                 }
                 else
                 {
@@ -78,14 +76,13 @@ namespace PREACT
             }
         }
         public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
-        public RuntimeData ScenarioData { get => _scenarioData; }
-        public Output Output { get => _output; }     
+        public PREACTOutput Output { get => _output; }     
 
         public Engine(ExternalManager externalManager, bool mainEngine = true)
         {
             //needed for proper reading of input files on all systems
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            _output = new Output();
+            _output = new PREACTOutput();
             _externalManager = externalManager;
             if(mainEngine)
             {
@@ -121,7 +118,7 @@ namespace PREACT
             
             for (int i = 0; i < _simulations.Length; ++i)
             {
-                _simulations[i] = new Simulation(this, _input, i);
+                _simulations[i] = new Simulation(this, _scenario, i);
                 _mainSimulation = _simulations[i];
                 _simulations[i].Run();
                 CollectSimulationStatistics(_simulations[i], engineTask);
@@ -213,15 +210,15 @@ namespace PREACT
                 _simulations = new Simulation[engineTask.NumberOfRuns];
                 for (int i = 0; i < _simulations.Length; ++i)
                 {
-                    _simulations[i] = new Simulation(this, _input, i);
+                    _simulations[i] = new Simulation(this, _scenario, i);
                 }
                 //by default simulation 0 will be the main to be displayed
                 SetMainSimulation(0);
             }            
 
-            if (_input.WUIShow.SendDataToWUIShow && _input.Simulation.RunTrafficModule)
+            if (_scenario.Input.WUIShow.SendDataToWUIShow && _scenario.Input.Simulation.RunTrafficModule)
             {
-                _wuiShow = new Visualization.WUIShowCommunicator(this, _input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
+                _wuiShow = new Visualization.WUIShowCommunicator(this, _scenario.Input.WUIShow.WuiShowServerIP, _scenario.Input.WUIShow.WuiShowServerPort, 0, _scenario.Input.Simulation.LowerLeftLatLon.y, _scenario.Input.Simulation.LowerLeftLatLon.x);
             }
         }   
         
@@ -267,7 +264,7 @@ namespace PREACT
                 MESSAGE(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
 
-            Output.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
+            PREACTOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _scenario.Input.Simulation.Name + ".log"));
         }
 
         float cumulativeTotalEvacTime = 0.0f;
@@ -321,47 +318,41 @@ namespace PREACT
             }            
         }       
 
-        public void SetInput(Input input)
+        public void LoadScenarioFromInput(PREACTInput input, string rootFolder, out bool success)
         {
             _dataStatus.HaveInput = true;
-            _workingFile = null;
-            _workingFolder = null;
-            _input = input;
-            CreateDataFromInput();
-        }
-
-        public void LoadInputFromFile(string file)
-        {
-            Input input = Input.LoadFromDisk(file);
-
-            if(input != null)
+            PREACTScenario scenario = PREACTScenario.LoadFromInput(input, rootFolder, out success);
+            if (success)
             {
-                _workingFile = file;
-                _workingFolder = Path.GetDirectoryName(file);
+                _workingFile = null;
+                _workingFolder = rootFolder;
                 _dataStatus.Reset();
                 _dataStatus.HaveInput = true;
-                _input = input;  
-                CreateDataFromInput();
+
+                if (_externalManager != null)
+                {
+                    _externalManager.UpdateMap();
+                    _externalManager.InputHasChanged();
+                }
             }
         }
 
-        private void CreateDataFromInput()
+        public void LoadScenarioFromFile(string inputFilePath, out bool success)
         {
-            _scenarioData = new RuntimeData(_input);
-            //transform input to actual data
-            MESSAGE(null, LogType.Log, "Loading referenced data from input file...");
-            //need to load evacuation goals before routing as they rely on evacuation goals
-            _scenarioData.Population.LoadAll(_input, _workingFolder);
-            _scenarioData.Evacuation.LoadAll(_input, _workingFolder);
-            //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now                
-            _scenarioData.Traffic.LoadAll(_input, _workingFolder);
-            _scenarioData.Fire.LoadAll(_input, _workingFolder);
-            _scenarioData.Smoke.LoadAll(_input, _workingFolder); //does nothing right now
-
-            if (_externalManager != null)
+            _dataStatus.HaveInput = false;
+            PREACTScenario scenario = PREACTScenario.LoadFromDisk(inputFilePath, out success);
+            if(success)
             {
-                _externalManager.UpdateMap();
-                _externalManager.InputHasChanged();
+                _workingFile = inputFilePath;
+                _workingFolder = Path.GetDirectoryName(inputFilePath);
+                _dataStatus.Reset();
+                _dataStatus.HaveInput = true;
+
+                if (_externalManager != null)
+                {
+                    _externalManager.UpdateMap();
+                    _externalManager.InputHasChanged();
+                }
             }
         }
                 
@@ -471,8 +462,7 @@ namespace PREACT
             {
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
-            Input wuiIn = Input;
-            string path = Path.Combine(OutputFolder, wuiIn.Simulation.Name + "_traffic_average.csv");
+            string path = Path.Combine(OutputFolder, _scenario.Input.Simulation.Name + "_traffic_average.csv");
             System.IO.File.WriteAllLines(path, output);
         }
 

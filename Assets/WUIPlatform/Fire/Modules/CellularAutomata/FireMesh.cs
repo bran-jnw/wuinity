@@ -89,7 +89,7 @@ namespace PREACT.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = _simulation.Input.Fire.FireCellInput.SpreadMode;
+            spreadMode = _simulation.Scenario.Input.Fire.FireCellInput.SpreadMode;
 
             InitializeMesh();
         }
@@ -317,7 +317,7 @@ namespace PREACT.Fire
             for (int i = 0; i < _fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
-                if(_simulation.Input.Simulation.RunSmokeModule)
+                if(_simulation.Scenario.Input.Simulation.RunSmokeModule)
                 {
                     sootProduction[i] = 0.0f;
                     if (_fireCells[i].cellState == FireCellState.Burning)
@@ -330,7 +330,7 @@ namespace PREACT.Fire
 
             //update time and wind for next time step. TODO: spread out the update over several frames
             timeSinceStart += dt;
-            _currentWindData = wind.GetWindDataAtTime((float)timeSinceStart);
+            _currentWindData = wind.GetWindDataAtTime((float)timeSinceStart, _simulation.Scenario.Input.Fire);
             //TODO: only update if any input has changed, re-calculate spread rates
             UpdateCellSpreadRates();
 
@@ -369,7 +369,7 @@ namespace PREACT.Fire
                 return;
             }
 
-            if(_simulation.Input.Fire.FireCellInput.UseInitialIgnitionMap)
+            if(_simulation.Scenario.Input.Fire.FireCellInput.UseInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
@@ -452,7 +452,7 @@ namespace PREACT.Fire
 
         public override FireCellState GetFireCellState(Vector2d latLong)     
         {
-            Vector2d pos = _simulation.RuntimeData.Simulation.GetSimulationPosition(latLong);
+            Vector2d pos = _simulation.RuntimeData.Geo.GetSimulationPosition(latLong);
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);

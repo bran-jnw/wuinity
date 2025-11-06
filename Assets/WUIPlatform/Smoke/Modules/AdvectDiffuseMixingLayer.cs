@@ -80,10 +80,10 @@ namespace PREACT.Smoke
             _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
-            _globalData.cellHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
+            _globalData.cellHeight = _simulation.Scenario.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
-            _globalData.deltaTime = _simulation.Input.Simulation.DeltaTime;
+            _globalData.deltaTime = _simulation.Scenario.Input.Simulation.DeltaTime;
 
             _allBuffers = new List<MemoryBuffer1D<float, Stride1D.Dense>>();
             bufferSize = _globalData.cellsX * _globalData.cellsY;

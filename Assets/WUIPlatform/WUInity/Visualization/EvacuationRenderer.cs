@@ -27,19 +27,18 @@ namespace WUInity.Visualization
         Dictionary<uint, TrafficModuleVehicle> _activeVehicles;
 
 
-        public void CreateBuffers(bool renderHouseholds, bool renderTraffic)
+        public void CreateBuffers(bool renderHouseholds, bool renderTraffic, Vector2d domainSize, PedestrianModule pedestrianModule)
         {
             Release();
 
             //calculate bounds here as traffic will need it too, not only pedestrian visualizer
-            Vector2d domainSize = Engine.Input.Simulation.DomainSize;
             Vector3 center = new Vector3((float)domainSize.x * 0.5f, 1f, (float)domainSize.y * 0.5f);
             Vector3 size = new Vector3((float)domainSize.x + 2f, 2f, (float)domainSize.y + 2f);
             bounds = new Bounds(center, size);
 
             if (renderHouseholds)
             {
-                CreateHouseholdsBuffer(((MacroHouseholdSim)Engine.SIM.PedestrianModule).GetHouseholdPositions().Length);
+                CreateHouseholdsBuffer(((MacroHouseholdSim)pedestrianModule).GetHouseholdPositions().Length);
             }            
         }
 
@@ -48,11 +47,11 @@ namespace WUInity.Visualization
             householdPositionsBuffer = new ComputeBuffer(householdCount, 4 * sizeof(float));
         }
 
-        public void UpdateEvacuationRenderer(bool renderHouseholds, bool renderCars)
+        public void UpdateEvacuationRenderer(bool renderHouseholds, bool renderCars, PedestrianModule pedestrianModule, TrafficModule trafficModule)
         {
             if (renderHouseholds)
             {
-                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)Engine.SIM.PedestrianModule).GetHouseholdPositions();
+                System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)pedestrianModule).GetHouseholdPositions();
                 householdPositionsBuffer.SetData(newPositions);
                 householdsMaterial.SetBuffer("_PositionsAndState", householdPositionsBuffer);
                 Graphics.DrawMeshInstancedProcedural(householdMesh, 0, householdsMaterial, bounds, householdPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
@@ -60,7 +59,7 @@ namespace WUInity.Visualization
 
             if (renderCars)
             {
-                Dictionary<uint, TrafficModuleVehicle> currentVehicles = Engine.SIM.TrafficModule.GetActiveVehicles();
+                Dictionary<uint, TrafficModuleVehicle> currentVehicles = trafficModule.GetActiveVehicles();
                 if(currentVehicles.Count > 0)
                 {
                     //need to make a copy as it might get modified during foreach

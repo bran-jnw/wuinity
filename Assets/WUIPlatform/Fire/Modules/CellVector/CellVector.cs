@@ -142,11 +142,11 @@ namespace PREACT.Fire
 
         public CellVector(Simulation simulation) : base(simulation)
         {
-            _lcpData = Engine.ScenarioData.Fire.LCPData;
-            _weather = Engine.ScenarioData.Fire.WeatherInput;
-            _wind = Engine.ScenarioData.Fire.WindInput;
-            _initialFuelMoisture = Engine.ScenarioData.Fire.InitialFuelMoistureData;
-            _ignitionPoints = Engine.ScenarioData.Fire.IgnitionPoints;
+            _lcpData = _simulation.Scenario.Data.Fire.LCPData;
+            _weather = _simulation.Scenario.Data.Fire.WeatherInput;
+            _wind = _simulation.Scenario.Data.Fire.WindInput;
+            _initialFuelMoisture = _simulation.Scenario.Data.Fire.InitialFuelMoistureData;
+            _ignitionPoints = _simulation.Scenario.Data.Fire.IgnitionPoints;
 
             _cellSizeX = (float)_lcpData.RasterCellResolutionX;
             _cellSizeY = (float)_lcpData.RasterCellResolutionY;
@@ -154,7 +154,7 @@ namespace PREACT.Fire
             _cellsY = _lcpData.GetCellCountY();
 
             Vector2d lcpUTM = _lcpData.GetLowerLeftUTM();
-            offset = lcpUTM - Engine.ScenarioData.Simulation.UTMOrigin;
+            offset = lcpUTM - _simulation.Scenario.Data.Geo.UTMOrigin;
 
             bufferSize = _cellsX * _cellsY;
             _cells = new CellVectorCell[bufferSize];
@@ -184,12 +184,12 @@ namespace PREACT.Fire
         {
             _fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if (Engine.DataStatus.FuelModelsLoaded)
+            if (_simulation.Scenario.Data.Fire.FuelModelsData != null)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < Engine.ScenarioData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < _simulation.Scenario.Data.Fire.FuelModelsData.Fuels.Count; i++)
                 {
-                    _fuelModelSet.setFuelModelRecord(Engine.ScenarioData.Fire.FuelModelsData.Fuels[i]);
+                    _fuelModelSet.setFuelModelRecord(_simulation.Scenario.Data.Fire.FuelModelsData.Fuels[i]);
                 }
             }
             _surfaceFire = new Surface(_fuelModelSet);

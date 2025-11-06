@@ -220,7 +220,7 @@ namespace WUInity
                 string file = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "example\\example.wui");
                 if (File.Exists(file))
                 {
-                    _engine.LoadInputFromFile(file);
+                    _engine.LoadScenarioFromFile(file);
                 }
                 else
                 {
@@ -401,7 +401,7 @@ namespace WUInity
                     {
                         CreateVisualizers();
                     }
-                    EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic);
+                    EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic, _engine.Simulation.PedestrianModule, _engine.Simulation.TrafficModule);
                     FIRE_VISUALS.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion);
                 }
             }            
@@ -444,7 +444,7 @@ namespace WUInity
             string[] inputFiles = Directory.GetFiles(folder, "*.wui");
             for (int i = 0; i < inputFiles.Length; i++)
             {
-                _engine.LoadInputFromFile(inputFiles[i]);
+                _engine.LoadScenarioFromFile(inputFiles[i]);
                 RunSimulation(engineTask);
             }
         }

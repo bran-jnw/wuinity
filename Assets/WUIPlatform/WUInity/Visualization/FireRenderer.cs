@@ -68,18 +68,18 @@ namespace WUInity.Visualization
             }
         }
 
-        public void CreateBuffers(bool renderFire, bool renderSmoke)
+        public void CreateBuffers(bool renderFire, bool renderSmoke, int xDim, int yDim, SmokeInput smokeInput)
         {
             Release(true);
 
             if (renderFire)
             {
-                CreateFireBuffer();
+                CreateFireBuffer(xDim, yDim);
             }
             
             if(renderSmoke)
             {
-                CreateSootBuffer();
+                CreateSootBuffer(smokeInput, xDim, yDim);
             }            
         }
 
@@ -99,13 +99,13 @@ namespace WUInity.Visualization
             SetFireOffsetAndScale();
         }
 
-        void CreateSootBuffer(SmokeInput smokeInput, int cellsX, int cellsY)
+        void CreateSootBuffer(SmokeInput smokeInput, int xDim, int yDim)
         {
             if(smokeInput.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
                 || smokeInput.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
             {
-                sootCellCountX = cellsX;
-                sootCellCountY = cellsY;
+                sootCellCountX = xDim;
+                sootCellCountY = yDim;
                 sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);

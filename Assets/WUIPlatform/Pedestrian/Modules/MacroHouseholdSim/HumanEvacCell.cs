@@ -33,9 +33,9 @@ namespace PREACT.Pedestrian
         /// <param name="cellWorldSize"></param>
         /// <param name="routeCollection"></param>
         /// <param name="personsInCell"></param>
-        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2d roadAccessLatLon, int personsInCell, int cellIndex)
+        public HumanEvacCell(Vector2d nodeCenter, Vector2d cellWorldSize, Vector2d roadAccessLatLon, int personsInCell, int cellIndex, Simulation simulation)
         {
-            PopulationInput eO = Engine.Input.Population;
+            PopulationInput eO = simulation.Scenario.Input.Population;
 
             this.cellWorldSize = cellWorldSize;
             this.cellIndex = cellIndex;
@@ -45,7 +45,7 @@ namespace PREACT.Pedestrian
             List<int> personsPerHousehold = new List<int>();
             while (peopleWithoutHouseHold > 0)
             {
-                int p = Random.Range(eO.MinHouseholdSize, eO.MaxHouseholdSize);
+                int p = Randomf.Range(eO.MinHouseholdSize, eO.MaxHouseholdSize);
                 if (p > peopleWithoutHouseHold)
                 {
                     p = peopleWithoutHouseHold;
@@ -56,10 +56,10 @@ namespace PREACT.Pedestrian
 
             macroHouseholds = new MacroHousehold[personsPerHousehold.Count];
 
-            closestNodeSimulationSpace = Engine.ScenarioData.Simulation.GetSimulationPosition(roadAccessLatLon);
+            closestNodeSimulationSpace = simulation.Scenario.Data.Geo.GetSimulationPosition(roadAccessLatLon);
             for (int i = 0; i < macroHouseholds.Length; ++i)
             {
-                int evacGroupIndex = Engine.ScenarioData.Evacuation.EvacGroupIndices[i];
+                int evacGroupIndex = simulation.Scenario.Data.Evacuation.EvacGroupIndices[i];
                 //macroHouseholds[i] = new MacroHousehold(this, nodeCenter, personsPerHousehold[i], MacroHouseholdSim.GetRandomWalkingSpeed(), MacroHouseholdSim.GetRandomResponseTime(evacGroupIndex));
             }
         }

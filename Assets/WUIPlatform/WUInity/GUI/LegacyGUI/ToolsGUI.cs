@@ -267,8 +267,8 @@ namespace WUInity.UI
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run k-PERIL"))
                 {
                     float[,] tB = PREACT.WUIPlatformPERIL.RunPERIL(_engine.Input.TriggerBuffer.kPERILInput.MidflameWindspeed);
-                    _engine.Simulation.SetTriggerBufferData(tB);
-                    _engine.Simulation.DisplayTriggerBuffer();
+                    //_engine.Simulation.SetTriggerBufferData(tB);
+                    //_engine.Simulation.DisplayTriggerBuffer();
                 }
             }   
         }        
@@ -327,7 +327,7 @@ namespace WUInity.UI
         {
             FileBrowser.SetFilters(false, osmFilter);
             string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
-            FileBrowser.ShowLoadDialog(FilterOSM, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM data to filter spacially", "Set");
+            FileBrowser.ShowLoadDialog(FilterOSM, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM data to filter spatially", "Set");
         }
         void FilterOSM(string[] paths)
         {
@@ -335,22 +335,23 @@ namespace WUInity.UI
         }
 
         //Router Db
+        string _firstFileInSequence;
         void OpenCreateAndSaveRouterDb()
         {
             FileBrowser.SetFilters(false, osmFilter);
             string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
-            FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
+            FileBrowser.ShowLoadDialog(OpenSelectNewRouterDbFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
         }
-        void OpenSelectNewRouterDbFile()
+        void OpenSelectNewRouterDbFile(string[] paths)
         {
+            _firstFileInSequence = paths[0];
             FileBrowser.SetFilters(false, routerDbFilter);
             string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
-            FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
+            FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify filename of new routerDb", "Set");
         }
-
         void CreateAndSaveRouterDb(string[] paths)
         {
-            PopulationTools.CreateAndSaveRouterDb(, paths[0]);
+            PopulationTools.CreateAndSaveRouterDb(_firstFileInSequence, paths[0]);
         }
         /*void OpenLoadRouterDb()
         {

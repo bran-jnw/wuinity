@@ -11,23 +11,20 @@ namespace PREACT
 {
     public static class GraphicalFireInput
     {
-        public static void SaveGraphicalFireInput(string rootFolder, IO.Input input, Runtime.RuntimeData scenario)
+        public static void SaveGraphicalFireInput(string file, IO.PREACTInput input, Runtime.FireData fireData)
         {
-            string path = Path.Combine(rootFolder, input.Simulation.Name + ".gfi");
-            //WUIinput.Fire.GraphicalFireInputFile = WUIinput.Simulation.Id + ".gfi";
-
-            using (FileStream fs = new FileStream(path, FileMode.Create))
+            using (FileStream fs = new FileStream(file, FileMode.Create))
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    int xCount = scenario.Fire.LCPData.GetCellCountX();
-                    int yCount = scenario.Fire.LCPData.GetCellCountY();
+                    int xCount = fireData.LCPData.GetCellCountX();
+                    int yCount = fireData.LCPData.GetCellCountY();
                     bw.Write(xCount);
                     bw.Write(yCount);
-                    bw.Write(GetBytes(scenario.Fire.WuiArea));
-                    bw.Write(GetBytes(scenario.Fire.RandomIgnition));
-                    bw.Write(GetBytes(scenario.Fire.InitialIgnition));
-                    bw.Write(GetBytes(scenario.Fire.ManualTriggerBuffer));
+                    bw.Write(GetBytes(fireData.WuiArea));
+                    bw.Write(GetBytes(fireData.RandomIgnition));
+                    bw.Write(GetBytes(fireData.InitialIgnition));
+                    bw.Write(GetBytes(fireData.ManualTriggerBuffer));
                 }
             }
         }
@@ -46,52 +43,40 @@ namespace PREACT
             return result;
         }
 
-        public static void LoadGraphicalFireInput(string rootFolder, IO.Input input, Runtime.RuntimeData scenario, out bool success)
+        public static void LoadGraphicalFireInput(string file, Fire.LCPData lcpData, out bool[] wuiArea, out bool[] randomIgnitionArea, out bool[] initialIgnitionIndices, out bool[] triggerBufferIndices, out bool success)
         {
             success = false;
-            string path = Path.Combine(rootFolder, input.Fire.GraphicalFireInputFile); //graphical fire input
 
-            if(scenario.Fire.LCPData == null)
+            if(File.Exists(file))
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "No LCP data has been loaded, can't try and look for GFI data.");
-                return;
-            }
-
-            if(File.Exists(path))
-            {
-                using (FileStream fs = new FileStream(path, FileMode.Open))
+                using (FileStream fs = new FileStream(file, FileMode.Open))
                 {
                     using (BinaryReader br = new BinaryReader(fs))
                     {
                         int ncols = br.ReadInt32();
                         int nrows = br.ReadInt32();
-                        if(ncols == scenario.Fire.LCPData.GetCellCountX() && nrows == scenario.Fire.LCPData.GetCellCountY())
+                        if(ncols == lcpData.GetCellCountX() && nrows == lcpData.GetCellCountY())
                         {
                             int dataSize = ncols * nrows;
 
                             byte[] b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] wuiAreaIndices = GetBools(b, dataSize);
+                            wuiArea = GetBools(b, dataSize);
 
                             b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] randomIgnitionArea = GetBools(b, dataSize);
+                            randomIgnitionArea = GetBools(b, dataSize);
 
                             b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] initialIgnitionIndices = GetBools(b, dataSize);
+                            initialIgnitionIndices = GetBools(b, dataSize);
 
                             b = br.ReadBytes(dataSize * sizeof(bool));
-                            bool[] triggerBufferIndices = GetBools(b, dataSize);
+                            triggerBufferIndices = GetBools(b, dataSize);
 
-                            scenario.Fire.UpdateWUIArea(wuiAreaIndices, ncols, nrows);
-                            scenario.Fire.UpdateRandomIgnitionIndices(randomIgnitionArea, ncols, nrows);
-                            scenario.Fire.UpdateInitialIgnitionIndices(initialIgnitionIndices, ncols, nrows);
-                            scenario.Fire.UpdateTriggerBufferIndices(triggerBufferIndices, ncols, nrows);
                             success = true;
                         }
                         else
                         {
                             Engine.MESSAGE(null, Engine.LogType.Warning, "Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.");
-                            br.Close();
-                            CreateDefaultInputs(rootFolder, input, scenario);
+                            CreateDefault(lcpData, out wuiArea, out randomIgnitionArea, out initialIgnitionIndices, out triggerBufferIndices);
                         }
                     }
                 }
@@ -99,21 +84,19 @@ namespace PREACT
             else
             {
                 Engine.MESSAGE(null, Engine.LogType.Warning, "Could not find GFI data, creating empty default.");
-                CreateDefaultInputs(rootFolder, input, scenario);                
+                CreateDefault(lcpData, out wuiArea, out randomIgnitionArea, out initialIgnitionIndices, out triggerBufferIndices);
             }
         }
 
-        private static void CreateDefaultInputs(string rootFolder, IO.Input input, Runtime.RuntimeData scenario)
+        private static void CreateDefault(Fire.LCPData lcpData, out bool[] wuiArea, out bool[] randomIgnitionArea, out bool[] initialIgnitionIndices, out bool[] triggerBufferIndices)
         {
             //LCP file has already been read, use that for dimensions
-            int xCount = scenario.Fire.LCPData.GetCellCountX();
-            int yCount = scenario.Fire.LCPData.GetCellCountY();
-
-            scenario.Fire.UpdateWUIArea(null, xCount, yCount);
-            scenario.Fire.UpdateRandomIgnitionIndices(null, xCount, yCount);
-            scenario.Fire.UpdateInitialIgnitionIndices(null, xCount, yCount);
-            scenario.Fire.UpdateTriggerBufferIndices(null, xCount, yCount);
-            SaveGraphicalFireInput(rootFolder, input, scenario);
+            int xDim = lcpData.GetCellCountX();
+            int yDim = lcpData.GetCellCountY();
+            wuiArea = new bool[xDim * yDim];
+            randomIgnitionArea = new bool[xDim * yDim];
+            initialIgnitionIndices = new bool[xDim * yDim];
+            triggerBufferIndices = new bool[xDim * yDim];
         }
     }
 }

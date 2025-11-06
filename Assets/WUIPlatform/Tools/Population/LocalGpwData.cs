@@ -58,7 +58,7 @@ namespace PREACT.Population
             return new Vector2d(xSize, ySize);
         }
 
-        private void SaveLocalGPWData(Input input, string rootFolder)
+        private void SaveLocalGPWData(PREACTInput input, string rootFolder)
         {            
             string[] data = new string[13];
 
@@ -166,7 +166,7 @@ namespace PREACT.Population
             return success;
         }
 
-        public bool CreateLocalGPWData(Input input, string globalGpwFolder)
+        public bool CreateLocalGPWData(PREACTInput input, string globalGpwFolder)
         {
             bool success = LoadRelevantGPWData(input, globalGpwFolder);
 
@@ -267,7 +267,7 @@ namespace PREACT.Population
         /// <summary>
         /// Returns the density data at a gridpoint based on polar coordinates.
         /// </summary>
-        private bool LoadRelevantGPWData(Input input, string globalGpwFolder)
+        private bool LoadRelevantGPWData(PREACTInput input, string globalGpwFolder)
         {
             Vector2d latLong = input.Simulation.LowerLeftLatLon;
             Vector2d size = input.Simulation.DomainSize;

@@ -11,7 +11,7 @@ using System.IO;
 namespace PREACT.Fire
 {
     [System.Serializable]
-    public class InitialFuelMoisture
+    public struct InitialFuelMoisture
     {
         public static InitialFuelMoisture DEFAULT = new InitialFuelMoisture(0, 6, 7, 8, 60, 90);
 
@@ -84,11 +84,8 @@ namespace PREACT.Fire
 
         public InitialFuelMoisture GetInitialFuelMoisture(int fuelModelNumber)
         {
-            InitialFuelMoisture result = null;
-
-            _initialFuelMoistures.TryGetValue(fuelModelNumber, out result);             
-
-            if(result == null)
+            InitialFuelMoisture result;  
+            if(!_initialFuelMoistures.TryGetValue(fuelModelNumber, out result))
             {
                 result = new InitialFuelMoisture(fuelModelNumber);
                 _initialFuelMoistures.Add(fuelModelNumber, result);

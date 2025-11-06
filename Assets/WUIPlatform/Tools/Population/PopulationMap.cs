@@ -85,7 +85,7 @@ namespace PREACT.Population
             return _mask[x + y * _cells.x];
         }
 
-        public void CreateFromLocalGPW(IO.Input input, LocalGPWData localGPWData, float cellSize)
+        public void CreateFromLocalGPW(IO.PREACTInput input, LocalGPWData localGPWData, float cellSize)
         {
             _lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
             _size = input.Simulation.DomainSize;
@@ -140,9 +140,10 @@ namespace PREACT.Population
             Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
-        public void UpdatePopulationMapBasedOnRoadAccess(RuntimeData scenario, Itinero.Router router)
+        public void UpdatePopulationMapBasedOnRoadAccess(GeoData geoData, Itinero.RouterDb routerDb)
         {
             int stuckPeople = 0;
+            Itinero.Router router = new Itinero.Router(routerDb);
             for (int i = 0; i < _cellPopulations.Length; ++i)
             {
                 if (_cellPopulations[i] > 0)
@@ -150,7 +151,7 @@ namespace PREACT.Population
                     int yIndex = i / _cells.x;
                     int xIndex = i - yIndex * _cells.x;
                     Vector2d cellCenterPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize);
-                    Vector2d coord = scenario.Simulation.GetWGS84FromSimulationPosition(cellCenterPos);
+                    Vector2d coord = geoData.GetWGS84FromSimulationPosition(cellCenterPos);
                     Itinero.RouterPoint p = Traffic.RouteCreator.GetValidRouterPoint(router, coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), _cellSize);
                     if(p != null)
                     {
@@ -401,11 +402,11 @@ namespace PREACT.Population
             return success;
         }
 
-        public bool LoadFromFile(string path)
+        public void LoadFromFile(string path, out bool success)
         {
             string[] d = File.ReadAllLines(path);
 
-            bool success = false;
+            success = false;
             if (d.Length == 9)
             {
                 _totalActiveCells = 0;
@@ -446,12 +447,12 @@ namespace PREACT.Population
             {
                 Engine.MESSAGE(null, Engine.LogType.Warning, " Population data not valid for current map.");
             }
-
-            return success;
         }
 
-        public void CreateAndLoadPopulation(IO.Input input, RuntimeData scenario, string file)
+        public void CreatePopulation(IO.PREACTInput input, GeoData geoData, string file, out bool success)
         {
+            success = false;
+
             using (StreamWriter sW = new StreamWriter(file))
             {
                 sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");
@@ -481,7 +482,7 @@ namespace PREACT.Population
                             Vector2d householdStartPos = nodeCenter;
                             householdStartPos.x += _cellSize * Randomf.Range(-0.5f, 0.5f);
                             householdStartPos.y += _cellSize * Randomf.Range(-0.5f, 0.5f);
-                            Vector2d householdStartLatLon = scenario.Simulation.GetWGS84FromSimulationPosition(householdStartPos);
+                            Vector2d householdStartLatLon = geoData.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;
                             double goalLon = _cellRoadAccessLatLon[i].y;
@@ -490,10 +491,9 @@ namespace PREACT.Population
                     }
                 }
 
+                success = true;
                 Engine.MESSAGE(null, Engine.LogType.Log, "Generated and saved population to file " + file);
             }
-
-            scenario.Population.LoadPopulation(file);
         }
     }
 }
