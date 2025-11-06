@@ -30,17 +30,26 @@ namespace PREACT.Tools
             return LocalGPWData.LoadFromFile(localGpwFile, out success);   
         }
 
-        public static void CreateAndSavePopulationMap(Engine engine, string localGPWFile, string cellSize)
+        public static PopulationMap CreateAndSavePopulationMap(PREACTInput input, string localGPWFile, string cellSize, string filePath, out bool success)
         {
+            success = false;
+            PopulationMap populationMap = null;
+
             float c;
             if(float.TryParse(cellSize, out c))
             {
-                CreateAndSavePopulationMap(engine, localGPWFile, cellSize);
+                LocalGPWData localGPWData = LoadLocalGPWData(localGPWFile, out success);
+                if(success)
+                {
+                    populationMap = CreateAndSavePopulationMap(input, localGPWData, c, filePath, out success);
+                }                
             }
             else
             {
                 Engine.MESSAGE(null, Engine.LogType.Warning, "Population map cell size is not a valid number, please check your input.");
             }
+
+            return populationMap;
         }
 
         private static PopulationMap CreateAndSavePopulationMap(PREACTInput input, LocalGPWData localGPWData, float cellSize, string filePath, out bool success)
