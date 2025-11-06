@@ -6,48 +6,35 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using PREACT.Runtime;
+using PREACT.Population;
+using PREACT;
 
-namespace PREACT.Population
+namespace WUInity.Population
 {
     public class PopulationVisualizerUnity : PopulationVisualizer
     {
+        WUInityManager _manager;
         private GameObject _LocalGPWDataPlane;
-        private Material gpwDataPlaneMaterial;
+        private Material _gpwDataPlaneMaterial;
 
-        private Texture2D populationMapTexture;
-        private Texture2D populationMapMaskTexture;
-        private Texture2D densityTexture;
+        private Texture2D _populationMapTexture;
+        private Texture2D _populationMapMaskTexture;
+        private Texture2D _localGPWTexture;
 
-        public PopulationVisualizerUnity(PopulationData owner) : base(owner)
-        { 
+        private LocalGPWData _localGPWData;
+        private PopulationMap _populationMap;
 
-        }
-
-        public override bool IsDataPlaneActive()
-        {
-            return DataPlane.activeSelf;
-        }
-
-        public override object GetPopulationTexture()
-        {
-            return populationMapTexture;
-        }
-
-        public override object GetPopulationMaskTexture()
-        {
-            return populationMapMaskTexture;
-        }
-
+        public LocalGPWData LocalGPWData { get => _localGPWData; }        
+        public PopulationMap PopulationMap { get => _populationMap; }
         public GameObject DataPlane
         {
             get
             {
                 if (_LocalGPWDataPlane == null)
                 {
-                    if(Engine.ScenarioData.Population.LocalGPWData != null)
+                    if (_localGPWData != null)
                     {
-                        CreateLocalGPWDataPlane(Engine.ScenarioData.Population.LocalGPWData);
+                        CreateLocalGPWDataPlane(_localGPWData);
                     }
                     else
                     {
@@ -57,6 +44,26 @@ namespace PREACT.Population
 
                 return _LocalGPWDataPlane;
             }
+        }
+        
+        public PopulationVisualizerUnity(WUInityManager manager)
+        { 
+            _manager = manager;
+        }
+
+        public override bool IsDataPlaneActive()
+        {
+            return DataPlane.activeSelf;
+        }
+
+        public override object GetPopulationTexture()
+        {
+            return _populationMapTexture;
+        }
+
+        public override object GetPopulationMaskTexture()
+        {
+            return _populationMapMaskTexture;
         }
 
         public override void SetDataPlane(bool activeSelf)
@@ -71,14 +78,39 @@ namespace PREACT.Population
             return DataPlane.activeSelf;
         }
 
-        public override void CreatePopulationMapTexture(PopulationMap data)
+        public override void DisplayLocalGPW(LocalGPWData data)
         {
-            if(populationMapTexture == null || !(populationMapTexture.width == data._cells.x && populationMapTexture.height == data._cells.y))
+            if (_localGPWData == null || data != _localGPWData)
             {
-                populationMapTexture = new Texture2D(data._cells.x, data._cells.y);
-                populationMapTexture.filterMode = FilterMode.Point;
-            }            
+                _localGPWTexture = new Texture2D(data.CellCount.x, data.CellCount.y);
+                _localGPWTexture.filterMode = FilterMode.Point;
+            }
+            _localGPWData = data;
             
+            for (int y = 0; y < data.CellCount.y; y++)
+            {
+                for (int x = 0; x < data.CellCount.x; x++)
+                {
+                    double density = data.GetDensity(x, y);
+                    PREACTColor color = GetGPWColor((float)density);
+
+                    _localGPWTexture.SetPixel(x, y, color.UnityColor);
+                }
+            }
+            _localGPWTexture.Apply();
+
+
+        }
+
+        public override void DisplayPopulationMap(PopulationMap data)
+        {
+            if(_populationMapTexture == null || data != _populationMap)
+            {
+                _populationMapTexture = new Texture2D(data._cells.x, data._cells.y);
+                _populationMapTexture.filterMode = FilterMode.Point;
+            }
+            _populationMap = data;
+
             for (int y = 0; y < data._cells.y; y++)
             {
                 for (int x = 0; x < data._cells.x; x++)
@@ -90,18 +122,18 @@ namespace PREACT.Population
                         color.a = 0f;
                     }
 
-                    populationMapTexture.SetPixel(x, y, color.UnityColor);
+                    _populationMapTexture.SetPixel(x, y, color.UnityColor);
                 }
             }
-            populationMapTexture.Apply();
+            _populationMapTexture.Apply();
         }
 
         public override void CreatePopulationMapMaskTexture(PopulationMap data)
         {
-            if (populationMapMaskTexture == null || !(populationMapMaskTexture.width == data._cells.x && populationMapMaskTexture.height == data._cells.y))
+            if (_populationMapMaskTexture == null || !(_populationMapMaskTexture.width == data._cells.x && _populationMapMaskTexture.height == data._cells.y))
             {
-                populationMapMaskTexture = new Texture2D(data._cells.x, data._cells.y);
-                populationMapMaskTexture.filterMode = FilterMode.Point;
+                _populationMapMaskTexture = new Texture2D(data._cells.x, data._cells.y);
+                _populationMapMaskTexture.filterMode = FilterMode.Point;
             }
 
             for (int y = 0; y < data._cells.y; y++)
@@ -112,11 +144,11 @@ namespace PREACT.Population
                     {
                         Color color = Color.red;
                         color.a = 0.5f;
-                        populationMapMaskTexture.SetPixel(x, y, color);
+                        _populationMapMaskTexture.SetPixel(x, y, color);
                     }                    
                 }
             }
-            populationMapMaskTexture.Apply();
+            _populationMapMaskTexture.Apply();
         }
 
         private void CreateLocalGPWDataPlane(LocalGPWData localGPWData)
@@ -128,7 +160,7 @@ namespace PREACT.Population
             if (_LocalGPWDataPlane == null)
             {
                 _LocalGPWDataPlane = new GameObject("GPWDensityMap");
-                _LocalGPWDataPlane.transform.parent = WUInity.WUInityEngine.INSTANCE.transform;
+                _LocalGPWDataPlane.transform.parent = _manager.transform;
                 _LocalGPWDataPlane.isStatic = true;
                 filter = _LocalGPWDataPlane.AddComponent<MeshFilter>();
                 mesh = new Mesh(); // filter.mesh;
@@ -146,42 +178,25 @@ namespace PREACT.Population
 
             mesh.Clear();
 
-            float width = (float)localGPWData.realWorldSize.x; //(float)size.x;
-            float length = (float)localGPWData.realWorldSize.y; //(float)size.y;
+            float width = (float)localGPWData.RealWorldSize.x; //(float)size.x;
+            float length = (float)localGPWData.RealWorldSize.y; //(float)size.y;
 
-            Vector3 offset = new Vector3((float)localGPWData.originOffset.x, 0.0f, (float)localGPWData.originOffset.y);
+            Vector3 offset = new Vector3((float)localGPWData.OriginOffset.x, 0.0f, (float)localGPWData.OriginOffset.y);
 
             WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset);
 
-            if (gpwDataPlaneMaterial == null)
+            if (_gpwDataPlaneMaterial == null)
             {
-                gpwDataPlaneMaterial = new Material(Shader.Find("Unlit/Transparent"));
+                _gpwDataPlaneMaterial = new Material(Shader.Find("Unlit/Transparent"));
             }
-            gpwDataPlaneMaterial.mainTexture = densityTexture;
+            _gpwDataPlaneMaterial.mainTexture = _localGPWTexture;
 
-            mR.material = gpwDataPlaneMaterial;
+            mR.material = _gpwDataPlaneMaterial;
             //filter.mesh = mesh;
 
             //move up one meter
             _LocalGPWDataPlane.transform.position = Vector3.up;
             _LocalGPWDataPlane.SetActive(false);
-        }
-
-        public override void CreateGPWTexture(LocalGPWData data)
-        {
-            densityTexture = new Texture2D(data._cells.x, data._cells.y);
-            densityTexture.filterMode = UnityEngine.FilterMode.Point;
-            for (int y = 0; y < data._cells.y; y++)
-            {
-                for (int x = 0; x < data._cells.x; x++)
-                {
-                    double density = data.GetDensity(x, y);
-                    PREACTColor color = GetGPWColor((float)density);
-
-                    densityTexture.SetPixel(x, y, color.UnityColor);
-                }
-            }
-            densityTexture.Apply();
-        }
+        }        
     }
 }

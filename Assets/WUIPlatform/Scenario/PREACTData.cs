@@ -15,22 +15,29 @@ namespace PREACT.Runtime
         public GeoData Geo;
         public EvacuationData Evacuation;
         public PopulationData Population;
-        public RoutingData Routing;
         public TrafficData Traffic;
         public FireData Fire;
         public SmokeData Smoke;
 
         public PREACTData(IO.PREACTInput input)
         {
-            Geo = new GeoData(input.Simulation);
-            //Visualization = new VisualizationData();         
+            Geo = new GeoData(input);         
             Evacuation = new EvacuationData(input);
             Population = new PopulationData();
-            Routing = new RoutingData();
             Traffic = new TrafficData();
             Fire = new FireData();
-            Smoke = new SmokeData();
+            Smoke = new SmokeData();            
         }       
+
+        public void LoadAll(IO.PREACTInput input, string rootFolder, out bool success)
+        {
+            //need to load evacuation goals before routing as they rely on evacuation goals
+            Population.LoadAll(input, rootFolder, out success);
+            Evacuation.LoadAll(input, rootFolder, out success);
+            Traffic.LoadAll(input, rootFolder, out success);
+            Fire.LoadAll(input, rootFolder, Geo.UTMOrigin, out success);
+            Smoke.LoadAll(input, rootFolder, out success); //does nothing right now
+        }
     }
 }
 

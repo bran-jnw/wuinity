@@ -13,31 +13,22 @@ namespace PREACT.Runtime
     public class TrafficData
     {       
         private Traffic.RoadTypeData _roadTypeData;
-        public Traffic.RoadTypeData RoadTypeData
-        {
-            get
-            {
-                return _roadTypeData;
-            }
-        }
+        public Traffic.RoadTypeData RoadTypeData { get => _roadTypeData; }
 
-        public void LoadAll(PREACTInput input, string workingFolder)
+        public void LoadAll(PREACTInput input, string rootFolder, out bool success)
         {
-            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Traffic data...");
+            success = true;
 
             if (input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
-                LoadRoadTypeData(Path.Combine(workingFolder, input.Traffic.MacroTrafficSimInput.RoadTypesFile));
+                LoadRoadTypeData(Path.Combine(rootFolder, input.Traffic.MacroTrafficSimInput.RoadTypesFile), out success);
             }
         }
 
-        private bool LoadRoadTypeData(string path)
+        public void LoadRoadTypeData(string filePath, out bool success)
         {
             //success in this case means that we loaded a file and not defaults
-            bool success;
-            _roadTypeData = Traffic.RoadTypeData.LoadRoadTypeData(path, out success);
-
-            return success;
+            _roadTypeData = Traffic.RoadTypeData.LoadRoadTypeData(filePath, out success);
         } 
     }
 }

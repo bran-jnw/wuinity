@@ -13,7 +13,8 @@ namespace PREACT.IO
 {
     [System.Serializable]
     public class PREACTInput
-    {    
+    {
+        public string RootFolder;
         public SimulationInput Simulation;
         public MapInput Map;                
         public PopulationInput Population;
@@ -26,8 +27,9 @@ namespace PREACT.IO
         public WUIShowInput WUIShow;
         public EventsInput Events;
 
-        public PREACTInput()
+        public PREACTInput(string rootFolder)
         {
+            RootFolder = rootFolder;
             /*Simulation = new SimulationInput();
             Map = new MapInput();            
             Population = new PopulationInput();
@@ -40,7 +42,7 @@ namespace PREACT.IO
             WUIShow = new WUIShowInput();*/
         }
 
-        public void SaveToDisk(string file)
+        public static void SaveToDisk(PREACTInput input, string filePath)
         {
             //TODO: fix new format save
             //string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
@@ -48,7 +50,7 @@ namespace PREACT.IO
             //EvacuationGroup.SaveEvacGroupIndices();
             //GraphicalFireInput.SaveGraphicalFireInput();
 
-            Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + file + " saved.");       
+            Engine.MESSAGE(null, Engine.LogType.Log, " Input file " + filePath + " saved.");       
         }
 
         public static PREACTInput LoadFromDisk(string filePath, out bool success)
@@ -86,7 +88,7 @@ namespace PREACT.IO
         private static PREACTInput ParseInput(string rootFolder, string[] inputLines, out bool success)
         {
             success = false;
-            PREACTInput newInput = new PREACTInput();
+            PREACTInput newInput = new PREACTInput(rootFolder);
             Dictionary<string, int> headerLineIndex = new Dictionary<string, int>();
 
             //first index all headers

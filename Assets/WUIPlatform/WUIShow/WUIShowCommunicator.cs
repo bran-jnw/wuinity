@@ -97,18 +97,18 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.ScenarioData.Fire.LCPData.GetLCPSizeX();
+                double xSize = _engine.Simulation.Scenario.Data.Fire.LCPData.GetLCPSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.ScenarioData.Fire.LCPData.GetLCPSizeY();
+                double ySize = _engine.Simulation.Scenario.Data.Fire.LCPData.GetLCPSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = _engine.ScenarioData.Simulation.UTMOrigin + _engine.ScenarioData.Fire.LCPData.OriginOffset;
-                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Input.Simulation.LowerLeftLatLon.x, _engine.Input.Simulation.LowerLeftLatLon.y);
+                Vector2d lcpOriginUTM = _engine.Simulation.Scenario.Data.Geo.UTMOrigin + _engine.Simulation.Scenario.Data.Fire.LCPData.OriginOffset;
+                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Simulation.Scenario.Input.Simulation.LowerLeftLatLon.x, _engine.Simulation.Scenario.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;
                 double lon = lcpOriginWgs84.Lng;
@@ -259,7 +259,7 @@ namespace PREACT.Visualization
                 return;
             }
 
-            if (currentTime > lastTime + _engine.Input.WUIShow.WuiShowDeltaTime)
+            if (currentTime > lastTime + _engine.Simulation.Scenario.Input.WUIShow.WuiShowDeltaTime)
             {
                 byte[] sendBytes = new byte[activeVehicles.Count * 16];
                 int i = 0;

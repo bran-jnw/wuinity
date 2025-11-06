@@ -27,7 +27,6 @@ namespace PREACT
 
         //References
         private Engine _engine;
-        private Runtime.PREACTData _runtimeData;
         private PREACTScenario _scenario;
         private SimulationState _state;
         private TrafficModule _trafficModule;
@@ -55,7 +54,6 @@ namespace PREACT
         
         //References
         public Engine Engine { get => _engine; }
-        public Runtime.PREACTData RuntimeData { get => _runtimeData; }
         public SimulationState State { get => _state; }
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
@@ -202,7 +200,7 @@ namespace PREACT
                         if (_scenario.Input.TriggerBuffer.kPERILInput.CalculateROSFromBehave || _fireModule != null)
                         {
                             string outputFile = Path.Combine(_engine.OutputFolder, _scenario.Input.Simulation.Name + _simulationIndex + ".tiff");
-                            _triggerBufferDataOutput = WUIPlatformPERIL.RunPERIL(_runtimeData.Fire.LCPData, _runtimeData.Fire.WuiArea, _scenario.Input.TriggerBuffer.kPERILInput.MidflameWindspeed, 0f, _currentTime, outputFile, _runtimeData.Fire.InitialFuelMoistureData, _runtimeData.Fire.FuelModelsData);
+                            _triggerBufferDataOutput = WUIPlatformPERIL.RunPERIL(_scenario.Data.Fire.LCPData, _scenario.Data.Fire.WuiArea, _scenario.Input.TriggerBuffer.kPERILInput.MidflameWindspeed, 0f, _currentTime, outputFile, _scenario.Data.Fire.InitialFuelMoistureData, _scenario.Data.Fire.FuelModelsData);
                         }
                     }
                 }
@@ -261,7 +259,7 @@ namespace PREACT
                 }
                 else if(_scenario.Input.Fire.FireModule == FireInput.FireModuleChoice.FireCell)
                 {
-                    _fireModule = new FireMesh(this, _runtimeData.Fire.LCPData, _runtimeData.Fire.WeatherInput, _runtimeData.Fire.WindInput, _runtimeData.Fire.InitialFuelMoistureData, _runtimeData.Fire.IgnitionPoints);
+                    _fireModule = new FireMesh(this, _scenario.Data.Fire.LCPData, _scenario.Data.Fire.WeatherInput, _scenario.Data.Fire.WindInput, _scenario.Data.Fire.InitialFuelMoistureData, _scenario.Data.Fire.IgnitionPoints);
                     Engine.MESSAGE(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
                 else
@@ -283,8 +281,7 @@ namespace PREACT
                 //this module does not need the fire
                 if (_scenario.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
                 {
-                    string file = Path.Combine(_engine.WorkingFolder, _scenario.Input.Smoke.GlobalSmokeInput.ExtinctionFile);
-                    _smokeModule = new GlobalSmoke(this, file);
+                    _smokeModule = new GlobalSmoke(this, _scenario.Data.Smoke.ExtinctionRamp);
                     return;
                 }                
 
@@ -334,7 +331,7 @@ namespace PREACT
                     MacroHouseholdSim macroHouseholdSim = (MacroHouseholdSim)_pedestrianModule;
                     //place people
                     //macroHouseholdSim.PopulateCells(WUI_engine.RUNTIME_DATA.Routing.RouteCollections, WUI_engine.POPULATION.GetPopulationData());
-                    macroHouseholdSim.PopulateSimulation(_runtimeData.Population.Households);
+                    macroHouseholdSim.PopulateSimulation(_scenario.Data.Population.Households);
                     Engine.MESSAGE(this, Engine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
                 }
             }
@@ -500,11 +497,11 @@ namespace PREACT
             if (_scenario.Input.Simulation.RunTrafficModule)
             {
                 //check for global events
-                if (_runtimeData.Evacuation.BlockGoalEvents != null)
+                if (_scenario.Data.Evacuation.BlockGoalEvents != null)
                 {
-                    for (int i = 0; i < _runtimeData.Evacuation.BlockGoalEvents.Length; i++)
+                    for (int i = 0; i < _scenario.Data.Evacuation.BlockGoalEvents.Length; i++)
                     {
-                        BlockDestinationEvent bGE = _runtimeData.Evacuation.BlockGoalEvents[i];
+                        BlockDestinationEvent bGE = _scenario.Data.Evacuation.BlockGoalEvents[i];
                         if (CurrentTime >= bGE.StartTime && !bGE.Triggered)
                         {
                             bGE.ApplyEffects();
@@ -719,9 +716,9 @@ namespace PREACT
         {
             if(_triggerBufferDataOutput != null)
             {
-                _runtimeData.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferDataOutput);
-                _runtimeData.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
-                _runtimeData.Fire.Visualizer.SetLCPDataPlane(true);
+                _scenario.Data.Fire.Visualizer.CreateTriggerBufferVisuals(_triggerBufferDataOutput);
+                _scenario.Data.Fire.Visualizer.SetLCPViewMode(Visualization.FireDataVisualizer.LcpViewMode.TriggerBuffer);
+                _scenario.Data.Fire.Visualizer.SetLCPDataPlane(true);
             }            
         }
 

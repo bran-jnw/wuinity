@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using PREACT;
+using System.Collections.Generic;
 
 namespace WUInity.UI
 {
@@ -71,6 +72,9 @@ namespace WUInity.UI
         
         string[] populationMapFilter = new string[] { ".pop" };
         string[] gpwFilter = new string[] { ".gpw" };
+
+        private PREACT.IO.PREACTInput _input;
+        private Simulation _simulation;
               
 
         private void Start()
@@ -91,28 +95,38 @@ namespace WUInity.UI
             swapGUI = new MenuButton(buttonHeight, "New GUI");
         }
 
-        Engine _engine;
         WUInityManager _wuinityManager;
-        public void SetEngines(WUInityManager wuinityEngine, Engine engine)
+        public void SetManager(WUInityManager wuinityEngine)
         {
-            _engine = engine;
             _wuinityManager = wuinityEngine;
         }
 
-        string[] _log;
-        private void Update()
+        public void SetInput(PREACT.IO.PREACTInput input)
         {
-            if (_engine == null || _wuinityManager == null)
-            {
-                return;
-            }
+            _input = input;
+            SetDirty();
+        }
 
-            _log = _engine.GetMessageLog();
+        List<string> _messages = new List<string>();
+        public void NewMessage(string message)
+        {
+            _messages.Add(message);
+        }
+
+        bool _simulationRunning = false;
+        public void SimulationStarted()
+        {
+            _simulationRunning = true;
+        }
+
+        public void SimulationStopped()
+        {
+            _simulationRunning = true;
         }
 
         void OnGUI()
         {
-            if (_engine == null || _wuinityManager == null)
+            if (_wuinityManager == null)
             {
                 return;
             }
@@ -122,15 +136,15 @@ namespace WUInity.UI
 
             //select menu
             GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
-            if (GUI.Button(mainMenu.rect, mainMenu.text) && _engine.Simulation.State != Simulation.SimulationState.Running)
+            if (GUI.Button(mainMenu.rect, mainMenu.text) && !_simulationRunning)
             {
                 menuChoice = ActiveMenu.MainMenu;
-                WUInityManager.INSTANCE.SetSampleMode(DataSampleMode.None);
+                _wuinityManager.SetSampleMode(DataSampleMode.None);
             }
 
-            if(_engine.DataStatus.HaveInput)
+            if(_input != null)
             {
-                if(_engine.Simulation.State != Simulation.SimulationState.Running)
+                if(!_simulationRunning)
                 {
                     if (mapMenu.Pressed())
                     {
@@ -168,7 +182,7 @@ namespace WUInity.UI
                     }
                 }                
 
-                if (_engine.Simulation.HaveResults)
+                if (_wuinityManager.Engine.Simulation != null && _wuinityManager.Engine.Simulation.HaveResults)
                 {
                     if (GUI.Button(outputMenu.rect, outputMenu.text))
                     {
@@ -187,7 +201,7 @@ namespace WUInity.UI
 
             if (GUI.Button(exitMenu.rect, exitMenu.text))
             {
-                _engine.Close(false);
+                _wuinityManager.StopSimulations();
                 Application.Quit();
             }
 
@@ -244,13 +258,10 @@ namespace WUInity.UI
             GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
-                 
-            if(_log!= null)
+            
+            for (int i = _messages.Count - 1; i >= 0; i--)
             {
-                for (int i = _log.Length - 1; i >= 0; i--)
-                {
-                    GUILayout.Label(_log[i]);
-                }
+                GUILayout.Label(_messages[i]);
             }
             
             GUILayout.EndScrollView();

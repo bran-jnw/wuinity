@@ -3,6 +3,7 @@ using SimpleFileBrowser;
 using System.IO;
 using PREACT.IO;
 using PREACT.Tools;
+using PREACT.Population;
 
 namespace WUInity.UI
 {
@@ -292,8 +293,12 @@ namespace WUInity.UI
         }
         void LoadLocalGPW(string[] paths)
         {
-            PopulationTools.LoadLocalGPWData(_engine, paths[0]);
-            _engine.ScenarioData.Population.Visualizer.SetDataPlane(true);
+            bool success;
+            LocalGPWData localGPWData = PopulationTools.LoadLocalGPWData(paths[0], out success);
+            if(success)
+            {
+                _wuinityManager.PopulationVisualizer.DisplayLocalGPWTexture(localGPWData);
+            }
         }
 
         //Interpolated GPW

@@ -13,8 +13,6 @@ namespace WUInity.UI
 
         void MainMenu()
         {
-            PREACT.IO.PREACTInput wO = _engine.Input;
-
             //whenever we load a file we need to set the new data for the GUI
             if (mainMenuDirty)
             {
@@ -30,7 +28,7 @@ namespace WUInity.UI
                 return;
             }
 
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "New file"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "New file"))
             {
                 creatingNewFile = true;
                 OpenSaveInput();
@@ -43,15 +41,7 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            //will remove default and use example instead
-            if (GUI.Button(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load defaults"))
-            {
-                SaveLoadWUI.LoadDefaultInputs();
-                mainInputDirty = true;
-            }
-            ++buttonIndex;*/
-
-            if (!_engine.DataStatus.HaveInput)
+            if (_input != null)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run folder"))
                 {
@@ -62,19 +52,19 @@ namespace WUInity.UI
                 return;
             }
 
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save"))
             {
-                if (_engine.WorkingFile== null)
+                if (_wuinityManager.Engine.WorkingFile== null)
                 {
                     OpenSaveInput();
                 }
                 else
                 {
                     ParseMainData(wO);
-                    PREACT.IO.Input.SaveInput();
+                    PREACT.IO.PREACTInput.SaveToDisk(_input, _engine.WorkingFile);
                 }
             }
-            ++buttonIndex;*/
+            ++buttonIndex;
 
             /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save as"))
             {
@@ -85,7 +75,7 @@ namespace WUInity.UI
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation ID:");
             ++buttonIndex;
-            wO.Simulation.Name = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), wO.Simulation.Name);
+            _input.Simulation.Name = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.Name);
             ++buttonIndex;   
             
             //dT
@@ -116,16 +106,16 @@ namespace WUInity.UI
                 }
             }
 
-            _engine.Input.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.Input.Simulation.RunPedestrianModule, "Simulate pedestrians");
+            _input.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunPedestrianModule, "Simulate pedestrians");
             ++buttonIndex;
 
-            _engine.Input.Simulation.RunTrafficModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.Input.Simulation.RunTrafficModule, "Simulate traffic");
+            _input.Simulation.RunTrafficModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunTrafficModule, "Simulate traffic");
             ++buttonIndex;
 
-            _engine.Input.Simulation.RunFireModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.Input.Simulation.RunFireModule, "Simulate fire spread");
+            _input.Simulation.RunFireModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunFireModule, "Simulate fire spread");
             ++buttonIndex;
 
-            _engine.Input.Simulation.RunSmokeModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.Input.Simulation.RunSmokeModule, "Simulate smoke spread");
+            _input.Simulation.RunSmokeModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunSmokeModule, "Simulate smoke spread");
             ++buttonIndex;            
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
@@ -149,18 +139,9 @@ namespace WUInity.UI
                 dT = "-1.0";
             }
             
-            if(_engine.ScenarioData != null)
-            {
-                nrRuns = _engineTask.NumberOfRuns.ToString();
-                convergenceMaxDifference = _engineTask.ConvergenceMaxDifference.ToString();
-                convergenceMinSequence = _engineTask.ConvergenceMinSequence.ToString();
-            }
-            else
-            {
-                nrRuns = "0";
-                convergenceMaxDifference = "0";
-                convergenceMinSequence = "0";
-            }
+            nrRuns = _engineTask.NumberOfRuns.ToString();
+            convergenceMaxDifference = _engineTask.ConvergenceMaxDifference.ToString();
+            convergenceMinSequence = _engineTask.ConvergenceMinSequence.ToString();
 
                       
         }
@@ -181,35 +162,22 @@ namespace WUInity.UI
             int.TryParse(convergenceMinSequence, out _engineTask.ConvergenceMinSequence);
         }
 
-        /*void OpenSaveInput()
+        void OpenSaveInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            PREACT.IO.Input wO = _engine.Input;
             string initialPath = Path.GetDirectoryName(_engine.WorkingFile);
-            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, "new.wui", "Save file", "Save");
-        }              
-
+            FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
+        }   
         void SaveInput(string[] paths)
         {
-            PREACT.IO.Input wO = _engine.Input;
-
-            _engine.WorkingFile = paths[0];
-            if (creatingNewFile)
-            {
-                mainMenuDirty = true;
-                _engine.CreateNewInputData();
-                wO = _engine.Input; //have to update this since we are creating a new one
-            }
-            else
-            {
-                ParseMainData(wO);
-            }
+            mainMenuDirty = true;
+            ParseMainData(_input);
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
             wO.Simulation.Id = name;
 
-            PREACT.IO.Input.SaveInputToDisk();
-        }*/
+            PREACT.IO.PREACTInput.SaveInputToDisk();
+        }
 
         void OpenLoadInput()
         {

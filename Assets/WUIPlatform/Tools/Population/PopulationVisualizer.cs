@@ -11,20 +11,18 @@ namespace PREACT.Population
 {
     public abstract class PopulationVisualizer
     {
-        protected PopulationData _owner;
-
-        public PopulationVisualizer(PopulationData owner)
+        public PopulationVisualizer()
         {
-            _owner = owner;
+
         }
 
         public abstract void SetDataPlane(bool setActive);
         public abstract bool IsDataPlaneActive();
         public abstract object GetPopulationTexture();
         public abstract object GetPopulationMaskTexture();
-        public abstract void CreatePopulationMapTexture(PopulationMap data);
+        public abstract void DisplayPopulationMap(PopulationMap data);
         public abstract void CreatePopulationMapMaskTexture(PopulationMap data);
-        public abstract void CreateGPWTexture(LocalGPWData data);
+        public abstract void DisplayLocalGPW(LocalGPWData data);
         public abstract bool ToggleLocalGPWVisibility();
 
         //colors from GPW website

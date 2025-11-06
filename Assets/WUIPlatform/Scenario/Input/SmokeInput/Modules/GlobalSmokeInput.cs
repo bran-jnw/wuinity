@@ -10,7 +10,6 @@ using System.Collections.Generic;
 
 namespace PREACT.IO
 {
-    [System.Serializable]
     public class GlobalSmokeInput
     {
         public string ExtinctionFile;

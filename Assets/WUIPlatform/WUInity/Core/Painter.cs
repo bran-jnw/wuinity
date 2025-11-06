@@ -209,30 +209,30 @@ namespace WUInity
             _brushSize = 1;
         }
 
-        void SetPainterWUIArea()
+        void SetPainterWUIArea(PREACT.Fire.LCPData lcpData)
         {
             paintMode = PaintMode.WUIArea;
             CheckDataResources(wuiAreaTex, wuiAreaColorArray);
             SetWUIAreaColor(true);
             _brushSize = 5;
-            _offset = new Vector3((float)Engine.ScenarioData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.ScenarioData.Fire.LCPData.OriginOffset.y);
+            _offset = new Vector3((float)lcpData.OriginOffset.x, 0f, (float)lcpData.OriginOffset.y);
         }
 
-        void SetPainterRandomIgnition()
+        void SetPainterRandomIgnition(PREACT.Fire.LCPData lcpData)
         {
             paintMode = PaintMode.RandomIgnitionArea;
             CheckDataResources(randomIgnitionTex, randomIgnitionColorArray);
             SetRandomIgnitionAreaColor(true);
             _brushSize = 5;
-            _offset = new Vector3((float)Engine.ScenarioData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.ScenarioData.Fire.LCPData.OriginOffset.y);
+            _offset = new Vector3((float)lcpData.OriginOffset.x, 0f, (float)lcpData.OriginOffset.y);
         }
-        void SetPainterInitialIgnition()
+        void SetPainterInitialIgnition(PREACT.Fire.LCPData lcpData)
         {
             paintMode = PaintMode.InitialIgnition;
             CheckDataResources(initialIgnitionTex, initialIgnitionColorArray);
             SetInitialIgnitionAreaColor(true);
             _brushSize = 3;
-            _offset = new Vector3((float)Engine.ScenarioData.Fire.LCPData.OriginOffset.x, 0f, (float)Engine.ScenarioData.Fire.LCPData.OriginOffset.y);
+            _offset = new Vector3((float)lcpData.OriginOffset.x, 0f, (float)lcpData.OriginOffset.y);
         }
 
         void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray)

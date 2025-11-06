@@ -60,7 +60,7 @@ namespace PREACT.Traffic
         {
             return _activeVehicles;
         }
-        public abstract void SaveToFile(int simulationIdentifier);
+        public abstract void SaveToFile(int simulationIndex);
 
         private static uint carCount = 0;
         protected static uint GetNewCarID()

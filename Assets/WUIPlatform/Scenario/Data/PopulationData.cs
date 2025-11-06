@@ -34,37 +34,20 @@ namespace PREACT.Runtime
 
         private int _totalPopulation;
         public int TotalPopulation { get => _totalPopulation; }
-
-        protected PopulationVisualizer _visualizer;
-        public PopulationVisualizer Visualizer { get =>_visualizer; }
-        
-        private LocalGPWData _localGPWData;
-        public LocalGPWData LocalGPWData { get => _localGPWData; }
-
-        private PopulationMap _populationMap;
-        public PopulationMap PopulationMap { get => _populationMap; }
-
+                
         public PopulationData()
         {
-            _localGPWData = new LocalGPWData(this);
-            _populationMap = new PopulationMap(this);
-
-            #if USING_UNITY
-            _visualizer = new PopulationVisualizerUnity(this);
-            #else
-
-            #endif
+            _totalPopulation = 0;
         }
 
         public void LoadAll(PREACTInput input, string rootFolder, out bool success)
         {
             success = false;
-            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Population data...");
             
             if(input.Simulation.RunPedestrianModule)
             {
                 string filePath = Path.Combine(rootFolder, input.Population.PopulationFile);
-                LoadPopulation(filePath, out success);
+                _householdData = LoadPopulation(filePath, out _totalPopulation, out success);
                 if(!success)
                 {
                     return;
@@ -74,13 +57,15 @@ namespace PREACT.Runtime
             success = true;
         }
         
-        public void LoadPopulation(string path, out bool success)
+        public static HouseholdData[] LoadPopulation(string filePath, out int totalPopulation, out bool success)
         {
             success = false;
+            totalPopulation = 0;
+            HouseholdData[] householdData = null;
 
-            if (File.Exists(path))
+            if (File.Exists(filePath))
             {
-                using (StreamReader sr = new StreamReader(path))
+                using (StreamReader sr = new StreamReader(filePath))
                 {
                     List<string> lines = new List<string>();
 
@@ -90,8 +75,7 @@ namespace PREACT.Runtime
                     }
 
                     //skip first rom (header, and last row (should be empty)
-                    _householdData = new HouseholdData[lines.Count - 1];
-                    _totalPopulation = 0;
+                    householdData = new HouseholdData[lines.Count - 1];
                     for (int i = 1; i < lines.Count; ++i)
                     {
                         string[] line = lines[i].Split(",");
@@ -100,20 +84,28 @@ namespace PREACT.Runtime
                         double carLat = double.Parse(line[2]);
                         double carLon = double.Parse(line[3]);
                         int people = int.Parse(line[4]);                        
-                        _householdData[i - 1] = new HouseholdData(new Vector2d(lat, lon), new Vector2d(carLat, carLon), people);
-                        _totalPopulation += people;
+                        householdData[i - 1] = new HouseholdData(new Vector2d(lat, lon), new Vector2d(carLat, carLon), people);
+                        totalPopulation += people;
                     }
 
-                    success = true;
-                    Engine.MESSAGE(null, Engine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(path) + " containing " + _totalPopulation + " people and " + _householdData.Length + " households.");
+                    if(totalPopulation > 0)
+                    {
+                        success = true;
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(filePath) + " containing " + totalPopulation + " people and " + householdData.Length + " households.");
+                    }
+                    else
+                    {
+                        Engine.MESSAGE(null, Engine.LogType.InputError, "Population file found but did not contain any population.");
+                    }
+                    
                 }                
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, "Population file " + path + " could not be found.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, "Population file " + filePath + " could not be found.");
             }
 
-            //Engine.DataStatus.SetPopulation(success);
+            return householdData;
         }        
     }
 }

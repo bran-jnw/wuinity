@@ -98,7 +98,7 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if (_engine.Input.Simulation.RunPedestrianModule && _engine.Simulation.PedestrianModule != null)
+            if (_input.Simulation.RunPedestrianModule && _engine.Simulation.PedestrianModule != null)
             {
                 //pedestrians still left
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.PedestrianModule.GetPeopleLeft() + " / " + _engine.Simulation.PedestrianModule.GetTotalPopulation());
@@ -110,13 +110,13 @@ namespace WUInity.UI
             }
 
             //cars still left
-            if (_engine.Input.Simulation.RunTrafficModule && _engine.Simulation.TrafficModule != null)
+            if (_input.Simulation.RunTrafficModule && _engine.Simulation.TrafficModule != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + _engine.Simulation.TrafficModule.GetNumberOfCarsInSystem() + " / " + _engine.Simulation.TrafficModule.GetTotalCarsSimulated());
                 ++buttonIndex;
             }
 
-            if(_engine.Input.Simulation.RunPedestrianModule)
+            if(_input.Simulation.RunPedestrianModule)
             {
                 for (int i = 0; i < _engine.Simulation.Destinations.Count; i++)
                 {
@@ -129,7 +129,7 @@ namespace WUInity.UI
             }            
 
             //fire output stuff
-            if (_engine.Input.Simulation.RunFireModule && _engine.Simulation.State == Simulation.SimulationState.Running)
+            if (_input.Simulation.RunFireModule && _engine.Simulation.State == Simulation.SimulationState.Running)
             {               
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + _engine.Simulation.FireModule.GetCurrentWindData().speed + " m/s");
                 ++buttonIndex;
@@ -176,7 +176,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Stop simulation"))
                 {                    
-                    _wuinityManager.StopSimulation();
+                    _wuinityManager.StopSimulations();
                 }
                 ++buttonIndex;
 
@@ -266,7 +266,7 @@ namespace WUInity.UI
 
         void LegendGUI()
         {
-            if (_engine.Input.Simulation.RunFireModule)
+            if (_input.Simulation.RunFireModule)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f - 305, 120, 300));
 
@@ -280,7 +280,7 @@ namespace WUInity.UI
                 GUI.EndGroup();
             }
 
-            if (_engine.Input.Simulation.RunSmokeModule)
+            if (_input.Simulation.RunSmokeModule)
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f + 5, 120, 300));
 

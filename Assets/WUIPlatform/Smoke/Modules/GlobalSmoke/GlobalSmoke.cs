@@ -14,13 +14,9 @@ namespace PREACT.Smoke
         ExtinctionRamp _extinctionCoefficientRamp;
         float[] _extinctionCoefficientOutput;
 
-        public GlobalSmoke(Simulation simulation, string extinctionCoefficientFile) : base(simulation)
+        public GlobalSmoke(Simulation simulation, ExtinctionRamp extinctionCoefficientRamp) : base(simulation)
         {
-            _extinctionCoefficientRamp = new ExtinctionRamp();
-            if(!_extinctionCoefficientRamp.LoadExtinctionRampFile(extinctionCoefficientFile))
-            {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Failed to initialize GlobalSmoke.");
-            }
+            _extinctionCoefficientRamp = extinctionCoefficientRamp;
             _extinctionCoefficientOutput = new float[1];
         }
 

@@ -14,37 +14,13 @@ using OsmSharp.Streams;
 
 namespace PREACT.Runtime
 {
-    public class RoutingData
+    public static class RoutingData
     {
-        public float BorderSize;
-
-        private RouterDb _routerDb;
-        public RouterDb RouterDb{ get => _routerDb; }
-
-        private Router _router;
-        public Router Router { get => _router; }
-
-        private RouteCollection[] _routeCollections;
-        public RouteCollection[] RouteCollections { get => _routeCollections; }
-
-        // Add an array of the cell sorted vertices
-        private List<uint>[] _cellSortedVertices;  
-
-        public RoutingData()
-        {
-
-        }
-
-        public void LoadAll()
-        {
-            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Routing data...");
-        }
-
         public static RouterDb LoadRouterDb(string filePath, out bool success)
         {
             success = false;
 
-            RouterDb routerDb;
+            RouterDb routerDb = null;
             if (File.Exists(filePath))
             {
                 using (FileStream stream = new FileInfo(filePath).OpenRead())

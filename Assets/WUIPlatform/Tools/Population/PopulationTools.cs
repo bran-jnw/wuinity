@@ -9,24 +9,25 @@ using PREACT.Population;
 using PREACT.Utility.Math;
 using OsmSharp.Streams;
 using System.IO;
+using PREACT.IO;
 
 namespace PREACT.Tools
 {
     public static class PopulationTools
     {
-        public static bool CreateAndSaveLocalGPWData(Engine engine, string globalGpwFolder)
+        public static LocalGPWData CreateLocalGPWData(PREACTInput input, string globalGpwFolder, out bool success)
         {
-            bool success = false;
-
-            success = engine.Scenario.Data.Population.LocalGPWData.CreateLocalGPWData(engine.Scenario.Input, globalGpwFolder);
-
-            return success;
+            return LocalGPWData.CreateLocalGPWData(input, globalGpwFolder, out success);
         }
 
-        public static bool LoadLocalGPWData(Engine engine, string localGpwFile)
-        {            
-            bool success = engine.Scenario.Data.Population.LocalGPWData.LoadFromFile(localGpwFile);            
-            return success;
+        public static void SaveLocalGPWData(string filePath, LocalGPWData localGPWData)
+        {
+            localGPWData.SaveToDisk(filePath);
+        }
+
+        public static LocalGPWData LoadLocalGPWData(string localGpwFile, out bool success)
+        {           
+            return LocalGPWData.LoadFromFile(localGpwFile, out success);   
         }
 
         public static void CreateAndSavePopulationMap(Engine engine, string localGPWFile, string cellSize)
@@ -34,7 +35,7 @@ namespace PREACT.Tools
             float c;
             if(float.TryParse(cellSize, out c))
             {
-                CreateAndSavePopulationMap(engine, localGPWFile, c);
+                CreateAndSavePopulationMap(engine, localGPWFile, cellSize);
             }
             else
             {
@@ -42,49 +43,49 @@ namespace PREACT.Tools
             }
         }
 
-        private static void CreateAndSavePopulationMap(Engine engine, string localGpwFile, float cellSize)
+        private static PopulationMap CreateAndSavePopulationMap(PREACTInput input, LocalGPWData localGPWData, float cellSize, string filePath, out bool success)
         {
-            if (engine.Scenario.Data.Population.LocalGPWData.LoadFromFile(localGpwFile))
-            {
-                engine.Scenario.Data.Population.PopulationMap.CreateFromLocalGPW(engine.Scenario.Input, engine.Scenario.Data.Population.LocalGPWData, cellSize);
-            }
+            PopulationMap populationMap = new PopulationMap();
+            populationMap.CreateFromLocalGPW(input, localGPWData, cellSize, out success);
+            populationMap.SaveToFile(filePath);
+            return populationMap;
         }
 
-        public static void LoadPopulationMap(PopulationMap populationMap, string populationMapFile, out bool success)
-        {     
-            return populationMap.LoadFromFile(populationMapFile, out success);
+        public static PopulationMap LoadPopulationMap(string populationMapFile, out bool success)
+        {
+            PopulationMap populationMap = new PopulationMap();
+            populationMap.LoadFromFile(populationMapFile, out success);
+            return populationMap;
         }
 
-        public static bool ScaleTotalPopulation(Engine engine, string desiredPopulation)
+        public static void ScaleTotalPopulation(PopulationMap populationMap, string desiredPopulation, out bool success)
         {
-            bool success = false;
+            success = false;
+
             int newPop;
             if (int.TryParse(desiredPopulation, out newPop))
             {
-                success = ScaleTotalPopulation(engine, newPop);
+                ScaleTotalPopulation(populationMap, newPop, out success);
             }
             else
             {
                 Engine.MESSAGE(null, Engine.LogType.Warning, " New population count not a number, please check your input.");
             }
-
-            return success;
         }
 
-        public static bool ScaleTotalPopulation(Engine engine, int desiredPopulation)
+        public static void ScaleTotalPopulation(PopulationMap populationMap, int desiredPopulation, out bool success)
         {
-            bool success = false;
+            success = false;
 
-            if(engine.Scenario.Data.Population.PopulationMap.HaveData)
+            if(populationMap.HaveData)
             {
-                engine.Scenario.Data.Population.PopulationMap.ScaleTotalPopulation(desiredPopulation);
+                populationMap.ScaleTotalPopulation(desiredPopulation);
+                success = true;
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "No population map loaded, cannot scale.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "No data in population map, cannot scale.");
             }
-
-            return success;
         }
 
         /// <summary>
@@ -108,17 +109,17 @@ namespace PREACT.Tools
             }
         }
 
-        public static void ApplyPopulationMapMask(Engine engine, string populationMaskFile)
+        public static void ApplyPopulationMapMask(PopulationMap populationMap, string populationMaskFile)
         {
-            if(engine.Scenario.Data.Population.PopulationMap.HaveData && engine.Scenario.Data.Population.PopulationMap.LoadPopulationMask(populationMaskFile))
+            if(populationMap.HaveData && populationMap.LoadPopulationMask(populationMaskFile))
             {
-                engine.Scenario.Data.Population.PopulationMap.ApplyMaskToPopulation();
+                populationMap.ApplyMaskToPopulation();
             }            
         }
 
-        public static void SavePopulationMask(Engine engine, string file)
+        public static void SavePopulationMask(PopulationMap populationMap, string filePath)
         {
-            engine.Scenario.Data.Population.PopulationMap.SavePopulationMask(file);
+            populationMap.SavePopulationMask(filePath);
         }
 
         /*public static void LoadPopulationMask(string populationMaskFile)

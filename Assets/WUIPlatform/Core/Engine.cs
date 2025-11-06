@@ -5,7 +5,6 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.Runtime;
 using PREACT.IO;
 using System.IO;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace PREACT
     public class Engine
     {
         private static Engine _ENGINE;
-        private ExternalManager _externalManager;
+        private IExternalManager _externalManager;
         private Simulation[] _simulations;
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private PREACTScenario _scenario;
@@ -28,7 +27,7 @@ namespace PREACT
         private Visualization.WUIShowCommunicator _wuiShow;
 
         public Simulation Simulation { get => _mainSimulation; }
-        public PREACTScenario Scenario { get => _scenario; }
+        //public PREACTScenario Scenario { get => _scenario; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
         public string WorkingFolder
@@ -78,7 +77,7 @@ namespace PREACT
         public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
         public PREACTOutput Output { get => _output; }     
 
-        public Engine(ExternalManager externalManager, bool mainEngine = true)
+        public Engine(IExternalManager externalManager, bool mainEngine = true)
         {
             //needed for proper reading of input files on all systems
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
@@ -328,12 +327,7 @@ namespace PREACT
                 _workingFolder = rootFolder;
                 _dataStatus.Reset();
                 _dataStatus.HaveInput = true;
-
-                if (_externalManager != null)
-                {
-                    _externalManager.UpdateMap();
-                    _externalManager.InputHasChanged();
-                }
+                UpdateExternalManager();
             }
         }
 
@@ -346,13 +340,17 @@ namespace PREACT
                 _workingFile = inputFilePath;
                 _workingFolder = Path.GetDirectoryName(inputFilePath);
                 _dataStatus.Reset();
-                _dataStatus.HaveInput = true;
+                _dataStatus.HaveInput = true;   
+                UpdateExternalManager();
+            }
+        }
 
-                if (_externalManager != null)
-                {
-                    _externalManager.UpdateMap();
-                    _externalManager.InputHasChanged();
-                }
+        private void UpdateExternalManager()
+        {
+            if (_externalManager != null)
+            {
+                _externalManager.UpdateMap();
+                _externalManager.InputHasChanged();
             }
         }
                 

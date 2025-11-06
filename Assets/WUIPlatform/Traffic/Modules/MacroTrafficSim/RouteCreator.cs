@@ -276,9 +276,9 @@ namespace PREACT.Traffic
             SelectCorrectRoute(rC, -1);
         }
 
-        public static void UpdateRouteCollectionBasedOnRouteChoice(RouteCollection rC, int cellIndex)
+        public static void UpdateRouteCollectionBasedOnRouteChoice(MacroTrafficSimInput.RoutingChoice rotuingChoice, RouteCollection rC, int cellIndex)
         {
-            if(Engine.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.EvacGroup || Engine.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Random)
+            if(rotuingChoice == MacroTrafficSimInput.RoutingChoice.EvacGroup || rotuingChoice == MacroTrafficSimInput.RoutingChoice.Random)
             {
                 SelectCorrectRoute(rC, cellIndex);
             }
@@ -300,8 +300,8 @@ namespace PREACT.Traffic
             {
                 if (cellIndex >= 0)
                 {
-                    EvacuationGroup group = simulation.RuntimeData.Evacuation.GetEvacGroup(cellIndex);
-                    EvacuationDestination goal = group.GetWeightedEvacGoal();
+                    EvacuationGroup group = simulation.Scenario.Data.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationDestination goal = group.GetWeightedRandomDestination(simulation.Destinations);
                     rC.SelectForcedNonBlocked(goal, simulation);
                 }
                 else
@@ -314,11 +314,11 @@ namespace PREACT.Traffic
                 int randomChoice = Randomf.Range(0, simulation.Destinations.Count - 1);
                 rC.SelectForcedNonBlocked(simulation.Destinations[randomChoice], simulation);
             }
-            else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Closest)
+            else if (routingChoice == MacroTrafficSimInput.RoutingChoice.Closest)
             {
                 rC.SelectClosestNonBlocked(simulation);
             }
-            else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Fastest)
+            else if (routingChoice == MacroTrafficSimInput.RoutingChoice.Fastest)
             {
                 rC.SelectFastestNonBlocked(simulation);
             }

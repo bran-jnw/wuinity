@@ -15,17 +15,29 @@ namespace PREACT.Smoke
     {
         LinearSpline1D _rampData;
 
-        public bool LoadExtinctionRampFile(string path)
+        public ExtinctionRamp(LinearSpline1D rampData)
         {
+            _rampData = rampData;
+        }
+
+        public float GetOpticalDensity(float time)
+        {
+            return _rampData.GetYValue(time);
+        }
+        public static ExtinctionRamp LoadExtinctionRampFile(string filePath, out bool success)
+        {
+            success = false;
+            ExtinctionRamp extinctionRamp = null;
+
             string[] rampLines;
-            if (File.Exists(path))
+            if (File.Exists(filePath))
             {
-                rampLines = File.ReadAllLines(path);
+                rampLines = File.ReadAllLines(filePath);
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Extinction coefficient ramp file " + path + " not found.");
-                return false;
+                Engine.MESSAGE(null, Engine.LogType.Warning, "Extinction coefficient ramp file " + filePath + " not found.");
+                return extinctionRamp;
             }
 
             List<Vector2> validRampLines = new List<Vector2>();
@@ -34,32 +46,25 @@ namespace PREACT.Smoke
             {
                 string[] rampLine = rampLines[i].Split(',');
                 //make sure there is some data and not just empty line
-                if(rampLine.Length == 2)
+                if (rampLine.Length == 2)
                 {
                     float time, value;
                     bool validTime = float.TryParse(rampLine[0], out time);
                     bool validValue = float.TryParse(rampLine[1], out value);
-                    if(validTime && validValue)
+                    if (validTime && validValue)
                     {
                         validRampLines.Add(new Vector2(time, value));
-                    }                    
+                    }
                 }
             }
 
-            if(validRampLines.Count >= 2)
+            if (validRampLines.Count >= 2)
             {
-                _rampData = new LinearSpline1D(validRampLines);
-                return true;
+                success = true;
+                extinctionRamp = new ExtinctionRamp(new LinearSpline1D(validRampLines));
             }
-            else
-            {
-                return false;
-            }            
-        }
 
-        public float GetOpticalDensity(float time)
-        {
-            return _rampData.GetYValue(time);
+            return extinctionRamp;
         }
     }
 }

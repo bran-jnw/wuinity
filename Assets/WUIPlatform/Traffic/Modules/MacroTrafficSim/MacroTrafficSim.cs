@@ -433,11 +433,9 @@ namespace PREACT.Traffic
             return canReverseLanes;
         }
 
-        public override void SaveToFile(int runNumber)
-        {
-            PREACTInput wuiIn = Engine.Input;
-            string path = System.IO.Path.Combine(Engine.OutputFolder, wuiIn.Simulation.Name + "_traffic_output_" + runNumber + ".csv");
-            System.IO.File.WriteAllLines(path, output);
+        public override void SaveToFile(string filePath)
+        {            
+            System.IO.File.WriteAllLines(filePath, output);
         }
 
         public override void HandleIgnitedFireCells(List<Vector2int> cellIndices)

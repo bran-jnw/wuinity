@@ -15,28 +15,23 @@ namespace PREACT.Population
 {
     [Serializable]
     public class LocalGPWData
-    {     
-        public int ncols;
-        public int nrows;
-        public double xllcorner;
-        public double yllcorner;
-        public double cellsize; //size in degrees
-        public int NODATA_value;
-        public double[] density;
-        public Vector2int _cells;
-        public Vector2d actualOriginDegrees;
-        public Vector2d originOffset;
-        public Vector2d realWorldSize;
-        public int totalPopulation;
-                        
-        private bool _haveData;
-        public bool HavedData { get => _haveData; }
-        private PopulationData _populationData;
+    {
+        public Vector2d ActualOriginDegrees;
+        public Vector2d OriginOffset;
+        public Vector2d RealWorldSize;
+        public Vector2int CellCount;
+        public int TotalPopulation;
+        public double[] Density;     
 
-        public LocalGPWData(PopulationData populationData)
+
+        public LocalGPWData(Vector2d actualOriginDegrees, Vector2d originOffset, Vector2d realWorldSize, Vector2int cellCount, int totalPopulation, double[] density)
         {
-            _haveData = false;
-            _populationData = populationData;
+            ActualOriginDegrees = actualOriginDegrees;
+            OriginOffset = originOffset;
+            RealWorldSize = realWorldSize;
+            CellCount = cellCount;
+            TotalPopulation = totalPopulation;
+            Density = density;
         }
 
         //http://www.land-navigation.com/latitude-and-longitude.html
@@ -58,94 +53,76 @@ namespace PREACT.Population
             return new Vector2d(xSize, ySize);
         }
 
-        private void SaveLocalGPWData(PREACTInput input, string rootFolder)
+        public void SaveToDisk(string filePath)
         {            
-            string[] data = new string[13];
+            string[] data = new string[6];
+                        
+            data[0] = ActualOriginDegrees.x + " " + ActualOriginDegrees.y;
+            data[1] = OriginOffset.x + " " + OriginOffset.y;
+            data[2] = RealWorldSize.x + " " + RealWorldSize.y;
+            data[3] = CellCount.x + " " + CellCount.y;
+            data[4] = TotalPopulation.ToString();
 
-            //save data stamp to make sure data fits input
-            string dataStamp = input.Simulation.LowerLeftLatLon.x.ToString() + " " + input.Simulation.LowerLeftLatLon.y.ToString()
-                    + " " + input.Simulation.DomainSize.y.ToString() + " " + input.Simulation.DomainSize.y.ToString();
-            data[0] = dataStamp;
-
-            data[1] = ncols.ToString();
-            data[2] = nrows.ToString();
-            data[3] = xllcorner.ToString();
-            data[4] = yllcorner.ToString();
-            data[5] = cellsize.ToString();
-            data[6] = NODATA_value.ToString();
-
-            string densData = "";
-            for (int i = 0; i < density.Length; ++i)
+            string densityData = "";
+            for (int i = 0; i < Density.Length; ++i)
             {
-                densData += density[i] + " ";
+                densityData += Density[i] + " ";
             }
-            data[7] = densData;
-            data[8] = _cells.x + " " + _cells.y;
-            data[9] = actualOriginDegrees.x + " " + actualOriginDegrees.y;
-            data[10] = originOffset.x + " " + originOffset.y;
-            data[11] = realWorldSize.x + " " + realWorldSize.y;
-            data[12] = totalPopulation.ToString();
+            data[5] = densityData;
 
-            string path = Path.Combine(rootFolder, input.Simulation.Name + ".gpw");
-            File.WriteAllLines(path, data);
+            File.WriteAllLines(filePath, data);
         }
 
-        public bool LoadFromFile(string localGpwFile)
+        public static LocalGPWData LoadFromFile(string localGpwFile, out bool success)
         {
-            bool success = false;
+            success = false;
+            LocalGPWData localGPWData = null;
+
             if (File.Exists(localGpwFile))
             {
                 string[] d = File.ReadAllLines(localGpwFile);
 
-                int.TryParse(d[1], out ncols);
-                int.TryParse(d[2], out nrows);
-                double.TryParse(d[3], out xllcorner);
-                double.TryParse(d[4], out yllcorner);
-                double.TryParse(d[5], out cellsize);
-                int.TryParse(d[6], out NODATA_value);
+                Vector2d actualOriginDegrees;
+                Vector2d originOffset;
+                Vector2d realWorldSize;
+                Vector2int _cellCount;  
+                int totalPopulation;
+                double[] density;
 
-                //switch order due to needing data size first
-                string[] dummy = d[8].Split(' ');
-                int xI;
-                int yI;
-                int.TryParse(dummy[0], out xI);
-                int.TryParse(dummy[1], out yI);
-                _cells = new Vector2int(xI, yI);
-
-                dummy = d[7].Split(' ');
-                density = new double[_cells.x * _cells.y];
-                for (int i = 0; i < density.Length; ++i)
-                {
-                    double.TryParse(dummy[i], out density[i]);
-                }
-
-                dummy = d[9].Split(' ');
+                string[] dummy = d[0].Split(' ');
                 double xD;
                 double yD;
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
                 actualOriginDegrees = new Vector2d(xD, yD);
 
-                dummy = d[10].Split(' ');
+                dummy = d[1].Split(' ');
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
                 originOffset = new Vector2d(xD, yD);
 
-                dummy = d[11].Split(' ');
+                dummy = d[2].Split(' ');
                 double.TryParse(dummy[0], out xD);
                 double.TryParse(dummy[1], out yD);
                 realWorldSize = new Vector2d(xD, yD);
 
-                //some older files might not have the total population
-                if (d.Length > 12)
+                dummy = d[3].Split(' ');
+                int xI;
+                int yI;
+                int.TryParse(dummy[0], out xI);
+                int.TryParse(dummy[1], out yI);
+                _cellCount = new Vector2int(xI, yI);
+
+                int.TryParse(d[4], out totalPopulation);
+
+                dummy = d[5].Split(' ');
+                density = new double[_cellCount.x * _cellCount.y];
+                for (int i = 0; i < density.Length; ++i)
                 {
-                    int.TryParse(d[12], out totalPopulation);
+                    double.TryParse(dummy[i], out density[i]);
                 }
-                else
-                {
-                    CalculateTotalPopulation();
-                }
-                _haveData = true;
+
+                localGPWData = new LocalGPWData(actualOriginDegrees, originOffset, realWorldSize, _cellCount, totalPopulation, density);
                 success = true;
                 Engine.MESSAGE(null, Engine.LogType.Log, " Loaded local GPW data from " + localGpwFile);
             }
@@ -154,33 +131,84 @@ namespace PREACT.Population
                 Engine.MESSAGE(null, Engine.LogType.Warning, " No local GPW data was found, build from global GPW or create custom population.");                
             }
 
-            if(success)
-            {
-                if(_populationData != null)
-                {
-                    _populationData.Visualizer.CreateGPWTexture(this);
-                }                
-                _haveData = true;                
-            }
-
-            return success;
+            return localGPWData;
         }
 
-        public bool CreateLocalGPWData(PREACTInput input, string globalGpwFolder)
+        public static LocalGPWData CreateLocalGPWData(PREACTInput input, string globalGpwFolder, out bool success)
         {
-            bool success = LoadRelevantGPWData(input, globalGpwFolder);
+            Vector2d latLon = input.Simulation.LowerLeftLatLon;
+            Vector2d size = input.Simulation.DomainSize;
 
-            if (success)
-            {                
-                CalculateTotalPopulation();
-                if (_populationData != null)
+            success = false;
+            LocalGPWData localGPWData = null;
+
+            if (IsGPWAvailable(globalGpwFolder))
+            {
+                // New code to accept GPW data-sets from any version and any year
+                string[] AscFiles = Directory.GetFiles(globalGpwFolder, "*.asc");  // Get all ASCII files of the GPW data set
+                Array.Sort(AscFiles);   // Sort the array in case it is not already sorted.
+                string relevantAscFile;
+
+                if (latLon.x >= -3.4106051316485e-012)
                 {
-                    _populationData.Visualizer.CreateGPWTexture(this);
-                }                
-                _haveData = true;
+                    if (latLon.y < -90.000000000005)
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
+                        relevantAscFile = AscFiles[0];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 1");
+                    }
+                    else if (latLon.y < -1.0231815394945e-011)
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
+                        relevantAscFile = AscFiles[1];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 2");
+                    }
+                    else if (latLon.y < 89.999999999985)
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
+                        relevantAscFile = AscFiles[2];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 3");
+                    }
+                    else
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
+                        relevantAscFile = AscFiles[3];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 4");
+                    }
+                }
+                else
+                {
+                    if (latLon.y < -90.000000000005)
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
+                        relevantAscFile = AscFiles[4];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 5");
+                    }
+                    else if (latLon.y < -1.0231815394945e-011)
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
+                        relevantAscFile = AscFiles[5];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 6");
+                    }
+                    else if (latLon.y < 89.999999999985)
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
+                        relevantAscFile = AscFiles[6];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 7");
+                    }
+                    else
+                    {
+                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
+                        relevantAscFile = AscFiles[7];
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 8");
+                    }
+                }
+
+                localGPWData = CreateFromGlobalGPWSector(relevantAscFile, latLon, size, out success);
+                localGPWData.CalculateTotalPopulation();
             }
 
-            return success;
+            return localGPWData;
         }
 
         bool AreSame(double a, double b)    // for comparing double values, added 14/08/2023
@@ -196,20 +224,20 @@ namespace PREACT.Population
 
         private void CalculateTotalPopulation()
         {
-            totalPopulation = 0;
+            TotalPopulation = 0;
 
-            double cellSizeX = realWorldSize.x / _cells.x;
-            double cellSizeY = realWorldSize.y / _cells.y;
+            double cellSizeX = RealWorldSize.x / CellCount.x;
+            double cellSizeY = RealWorldSize.y / CellCount.y;
             double cellArea = cellSizeX * cellSizeY / (1000000d); // people/square km
-            totalPopulation = 0;
-            for (int y = 0; y < _cells.y; ++y)
+            TotalPopulation = 0;
+            for (int y = 0; y < CellCount.y; ++y)
             {
-                for (int x = 0; x < _cells.x; ++x)
+                for (int x = 0; x < CellCount.x; ++x)
                 {
                     double density = GetDensity(x, y);
                     int pop = Mathf.CeilToInt((float)(cellArea * density));
                     pop = Mathf.Clamp(pop, 0, pop);
-                    totalPopulation += pop;
+                    TotalPopulation += pop;
                 }
             }
         }
@@ -219,35 +247,35 @@ namespace PREACT.Population
         /// </summary>
         public double GetDensity(int x, int y)
         {
-            if(density == null || density.Length == 0)
+            if(Density == null || Density.Length == 0)
             {
                 return -1.0;
             }
 
-            x = Mathf.Clamp(x, 0, _cells.x - 1);
-            y = Mathf.Clamp(y, 0, _cells.y - 1);
-            return density[x + y * _cells.x];
+            x = Mathf.Clamp(x, 0, CellCount.x - 1);
+            y = Mathf.Clamp(y, 0, CellCount.y - 1);
+            return Density[x + y * CellCount.x];
         }
 
         public double GetDensitySimulationSpace(Vector2d pos)
         {
-            Vector2d positiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
-            int xInt = (int)((pos.x / positiveSize.x) * _cells.x);
-            int yInt = (int)((pos.y / positiveSize.y) * _cells.y);
+            Vector2d positiveSize = RealWorldSize + OriginOffset; //since offset is always negative we add it here
+            int xInt = (int)((pos.x / positiveSize.x) * CellCount.x);
+            int yInt = (int)((pos.y / positiveSize.y) * CellCount.y);
             double dens = GetDensity(xInt, yInt);
             return dens;
         }
 
         public  double GetDensitySimulationSpaceBilinear(Vector2d pos)
         {
-            Vector2d positiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
+            Vector2d positiveSize = RealWorldSize + OriginOffset; //since offset is always negative we add it here
 
-            double x = (pos.x / positiveSize.x) * _cells.x;
+            double x = (pos.x / positiveSize.x) * CellCount.x;
             int xLow = (int)x;
             int xHigh = xLow + 1;
             double xWeight = x - xLow;
 
-            double y = (pos.y / positiveSize.y) * _cells.y;
+            double y = (pos.y / positiveSize.y) * CellCount.y;
             int yLow = (int)y;
             int yHigh = yLow + 1;
             double yWeight = y - yLow;
@@ -264,84 +292,7 @@ namespace PREACT.Population
             return h;
         }       
 
-        /// <summary>
-        /// Returns the density data at a gridpoint based on polar coordinates.
-        /// </summary>
-        private bool LoadRelevantGPWData(PREACTInput input, string globalGpwFolder)
-        {
-            Vector2d latLong = input.Simulation.LowerLeftLatLon;
-            Vector2d size = input.Simulation.DomainSize;
-
-            bool success = false;
-            if (IsGPWAvailable(globalGpwFolder))
-            {
-                // New code to accept GPW data-sets from any version and any year
-                string[] AscFiles = Directory.GetFiles(globalGpwFolder, "*.asc");  // Get all ASCII files of the GPW data set
-                Array.Sort(AscFiles);   // Sort the array in case it is not already sorted.
-                string relevantAscFile;
-
-                if (latLong.x >= -3.4106051316485e-012)
-                {
-                    if (latLong.y < -90.000000000005)
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
-                        relevantAscFile = AscFiles[0];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 1");
-                    }
-                    else if (latLong.y < -1.0231815394945e-011)
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
-                        relevantAscFile = AscFiles[1];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 2");
-                    }
-                    else if (latLong.y < 89.999999999985)
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
-                        relevantAscFile = AscFiles[2];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 3");
-                    }
-                    else
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
-                        relevantAscFile = AscFiles[3];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 4");
-                    }
-                }
-                else
-                {
-                    if (latLong.y < -90.000000000005)
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
-                        relevantAscFile = AscFiles[4];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 5");
-                    }
-                    else if (latLong.y < -1.0231815394945e-011)
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
-                        relevantAscFile = AscFiles[5];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 6");
-                    }
-                    else if (latLong.y < 89.999999999985)
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
-                        relevantAscFile = AscFiles[6];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 7");
-                    }
-                    else
-                    {
-                        //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
-                        relevantAscFile = AscFiles[7];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 8");
-                    }
-                }
-
-                success = ReadGlobalGPWSector(relevantAscFile, latLong, size);
-            }
-
-            return success;
-        }
-
-        public static bool IsGPWAvailable(string path)
+        private static bool IsGPWAvailable(string path)
         {
             bool isAvailable = false;
 
@@ -356,12 +307,12 @@ namespace PREACT.Population
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "Not all GPW files found.");
+                    Engine.MESSAGE(null, Engine.LogType.InputError, "Not all GPW files found.");
                 }
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "GPW path does NOT exist.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, "GPW path does NOT exist.");
             }
 
             return isAvailable;
@@ -370,96 +321,108 @@ namespace PREACT.Population
         /// <summary>
         /// Reads specified dataset from global GPW.
         /// </summary>
-        private bool ReadGlobalGPWSector(string file, Vector2d latLong, Vector2d size)
+        private static LocalGPWData CreateFromGlobalGPWSector(string filePath, Vector2d latLon, Vector2d size, out bool success)
         {
-            string[] d = new string[6];
-            StreamReader sr = new StreamReader(file);
-            if (File.Exists(file))
+            success = false;
+            LocalGPWData localGPWData = null;
+            
+            StreamReader sr = new StreamReader(filePath);
+            if (File.Exists(filePath))
             {
+                string[] d = new string[6];
                 for (int i = 0; i < 6; ++i)
                 {
                     d[i] = sr.ReadLine();
                 }
+
+                int ncols;
+                int nrows;
+                double xllcorner;
+                double yllcorner;
+                double cellsize; //size in degrees
+                int NODATA_value;
+
+                //read and save general stuff
+                string[] dummy = d[0].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out ncols);
+                dummy = d[1].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out nrows);
+                dummy = d[2].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out xllcorner);
+                dummy = d[3].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out yllcorner);
+                dummy = d[4].Split(' ');
+                double.TryParse(dummy[dummy.Length - 1], out cellsize);
+                dummy = d[5].Split(' ');
+                int.TryParse(dummy[dummy.Length - 1], out NODATA_value);
+
+                Vector2d degreesToRead = SizeToDegrees(latLon, size);
+                //number of columns and rows
+                Vector2int cells = new Vector2int(Mathd.CeilToInt(degreesToRead.x / cellsize), Mathd.CeilToInt(degreesToRead.y / cellsize));
+                //start index to read data
+                int xSI = (int)((latLon.y - xllcorner) / cellsize);
+                int ySI = (int)((latLon.x - yllcorner) / cellsize);
+                //end index to read data
+                int xEI = xSI + (int)(degreesToRead.x / cellsize);
+                int yEI = ySI + (int)(degreesToRead.y / cellsize);
+
+                //how far are we into the data set? 
+                Vector2d actualOriginDegrees = new Vector2d(ySI * cellsize + yllcorner, xSI * cellsize + xllcorner);
+
+                //calculate how many units we have to move the data when drawing quad
+                Vector2d dOffset = actualOriginDegrees - latLon;
+                //flip these as lat/long has reversed order to x/y 
+                dOffset = new Vector2d(dOffset.y, dOffset.x);
+                Vector2d originOffset = DegreesToSize(latLon, dOffset);
+                Vector2d realWorldSize = DegreesToSize(latLon, new Vector2d(cells.x * cellsize, cells.y * cellsize));
+                //check if we need to add another cell after shifting origin
+                Vector2d actualPositiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
+                bool updateSize = false;
+                if (actualPositiveSize.x < size.x)
+                {
+                    ++xEI;
+                    ++cells.x;
+                    updateSize = true;
+                }
+                if (actualPositiveSize.y < size.y)
+                {
+                    ++yEI;
+                    ++cells.y;
+                    updateSize = true;
+                }
+                if (updateSize)
+                {
+                    realWorldSize = DegreesToSize(latLon, new Vector2d(cells.x * cellsize, cells.y * cellsize));
+                }
+
+                //create needed array
+                double[] density = new double[cells.x * cells.y];
+
+                for (int i = 0; i < nrows; ++i) //density.Length
+                {
+                    //since read begin from upper corner and not lower
+                    int realYIndex = nrows - 1 - i;
+                    string[] e = sr.ReadLine().Split(' ');
+                    for (int j = 0; j < ncols; ++j)
+                    {
+                        if (j >= xSI && j <= xEI && realYIndex >= ySI && realYIndex <= yEI)
+                        {
+                            int index = (j - xSI) + (realYIndex - ySI) * cells.x;
+                            double.TryParse(e[j], out density[index]);
+                        }
+                    }
+                }
+                sr.Close();
+
+                success = true;
+                localGPWData = new LocalGPWData(actualOriginDegrees, originOffset, realWorldSize, cells, 0, density);
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, " Global GPW data files not found. Please make sure the folder structure is correct.");
-                return false;
-            }
+                Engine.MESSAGE(null, Engine.LogType.InputError, " Global GPW data files not found. Please make sure the folder structure is correct.");
+            }            
 
-            //read and save general stuff
-            string[] dummy = d[0].Split(' ');
-            int.TryParse(dummy[dummy.Length - 1], out ncols);
-            dummy = d[1].Split(' ');
-            int.TryParse(dummy[dummy.Length - 1], out nrows);
-            dummy = d[2].Split(' ');
-            double.TryParse(dummy[dummy.Length - 1], out xllcorner);
-            dummy = d[3].Split(' ');
-            double.TryParse(dummy[dummy.Length - 1], out yllcorner);
-            dummy = d[4].Split(' ');
-            double.TryParse(dummy[dummy.Length - 1], out cellsize);
-            dummy = d[5].Split(' ');
-            int.TryParse(dummy[dummy.Length - 1], out NODATA_value);
-
-            Vector2d degreesToRead = SizeToDegrees(latLong, size);
-            //number of columns and rows
-            _cells = new Vector2int(Mathd.CeilToInt(degreesToRead.x / cellsize), Mathd.CeilToInt(degreesToRead.y / cellsize));
-            //start index to read data
-            int xSI = (int)((latLong.y - xllcorner) / cellsize);
-            int ySI = (int)((latLong.x - yllcorner) / cellsize);
-            //end index to read data
-            int xEI = xSI + (int)(degreesToRead.x / cellsize);
-            int yEI = ySI + (int)(degreesToRead.y / cellsize);
-
-            //how far are we into the data set? 
-            actualOriginDegrees = new Vector2d(ySI * cellsize + yllcorner, xSI * cellsize + xllcorner);
-
-            //calculate how many units we have to move the data in Unity when drawing quad
-            Vector2d dOffset = actualOriginDegrees - latLong;
-            //flip these as lat/long has reversed order to x/y 
-            dOffset = new Vector2d(dOffset.y, dOffset.x);
-            originOffset = DegreesToSize(latLong, dOffset);
-            realWorldSize = DegreesToSize(latLong, new Vector2d(_cells.x * cellsize, _cells.y * cellsize));
-            //check if we need to add another cell after shifting origin
-            Vector2d actualPositiveSize = realWorldSize + originOffset; //since offset is always negative we add it here
-            bool updateSize = false;
-            if (actualPositiveSize.x < size.x)
-            {
-                ++xEI;
-                ++_cells.x;
-                updateSize = true;
-            }
-            if (actualPositiveSize.y < size.y)
-            {
-                ++yEI;
-                ++_cells.y;
-                updateSize = true;
-            }
-            if (updateSize)
-            {
-                realWorldSize = DegreesToSize(latLong, new Vector2d(_cells.x * cellsize, _cells.y * cellsize));
-            }
-
-            //create needed array
-            density = new double[_cells.x * _cells.y];
-
-            for (int i = 0; i < nrows; ++i) //density.Length
-            {
-                //since read begin from upper corner and not lower
-                int realYIndex = nrows - 1 - i;
-                string[] e = sr.ReadLine().Split(' ');
-                for (int j = 0; j < ncols; ++j)
-                {
-                    if (j >= xSI && j <= xEI && realYIndex >= ySI && realYIndex <= yEI)
-                    {
-                        int index = (j - xSI) + (realYIndex - ySI) * _cells.x;
-                        double.TryParse(e[j], out density[index]);
-                    }
-                }
-            }
-            sr.Close();                       
-
-            return true;
+            return localGPWData;
         }
 
     }

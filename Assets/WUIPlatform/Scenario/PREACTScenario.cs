@@ -56,19 +56,13 @@ namespace PREACT
         private static PREACTData CreateDataFromInput(PREACTInput input, string rootFolder, out bool success)
         {
             success = false;
-            Engine.MESSAGE(null, Engine.LogType.Log, "Loading referenced data from input file...");
-            PREACTData data = new PREACTData(input); //Geo gets loaded automatically            
-            //need to load evacuation goals before routing as they rely on evacuation goals
-            data.Population.LoadAll(input, rootFolder, out success);
-            data.Evacuation.LoadAll(input, rootFolder, out success);
-            //RUNTIME_DATA.Routing.LoadAll(); //this does nothing right now                
-            data.Traffic.LoadAll(input, rootFolder);
-            data.Fire.LoadAll(input, rootFolder, data.Geo.UTMOrigin, out success);
+            PREACTData data = new PREACTData(input); //Geo gets loaded automatically
+
+            data.LoadAll(input, rootFolder, out success);            
             if (!success)
             {
                 return null;
-            }
-            data.Smoke.LoadAll(input, rootFolder); //does nothing right now
+            }           
 
             success = true;
             return data;

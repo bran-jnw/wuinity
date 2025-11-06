@@ -6,29 +6,38 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using PREACT.IO;
+using System.IO;
 
 namespace PREACT.Runtime
 {
     public class SmokeData
     {
-        //private GlobalSmokeData globalSmokeData;
+        private Smoke.ExtinctionRamp _extinctionRamp;
 
-        public void LoadAll(PREACTInput input, string rootFolder)
+        public Smoke.ExtinctionRamp ExtinctionRamp { get => _extinctionRamp; }
+
+        public void LoadAll(PREACTInput input, string rootFolder, out bool success)
         {
+            success = false;
+
             if(!input.Simulation.RunSmokeModule)
             {
+                success = true;
                 return;
-            }           
+            }
+
+            if (input.Simulation.RunSmokeModule && input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            {
+                string filePath = Path.Combine(rootFolder, input.Smoke.GlobalSmokeInput.ExtinctionFile);
+                LoadExtinctionRamp(filePath, out success);
+            }            
+        }
+
+        public void LoadExtinctionRamp(string filePath, out bool success)
+        {
+            _extinctionRamp = Smoke.ExtinctionRamp.LoadExtinctionRampFile(filePath, out success);
         }
     }
 
-    /*public class GlobalSmokeData
-    {
-        Vector2[] data;
-
-        public float GetGlobalDensity(float time)
-        {
-            return 0f;
-        }
-    }*/
+    
 }

@@ -28,7 +28,6 @@ namespace PREACT.Population
 
 
         //not saved
-        private PopulationData _populationData;
         private bool _haveData;
         public bool HaveData { get => _haveData; }
         private bool _correctedForRoadAccess;
@@ -36,22 +35,8 @@ namespace PREACT.Population
         private string _fileName;
         public string FileName{ get => _fileName; }
 
-        public PopulationMap(PopulationData populationData)
+        public PopulationMap()
         {
-            /*_lowerLeftLatLong = WUIEngine.INPUT.Simulation.LowerLeftLatLong;
-            _size = WUIEngine.INPUT.Simulation.Size;
-            _cells = WUIEngine.RUNTIME_DATA.Evacuation.CellCount;
-            _cellSize = WUIEngine.INPUT.Evacuation.RouteCellSize;
-
-            _cellArea = _cellSize * _cellSize / (1000000d); // people/square km
-            _totalPopulation = 0;
-
-            _cellPopulations = new int[_cells.x * _cells.y];
-            populationMask = new bool[_cells.x * _cells.y];
-
-            isLoaded = false;
-            correctedForRoutes = false;*/
-            _populationData = populationData;
             _haveData = false;
             _correctedForRoadAccess = false;
         }
@@ -85,8 +70,10 @@ namespace PREACT.Population
             return _mask[x + y * _cells.x];
         }
 
-        public void CreateFromLocalGPW(IO.PREACTInput input, LocalGPWData localGPWData, float cellSize)
+        public void CreateFromLocalGPW(IO.PREACTInput input, LocalGPWData localGPWData, float cellSize, out bool success)
         {
+            success = false;
+
             _lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
             _size = input.Simulation.DomainSize;
             _cellSize = cellSize;
@@ -127,16 +114,17 @@ namespace PREACT.Population
             
             //the bilinear interpolation might not have conserved the amount of people correctly, or we have masked off some people
             //UPDATE: maybe issue to do this as the area of the GPW piece might be much larger than the area of interest
-            if (localGPWData.totalPopulation < _totalPopulation)
+            if (localGPWData.TotalPopulation < _totalPopulation)
             {
-                ScaleTotalPopulation(localGPWData.totalPopulation);
+                ScaleTotalPopulation(localGPWData.TotalPopulation);
             }     
             
             _haveData = true;
+            success = true;
             _correctedForRoadAccess = false;
             _fileName = input.Simulation.Name;
-            _populationData.Visualizer.CreatePopulationMapTexture(this);
-            _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
+            //_populationData.Visualizer.CreatePopulationMapTexture(this);
+            //_populationData.Visualizer.CreatePopulationMapMaskTexture(this);
             Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
@@ -255,7 +243,7 @@ namespace PREACT.Population
             }
 
             _haveData = true;
-            _populationData.Visualizer.CreatePopulationMapTexture(this);            
+            //_populationData.Visualizer.CreatePopulationMapTexture(this);            
         }    
 
         /// <summary>
@@ -311,10 +299,10 @@ namespace PREACT.Population
             }
 
             Engine.MESSAGE(null, Engine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
-            _populationData.Visualizer.CreatePopulationMapTexture(this);          
+            //_populationData.Visualizer.CreatePopulationMapTexture(this);          
         }
 
-        private void SaveToFile(string fileName, string rootFolder)
+        public void SaveToFile(string filePath)
         {
             string[] data = new string[9];
 
@@ -332,12 +320,11 @@ namespace PREACT.Population
                 data[8] += _cellPopulations[i] + " ";
             }
 
-            string path = Path.Combine(rootFolder, fileName + ".pop");
-            File.WriteAllLines(path, data);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map to " + path);
+            File.WriteAllLines(filePath, data);
+            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map to " + filePath);
         }
 
-        public void SavePopulationMask(string file)
+        public void SavePopulationMask(string filePath)
         {
             string[] data = new string[9];
 
@@ -355,8 +342,8 @@ namespace PREACT.Population
                 data[8] += _mask[i] == true ? 1 + " " : 0 + " ";
             }
 
-            File.WriteAllLines(file, data);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map mask to " + file);
+            File.WriteAllLines(filePath, data);
+            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map mask to " + filePath);
         }
 
         public bool LoadPopulationMask(string populationMaskFile)
@@ -390,7 +377,7 @@ namespace PREACT.Population
                         _mask[i] = true;
                     }
                 }
-                _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
+                //_populationData.Visualizer.CreatePopulationMapMaskTexture(this);
                 success = true;
                 Engine.MESSAGE(null, Engine.LogType.Log, " Loaded population map mask from file " + populationMaskFile + ".");
             }
@@ -435,8 +422,8 @@ namespace PREACT.Population
                     }
                 }
                 _cellRoadAccessLatLon = new Vector2d[_cells.x * _cells.y];
-                _populationData.Visualizer.CreatePopulationMapTexture(this);
-                _populationData.Visualizer.CreatePopulationMapMaskTexture(this);
+                //_populationData.Visualizer.CreatePopulationMapTexture(this);
+                //_populationData.Visualizer.CreatePopulationMapMaskTexture(this);
                 _haveData = true;
                 _correctedForRoadAccess = false;
                 success = true;           
