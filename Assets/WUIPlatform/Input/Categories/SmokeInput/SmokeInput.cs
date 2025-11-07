@@ -84,42 +84,38 @@ namespace PREACT.IO
                 return newInput;
             }
 
-            if(newInput.SmokeModule == SmokeModuleChoice.GlobalSmoke)
+            int lineIndex;
+            //global smoke
+            input = nameof(SmokeModuleChoice.GlobalSmoke);
+            if (headerLineIndex.TryGetValue(input, out lineIndex))
             {
-                int lineIndex;
-                input = nameof(SmokeModuleChoice.GlobalSmoke);
-                if (headerLineIndex.TryGetValue(input, out lineIndex))
-                {
-                    PREACTInput.ReadingInputMessage(input);
-                    newInput._globalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex);
-                }
-                else
-                {
-                    //critical
-                    ++issues;
-                    Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + PREACTInput.pleaseCheckInput);
-                }
-                if (issues > 0)
-                {
-                    success = false;
-                    return newInput;
-                }
+                PREACTInput.ReadingInputMessage(input);
+                newInput._globalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex, newInput, out success);
             }
-            else if(newInput.SmokeModule == SmokeModuleChoice.AdvectDiffuseMixingLayer)
+            else
             {
-                int lineIndex;
-                input = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
-                if (headerLineIndex.TryGetValue(input, out lineIndex))
-                {
-                    PREACTInput.ReadingInputMessage(input);
-                    newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex);
-                }
-                else
-                {
-                    //critical
-                    Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + PREACTInput.pleaseCheckInput);
-                    return null;
-                }
+                //critical
+                ++issues;
+                Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + PREACTInput.pleaseCheckInput);
+            }
+            if (issues > 0)
+            {
+                success = false;
+                return newInput;
+            }
+
+            //advect diffuse
+            input = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
+            if (headerLineIndex.TryGetValue(input, out lineIndex))
+            {
+                PREACTInput.ReadingInputMessage(input);
+                newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex);
+            }
+            else
+            {
+                //critical
+                Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + PREACTInput.pleaseCheckInput);
+                return null;
             }
 
             newInput._data.LoadAll(simulationInput, newInput, rootFolder, out success);
