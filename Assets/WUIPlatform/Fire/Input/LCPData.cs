@@ -163,7 +163,7 @@ namespace PREACT.Fire
             Header.loelev = 0;
         }
 
-		public LCPData(string filePath, Vector2d utmOrigin)					
+		public LCPData(string filePath, Vector2d simulationUtmOrigin)					
 		{
 			bool readGeoTIFF = false;
             if (filePath.EndsWith("tif") || filePath.EndsWith("tiff"))
@@ -179,7 +179,7 @@ namespace PREACT.Fire
 			{
                 ReadLCP(filePath);
             }
-			CalculateOriginOffset(utmOrigin);
+			CalculateOriginOffset(simulationUtmOrigin);
 		}
 
 		private void ReadGeoTIFF(string filePath)

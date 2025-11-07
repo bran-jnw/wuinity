@@ -100,7 +100,7 @@ namespace PREACT.Tools
         /// <summary>
         /// Filters the interpolated GPW data set to account for the user created population mask as well as checking for road access.
         /// </summary>
-        public static void RoadAccessCorrectPopulationMap(PopulationMap populationMap, Runtime.GeoData geoData, string routerDbFile, out bool success)
+        public static void RoadAccessCorrectPopulationMap(PopulationMap populationMap, Runtime.SimulationData geoData, string routerDbFile, out bool success)
         {
             success = false;
 
@@ -136,7 +136,7 @@ namespace PREACT.Tools
             WUIengine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
         }*/ 
 
-        public static void CreatePopulation(IO.PREACTInput input, PopulationMap populationMap, Runtime.GeoData geoData, string filePath, out bool success)
+        public static void CreatePopulation(IO.PREACTInput input, PopulationMap populationMap, Runtime.SimulationData geoData, string filePath, out bool success)
         {
             success = false;
 

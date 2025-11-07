@@ -399,7 +399,7 @@ namespace PREACT.Pedestrian
         /// <returns></returns>
         public float GetRandomWalkingSpeed()
         {
-            MacroHouseholdSimInput eO = _simulation.Scenario.Input.Pedestrian.macroHouseholdSimInput;
+            MacroHouseholdSimInput eO = _simulation.Scenario.Input.Pedestrian.MacroHouseholdSimInput;
             return Randomf.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 

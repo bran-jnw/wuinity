@@ -41,7 +41,7 @@ namespace PREACT.Pedestrian
         public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
         {
             PopulationInput popInput = simulation.Scenario.Input.Population;
-            MacroHouseholdSimInput houseInput = simulation.Scenario.Input.Pedestrian.macroHouseholdSimInput;
+            MacroHouseholdSimInput houseInput = simulation.Scenario.Input.Pedestrian.MacroHouseholdSimInput;
 
             _houseHoldData = householdData;
             _cellIndex = cellIndex;

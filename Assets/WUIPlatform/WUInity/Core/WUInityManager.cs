@@ -74,7 +74,7 @@ namespace WUInity
         }
 
         private Mapbox.Unity.Map.AbstractMap _mapboxMap;
-        public Mapbox.Unity.Map.AbstractMap Map { get => _mapboxMap }
+        public Mapbox.Unity.Map.AbstractMap Map { get => _mapboxMap; }
 
         private Painter _painter;
         public Painter Painter
@@ -283,7 +283,7 @@ namespace WUInity
             Engine.MESSAGE(null, Engine.LogType.Log, "Map loaded succesfully.");
 
             //do adjustement to better fit UTM
-            PREACT.Runtime.GeoData geoData = new PREACT.Runtime.GeoData(input);
+            PREACT.Runtime.SimulationData geoData = new PREACT.Runtime.GeoData(input);
             for (int i = 0; i < Map.transform.childCount; ++i)
             {
                 Mapbox.Unity.MeshGeneration.Data.UnityTile tile = Map.transform.GetChild(i).GetComponent<Mapbox.Unity.MeshGeneration.Data.UnityTile>();

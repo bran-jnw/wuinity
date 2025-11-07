@@ -128,7 +128,7 @@ namespace PREACT.Population
             Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
-        public void UpdatePopulationMapBasedOnRoadAccess(GeoData geoData, Itinero.RouterDb routerDb)
+        public void UpdatePopulationMapBasedOnRoadAccess(SimulationData geoData, Itinero.RouterDb routerDb)
         {
             int stuckPeople = 0;
             Itinero.Router router = new Itinero.Router(routerDb);
@@ -436,7 +436,7 @@ namespace PREACT.Population
             }
         }
 
-        public void CreatePopulation(IO.PREACTInput input, GeoData geoData, string file, out bool success)
+        public void CreatePopulation(IO.PREACTInput input, SimulationData geoData, string file, out bool success)
         {
             success = false;
 
