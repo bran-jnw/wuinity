@@ -5,6 +5,8 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using PREACT.IO;
+
 namespace PREACT
 {
     public class DataStatus
@@ -18,17 +20,17 @@ namespace PREACT
 
         public bool ResponseCurvesValid;
 
-        public bool CanRunSimulation(PREACTScenario scenario)
+        public bool CanRunSimulation(PREACTInput input)
         {
             bool canRun = true;
 
-            if (scenario.Input.Simulation.RunPedestrianModule && !PopulationLoaded)
+            if (input.Simulation.RunPedestrianModule && !PopulationLoaded)
             {
                 canRun = false;
                 Engine.MESSAGE(null, Engine.LogType.SimulationError, "Population is not loaded but user has requested pedestrian model.");
             }
 
-            if (scenario.Input.Simulation.RunFireModule)
+            if (input.Simulation.RunFireModule)
             {
                 if (!LcpLoaded)
                 {
@@ -37,9 +39,9 @@ namespace PREACT
                 }
             }
 
-            if (scenario.Input.Simulation.RunPedestrianModule)
+            if (input.Simulation.RunPedestrianModule)
             {
-                if (scenario.Data.Evacuation.ResponseCurves == null)
+                if (input.Evacuation.Data.ResponseCurves == null)
                 {
                     canRun = false;
                     Engine.MESSAGE(null, Engine.LogType.SimulationError, "No valid response curves have been loaded.");

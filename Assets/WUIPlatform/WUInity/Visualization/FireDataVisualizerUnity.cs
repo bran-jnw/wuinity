@@ -6,19 +6,24 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using PREACT.Runtime;
+using PREACT;
+using PREACT.Fire;
+using PREACT.Utility.Math;
+using PREACT.Visualization;
 
-namespace PREACT.Visualization
+namespace WUInity.Visualization
 {
     public class FireDataVisualizerUnity : FireDataVisualizer
     {
         GameObject _lcpDataPlane;
         Texture2D _fuelModelsTexture, _elevationTexture, _slopeTexture, _aspectTexture, _triggerBufferTexture;
         MeshRenderer lcpMeshRenderer;
+        LCPData _lcpData;
+        Transform root;
 
-        public FireDataVisualizerUnity(FireData owner) : base(owner) 
+        public FireDataVisualizerUnity(LCPData lcpData, Transform root)
         {
-            
+            _lcpData = lcpData;
         }
 
         public override void SetLCPViewMode(LcpViewMode lcpViewMode)
@@ -52,7 +57,6 @@ namespace PREACT.Visualization
 
         private void CreateLCPVisuals()
         {
-            Fire.LCPData _lcpData = owner.LCPData;
             if(_lcpData == null)
             {
                 Engine.MESSAGE(null, Engine.LogType.Warning, "Trying to create LCP data plane and texture but no LCP data exists.");
@@ -90,7 +94,7 @@ namespace PREACT.Visualization
             {
                 for (int x = 0; x < xPixels; x++)
                 {
-                    Fire.LandscapeStruct l = _lcpData.GetCellDataSimulationIndex(x, y, false);
+                    LandscapeStruct l = _lcpData.GetCellDataSimulationIndex(x, y, false);
 
                     PREACTColor c = FuelModelColors.GetFuelColor((int)l.fuel_model);
                     c.a = alpha;
@@ -115,12 +119,21 @@ namespace PREACT.Visualization
             _slopeTexture.Apply();
             _aspectTexture.Apply();
 
-            CreateLCPDataPlane(WUInity.WUInityEngine.INSTANCE.transform, "LCP_plane", true, xDim, yDim, _lcpData.OriginOffset);
+            CreateLCPDataPlane(root, "LCP_plane", true, xDim, yDim, _lcpData.OriginOffset);
         }
 
-        public override void CreateTriggerBufferVisuals(float[,] triggerBufferData)
+        public void DisplayTriggerBuffer(int[,] triggerBufferOutput)
         {
-            Fire.LCPData _lcpData = owner.LCPData;
+            if (triggerBufferOutput != null)
+            {
+                CreateTriggerBufferVisuals(triggerBufferOutput);
+                SetLCPViewMode(LcpViewMode.TriggerBuffer);
+                SetLCPDataPlane(true);
+            }
+        }
+
+        public override void CreateTriggerBufferVisuals(int[,] triggerBufferData)
+        {
             int xPixels = _lcpData.GetCellCountX();
             int yPixels = _lcpData.GetCellCountY();
 
@@ -176,7 +189,7 @@ namespace PREACT.Visualization
             Vector3 unityOffset = new Vector3((float)offset.x, 0f, (float)offset.y);
             Vector2 maxUV = Vector2.one;
 
-            WUInity.Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, unityOffset);
+            VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, unityOffset);
 
             lcpMeshRenderer.material.mainTexture = _fuelModelsTexture;
 
@@ -186,31 +199,11 @@ namespace PREACT.Visualization
 
         public override void ToggleLCPDataPlane()
         {
-            if (Engine.ScenarioData.Fire.LCPData == null)
-            {
-                return;
-            }
-
-            if (_lcpDataPlane == null)
-            {
-                CreateLCPVisuals();
-            }
-
             _lcpDataPlane.SetActive(!_lcpDataPlane.activeSelf);
         }
 
         public override void SetLCPDataPlane(bool setActive)
-        {
-            if(Engine.ScenarioData.Fire.LCPData == null)
-            {
-                return;
-            }
-
-            if (_lcpDataPlane == null)
-            {
-                CreateLCPVisuals();
-            }
-            
+        {            
             _lcpDataPlane.SetActive(setActive);
         }
     }

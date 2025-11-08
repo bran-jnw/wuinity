@@ -16,7 +16,7 @@ namespace WUInity.UI
             //whenever we load a file we need to set the new data for the GUI
             if (mainMenuDirty)
             {
-                CleanMainMenu(wO);
+                CleanMainMenu();
             }
 
             GUI.Box(new Rect(subMenuXOrigin, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -60,17 +60,17 @@ namespace WUInity.UI
                 }
                 else
                 {
-                    ParseMainData(wO);
-                    PREACT.IO.PREACTInput.SaveToDisk(_input, _engine.WorkingFile);
+                    ParseMainData();
+                    PREACT.IO.PREACTInput.SaveToDisk(_input, _wuinityManager.WorkingFolder);
                 }
             }
             ++buttonIndex;
 
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save as"))
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Save as"))
             {
                 OpenSaveInput();
             }
-            buttonIndex += 2;*/
+            buttonIndex += 2;
 
             //name
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation ID:");
@@ -120,24 +120,17 @@ namespace WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))
             {
-                ParseMainData(wO);
+                ParseMainData();
                 menuChoice = ActiveMenu.Output;
                 _wuinityManager.RunSimulation(_engineTask);
             }
             ++buttonIndex;            
         }
 
-        void CleanMainMenu(PREACT.IO.PREACTInput wO)
+        void CleanMainMenu()
         {
             mainMenuDirty = false;
-            if(wO != null)
-            {
-                dT = wO.Simulation.DeltaTime.ToString();
-            }
-            else
-            {
-                dT = "-1.0";
-            }
+            dT = _input.Simulation.DeltaTime.ToString();
             
             nrRuns = _engineTask.NumberOfRuns.ToString();
             convergenceMaxDifference = _engineTask.ConvergenceMaxDifference.ToString();
@@ -146,7 +139,7 @@ namespace WUInity.UI
                       
         }
 
-        public void ParseMainData(PREACT.IO.PREACTInput wO)
+        public void ParseMainData()
         {
             ParseEvacInput();
             ParseTrafficInput();
@@ -156,7 +149,7 @@ namespace WUInity.UI
                 return;
             }
 
-            float.TryParse(dT, out wO.Simulation.DeltaTime);
+            float.TryParse(dT, out _input.Simulation.DeltaTime);
             int.TryParse(nrRuns, out _engineTask.NumberOfRuns);
             float.TryParse(convergenceMaxDifference, out _engineTask.ConvergenceMaxDifference);
             int.TryParse(convergenceMinSequence, out _engineTask.ConvergenceMinSequence);
@@ -165,24 +158,24 @@ namespace WUInity.UI
         void OpenSaveInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFile);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowSaveDialog(SaveInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
         }   
         void SaveInput(string[] paths)
         {
             mainMenuDirty = true;
-            ParseMainData(_input);
+            ParseMainData();
             creatingNewFile = false;
             string name = Path.GetFileNameWithoutExtension(paths[0]);
-            wO.Simulation.Id = name;
+            _input.Simulation.Name = name;
 
-            PREACT.IO.PREACTInput.SaveInputToDisk();
+            PREACT.IO.PREACTInput.SaveToDisk(_input, paths[0]);
         }
 
         void OpenLoadInput()
         {
             FileBrowser.SetFilters(false, wuiFilter);
-            string initialPath = _engine.WorkingFolder;
+            string initialPath = _input.RootFolder;
             FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
         }
 
@@ -204,7 +197,7 @@ namespace WUInity.UI
         void OpenRunFolder()
         {
             FileBrowser.SetFilters(true);
-            string initialPath = _engine.WorkingFolder;
+            string initialPath = _input.RootFolder;
             FileBrowser.ShowLoadDialog(RunFolder, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Run all files in folder", "Run");
         }
 

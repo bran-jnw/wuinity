@@ -14,14 +14,15 @@ namespace PREACT.IO
     [System.Serializable] 
     public class MacroTrafficSimInput
     {
+        public enum RoutingPriority { Fastest, Closest, Random, EvacGroup };
+
         public string RoadTypesFile;
-        public float StallSpeed = 5f;
-        public enum RoutingChoice { Fastest, Closest, Random, EvacGroup };
-        public RoutingChoice Routing = RoutingChoice.Closest;
+        public float StallSpeed = 5f;        
+        public RoutingPriority Routing = RoutingPriority.Closest;
         public Vector2 BackGroundDensityMinMax = Vector2.Zero;
-        public TrafficAccident[] TrafficAccidents;
-        public ReverseLanes[] ReverseLanes;
-        public TrafficInjection[] TrafficInjections;
+        public List<TrafficAccident> TrafficAccidents = new List<TrafficAccident>();
+        public List<ReverseLanes> ReverseLanes = new List<ReverseLanes>();
+        public List<TrafficInjection> TrafficInjections = new List<TrafficInjection>();
         public TrafficProbe[] TrafficProbes;
 
         //TODO: write parser

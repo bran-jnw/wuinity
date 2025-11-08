@@ -11,9 +11,9 @@ namespace PREACT
 {
     public static class GraphicalFireInput
     {
-        public static void SaveGraphicalFireInput(string file, IO.PREACTInput input, Runtime.FireData fireData)
+        public static void SaveGraphicalFireInput(string filePath, IO.PREACTInput input, IO.FireData fireData)
         {
-            using (FileStream fs = new FileStream(file, FileMode.Create))
+            using (FileStream fs = new FileStream(filePath, FileMode.Create))
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {

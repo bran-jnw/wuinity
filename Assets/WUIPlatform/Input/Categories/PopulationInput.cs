@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.IO
 {
@@ -17,7 +17,7 @@ namespace PREACT.IO
         private PopulationData _data;
 
         public PopulationData Data { get => _data; }
-        public string PopulationFile;
+        public string PopulationFile = string.Empty;
         public int MinHouseholdSize = 1;
         public int MaxHouseholdSize = 5;
         public bool AllowMoreThanOneCar = true;
@@ -31,73 +31,73 @@ namespace PREACT.IO
 
         public static PopulationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, string rootFolder, out bool success)
         {
-            int issues = 0;
             PopulationInput newInput = new PopulationInput();
+            int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(PopulationFile);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(PopulationFile);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.PopulationFile = userInput;
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {
-                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(MinHouseholdSize);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(MinHouseholdSize);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 int.TryParse(userInput, out newInput.MinHouseholdSize);
             }
             else
             {
-                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(MaxHouseholdSize);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(MaxHouseholdSize);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 int.TryParse(userInput, out newInput.MaxHouseholdSize);
             }
             else
             {
-                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(AllowMoreThanOneCar);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(AllowMoreThanOneCar);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.AllowMoreThanOneCar);
             }
             else
             {
-                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(MaxCars);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(MaxCars);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 int.TryParse(userInput, out newInput.MaxCars);
             }
             else
             {
-                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(MaxCarsProbability);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(MaxCarsProbability);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.MaxCarsProbability);
             }
             else
             {
-                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             newInput.Data.LoadAll(simulationInput, newInput, rootFolder, out success);
-
             return newInput;
         }
     }

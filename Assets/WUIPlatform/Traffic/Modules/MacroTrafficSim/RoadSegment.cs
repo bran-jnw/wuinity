@@ -22,30 +22,28 @@ namespace PREACT.Traffic
         public float length;
         public List<MacroVehicle> vehicles;
         string highwayType;
-        MacroTrafficSim _mCS;
         public float maxCapacity;
         private int maxCarsOnRoad;
         public bool upstreamMovementBlocked;
         LinearSpline2D spline;
         public float speedLimit;
 
-        public RoadSegment(MacroVehicle vehicle, MacroTrafficSim mCS, Simulation simulation)
+        public RoadSegment(MacroVehicle vehicle, Simulation simulation)
         {
             goalCoord = vehicle.goingToCoord;
             streetName = vehicle.drivingOnStreet;
             vehicle.GetCurrentMetaData().Attributes.TryGetValue("highway", out highwayType);
-            laneCount = mCS.GetNumberOfLanes(highwayType);
-            maxCapacity = mCS.GetMaxCapacity(highwayType);
+            laneCount = MacroTrafficSim.GetNumberOfLanes(highwayType, simulation);
+            maxCapacity = MacroTrafficSim.GetMaxCapacity(highwayType, simulation);
             length = vehicle.currentShapeLength;
             vehicles = new List<MacroVehicle>();
             vehicles.Add(vehicle);
-            _mCS = mCS;
 
             maxCarsOnRoad = Math.Max(1, (int)(length * 0.2f * laneCount)); //each car takes about 5 meters
             upstreamMovementBlocked = false;
 
             CalculateSpline(vehicle, simulation);
-            speedLimit = vehicle.GetAndSetCurrentSpeedLimit();
+            speedLimit = vehicle.GetAndSetCurrentSpeedLimit(simulation);
             vehicle.SetSpline(spline);
         }
 
@@ -63,7 +61,7 @@ namespace PREACT.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Vector2d simulationPos = simulation.RuntimeData.Geo.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
+                Vector2d simulationPos = simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
                 if (i > 0)
                 {
                     distance += Vector2.Distance(new Vector2((float)simulationPos.x, (float)simulationPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));
@@ -113,12 +111,12 @@ namespace PREACT.Traffic
             dens += Randomf.Range(tO.MacroTrafficSimInput.BackGroundDensityMinMax.X, tO.MacroTrafficSimInput.BackGroundDensityMinMax.Y);
 
             //we use the same function to check if a road is blocked due to being main road or if they reverse lanes for now
-            if (mCS.stallBigRoads && mCS.CanReverseLanes(highwayType))
+            if (mCS.stallBigRoads && MacroTrafficSim.CanReverseLanes(highwayType, simulation))
             {
                 dens = maxCapacity; //gives  stall speed
             }
             //reverse traffic in lanes means double the amount of lanes
-            else if (mCS.reverseLanes && mCS.CanReverseLanes(highwayType))
+            else if (mCS.reverseLanes && MacroTrafficSim.CanReverseLanes(highwayType, simulation))
             {
                 dens *= 0.5f;
             }

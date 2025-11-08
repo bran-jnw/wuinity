@@ -124,7 +124,7 @@ namespace PREACT.Traffic
         /// Returns speed in [m/s] based on highway type if found, if not found default speed is 2.78 m/s (10 km/h).
         /// </summary>
         /// <returns></returns>
-        public float GetAndSetCurrentSpeedLimit()
+        public float GetAndSetCurrentSpeedLimit(Simulation simulation)
         {
             //default 10 km/h
             float speed = 2.78f;
@@ -142,7 +142,7 @@ namespace PREACT.Traffic
 
                 string highwayType;
                 routeData.route.ShapeMeta[currentShapeIndex].Attributes.TryGetValue("highway", out highwayType);
-                speed = MacroTrafficSim.GetSpeedLimit(highwayType);
+                speed = MacroTrafficSim.GetSpeedLimit(highwayType, simulation);
             }
 
             currentSpeedLimit = speed;

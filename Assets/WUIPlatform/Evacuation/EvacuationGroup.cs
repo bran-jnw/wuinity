@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Evacuation
 {
@@ -43,12 +44,12 @@ namespace PREACT.Evacuation
             return destinations[DestinationIndices[DestinationIndices.Length - 1]];
         }
 
-        public static List<EvacuationGroup> LoadEvacGroupFiles(string rootFolder, Runtime.EvacuationData evacuationData, string[] evacuationGroupFiles, out bool success)
+        public static List<EvacuationGroup> LoadEvacGroupFiles(string rootFolder, IO.EvacuationData evacuationData, List<string> evacuationGroupFiles, out bool success)
         {
             success = false;
             List<EvacuationGroup> evacGroups = new List<EvacuationGroup>();
 
-            for (int i = 0; i < evacuationGroupFiles.Length; i++)
+            for (int i = 0; i < evacuationGroupFiles.Count; i++)
             {
                 string path = Path.Combine(rootFolder, evacuationGroupFiles[i] + ".eg");
                 bool fileExists = File.Exists(path);
@@ -172,14 +173,14 @@ namespace PREACT.Evacuation
             return evacGroups;
         }
 
-        public static void SaveEvacGroupIndices(string rootFolder, string filename, int cellsX, int cellsY, int groupCount, int[] EvacGroupIndices)
+        public static void SaveEvacGroupIndices(string filePath, Vector2int cells, int groupCount, int[] EvacGroupIndices)
         {
 
             string[] data = new string[4];
             //nrows
-            data[0] = cellsX.ToString();
+            data[0] = cells.x.ToString();
             //ncols
-            data[1] = cellsY.ToString();
+            data[1] = cells.y.ToString();
             //how many evac groups
             data[2] = groupCount.ToString();
             //actual data
@@ -189,10 +190,10 @@ namespace PREACT.Evacuation
                 data[3] += EvacGroupIndices[i] + " ";
             }
 
-            File.WriteAllLines(rootFolder + "/" + filename + ".egs", data);
+            File.WriteAllLines(filePath, data);
         }
 
-        public static void LoadEvacGroupIndices(string file, Runtime.EvacuationData evacuationData, out int[] evacGroupIndices, out bool success)
+        public static void LoadEvacGroupIndices(string file, IO.EvacuationData evacuationData, out int[] evacGroupIndices, out bool success)
         {
             success = false;
             try

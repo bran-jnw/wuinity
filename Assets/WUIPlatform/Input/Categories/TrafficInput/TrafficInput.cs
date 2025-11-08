@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using PREACT.Traffic;
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.IO
 {
@@ -21,7 +21,7 @@ namespace PREACT.IO
         private SUMOInput _sumoInput;
         private MacroTrafficSimInput _macroTrafficSimInput;
 
-        TrafficData Data { get => _data; }
+        public TrafficData Data { get => _data; }
         public SUMOInput SumoInput { get { return _sumoInput; } }
         public MacroTrafficSimInput MacroTrafficSimInput { get => _macroTrafficSimInput; }
         public TrafficModuleChoice TrafficModule = TrafficModuleChoice.SUMO;      

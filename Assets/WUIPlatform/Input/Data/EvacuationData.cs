@@ -5,28 +5,25 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.IO;
 using PREACT.Evacuation;
 using PREACT.Utility.Math;
 using System.Collections.Generic;
 using System.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class EvacuationData
     {
         SimulationInput _simulationInput;
         EvacuationInput _evacuationInput;
-        EventsInput _eventsInput;
         public List<ResponseCurve> ResponseCurves;
         public List<EvacuationDestinationInput> EvacuationDestinationInputs;        
         public List<EvacuationGroup> EvacuationGroups;
 
-        public EvacuationData(SimulationInput simulationInput, EvacuationInput evacuationInput, EventsInput eventsInput)
+        public EvacuationData(SimulationInput simulationInput, EvacuationInput evacuationInput)
         {
             _simulationInput = simulationInput;
             _evacuationInput = evacuationInput;
-            _eventsInput = eventsInput;
         }
 
         //TODO: fix this getter, want to get rid of
@@ -73,31 +70,26 @@ namespace PREACT.Runtime
                 LoadEvacGroupFiles(rootFolder, this, _evacuationInput.EvacuationGroupFiles, out success);
                 string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
                 LoadEvacGroupIndices(filePath, out success);
-                LoadBlockGoalEvents(rootFolder, _eventsInput.BlockGoalEventFiles, out success);
+                
             }
 
             success = true;
         }
 
-        public void LoadResponseCurves(string rootFolder, string[] responseCurveFiles, out bool success)
+        public void LoadResponseCurves(string rootFolder, List<string> responseCurveFiles, out bool success)
         {
             ResponseCurves = ResponseCurve.LoadResponseCurves(rootFolder, responseCurveFiles, out success);
         }
 
-        public void LoadEvacuationDestinations(string rootFolder, string[] evacuationGoalFiles, out bool success)
+        public void LoadEvacuationDestinations(string rootFolder, List<string> evacuationGoalFiles, out bool success)
         {
             EvacuationDestinationInputs = EvacuationDestinationInput.LoadEvacuationDestinationFiles(rootFolder, evacuationGoalFiles, out success);
         }
 
-        public void LoadEvacGroupFiles(string rootFolder, Runtime.EvacuationData evacuationData, string[] evacuationGroupFiles, out bool success)
+        public void LoadEvacGroupFiles(string rootFolder, EvacuationData evacuationData, List<string> evacuationGroupFiles, out bool success)
         {
             EvacuationGroups = EvacuationGroup.LoadEvacGroupFiles(rootFolder, this, evacuationGroupFiles, out success);
-        }
-
-        public void LoadBlockGoalEvents(string rootFolder, string[] blockGoalEventFiles, out bool success)
-        {
-            _blockGoalEvents = BlockDestinationEvent.LoadBlockGoalEvents(rootFolder, blockGoalEventFiles, out success);
-        }
+        }        
 
         public void LoadEvacGroupIndices(string filePath, out bool success)
         {

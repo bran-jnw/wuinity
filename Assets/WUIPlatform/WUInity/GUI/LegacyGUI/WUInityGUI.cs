@@ -73,9 +73,6 @@ namespace WUInity.UI
         string[] populationMapFilter = new string[] { ".pop" };
         string[] gpwFilter = new string[] { ".gpw" };
 
-        private PREACT.IO.PREACTInput _input;
-        private Simulation _simulation;
-              
 
         private void Start()
         {
@@ -96,12 +93,16 @@ namespace WUInity.UI
         }
 
         WUInityManager _wuinityManager;
-        public void SetManager(WUInityManager wuinityEngine)
+        Engine _engine;
+        private PREACT.IO.PREACTInput _input;
+        private PREACT.Runtime.WorkingData _workingData;
+        public void SetManager(WUInityManager wuinityManager, Engine engine)
         {
-            _wuinityManager = wuinityEngine;
+            _wuinityManager = wuinityManager;
+            _engine = engine;
         }
 
-        public void SetInput(PREACT.IO.PREACTInput input)
+        public void UpdateInput(PREACT.IO.PREACTInput input)
         {
             _input = input;
             SetDirty();
@@ -160,25 +161,25 @@ namespace WUInity.UI
                     if (GUI.Button(evacMenu.rect, evacMenu.text))
                     {
                         menuChoice = ActiveMenu.Evac;
-                        WUInityManager.INSTANCE.SetSampleMode(DataSampleMode.None);
+                        _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
 
                     if (GUI.Button(routingMenu.rect, routingMenu.text))
                     {
                         menuChoice = ActiveMenu.Routing;
-                        WUInityManager.INSTANCE.SetSampleMode(DataSampleMode.None);
+                        _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
 
                     if (GUI.Button(trafficMenu.rect, trafficMenu.text))
                     {
                         menuChoice = ActiveMenu.Traffic;
-                        WUInityManager.INSTANCE.SetSampleMode(DataSampleMode.None);
+                        _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
 
                     if (GUI.Button(fireMenu.rect, fireMenu.text))
                     {
                         menuChoice = ActiveMenu.Fire;
-                        WUInityManager.INSTANCE.SetSampleMode(DataSampleMode.None);
+                        _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
                 }                
 
@@ -187,7 +188,7 @@ namespace WUInity.UI
                     if (GUI.Button(outputMenu.rect, outputMenu.text))
                     {
                         menuChoice = ActiveMenu.Output;
-                        WUInityManager.INSTANCE.SetSampleMode(DataSampleMode.None);
+                        _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
                 }
             }    
@@ -195,7 +196,7 @@ namespace WUInity.UI
             //if menu has changed we might have to kill a few things
             if(lastMenu != menuChoice)
             {
-                WUInityManager.INSTANCE.StopPainter();
+                _wuinityManager.StopPainter();
                 ResetFireGUI();
             }
 
@@ -281,7 +282,7 @@ namespace WUInity.UI
         const int dataSampleWindowHeight = 20;
         private void DataSampleWindow()
         {
-            GUI.Box(new Rect(Screen.width - dataSampleWindowWidth, 0, dataSampleWindowWidth, dataSampleWindowHeight), WUInityManager.INSTANCE.GetDataSampleString());
+            GUI.Box(new Rect(Screen.width - dataSampleWindowWidth, 0, dataSampleWindowWidth, dataSampleWindowHeight), _wuinityManager.GetDataSampleString());
         }   
     }
 }

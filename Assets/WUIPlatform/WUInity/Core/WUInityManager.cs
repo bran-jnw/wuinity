@@ -14,6 +14,7 @@ using System.IO;
 using PREACT;
 using WUInity.UI;
 using PREACT.Population;
+using WUInity.Visualization;
 
 namespace WUInity
 {
@@ -24,52 +25,35 @@ namespace WUInity
     [RequireComponent(typeof(Visualization.FireRenderer))]
     public class WUInityManager : MonoBehaviour, IExternalManager                     
     {
-        public static WUInityManager INSTANCE
+        public EvacuationRenderer EvacuationRenderer
         {
             get
             {
-                if (_instance == null)
+                if (_evacuationRenderer == null)
                 {
-                    _instance = FindAnyObjectByType<WUInityManager>();
-                    if (_instance == null)
+                    _evacuationRenderer = GetComponent<EvacuationRenderer>();
+                    if(_evacuationRenderer == null)
                     {
-                        GameObject g = new GameObject();
-                        _instance = g.AddComponent<WUInityManager>();
+                        _evacuationRenderer = gameObject.AddComponent<EvacuationRenderer>();
                     }
                 }
-                return _instance;
+                return _evacuationRenderer;
             }
         }
 
-        public static Visualization.EvacuationRenderer EVAC_VISUALS
+        public FireRenderer FireRenderer
         {
             get
             {
-                if (INSTANCE._evacuationRenderer == null)
+                if (_fireRenderer == null)
                 {
-                    INSTANCE._evacuationRenderer = INSTANCE.GetComponent<Visualization.EvacuationRenderer>();
-                    if(INSTANCE._evacuationRenderer == null)
+                    _fireRenderer = GetComponent<FireRenderer>();
+                    if (_fireRenderer == null)
                     {
-                        INSTANCE._evacuationRenderer = INSTANCE.gameObject.AddComponent<Visualization.EvacuationRenderer>();
+                        _fireRenderer = gameObject.AddComponent<FireRenderer>();
                     }
                 }
-                return INSTANCE._evacuationRenderer;
-            }
-        }
-
-        public Visualization.FireRenderer FIRE_VISUALS
-        {
-            get
-            {
-                if (INSTANCE._fireRenderer == null)
-                {
-                    INSTANCE._fireRenderer = INSTANCE.GetComponent<Visualization.FireRenderer>();
-                    if (INSTANCE._fireRenderer == null)
-                    {
-                        INSTANCE._fireRenderer = INSTANCE.gameObject.AddComponent<Visualization.FireRenderer>();
-                    }
-                }
-                return INSTANCE._fireRenderer;
+                return _fireRenderer;
             }
         }
 
@@ -77,13 +61,7 @@ namespace WUInity
         public Mapbox.Unity.Map.AbstractMap Map { get => _mapboxMap; }
 
         private Painter _painter;
-        public Painter Painter
-        {
-            get
-            {
-                return _painter;
-            }
-        }
+        public Painter Painter{ get => _painter; }
 
         [SerializeField] private GodCamera _godCamera;
         public GodCamera WUICamera { get => _godCamera; }
@@ -108,18 +86,19 @@ namespace WUInity
                 
         public DataSampleMode dataSampleMode = DataSampleMode.None;
 
-        //never directly call these, always use singletons (except once when setting input)
-        private static WUInityManager _instance;
-
-        //private Farsite.FarsiteViewer _farsiteViewer;
-
         private WUInityGUI _wuiGUI;
-       
+        PREACTInput _input;
+        public PREACTInput PREACTInput { get => _input; }
+
+
+        private FireRenderer _fireRenderer;
+        private EvacuationRenderer _evacuationRenderer;
+        private PopulationDataVisualizerUnity _populationDataVisualizer;
+        private FireDataVisualizerUnity _fireDataVisualizer;
+
+        public PopulationDataVisualizerUnity PopulationDataVisualizer { get => _populationDataVisualizer; }
+        public FireDataVisualizerUnity FireDataVisualizer { get => _fireDataVisualizer; }
         
-        private Visualization.FireRenderer _fireRenderer;
-        private Visualization.EvacuationRenderer _evacuationRenderer;
-        private PopulationVisualizerUnity _populationVisualizer;
-        public PopulationVisualizerUnity PopulationVisualizer { get =>  _populationVisualizer; }
 
         MeshRenderer _domainDataMeshRenderer;
         MeshRenderer _fireDataPlaneMeshRenderer;
@@ -159,12 +138,12 @@ namespace WUInity
             _engine = new Engine(this);
 
             //gui
-            _wuiGUI = INSTANCE.GetComponent<WUInityGUI>();
+            _wuiGUI = GetComponent<WUInityGUI>();
             if (_wuiGUI == null)
             {
                 gameObject.AddComponent<WUInityGUI>();
             }
-            _wuiGUI.SetManager(this);
+            _wuiGUI.SetManager(this, _engine);
 
             //map
             _mapboxMap = FindFirstObjectByType<Mapbox.Unity.Map.AbstractMap>();
@@ -172,7 +151,7 @@ namespace WUInity
             {
                 GameObject g = new GameObject();
                 g.name = "Mapbox Map";
-                g.transform.parent = INSTANCE.transform;
+                g.transform.parent = transform;
                 _mapboxMap = g.AddComponent<Mapbox.Unity.Map.AbstractMap>();
             }
 
@@ -204,7 +183,7 @@ namespace WUInity
                 string file = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "example\\example.wui");                
                 if (File.Exists(file))
                 {                    
-                    _engine.LoadScenarioFromFile(file, out success);
+                    _engine.LoadInputFromFile(file, out success);
 
                 }
                 else
@@ -218,7 +197,7 @@ namespace WUInity
         {
             if (_engine != null)
             {
-                _engine.Close(false);
+                _engine.CloseSimulations(false);
             }            
         }
 
@@ -282,8 +261,7 @@ namespace WUInity
             Map.Initialize(new Mapbox.Utils.Vector2d(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y), input.Map.ZoomLevel);
             Engine.MESSAGE(null, Engine.LogType.Log, "Map loaded succesfully.");
 
-            //do adjustement to better fit UTM
-            PREACT.Runtime.SimulationData geoData = new PREACT.Runtime.GeoData(input);
+            //do warping to better fit UTM
             for (int i = 0; i < Map.transform.childCount; ++i)
             {
                 Mapbox.Unity.MeshGeneration.Data.UnityTile tile = Map.transform.GetChild(i).GetComponent<Mapbox.Unity.MeshGeneration.Data.UnityTile>();
@@ -295,7 +273,7 @@ namespace WUInity
                         Vector3 worldPos = tile.transform.TransformPoint(vertices[v]);
                         var wgs84Pos = Map.WorldToGeoPosition(worldPos); //GeoConversions.MetersToLatLon(new Vector2d(worldPos.x, worldPos.z) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
                         PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Pos.x, wgs84Pos.y);
-                        Vector3 newWorldPos = new Vector3((float)(utmPos.Easting - geoData.UTMOrigin.x), 0f, (float)(utmPos.Northing - geoData.UTMOrigin.y));
+                        Vector3 newWorldPos = new Vector3((float)(utmPos.Easting - input.Simulation.Data.UTMOrigin.x), 0f, (float)(utmPos.Northing - input.Simulation.Data.UTMOrigin.y));
                         vertices[v] = tile.transform.InverseTransformPoint(newWorldPos);
                     }
                     tile.GetComponent<MeshFilter>().mesh.SetVertices(vertices);
@@ -365,19 +343,19 @@ namespace WUInity
                 if (_yPlane.Raycast(ray, out enter))
                 {
                     Vector3 hitPoint = ray.GetPoint(enter);
-                    float xNorm = hitPoint.x / (float)_engine.Scenario.Input.Simulation.DomainSize.x;
+                    float xNorm = hitPoint.x / (float)_input.Simulation.DomainSize.x;
                     //xNorm = Mathf.Clamp01(xNorm);
-                    int x = (int)(_engine.Scenario.Data.Evacuation.CellCount.x * xNorm);
+                    int x = (int)(_input.Evacuation.Data.CellCount.x * xNorm);
 
-                    float yNorm = hitPoint.z / (float)_engine.Scenario.Input.Simulation.DomainSize.y;
+                    float yNorm = hitPoint.z / (float)_input.Simulation.DomainSize.y;
                     //yNorm = Mathf.Clamp01(yNorm);
-                    int y = (int)(_engine.Scenario.Data.Evacuation.CellCount.y * yNorm);
+                    int y = (int)(_input.Evacuation.Data.CellCount.y * yNorm);
                     GetCellInfo(hitPoint, x, y);
                 }
             }    
 
             //always update visuals, even when paused
-            if(_engine.Scenario.Data != null)
+            if(_engine.Simulation != null)
             {
                 if (_engine.Simulation.State == Simulation.SimulationState.Running) // !WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && 
                 {
@@ -385,8 +363,8 @@ namespace WUInity
                     {
                         CreateVisualizers();
                     }
-                    EVAC_VISUALS.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic, _engine.Simulation.PedestrianModule, _engine.Simulation.TrafficModule);
-                    FIRE_VISUALS.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion);
+                    EvacuationRenderer.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic, _engine.Simulation.PedestrianModule, _engine.Simulation.TrafficModule);
+                    FireRenderer.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion, _engine.Simulation);
                 }
             }            
 
@@ -408,15 +386,15 @@ namespace WUInity
         {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EVAC_VISUALS.CreateBuffers(_engine.Scenario.Input.Simulation.RunPedestrianModule, _engine.Scenario.Input.Simulation.RunTrafficModule, _engine.Scenario.Input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
+            EvacuationRenderer.CreateBuffers(_input.Simulation.RunPedestrianModule, _input.Simulation.RunTrafficModule, _input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
 
-            _renderHouseholds = _engine.Scenario.Input.Simulation.RunPedestrianModule;
-            _renderTraffic = _engine.Scenario.Input.Simulation.RunTrafficModule;
+            _renderHouseholds = _input.Simulation.RunPedestrianModule;
+            _renderTraffic = _input.Simulation.RunTrafficModule;
 
             //and then for fire rendering
-            FIRE_VISUALS.CreateBuffers(_engine.Scenario.Input.Simulation.RunFireModule, _engine.Scenario.Input.Simulation.RunSmokeModule);
-            _renderFireSpread = _engine.Scenario.Input.Simulation.RunFireModule;
-            _renderSmokeDispersion = _engine.Scenario.Input.Simulation.RunSmokeModule;
+            FireRenderer.CreateBuffers(_engine.Simulation);
+            _renderFireSpread = _input.Simulation.RunFireModule;
+            _renderSmokeDispersion = _input.Simulation.RunSmokeModule;
 
             _visualsExist = true;
 
@@ -429,7 +407,7 @@ namespace WUInity
             bool success;
             for (int i = 0; i < inputFiles.Length; i++)
             {
-                _engine.LoadScenarioFromFile(inputFiles[i], out success);
+                _engine.LoadInputFromFile(inputFiles[i], out success);
                 if(success)
                 {
                     RunSimulation(engineTask);
@@ -440,7 +418,7 @@ namespace WUInity
         public void StopSimulations()
         {
             HideAllRuntimeVisuals();
-            _engine.Close(false);
+            _engine.CloseSimulations(false);
         }
 
         bool updateOSMBorder = false;
@@ -469,9 +447,9 @@ namespace WUInity
             if (_simBorder != null)
             {
                 _simBorder.SetPosition(0, Vector3.zero + upOffset);
-                _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)_engine.Scenario.Input.Simulation.DomainSize.x);
-                _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)_engine.Scenario.Input.Simulation.DomainSize.y);
-                _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)_engine.Scenario.Input.Simulation.DomainSize.x);
+                _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)_input.Simulation.DomainSize.x);
+                _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)_input.Simulation.DomainSize.y);
+                _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)_input.Simulation.DomainSize.x);
                 _simBorder.SetPosition(4, _simBorder.GetPosition(0));
             }        
         }
@@ -493,14 +471,14 @@ namespace WUInity
             dataSampleString = "No data to sample.";
             if (dataSampleMode == DataSampleMode.LocalGPW)
             {
-                if (_engine.Scenario.Data.Population.LocalGPWData != null && _engine.Scenario.Data.Population.LocalGPWData.density != null && _engine.Scenario.Data.Population.LocalGPWData.density.Length > 0)
+                if (_engine.WorkingData.LocalGPWData != null && _engine.WorkingData.LocalGPWData.Density != null && _engine.WorkingData.LocalGPWData.Density.Length > 0)
                 {
-                    if (_engine.Scenario.Data.Population.Visualizer.IsDataPlaneActive())
+                    if (_populationDataVisualizer.IsDataPlaneActive())
                     {
-                        float xCellSize = (float)(_engine.Scenario.Data.Population.LocalGPWData.realWorldSize.x / _engine.Scenario.Data.Population.LocalGPWData._cells.x);
-                        float yCellSize = (float)(_engine.Scenario.Data.Population.LocalGPWData.realWorldSize.y / _engine.Scenario.Data.Population.LocalGPWData._cells.y);
+                        float xCellSize = (float)(_engine.WorkingData.LocalGPWData.RealWorldSize.x / _engine.WorkingData.LocalGPWData.CellCount.x);
+                        float yCellSize = (float)(_engine.WorkingData.LocalGPWData.RealWorldSize.y / _engine.WorkingData.LocalGPWData.CellCount.y);
                         double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(_engine.Scenario.Data.Population.LocalGPWData.GetDensitySimulationSpace(new PREACT.Utility.Math.Vector2d(pos.x, pos.z)) * cellArea);
+                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(_engine.WorkingData.LocalGPWData.GetDensitySimulationSpace(new PREACT.Utility.Math.Vector2d(pos.x, pos.z)) * cellArea);
                     }
                     else
                     {
@@ -508,7 +486,7 @@ namespace WUInity
                     }
                 }
             }
-            else if (x < 0 || x > _engine.Scenario.Data.Evacuation.CellCount.x || y < 0 || y > _engine.Scenario.Data.Evacuation.CellCount.y)
+            else if (x < 0 || x > _input.Evacuation.Data.CellCount.x || y < 0 || y > _input.Evacuation.Data.CellCount.y)
             {
                 //dataSampleString = "Outside of data range.";
                 return;
@@ -525,7 +503,7 @@ namespace WUInity
             {
                 if (dataSampleMode == DataSampleMode.PopulationMap)
                 {
-                    dataSampleString = "Interpolated people count: " + _engine.Scenario.Data.Population.PopulationMap.GetPeopleCount(x, y);
+                    dataSampleString = "Interpolated people count: " + _engine.WorkingData.PopulationMap.GetPeopleCount(x, y);
                 }
                 else if (dataSampleMode == DataSampleMode.Relocated)
                 {
@@ -536,12 +514,12 @@ namespace WUInity
                 }
                 else if (dataSampleMode == DataSampleMode.TrafficDens)
                 {
-                    int people = currentPeopleInCells[x + y * _engine.Scenario.Data.Evacuation.CellCount.x];
+                    int people = currentPeopleInCells[x + y * _input.Evacuation.Data.CellCount.x];
                     dataSampleString = "People: " + people;
-                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * _engine.Scenario.Data.Evacuation.CellCount.x] != null)
+                    if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x] != null)
                     {
-                        int peopleInCars = currenttrafficDensityData[x + y * _engine.Scenario.Data.Evacuation.CellCount.x].peopleCount;
-                        int cars = currenttrafficDensityData[x + y * _engine.Scenario.Data.Evacuation.CellCount.x].carCount;
+                        int peopleInCars = currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x].peopleCount;
+                        int cars = currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x].carCount;
 
                         dataSampleString += " | People in cars: " + peopleInCars + " (Cars: " + cars + "). Total people " + (people + peopleInCars);
                     }
@@ -670,15 +648,15 @@ namespace WUInity
                 }
             }
 
-            _goalMarkers = new GameObject[_engine.Scenario.Data.Evacuation.EvacuationDestinationInputs.Count];
-            for (int i = 0; i < _engine.Scenario.Data.Evacuation.EvacuationDestinationInputs.Count; i++)
+            _goalMarkers = new GameObject[_input.Evacuation.Data.EvacuationDestinationInputs.Count];
+            for (int i = 0; i < _input.Evacuation.Data.EvacuationDestinationInputs.Count; i++)
             {
-                EvacuationDestinationInput eG = _engine.Scenario.Data.Evacuation.EvacuationDestinationInputs[i];
+                EvacuationDestinationInput eG = _input.Evacuation.Data.EvacuationDestinationInputs[i];
                 _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
                 PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(eG.LatLon.x, eG.LatLon.y);
-                PREACT.Utility.Math.Vector2d pos = new PREACT.Utility.Math.Vector2d(utmPos.Easting, utmPos.Northing) - _engine.Scenario.Data.Geo.UTMOrigin;
+                PREACT.Utility.Math.Vector2d pos = new PREACT.Utility.Math.Vector2d(utmPos.Easting, utmPos.Northing) - _input.Simulation.Data.UTMOrigin;
 
-                float scale = 0.02f * (float)_engine.Scenario.Input.Simulation.DomainSize.y;
+                float scale = 0.02f * (float)_input.Simulation.DomainSize.y;
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
                 _goalMarkers[i].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
                 MeshRenderer mR = _goalMarkers[i].GetComponentInChildren<MeshRenderer>();
@@ -690,7 +668,7 @@ namespace WUInity
         int[] currentPeopleInCells;
         /*public void DisplayClosestDensityData(float time)
         {
-            if(_engine.Scenario.Input.Simulation.RunTrafficModule)
+            if(_input.Simulation.RunTrafficModule)
             {
                 int index = UnityEngine.Mathf.Max(0, (int)time / 600);
                 if (index > outputTextures.Count - 1)
@@ -708,22 +686,22 @@ namespace WUInity
 
         public void ActivateSuitableVisuals()
         {
-            if(_engine.Scenario.Input.Simulation.RunPedestrianModule)
+            if(_input.Simulation.RunPedestrianModule)
             {
                 SetHouseholdRendering(true);
             }
 
-            if (_engine.Scenario.Input.Simulation.RunTrafficModule)
+            if (_input.Simulation.RunTrafficModule)
             {
                 SetTrafficRendering(true);
             }
 
-            if (_engine.Scenario.Input.Simulation.RunFireModule)
+            if (_input.Simulation.RunFireModule)
             {
                 SetFireSpreadRendering(true);
             }
 
-            if (_engine.Scenario.Input.Simulation.RunSmokeModule)
+            if (_input.Simulation.RunSmokeModule)
             {
                 SetSootRendering(true);
             }
@@ -739,7 +717,7 @@ namespace WUInity
 
         public void DisplayPopulationMap()
         {
-            SetDataPlaneTexture((Texture2D)_engine.Scenario.Data.Population.Visualizer.GetPopulationTexture());
+            SetDataPlaneTexture((Texture2D)_populationDataVisualizer.GetPopulationTexture());
         }
 
         private void DisplayWUIAreaMap()
@@ -866,7 +844,7 @@ namespace WUInity
 
         public bool ToggleSootRendering()
         {
-            _renderSmokeDispersion = FIRE_VISUALS.ToggleSoot();
+            _renderSmokeDispersion = FireRenderer.ToggleSoot(_input);
             return _renderSmokeDispersion;
         }
 
@@ -880,7 +858,7 @@ namespace WUInity
 
         public bool ToggleFireSpreadRendering()
         {
-            _renderFireSpread = FIRE_VISUALS.ToggleFire();
+            _renderFireSpread = FireRenderer.ToggleFire(_input);
             return _renderFireSpread;
         }
 
@@ -888,16 +866,16 @@ namespace WUInity
         {
             //pick needed data plane
             MeshRenderer activeMeshRenderer = _domainDataMeshRenderer;
-            PREACT.Utility.Math.Vector2int cellCount = _engine.Scenario.Data.Evacuation.CellCount;
-            PREACT.Utility.Math.Vector2d size = _engine.Scenario.Input.Simulation.DomainSize;
+            PREACT.Utility.Math.Vector2int cellCount = _input.Evacuation.Data.CellCount;
+            PREACT.Utility.Math.Vector2d size = _input.Simulation.DomainSize;
             PREACT.Utility.Math.Vector2d offset = PREACT.Utility.Math.Vector2d.zero;
             string name = "Evac Data Plane";
             if (fireMeshMode)
             {
                 activeMeshRenderer = _fireDataPlaneMeshRenderer;
-                cellCount = new PREACT.Utility.Math.Vector2int(_engine.Scenario.Data.Fire.LCPData.GetCellCountX(), _engine.Scenario.Data.Fire.LCPData.GetCellCountY());
-                size = _engine.Scenario.Data.Fire.LCPData.GetSize();
-                offset = _engine.Scenario.Data.Fire.LCPData.OriginOffset;
+                cellCount = new PREACT.Utility.Math.Vector2int(_input.Fire.Data.LCPData.GetCellCountX(), _input.Fire.Data.LCPData.GetCellCountY());
+                size = _input.Fire.Data.LCPData.GetSize();
+                offset = _input.Fire.Data.LCPData.OriginOffset;
                 name = "Fire Data Plane";
             }
 
@@ -933,25 +911,26 @@ namespace WUInity
         List<TrafficCellData[]> trafficDensityData;
         List<int[]> peopleInCells;
         public List<Texture2D> outputTextures;
-
-        public void InputHasChanged()
+        
+        public void UpdateInput(PREACTInput input)
         {
-            _wuiGUI.SetInput(_engine.Scenario.Input);
-            _wuiGUI.SetDirty();
+            _input = input;
+            _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
             SpawnEvacuationGoalMarkers();
+            UpdateMap();
+            UpdateSimBorders();
+            WUICamera.SetCameraStartPosition(_input.Simulation.DomainSize);
         }
 
         public void UpdateMap()
         {
-            LoadMapbox();
-            UpdateSimBorders();
-            WUICamera.SetCameraStartPosition(_engine.Scenario.Input.Simulation.DomainSize);
+            LoadMapbox(_input);
         }
 
         public void NewLogMessage(string message)
         {
-            if (Application.isEditor) //&& !WUInity.WUInityEngine.INSTANCE.SuppressMessages) // || UnityEngine.Debug.isDebugBuild
+            if (Application.isEditor && !SuppressMessages) //&& || UnityEngine.Debug.isDebugBuild
             {
                 Debug.Log(message);
             }
@@ -965,5 +944,12 @@ namespace WUInity
         {
             _wuiGUI.SimulationStopped();
         }
+
+        public void PauseSimulations()
+        {
+            _engine.PauseSimulations();
+        }
+
+        public string WorkingFolder { get => _engine.WorkingFolder; }
     }
 }

@@ -23,9 +23,9 @@ namespace PREACT.IO
 
         public static MacroHouseholdSimInput Parse(string[] inputLines, int startIndex, out bool success)
         {
-            success = false;
-            int issues = 0;
             MacroHouseholdSimInput newInput = new MacroHouseholdSimInput();
+            success = false;
+            int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 

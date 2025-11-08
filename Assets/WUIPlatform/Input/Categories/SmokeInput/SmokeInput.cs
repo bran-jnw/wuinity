@@ -5,9 +5,8 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using System.Collections.Generic;
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.IO
 {
@@ -47,11 +46,11 @@ namespace PREACT.IO
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
             //critical
-            input = nameof(SmokeModule);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(SmokeModule);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
@@ -69,64 +68,88 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        Engine.MESSAGE(null, Engine.LogType.Warning, input + " was not recognized." + PREACTInput.pleaseCheckInput);
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
             if(issues > 0)
             {
                 success = false;
                 return newInput;
             }
+                        
+            //critical
+            if (newInput.SmokeModule == SmokeModuleChoice.GlobalSmoke)
+            {
+                int lineIndex;
+                nameOfInput = nameof(SmokeModuleChoice.GlobalSmoke);
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
+                {
+                    PREACTInput.ReadingInputMessage(nameOfInput);
+                    newInput._globalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex, rootFolder, newInput, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    return newInput;
+                }
+            }
 
-            int lineIndex;
-            //global smoke
-            input = nameof(SmokeModuleChoice.GlobalSmoke);
-            if (headerLineIndex.TryGetValue(input, out lineIndex))
+            //critical
+            if (newInput.SmokeModule == SmokeModuleChoice.AdvectDiffuseMixingLayer)
             {
-                PREACTInput.ReadingInputMessage(input);
-                newInput._globalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex, newInput, out success);
-            }
-            else
-            {
-                //critical
-                ++issues;
-                Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + PREACTInput.pleaseCheckInput);
-            }
-            if (issues > 0)
-            {
-                success = false;
-                return newInput;
+                int lineIndex;
+                nameOfInput = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
+                {
+                    PREACTInput.ReadingInputMessage(nameOfInput);
+                    newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    return newInput;
+                }
             }
 
-            //advect diffuse
-            input = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
-            if (headerLineIndex.TryGetValue(input, out lineIndex))
+            ///critical
+            if (newInput.SmokeModule == SmokeModuleChoice.Lagrangian)
             {
-                PREACTInput.ReadingInputMessage(input);
-                newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex);
-            }
-            else
-            {
-                //critical
-                Engine.MESSAGE(null, Engine.LogType.InputError, input + " header not found but user has requested this smoke module." + PREACTInput.pleaseCheckInput);
-                return null;
+                int lineIndex;
+                nameOfInput = nameof(SmokeModuleChoice.Lagrangian);
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
+                {
+                    PREACTInput.ReadingInputMessage(nameOfInput);
+                    newInput._lagrangianInput = LagrangianInput.Parse(inputLines, lineIndex, out success);
+                }
+                else
+                {                    
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    return newInput;
+                }
             }
 
             newInput._data.LoadAll(simulationInput, newInput, rootFolder, out success);
             return newInput;
         }
-    }
-
-    public class LagrangianInput
-    {
-        public uint particlesPerFireCell = 50;
-    }
+    }    
 }
 
     

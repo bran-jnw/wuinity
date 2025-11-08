@@ -26,7 +26,7 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
             ++buttonIndex;
 
-            dummy = _engine.ScenarioData.Population.TotalPopulation;
+            dummy = _engine.Simulation.Input.Population.Data.TotalPopulation;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
@@ -124,7 +124,7 @@ namespace WUInity.UI
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.Simulation.Destinations[i].CurrentPeople + " (" + _engine.Simulation.Destinations[i].Vehicles.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.RuntimeData.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 
@@ -143,12 +143,12 @@ namespace WUInity.UI
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fireline intensity"))
                 {
-                    _wuinityManager.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
+                    _wuinityManager.FireRenderer.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FirelineIntensity);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    _wuinityManager.FIRE_VISUALS.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
+                    _wuinityManager.FireRenderer.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
                 }
                 ++buttonIndex;
             }
@@ -217,7 +217,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle k-PERIL results"))
                 {
-                    _engine.Simulation.DisplayTriggerBuffer();
+                    _wuinityManager.FireDataVisualizer.DisplayTriggerBuffer(_engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success));
                 }
                 ++buttonIndex;
             }
@@ -256,7 +256,7 @@ namespace WUInity.UI
         private void CreateArrivalTexture()
         {
             plotFig = new Texture2D(2, 2);
-            ImageConversion.LoadImage(plotFig, _engine.GetArrivalPlotBytes());
+            //ImageConversion.LoadImage(plotFig, _engine.Simulation.GetArrivalPlotBytes());
         }
 
         void ResetOutputGUI()
@@ -272,9 +272,9 @@ namespace WUInity.UI
 
                 GUI.Box(new Rect(0, 0, 120, 300), "Fireline int.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = _wuinityManager.FIRE_VISUALS.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                string upperLimit = _wuinityManager.FireRenderer.GetUpperFirelineIntensityLimit().ToString("f1") + " [kW/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = _wuinityManager.FIRE_VISUALS.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
+                string lowerLimit = _wuinityManager.FireRenderer.GetLowerFirelineIntensityLimit().ToString("f1") + " [kW/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();
@@ -286,9 +286,9 @@ namespace WUInity.UI
 
                 GUI.Box(new Rect(0, 0, 120, 300), "Optical dens.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = _wuinityManager.FIRE_VISUALS.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string upperLimit = _wuinityManager.FireRenderer.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = _wuinityManager.FIRE_VISUALS.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string lowerLimit = _wuinityManager.FireRenderer.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();

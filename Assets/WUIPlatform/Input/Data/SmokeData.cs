@@ -8,7 +8,7 @@
 using PREACT.IO;
 using System.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class SmokeData
     {

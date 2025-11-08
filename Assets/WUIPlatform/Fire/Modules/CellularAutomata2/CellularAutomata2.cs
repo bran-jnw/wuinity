@@ -29,20 +29,20 @@ namespace PREACT.Fire
         {
             Engine.MESSAGE(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
-            xDim = _simulation.RuntimeData.Fire.LCPData.GetCellCountX();
-            yDim = _simulation.RuntimeData.Fire.LCPData.GetCellCountY();
-            bool[,] wuiArea = GetWUIArea2D(_simulation.RuntimeData.Fire.WuiArea, xDim, yDim);
-            float distance = (float)_simulation.RuntimeData.Fire.LCPData.RasterCellResolutionX;
+            xDim = simulation.Input.Fire.Data.LCPData.GetCellCountX();
+            yDim = simulation.Input.Fire.Data.LCPData.GetCellCountY();
+            bool[,] wuiArea = GetWUIArea2D(simulation.Input.Fire.Data.WuiArea, xDim, yDim);
+            float distance = (float)simulation.Input.Fire.Data.LCPData.RasterCellResolutionX;
             float distanceDiagonal = Mathf.Sqrt(2) * distance;
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea);
 
             FuelModelSet fuelModelSet = new FuelModelSet();
-            if (_simulation.RuntimeData.Fire.FuelModelsData != null)
+            if (simulation.Input.Fire.Data.FuelModelsData != null)
             {
-                for (int i = 0; i < _simulation.RuntimeData.Fire.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < simulation.Input.Fire.Data.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(_simulation.RuntimeData.Fire.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(simulation.Input.Fire.Data.FuelModelsData.Fuels[i]);
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
@@ -54,7 +54,7 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, _simulation.RuntimeData.Fire.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this, simulation.RuntimeData.Fire.InitialFuelMoistureData);
+                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, simulation.Input.Fire.Data.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this, simulation.Input.Fire.Data.InitialFuelMoistureData);
                     if (fireCells[x, y]._maxROS > maxROS)
                     {
                         maxROS = fireCells[x, y]._maxROS;

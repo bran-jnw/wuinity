@@ -2,8 +2,7 @@ namespace PREACT
 {
     public interface IExternalManager
     {
-        public void InputHasChanged();
-        public void UpdateMap();
+        public void UpdateInput(IO.PREACTInput input);
         public void NewLogMessage(string message);
         public void SimulationStarted();
         public void SimulationStopped();

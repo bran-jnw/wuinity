@@ -1,28 +1,26 @@
 using UnityEngine;
 using PREACT.IO;
-using PREACT;
+using System.IO;
 using PREACT.Evacuation;
 
 namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string totalPop, maxCars, maxCarsProb, minHousehold, maxHousehold, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
+        string totalPop, maxCars, maxCarsProb, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
         bool evacMenuDirty = true;
 
         void EvacMenu()
         {
-            PopulationInput popIn = _engine.Input.Population;
-            MacroHouseholdSimInput macroIn = _engine.Input.Pedestrian.macroHouseholdSimInput;
-            EvacuationInput evacIn = _engine.Input.Evacuation;
+            PopulationInput popIn = _input.Population;
+            MacroHouseholdSimInput macroIn = _input.Pedestrian.MacroHouseholdSimInput;
+            EvacuationInput evacIn = _input.Evacuation;
 
             if (evacMenuDirty)
             {
                 evacMenuDirty = false;
                 maxCars = popIn.MaxCars.ToString();
                 maxCarsProb = popIn.MaxCarsProbability.ToString();
-                minHousehold = popIn.MinHouseholdSize.ToString();
-                maxHousehold = popIn.MaxHouseholdSize.ToString();
                 walkSpeedMin = macroIn.WalkingSpeedMinMax.X.ToString();
                 walkSpeedMax = macroIn.WalkingSpeedMinMax.Y.ToString();
                 walkSpeedMod = macroIn.WalkingSpeedModifier.ToString();
@@ -50,18 +48,7 @@ namespace WUInity.UI
             ++buttonIndex;
             maxCarsProb = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), maxCarsProb);
             ++buttonIndex;
-
-            //
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min. persons per household");
-            ++buttonIndex;
-            minHousehold = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), minHousehold);
-            ++buttonIndex;
-            //
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Max. persons per household");
-            ++buttonIndex;
-            maxHousehold = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), maxHousehold);
-            ++buttonIndex;
-
+                        
             //
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min. walking speed");
             ++buttonIndex;
@@ -89,29 +76,30 @@ namespace WUInity.UI
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
             ++buttonIndex;            
 
-            if (!WUInityManager.INSTANCE.IsPainterActive())
+            if (!_wuinityManager.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
                 {
-                    WUInityManager.INSTANCE.StartPainter(Painter.PaintMode.EvacGroup);
+                    _wuinityManager.StartPainter(Painter.PaintMode.EvacGroup);
                 }
                 ++buttonIndex;                
             }
             else
             {
-                for (int i = 0; i < _engine.ScenarioData.Evacuation.EvacuationGroups.Length; i++)
+                for (int i = 0; i < _input.Evacuation.Data.EvacuationGroups.Count; i++)
                 {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engine.ScenarioData.Evacuation.EvacuationGroups[i].Name))
+                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Evacuation.Data.EvacuationGroups[i].Name))
                     {
-                        WUInityManager.Painter.SetEvacGroupColor(i);
+                        _wuinityManager.Painter.SetEvacGroupColor(i);
                     }
                     ++buttonIndex;
                 }
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
                 {
-                    EvacuationGroup.SaveEvacGroupIndices();
-                    WUInityManager.INSTANCE.StopPainter();
+                    string filePath = Path.Combine(_input.RootFolder, _input.Simulation.Name + ".egs");
+                    EvacuationGroup.SaveEvacGroupIndices(filePath, _input.Evacuation.Data.CellCount, _input.Evacuation.Data.EvacuationGroups.Count, _input.Evacuation.Data.EvacGroupIndices);
+                    _wuinityManager.StopPainter();
                 }
                 ++buttonIndex;
             }
@@ -124,14 +112,12 @@ namespace WUInity.UI
                 return;
             }
 
-            PopulationInput popIn = _engine.Input.Population;
-            MacroHouseholdSimInput macroIn = _engine.Input.Pedestrian.macroHouseholdSimInput;
-            EvacuationInput evacIn = _engine.Input.Evacuation;
+            PopulationInput popIn = _input.Population;
+            MacroHouseholdSimInput macroIn = _input.Pedestrian.MacroHouseholdSimInput;
+            EvacuationInput evacIn = _input.Evacuation;
 
             int.TryParse(maxCars, out popIn.MaxCars);
             float.TryParse(maxCarsProb, out popIn.MaxCarsProbability);
-            int.TryParse(minHousehold, out popIn.MinHouseholdSize);
-            int.TryParse(maxHousehold, out popIn.MaxHouseholdSize);
             float.TryParse(walkSpeedMin, out macroIn.WalkingSpeedMinMax.X);
             float.TryParse(walkSpeedMax, out macroIn.WalkingSpeedMinMax.Y);
             float.TryParse(walkSpeedMod, out macroIn.WalkingSpeedModifier);

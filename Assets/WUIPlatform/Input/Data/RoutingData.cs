@@ -6,13 +6,12 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using Itinero;
-using Reminiscence.Collections;
 using System.IO;
 using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public static class RoutingData
     {
@@ -45,7 +44,7 @@ namespace PREACT.Runtime
             return routerDb;
         }
 
-        public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFile)
+        public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFilePath)
         {
             bool success = false;
 
@@ -75,10 +74,10 @@ namespace PREACT.Runtime
                     routerDb.LoadOsmData(source, settings, Vehicle.Car);
 
                     // write the new routerdb to disk.
-                    using (FileStream outputStream = new FileInfo(outputFile).Open(FileMode.Create))
+                    using (FileStream outputStream = new FileInfo(outputFilePath).Open(FileMode.Create))
                     {
                         routerDb.Serialize(outputStream);
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Router database saved to file " + outputFile);
+                        Engine.MESSAGE(null, Engine.LogType.Log, "Router database saved to file " + outputFilePath);
                     }
 
                     success = true;
@@ -86,7 +85,7 @@ namespace PREACT.Runtime
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Router database file could not be found.");
+                Engine.MESSAGE(null, Engine.LogType.Warning, "OSM file could not be found.");
             }
 
             return success;

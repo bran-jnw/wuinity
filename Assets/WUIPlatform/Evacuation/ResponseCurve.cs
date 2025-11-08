@@ -46,11 +46,11 @@ namespace PREACT.Evacuation
             this.dataPoints = dataPoints.ToArray();
         }
 
-        public static List<ResponseCurve> LoadResponseCurves(string rootFolder, string[] responseCurveFiles, out bool success)
+        public static List<ResponseCurve> LoadResponseCurves(string rootFolder, List<string> responseCurveFiles, out bool success)
         {
             success = false;
             List<ResponseCurve> responseCurves = new List<ResponseCurve>();
-            for (int i = 0; i < responseCurveFiles.Length; i++)
+            for (int i = 0; i < responseCurveFiles.Count; i++)
             {
                 string path = Path.Combine(rootFolder, responseCurveFiles[i]);
                 if (File.Exists(path))

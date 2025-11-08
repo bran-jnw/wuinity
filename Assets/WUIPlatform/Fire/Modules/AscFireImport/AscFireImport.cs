@@ -38,14 +38,14 @@ namespace PREACT.Fire
 
         public AscFireImport(Simulation simulation) : base(simulation)
         {
-            string TOAFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Scenario.Input.Fire.AscImportInput.RootFolder, _simulation.Scenario.Input.Fire.AscImportInput.TimeOfArrivalFile);
-            string ROSFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Scenario.Input.Fire.AscImportInput.RootFolder, _simulation.Scenario.Input.Fire.AscImportInput.RateOfSpreadFile);
-            string FIFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Scenario.Input.Fire.AscImportInput.RootFolder, _simulation.Scenario.Input.Fire.AscImportInput.FirelineIntensityFile);
-            string SDFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Scenario.Input.Fire.AscImportInput.RootFolder, _simulation.Scenario.Input.Fire.AscImportInput.SpreadDirectionFile);
+            string TOAFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.TimeOfArrivalFile);
+            string ROSFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.RateOfSpreadFile);
+            string FIFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.FirelineIntensityFile);
+            string SDFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.SpreadDirectionFile);
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d ascUTM = new Vector2d(_xllcorner, _yllcorner);
-            _originOffset = ascUTM - _simulation.RuntimeData.Geo.UTMOrigin;
+            _originOffset = ascUTM - _simulation.Input.Simulation.Data.UTMOrigin;
 
             _firelineIntensityData = new float[ncols * nrows];
             _newlyIgnitedCells = new List<Vector2int>();
@@ -92,8 +92,8 @@ namespace PREACT.Fire
         public void GetOffsetAndScale(out Vector2d offset, out float xScale, out float yScale)
         {
             offset = this._originOffset;
-            xScale = (float)(_cellsize * ncols / _simulation.Scenario.Input.Simulation.DomainSize.x);
-            yScale = (float)(_cellsize * nrows / _simulation.Scenario.Input.Simulation.DomainSize.y);
+            xScale = (float)(_cellsize * ncols / _simulation.Input.Simulation.DomainSize.x);
+            yScale = (float)(_cellsize * nrows / _simulation.Input.Simulation.DomainSize.y);
         }
 
         public override bool IsSimulationDone()
@@ -269,7 +269,7 @@ namespace PREACT.Fire
         /// <returns></returns>
         public override FireCellState GetFireCellState(Vector2d latLon)
         {
-            Vector2d pos = _simulation.RuntimeData.Geo.GetSimulationPosition(latLon);
+            Vector2d pos = _simulation.GetSimulationPosition(latLon);
             pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);
@@ -298,7 +298,7 @@ namespace PREACT.Fire
 
         public override float GetInternalDeltaTime()
         {
-            return _simulation.Scenario.Input.Simulation.DeltaTime;
+            return _simulation.Input.Simulation.DeltaTime;
         }
 
         public FireRasterData[,] GetCompleteFireData()

@@ -1,4 +1,5 @@
 using UnityEngine;
+using PREACT.Utility.Math;
 
 namespace WUInity.UI
 {
@@ -9,12 +10,10 @@ namespace WUInity.UI
 
         void MapMenu()
         {
-            PREACT.IO.PREACTInput wO = _engine.Input;
-
             //whenever we load a file we need to set the new data for the GUI
             if (mapMenuDirty)
             {
-                CleanMapMenu(wO);
+                CleanMapMenu();
             }
 
             GUI.Box(new Rect(subMenuXOrigin, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -48,33 +47,39 @@ namespace WUInity.UI
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex* (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Update map"))
             {
-                ParseMapData(wO);
-                _wuinityManager.UpdateMap();
+                ParseMapData();                
             }
         }
 
-        void CleanMapMenu(PREACT.IO.PREACTInput wO)
-        {
+        void CleanMapMenu()
+        {            
+            Lat = _input.Simulation.LowerLeftLatLon.x.ToString();
+            Long = _input.Simulation.LowerLeftLatLon.y.ToString();
+            sizeX = _input.Simulation.DomainSize.x.ToString();
+            sizeY = _input.Simulation.DomainSize.y.ToString();
+            zoom = _input.Map.ZoomLevel.ToString();
             mapMenuDirty = false;
-            Lat = wO.Simulation.LowerLeftLatLon.x.ToString();
-            Long = wO.Simulation.LowerLeftLatLon.y.ToString();
-            sizeX = wO.Simulation.DomainSize.x.ToString();
-            sizeY = wO.Simulation.DomainSize.y.ToString();
-            zoom = wO.Map.ZoomLevel.ToString();
         }
 
-        void ParseMapData(PREACT.IO.PREACTInput wO)
+        void ParseMapData()
         {
             if (mapMenuDirty)
             {
                 return;
             }
 
-            double.TryParse(Lat, out wO.Simulation.LowerLeftLatLon.x);
-            double.TryParse(Long, out wO.Simulation.LowerLeftLatLon.y);
-            double.TryParse(sizeX, out wO.Simulation.DomainSize.x);
-            double.TryParse(sizeY, out wO.Simulation.DomainSize.y);
-            int.TryParse(zoom, out wO.Map.ZoomLevel);
+            int issues = 0;
+            Vector2d temp;
+            issues += double.TryParse(Lat, out temp.x) ? 0 : 1;
+            issues += double.TryParse(Long, out temp.y) ? 0 : 1;
+            if(issues == 0)
+            {
+                _input.Simulation.LowerLeftLatLon = temp;
+                _wuinityManager.UpdateMap();
+            }           
+            double.TryParse(sizeX, out _input.Simulation.DomainSize.x);
+            double.TryParse(sizeY, out _input.Simulation.DomainSize.y);
+            int.TryParse(zoom, out _input.Map.ZoomLevel);
         }
     }
 }

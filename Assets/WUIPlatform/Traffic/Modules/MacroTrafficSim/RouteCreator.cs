@@ -29,11 +29,11 @@ namespace PREACT.Traffic
             _routerDb = routerDb;
         }      
 
-        Itinero.Profiles.Profile GetRouterProfile(MacroTrafficSimInput.RoutingChoice routingChoice)
+        Itinero.Profiles.Profile GetRouterProfile(MacroTrafficSimInput.RoutingPriority routingPriority)
         {
             Itinero.Profiles.Profile p;
 
-            if (routingChoice == MacroTrafficSimInput.RoutingChoice.Closest || routingChoice == MacroTrafficSimInput.RoutingChoice.EvacGroup)
+            if (routingPriority == MacroTrafficSimInput.RoutingPriority.Closest || routingPriority == MacroTrafficSimInput.RoutingPriority.EvacGroup)
             {
                 p = Vehicle.Car.Shortest();
             }
@@ -45,9 +45,9 @@ namespace PREACT.Traffic
             return p;
         }
 
-        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput mTSI,  List<EvacuationDestination> evacuatonGoals, bool logMessages)
+        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput.RoutingPriority routingPriority,  List<EvacuationDestination> evacuatonGoals, bool logMessages)
         {
-            Itinero.Profiles.Profile routerProfile = GetRouterProfile(mTSI);
+            Itinero.Profiles.Profile routerProfile = GetRouterProfile(routingPriority);
 
             //check that evac goals are valid
             _validEvacuationGoalRouterPoints = new List<RouterPoint>();
@@ -190,7 +190,7 @@ namespace PREACT.Traffic
         public RouteData CalcTrafficRoute(Simulation simulation, Vector2d startLatLon)
         {
             float cellSize = simulation.Input.Evacuation.PaintCellSize;
-            Itinero.Profiles.Profile routerProfile = GetRouterProfile(simulation.Input.Traffic.MacroTrafficSimInput);
+            Itinero.Profiles.Profile routerProfile = GetRouterProfile(simulation.Input.Traffic.MacroTrafficSimInput.Routing);
 
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
             //this is a quick way of getting a route from an approximate position of the car
@@ -219,7 +219,7 @@ namespace PREACT.Traffic
             //loop through all defined goals and save them for potential use later (old way only saved the currently needed route and the re-calced if needed)
             if (_validEvacuationGoals == null || _validEvacuationGoalRouterPoints == null)
             {
-                DetermineValidGoalsAndRouterPoints(simulation.Destinations, false);
+                DetermineValidGoalsAndRouterPoints(simulation.Input.Traffic.MacroTrafficSimInput.Routing, simulation.Destinations, false);
             }
             for (int i = 0; i < _validEvacuationGoals.Count; i++)
             {
@@ -261,7 +261,7 @@ namespace PREACT.Traffic
                 rC.routes[i] = routeData[i];
             }
 
-            SelectCorrectRouteFromCar(rC);
+            SelectCorrectRouteFromCar(simulation, rC);
 
             return rC.GetSelectedRoute();
         }
@@ -271,16 +271,16 @@ namespace PREACT.Traffic
             return Mathd.Approximately(start.Latitude, end.Latitude) && Mathd.Approximately(start.Longitude, end.Longitude);
         }
 
-        private static void SelectCorrectRouteFromCar(RouteCollection rC)
+        private static void SelectCorrectRouteFromCar(Simulation simulation, RouteCollection rC)
         {
-            SelectCorrectRoute(rC, -1);
+            SelectCorrectRoute(simulation, rC, -1);
         }
 
-        public static void UpdateRouteCollectionBasedOnRouteChoice(MacroTrafficSimInput.RoutingChoice rotuingChoice, RouteCollection rC, int cellIndex)
+        public static void UpdateRouteCollectionBasedOnRouteChoice(Simulation simulation, RouteCollection rC, int cellIndex)
         {
-            if(rotuingChoice == MacroTrafficSimInput.RoutingChoice.EvacGroup || rotuingChoice == MacroTrafficSimInput.RoutingChoice.Random)
+            if(simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup || simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
             {
-                SelectCorrectRoute(rC, cellIndex);
+                SelectCorrectRoute(simulation, rC, cellIndex);
             }
         }
 
@@ -291,16 +291,16 @@ namespace PREACT.Traffic
         /// <param name="rC"></param>
         /// <param name="considerForceMap"></param>
         /// <param name="cellIndex"></param>
-        public static void SelectCorrectRoute(Simulation simulation, RouteCollection rC, int cellIndex, MacroTrafficSimInput.RoutingChoice routingChoice)
+        public static void SelectCorrectRoute(Simulation simulation, RouteCollection rC, int cellIndex)
         {
          //   TrafficInput tO = Engine.Input.Traffic;
             //Vector2int cells = Engine.ScenarioData.Evacuation.CellCount;
 
-            if (routingChoice == MacroTrafficSimInput.RoutingChoice.EvacGroup)
+            if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup)
             {
                 if (cellIndex >= 0)
                 {
-                    EvacuationGroup group = simulation.Scenario.Data.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationGroup group = simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
                     EvacuationDestination goal = group.GetWeightedRandomDestination(simulation.Destinations);
                     rC.SelectForcedNonBlocked(goal, simulation);
                 }
@@ -309,16 +309,16 @@ namespace PREACT.Traffic
                     rC.SelectFastestNonBlocked(simulation);
                 }
             }
-            else if (routingChoice == MacroTrafficSimInput.RoutingChoice.Random)
+            else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
             {
                 int randomChoice = Randomf.Range(0, simulation.Destinations.Count - 1);
                 rC.SelectForcedNonBlocked(simulation.Destinations[randomChoice], simulation);
             }
-            else if (routingChoice == MacroTrafficSimInput.RoutingChoice.Closest)
+            else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Closest)
             {
                 rC.SelectClosestNonBlocked(simulation);
             }
-            else if (routingChoice == MacroTrafficSimInput.RoutingChoice.Fastest)
+            else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Fastest)
             {
                 rC.SelectFastestNonBlocked(simulation);
             }

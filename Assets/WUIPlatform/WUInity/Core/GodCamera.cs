@@ -15,7 +15,7 @@ namespace WUInity
         CameraMode cMode = CameraMode.twoD;
         [SerializeField] float zoomSpeed = 100.0f;
         [SerializeField] float lowestY = 200f;
-        [SerializeField] Camera c;
+        [SerializeField] Camera cam;
 
         float maximumY;
         bool dragging = false;
@@ -23,41 +23,37 @@ namespace WUInity
         Vector3 startMousePos;
         PREACT.Utility.Math.Vector2d _mapSize;
         bool refreshClipPlanes = false;
-        private PREACT.Engine _engine;
+        private PREACT.IO.PREACTInput _input;
 
         // Use this for initialization
         void OnValidate()
         {
-            if(c == null)
+            if(cam == null)
             {
-                c = GetComponent<Camera>();
+                cam = GetComponent<Camera>();
             }            
         }
 
-        public void SetEngines(PREACT.Engine engine)
+        public void SetInput(PREACT.IO.PREACTInput input)
         {
-            _engine = engine;
+            _input = input;
         }
 
         public void SetCameraStartPosition(PREACT.Utility.Math.Vector2d mapSize)
         {
             _mapSize = mapSize;
-            float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * c.fieldOfView * 0.5f);
+            float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * cam.fieldOfView * 0.5f);
             maximumY = yPos * 1.5f;
 
             transform.position = new Vector3((float)mapSize.x * 0.5f, yPos, (float)mapSize.y * 0.5f);
             //rescale clip planes
-            c.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * c.fieldOfView * 0.5f) + 1.0f;
+            cam.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * cam.fieldOfView * 0.5f) + 1.0f;
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (_engine == null)
-            {
-                return;
-            }
-            if (_engine.Input == null)
+            if (_input == null)
             {
                 return;
             }
@@ -72,7 +68,7 @@ namespace WUInity
                 {
                     cMode = CameraMode.twoD;
                 }
-                SetCameraStartPosition(_engine.Input.Simulation.DomainSize);
+                SetCameraStartPosition(_input.Simulation.DomainSize);
             }
 
             if (cMode == CameraMode.twoD)
@@ -91,7 +87,7 @@ namespace WUInity
 
                 if (dragging)
                 {
-                    float mapWidth = 2.0f * transform.position.y / (Mathf.PI * 0.5f - Mathf.Sin(Mathf.Deg2Rad * c.fieldOfView * 0.5f));
+                    float mapWidth = 2.0f * transform.position.y / (Mathf.PI * 0.5f - Mathf.Sin(Mathf.Deg2Rad * cam.fieldOfView * 0.5f));
                     Vector2 res = new Vector2(Screen.width, Screen.height);
                     transform.position = startDragPos + mapWidth * (Vector3.left * (Input.mousePosition.x - startMousePos.x) / res.x + (res.y / res.x) * Vector3.back * (Input.mousePosition.y - startMousePos.y) / res.y);                    
                 }
@@ -121,8 +117,8 @@ namespace WUInity
                 {
                     refreshClipPlanes = false;
                     //rescale clip planes
-                    c.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * c.fieldOfView * 0.5f) + 1.0f;
-                    c.nearClipPlane = c.farClipPlane * 0.8f;
+                    cam.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * cam.fieldOfView * 0.5f) + 1.0f;
+                    cam.nearClipPlane = cam.farClipPlane * 0.8f;
                 }
             }
             else

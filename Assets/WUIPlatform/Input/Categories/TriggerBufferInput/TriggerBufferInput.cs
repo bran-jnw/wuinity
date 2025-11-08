@@ -12,33 +12,42 @@ namespace PREACT.IO
     [System.Serializable]
     public class TriggerBufferInput
     {
-        public bool CalculateTriggerBuffer = false;
-        public enum TriggerBufferChoice { kPERIL, BackwardsFireCell2 }
-        public TriggerBufferChoice TriggerBuffer = TriggerBufferChoice.kPERIL;
+        public enum TriggerBufferChoice { None, kPERIL, BackwardsFireCell2 }
 
-        public kPERILInput kPERILInput;
+        public kPERILInput _kPERILInput;
 
-        public static TriggerBufferInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex)
+        public kPERILInput kPERILInput { get => _kPERILInput; }
+        public bool CalculateTriggerBuffer = false;        
+        public TriggerBufferChoice TriggerBuffer = TriggerBufferChoice.None;
+        
+
+        public TriggerBufferInput() 
+        { 
+            _kPERILInput = new kPERILInput();
+        }
+
+        public static TriggerBufferInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
         {
-            int issues = 0;
             TriggerBufferInput newInput = new TriggerBufferInput();
+            int issues = 0;   
+            success = false;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(CalculateTriggerBuffer);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(CalculateTriggerBuffer);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.CalculateTriggerBuffer);
             }
             else
             {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             if (newInput.CalculateTriggerBuffer)
             {
-                if (inputToParse.TryGetValue(nameof(TriggerBuffer), out userInput))
+                nameOfInput = nameof(TriggerBuffer);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     switch (userInput)
                     {
@@ -50,38 +59,49 @@ namespace PREACT.IO
                             break;
                         default:
                             ++issues;
-                            PREACTInput.CouldNotInterpretInputMessage(input, userInput);
+                            PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                             break;
                     }
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "No trigger buffer module was set, using " + newInput.TriggerBuffer.ToString() + ".");
+                    ++issues;
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+                if(issues > 0)
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                    return newInput;
                 }
 
                 //now check modules that have been selected
                 if (newInput.TriggerBuffer == TriggerBufferChoice.kPERIL)
                 {
-                    input = nameof(TriggerBufferChoice.kPERIL);
-                    PREACTInput.ReadingInputMessage(input);
+                    //critical
+                    nameOfInput = nameof(TriggerBufferChoice.kPERIL);
                     int lineindex;
-                    if (headerLineIndex.TryGetValue(input, out lineindex))
+                    if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
                     {
-                        newInput.kPERILInput = kPERILInput.Parse(inputLines, lineindex);
+                        newInput._kPERILInput = kPERILInput.Parse(inputLines, lineindex, rootFolder, out success);
                     }
                     else
                     {
-                        //critical
-                        ++issues;
-                        PREACTInput.InputNotFoundMessage(input);
+                        success = false;
+                        PREACTInput.InputNotFoundMessage(nameOfInput);
+                    }
+                    if(!success)
+                    {
+                        return newInput;
                     }
                 }
                 else
                 {
                     Engine.MESSAGE(null, Engine.LogType.Debug, "Trying to use non-implemented trigger buffer.");
                 }
-            }    
+            }
 
+            success = true;
             return newInput;
         }
     }     

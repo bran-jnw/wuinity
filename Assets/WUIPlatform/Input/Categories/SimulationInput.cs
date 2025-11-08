@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using PREACT.Utility.Math;
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.IO
 {
@@ -17,8 +17,8 @@ namespace PREACT.IO
         private Vector2d _lowerLeftLatLon;
 
         public SimulationData Data { get => _data; }
-        public string Name;
-        public Vector2d LowerLeftLatLon { get => _lowerLeftLatLon; set { _lowerLeftLatLon = value; _data.UpdateData(this); } }
+        public string Name = string.Empty;
+        public Vector2d LowerLeftLatLon { get => _lowerLeftLatLon; set { _lowerLeftLatLon = value; _data.UpdateData(LowerLeftLatLon); } }
         public Vector2d DomainSize;
         public float DeltaTime = 1.0f;
         public float MaxSimTime= float.MaxValue;
@@ -30,7 +30,7 @@ namespace PREACT.IO
 
         public SimulationInput()
         {
-            _data = new SimulationData(this);
+            _data = new SimulationData(LowerLeftLatLon);
         }
 
         public static SimulationInput Parse(string[] inputLines, int startIndex, out bool success)
@@ -166,7 +166,7 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(input);
             }
 
-            newInput._data.UpdateData(newInput);
+            newInput._data.UpdateData(newInput.LowerLeftLatLon);
             success = true;
             return newInput;
         }

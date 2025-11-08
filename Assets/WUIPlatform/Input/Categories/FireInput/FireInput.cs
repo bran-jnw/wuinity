@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.IO
 {
@@ -19,12 +19,12 @@ namespace PREACT.IO
         private AscImportInput _ascImportInput;
         private FireCellInput _fireCellInput;
 
-        public FireData FireData { get => _data; }
+        public FireData Data { get => _data; }
         public AscImportInput AscImportInput { get => _ascImportInput; }
         public FireCellInput FireCellInput { get => _fireCellInput; }
         public FireModuleChoice FireModule = FireModuleChoice.None;
-        public string LcpFile = "";
-        public string GraphicalFireInputFile = "";
+        public string LcpFile = string.Empty;
+        public string GraphicalFireInputFile = string.Empty;
 
 
         public FireInput() 
@@ -96,12 +96,16 @@ namespace PREACT.IO
                 }
             }            
 
-            //might be critical
+            //might be critical if using e.g. random ignition
             inputName = nameof(GraphicalFireInputFile);
             if (inputToParse.TryGetValue(nameof(GraphicalFireInputFile), out userInput))
             {
                 newInput.GraphicalFireInputFile = userInput;
                 PREACTInput.CheckIfFileExist(inputName, userInput, rootFolder, out success);
+                if(!success)
+                {
+                    newInput.GraphicalFireInputFile = string.Empty;
+                }
             }
             else
             {

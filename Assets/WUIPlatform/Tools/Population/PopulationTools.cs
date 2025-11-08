@@ -30,7 +30,7 @@ namespace PREACT.Tools
             return LocalGPWData.LoadFromFile(localGpwFile, out success);   
         }
 
-        public static PopulationMap CreateAndSavePopulationMap(PREACTInput input, string localGPWFile, string cellSize, string filePath, out bool success)
+        public static PopulationMap CreateAndSavePopulationMap(string localGPWFile, string cellSize, string filePath, out bool success)
         {
             success = false;
             PopulationMap populationMap = null;
@@ -41,7 +41,7 @@ namespace PREACT.Tools
                 LocalGPWData localGPWData = LoadLocalGPWData(localGPWFile, out success);
                 if(success)
                 {
-                    populationMap = CreateAndSavePopulationMap(input, localGPWData, c, filePath, out success);
+                    populationMap = CreateAndSavePopulationMap(localGPWData, c, filePath, out success);
                 }                
             }
             else
@@ -100,16 +100,21 @@ namespace PREACT.Tools
         /// <summary>
         /// Filters the interpolated GPW data set to account for the user created population mask as well as checking for road access.
         /// </summary>
-        public static void RoadAccessCorrectPopulationMap(PopulationMap populationMap, Runtime.SimulationData geoData, string routerDbFile, out bool success)
+        public static void RoadAccessCorrectPopulationMap(PopulationMap populationMap, string lat, string lon, string routerDbFile, out bool success)
         {
             success = false;
 
             if (populationMap.HaveData)
             {
-                Itinero.RouterDb rDb = Runtime.RoutingData.LoadRouterDb(routerDbFile, out success);
+                Itinero.RouterDb rDb = RoutingData.LoadRouterDb(routerDbFile, out success);
                 if (success)
                 {
-                    populationMap.UpdatePopulationMapBasedOnRoadAccess(geoData, rDb);
+                    Vector2d latLon;
+                    if(double.TryParse(lat, out latLon.x) && double.TryParse(lon, out latLon.y))
+                    {
+                        SimulationData sData = new SimulationData(latLon);
+                        populationMap.UpdatePopulationMapBasedOnRoadAccess(sData, rDb);
+                    }                    
                 }                
             }
             else
@@ -136,13 +141,17 @@ namespace PREACT.Tools
             WUIengine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
         }*/ 
 
-        public static void CreatePopulation(IO.PREACTInput input, PopulationMap populationMap, Runtime.SimulationData geoData, string filePath, out bool success)
+        public static void CreatePopulation(string minHouseholdSize, string maxHouseholdSize, PopulationMap populationMap, SimulationData simulationData, string filePath, out bool success)
         {
             success = false;
 
             if (populationMap.HaveData && populationMap.CorrectedForRoadAccess)
             {
-                populationMap.CreatePopulation(input, geoData, filePath, out success);
+                int min, max;
+                if(int.TryParse(minHouseholdSize, out min) && int.TryParse(maxHouseholdSize, out max) && min <= max)
+                {
+                    populationMap.CreatePopulation(min, max, simulationData, filePath, out success);
+                }    
             }
             else
             {
@@ -152,20 +161,25 @@ namespace PREACT.Tools
 
         public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFile)
         {
-            return Runtime.RoutingData.CreateAndSaveRouterDb(osmInputFile, outputFile);
+            return RoutingData.CreateAndSaveRouterDb(osmInputFile, outputFile);
         }
 
-        public static Itinero.RouterDb LoadRouterDb(Engine engine, string routerDbFile, out bool success)
+        public static Itinero.RouterDb LoadRouterDb(string routerDbFile, out bool success)
         {
-            return Runtime.RoutingData.LoadRouterDb(routerDbFile, out success);
+            return RoutingData.LoadRouterDb(routerDbFile, out success);
         }
 
-        public static bool FilterOsmData(IO.PREACTInput input, string osmFile, string xBorder, string yBorder)
+        public static bool FilterOsmData(string osmFile, string xBorder, string yBorder, string lowerLeftLat, string lowerLeftLon, string domainSizeX, string domainSizeY)
         {
-            Vector2d osmFilterBorder;
-            if (double.TryParse(xBorder, out osmFilterBorder.x) && double.TryParse(yBorder, out osmFilterBorder.y))
+            Vector2d osmFilterBorder, domainSize, lowerLeftLatLon;
+            if (double.TryParse(xBorder, out osmFilterBorder.x) 
+                && double.TryParse(yBorder, out osmFilterBorder.y)
+                && double.TryParse(lowerLeftLat, out lowerLeftLatLon.x)
+                && double.TryParse(lowerLeftLon, out lowerLeftLatLon.y)
+                && double.TryParse(domainSizeX, out domainSize.x)
+                && double.TryParse(domainSizeY, out domainSize.y))
             {
-                return FilterOsmData(input, osmFile, osmFilterBorder);
+                return FilterOsmData(osmFile, lowerLeftLatLon, domainSize, osmFilterBorder);
             }
             else
             {
@@ -175,7 +189,7 @@ namespace PREACT.Tools
             return false;
         }
 
-        private static bool FilterOsmData(IO.PREACTInput input, string osmFile, Vector2d borderSize)
+        private static bool FilterOsmData(string osmFile, Vector2d lowerLeftLatLon, Vector2d domainSize, Vector2d borderSize)
         {
             bool success = false;
 
@@ -183,11 +197,11 @@ namespace PREACT.Tools
             {
                 using (FileStream stream = new FileInfo(osmFile).OpenRead())
                 {
-                    float left = (float)(input.Simulation.LowerLeftLatLon.y - borderSize.x);
-                    float bottom = (float)(input.Simulation.LowerLeftLatLon.x - borderSize.y);
-                    Vector2d size = LocalGPWData.SizeToDegrees(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
-                    float right = (float)(input.Simulation.LowerLeftLatLon.y + size.x + borderSize.x);
-                    float top = (float)(input.Simulation.LowerLeftLatLon.x + size.y + borderSize.y);
+                    float left = (float)(lowerLeftLatLon.y - borderSize.x);
+                    float bottom = (float)(lowerLeftLatLon.x - borderSize.y);
+                    Vector2d size = LocalGPWData.SizeToDegrees(lowerLeftLatLon, domainSize);
+                    float right = (float)(lowerLeftLatLon.y + size.x + borderSize.x);
+                    float top = (float)(lowerLeftLatLon.x + size.y + borderSize.y);
 
                     OsmStreamSource source;                    
                     if (osmFile.EndsWith("pbf"))

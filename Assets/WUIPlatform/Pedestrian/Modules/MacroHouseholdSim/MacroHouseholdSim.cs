@@ -28,7 +28,7 @@ namespace PREACT.Pedestrian
         Vector2d realWorldSize;
         public Vector2d cellWorldSize;
 
-        Runtime.PopulationData.HouseholdData[] _householdData;
+        IO.PopulationData.HouseholdData[] _householdData;
         List<MacroHousehold> _macroHouseholds;
         int totalPopulation;
         int totalCars;
@@ -52,15 +52,6 @@ namespace PREACT.Pedestrian
         {
             output = new List<string>();
             output.Add("Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total cars activated,Avg. walking dist.");
-            //string output = "Time(s),People reached car";
-            //SaveToFile(output, true);
-
-            #if USING_UNITY
-            _visualizer = new MacroHouseholdVisualizerUnity();
-            #else
-
-            #endif
-
         }
 
         public int GetCellsX()
@@ -200,7 +191,7 @@ namespace PREACT.Pedestrian
 
         private void ReachedCar(MacroHousehold household)
         {
-            if(_simulation.Scenario.Input.Simulation.RunTrafficModule)
+            if(_simulation.Input.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacGoal = GetEvacuationGoal(null, household.GetCellIndex());
@@ -257,23 +248,23 @@ namespace PREACT.Pedestrian
         {
             EvacuationDestination goal = null;
 
-            if (_simulation.Scenario.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
+            if (_simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                
-                if (_simulation.Scenario.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
+                if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
                 {
-                    EvacuationGroup group = _simulation.RuntimeData.Evacuation.GetEvacGroup(cellIndex);
+                    EvacuationGroup group = _simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedRandomDestination(_simulation.Destinations);
                 }
-                else if (_simulation.Scenario.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
+                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
                 {
                     int randomChoice = Randomf.Range(0, _simulation.Destinations.Count - 1);
                     goal = _simulation.Destinations[randomChoice];
                 }
             }
-            else if(cell != null && _simulation.Scenario.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            else if(cell != null && _simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
             {
                 //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
-                Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(cell.routeCollection, cell.GetCellIndex());
+                Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(_simulation, cell.routeCollection, cell.GetCellIndex());
             }
 
             if(goal == null)
@@ -289,11 +280,11 @@ namespace PREACT.Pedestrian
             System.IO.File.WriteAllLines(file, output);
         }
 
-        public void PopulateSimulation(Runtime.PopulationData.HouseholdData[] householdData)
+        public void PopulateSimulation(IO.PopulationData.HouseholdData[] householdData)
         {
-            cellsX = _simulation.RuntimeData.Evacuation.CellCount.x;
-            cellsY = _simulation.RuntimeData.Evacuation.CellCount.y;
-            realWorldSize = _simulation.Scenario.Input.Simulation.DomainSize;            
+            cellsX = _simulation.Input.Evacuation.Data.CellCount.x;
+            cellsY = _simulation.Input.Evacuation.Data.CellCount.y;
+            realWorldSize = _simulation.Input.Simulation.DomainSize;            
             population = new int[cellsX * cellsY];
             _householdData = householdData;
 
@@ -312,7 +303,7 @@ namespace PREACT.Pedestrian
             _macroHouseholds = new List<MacroHousehold>();
             for (int i = 0; i < _householdData.Length; ++i)
             {
-                Vector2d pos = _simulation.RuntimeData.Geo.GetSimulationPosition(_householdData[i].originLatLon);
+                Vector2d pos = _simulation.GetSimulationPosition(_householdData[i].originLatLon);
                 int xIndex = (int)(pos.x / cellSizeX);
                 int yIndex = (int)(pos.y / cellSizeY);
 
@@ -321,7 +312,7 @@ namespace PREACT.Pedestrian
                 {
                     int cellIndex = xIndex + cellsX * yIndex;
                     population[cellIndex] += _householdData[i].peopleCount;
-                    int evacGroupIndex = _simulation.RuntimeData.Evacuation.EvacGroupIndices[cellIndex];
+                    int evacGroupIndex = _simulation.Input.Evacuation.Data.EvacGroupIndices[cellIndex];
                     MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), GetRandomResponseTime(evacGroupIndex), cellIndex, _simulation);
                     _macroHouseholds.Add(mH);
                 }
@@ -362,30 +353,30 @@ namespace PREACT.Pedestrian
         /// <returns></returns>
         public float GetRandomResponseTime(int evacGroupIndex)
         {
-            EvacuationInput evacIn = _simulation.Scenario.Input.Evacuation;
+            EvacuationInput evacIn = _simulation.Input.Evacuation;
 
             float responseTime = float.MaxValue;
             float r = Randomf.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
-            for (int i = 0; i < _simulation.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
+            for (int i = 0; i < _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
             {
-                if(r <= _simulation.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].DestinationCumulativeWeights[i])
+                if(r <= _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].DestinationCumulativeWeights[i])
                 {
                     randomResponseCurveIndex = i;
                     break;
                 }
             }
-            int curveIndex = _simulation.RuntimeData.Evacuation.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
+            int curveIndex = _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
 
 
             //skip first as that is always zero probability
-            for (int i = 1; i < _simulation.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints.Length; i++)
+            for (int i = 1; i < _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints.Length; i++)
             {
-                if (r <= _simulation.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Randomf.Range(_simulation.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.RuntimeData.Evacuation.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
+                    responseTime = Randomf.Range(_simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }
@@ -399,7 +390,7 @@ namespace PREACT.Pedestrian
         /// <returns></returns>
         public float GetRandomWalkingSpeed()
         {
-            MacroHouseholdSimInput eO = _simulation.Scenario.Input.Pedestrian.MacroHouseholdSimInput;
+            MacroHouseholdSimInput eO = _simulation.Input.Pedestrian.MacroHouseholdSimInput;
             return Randomf.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 
@@ -423,7 +414,7 @@ namespace PREACT.Pedestrian
 
         public override void Stop()
         {
-            //throw new System.NotImplementedException();
+            //there is nothing to stop;
         }
     }
 }

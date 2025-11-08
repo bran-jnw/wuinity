@@ -21,7 +21,7 @@ namespace PREACT.Utility.Math
         }
 
         /// <summary>
-        /// Inlusive lower bound, esclusive upper bound.
+        /// Inlusive lower bound, exclusive upper bound.
         /// </summary>
         public static float value
         {

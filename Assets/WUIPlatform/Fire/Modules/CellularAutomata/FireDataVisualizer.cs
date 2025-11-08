@@ -5,7 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.Visualization
 {
@@ -13,17 +13,10 @@ namespace PREACT.Visualization
     {
         public enum LcpViewMode { FuelModel, Elevation, Slope, Aspect, TriggerBuffer }
 
-        public Runtime.FireData owner;
-
-        public FireDataVisualizer(FireData owner)
-        {
-            this.owner = owner;
-        }
-
         public abstract void SetLCPViewMode(LcpViewMode lcpViewMode);
         public abstract void ToggleLCPDataPlane();
         public abstract void SetLCPDataPlane(bool setActive);
-        public abstract void CreateTriggerBufferVisuals(float[,] data);
+        public abstract void CreateTriggerBufferVisuals(int[,] data);
     }
 }
 

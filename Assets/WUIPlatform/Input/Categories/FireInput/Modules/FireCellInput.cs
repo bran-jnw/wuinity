@@ -15,12 +15,12 @@ namespace PREACT.IO
         public enum SpreadModeEnum { FourDirections, EightDirections, SixteenDirections }
 
         public SpreadModeEnum SpreadMode = SpreadModeEnum.SixteenDirections;
-        public string RootFolder = "";
-        public string FuelModelsFile = "";
-        public string InitialFuelMoistureFile = "";
-        public string WeatherFile = "";
-        public string WindFile = "";
-        public string IgnitionPointsFile = "";
+        public string RootFolder = string.Empty;
+        public string FuelModelsFile = string.Empty;
+        public string InitialFuelMoistureFile = string.Empty;
+        public string WeatherFile = string.Empty;
+        public string WindFile = string.Empty;
+        public string IgnitionPointsFile = string.Empty;
         public float WindMultiplier = 1f;
         public bool UseRandomIgnitionMap = false;
         public int RandomIgnitionPoints = 0;
@@ -199,7 +199,7 @@ namespace PREACT.IO
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (newInput.UseInitialIgnitionMap && fireInput.GraphicalFireInputFile != "")
+            if (newInput.UseInitialIgnitionMap && fireInput.GraphicalFireInputFile != string.Empty)
             {
                 success = false;
                 return newInput;

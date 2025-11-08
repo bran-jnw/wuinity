@@ -8,7 +8,7 @@
 using System.IO;
 using PREACT.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class TrafficData
     {       

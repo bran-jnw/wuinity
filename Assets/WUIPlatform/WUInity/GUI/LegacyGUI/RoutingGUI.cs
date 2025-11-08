@@ -23,7 +23,7 @@ namespace WUInity.UI
         {
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
-            TrafficInput tO = _engine.Input.Traffic;
+            TrafficInput tO = _engine.Simulation.Input.Traffic;
             if (routingMenuDirty)
             {
                 routingMenuDirty = false;
@@ -41,24 +41,24 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if(_engine.Input.Traffic.MacroTrafficSimInput != null)
+            if(_engine.Simulation.Input.Traffic.MacroTrafficSimInput != null)
             {
                 //route choice info
                 ++buttonIndex;
                 string routeChoice = "Route choice: ";
-                if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Fastest)
+                if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Fastest)
                 {
                     routeChoice += "Fastest";
                 }
-                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Closest)
+                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Closest)
                 {
                     routeChoice += "Closest";
                 }
-                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.Random)
+                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
                 {
                     routeChoice += "Random";
                 }
-                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingChoice.EvacGroup)
+                else if (tO.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup)
                 {
                     routeChoice += "Evac. group";
                 }
@@ -83,8 +83,8 @@ namespace WUInity.UI
 
         void LoadRouterDbFile(string[] paths)
         {
-            string selectedFile = paths[0];
-            PopulationTools.LoadRouterDb(_engine, selectedFile);
+            bool success;
+            PopulationTools.LoadRouterDb(paths[0], out success);
         }
 
         void OpenBuildRouterDbFromOSM()
@@ -96,8 +96,8 @@ namespace WUInity.UI
 
         void BuildRouterDbFromOSM(string[] paths)
         {
-            string selectedFile = paths[0];
-            PopulationTools.CreateAndSaveRouterDb(_engine, selectedFile);
+            string outputFile = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]), ".routerDb");
+            PopulationTools.CreateAndSaveRouterDb(paths[0], outputFile);
         }
     }
 }

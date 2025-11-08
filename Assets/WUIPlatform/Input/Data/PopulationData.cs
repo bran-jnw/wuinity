@@ -11,7 +11,7 @@ using PREACT.Population;
 using PREACT.IO;
 using PREACT.Utility.Math;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class PopulationData
     {    

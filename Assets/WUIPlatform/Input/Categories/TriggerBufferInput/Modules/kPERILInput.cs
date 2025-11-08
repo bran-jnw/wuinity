@@ -14,55 +14,83 @@ namespace PREACT.IO
     {
         public float MidflameWindspeed = 0f;
         public bool CalculateROSFromBehave = true;
-        public string InitialFuelMoistureFile;
-        public string OutputName;
+        public string InitialFuelMoistureFile = string.Empty;
+        public string OutputName = string.Empty;
 
-        public static kPERILInput Parse(string[] inputLines, int startIndex)
+        public kPERILInput()
         {
-            int issues = 0;
-            kPERILInput newInput = new kPERILInput();
-            Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+        }
 
-            input = nameof(MidflameWindspeed);
-            if (inputToParse.TryGetValue(input, out userInput))
+        public static kPERILInput Parse(string[] inputLines, int startIndex, string rootFolder, out bool success)
+        {
+            kPERILInput newInput = new kPERILInput();
+            success = false;
+            int issues = 0;            
+            Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
+            string nameOfInput, userInput;
+
+            nameOfInput = nameof(MidflameWindspeed);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out newInput.MidflameWindspeed);
+                issues += float.TryParse(userInput, out newInput.MidflameWindspeed) ? 0 : 1;
+                if(issues > 0)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
             }
             else
             {
                 ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if(issues > 0)
+            {
+                success = false;
+                return newInput;
             }
 
-            input = nameof(CalculateROSFromBehave);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(CalculateROSFromBehave);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.CalculateROSFromBehave);
+                issues += bool.TryParse(userInput, out newInput.CalculateROSFromBehave) ? 0 : 1;
+                if (issues > 0)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, input + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
+                Engine.MESSAGE(null, Engine.LogType.Warning, nameOfInput + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
             }
 
-            input = nameof(InitialFuelMoistureFile);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(InitialFuelMoistureFile);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.InitialFuelMoistureFile= userInput;
+                newInput.InitialFuelMoistureFile = userInput;
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+            }
+            if(!success)
+            {
+                return newInput;
             }
 
-            input = nameof(OutputName);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(OutputName);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.OutputName = userInput;
             }
             else
             {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
+            success = true;
             return newInput;
         }
 

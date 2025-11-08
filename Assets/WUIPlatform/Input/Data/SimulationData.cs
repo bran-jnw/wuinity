@@ -9,7 +9,7 @@ using PREACT.Utility;
 using PREACT.Utility.Math;
 using PREACT.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class SimulationData
     {       
@@ -20,26 +20,36 @@ namespace PREACT.Runtime
         public LatLngUTMConverter.UTMResult UTMData { get => _utmData; }
 
 
-        public SimulationData(SimulationInput simulationInput) 
+        public SimulationData(Vector2d lowerLeftLatLon) 
         {
-            UpdateData(simulationInput);
+            UpdateData(lowerLeftLatLon);
         }
 
-        public void UpdateData(SimulationInput simulationInput)
+        public void UpdateData(string lat, string lon)
         {
-            _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(simulationInput.LowerLeftLatLon.x, simulationInput.LowerLeftLatLon.y);
+            Vector2d latLon;
+            if (double.TryParse(lat, out latLon.x) && double.TryParse(lon, out latLon.y))
+            {
+                _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);
+                _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
+            }            
+        }
+
+        public void UpdateData(Vector2d lowerLeftLatLon)
+        {
+            _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(lowerLeftLatLon.x, lowerLeftLatLon.y);
             _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
         }
 
         public Vector2d GetSimulationPosition(Vector2d latLon)
         {
-            LatLngUTMConverter.UTMResult utmPos = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);  
+            LatLngUTMConverter.UTMResult utmPos = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);
             return new Vector2d(utmPos.Easting, utmPos.Northing) - _utmOrigin;
         }
 
         public Vector2d GetWGS84FromSimulationPosition(Vector2d pos)
         {
-            pos += UTMOrigin;
+            pos += _utmOrigin;
             LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmData.ZoneLetter);
             return new Vector2d(wgs84.Lat, wgs84.Lng);
         }

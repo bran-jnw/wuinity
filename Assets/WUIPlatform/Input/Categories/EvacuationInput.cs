@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using PREACT.Runtime;
+using PREACT.IO;
 
 namespace PREACT.IO
 {
@@ -16,116 +16,153 @@ namespace PREACT.IO
     {
         private EvacuationData _data;
 
-        EvacuationData Data { get => _data; }
+        public EvacuationData Data { get => _data; }
         public float EvacuationOrderStart = 0.0f;
-        public string[] EvacuationDestinationFiles;
-        public string[] ResponseCurveFiles;        
-        public string[] EvacuationGroupFiles;        
-        public string EvacuationGroupsMapFile;
+        public List<string> EvacuationDestinationFiles = new List<string>();
+        public List<string> ResponseCurveFiles = new List<string>();      
+        public List<string> EvacuationGroupFiles = new List<string>();        
+        public string EvacuationGroupsMapFile = string.Empty;
         public float PaintCellSize = 200f;
         public bool UseTriggerBufferEvacuation = false;
-        public string TriggerBufferFile;
+        public string TriggerBufferFile = string.Empty;
 
-        public EvacuationInput(SimulationInput simulationInput, EventsInput eventsInput)
+        public EvacuationInput(SimulationInput simulationInput)
         {
-            _data = new EvacuationData(simulationInput, this, eventsInput);
+            _data = new EvacuationData(simulationInput, this);
         }
 
         public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, string rootFolder, out bool success)
         {
-            int issues = 0;
-            EvacuationInput newInput = new EvacuationInput(simulationInput, eventsInput);
+            EvacuationInput newInput = new EvacuationInput(simulationInput);
+            int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(EvacuationOrderStart);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //not critical
+            nameOfInput = nameof(EvacuationOrderStart);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.EvacuationOrderStart);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);            
+                PREACTInput.InputNotFoundMessage(nameOfInput);            
             }
 
-            input = nameof(EvacuationDestinationFiles);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //critical
+            nameOfInput = nameof(EvacuationDestinationFiles);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                newInput.EvacuationDestinationFiles = data;
-                PREACTInput.CheckIfFilesExists(input, data, rootFolder, ref issues, out success);
+                newInput.EvacuationDestinationFiles.AddRange(data);
+                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
             }
             else
             {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+            }
+            if(!success)
+            {
+                return newInput;
             }
 
-            input = nameof(EvacuationGroupFiles);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //critical
+            nameOfInput = nameof(EvacuationGroupFiles);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                newInput.EvacuationGroupFiles = data;
-                PREACTInput.CheckIfFilesExists(input, data, rootFolder, ref issues, out success);
+                newInput.EvacuationGroupFiles.AddRange(data);
+                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
             }
             else
             {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+            }
+            if(!success)
+            {
+                return newInput;
             }
 
-            input = nameof(EvacuationGroupsMapFile);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //critical sometimes
+            nameOfInput = nameof(EvacuationGroupsMapFile);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.EvacuationGroupsMapFile = userInput;
-                PREACTInput.CheckIfFileExist(input, userInput, rootFolder, ref issues, out success);
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if(!success && newInput.EvacuationGroupFiles.Count > 1)
+            {
+                return newInput;
             }
 
-            input = nameof(ResponseCurveFiles);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //critical
+            nameOfInput = nameof(ResponseCurveFiles);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                newInput.ResponseCurveFiles = data;
-                PREACTInput.CheckIfFilesExists(input, data, rootFolder, ref issues, out success);
+                newInput.ResponseCurveFiles.AddRange(data);
+                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
             }
             else
             {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+            }
+            if(!success)
+            {
+                return newInput;
             }
 
-            input = nameof(PaintCellSize);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(PaintCellSize);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.PaintCellSize);
             }
             else
             {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(UseTriggerBufferEvacuation);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //not critical
+            nameOfInput = nameof(UseTriggerBufferEvacuation);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.UseTriggerBufferEvacuation);
             }
             else
             {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(TriggerBufferFile);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //maybe critical
+            if(newInput.UseTriggerBufferEvacuation)
             {
-                newInput.TriggerBufferFile = userInput;
-            }
-            else
-            {
+                nameOfInput = nameof(TriggerBufferFile);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    newInput.TriggerBufferFile = userInput;
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if(!success)
+                {
+                    return newInput;
+                }
+
             }
 
             newInput._data.LoadAll(rootFolder, out success);
-
             return newInput;
         }
 

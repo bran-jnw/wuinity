@@ -13,12 +13,12 @@ namespace PREACT.IO
     [System.Serializable]
     public class AscImportInput
     {
-        public string RootFolder = "";
-        public string TimeOfArrivalFile = "";
-        public string RateOfSpreadFile = "";
-        public string SpreadDirectionFile = "";
-        public string FirelineIntensityFile = "";
-        public string WeatherStreamFile = "";
+        public string RootFolder = string.Empty;
+        public string TimeOfArrivalFile = string.Empty;
+        public string RateOfSpreadFile = string.Empty;
+        public string SpreadDirectionFile = string.Empty;
+        public string FirelineIntensityFile = string.Empty;
+        public string WeatherStreamFile = string.Empty;
 
         public AscImportInput()
         {
@@ -33,6 +33,7 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
+            //could be empty
             nameOfInput = nameof(RootFolder);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -40,7 +41,6 @@ namespace PREACT.IO
             }
             else
             {
-                ++issues;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
@@ -49,16 +49,16 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.TimeOfArrivalFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, ref issues, out success);
-                if(!success)
-                {
-                    return newInput;
-                }
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);                
             }
             else
             {
-                ++issues;
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return newInput;
             }
 
             //critical only for k-PERIL
@@ -66,16 +66,16 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.RateOfSpreadFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, ref issues, out success);
-                if (!success)
-                {
-                    return newInput;
-                }
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);                
             }
             else
             {
-                ++issues;
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return newInput;
             }
 
             //critical only for k-PERIL
@@ -83,16 +83,16 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.SpreadDirectionFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, ref issues, out success);
-                if (!success)
-                {
-                    return newInput;
-                }
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);                
             }
             else
             {
-                ++issues;
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return newInput;
             }
 
             //not critical
@@ -100,11 +100,10 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.FirelineIntensityFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, ref issues, out success);
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder,out success);
             }
             else
             {
-                ++issues;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
@@ -113,11 +112,10 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.WeatherStreamFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, ref issues, out success);
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {
-                ++issues;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 

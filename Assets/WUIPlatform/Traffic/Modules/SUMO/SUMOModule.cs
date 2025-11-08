@@ -37,13 +37,13 @@ namespace PREACT.Traffic
             try
             {
                 _vehicles = new Dictionary<string, SUMOVehicle>();
-                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Scenario.Input.Traffic.SumoInput.ConfigurationFile);
+                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
-                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Scenario.Input.Simulation.MaxSimTime.ToString() }));
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Input.Simulation.MaxSimTime.ToString() }));
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
-                Vector2d sumoUTM = new Vector2d(-_simulation.Scenario.Input.Traffic.SumoInput.UTMoffset.x, -_simulation.Scenario.Input.Traffic.SumoInput.UTMoffset.y);
-                _originOffset = sumoUTM - _simulation.Scenario.Data.Geo.UTMOrigin;
+                Vector2d sumoUTM = new Vector2d(-_simulation.Input.Traffic.SumoInput.UTMoffset.x, -_simulation.Input.Traffic.SumoInput.UTMoffset.y);
+                _originOffset = sumoUTM - _simulation.UTMOrigin;
 
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
@@ -57,8 +57,8 @@ namespace PREACT.Traffic
                 }
                 output.Add(header);
 
-                int xDim = Mathd.CeilToInt(_simulation.Scenario.Input.Simulation.DomainSize.x / _simulation.Scenario.Input.Traffic.SumoInput.OutputRasterSize);
-                int yDim = Mathd.CeilToInt(_simulation.Scenario.Input.Simulation.DomainSize.y / _simulation.Scenario.Input.Traffic.SumoInput.OutputRasterSize);
+                int xDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.x / _simulation.Input.Traffic.SumoInput.OutputRasterSize);
+                int yDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.y / _simulation.Input.Traffic.SumoInput.OutputRasterSize);
 
                 _maxUsage = 0f;
                 _usageMap = new float[xDim, yDim];
@@ -162,8 +162,8 @@ namespace PREACT.Traffic
         {
             Vector2d pos = vehicle.WorldPosition;
 
-            int xIndex = (int)(_usageMap.GetLength(0) * pos.x / _simulation.Scenario.Input.Simulation.DomainSize.x);
-            int yIndex = (int)(_usageMap.GetLength(1) * pos.y / _simulation.Scenario.Input.Simulation.DomainSize.y);
+            int xIndex = (int)(_usageMap.GetLength(0) * pos.x / _simulation.Input.Simulation.DomainSize.x);
+            int yIndex = (int)(_usageMap.GetLength(1) * pos.y / _simulation.Input.Simulation.DomainSize.y);
 
             //we can be outside as sometimes roads reach beyond simulation domain
             if (xIndex >= 0 && xIndex < _usageMap.GetLength(0) && yIndex >= 0 && yIndex < _usageMap.GetLength(1))
@@ -299,7 +299,7 @@ namespace PREACT.Traffic
             //arrival data to csv
             try
             {
-                filePath = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Scenario.Input.Simulation.Name + "_traffic_output_" + simulationIndex + ".csv");
+                filePath = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Name + "_traffic_output_" + simulationIndex + ".csv");
                 File.WriteAllLines(filePath, output);
             }
             catch(Exception e)
@@ -307,7 +307,7 @@ namespace PREACT.Traffic
                 Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
             }
 
-            filePath = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Scenario.Input.Simulation.Name + "_trafficData_" + simulationIndex + ".tiff");
+            filePath = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Name + "_trafficData_" + simulationIndex + ".tiff");
             SaveOutputMaps(filePath);
         }
 
@@ -323,15 +323,15 @@ namespace PREACT.Traffic
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
                 OSGeo.GDAL.Dataset output = driver.Create(filePath, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
 
-                double leftX = _simulation.Scenario.Data.Geo.UTMOrigin.x;
-                double lowerLeftY = _simulation.Scenario.Data.Geo.UTMOrigin.y;
-                double[] geoTransform = new double[] { leftX, _simulation.Scenario.Input.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Scenario.Input.Traffic.SumoInput.OutputRasterSize };
+                double leftX = _simulation.UTMOrigin.x;
+                double lowerLeftY = _simulation.UTMOrigin.y;
+                double[] geoTransform = new double[] { leftX, _simulation.Input.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Input.Traffic.SumoInput.OutputRasterSize };
                 output.SetGeoTransform(geoTransform);
 
                 OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
-                reference.SetProjCS("UTM " + _simulation.Scenario.Data.Geo.UTMData.Zona + " (WGS84)");
+                reference.SetProjCS("UTM " + _simulation.UTMData.Zona + " (WGS84)");
                 reference.SetWellKnownGeogCS("WGS84");
-                reference.SetUTM(_simulation.Scenario.Data.Geo.UTMData.ZoneNumber, _simulation.Scenario.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                reference.SetUTM(_simulation.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                 output.SetSpatialRef(reference);
 
                 //heat map
@@ -406,7 +406,7 @@ namespace PREACT.Traffic
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
-            if(!_simulation.Scenario.Input.Simulation.RunFireModule)
+            if(!_simulation.Input.Simulation.RunFireModule)
             {
                 Engine.MESSAGE(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
                 return;

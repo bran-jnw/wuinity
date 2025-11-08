@@ -18,7 +18,7 @@ namespace PREACT.IO
         {
         }
 
-        public static GlobalSmokeInput Parse(string[] inputLines, int startIndex, SmokeInput smokeInput, out bool success)
+        public static GlobalSmokeInput Parse(string[] inputLines, int startIndex, string rootFolder, SmokeInput smokeInput, out bool success)
         {
             GlobalSmokeInput newInput = new GlobalSmokeInput();
             if(smokeInput.SmokeModule != SmokeInput.SmokeModuleChoice.GlobalSmoke)
@@ -30,17 +30,23 @@ namespace PREACT.IO
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(ExtinctionFile);
-            if (inputToParse.TryGetValue(input, out userInput))
+            //critical
+            nameOfInput = nameof(ExtinctionFile);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.ExtinctionFile = userInput;
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if(!success)
+            {
+                return newInput;
             }
 
             success = true;

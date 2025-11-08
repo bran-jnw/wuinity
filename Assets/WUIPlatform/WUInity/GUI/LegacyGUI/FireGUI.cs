@@ -13,13 +13,13 @@ namespace WUInity.UI
         string lcpCurrentInfo;
         void FireMenu()
         {
-            FireInput fI = _engine.Input.Fire;
+            FireInput fI = _input.Fire;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             string lcpExistsStatus = "LCP file NOT found"; 
-            if(_engine.DataStatus.LcpLoaded)
+            if(_wuinityManager.Engine.DataStatus.LcpLoaded)
             {
                 lcpExistsStatus = "LCP file found";
             }
@@ -32,43 +32,43 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if(_engine.ScenarioData.Fire.LCPData != null)
+            if(_input.Fire.Data.LCPData != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP DATA");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _engine.ScenarioData.Fire.LCPData.GetCellCountX() + ", " + _engine.ScenarioData.Fire.LCPData.GetCellCountY());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _input.Fire.Data.LCPData.GetCellCountX() + ", " + _input.Fire.Data.LCPData.GetCellCountY());
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_engine.ScenarioData.Fire.LCPData.RasterCellResolutionX) + ", " + Unity_engine.Mathf.RoundToInt((float)_engine.ScenarioData.Fire.LCPData.RasterCellResolutionY));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_input.Fire.Data.LCPData.RasterCellResolutionX) + ", " + Mathf.RoundToInt((float)_input.Fire.Data.LCPData.RasterCellResolutionY));
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle LCP display"))
                 {
-                    _engine.ScenarioData.Fire.ToggleLCPDataPlane();   
+                    _wuinityManager.FireDataVisualizer.ToggleLCPDataPlane();   
                 }
                 ++buttonIndex;
 
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.FuelModel);
+                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.FuelModel);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
-                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Elevation);
-                    lcpCurrentInfo = "Elevation range: " + _engine.ScenarioData.Fire.LCPData.GetElevationMin() + "-" + _engine.ScenarioData.Fire.LCPData.GetElevationMax() + " [m]";
+                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Elevation);
+                    lcpCurrentInfo = "Elevation range: " + _input.Fire.Data.LCPData.GetElevationMin() + "-" + _input.Fire.Data.LCPData.GetElevationMax() + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
-                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Slope);
-                    lcpCurrentInfo = "Slope range: " + _engine.ScenarioData.Fire.LCPData.GetSlopeMin() + "-" + _engine.ScenarioData.Fire.LCPData.GetSlopeMax() + " [-]";
+                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Slope);
+                    lcpCurrentInfo = "Slope range: " + _input.Fire.Data.LCPData.GetSlopeMin() + "-" + _input.Fire.Data.LCPData.GetSlopeMax() + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
-                    _engine.ScenarioData.Fire.Visualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Aspect);
-                    lcpCurrentInfo = "Aspect range: " + _engine.ScenarioData.Fire.LCPData.GetAspectMin() + "-" + _engine.ScenarioData.Fire.LCPData.GetAspectMax() + " [°]";
+                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Aspect);
+                    lcpCurrentInfo = "Aspect range: " + _input.Fire.Data.LCPData.GetAspectMin() + "-" + _input.Fire.Data.LCPData.GetAspectMax() + " [°]";
                 }
                 ++buttonIndex;
 
@@ -76,7 +76,7 @@ namespace WUInity.UI
                 ++buttonIndex;
             }            
 
-            if (_engine.DataStatus.FuelModelsLoaded)
+            if (_wuinityManager.Engine.DataStatus.FuelModelsLoaded)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Custom fuel model set loaded");
                 ++buttonIndex;
@@ -89,12 +89,12 @@ namespace WUInity.UI
             ++buttonIndex;
 
             //edit maps
-            if (!WUInityManager.INSTANCE.IsPainterActive())
+            if (!_wuinityManager.IsPainterActive())
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit WUI area"))
                 {
                     fireEditMode = "WUI area";
-                    WUInityManager.INSTANCE.StartPainter(Painter.PaintMode.WUIArea);
+                    _wuinityManager.StartPainter(Painter.PaintMode.WUIArea);
                 }
                 ++buttonIndex;
 
@@ -106,7 +106,7 @@ namespace WUInity.UI
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit random ignition area"))
                     {
                         fireEditMode = "Random ignition";
-                        WUInityManager.INSTANCE.StartPainter(Painter.PaintMode.RandomIgnitionArea);
+                        _wuinityManager.StartPainter(Painter.PaintMode.RandomIgnitionArea);
                     }
                     ++buttonIndex;
                 //}
@@ -119,7 +119,7 @@ namespace WUInity.UI
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit initial ignition"))
                     {
                         fireEditMode = "Initial ignition";
-                        WUInityManager.INSTANCE.StartPainter(Painter.PaintMode.InitialIgnition);
+                        _wuinityManager.StartPainter(Painter.PaintMode.InitialIgnition);
                     }
                     ++buttonIndex;
                 //}      
@@ -131,19 +131,19 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add cells"))
                 {
-                    WUInityManager.Painter.SetWUIAreaColor(true);
+                    _wuinityManager.Painter.SetWUIAreaColor(true);
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove cells"))
                 {
-                    WUInityManager.Painter.SetWUIAreaColor(false);
+                    _wuinityManager.Painter.SetWUIAreaColor(false);
                 }
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
                 {                    
-                    WUInityManager.INSTANCE.StopPainter();
+                    _wuinityManager.StopPainter();
                     GraphicalFireInput.SaveGraphicalFireInput();
                 }
                 ++buttonIndex;                
@@ -153,7 +153,7 @@ namespace WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Farsite import"))
             {
                 menuChoice = ActiveMenu.Farsite;
-                WUInityManager.INSTANCE.SetSampleMode(WUInityManager.DataSampleMode.Farsite);
+                _wuinityManager.SetSampleMode(DataSampleMode.Farsite);
             }
             ++buttonIndex;
         }
@@ -167,7 +167,7 @@ namespace WUInity.UI
 
         void LoadLCP(string[] paths)
         {
-            _engine.ScenarioData.Fire.LoadLCPFile(paths[0], true);
+            _input.Fire.Data.LoadLCPFile(paths[0], true);
         }
 
         void OpenLoadFuelsModelFile()
@@ -179,12 +179,12 @@ namespace WUInity.UI
 
         void LoadFuelModelsFile(string[] paths)
         {
-            _engine.ScenarioData.Fire.LoadFuelModelsInput(paths[0], true);
+            _input.Fire.Data.LoadFuelModelsInput(paths[0], true);
         }
 
         void ResetFireGUI()
         {
-            _engine.ScenarioData.Fire.SetLCPDataPlane(false);
+            _wuinityManager.Fir.SetLCPDataPlane(false);
         }
     }
 }

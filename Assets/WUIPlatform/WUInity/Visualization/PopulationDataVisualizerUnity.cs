@@ -8,10 +8,11 @@
 using UnityEngine;
 using PREACT.Population;
 using PREACT;
+using PREACT.Runtime;
 
-namespace WUInity.Population
+namespace WUInity.Visualization
 {
-    public class PopulationVisualizerUnity : PopulationVisualizer
+    public class PopulationDataVisualizerUnity : PopulationVisualizer
     {
         WUInityManager _manager;
         private GameObject _LocalGPWDataPlane;
@@ -20,21 +21,16 @@ namespace WUInity.Population
         private Texture2D _populationMapTexture;
         private Texture2D _populationMapMaskTexture;
         private Texture2D _localGPWTexture;
-
-        private LocalGPWData _localGPWData;
-        private PopulationMap _populationMap;
-
-        public LocalGPWData LocalGPWData { get => _localGPWData; }        
-        public PopulationMap PopulationMap { get => _populationMap; }
+        
         public GameObject DataPlane
         {
             get
             {
                 if (_LocalGPWDataPlane == null)
                 {
-                    if (_localGPWData != null)
+                    if (_workingData.LocalGPWData != null)
                     {
-                        CreateLocalGPWDataPlane(_localGPWData);
+                        CreateLocalGPWDataPlane(_workingData.LocalGPWData);
                     }
                     else
                     {
@@ -45,10 +41,10 @@ namespace WUInity.Population
                 return _LocalGPWDataPlane;
             }
         }
-        
-        public PopulationVisualizerUnity(WUInityManager manager)
+
+        public PopulationDataVisualizerUnity(WorkingData workingData) : base(workingData)
         { 
-            _manager = manager;
+
         }
 
         public override bool IsDataPlaneActive()
@@ -80,12 +76,12 @@ namespace WUInity.Population
 
         public override void DisplayLocalGPW(LocalGPWData data)
         {
-            if (_localGPWData == null || data != _localGPWData)
+            if (_workingData.LocalGPWData == null || data != _workingData.LocalGPWData)
             {
                 _localGPWTexture = new Texture2D(data.CellCount.x, data.CellCount.y);
                 _localGPWTexture.filterMode = FilterMode.Point;
             }
-            _localGPWData = data;
+            _workingData.LocalGPWData = data;
             
             for (int y = 0; y < data.CellCount.y; y++)
             {
@@ -104,12 +100,12 @@ namespace WUInity.Population
 
         public override void DisplayPopulationMap(PopulationMap data)
         {
-            if(_populationMapTexture == null || data != _populationMap)
+            if(_populationMapTexture == null || data != _workingData.PopulationMap)
             {
                 _populationMapTexture = new Texture2D(data._cells.x, data._cells.y);
                 _populationMapTexture.filterMode = FilterMode.Point;
             }
-            _populationMap = data;
+            //_workingData.PopulationMap = data;
 
             for (int y = 0; y < data._cells.y; y++)
             {

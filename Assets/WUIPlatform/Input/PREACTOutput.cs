@@ -19,6 +19,8 @@ namespace PREACT.IO
         public EvacOutput Evac { get => _evac; }
         private List<float> _averageEvacTimes;
 
+        Dictionary<int, int[,]> _triggerBuffers = new Dictionary<int, int[,]>();
+
 
         public PREACTOutput()
         {
@@ -34,6 +36,42 @@ namespace PREACT.IO
                 _totalAverageEvacTime += _averageEvacTimes[i];
             }
             _totalAverageEvacTime /= _averageEvacTimes.Count;
+        }
+
+        public void AddTriggerBufferOutput(int[,] triggerBufferOutput, int simulationIndex)
+        {
+            _triggerBuffers.Add(simulationIndex, triggerBufferOutput);
+        }
+
+        public int[,] GetTriggerBufferOutput(int simulationIndex, out bool success)
+        {
+            int[,] buffer = null;
+            success = _triggerBuffers.TryGetValue(simulationIndex, out buffer);
+            return buffer;
+        }
+
+        public void CalculateAverageTriggerBuffer()
+        {
+            float bufferCountInverse = 1f / _triggerBuffers.Count;
+            float[,] perilOutput = null;         
+            foreach (KeyValuePair<int, int[,]> buffer in _triggerBuffers)
+            {
+                int xDim = buffer.Value.GetLength(0);
+                int yDim = buffer.Value.GetLength(1);
+
+                if(perilOutput == null)
+                {
+                    perilOutput = new float[xDim, yDim];
+                }
+
+                for(int y = 0; y < yDim; ++y)
+                {
+                    for (int x = 0; x < xDim; ++x)
+                    {
+                        perilOutput[x, y] += buffer.Value[x, y] * bufferCountInverse;
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -36,7 +36,7 @@ namespace PREACT.IO
                 Map = new MapInput();   
                 Population = new PopulationInput();
                 Events = new EventsInput();
-                Evacuation = new EvacuationInput(Simulation, Events);
+                Evacuation = new EvacuationInput(Simulation);
                 Pedestrian = new PedestrianInput();
                 Traffic = new TrafficInput();                
                 Fire = new FireInput();            
@@ -165,7 +165,7 @@ namespace PREACT.IO
             if (headerLineIndex.TryGetValue(input, out lineindex))
             {
                 ReadingInputMessage(input);
-                newInput.Events = EventsInput.Parse(inputLines, lineindex);
+                newInput.Events = EventsInput.Parse(inputLines, lineindex, rootFolder, out success);
             }
             else
             {
@@ -263,7 +263,7 @@ namespace PREACT.IO
             if (headerLineIndex.TryGetValue(input, out lineindex))
             {
                 ReadingInputMessage(input);
-                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex, headerLineIndex);
+                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex, headerLineIndex, rootFolder, out success);
             }
             else
             {
@@ -345,7 +345,7 @@ namespace PREACT.IO
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, nameOfInput + " was not found, defaults have been used.");
+                Engine.MESSAGE(null, Engine.LogType.InputError, nameOfInput + " was not found, default value has been used.");
             }                
         }
 

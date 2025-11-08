@@ -25,7 +25,7 @@ namespace PREACT.Pedestrian
         public bool isMoving;
         public float walkingDistance;
 
-        Runtime.PopulationData.HouseholdData _houseHoldData;
+        IO.PopulationData.HouseholdData _houseHoldData;
         Vector2 homePosition, carPosition;
         int _cellIndex;
 
@@ -38,10 +38,10 @@ namespace PREACT.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(Runtime.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
+        public MacroHousehold(IO.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
         {
-            PopulationInput popInput = simulation.Scenario.Input.Population;
-            MacroHouseholdSimInput houseInput = simulation.Scenario.Input.Pedestrian.MacroHouseholdSimInput;
+            PopulationInput popInput = simulation.Input.Population;
+            MacroHouseholdSimInput houseInput = simulation.Input.Pedestrian.MacroHouseholdSimInput;
 
             _houseHoldData = householdData;
             _cellIndex = cellIndex;
@@ -59,9 +59,9 @@ namespace PREACT.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = simulation.Scenario.Data.Geo.GetSimulationPosition(householdData.originLatLon);
+            Vector2d temp = simulation.GetSimulationPosition(householdData.originLatLon);
             homePosition = new Vector2((float)temp.x, (float)temp.y);           
-            temp = simulation.Scenario.Data.Geo.GetSimulationPosition(householdData.roadAccessLatLon);
+            temp = simulation.GetSimulationPosition(householdData.roadAccessLatLon);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
             float travelTime = walkingDistance / walkingSpeed;

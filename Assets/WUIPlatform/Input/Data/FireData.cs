@@ -11,7 +11,7 @@ using PREACT.Visualization;
 using PREACT.IO;
 using PREACT.Utility.Math;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class FireData
     {
@@ -27,8 +27,7 @@ namespace PREACT.Runtime
         public bool[] InitialIgnition;
         public bool[] ManualTriggerBuffer;
 
-        private FireDataVisualizer _visualizer;
-        public FireDataVisualizer Visualizer {  get => _visualizer; }         
+               
         public LCPData LCPData { get => _lcpData; }        
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
         public IgnitionPoint[] IgnitionPoints { get => _ignitionPoints; }       
@@ -38,11 +37,6 @@ namespace PREACT.Runtime
 
         public FireData()
         {
-            #if USING_UNITY
-            _visualizer = new FireDataVisualizerUnity(this);
-            #else
-
-            #endif
         }
 
         public void LoadAll(SimulationInput simulationInput, FireInput fireInput, string rootFolder, out bool success)
@@ -216,16 +210,6 @@ namespace PREACT.Runtime
                 triggerBufferIndices = new bool[xCount * yCount];
             }
             ManualTriggerBuffer = triggerBufferIndices;
-        }
-
-        public void ToggleLCPDataPlane()
-        {
-            _visualizer.ToggleLCPDataPlane();
-        }
-
-        public void SetLCPDataPlane(bool setActive)
-        {
-            _visualizer.SetLCPDataPlane(setActive);
         }
     }
 }

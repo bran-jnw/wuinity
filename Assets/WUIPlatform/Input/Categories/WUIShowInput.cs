@@ -17,39 +17,55 @@ namespace PREACT.IO
         public int WuiShowServerPort = 9023;
         public float WuiShowDeltaTime = 1f;
 
-        /*private static readonly string sendDataString = "sendDataToWUIShow";
-        private static readonly string serverIPString = "wuiShowServerIP";
-        private static readonly string serverPortString = "wuiShowServerPort";
-        private static readonly string deltaTimeString = "wuiShowDeltaTime";*/
+
+        public WUIShowInput()
+        {
+        }
 
         public static WUIShowInput Parse(string[] inputLines, int startIndex)
         {
             WUIShowInput newInput = new WUIShowInput();
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(SendDataToWUIShow);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(SendDataToWUIShow);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.SendDataToWUIShow);
             }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
 
-            input = nameof(WuiShowServerIP);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(WuiShowServerIP);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.WuiShowServerIP = userInput;
             }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
 
-            input = nameof(WuiShowServerPort);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(WuiShowServerPort);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 int.TryParse(userInput, out newInput.WuiShowServerPort);
             }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
 
-            input = nameof(WuiShowDeltaTime);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(WuiShowDeltaTime);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.WuiShowDeltaTime);
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             return newInput;

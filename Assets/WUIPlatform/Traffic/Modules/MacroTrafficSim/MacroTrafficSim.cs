@@ -256,7 +256,7 @@ namespace PREACT.Traffic
                             vehicle.MoveCar(currentTime, deltaTime, speed);
                             //now we need to add to our temporary road segment dictionary since otherwise we might overfill any new segment
                             int hash = vehicle.roadSegmentHash;
-                            nextSegment = new RoadSegment(vehicle, this, _simulation);
+                            nextSegment = new RoadSegment(vehicle, _simulation);
                             newRoadSegments.Add(hash, nextSegment);
                         }
                     }
@@ -294,7 +294,7 @@ namespace PREACT.Traffic
                 else
                 {
                     //new section of road so can add without issues, create new traffic density in case any other car wants to get in on the same road
-                    roadSegments.Add(hash, new RoadSegment(car, this));
+                    roadSegments.Add(hash, new RoadSegment(car, _simulation));
                     carsOnHold.Remove(car);
                     carsInSystem.Add(car);
                 }
@@ -364,17 +364,17 @@ namespace PREACT.Traffic
                 }
                 else
                 {
-                    tDD.Add(hash, new RoadSegment(c, this));
+                    tDD.Add(hash, new RoadSegment(c, _simulation));
                 }
             }
             return tDD;
         }
                
 
-        public float GetMaxCapacity(string highway)
+        public static float GetMaxCapacity(string highway, Simulation simulation)
         {
             float capacity = 50.0f;
-            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = simulation.Input.Traffic.Data.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -387,10 +387,10 @@ namespace PREACT.Traffic
         }
 
         //based on https://github.com/itinero/routing/blob/1764afc75db43a1459789592de175283f642123f/test/Itinero.Test/test-data/profiles/osm/car.lua
-        public float GetSpeedLimit(string highway)
+        public static float GetSpeedLimit(string highway, Simulation simulation)
         {
             float speed = RoadTypeData.default_value.speedLimit;
-            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = simulation.Input.Traffic.Data.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if(highway == r[i].name)
@@ -403,10 +403,10 @@ namespace PREACT.Traffic
         }
 
         //https://wiki.openstreetmap.org/wiki/Key:lanes#Assumptions
-        public int GetNumberOfLanes(string highway)
+        public static int GetNumberOfLanes(string highway, Simulation simulation)
         {
             int lanes = RoadTypeData.default_value.lanes;
-            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = simulation.Input.Traffic.Data.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -418,10 +418,10 @@ namespace PREACT.Traffic
             return lanes;
         }
 
-        public bool CanReverseLanes(string highway)
+        public static bool CanReverseLanes(string highway, Simulation simulation)
         {
             bool canReverseLanes = RoadTypeData.default_value.canBeReversed;
-            RoadData[] r = _simulation.RuntimeData.Traffic.RoadTypeData.roadData;
+            RoadData[] r = simulation.Input.Traffic.Data.RoadTypeData.roadData;
             for (int i = 0; i < r.Length; i++)
             {
                 if (highway == r[i].name)
@@ -433,8 +433,9 @@ namespace PREACT.Traffic
             return canReverseLanes;
         }
 
-        public override void SaveToFile(string filePath)
+        public override void SaveToFile(int simulationIndex)
         {            
+            string filePath = System.IO.Path.Combine(_simulation.Engine.OutputFolder, "MacroTrafficSim_output_" + simulationIndex + ".csv");
             System.IO.File.WriteAllLines(filePath, output);
         }
 

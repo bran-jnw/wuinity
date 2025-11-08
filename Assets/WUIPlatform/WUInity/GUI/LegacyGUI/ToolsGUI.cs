@@ -11,16 +11,12 @@ namespace WUInity.UI
     {
         private bool populationMenuDirty = true;
         private bool _reScaling = false, _filteringOSM = false, _creatingPopulationMap = false;
-        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize;
-
-        private bool HaveLocalGPW { get => _engine.ScenarioData.Population.LocalGPWData.HavedData; }
-        private bool HavePopulationMap { get => _engine.ScenarioData.Population.PopulationMap.HaveData; }
-        private bool PopulationMapCorrectedForRoadAccess { get => _engine.ScenarioData.Population.PopulationMap.CorrectedForRoadAccess; }
-        private bool HaveRouterDb { get => _engine.ScenarioData.Routing.RouterDb == null ? false : true; }
+        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _minHouseholdSize, _maxHouseholdSize, _latitude, _longitude;
+        bool success;
 
         void ToolsMenu()
         {
-            PopulationInput popIn = _engine.Input.Population;
+            PopulationInput popIn = _input.Population;
             if (populationMenuDirty)
             {
                 populationMenuDirty = false;
@@ -40,14 +36,14 @@ namespace WUInity.UI
             //GPW stuff
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW tools");
             ++buttonIndex;
-            if(_engine.ScenarioData.Population.LocalGPWData.HavedData)
+            if(_workingData.HaveLocalGPW)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _engine.ScenarioData.Population.LocalGPWData.totalPopulation);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _workingData.LocalGPWData.TotalPopulation);
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
                 {
                     _wuinityManager.SetSampleMode(DataSampleMode.LocalGPW);
-                    _engine.ScenarioData.Population.Visualizer.ToggleLocalGPWVisibility();
+                    _wuinityManager.PopulationDataVisualizer.ToggleLocalGPWVisibility();
                 }
                 ++buttonIndex;
             }
@@ -81,9 +77,9 @@ namespace WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population map tools");
             ++buttonIndex;
-            if (HavePopulationMap)
+            if (_workingData.HavePopulationMap)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _engine.ScenarioData.Population.PopulationMap._totalPopulation);
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _workingData.PopulationMap.TotalPopulation);
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide population map"))
                 {
@@ -127,7 +123,7 @@ namespace WUInity.UI
                 OpenLoadPopulationMap();
             }
             ++buttonIndex;
-            if (HavePopulationMap)
+            if (_workingData.HavePopulationMap)
             {               
                 //re-scaling
                 if (!_reScaling)
@@ -146,7 +142,7 @@ namespace WUInity.UI
                     ++buttonIndex;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply re-scale"))
                     {
-                        PREACT.Tools.PopulationTools.ScaleTotalPopulation(_engine, _desiredPopulation);
+                        PopulationTools.ScaleTotalPopulation(_workingData.PopulationMap, _desiredPopulation, out success);
                         _wuinityManager.DisplayPopulationMap();
                         _reScaling = false;
                     }                    
@@ -167,7 +163,7 @@ namespace WUInity.UI
             }
 
             //paint population mask
-            if(HavePopulationMap)
+            if(_workingData.HavePopulationMap)
             {
                 if (!_wuinityManager.IsPainterActive())
                 {
@@ -212,13 +208,29 @@ namespace WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population tools");
             ++buttonIndex;
-            if(HavePopulationMap && PopulationMapCorrectedForRoadAccess)
+            if(_workingData.HavePopulationMap && _workingData.PopulationMapCorrectedForRoadAccess)
             {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min/max household size");
+                ++buttonIndex;
+                _minHouseholdSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _minHouseholdSize);
+                _maxHouseholdSize = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _maxHouseholdSize);
+                ++buttonIndex;
+
+                if(_input == null)
+                {
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
+                    ++buttonIndex;
+                    _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
+                    _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
+                    ++buttonIndex;
+                }                
+
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population"))
                 {
                     OpenCreatePopulation();
                 }
                 ++buttonIndex;
+
             }
             else
             {
@@ -263,11 +275,11 @@ namespace WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Trigger buffer tools");
             ++buttonIndex;
-            if(_engine.Input.TriggerBuffer.kPERILInput != null)
+            if(_input.TriggerBuffer.kPERILInput != null)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run k-PERIL"))
                 {
-                    float[,] tB = PREACT.WUIPlatformPERIL.RunPERIL(_engine.Input.TriggerBuffer.kPERILInput.MidflameWindspeed);
+                    //float[,] tB = PREACT.kPERIL.RunPERIL(_input.TriggerBuffer.kPERILInput.MidflameWindspeed);
                     //_engine.Simulation.SetTriggerBufferData(tB);
                     //_engine.Simulation.DisplayTriggerBuffer();
                 }
@@ -277,18 +289,18 @@ namespace WUInity.UI
         //GPW
         void OpenCreateAndSaveLocalGPW()
         {
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(CreateAndSaveLocalGPW, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Select global GPW folder", "Set");
         }
         void CreateAndSaveLocalGPW(string[] paths)
         {
-            PopulationTools.CreateAndSaveLocalGPWData(_engine, paths[0]);
-            _engine.ScenarioData.Population.Visualizer.SetDataPlane(true);
+            PopulationTools.CreateLocalGPWData(_input, paths[0], out success);
+            _wuinityManager.PopulationDataVisualizer.SetDataPlane(true);
         }
         void OpenLoadLocalGPW()
         {
             FileBrowser.SetFilters(false, gpwFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(LoadLocalGPW, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select local GPW data", "Set");
         }
         void LoadLocalGPW(string[] paths)
@@ -297,7 +309,8 @@ namespace WUInity.UI
             LocalGPWData localGPWData = PopulationTools.LoadLocalGPWData(paths[0], out success);
             if(success)
             {
-                _wuinityManager.PopulationVisualizer.DisplayLocalGPWTexture(localGPWData);
+                _wuinityManager.PopulationDataVisualizer.DisplayLocalGPW(localGPWData);
+                _workingData.LocalGPWData = localGPWData;
             }
         }
 
@@ -305,12 +318,13 @@ namespace WUInity.UI
         void OpenCreateAndSavePopulationMap()
         {
             FileBrowser.SetFilters(false, gpwFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(CreateAndSavePopulationMap, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select local GPW data", "Set");
         }        
         void CreateAndSavePopulationMap(string[] paths)
         {
-            PopulationTools.CreateAndSavePopulationMap(_engine, paths[0], _populationMapCellSize);
+            string filePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".csv");
+            PopulationTools.CreateAndSavePopulationMap(paths[0], _populationMapCellSize, filePath, out success);
             _wuinityManager.DisplayPopulationMap();
             _wuinityManager.SetDomainDataPlane(true);           
         }
@@ -322,7 +336,7 @@ namespace WUInity.UI
         }
         void LoadPopulationMap(string[] paths)
         {
-            PopulationTools.LoadPopulationMap(_engine, paths[0]);
+            PopulationTools.LoadPopulationMap(paths[0], out success);
             _wuinityManager.DisplayPopulationMap();
             _wuinityManager.SetDomainDataPlane(true);
         }
@@ -336,7 +350,7 @@ namespace WUInity.UI
         }
         void FilterOSM(string[] paths)
         {
-            PopulationTools.FilterOsmData(_engine, paths[0], _xBorder, _yBorder);            
+            PopulationTools.FilterOsmData(_input, paths[0], _xBorder, _yBorder);            
         }
 
         //Router Db
@@ -344,14 +358,14 @@ namespace WUInity.UI
         void OpenCreateAndSaveRouterDb()
         {
             FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(OpenSelectNewRouterDbFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
         }
         void OpenSelectNewRouterDbFile(string[] paths)
         {
             _firstFileInSequence = paths[0];
             FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify filename of new routerDb", "Set");
         }
         void CreateAndSaveRouterDb(string[] paths)
@@ -361,7 +375,7 @@ namespace WUInity.UI
         /*void OpenLoadRouterDb()
         {
             FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(WUI_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(WUI_input.RootFolder);
             FileBrowser.ShowLoadDialog(LoadRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select local GPW data", "Set");
         }
         void LoadRouterDb(string[] paths)
@@ -373,52 +387,60 @@ namespace WUInity.UI
         void OpenRoadAccessCorrectPopulationMap()
         {
             FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(RoadAccessCorrectPopulationMap, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select routerDb to use for road access correction", "Set");
         }
         void RoadAccessCorrectPopulationMap(string[] paths)
         {
-            PopulationTools.RoadAccessCorrectPopulationMap(_engine, paths[0]);
+            PopulationTools.RoadAccessCorrectPopulationMap(_workingData.PopulationMap, _workingData.RouterDb, paths[0], out success);
         }
 
         void OpenApplyMaskOnPopulationMap()
         {
             FileBrowser.SetFilters(false, maskFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(ApplyPopulationMapMask, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select population map mask to apply", "Set");
         }
         void ApplyPopulationMapMask(string[] paths)
         {
-            PopulationTools.ApplyPopulationMapMask(_engine, paths[0]);
+            PopulationTools.ApplyPopulationMapMask(_workingData.PopulationMap, paths[0]);
         }
 
         //create population
         /*void OpenCreatePopulation()
         {
             FileBrowser.SetFilters(false, populationMapFilter);
-            string initialPath = Path.GetDirectoryName(WUI_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(WUI_input.RootFolder);
             FileBrowser.ShowLoadDialog(CreatePopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select routerDb to use for road access correction", "Set");
         }*/
         private void OpenCreatePopulation() //string[] paths
         {
             FileBrowser.SetFilters(false, csvFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(CreatePopulation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify population output file", "Create");
         }
         private void CreatePopulation(string[] paths) //string[] paths
         {
-            PopulationTools.CreatePopulation(_engine, paths[0]);
+            if(_input == null)
+            {
+                _workingData.SimulationData.UpdateData(_latitude, _longitude);
+                PopulationTools.CreatePopulation(_minHouseholdSize, _maxHouseholdSize, _workingData.PopulationMap, _workingData.SimulationData, paths[0], out success);
+            }
+            else
+            {
+                PopulationTools.CreatePopulation(_minHouseholdSize, _maxHouseholdSize, _workingData.PopulationMap, _input.Simulation.Data, paths[0], out success);
+            }                
         }
 
         private void OpenSavePopulationMask() //string[] paths
         {
             FileBrowser.SetFilters(false, maskFilter);
-            string initialPath = Path.GetDirectoryName(_engine.WorkingFolder);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(SavePopulationMask, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify population output file", "Create");
         }
         private void SavePopulationMask(string[] paths) //string[] paths
         {
-            PopulationTools.SavePopulationMask(_engine, paths[0]);
+            PopulationTools.SavePopulationMask(_workingData.PopulationMap, paths[0]);
         }
         
     }

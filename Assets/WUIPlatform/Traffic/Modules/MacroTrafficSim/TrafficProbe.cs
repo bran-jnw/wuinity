@@ -7,7 +7,7 @@
 
 namespace PREACT.Traffic
 {
-    public struct TrafficProbe
+    public class TrafficProbe
     {
         public int nodeID;
 

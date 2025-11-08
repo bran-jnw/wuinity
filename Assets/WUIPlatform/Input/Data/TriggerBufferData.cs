@@ -2,7 +2,7 @@ using PREACT.IO;
 using PREACT.Fire;
 using System.IO;
 
-namespace PREACT.Runtime
+namespace PREACT.IO
 {
     public class TriggerBufferData
     {

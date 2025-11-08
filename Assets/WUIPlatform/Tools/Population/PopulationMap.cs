@@ -7,24 +7,27 @@
 
 using System.Collections.Generic;
 using System.IO;
-using PREACT.Runtime;
+using PREACT.IO;
 using PREACT.Utility.Math;
 
 namespace PREACT.Population
 {
     public class PopulationMap
     {
+        //TODO
         public Vector2d _lowerLeftLatLong;
         public Vector2d _size;
         public Vector2int _cells;
         public float _cellSize;
-        public int _totalPopulation;
+        private int _totalPopulation;
         public int _totalActiveCells;
         public int[] _cellPopulations;
         public Vector2d[] _cellRoadAccessLatLon;
         public  double _cellArea;
         private bool[] _mask;
         public bool[] Mask {  get =>_mask; }
+
+        public int TotalPopulation { get => _totalPopulation; }
 
 
         //not saved
@@ -70,7 +73,7 @@ namespace PREACT.Population
             return _mask[x + y * _cells.x];
         }
 
-        public void CreateFromLocalGPW(IO.PREACTInput input, LocalGPWData localGPWData, float cellSize, out bool success)
+        public void CreateFromLocalGPW(PREACTInput input, LocalGPWData localGPWData, float cellSize, out bool success)
         {
             success = false;
 
@@ -128,7 +131,7 @@ namespace PREACT.Population
             Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
-        public void UpdatePopulationMapBasedOnRoadAccess(SimulationData geoData, Itinero.RouterDb routerDb)
+        public void UpdatePopulationMapBasedOnRoadAccess(SimulationData simulationData, Itinero.RouterDb routerDb)
         {
             int stuckPeople = 0;
             Itinero.Router router = new Itinero.Router(routerDb);
@@ -139,7 +142,7 @@ namespace PREACT.Population
                     int yIndex = i / _cells.x;
                     int xIndex = i - yIndex * _cells.x;
                     Vector2d cellCenterPos = new Vector2d((xIndex + 0.5f) * _cellSize, (yIndex + 0.5) * _cellSize);
-                    Vector2d coord = geoData.GetWGS84FromSimulationPosition(cellCenterPos);
+                    Vector2d coord = simulationData.GetWGS84FromSimulationPosition(cellCenterPos);
                     Itinero.RouterPoint p = Traffic.RouteCreator.GetValidRouterPoint(router, coord, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), _cellSize);
                     if(p != null)
                     {
@@ -436,7 +439,7 @@ namespace PREACT.Population
             }
         }
 
-        public void CreatePopulation(IO.PREACTInput input, SimulationData geoData, string file, out bool success)
+        public void CreatePopulation(int minHouseholdSize, int maxHouseholdSize, SimulationData simulationData, string file, out bool success)
         {
             success = false;
 
@@ -452,7 +455,7 @@ namespace PREACT.Population
                         List<int> householdCounts = new List<int>();
                         while (peopleWithoutHouseHold > 0)
                         {
-                            int p = Randomf.Range(input.Population.MinHouseholdSize, input.Population.MaxHouseholdSize);
+                            int p = Randomf.Range(minHouseholdSize, maxHouseholdSize);
                             if (p > peopleWithoutHouseHold)
                             {
                                 p = peopleWithoutHouseHold;
@@ -469,7 +472,7 @@ namespace PREACT.Population
                             Vector2d householdStartPos = nodeCenter;
                             householdStartPos.x += _cellSize * Randomf.Range(-0.5f, 0.5f);
                             householdStartPos.y += _cellSize * Randomf.Range(-0.5f, 0.5f);
-                            Vector2d householdStartLatLon = geoData.GetWGS84FromSimulationPosition(householdStartPos);
+                            Vector2d householdStartLatLon = simulationData.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;
                             double goalLon = _cellRoadAccessLatLon[i].y;

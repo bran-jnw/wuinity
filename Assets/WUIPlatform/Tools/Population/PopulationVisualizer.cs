@@ -11,9 +11,10 @@ namespace PREACT.Population
 {
     public abstract class PopulationVisualizer
     {
-        public PopulationVisualizer()
+        protected WorkingData _workingData;
+        public PopulationVisualizer(WorkingData workingData)
         {
-
+            _workingData = workingData;
         }
 
         public abstract void SetDataPlane(bool setActive);

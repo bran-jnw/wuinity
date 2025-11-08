@@ -5,7 +5,6 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Numerics;
 using System.Collections.Generic;
 
 namespace PREACT.IO
@@ -15,21 +14,28 @@ namespace PREACT.IO
     {
         public float MixingLayerHeight = 250.0f;
 
-        public static AdvectDiffuseInput Parse(string[] inputLines, int startIndex)
+        public static AdvectDiffuseInput Parse(string[] inputLines, int startIndex, out bool success)
         {
-            int issues = 0;
             AdvectDiffuseInput newInput = new AdvectDiffuseInput();
+            success = false;
+            int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
             input = nameof(MixingLayerHeight);
             if (inputToParse.TryGetValue(input, out userInput))
             {
-                float.TryParse(userInput, out newInput.MixingLayerHeight);
+                issues += float.TryParse(userInput, out newInput.MixingLayerHeight) ? 0 : 1;
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                ++issues;
+                PREACTInput.InputNotFoundMessage(input, true);
+            }
+            if(issues > 0)
+            {
+                success = false;
+                return newInput;
             }
 
             return newInput;

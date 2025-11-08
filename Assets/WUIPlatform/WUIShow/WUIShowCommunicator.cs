@@ -18,7 +18,7 @@ namespace PREACT.Visualization
         private UdpClient udpClient;
         private TcpServer tcpServer;
 
-        private Dictionary<uint, Vector2d> previouslySentPositions;
+        private Dictionary<uint, Vector2d> previouslySentVehiclePositions;
         private Queue<Traffic.TrafficModuleVehicle> _newVehiclesNotSent;
         private int numberOfBlockedCars = 0;
         private double origoLongitude;
@@ -40,15 +40,19 @@ namespace PREACT.Visualization
 
             this.offset = _engine.Simulation.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
-            previouslySentPositions = new Dictionary<uint, Vector2d>();
+            previouslySentVehiclePositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
             
         }
 
-        private byte[] GetTriggerBufferData()
+        private byte[] GetTriggerBufferData(out bool success)
         {
             byte[] result = null;
-            float[,] data = _engine.Simulation.GetTriggerBufferData();
+            int[,] data = _engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success);
+            if (!success)
+            {
+                return result;
+            }
 
             if (data != null)
             {
@@ -97,18 +101,18 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.Simulation.Scenario.Data.Fire.LCPData.GetLCPSizeX();
+                double xSize = _engine.Simulation.Input.Fire.Data.LCPData.GetLCPSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.Simulation.Scenario.Data.Fire.LCPData.GetLCPSizeY();
+                double ySize = _engine.Simulation.Input.Fire.Data.LCPData.GetLCPSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = _engine.Simulation.Scenario.Data.Geo.UTMOrigin + _engine.Simulation.Scenario.Data.Fire.LCPData.OriginOffset;
-                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Simulation.Scenario.Input.Simulation.LowerLeftLatLon.x, _engine.Simulation.Scenario.Input.Simulation.LowerLeftLatLon.y);
+                Vector2d lcpOriginUTM = _engine.Simulation.UTMOrigin + _engine.Simulation.Input.Fire.Data.LCPData.OriginOffset;
+                var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Simulation.Input.Simulation.LowerLeftLatLon.x, _engine.Simulation.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;
                 double lon = lcpOriginWgs84.Lng;
@@ -181,6 +185,7 @@ namespace PREACT.Visualization
         public byte[] HandleTcpRequest(string request)
         {
             request = request.TrimEnd('\0');
+            bool success = false;
             string headerMessage = "UnknownRequest"; //must not exceed 24 characters
             byte[] data = new byte[0];
             if (request == "GetOrigin")
@@ -203,7 +208,7 @@ namespace PREACT.Visualization
             else if (request == "TriggerBuffer")
             {
                 headerMessage = "int, int, float[]";
-                data = GetTriggerBufferData();
+                data = GetTriggerBufferData(out success);
             }
             else if(request == "GetNewVehicles")
             {
@@ -259,7 +264,7 @@ namespace PREACT.Visualization
                 return;
             }
 
-            if (currentTime > lastTime + _engine.Simulation.Scenario.Input.WUIShow.WuiShowDeltaTime)
+            if (currentTime > lastTime + _engine.Simulation.Input.WUIShow.WuiShowDeltaTime)
             {
                 byte[] sendBytes = new byte[activeVehicles.Count * 16];
                 int i = 0;
@@ -280,18 +285,18 @@ namespace PREACT.Visualization
                     {
                         bool sendData = false;
                         Vector2d oldWorldPos;
-                        bool foundVehicle = previouslySentPositions.TryGetValue(vehicle.VehicleId, out oldWorldPos);
+                        bool foundVehicle = previouslySentVehiclePositions.TryGetValue(vehicle.VehicleId, out oldWorldPos);
                         //new vehicle not sent before
                         if (!foundVehicle)
                         {
-                            previouslySentPositions.Add(vehicle.VehicleId, vehicle.WorldPosition);
+                            previouslySentVehiclePositions.Add(vehicle.VehicleId, vehicle.WorldPosition);
                             _newVehiclesNotSent.Enqueue(vehicle);
                             sendData = true;
                         }
                         //only send if position has changed
                         else if (vehicle.WorldPosition != oldWorldPos)
                         {
-                            previouslySentPositions[vehicle.VehicleId] = vehicle.WorldPosition;
+                            previouslySentVehiclePositions[vehicle.VehicleId] = vehicle.WorldPosition;
                             sendData = true;
                         } 
 

@@ -38,7 +38,7 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(input, out userInput))
             {
                 newInput.ConfigurationFile = userInput;
-                PREACTInput.CheckIfFileExist(input, userInput, rootFolder, ref issues, out success);
+                PREACTInput.CheckIfFileExist(input, userInput, rootFolder, out success);
             }
             else
             {
