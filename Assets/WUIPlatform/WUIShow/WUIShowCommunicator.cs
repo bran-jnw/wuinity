@@ -355,7 +355,7 @@ namespace PREACT.Visualization
                 TcpListener server = new TcpListener(IPAddress.Any, port);
 
                 server.Start();
-                Engine.MESSAGE(null, Engine.LogType.Log, "TCP Server started on port: " + port);
+                Engine.Message(null, Engine.LogType.Log, "TCP Server started on port: " + port);
 
                 while (true)
                 {
@@ -382,14 +382,14 @@ namespace PREACT.Visualization
                         }
 
                         string receivedMessage = Encoding.UTF8.GetString(buffer, 0, totalBytesRead);
-                        Engine.MESSAGE(null, Engine.LogType.Log, "TCP server received message: " + receivedMessage);
+                        Engine.Message(null, Engine.LogType.Log, "TCP server received message: " + receivedMessage);
                         byte[] response = handleRequestMethod(receivedMessage);
                         await stream.WriteAsync(response, 0, response.Length);
                     }
                 }
                 catch (Exception e)
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Error handling wuishow TCP request: " + e.Message);
+                    Engine.Message(null, Engine.LogType.Warning, "Error handling wuishow TCP request: " + e.Message);
                 }
                 finally
                 {

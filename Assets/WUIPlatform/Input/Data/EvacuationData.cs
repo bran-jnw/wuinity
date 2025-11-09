@@ -59,7 +59,7 @@ namespace PREACT.IO
         public void LoadAll(string rootFolder, out bool success)
         {
             success = false;
-            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Evacuation data...");
+            Engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
             
             if(_simulationInput.RunPedestrianModule)
             {
@@ -104,7 +104,7 @@ namespace PREACT.IO
 
         private void DefaultEvacGroupIndices()
         {
-            Engine.MESSAGE(null, Engine.LogType.Warning, "Creating default group map.");
+            Engine.Message(null, Engine.LogType.Warning, "Creating default group map.");
             _evacGroupIndices = new int[CellCount.x * CellCount.y];
             for (int y = 0; y < CellCount.y; y++)
             {
@@ -130,7 +130,7 @@ namespace PREACT.IO
 
             if (index < 0)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
+                Engine.Message(null, Engine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
             }
 
             return index;
@@ -150,7 +150,7 @@ namespace PREACT.IO
 
             if (index < 0)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, " User has specified a response curve named " + name + " but no such response curve has been defined.");
+                Engine.Message(null, Engine.LogType.Warning, " User has specified a response curve named " + name + " but no such response curve has been defined.");
             }
 
             return index;

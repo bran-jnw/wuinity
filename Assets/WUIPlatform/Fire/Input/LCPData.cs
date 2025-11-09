@@ -49,7 +49,7 @@ namespace PREACT.Fire
 		public short w;				// coarse woody model
 	}
 
-	[System.Serializable]
+
 	public class LCPData
 	{
 		// header for landscape file
@@ -193,7 +193,7 @@ namespace PREACT.Fire
 
 				if(NumVals != 8)
 				{
-					Engine.MESSAGE(null, Engine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contain the expected 8 raster sets, aborting.");
+					Engine.Message(null, Engine.LogType.InputError, "The landscape trying to be read from GeoTIFF does not contain the expected 8 raster sets, aborting.");
 					CantAllocLCP = true;
 
                     return;
@@ -577,7 +577,7 @@ namespace PREACT.Fire
 						error += ", ";
 					}
 				}
-                Engine.MESSAGE(null, Engine.LogType.Warning, error);
+                Engine.Message(null, Engine.LogType.Warning, error);
             }
 
 			List<int> presentFuelModelNumbers= new List<int>();
@@ -682,7 +682,7 @@ namespace PREACT.Fire
         {
 			if (!File.Exists(path))
 			{
-				Engine.MESSAGE(null, Engine.LogType.Warning, " LCP file not found in " + path + ".");
+				Engine.Message(null, Engine.LogType.Warning, " LCP file not found in " + path + ".");
 				return false;
 			}
 
@@ -949,11 +949,11 @@ namespace PREACT.Fire
 
             if (CantAllocLCP)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
+                Engine.Message(null, Engine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, " LCP found in " + path + ", read succesfully.");
+                Engine.Message(null, Engine.LogType.Log, " LCP found in " + path + ", read succesfully.");
             }
         }
 

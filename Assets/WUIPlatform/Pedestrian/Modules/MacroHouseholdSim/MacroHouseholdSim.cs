@@ -269,7 +269,7 @@ namespace PREACT.Pedestrian
 
             if(goal == null)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
             }
 
             return goal;
@@ -320,7 +320,7 @@ namespace PREACT.Pedestrian
                 {
                     totalPopulation -= _householdData[i].peopleCount;
                     --totalHouseholds;
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + _householdData[i].originLatLon.x + ", " + _householdData[i].originLatLon.y + ", " + (i + 2));
+                    Engine.Message(null, Engine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + _householdData[i].originLatLon.x + ", " + _householdData[i].originLatLon.y + ", " + (i + 2));
                 }
             }            
 
@@ -342,9 +342,9 @@ namespace PREACT.Pedestrian
             householdPositions = new Vector4[totalHouseholds];
             peopleLeft = totalPopulation;
 
-            Engine.MESSAGE(null, Engine.LogType.Log, " Total households: " + totalHouseholds);
-            Engine.MESSAGE(null, Engine.LogType.Log, " Total cars: " + totalCars);
-            Engine.MESSAGE(null, Engine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
+            Engine.Message(null, Engine.LogType.Log, " Total households: " + totalHouseholds);
+            Engine.Message(null, Engine.LogType.Log, " Total cars: " + totalCars);
+            Engine.Message(null, Engine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 
         /// <summary>

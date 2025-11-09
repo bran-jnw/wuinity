@@ -33,12 +33,12 @@ namespace PREACT.IO
             {
                 //some road networks returns zero routes without this contract being signed (especially Swedish road networks)...
                 routerDb.AddContracted(routerDb.GetSupportedProfile("Car"));
-                Engine.MESSAGE(null, Engine.LogType.Log, "Router database loaded succesfully.");
+                Engine.Message(null, Engine.LogType.Log, "Router database loaded succesfully.");
                 
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Router database could not be found.");
+                Engine.Message(null, Engine.LogType.Warning, "Router database could not be found.");
             }
 
             return routerDb;
@@ -77,7 +77,7 @@ namespace PREACT.IO
                     using (FileStream outputStream = new FileInfo(outputFilePath).Open(FileMode.Create))
                     {
                         routerDb.Serialize(outputStream);
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Router database saved to file " + outputFilePath);
+                        Engine.Message(null, Engine.LogType.Log, "Router database saved to file " + outputFilePath);
                     }
 
                     success = true;
@@ -85,7 +85,7 @@ namespace PREACT.IO
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "OSM file could not be found.");
+                Engine.Message(null, Engine.LogType.Warning, "OSM file could not be found.");
             }
 
             return success;

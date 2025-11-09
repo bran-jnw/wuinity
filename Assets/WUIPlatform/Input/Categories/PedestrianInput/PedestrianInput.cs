@@ -72,12 +72,12 @@ namespace PREACT.IO
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, nameof(PedestrianModuleChoice.MacroHouseholdSim) + " input was not found, using defaults.");
+                    Engine.Message(null, Engine.LogType.Warning, nameof(PedestrianModuleChoice.MacroHouseholdSim) + " input was not found, using defaults.");
                 }
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Debug, "This should not happen, trying to use non-implemented pedestrian module.");
+                Engine.Message(null, Engine.LogType.Debug, "This should not happen, trying to use non-implemented pedestrian module.");
             }
 
             success = true;

@@ -11,7 +11,7 @@ namespace PREACT
 {
     public static class GraphicalFireInput
     {
-        public static void SaveGraphicalFireInput(string filePath, IO.PREACTInput input, IO.FireData fireData)
+        public static void SaveGraphicalFireInput(string filePath, IO.FireData fireData)
         {
             using (FileStream fs = new FileStream(filePath, FileMode.Create))
             {
@@ -75,7 +75,7 @@ namespace PREACT
                         }
                         else
                         {
-                            Engine.MESSAGE(null, Engine.LogType.Warning, "Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.");
+                            Engine.Message(null, Engine.LogType.Warning, "Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.");
                             CreateDefault(lcpData, out wuiArea, out randomIgnitionArea, out initialIgnitionIndices, out triggerBufferIndices);
                         }
                     }
@@ -83,7 +83,7 @@ namespace PREACT
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Could not find GFI data, creating empty default.");
+                Engine.Message(null, Engine.LogType.Warning, "Could not find GFI data, creating empty default.");
                 CreateDefault(lcpData, out wuiArea, out randomIgnitionArea, out initialIgnitionIndices, out triggerBufferIndices);
             }
         }

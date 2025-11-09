@@ -82,7 +82,7 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        Engine.MESSAGE(null, Engine.LogType.SimulationError, input + " was not recognized." + PREACTInput.pleaseCheckInput);
+                        Engine.Message(null, Engine.LogType.SimulationError, input + " was not recognized." + PREACTInput.pleaseCheckInput);
                         break;
                 }
             }

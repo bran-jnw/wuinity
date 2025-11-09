@@ -40,7 +40,7 @@ namespace PREACT.Evacuation
             }
 
             //this should not happen, but keep as backup as we do not want to return null
-            Engine.MESSAGE(null, Engine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");
+            Engine.Message(null, Engine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");
             return destinations[DestinationIndices[DestinationIndices.Length - 1]];
         }
 
@@ -150,24 +150,24 @@ namespace PREACT.Evacuation
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Evacuation group file " + path + " not found and could not be loaded.");
+                    Engine.Message(null, Engine.LogType.Warning, "Evacuation group file " + path + " not found and could not be loaded.");
                 }
 
                 
                 if (fileExists && eG == null)
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Evacuation group file " + path + " was found but did not contain any valid data.");
+                    Engine.Message(null, Engine.LogType.Warning, "Evacuation group file " + path + " was found but did not contain any valid data.");
                 }
             }
 
             if (evacGroups.Count > 0)
             {
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
+                Engine.Message(null, Engine.LogType.Log, " Evacuation group files loaded, " + evacGroups.Count + " valid evacuation groups were found.");
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "No valid evacuation group data could be found or loaded, evacuation simulation will not run.");
+                Engine.Message(null, Engine.LogType.Warning, "No valid evacuation group data could be found or loaded, evacuation simulation will not run.");
             }
 
             return evacGroups;
@@ -221,20 +221,20 @@ namespace PREACT.Evacuation
                             int.TryParse(data[i], out eGsIndices[i]);
                         }
                         evacGroupIndices = eGsIndices;
-                        Engine.MESSAGE(null, Engine.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
+                        Engine.Message(null, Engine.LogType.Log, " Evac groups loaded from file, cells: " + ncols + ", " + nrows);
                         success = true;
                     }
                     else
                     {
                         evacGroupIndices = null;
-                        Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file does not match current mesh.");
+                        Engine.Message(null, Engine.LogType.Warning, "Evac groups file does not match current mesh.");
                     }
                 }
             }
             catch (System.Exception e)
             {
                 evacGroupIndices = null;
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Evac groups file " + file + " not found.");
+                Engine.Message(null, Engine.LogType.Warning, "Evac groups file " + file + " not found.");
                 //WUInity.WUINITY_SIM.LogMessage(e.Message);
             }            
         }

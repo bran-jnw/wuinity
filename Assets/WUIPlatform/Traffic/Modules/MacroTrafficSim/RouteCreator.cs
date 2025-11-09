@@ -62,14 +62,14 @@ namespace PREACT.Traffic
                     _validEvacuationGoals.Add(evacuatonGoals[i]);
                     if (logMessages)
                     {
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].Name);
+                        Engine.Message(null, Engine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].Name);
                     }
                 }
                 catch (Itinero.Exceptions.ResolveFailedException)
                 {
                     if (logMessages)
                     {
-                        Engine.MESSAGE(null, Engine.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].Name);
+                        Engine.Message(null, Engine.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].Name);
                     }
                 }
             }
@@ -251,7 +251,7 @@ namespace PREACT.Traffic
             if (!foundOneValidRoute)
             {
                 //TODO: fix what happens when cars get stuck
-                Engine.MESSAGE(simulation, Engine.LogType.SimulationError, "No routes found for car, will get stuck.");
+                Engine.Message(simulation, Engine.LogType.SimulationError, "No routes found for car, will get stuck.");
                 return null;
             }
 

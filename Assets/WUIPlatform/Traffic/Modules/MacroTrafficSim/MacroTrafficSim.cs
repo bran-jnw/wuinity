@@ -54,7 +54,7 @@ namespace PREACT.Traffic
 
             
 
-            Engine.MESSAGE(null, Engine.LogType.Log, "Macro traffic sim initiated.");
+            Engine.Message(null, Engine.LogType.Log, "Macro traffic sim initiated.");
         }
 
         public override void HandleNewCars()

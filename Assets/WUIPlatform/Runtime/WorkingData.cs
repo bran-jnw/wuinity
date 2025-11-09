@@ -8,14 +8,13 @@ namespace PREACT.Runtime
     /// </summary>
     public class WorkingData
     {
-        private IO.SimulationData _simulationData;
-        private PopulationMap _populationMap;
-
+        private IO.SimulationInput _simulationInput;
         public LocalGPWData LocalGPWData;
-        public PopulationMap PopulationMap { get => _populationMap; }
+        public PopulationMap PopulationMap;
         public Itinero.RouterDb RouterDb;
-        public IO.SimulationData SimulationData { get => _simulationData; }
+        public IO.SimulationInput SimulationInput { get => _simulationInput; }
 
+        public bool HaveSimulationInput { get => SimulationInput != null; }
         public bool HaveLocalGPW { get => LocalGPWData != null; }
         public bool HavePopulationMap { get => PopulationMap.HaveData; }
         public bool PopulationMapCorrectedForRoadAccess { get => PopulationMap.CorrectedForRoadAccess; }
@@ -26,8 +25,14 @@ namespace PREACT.Runtime
         /// </summary>
         public WorkingData()
         {
-            _simulationData = new IO.SimulationData(Vector2d.zero);
-            _populationMap = new PopulationMap();
-        }        
+            _simulationInput = new IO.SimulationInput();
+            //_populationMap = new PopulationMap();
+        }     
+        
+        public void SetSimulatonData(Vector2d lowerLeftLatLon, Vector2d domainSize)
+        {            
+            _simulationInput.DomainSize = domainSize;
+            _simulationInput.Data.UpdateData(lowerLeftLatLon);
+        }
     }
 }

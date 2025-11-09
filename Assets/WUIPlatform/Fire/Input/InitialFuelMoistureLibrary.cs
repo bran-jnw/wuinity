@@ -89,7 +89,7 @@ namespace PREACT.Fire
             {
                 result = new InitialFuelMoisture(fuelModelNumber);
                 _initialFuelMoistures.Add(fuelModelNumber, result);
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
+                Engine.Message(null, Engine.LogType.Warning, "Initial fuel moisture for fuel model " + fuelModelNumber + " was set to default as it has not been user specified.");
             }
 
             return result;
@@ -125,25 +125,25 @@ namespace PREACT.Fire
                         {
                             InitialFuelMoisture iFM = new InitialFuelMoisture(fuelMod, oneHour, tenHour, hundredHour, liveH, liveW);
                             initialFuelMoistures.Add(iFM);
-                            Engine.MESSAGE(null, Engine.LogType.Log, "Loaded initial fuel moistures for fuel model " + fuelMod + ".");
+                            Engine.Message(null, Engine.LogType.Log, "Loaded initial fuel moistures for fuel model " + fuelMod + ".");
                         }
                     }                    
                 }                              
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
+                Engine.Message(null, Engine.LogType.Warning, "Initial fuel moisture data file " + path + " not found and could not be loaded, using defaults.");
             }
 
             if (initialFuelMoistures.Count > 0)
             {
                 result = new InitialFuelMoistureLibrary(initialFuelMoistures);
                 success = true; 
-                Engine.MESSAGE(null, Engine.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
+                Engine.Message(null, Engine.LogType.Log, " Initial fuel moisture file " + path + " was found, " + initialFuelMoistures.Count + " valid initial fuel moistures were succesfully loaded.");
             }
             else if(fileExists)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
+                Engine.Message(null, Engine.LogType.Warning, "Initial fuel moisture file " + path + " was found but did not contain any valid data, using defaults.");
             }
 
             return result;

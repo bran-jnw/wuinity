@@ -25,14 +25,20 @@ namespace PREACT.IO
             UpdateData(lowerLeftLatLon);
         }
 
-        public void UpdateData(string lat, string lon)
+        public void UpdateData(string lat, string lon, out bool success)
         {
             Vector2d latLon;
             if (double.TryParse(lat, out latLon.x) && double.TryParse(lon, out latLon.y))
             {
+                success = true;
                 _utmData = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);
                 _utmOrigin = new Vector2d(_utmData.Easting, _utmData.Northing);
-            }            
+            }
+            else
+            {
+                success = false;
+                Engine.Message(null, Engine.LogType.InputError, "Could not parse latitude/longitude.");
+            }
         }
 
         public void UpdateData(Vector2d lowerLeftLatLon)

@@ -221,18 +221,18 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Weather data file " + file + " not found, will not be able to do fire or smoke spread simulations.");
+                Engine.Message(null, Engine.LogType.Warning, "Weather data file " + file + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (weatherData.Count > 0)
             {
                 result = new WeatherInput(weatherData.ToArray());
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " Weather input file " + file + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
+                Engine.Message(null, Engine.LogType.Log, " Weather input file " + file + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Weather input file " + file + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                Engine.Message(null, Engine.LogType.Warning, "Weather input file " + file + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

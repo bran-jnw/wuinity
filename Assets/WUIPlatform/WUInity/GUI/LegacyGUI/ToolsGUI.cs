@@ -4,6 +4,7 @@ using System.IO;
 using PREACT.IO;
 using PREACT.Tools;
 using PREACT.Population;
+using PREACT.Utility.Math;
 
 namespace WUInity.UI
 {
@@ -11,8 +12,23 @@ namespace WUInity.UI
     {
         private bool populationMenuDirty = true;
         private bool _reScaling = false, _filteringOSM = false, _creatingPopulationMap = false;
-        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _minHouseholdSize, _maxHouseholdSize, _latitude, _longitude;
+        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _minHouseholdSize, _maxHouseholdSize, _latitude, _longitude, _domainSizeX, _domainSizeY;
         bool success;
+
+        bool ParseVector2d(string x, string y, out Vector2d v)
+        {
+            double a, b;
+            if(double.TryParse(x, out a) && double.TryParse(y, out b))
+            {
+                v = new Vector2d(a, b);
+                return true;
+            }
+            else
+            {
+                v = Vector2d.zero;
+                return false;
+            }            
+        }
 
         void ToolsMenu()
         {
@@ -33,17 +49,52 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), localPopStatus);
             ++buttonIndex;*/
 
+            if (_input == null)
+            {
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
+                ++buttonIndex;
+                _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
+                _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
+                ++buttonIndex;
+
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Domain size x/y");
+                ++buttonIndex;
+                _domainSizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeX);
+                _domainSizeY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeY);
+                ++buttonIndex;
+
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
+                ++buttonIndex;
+                _xBorder = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _xBorder);
+                _yBorder = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _yBorder);
+                ++buttonIndex;
+
+                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply"))
+                {
+                    Vector2d latLon, domainSize;
+                    if(ParseVector2d(_latitude, _longitude, out latLon) && ParseVector2d(_domainSizeX, _domainSizeY, out domainSize))
+                    {
+                        _workingData.SetSimulatonData(latLon, domainSize);
+                    }                    
+                }
+                ++buttonIndex;
+            }
+
             //GPW stuff
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW tools");
-            ++buttonIndex;
-            if(_workingData.HaveLocalGPW)
+            ++buttonIndex;            
+
+            if (_workingData.HaveLocalGPW)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _workingData.LocalGPWData.TotalPopulation);
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
-                {
-                    _wuinityManager.SetSampleMode(DataSampleMode.LocalGPW);
-                    _wuinityManager.PopulationDataVisualizer.ToggleLocalGPWVisibility();
+                {                    
+                    _wuinityManager.SimulationDomainVisualizer.ToggleGPWVisibility();
+                    if(_wuinityManager.SimulationDomainVisualizer.IsGPWPlaneVisible())
+                    {
+                        _wuinityManager.SetSampleMode(DataSampleMode.LocalGPW);
+                    }
                 }
                 ++buttonIndex;
             }
@@ -84,8 +135,7 @@ namespace WUInity.UI
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide population map"))
                 {
                     _wuinityManager.SetSampleMode(DataSampleMode.PopulationMap);
-                    _wuinityManager.DisplayPopulationMap();
-                    _wuinityManager.ToggleDomainDataPlane();
+                    _wuinityManager.SimulationDomainVisualizer.ToggleVisibility();
 
                 }
                 ++buttonIndex;
@@ -142,8 +192,7 @@ namespace WUInity.UI
                     ++buttonIndex;
                     if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply re-scale"))
                     {
-                        PopulationTools.ScaleTotalPopulation(_workingData.PopulationMap, _desiredPopulation, out success);
-                        _wuinityManager.DisplayPopulationMap();
+                        ScalePopulation();
                         _reScaling = false;
                     }                    
                     ++buttonIndex;
@@ -214,16 +263,7 @@ namespace WUInity.UI
                 ++buttonIndex;
                 _minHouseholdSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _minHouseholdSize);
                 _maxHouseholdSize = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _maxHouseholdSize);
-                ++buttonIndex;
-
-                if(_input == null)
-                {
-                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
-                    ++buttonIndex;
-                    _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
-                    _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
-                    ++buttonIndex;
-                }                
+                ++buttonIndex;                               
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population"))
                 {
@@ -250,12 +290,7 @@ namespace WUInity.UI
                 }
             }
             else
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
-                ++buttonIndex;
-                _xBorder = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _xBorder);
-                _yBorder = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _yBorder);
-                ++buttonIndex;
+            {    
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select OSM data"))
                 {
                     OpenFilterOSM();
@@ -282,6 +317,7 @@ namespace WUInity.UI
                     //float[,] tB = PREACT.kPERIL.RunPERIL(_input.TriggerBuffer.kPERILInput.MidflameWindspeed);
                     //_engine.Simulation.SetTriggerBufferData(tB);
                     //_engine.Simulation.DisplayTriggerBuffer();
+                    PREACT.Engine.Message(null, PREACT.Engine.LogType.Debug, "Not yet implemented.");
                 }
             }   
         }        
@@ -290,12 +326,16 @@ namespace WUInity.UI
         void OpenCreateAndSaveLocalGPW()
         {
             string initialPath = Path.GetDirectoryName(_input.RootFolder);
-            FileBrowser.ShowLoadDialog(CreateAndSaveLocalGPW, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Select global GPW folder", "Set");
+            FileBrowser.ShowLoadDialog(CreateLocalGPW, CancelSaveLoad, FileBrowser.PickMode.Folders, false, initialPath, null, "Select global GPW folder", "Set");
         }
-        void CreateAndSaveLocalGPW(string[] paths)
+        void CreateLocalGPW(string[] paths)
         {
-            PopulationTools.CreateLocalGPWData(_input, paths[0], out success);
-            _wuinityManager.PopulationDataVisualizer.SetDataPlane(true);
+            LocalGPWData data = PopulationTools.CreateLocalGPWData(_input, paths[0], out success);
+            if (success)
+            {
+                _wuinityManager.SimulationDomainVisualizer.SetAndDisplayLocalGPW(data, _workingData);
+            }
+            
         }
         void OpenLoadLocalGPW()
         {
@@ -309,8 +349,7 @@ namespace WUInity.UI
             LocalGPWData localGPWData = PopulationTools.LoadLocalGPWData(paths[0], out success);
             if(success)
             {
-                _wuinityManager.PopulationDataVisualizer.DisplayLocalGPW(localGPWData);
-                _workingData.LocalGPWData = localGPWData;
+                _wuinityManager.SimulationDomainVisualizer.SetAndDisplayLocalGPW(localGPWData, _workingData);
             }
         }
 
@@ -323,10 +362,12 @@ namespace WUInity.UI
         }        
         void CreateAndSavePopulationMap(string[] paths)
         {
-            string filePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".csv");
-            PopulationTools.CreateAndSavePopulationMap(paths[0], _populationMapCellSize, filePath, out success);
-            _wuinityManager.DisplayPopulationMap();
-            _wuinityManager.SetDomainDataPlane(true);           
+            string filePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".pop");
+            PopulationTools.CreateAndSavePopulationMap(_workingData.SimulationInput, paths[0], _populationMapCellSize, filePath, out success);
+            if (success)
+            {
+                _wuinityManager.SimulationDomainVisualizer.SetAndDisplayPopulationMapTexture(_workingData.PopulationMap, _workingData);
+            }
         }
         void OpenLoadPopulationMap()
         {
@@ -337,8 +378,17 @@ namespace WUInity.UI
         void LoadPopulationMap(string[] paths)
         {
             PopulationTools.LoadPopulationMap(paths[0], out success);
-            _wuinityManager.DisplayPopulationMap();
-            _wuinityManager.SetDomainDataPlane(true);
+            if(success)
+            {
+                _wuinityManager.SimulationDomainVisualizer.SetAndDisplayPopulationMapTexture(_workingData.PopulationMap, _workingData);
+            }            
+        }
+
+        void ScalePopulation()
+        {
+            PopulationTools.ScaleTotalPopulation(_workingData.PopulationMap, _desiredPopulation, out success);
+            _wuinityManager.SimulationDomainVisualizer.SetAndDisplayPopulationMapTexture(_workingData.PopulationMap, _workingData);
+            _wuinityManager.SimulationDomainVisualizer.ToggleVisibility();
         }
 
         //Filtering of OSM        
@@ -350,7 +400,7 @@ namespace WUInity.UI
         }
         void FilterOSM(string[] paths)
         {
-            PopulationTools.FilterOsmData(_input, paths[0], _xBorder, _yBorder);            
+            PopulationTools.FilterOsmData(paths[0], _xBorder, _yBorder, _latitude, _longitude, _domainSizeX, _domainSizeY);            
         }
 
         //Router Db
@@ -392,7 +442,11 @@ namespace WUInity.UI
         }
         void RoadAccessCorrectPopulationMap(string[] paths)
         {
-            PopulationTools.RoadAccessCorrectPopulationMap(_workingData.PopulationMap, _workingData.RouterDb, paths[0], out success);
+            _workingData.SimulationInput.Data.UpdateData(_latitude, _longitude, out success);
+            if(success)
+            {
+                PopulationTools.RoadAccessCorrectPopulationMap(_workingData.PopulationMap, _workingData.SimulationInput.Data, paths[0], out success);
+            }            
         }
 
         void OpenApplyMaskOnPopulationMap()
@@ -423,13 +477,13 @@ namespace WUInity.UI
         {
             if(_input == null)
             {
-                _workingData.SimulationData.UpdateData(_latitude, _longitude);
-                PopulationTools.CreatePopulation(_minHouseholdSize, _maxHouseholdSize, _workingData.PopulationMap, _workingData.SimulationData, paths[0], out success);
+                _workingData.SimulationInput.Data.UpdateData(_latitude, _longitude, out success);
+                PopulationTools.CreatePopulation(_minHouseholdSize, _maxHouseholdSize, _workingData.PopulationMap, _workingData.SimulationInput.Data, paths[0], out success);
             }
             else
             {
                 PopulationTools.CreatePopulation(_minHouseholdSize, _maxHouseholdSize, _workingData.PopulationMap, _input.Simulation.Data, paths[0], out success);
-            }                
+            }
         }
 
         private void OpenSavePopulationMask() //string[] paths

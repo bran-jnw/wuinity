@@ -186,7 +186,7 @@ namespace PREACT.Fire
             //set custom fuel models if present
             if (_simulation.Input.Fire.Data.FuelModelsData != null)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
+                Engine.Message(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
                 for (int i = 0; i < _simulation.Input.Fire.Data.FuelModelsData.Fuels.Count; i++)
                 {
                     _fuelModelSet.setFuelModelRecord(_simulation.Input.Fire.Data.FuelModelsData.Fuels[i]);

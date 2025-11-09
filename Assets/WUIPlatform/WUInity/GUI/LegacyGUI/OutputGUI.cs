@@ -71,30 +71,11 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            float timeRange = _engine.Simulation.CurrentTime - _engine.Simulation.StartTime;
-            float time = sliderVtraffic * timeRange + _engine.Simulation.StartTime;
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density"))
-            {
-                //_wuinityManager.DisplayClosestDensityData(time);
-                _wuinityManager.ToggleDomainDataPlane();
-                _wuinityManager.SetSampleMode(DataSampleMode.TrafficDens);
-            }
-            ++buttonIndex;
-
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Traffic density: " + (int)time + " seconds");
-            ++buttonIndex;
-            sliderVtraffic = GUI.HorizontalSlider(new Rect(140, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), sliderVtraffic, 0.0f, 1.0f);
-            ++buttonIndex;
-            if (_wuinityManager.dataSampleMode == DataSampleMode.TrafficDens)
-            {
-                //WUInity.INSTANCE.DisplayClosestDensityData(time);
-            }
-            ++buttonIndex;
-
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Hide visual data"))
             {
-                _wuinityManager.SetDomainDataPlane(false);
-                _wuinityManager.SetFireDataPlane(false);
+                _wuinityManager.SimulationDomainVisualizer.SetVisibility(false);
+                _wuinityManager.SimulationDomainVisualizer.SetGPWVisibility(false);
+                _wuinityManager.FireDomainVisualizer.SetVisibility(false);
             }
             ++buttonIndex;
 
@@ -217,7 +198,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle k-PERIL results"))
                 {
-                    _wuinityManager.FireDataVisualizer.DisplayTriggerBuffer(_engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success));
+                    _wuinityManager.FireDomainVisualizer.DisplayTriggerBuffer(_engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success));
                 }
                 ++buttonIndex;
             }

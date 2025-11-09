@@ -100,7 +100,7 @@ namespace PREACT.Fire
             //set custom fuel models if present
             if (_simulation.Input.Fire.Data.FuelModelsData != null)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
+                Engine.Message(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
                 for (int i = 0; i < _simulation.Input.Fire.Data.FuelModelsData.Fuels.Count; i++)
                 {
                     fuelModelSet.setFuelModelRecord(_simulation.Input.Fire.Data.FuelModelsData.Fuels[i]);
@@ -403,7 +403,7 @@ namespace PREACT.Fire
                             activeCells.Add(f);
                             ignitionPoints[i].MarkAsIgnited();
 
-                            Engine.MESSAGE(null, Engine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
+                            Engine.Message(null, Engine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                         }
                         ++activatedIgnitions;
                     }

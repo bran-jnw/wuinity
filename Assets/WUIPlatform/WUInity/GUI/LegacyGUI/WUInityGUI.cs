@@ -9,8 +9,8 @@ namespace WUInity.UI
         [System.Serializable]
         public class MenuButton
         {
-            public string text;
-            public Rect rect;
+            private string _text;
+            private Rect _rect;
 
             static int MENU_COUNT;
 
@@ -19,18 +19,18 @@ namespace WUInity.UI
                 int buttonIndex = MENU_COUNT;
                 ++MENU_COUNT;
 
-                rect = new Rect();
-                this.text = text;
+                _rect = new Rect();
+                this._text = text;
 
-                rect.x = 10;
-                rect.y = buttonIndex * (buttonHeight + 5) + 10;
-                this.rect.height = buttonHeight;
-                this.rect.width = 100;// text.Length * 8;
+                _rect.x = 10;
+                _rect.y = buttonIndex * (buttonHeight + 5) + 10;
+                this._rect.height = buttonHeight;
+                this._rect.width = 100;// text.Length * 8;
             }
 
             public bool Pressed()
             {
-                return GUI.Button(rect, text);
+                return GUI.Button(_rect, _text);
             }
         }
 
@@ -137,61 +137,60 @@ namespace WUInity.UI
 
             //select menu
             GUI.Box(new Rect(0, 0, menuBarWidth, menuBarHeight), "");
-            if (GUI.Button(mainMenu.rect, mainMenu.text) && !_simulationRunning)
+            if (mainMenu.Pressed() && !_simulationRunning)
             {
                 menuChoice = ActiveMenu.MainMenu;
                 _wuinityManager.SetSampleMode(DataSampleMode.None);
             }
-
-            if(_input != null)
+            
+            if(!_simulationRunning)
             {
-                if(!_simulationRunning)
+                if(_input != null)
                 {
                     if (mapMenu.Pressed())
                     {
                         menuChoice = ActiveMenu.Map;
                     }
 
-                    if (GUI.Button(toolsMenu.rect, toolsMenu.text))
-                    {
-                        menuChoice = ActiveMenu.Tools;
-                        //WUInity.INSTANCE.SetSampleMode(WUInity.DataSampleMode.GPW);
-                    }
-
-                    if (GUI.Button(evacMenu.rect, evacMenu.text))
+                    if (evacMenu.Pressed())
                     {
                         menuChoice = ActiveMenu.Evac;
                         _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
 
-                    if (GUI.Button(routingMenu.rect, routingMenu.text))
+                    if (routingMenu.Pressed())
                     {
                         menuChoice = ActiveMenu.Routing;
                         _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
 
-                    if (GUI.Button(trafficMenu.rect, trafficMenu.text))
+                    if (trafficMenu.Pressed())
                     {
                         menuChoice = ActiveMenu.Traffic;
                         _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
 
-                    if (GUI.Button(fireMenu.rect, fireMenu.text))
+                    if (fireMenu.Pressed())
                     {
                         menuChoice = ActiveMenu.Fire;
                         _wuinityManager.SetSampleMode(DataSampleMode.None);
                     }
                 }                
 
-                if (_wuinityManager.Engine.Simulation != null && _wuinityManager.Engine.Simulation.HaveResults)
+                if (toolsMenu.Pressed())
                 {
-                    if (GUI.Button(outputMenu.rect, outputMenu.text))
-                    {
-                        menuChoice = ActiveMenu.Output;
-                        _wuinityManager.SetSampleMode(DataSampleMode.None);
-                    }
+                    menuChoice = ActiveMenu.Tools;
                 }
-            }    
+            }                
+
+            if (_wuinityManager.Engine.Simulation != null && _wuinityManager.Engine.Simulation.HaveResults)
+            {
+                if (outputMenu.Pressed())
+                {
+                    menuChoice = ActiveMenu.Output;
+                    _wuinityManager.SetSampleMode(DataSampleMode.None);
+                }
+            }
             
             //if menu has changed we might have to kill a few things
             if(lastMenu != menuChoice)
@@ -200,15 +199,10 @@ namespace WUInity.UI
                 ResetFireGUI();
             }
 
-            if (GUI.Button(exitMenu.rect, exitMenu.text))
+            if (exitMenu.Pressed())
             {
                 _wuinityManager.StopSimulations();
                 Application.Quit();
-            }
-
-            if (GUI.Button(swapGUI.rect, swapGUI.text))
-            {
-                this.enabled = false;
             }
 
             //call correct menu
@@ -236,10 +230,6 @@ namespace WUInity.UI
             {
                 TrafficMenu();
             }
-            /*else if (menuChoice == ActiveMenu.Farsite)
-            {
-                FarsiteMenu();
-            }*/
             else if (menuChoice == ActiveMenu.Fire)
             {
                 FireMenu();

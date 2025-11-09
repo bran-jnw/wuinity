@@ -37,6 +37,7 @@ namespace WUInity
         //general fire stuff
         Vector2d fireDataRealSize;
         Vector2int fireDataCellCount;
+        PREACT.Fire.LCPData _lcpData;
         bool addingArea;
 
         //wui area stuff
@@ -63,6 +64,11 @@ namespace WUInity
             _manager = manager;
         }
 
+        public void SetLCPData(PREACT.Fire.LCPData lcpData)
+        {
+            _lcpData = lcpData;
+        }
+
         public PaintMode GetPaintMode()
         {
             return paintMode;
@@ -81,7 +87,7 @@ namespace WUInity
         {
             if (populationMaskTex == null)
             {
-                Texture2D tex = (Texture2D)_manager.PopulationDataVisualizer.GetPopulationMaskTexture();
+                Texture2D tex = (Texture2D)_manager.SimulationDomainVisualizer.GetPopulationMaskTexture();
                 if (tex != null)
                 {
                     populationMaskTex = tex;
@@ -191,7 +197,7 @@ namespace WUInity
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Desired paint mode not yet implemented.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Desired paint mode not yet implemented.");
             }
         }
 
@@ -215,30 +221,45 @@ namespace WUInity
             _brushSize = 1;
         }
 
-        void SetPainterWUIArea(PREACT.Fire.LCPData lcpData)
+        void SetPainterWUIArea()
         {
+            if(_lcpData == null)
+            {
+                return;
+            }
+
             paintMode = PaintMode.WUIArea;
             CheckDataResources(wuiAreaTex, wuiAreaColorArray);
             SetWUIAreaColor(true);
             _brushSize = 5;
-            _offset = new Vector3((float)lcpData.OriginOffset.x, 0f, (float)lcpData.OriginOffset.y);
+            _offset = new Vector3((float)_lcpData.OriginOffset.x, 0f, (float)_lcpData.OriginOffset.y);
         }
 
-        void SetPainterRandomIgnition(PREACT.Fire.LCPData lcpData)
+        void SetPainterRandomIgnition()
         {
+            if (_lcpData == null)
+            {
+                return;
+            }
+
             paintMode = PaintMode.RandomIgnitionArea;
             CheckDataResources(randomIgnitionTex, randomIgnitionColorArray);
             SetRandomIgnitionAreaColor(true);
             _brushSize = 5;
-            _offset = new Vector3((float)lcpData.OriginOffset.x, 0f, (float)lcpData.OriginOffset.y);
+            _offset = new Vector3((float)_lcpData.OriginOffset.x, 0f, (float)_lcpData.OriginOffset.y);
         }
-        void SetPainterInitialIgnition(PREACT.Fire.LCPData lcpData)
+        void SetPainterInitialIgnition()
         {
+            if (_lcpData == null)
+            {
+                return;
+            }
+
             paintMode = PaintMode.InitialIgnition;
             CheckDataResources(initialIgnitionTex, initialIgnitionColorArray);
             SetInitialIgnitionAreaColor(true);
             _brushSize = 3;
-            _offset = new Vector3((float)lcpData.OriginOffset.x, 0f, (float)lcpData.OriginOffset.y);
+            _offset = new Vector3((float)_lcpData.OriginOffset.x, 0f, (float)_lcpData.OriginOffset.y);
         }
 
         void CheckDataResources(Texture2D requestedTexture, Color[] requestedColorArray)
@@ -257,7 +278,7 @@ namespace WUInity
                     }
                     else
                     {
-                        Engine.MESSAGE(null, Engine.LogType.Warning, "Painter is trying to access LCP data but it is not loaded.");
+                        Engine.Message(null, Engine.LogType.Warning, "Painter is trying to access LCP data but it is not loaded.");
                         return;
                     }
                 }

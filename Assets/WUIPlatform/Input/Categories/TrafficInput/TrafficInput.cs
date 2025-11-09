@@ -68,7 +68,7 @@ namespace PREACT.IO
             else
             {
                 ++issues;
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "No traffic module choice was set.");
+                Engine.Message(null, Engine.LogType.SimulationError, "No traffic module choice was set.");
             }
 
             input = nameof(VisibilityAffectsSpeed);
@@ -93,7 +93,7 @@ namespace PREACT.IO
                 else
                 {
                     //critical
-                    Engine.MESSAGE(null, Engine.LogType.SimulationError, nameof(Simulation) + " header not found." + PREACTInput.pleaseCheckInput);
+                    Engine.Message(null, Engine.LogType.SimulationError, nameof(Simulation) + " header not found." + PREACTInput.pleaseCheckInput);
                     return null;
                 }
             }
@@ -103,7 +103,7 @@ namespace PREACT.IO
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Unknown traffic module has been specified.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Unknown traffic module has been specified.");
             }
 
             newInput._data.LoadAll(newInput, rootFolder, out success);

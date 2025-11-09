@@ -122,24 +122,24 @@ namespace PREACT.Evacuation
                 if (_maxCars > 0 && _vehicles.Count >= _maxCars && !_blocked)
                 {
                     _blocked = true;
-                    Engine.MESSAGE(null, Engine.LogType.Event, "Evacuation goal " + _name + " has reached vehivle capacity, re-routing");
+                    Engine.Message(null, Engine.LogType.Event, "Evacuation goal " + _name + " has reached vehivle capacity, re-routing");
                     _simulation.GoalBlocked();
                 }
                 else if (_maxCars > 0 && _vehicles.Count > _maxCars)
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Log, "Additional car arrived at " + _name + ", arrived during same time step.");
+                    Engine.Message(null, Engine.LogType.Log, "Additional car arrived at " + _name + ", arrived during same time step.");
                 }
 
                 //track and respond people
                 if (_maxPeople > -1 && _currentPeople >= _maxPeople && !_blocked)
                 {
                     _blocked = true;
-                    Engine.MESSAGE(null, Engine.LogType.Event, "Evacuation goal " + _name + " has reached people capacity, re-routing");
+                    Engine.Message(null, Engine.LogType.Event, "Evacuation goal " + _name + " has reached people capacity, re-routing");
                     _simulation.GoalBlocked();
                 }
                 else if (_maxPeople > -1 && _currentPeople > _maxPeople)
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Log, "Additional people arrived at " + _name + ", arrived during same time step.");
+                    Engine.Message(null, Engine.LogType.Log, "Additional people arrived at " + _name + ", arrived during same time step.");
                 }
             }
         }

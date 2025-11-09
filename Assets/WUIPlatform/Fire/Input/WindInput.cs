@@ -194,18 +194,18 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind data file " + file + " not found, will not be able to do fire or smoke spread simulations.");
+                Engine.Message(null, Engine.LogType.Warning, "Wind data file " + file + " not found, will not be able to do fire or smoke spread simulations.");
             }
 
             if (windData.Count > 0)
             {
                 result = new WindInput(windData.ToArray());
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " Wind input data file " + file + " was found, " + windData.Count + " valid data points were succesfully loaded.");
+                Engine.Message(null, Engine.LogType.Log, " Wind input data file " + file + " was found, " + windData.Count + " valid data points were succesfully loaded.");
             }
             else if (fileExists)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Wind input data file " + file + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                Engine.Message(null, Engine.LogType.Warning, "Wind input data file " + file + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
             }
 
             return result;

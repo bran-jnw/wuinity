@@ -45,21 +45,22 @@ namespace PREACT.IO
 
             if(!simulationInput.RunFireModule)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
+                Engine.Message(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
                 success = true;
                 return;
             }
-            Engine.MESSAGE(null, Engine.LogType.Log, "Loading Fire data...");
+            Engine.Message(null, Engine.LogType.Log, "Loading Fire data...");
 
             //we need LCP for all fires except straight import of results
-            LoadLCPFile(Path.Combine(rootFolder, fireInput.LcpFile), simulationInput.Data.UTMOrigin, out success);
+            string filePath = Path.Combine(rootFolder, fireInput.LcpFile);
+            LoadLCPFile(fireInput, filePath, simulationInput.Data.UTMOrigin, false, out success);
             if(!success && fireInput.FireModule != FireInput.FireModuleChoice.AscImport)
             {
                 return;
             }
 
             //not critical
-            string filePath = Path.Combine(rootFolder, fireInput.GraphicalFireInputFile);
+            filePath = Path.Combine(rootFolder, fireInput.GraphicalFireInputFile);
             LoadGraphicalFireInput(fireInput, filePath, _lcpData, false, out success);
 
             if (fireInput.FireModule == FireInput.FireModuleChoice.FireCell)
@@ -95,13 +96,14 @@ namespace PREACT.IO
             success = true;
         }
 
-        public void LoadLCPFile(string filePath, Vector2d simulationUtmOrigin, out bool success)
+        public void LoadLCPFile(FireInput fireInput, string filePath, Vector2d simulationUtmOrigin, bool updateInput, out bool success)
         {
-            _lcpData = new LCPData(filePath, simulationUtmOrigin);
-            success = !_lcpData.CantAllocLCP;
+            LCPData lcpData = new LCPData(filePath, simulationUtmOrigin);
+            success = !lcpData.CantAllocLCP;
 
             if (success)
             {
+                _lcpData = lcpData;
                 int[] fuelNrs = _lcpData.GetExisitingFuelModelNumbers();
                 string message = "Present fuel model numbers are ";
                 for (int i = 0; i < fuelNrs.Length; i++)
@@ -117,11 +119,12 @@ namespace PREACT.IO
                     }
                 }
 
-                Engine.MESSAGE(null, Engine.LogType.Log, message);
+                Engine.Message(null, Engine.LogType.Log, message);
             }
-            else
+
+            if (success && updateInput)
             {
-                _lcpData = null;
+                fireInput.LcpFile = Path.GetFileName(filePath);
             }
         }
 

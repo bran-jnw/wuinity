@@ -73,12 +73,12 @@ namespace PREACT.Population
             return _mask[x + y * _cells.x];
         }
 
-        public void CreateFromLocalGPW(PREACTInput input, LocalGPWData localGPWData, float cellSize, out bool success)
+        public void CreateFromLocalGPW(SimulationInput simulationInput, LocalGPWData localGPWData, float cellSize, out bool success)
         {
             success = false;
 
-            _lowerLeftLatLong = input.Simulation.LowerLeftLatLon;
-            _size = input.Simulation.DomainSize;
+            _lowerLeftLatLong = simulationInput.LowerLeftLatLon;
+            _size = simulationInput.DomainSize;
             _cellSize = cellSize;
             _cells = new Vector2int((int)(0.5f + _size.x / cellSize), (int)(0.5f + _size.y / cellSize));
             _size = new Vector2d(cellSize * _cells.x, cellSize * _cells.y); 
@@ -125,10 +125,8 @@ namespace PREACT.Population
             _haveData = true;
             success = true;
             _correctedForRoadAccess = false;
-            _fileName = input.Simulation.Name;
-            //_populationData.Visualizer.CreatePopulationMapTexture(this);
-            //_populationData.Visualizer.CreatePopulationMapMaskTexture(this);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Created population map from local GPW data.");
+            _fileName = simulationInput.Name;            
+            Engine.Message(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
         public void UpdatePopulationMapBasedOnRoadAccess(SimulationData simulationData, Itinero.RouterDb routerDb)
@@ -301,7 +299,7 @@ namespace PREACT.Population
                 _totalActiveCells = activeCellIndices.Count;
             }
 
-            Engine.MESSAGE(null, Engine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
+            Engine.Message(null, Engine.LogType.Log, "Re-scaled the population map to " + desiredPopulation + " people.");
             //_populationData.Visualizer.CreatePopulationMapTexture(this);          
         }
 
@@ -324,7 +322,7 @@ namespace PREACT.Population
             }
 
             File.WriteAllLines(filePath, data);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map to " + filePath);
+            Engine.Message(null, Engine.LogType.Log, "Saved population map to " + filePath);
         }
 
         public void SavePopulationMask(string filePath)
@@ -346,7 +344,7 @@ namespace PREACT.Population
             }
 
             File.WriteAllLines(filePath, data);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Saved population map mask to " + filePath);
+            Engine.Message(null, Engine.LogType.Log, "Saved population map mask to " + filePath);
         }
 
         public bool LoadPopulationMask(string populationMaskFile)
@@ -382,11 +380,11 @@ namespace PREACT.Population
                 }
                 //_populationData.Visualizer.CreatePopulationMapMaskTexture(this);
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " Loaded population map mask from file " + populationMaskFile + ".");
+                Engine.Message(null, Engine.LogType.Log, " Loaded population map mask from file " + populationMaskFile + ".");
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, " Population data not valid for current map.");
+                Engine.Message(null, Engine.LogType.Warning, " Population data not valid for current map.");
             }
 
             return success;
@@ -431,11 +429,11 @@ namespace PREACT.Population
                 _correctedForRoadAccess = false;
                 success = true;           
                 _fileName = Path.GetFileNameWithoutExtension(path);
-                Engine.MESSAGE(null, Engine.LogType.Log, " Loaded population from file " + path + ".");
+                Engine.Message(null, Engine.LogType.Log, " Loaded population from file " + path + ".");
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, " Population data not valid for current map.");
+                Engine.Message(null, Engine.LogType.Warning, " Population data not valid for current map.");
             }
         }
 
@@ -482,7 +480,7 @@ namespace PREACT.Population
                 }
 
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, "Generated and saved population to file " + file);
+                Engine.Message(null, Engine.LogType.Log, "Generated and saved population to file " + file);
             }
         }
     }

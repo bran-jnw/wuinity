@@ -27,7 +27,7 @@ namespace PREACT
             if (input.Simulation.RunPedestrianModule && !PopulationLoaded)
             {
                 canRun = false;
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Population is not loaded but user has requested pedestrian model.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Population is not loaded but user has requested pedestrian model.");
             }
 
             if (input.Simulation.RunFireModule)
@@ -35,7 +35,7 @@ namespace PREACT
                 if (!LcpLoaded)
                 {
                     canRun = false;
-                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "No LCP file loaded but fire spread is activated.");
+                    Engine.Message(null, Engine.LogType.SimulationError, "No LCP file loaded but fire spread is activated.");
                 }
             }
 
@@ -44,7 +44,7 @@ namespace PREACT
                 if (input.Evacuation.Data.ResponseCurves == null)
                 {
                     canRun = false;
-                    Engine.MESSAGE(null, Engine.LogType.SimulationError, "No valid response curves have been loaded.");
+                    Engine.Message(null, Engine.LogType.SimulationError, "No valid response curves have been loaded.");
                 }
 
             }

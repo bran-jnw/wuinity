@@ -66,7 +66,7 @@ namespace PREACT.Smoke
             {
                 _accelerator = _context.GetPreferredDevice(false).CreateAccelerator(_context);
             }           
-            Engine.MESSAGE(null, Engine.LogType.Log, "ILGPU is using accelerator: " + _accelerator.Device.Name);
+            Engine.Message(null, Engine.LogType.Log, "ILGPU is using accelerator: " + _accelerator.Device.Name);
 
             //set up all buffers and data containers
             _globalData = new GlobalData();

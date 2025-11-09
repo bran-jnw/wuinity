@@ -15,22 +15,22 @@ namespace PREACT.Population
     [Serializable]
     public class LocalGPWData
     {
-        public Vector2d ActualOriginDegrees;
+        public Vector2d ActualOriginLatLon;
         public Vector2d OriginOffset;
         public Vector2d RealWorldSize;
         public Vector2int CellCount;
         public int TotalPopulation;
-        public double[] Density;     
+        private double[] _density;     
 
 
         public LocalGPWData(Vector2d actualOriginDegrees, Vector2d originOffset, Vector2d realWorldSize, Vector2int cellCount, int totalPopulation, double[] density)
         {
-            ActualOriginDegrees = actualOriginDegrees;
+            ActualOriginLatLon = actualOriginDegrees;
             OriginOffset = originOffset;
             RealWorldSize = realWorldSize;
             CellCount = cellCount;
             TotalPopulation = totalPopulation;
-            Density = density;
+            _density = density;
         }
 
         //http://www.land-navigation.com/latitude-and-longitude.html
@@ -56,16 +56,16 @@ namespace PREACT.Population
         {            
             string[] data = new string[6];
                         
-            data[0] = ActualOriginDegrees.x + " " + ActualOriginDegrees.y;
+            data[0] = ActualOriginLatLon.x + " " + ActualOriginLatLon.y;
             data[1] = OriginOffset.x + " " + OriginOffset.y;
             data[2] = RealWorldSize.x + " " + RealWorldSize.y;
             data[3] = CellCount.x + " " + CellCount.y;
             data[4] = TotalPopulation.ToString();
 
             string densityData = "";
-            for (int i = 0; i < Density.Length; ++i)
+            for (int i = 0; i < _density.Length; ++i)
             {
-                densityData += Density[i] + " ";
+                densityData += _density[i] + " ";
             }
             data[5] = densityData;
 
@@ -123,11 +123,11 @@ namespace PREACT.Population
 
                 localGPWData = new LocalGPWData(actualOriginDegrees, originOffset, realWorldSize, _cellCount, totalPopulation, density);
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " Loaded local GPW data from " + localGpwFile);
+                Engine.Message(null, Engine.LogType.Log, " Loaded local GPW data from " + localGpwFile);
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, " No local GPW data was found, build from global GPW or create custom population.");                
+                Engine.Message(null, Engine.LogType.Warning, " No local GPW data was found, build from global GPW or create custom population.");                
             }
 
             return localGPWData;
@@ -154,25 +154,25 @@ namespace PREACT.Population
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
                         relevantAscFile = AscFiles[0];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 1");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 1");
                     }
                     else if (latLon.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
                         relevantAscFile = AscFiles[1];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 2");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 2");
                     }
                     else if (latLon.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
                         relevantAscFile = AscFiles[2];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 3");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 3");
                     }
                     else
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_4.asc");
                         relevantAscFile = AscFiles[3];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 4");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 4");
                     }
                 }
                 else
@@ -181,25 +181,25 @@ namespace PREACT.Population
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
                         relevantAscFile = AscFiles[4];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 5");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 5");
                     }
                     else if (latLon.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
                         relevantAscFile = AscFiles[5];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 6");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 6");
                     }
                     else if (latLon.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
                         relevantAscFile = AscFiles[6];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 7");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 7");
                     }
                     else
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_8.asc");
                         relevantAscFile = AscFiles[7];
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loading GPW from sector 8");
+                        Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 8");
                     }
                 }
 
@@ -246,14 +246,14 @@ namespace PREACT.Population
         /// </summary>
         public double GetDensity(int x, int y)
         {
-            if(Density == null || Density.Length == 0)
+            if(_density == null || _density.Length == 0)
             {
                 return -1.0;
             }
 
             x = Mathf.Clamp(x, 0, CellCount.x - 1);
             y = Mathf.Clamp(y, 0, CellCount.y - 1);
-            return Density[x + y * CellCount.x];
+            return _density[x + y * CellCount.x];
         }
 
         public double GetDensitySimulationSpace(Vector2d pos)
@@ -298,7 +298,7 @@ namespace PREACT.Population
             if (Directory.Exists(path))
             {
                 string[] AscFiles = Directory.GetFiles(path, "*.asc");
-                Engine.MESSAGE(null, Engine.LogType.Log, AscFiles.Length.ToString() + " GPW files found.");
+                Engine.Message(null, Engine.LogType.Log, AscFiles.Length.ToString() + " GPW files found.");
 
                 if (AscFiles.Length == 8)
                 {
@@ -306,12 +306,12 @@ namespace PREACT.Population
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.InputError, "Not all GPW files found.");
+                    Engine.Message(null, Engine.LogType.InputError, "Not all GPW files found.");
                 }
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, "GPW path does NOT exist.");
+                Engine.Message(null, Engine.LogType.InputError, "GPW path does NOT exist.");
             }
 
             return isAvailable;
@@ -418,7 +418,7 @@ namespace PREACT.Population
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, " Global GPW data files not found. Please make sure the folder structure is correct.");
+                Engine.Message(null, Engine.LogType.InputError, " Global GPW data files not found. Please make sure the folder structure is correct.");
             }            
 
             return localGPWData;

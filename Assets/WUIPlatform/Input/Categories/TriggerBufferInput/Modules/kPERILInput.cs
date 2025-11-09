@@ -60,7 +60,7 @@ namespace PREACT.IO
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, nameOfInput + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
+                Engine.Message(null, Engine.LogType.Warning, nameOfInput + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
             }
 
             nameOfInput = nameof(InitialFuelMoistureFile);

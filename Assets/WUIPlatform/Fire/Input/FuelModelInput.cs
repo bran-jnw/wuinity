@@ -56,7 +56,7 @@ namespace PREACT.Fire
 
         public static FuelModelInput LoadFuelModelInputFile(string file, out bool success)
         {
-            Engine.MESSAGE(null, Engine.LogType.Log, " Attempting to load fuel model file.");
+            Engine.Message(null, Engine.LogType.Log, " Attempting to load fuel model file.");
             success = false;
 
             string[] fuelLines;
@@ -66,7 +66,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Fuel model file " + file + " not found." );
+                Engine.Message(null, Engine.LogType.Warning, "Fuel model file " + file + " not found." );
                 return null;
             }
 
@@ -118,7 +118,7 @@ namespace PREACT.Fire
                     isDynamic, isReserved);
 
                     fuels.Add(newFuel);
-                    Engine.MESSAGE(null, Engine.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
+                    Engine.Message(null, Engine.LogType.Log, " Loaded fuel model number  " + fuelModelNumber + ", " + code + ", " + name + ".");
                 }
             }
 

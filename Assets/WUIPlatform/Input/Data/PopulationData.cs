@@ -91,18 +91,18 @@ namespace PREACT.IO
                     if(totalPopulation > 0)
                     {
                         success = true;
-                        Engine.MESSAGE(null, Engine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(filePath) + " containing " + totalPopulation + " people and " + householdData.Length + " households.");
+                        Engine.Message(null, Engine.LogType.Log, "Loaded population " + Path.GetFileNameWithoutExtension(filePath) + " containing " + totalPopulation + " people and " + householdData.Length + " households.");
                     }
                     else
                     {
-                        Engine.MESSAGE(null, Engine.LogType.InputError, "Population file found but did not contain any population.");
+                        Engine.Message(null, Engine.LogType.InputError, "Population file found but did not contain any population.");
                     }
                     
                 }                
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, "Population file " + filePath + " could not be found.");
+                Engine.Message(null, Engine.LogType.InputError, "Population file " + filePath + " could not be found.");
             }
 
             return householdData;

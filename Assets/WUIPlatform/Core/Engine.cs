@@ -254,12 +254,12 @@ namespace PREACT
 
             if (convergedInSequence >= 10)
             {
-                MESSAGE(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
 
             }
             else
             {
-                MESSAGE(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
             }
 
             PREACTOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
@@ -354,7 +354,7 @@ namespace PREACT
         /// Receives all the information from a WUINITY session, used by GUI.
         /// </summary>
         /// <param name="message"></param>
-        public static void MESSAGE(Simulation simulation, LogType logType, string message)
+        public static void Message(Simulation simulation, LogType logType, string message)
         {
             //TODO: ReaderWriteLock
             if (_ENGINE == null)

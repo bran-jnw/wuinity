@@ -51,7 +51,7 @@ namespace PREACT.Fire
             _newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
-            Engine.MESSAGE(null, Engine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
+            Engine.Message(null, Engine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -180,7 +180,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Time of arrival file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Time of arrival file not found.");
                 return;
             }
 
@@ -190,7 +190,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Rate of spread file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Rate of spread file not found.");
                 return;
             }
 
@@ -200,7 +200,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
                 return;
             }
 
@@ -210,7 +210,7 @@ namespace PREACT.Fire
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
                 return;
             }
 

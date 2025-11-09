@@ -79,7 +79,7 @@ namespace PREACT
         /// <param name="_midflameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
         public override void Run()
         {
-            Engine.MESSAGE(null, Engine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
+            Engine.Message(null, Engine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
 
             //assume cell/raster is square
             int cellSize = Mathf.RoundToInt((float)_lcpData.RasterCellResolutionX);
@@ -88,19 +88,19 @@ namespace PREACT
 
             if (_calculateROS)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is calculating ROS using Behave.");
+                Engine.Message(null, Engine.LogType.Log, "k-PERIL is calculating ROS using Behave.");
                 bool[,] wuiArea2D = GetWUIArea2D(_wuiArea, _xDim, _yDim);
                 CalculateAllRateOfSpreadsAndDirections(_lcpData, out _maxROS, out _rosAzimuth, _midflameWindspeed, _windDirection, true, _fuelMoisture, wuiArea2D, _fuelModel);
             }
             else
             {    
-                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL is using ROS (and azimuth) from provided data.");
+                Engine.Message(null, Engine.LogType.Log, "k-PERIL is using ROS (and azimuth) from provided data.");
             }
 
             using (StringWriter output = new StringWriter())
             {
                 _triggerBufferOutput = _peril.CalculateBoundary(cellSize, _RSET, _midflameWindspeed, perilWUIArea, _maxROS, _rosAzimuth, output);
-                Engine.MESSAGE(null, Engine.LogType.Log, "k-PERIL output, RSET= " + _RSET + " minutes.\n" + output.ToString());
+                Engine.Message(null, Engine.LogType.Log, "k-PERIL output, RSET= " + _RSET + " minutes.\n" + output.ToString());
             }
 
             //k-PERIL returns flipped x/y and inversed y, so fix this here
@@ -156,7 +156,7 @@ namespace PREACT
             }
             catch (System.Exception e)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
+                Engine.Message(null, Engine.LogType.Warning, e.Message);
             }
         }
 

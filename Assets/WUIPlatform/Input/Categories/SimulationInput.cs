@@ -30,7 +30,7 @@ namespace PREACT.IO
 
         public SimulationInput()
         {
-            _data = new SimulationData(LowerLeftLatLon);
+            _data = new SimulationData(_lowerLeftLatLon);
         }
 
         public static SimulationInput Parse(string[] inputLines, int startIndex, out bool success)

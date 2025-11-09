@@ -97,7 +97,7 @@ namespace PREACT.IO
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Debug, "Trying to use non-implemented trigger buffer.");
+                    Engine.Message(null, Engine.LogType.Debug, "Trying to use non-implemented trigger buffer.");
                 }
             }
 

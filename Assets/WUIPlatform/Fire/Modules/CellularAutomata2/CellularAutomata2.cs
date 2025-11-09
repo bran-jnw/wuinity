@@ -27,7 +27,7 @@ namespace PREACT.Fire
 
         private CellularAutomata2(Simulation simulation, float windspeedTenMeters, float windDirection, float cellSize) : base(simulation)
         {
-            Engine.MESSAGE(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
+            Engine.Message(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
 
             xDim = simulation.Input.Fire.Data.LCPData.GetCellCountX();
             yDim = simulation.Input.Fire.Data.LCPData.GetCellCountY();
@@ -91,11 +91,11 @@ namespace PREACT.Fire
             float deltaTime = 0.5f * cellSize / maxROS;
             if (deltaTime <= 0.0f)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, "Something went wrong when calculating delta time (was less then/equal to zero), please check your input.");
+                Engine.Message(null, Engine.LogType.Log, "Something went wrong when calculating delta time (was less then/equal to zero), please check your input.");
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, "Fire spread delta time set to: " + deltaTime);
+                Engine.Message(null, Engine.LogType.Log, "Fire spread delta time set to: " + deltaTime);
             }            
         }
 
@@ -309,7 +309,7 @@ namespace PREACT.Fire
 
             if (activeCells.Count == 0 && cellsToIgnite.Count == 0)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, "No more active cells left, stopping fire spread simulation");
+                Engine.Message(null, Engine.LogType.Log, "No more active cells left, stopping fire spread simulation");
             }
         }
 
@@ -335,7 +335,7 @@ namespace PREACT.Fire
                 }
             }
 
-            Engine.MESSAGE(null, Engine.LogType.Log, "Finished backwards calculation of fire spread.");
+            Engine.Message(null, Engine.LogType.Log, "Finished backwards calculation of fire spread.");
         }
     }
 

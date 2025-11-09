@@ -93,19 +93,14 @@ namespace WUInity
 
         private FireRenderer _fireRenderer;
         private EvacuationRenderer _evacuationRenderer;
-        private PopulationDataVisualizerUnity _populationDataVisualizer;
-        private FireDataVisualizerUnity _fireDataVisualizer;
+        private SimulationDomainVisualizerUnity _simulationDomainVisualizer;
+        private FireDomainVisualizerUnity _fireDomainVisualizer;
 
-        public PopulationDataVisualizerUnity PopulationDataVisualizer { get => _populationDataVisualizer; }
-        public FireDataVisualizerUnity FireDataVisualizer { get => _fireDataVisualizer; }
+        public SimulationDomainVisualizerUnity SimulationDomainVisualizer { get => _simulationDomainVisualizer; }
+        public FireDomainVisualizerUnity FireDomainVisualizer { get => _fireDomainVisualizer; }
         
-
-        MeshRenderer _domainDataMeshRenderer;
-        MeshRenderer _fireDataPlaneMeshRenderer;
         //List<GameObject> drawnRoad_s;
         GameObject[] _goalMarkers;
-        private GameObject _evacDataPlane;
-        private GameObject _fireDataPlane;
         GameObject _directionsGO;
 
         bool _renderHouseholds = false;
@@ -173,6 +168,9 @@ namespace WUInity
                 g.name = "GodCamera";
                 _godCamera = g.AddComponent<GodCamera>();
             }
+
+            _simulationDomainVisualizer = new SimulationDomainVisualizerUnity(transform);
+            _fireDomainVisualizer = new FireDomainVisualizerUnity(transform);
         }
 
         private void Start()
@@ -253,13 +251,13 @@ namespace WUInity
 
             if (!Map.IsAccessTokenValid)
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, "Mapbox token not valid.");
+                Engine.Message(null, Engine.LogType.SimulationError, "Mapbox token not valid.");
                 return;
             }
 
-            Engine.MESSAGE(null, Engine.LogType.Log, "Starting to load Mapbox map.");
+            Engine.Message(null, Engine.LogType.Log, "Starting to load Mapbox map.");
             Map.Initialize(new Mapbox.Utils.Vector2d(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y), input.Map.ZoomLevel);
-            Engine.MESSAGE(null, Engine.LogType.Log, "Map loaded succesfully.");
+            Engine.Message(null, Engine.LogType.Log, "Map loaded succesfully.");
 
             //do warping to better fit UTM
             for (int i = 0; i < Map.transform.childCount; ++i)
@@ -469,21 +467,18 @@ namespace WUInity
         void GetCellInfo(Vector3 pos, int x, int y)
         {
             dataSampleString = "No data to sample.";
-            if (dataSampleMode == DataSampleMode.LocalGPW)
-            {
-                if (_engine.WorkingData.LocalGPWData != null && _engine.WorkingData.LocalGPWData.Density != null && _engine.WorkingData.LocalGPWData.Density.Length > 0)
+            if (dataSampleMode == DataSampleMode.LocalGPW && _engine.WorkingData.LocalGPWData != null)
+            {                
+                if (_simulationDomainVisualizer.IsDataPlaneActive())
                 {
-                    if (_populationDataVisualizer.IsDataPlaneActive())
-                    {
-                        float xCellSize = (float)(_engine.WorkingData.LocalGPWData.RealWorldSize.x / _engine.WorkingData.LocalGPWData.CellCount.x);
-                        float yCellSize = (float)(_engine.WorkingData.LocalGPWData.RealWorldSize.y / _engine.WorkingData.LocalGPWData.CellCount.y);
-                        double cellArea = xCellSize * yCellSize / (1000000d);
-                        dataSampleString = "GPW people count: " + System.Convert.ToInt32(_engine.WorkingData.LocalGPWData.GetDensitySimulationSpace(new PREACT.Utility.Math.Vector2d(pos.x, pos.z)) * cellArea);
-                    }
-                    else
-                    {
-                        dataSampleString = "GPW data not visible, activate to sample data.";
-                    }
+                    float xCellSize = (float)(_engine.WorkingData.LocalGPWData.RealWorldSize.x / _engine.WorkingData.LocalGPWData.CellCount.x);
+                    float yCellSize = (float)(_engine.WorkingData.LocalGPWData.RealWorldSize.y / _engine.WorkingData.LocalGPWData.CellCount.y);
+                    double cellArea = xCellSize * yCellSize / (1000000d);
+                    dataSampleString = "GPW people count: " + System.Convert.ToInt32(_engine.WorkingData.LocalGPWData.GetDensitySimulationSpace(new PREACT.Utility.Math.Vector2d(pos.x, pos.z)) * cellArea);
+                }
+                else
+                {
+                    dataSampleString = "GPW data not visible, activate to sample data.";
                 }
             }
             else if (x < 0 || x > _input.Evacuation.Data.CellCount.x || y < 0 || y > _input.Evacuation.Data.CellCount.y)
@@ -499,7 +494,7 @@ namespace WUInity
             {
 
             }
-            else if (_evacDataPlane != null && _evacDataPlane.activeSelf)
+            else if (_simulationDomainVisualizer.IsDataPlaneActive())
             {
                 if (dataSampleMode == DataSampleMode.PopulationMap)
                 {
@@ -571,19 +566,19 @@ namespace WUInity
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Paint mode not set correctly.");
+                Engine.Message(null, Engine.LogType.Warning, "Paint mode not set correctly.");
             }
             dataSampleMode = DataSampleMode.Paint;
 
             if(fireEdit)
             {
-                SetDomainDataPlane(false);
-                SetFireDataPlane(true);
+                _simulationDomainVisualizer.SetVisibility(false);
+                _fireDomainVisualizer.SetVisibility(true);
             }
             else
             {
-                SetDomainDataPlane(true);
-                SetFireDataPlane(false);
+                _simulationDomainVisualizer.SetVisibility(true);
+                _fireDomainVisualizer.SetVisibility(false);
             }
         }
 
@@ -591,48 +586,8 @@ namespace WUInity
         {
             Painter.gameObject.SetActive(false);
             dataSampleMode = DataSampleMode.None;
-            if (_evacDataPlane != null)
-            {
-                _evacDataPlane.SetActive(false);
-            }
-            if (_fireDataPlane != null)
-            {
-                _fireDataPlane.SetActive(false);
-            }
-        }
-
-        private MeshRenderer CreateDataPlane(Texture2D tex, string name, PREACT.Utility.Math.Vector2d size, PREACT.Utility.Math.Vector2d originOffset)
-        {
-            GameObject gO = new GameObject(name);
-            gO.transform.parent = this.transform;
-            gO.isStatic = true;
-            // You can change that line to provide another MeshFilter
-            MeshFilter filter = gO.AddComponent<MeshFilter>();
-            Mesh mesh = new Mesh(); // filter.mesh;
-            filter.mesh = mesh;
-            MeshRenderer mR = gO.AddComponent<MeshRenderer>();
-            mR.receiveShadows = false;
-            mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            mesh.Clear();
-
-            float width = (float)size.x;
-            float length = (float)size.y;
-
-
-            Vector3 offset = new Vector3((float)originOffset.x, 0f, (float)originOffset.y);
-
-            Visualization.VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset);
-
-            Material mat = new Material(Shader.Find("Unlit/Transparent"));
-            mat.mainTexture = tex;
-
-            mR.material = mat;
-
-            //move up one meter
-            gO.transform.position += Vector3.up;
-            gO.SetActive(false); //create hidden
-
-            return mR;
+            _simulationDomainVisualizer.SetVisibility(false);
+            _fireDomainVisualizer.SetVisibility(false);
         }
 
         public void SpawnEvacuationGoalMarkers()
@@ -715,34 +670,14 @@ namespace WUInity
             SetSootRendering(false);
         }
 
-        public void DisplayPopulationMap()
-        {
-            SetDataPlaneTexture((Texture2D)_populationDataVisualizer.GetPopulationTexture());
-        }
-
-        private void DisplayWUIAreaMap()
-        {
-            SetDataPlaneTexture(Painter.GetWUIAreaTexture(), true);
-        }
-
-        public void DisplayRandomIgnitionAreaMap()
-        {
-            SetDataPlaneTexture(Painter.GetRandomIgnitionTexture(), true);
-        }
-
-        public void DisplayInitialIgnitionMap()
-        {
-            SetDataPlaneTexture(Painter.GetInitialIgnitionTexture(), true);
-        }
-
         public void DisplayEvacGroupMap()
         {
-            SetDataPlaneTexture(Painter.GetEvacGroupTexture());
+            _simulationDomainVisualizer.SetSimulationPlaneTexture(Painter.GetEvacGroupTexture());
         }
 
         public void DisplayPopulationMask()
         {
-            SetDataPlaneTexture(Painter.GetPopulationMaskTexture());
+            _simulationDomainVisualizer.SetSimulationPlaneTexture(Painter.GetPopulationMaskTexture());
         }
 
         public void DisplayTrafficUsageMap()
@@ -751,8 +686,23 @@ namespace WUInity
             {
                 CreateTrafficUsageMapTexture();
             }
-            SetDataPlaneTexture(_trafficUsageMap);
-            SetDomainDataPlane(true);
+            //SetDataPlaneTexture(_trafficUsageMap);
+            //SetDomainDataPlane(true);
+        }
+
+        private void DisplayWUIAreaMap()
+        {
+            _fireDomainVisualizer.SetLCPPlaneTexture(Painter.GetWUIAreaTexture());
+        }
+
+        public void DisplayRandomIgnitionAreaMap()
+        {
+            _fireDomainVisualizer.SetLCPPlaneTexture(Painter.GetRandomIgnitionTexture());
+        }
+
+        public void DisplayInitialIgnitionMap()
+        {
+            _fireDomainVisualizer.SetLCPPlaneTexture(Painter.GetInitialIgnitionTexture());
         }
 
         Texture2D _trafficUsageMap;
@@ -777,33 +727,6 @@ namespace WUInity
                 }
             }
             _trafficUsageMap.Apply();
-        }
-
-        public  void SetDomainDataPlane(bool setActive)
-        {
-            if (_domainDataMeshRenderer != null)
-            {
-                _domainDataMeshRenderer.gameObject.SetActive(setActive);
-            }
-        }
-
-        public void SetFireDataPlane(bool setActive)
-        {
-            if (_fireDataPlaneMeshRenderer != null)
-            {
-                _fireDataPlaneMeshRenderer.gameObject.SetActive(setActive);
-            }
-        }
-
-        public bool ToggleDomainDataPlane()
-        {
-            if (_domainDataMeshRenderer != null)
-            {
-                _domainDataMeshRenderer.gameObject.SetActive(!_domainDataMeshRenderer.gameObject.activeSelf);
-                return _domainDataMeshRenderer.gameObject.activeSelf;
-            }
-
-            return false;
         }
 
         public void SetHouseholdRendering(bool enable)
@@ -860,45 +783,7 @@ namespace WUInity
         {
             _renderFireSpread = FireRenderer.ToggleFire(_input);
             return _renderFireSpread;
-        }
-
-        private void SetDataPlaneTexture(Texture2D tex, bool fireMeshMode = false)
-        {
-            //pick needed data plane
-            MeshRenderer activeMeshRenderer = _domainDataMeshRenderer;
-            PREACT.Utility.Math.Vector2int cellCount = _input.Evacuation.Data.CellCount;
-            PREACT.Utility.Math.Vector2d size = _input.Simulation.DomainSize;
-            PREACT.Utility.Math.Vector2d offset = PREACT.Utility.Math.Vector2d.zero;
-            string name = "Evac Data Plane";
-            if (fireMeshMode)
-            {
-                activeMeshRenderer = _fireDataPlaneMeshRenderer;
-                cellCount = new PREACT.Utility.Math.Vector2int(_input.Fire.Data.LCPData.GetCellCountX(), _input.Fire.Data.LCPData.GetCellCountY());
-                size = _input.Fire.Data.LCPData.GetSize();
-                offset = _input.Fire.Data.LCPData.OriginOffset;
-                name = "Fire Data Plane";
-            }
-
-            //make sure it exists, else create
-            if (activeMeshRenderer == null)
-            {
-                activeMeshRenderer = CreateDataPlane(tex, name, size, offset);
-                if(fireMeshMode)
-                {
-                    _fireDataPlaneMeshRenderer = activeMeshRenderer;
-                    _fireDataPlane = activeMeshRenderer.gameObject;
-                }
-                else
-                {
-                    _domainDataMeshRenderer = activeMeshRenderer;
-                    _evacDataPlane = activeMeshRenderer.gameObject;
-                }                
-            }
-            else
-            {
-                activeMeshRenderer.material.mainTexture = tex;                
-            }
-        }
+        }        
 
         PREACTColor GetTrafficDensityColor(int cars)
         {
@@ -921,6 +806,7 @@ namespace WUInity
             UpdateMap();
             UpdateSimBorders();
             WUICamera.SetCameraStartPosition(_input.Simulation.DomainSize);
+            _painter.SetLCPData(input.Fire.Data.LCPData);
         }
 
         public void UpdateMap()

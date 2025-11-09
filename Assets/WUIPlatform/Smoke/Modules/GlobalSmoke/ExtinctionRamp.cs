@@ -36,7 +36,7 @@ namespace PREACT.Smoke
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Extinction coefficient ramp file " + filePath + " not found.");
+                Engine.Message(null, Engine.LogType.Warning, "Extinction coefficient ramp file " + filePath + " not found.");
                 return extinctionRamp;
             }
 

@@ -115,14 +115,14 @@ namespace PREACT.IO
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
+                    Engine.Message(null, Engine.LogType.Warning, "Evacuation goal data file " + path + " not found and could not be loaded.");
                 }
             }
 
             if (evacDestinations.Count > 0)
             {
                 success = true;
-                Engine.MESSAGE(null, Engine.LogType.Log, " " + evacDestinations.Count + " valid evacuation goal files were succesfully loaded.");
+                Engine.Message(null, Engine.LogType.Log, " " + evacDestinations.Count + " valid evacuation goal files were succesfully loaded.");
             }
 
             return evacDestinations;

@@ -44,7 +44,7 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        Engine.MESSAGE(null, Engine.LogType.SimulationError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
+                        Engine.Message(null, Engine.LogType.SimulationError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
                         break;
                 }
             }
@@ -59,7 +59,7 @@ namespace PREACT.IO
                 if(newInput.ZoomLevel < 0 || newInput.ZoomLevel > 20)
                 {
                     newInput.ZoomLevel = 13;
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + newInput.ZoomLevel + ".");                                       
+                    Engine.Message(null, Engine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + newInput.ZoomLevel + ".");                                       
                 }
             }
             else

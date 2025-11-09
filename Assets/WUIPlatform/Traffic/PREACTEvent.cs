@@ -36,7 +36,7 @@ namespace PREACT
             if(!Triggered)
             {
                 Triggered = true;
-                Engine.MESSAGE(null, Engine.LogType.Event, "Goal blocked: " + _simulation.Destinations[GoalIndex].Name);
+                Engine.Message(null, Engine.LogType.Event, "Goal blocked: " + _simulation.Destinations[GoalIndex].Name);
                 _simulation.BlockEvacGoal(GoalIndex);
             }            
         }
@@ -60,7 +60,7 @@ namespace PREACT
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, "Goal blocking event file not found in " + filePath + " and could not be loaded");
+                Engine.Message(null, Engine.LogType.Warning, "Goal blocking event file not found in " + filePath + " and could not be loaded");
             }
             
             return blockDestinationEvent;

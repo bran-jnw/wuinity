@@ -13,6 +13,11 @@ namespace WUInity.UI
         string lcpCurrentInfo;
         void FireMenu()
         {
+            if(_input == null)
+            {
+                return;
+            }
+
             FireInput fI = _input.Fire;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -43,31 +48,31 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle LCP display"))
                 {
-                    _wuinityManager.FireDataVisualizer.ToggleLCPDataPlane();   
+                    _wuinityManager.FireDomainVisualizer.ToggleVisibility();
                 }
                 ++buttonIndex;
 
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Fuel model"))
                 {
-                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.FuelModel);
+                    _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.FuelModel);
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
-                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Elevation);
+                    _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Elevation);
                     lcpCurrentInfo = "Elevation range: " + _input.Fire.Data.LCPData.GetElevationMin() + "-" + _input.Fire.Data.LCPData.GetElevationMax() + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
-                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Slope);
+                    _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Slope);
                     lcpCurrentInfo = "Slope range: " + _input.Fire.Data.LCPData.GetSlopeMin() + "-" + _input.Fire.Data.LCPData.GetSlopeMax() + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
-                    _wuinityManager.FireDataVisualizer.SetLCPViewMode(FireDataVisualizer.LcpViewMode.Aspect);
+                    _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Aspect);
                     lcpCurrentInfo = "Aspect range: " + _input.Fire.Data.LCPData.GetAspectMin() + "-" + _input.Fire.Data.LCPData.GetAspectMax() + " [°]";
                 }
                 ++buttonIndex;
@@ -142,9 +147,8 @@ namespace WUInity.UI
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
-                {                    
-                    _wuinityManager.StopPainter();
-                    GraphicalFireInput.SaveGraphicalFireInput();
+                {
+                    FinishGraphicalFireInputEdit();
                 }
                 ++buttonIndex;                
             }
@@ -167,7 +171,7 @@ namespace WUInity.UI
 
         void LoadLCP(string[] paths)
         {
-            _input.Fire.Data.LoadLCPFile(paths[0], true);
+            _input.Fire.Data.LoadLCPFile(_input.Fire, paths[0], _input.Simulation.Data.UTMOrigin, true, out success);
         }
 
         void OpenLoadFuelsModelFile()
@@ -179,12 +183,19 @@ namespace WUInity.UI
 
         void LoadFuelModelsFile(string[] paths)
         {
-            _input.Fire.Data.LoadFuelModelsInput(paths[0], true);
+            _input.Fire.Data.LoadFuelModelsInput(_input.Fire, paths[0], true, out success);
+        }
+
+        void FinishGraphicalFireInputEdit()
+        {
+            _wuinityManager.StopPainter();
+            string filePath = Path.Combine(_engine.WorkingFolder, _input.Fire.GraphicalFireInputFile);
+            GraphicalFireInput.SaveGraphicalFireInput(filePath, _input.Fire.Data);
         }
 
         void ResetFireGUI()
         {
-            _wuinityManager.Fir.SetLCPDataPlane(false);
+            _wuinityManager.FireDomainVisualizer.SetVisibility(false);
         }
     }
 }

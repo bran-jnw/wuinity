@@ -82,12 +82,12 @@ namespace PREACT.Evacuation
                         string file = Path.Combine(rootFolder, responseCurveFiles[i]);
                         string name = Path.GetFileNameWithoutExtension(file);
                         responseCurves.Add(new ResponseCurve(dataPoints, name));
-                        Engine.MESSAGE(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
+                        Engine.Message(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
                     }                    
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
+                    Engine.Message(null, Engine.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
                 }
             }
 
@@ -98,7 +98,7 @@ namespace PREACT.Evacuation
             }
             else
             {
-                Engine.MESSAGE(null, Engine.LogType.InputError, " No response curves could be loaded, simulation will stall.");
+                Engine.Message(null, Engine.LogType.InputError, " No response curves could be loaded, simulation will stall.");
                 return null;
             }   
         }

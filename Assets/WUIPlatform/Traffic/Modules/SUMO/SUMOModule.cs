@@ -71,7 +71,7 @@ namespace PREACT.Traffic
             catch(Exception e)
             {
                 success = false;
-                Engine.MESSAGE(_simulation, Engine.LogType.SimulationError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
+                Engine.Message(_simulation, Engine.LogType.SimulationError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
             }
             
         }
@@ -233,16 +233,16 @@ namespace PREACT.Traffic
                         if(route.edges.Count > 0)
                         {
                             foundRoute = true;
-                            Engine.MESSAGE(null, Engine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location. Affected lat/lon: " + startLatLon.x + ", " + startLatLon.y);
+                            Engine.Message(null, Engine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location. Affected lat/lon: " + startLatLon.x + ", " + startLatLon.y);
                         }
                         else
                         {
-                            Engine.MESSAGE(null, Engine.LogType.Warning, "No route could be found for the injected car, tried teleporting but no valid route could be found.");
+                            Engine.Message(null, Engine.LogType.Warning, "No route could be found for the injected car, tried teleporting but no valid route could be found.");
                         }
                     }
                     else
                     {
-                        Engine.MESSAGE(null, Engine.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
+                        Engine.Message(null, Engine.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
                     }
 
                     if(foundRoute)
@@ -261,7 +261,7 @@ namespace PREACT.Traffic
                 }
                 catch (Exception e)
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Warning, "SUMO: " + e.Message);
+                    Engine.Message(null, Engine.LogType.Warning, "SUMO: " + e.Message);
                 }              
             } 
             
@@ -304,7 +304,7 @@ namespace PREACT.Traffic
             }
             catch(Exception e)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
+                Engine.Message(null, Engine.LogType.Warning, e.Message);
             }
 
             filePath = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Name + "_trafficData_" + simulationIndex + ".tiff");
@@ -394,7 +394,7 @@ namespace PREACT.Traffic
             }
             catch (Exception e)
             {
-                Engine.MESSAGE(null, Engine.LogType.Warning, e.Message);
+                Engine.Message(null, Engine.LogType.Warning, e.Message);
             }
         }
 
@@ -408,7 +408,7 @@ namespace PREACT.Traffic
         {
             if(!_simulation.Input.Simulation.RunFireModule)
             {
-                Engine.MESSAGE(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
+                Engine.Message(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
                 return;
             }
 
@@ -446,11 +446,11 @@ namespace PREACT.Traffic
                     }
                 }
 
-                Engine.MESSAGE(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
+                Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
             }
             catch (Exception e) 
             {
-                Engine.MESSAGE(null, Engine.LogType.SimulationError, e.Message);
+                Engine.Message(null, Engine.LogType.SimulationError, e.Message);
             }            
         }
 
@@ -489,11 +489,11 @@ namespace PREACT.Traffic
 
                 if(carsToUpdate.Count == 0)
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+                    Engine.Message(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
                 }
                 else
                 {
-                    Engine.MESSAGE(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
+                    Engine.Message(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
                 }
 
                 //then do update for affected cars

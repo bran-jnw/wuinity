@@ -9,22 +9,24 @@ using PREACT.Runtime;
 
 namespace PREACT.Population
 {
-    public abstract class PopulationVisualizer
+    public abstract class SimulationDomainVisualizer
     {
-        protected WorkingData _workingData;
-        public PopulationVisualizer(WorkingData workingData)
-        {
-            _workingData = workingData;
-        }
-
-        public abstract void SetDataPlane(bool setActive);
+        public abstract void SetAndDisplayPopulationMapTexture(PopulationMap data, WorkingData workingData);
+        public abstract void SetAndDisplayPopulationMapMaskTexture(PopulationMap data, WorkingData workingData);
+        public abstract void SetVisibility(bool visible);
+        public abstract bool ToggleVisibility();
         public abstract bool IsDataPlaneActive();
+        //textures
         public abstract object GetPopulationTexture();
         public abstract object GetPopulationMaskTexture();
-        public abstract void DisplayPopulationMap(PopulationMap data);
-        public abstract void CreatePopulationMapMaskTexture(PopulationMap data);
-        public abstract void DisplayLocalGPW(LocalGPWData data);
-        public abstract bool ToggleLocalGPWVisibility();
+        
+                
+        public abstract void SetAndDisplayLocalGPW(LocalGPWData data, WorkingData workingData);
+        public abstract void SetGPWVisibility(bool visible);
+        public abstract bool ToggleGPWVisibility();
+        public abstract bool IsGPWPlaneVisible();
+        //textures
+        public abstract object GetGPWTexture();
 
         //colors from GPW website
         static PREACTColor c0 = new PREACTColor(190f / 255f, 232f / 255f, 255f / 255f);

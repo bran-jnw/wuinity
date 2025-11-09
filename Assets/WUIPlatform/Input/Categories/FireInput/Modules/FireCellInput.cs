@@ -53,7 +53,7 @@ namespace PREACT.IO
                         newInput.SpreadMode = SpreadModeEnum.SixteenDirections;
                         break;
                     default:
-                        Engine.MESSAGE(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
+                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
                         break;
                 }
             }
