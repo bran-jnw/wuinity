@@ -184,7 +184,7 @@ namespace PREACT
                             preactRun.CreateNoWindow = true;
                             Process.Start(preactRun).WaitForExit();
                         });
-                    }                    
+                    }    
                 }
 
                 Task.WaitAll(tasks);

@@ -7,9 +7,9 @@ namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string dT, nrRuns, convergenceMaxDifference, convergenceMinSequence;
-        bool mainMenuDirty = true, creatingNewFile = false;
-        EngineTask _engineTask;
+        string _dT, _nrRuns, _convergenceMaxDifference, _convergenceMinSequence, _minimumRunSequence;
+        bool mainMenuDirty = true, creatingNewFile = false, _multipleSimulations;
+        EngineTask _engineTask = new EngineTask();
 
         void MainMenu()
         {
@@ -81,30 +81,35 @@ namespace WUInity.UI
             //dT
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Time step [s]:");
             ++buttonIndex;
-            dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), dT);
+            _dT = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _dT);
             ++buttonIndex;
 
-            _engineTask.MultipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engineTask.MultipleSimulations, "Multiple runs");
+            _multipleSimulations = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _multipleSimulations, "Multiple runs");
             ++buttonIndex;
-            if (_engineTask.MultipleSimulations)
+            if (_multipleSimulations)
             {
                 //number of runs
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Number of runs:");
                 ++buttonIndex;
-                nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), nrRuns);
+                _nrRuns = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _nrRuns);
                 ++buttonIndex;
 
                 _engineTask.StopAfterConverging = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _engineTask.StopAfterConverging, "Stop after converging");
                 ++buttonIndex;
 
-                if(_engineTask.StopAfterConverging)
+                if (_engineTask.StopAfterConverging)
                 {
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Convergence criteria:");
                     ++buttonIndex;
-                    convergenceMaxDifference = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), convergenceMaxDifference);
+                    _convergenceMaxDifference = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _convergenceMaxDifference);
+                    ++buttonIndex;
+
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Minimum runs:");
+                    ++buttonIndex;
+                    _minimumRunSequence = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _minimumRunSequence);
                     ++buttonIndex;
                 }
-            }
+            }            
 
             _input.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunPedestrianModule, "Simulate pedestrians");
             ++buttonIndex;
@@ -122,7 +127,23 @@ namespace WUInity.UI
             {
                 ParseMainData();
                 menuChoice = ActiveMenu.Output;
-                _wuinityManager.RunSimulation(new EngineTask(true, 1, true, 10, 0.02f));
+                if(_multipleSimulations)
+                {
+                    int.TryParse(_nrRuns, out _engineTask.NumberOfRuns);
+                    float.TryParse(_convergenceMaxDifference, out _engineTask.ConvergenceMaxDifference);
+                    int.TryParse(_minimumRunSequence, out _engineTask.ConvergenceMinSequence);
+                    if(_engineTask.NumberOfRuns > 1)
+                    {
+                        _engineTask.Execution = EngineTask.ExecutionMode.ParallelProcess;
+                    }
+                }
+                else
+                {
+                    _engineTask.NumberOfRuns = 1;
+                    _engineTask.StopAfterConverging = true;
+                    _engineTask.Execution = EngineTask.ExecutionMode.Serial;
+                }
+                _wuinityManager.RunSimulation(_engineTask);
             }
             ++buttonIndex;            
         }
@@ -132,10 +153,10 @@ namespace WUInity.UI
             mainMenuDirty = false;
             if(_input != null)
             {
-                dT = _input.Simulation.DeltaTime.ToString();
-                nrRuns = _engineTask.NumberOfRuns.ToString();
-                convergenceMaxDifference = _engineTask.ConvergenceMaxDifference.ToString();
-                convergenceMinSequence = _engineTask.ConvergenceMinSequence.ToString();
+                _dT = _input.Simulation.DeltaTime.ToString();
+                _nrRuns = _engineTask.NumberOfRuns.ToString();
+                _convergenceMaxDifference = _engineTask.ConvergenceMaxDifference.ToString();
+                _convergenceMinSequence = _engineTask.ConvergenceMinSequence.ToString();
             }          
         }
 
@@ -149,10 +170,10 @@ namespace WUInity.UI
                 return;
             }
 
-            float.TryParse(dT, out _input.Simulation.DeltaTime);
-            int.TryParse(nrRuns, out _engineTask.NumberOfRuns);
-            float.TryParse(convergenceMaxDifference, out _engineTask.ConvergenceMaxDifference);
-            int.TryParse(convergenceMinSequence, out _engineTask.ConvergenceMinSequence);
+            float.TryParse(_dT, out _input.Simulation.DeltaTime);
+            int.TryParse(_nrRuns, out _engineTask.NumberOfRuns);
+            float.TryParse(_convergenceMaxDifference, out _engineTask.ConvergenceMaxDifference);
+            int.TryParse(_convergenceMinSequence, out _engineTask.ConvergenceMinSequence);
         }
 
         void OpenSaveInput()
