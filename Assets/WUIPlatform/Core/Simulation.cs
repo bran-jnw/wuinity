@@ -753,5 +753,18 @@ namespace PREACT
 
             return result;
         }
+
+        List<float> _emptyArrivalData = new List<float>();
+        public List<float> GetTrafficArrivalData()
+        {
+            if (_trafficModule != null)
+            {
+                return _trafficModule.GetArrivalData();
+            }
+            else
+            {
+                return _emptyArrivalData;
+            }
+        }
     }    
 }

@@ -2,15 +2,17 @@ namespace PREACT
 {
     public struct EngineTask
     {
-        public bool MultipleSimulations;
+        public enum ExecutionMode { Serial, Parallel, ParallelProcess };
+
+        public ExecutionMode Execution;
         public int NumberOfRuns;
         public bool StopAfterConverging;        
         public int ConvergenceMinSequence;
         public float ConvergenceMaxDifference;
 
-        public EngineTask(bool multipleSimulations = true, int numberOfRuns = 50, bool stopAfterConverging = true, int convergenceMinSequence = 10, float convergenceMaxDifference = 0.02f)
+        public EngineTask(ExecutionMode Execution, int numberOfRuns, bool stopAfterConverging = true, int convergenceMinSequence = 10, float convergenceMaxDifference = 0.02f)
         {
-            MultipleSimulations = multipleSimulations;
+            this.Execution = Execution;
             NumberOfRuns = numberOfRuns;
             StopAfterConverging = stopAfterConverging;
             ConvergenceMinSequence = convergenceMinSequence;

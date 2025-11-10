@@ -9,8 +9,10 @@ using PREACT.IO;
 using System.IO;
 using System.Collections.Generic;
 using System;
+using System.Diagnostics;
 using PREACT.Utility.Analysis;
 using PREACT.Runtime;
+using System.Threading.Tasks;
 
 namespace PREACT
 {    
@@ -89,7 +91,7 @@ namespace PREACT
             }            
         }      
        
-        public async void RunSimulations(EngineTask engineTask, bool runInParallel = false)
+        public async void RunSimulations(EngineTask engineTask)
         {
             if(_input == null)
             {
@@ -99,16 +101,23 @@ namespace PREACT
 
             try
             {    
-                System.Threading.Tasks.Task task;
-                if(runInParallel)
+                Task task;
+                if(engineTask.Execution == EngineTask.ExecutionMode.Parallel)
                 {
+
                     Message(null, LogType.Log, "Starting simlations/s in parallel mode.");
-                    task = System.Threading.Tasks.Task.Run(() => RunSimulationsParallel(engineTask));
+                    task = Task.Run(() => RunSimulationsParallel(engineTask)); 
+                    
+                }
+                else if(engineTask.Execution == EngineTask.ExecutionMode.ParallelProcess)
+                {
+                    Message(null, LogType.Log, "Starting simlations/s in parallel process mode.");
+                    task = Task.Run(() => RunSimulationsParallelProcess(engineTask));
                 }
                 else
                 {
                     Message(null, LogType.Log, "Starting simlations/s in serial mode.");
-                    task = System.Threading.Tasks.Task.Run(() => RunSimulationsSerial(engineTask));
+                    task = Task.Run(() => RunSimulationsSerial(engineTask));
                 }
                 await task;
             }
@@ -128,7 +137,10 @@ namespace PREACT
                 Simulation simulation = new Simulation(this, _input, i);
                 _mainSimulation = simulation;
                 simulation.Run();
-                CollectSimulationStatistics(simulation, engineTask);
+                if(simulation.TrafficModule != null)
+                {
+                    CollectSimulationStatistics(simulation.GetTrafficArrivalData(), engineTask);
+                }                
                 if (_stopSimulations)
                 {
                     break;
@@ -138,42 +150,109 @@ namespace PREACT
             PostSimulations();
         }
 
-        private void RunSimulationsParalellProcess()
+        private void RunSimulationsParallelProcess(EngineTask engineTask)
         {
-            //run one sim in this process
-            _simulations[0].Run();
+            PreSimulations(engineTask);
 
-            //run the rest as new processes so that SUMO works
-            var tcs = new System.Threading.Tasks.TaskCompletionSource<int>();
-
-            var process = new System.Diagnostics.Process
+            //we run them in batches as running everything at once will likely overlaod the CPU cores, and we might waste a lot of processing power since we could terminate early if we reach convergence
+            int batches = engineTask.NumberOfRuns / _parallellRunsCount + engineTask.NumberOfRuns % _parallellRunsCount > 0 ? 1 : 0;
+            for (int i = 0; i < batches; ++i)
             {
-                StartInfo = { FileName = "wuinity.exe", Arguments= WorkingFile },
-                EnableRaisingEvents = true
-            };
+                int startIndex = i * _parallellRunsCount;
+                int endIndex = Math.Min(startIndex + _parallellRunsCount, engineTask.NumberOfRuns);
 
-            process.Exited += (sender, args) =>
-            {
-                tcs.SetResult(process.ExitCode);
-                process.Dispose();
-            };
+                int simulationCount = endIndex - startIndex;
+                Task[] tasks = new Task[simulationCount];
+                string[] outputFilePaths = new string[simulationCount - 1]; 
+                for (int j = 0; j < simulationCount; ++j)
+                {
+                    //run first one in this process
+                    if (j == 0)
+                    {
+                        _mainSimulation = new Simulation(this, _input, j + startIndex);
+                        tasks[j] = Task.Run(() => _mainSimulation.Run());
+                    }
+                    //run the rest as new processes so that SUMO works
+                    else
+                    {
+                        tasks[j] = Task.Run(() => 
+                        {
+                            ProcessStartInfo preactRun = new ProcessStartInfo();
+                            preactRun.FileName = "preact.exe";
+                            outputFilePaths[j - 1] = Path.Combine(OutputFolder, _input.Simulation.Name + "_" + j + "_arrivalData.csv");
+                            preactRun.Arguments = WorkingFile + " " + outputFilePaths[j - 1];
+                            preactRun.CreateNoWindow = true;
+                            Process.Start(preactRun).WaitForExit();
+                        });
+                    }                    
+                }
 
-            process.Start();
+                Task.WaitAll(tasks);
 
-            //collect the data written to disk to create output
+                for (int j = 0; j < simulationCount; ++j)
+                {
+                    if(j == 1)
+                    {
+                        CollectSimulationStatistics(_mainSimulation.GetTrafficArrivalData(), engineTask);                      
+                    }
+                    else
+                    {
+                        bool success;
+                        List<float> dataFromDisk = ParseArrivalData(outputFilePaths[j - 1], out success);
+                        if (success)
+                        {
+                            CollectSimulationStatistics(dataFromDisk, engineTask);
+                        }                        
+                    }
+                }
+
+                if (_stopSimulations)
+                {
+                    break;
+                }
+            }
+
+            PostSimulations();
         }
 
-        const int _parallellRunCount = 4;        
+        private List<float> ParseArrivalData(string filePath, out bool success)
+        {
+            List<float> result = new List<float>(); 
+            success = false;
+
+            if(File.Exists(filePath))
+            {
+                string[] data = File.ReadAllLines(filePath);
+
+                for(int i = 0; i < data.Length; ++i)
+                {
+                    float value;
+                    float.TryParse(data[i], out value);
+                    result.Add(value);
+                }
+
+                success = true;
+            }
+            
+            if(!success)
+            {
+                Message(null, LogType.Warning, "Could not read arrival data from " + filePath + ", skipping data from simulation.");
+            }
+
+            return result;
+        }
+
+        const int _parallellRunsCount = 4;        
         private void RunSimulationsParallel(EngineTask engineTask)
         {
             PreSimulations(engineTask);
 
             //Currently this will not work as SUMO can only run one instance per process, need to find workaround
-            int batches = engineTask.NumberOfRuns / _parallellRunCount + engineTask.NumberOfRuns % _parallellRunCount > 0 ? 1 : 0;
+            int batches = engineTask.NumberOfRuns / _parallellRunsCount + engineTask.NumberOfRuns % _parallellRunsCount > 0 ? 1 : 0;
             for (int i = 0; i < batches; ++i)
             {
-                int startIndex = batches * _parallellRunCount;
-                int endIndex = Math.Min(startIndex + _parallellRunCount, engineTask.NumberOfRuns);
+                int startIndex = i * _parallellRunsCount;
+                int endIndex = Math.Min(startIndex + _parallellRunsCount, engineTask.NumberOfRuns);
                 System.Threading.Tasks.Parallel.For(startIndex, endIndex, index =>
                 {
                     try
@@ -188,7 +267,7 @@ namespace PREACT
 
                 for(int j = startIndex; j < endIndex; ++j)
                 {
-                    CollectSimulationStatistics(_simulations[j], engineTask);
+                    CollectSimulationStatistics(_simulations[j].GetTrafficArrivalData(), engineTask);                  
                 }
                 if(_stopSimulations)
                 {
@@ -199,7 +278,7 @@ namespace PREACT
             PostSimulations();
         }
 
-        private void PreSimulations(EngineTask engineTask, bool parallel = false)
+        private void PreSimulations(EngineTask engineTask)
         {
             _stopSimulations = false;
 
@@ -210,18 +289,7 @@ namespace PREACT
             else
             {
                 trafficArrivalDataCollection = new List<List<float>>();
-            }
-
-            if (parallel)
-            {
-                _simulations = new Simulation[engineTask.NumberOfRuns];
-                for (int i = 0; i < _simulations.Length; ++i)
-                {
-                    _simulations[i] = new Simulation(this, _input, i);
-                }
-                //by default simulation 0 will be the main to be displayed
-                SetMainSimulation(0);
-            }            
+            }                     
 
             if (_input.WUIShow.SendDataToWUIShow && _input.Simulation.RunTrafficModule)
             {
@@ -285,49 +353,43 @@ namespace PREACT
         /// Each simulation calls this function when it is done to see if evacuation time has vonverged and simulations should be stopped.
         /// </summary>
         /// <param name="simulation"></param>
-        private void CollectSimulationStatistics(Simulation simulation, EngineTask engineTask)
+        private void CollectSimulationStatistics(List<float> arrivalData, EngineTask engineTask)
         {
-            lock(trafficArrivalDataCollection)
-            {
-                if (simulation.TrafficModule != null)
-                {
-                    trafficArrivalDataCollection.Add(simulation.TrafficModule.GetArrivalData());
-                }
-                else
-                {
-                    return;
-                }
+            trafficArrivalDataCollection.Add(arrivalData);
+            EvaluateSimulationStatistics(arrivalData[arrivalData.Count - 1], engineTask);
+        }
 
-                int resultCount = trafficArrivalDataCollection.Count;
-                //need at least 2 simulations to have valid average
-                if (resultCount > 1)
+        private void EvaluateSimulationStatistics(float simulationRSET, EngineTask engineTask)
+        {
+            int resultCount = trafficArrivalDataCollection.Count;
+            //need at least 2 simulations to have valid average
+            if (resultCount > 1)
+            {
+                float pastAverage = cumulativeTotalEvacTime / (resultCount - 1);
+                cumulativeTotalEvacTime += simulationRSET;
+                float currentAverage = cumulativeTotalEvacTime / resultCount;
+                float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
+                //if convergence met we can stop
+                if (convergenceCriteria < engineTask.ConvergenceMaxDifference)
                 {
-                    float pastAverage = cumulativeTotalEvacTime / (resultCount - 1);
-                    cumulativeTotalEvacTime += simulation.CurrentTime;
-                    float currentAverage = cumulativeTotalEvacTime / resultCount;
-                    float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
-                    //if convergence met we can stop
-                    if (convergenceCriteria < engineTask.ConvergenceMaxDifference)
+                    ++convergedInSequence;
+                    //we are done
+                    if (engineTask.StopAfterConverging && convergedInSequence > engineTask.ConvergenceMinSequence)
                     {
-                        ++convergedInSequence;
-                        //we are done
-                        if (engineTask.StopAfterConverging && convergedInSequence > engineTask.ConvergenceMinSequence)
-                        {
-                            _stopSimulations = true; //needed for serial run
-                            CloseSimulations(false); //needed for parallel run
-                        }
-                    }
-                    else
-                    {
-                        convergedInSequence = 0;
+                        _stopSimulations = true; //needed for serial run
+                        CloseSimulations(false); //needed for parallel run
                     }
                 }
                 else
                 {
-                    cumulativeTotalEvacTime += simulation.CurrentTime;
+                    convergedInSequence = 0;
                 }
-            }            
-        }       
+            }
+            else
+            {
+                cumulativeTotalEvacTime += simulationRSET;
+            }
+        }
 
         public void SetInput(PREACTInput input)
         {
@@ -513,7 +575,7 @@ namespace PREACT
         public byte[] GetArrivalPlotBytes()
         {
             return _plotBytes;
-        }
+        }        
     }
 }
 

@@ -125,20 +125,20 @@ namespace PREACT.Traffic
                 LIBSUMO.StringVector arrivedVehicles = LIBSUMO.Simulation.getArrivedIDList();
                 for (int i = 0; i < arrivedVehicles.Count; i++)
                 {
-                    SUMOVehicle car;
-                    _vehicles.TryGetValue(arrivedVehicles[i], out car);
-                    if(car != null)
+                    SUMOVehicle vehicle;
+                    _vehicles.TryGetValue(arrivedVehicles[i], out vehicle);
+                    if(vehicle != null)
                     {
-                        car.Arrive(deltaTime, currentTime);
+                        vehicle.Arrive(deltaTime, currentTime);
                     }
                     _vehicles.Remove(arrivedVehicles[i]);
-                    _activeVehicles.Remove(car.VehicleId);
+                    _activeVehicles.Remove(vehicle.VehicleId);
                     //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
-                    if (car.NumberOfPeople > 0)
+                    if (vehicle.NumberOfPeople > 0)
                     {
                         _arrivalData.Add(currentTime + deltaTime);
                         totalVehiclesArrived++;
-                        totalPeopleArrived += car.NumberOfPeople;
+                        totalPeopleArrived += vehicle.NumberOfPeople;
                     }
                     else
                     {
