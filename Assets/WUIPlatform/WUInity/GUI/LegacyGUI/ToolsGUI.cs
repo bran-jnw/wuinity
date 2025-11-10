@@ -363,9 +363,10 @@ namespace WUInity.UI
         void CreateAndSavePopulationMap(string[] paths)
         {
             string filePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".pop");
-            PopulationTools.CreateAndSavePopulationMap(_workingData.SimulationInput, paths[0], _populationMapCellSize, filePath, out success);
+            PopulationMap pMap = PopulationTools.CreateAndSavePopulationMap(_workingData.SimulationInput, paths[0], _populationMapCellSize, filePath, out success);
             if (success)
             {
+                _workingData.PopulationMap = pMap;
                 _wuinityManager.SimulationDomainVisualizer.SetAndDisplayPopulationMapTexture(_workingData.PopulationMap, _workingData);
             }
         }
@@ -377,9 +378,10 @@ namespace WUInity.UI
         }
         void LoadPopulationMap(string[] paths)
         {
-            PopulationTools.LoadPopulationMap(paths[0], out success);
+            PopulationMap pMap = PopulationTools.LoadPopulationMap(paths[0], out success);
             if(success)
             {
+                _workingData.PopulationMap = pMap;
                 _wuinityManager.SimulationDomainVisualizer.SetAndDisplayPopulationMapTexture(_workingData.PopulationMap, _workingData);
             }            
         }

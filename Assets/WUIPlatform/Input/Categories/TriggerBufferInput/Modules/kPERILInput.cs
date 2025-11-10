@@ -29,6 +29,7 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
+            //critical
             nameOfInput = nameof(MidflameWindspeed);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -49,6 +50,7 @@ namespace PREACT.IO
                 return newInput;
             }
 
+            //not critical
             nameOfInput = nameof(CalculateROSFromBehave);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -63,6 +65,7 @@ namespace PREACT.IO
                 Engine.Message(null, Engine.LogType.Warning, nameOfInput + " was not found, defaulting to " + newInput.CalculateROSFromBehave.ToString() + ".");
             }
 
+
             nameOfInput = nameof(InitialFuelMoistureFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -74,11 +77,13 @@ namespace PREACT.IO
                 success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
-            if(!success)
+            //critical
+            if(!success && newInput.CalculateROSFromBehave)
             {
                 return newInput;
             }
 
+            //critical
             nameOfInput = nameof(OutputName);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -88,6 +93,10 @@ namespace PREACT.IO
             {
                 success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return newInput;
             }
 
             success = true;

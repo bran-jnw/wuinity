@@ -23,7 +23,7 @@ namespace WUInity.UI
         {
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
-            TrafficInput tO = _engine.Simulation.Input.Traffic;
+            TrafficInput tO = _input.Traffic;
             if (routingMenuDirty)
             {
                 routingMenuDirty = false;
@@ -41,7 +41,7 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if(_engine.Simulation.Input.Traffic.MacroTrafficSimInput != null)
+            if(_input.Traffic.MacroTrafficSimInput != null)
             {
                 //route choice info
                 ++buttonIndex;

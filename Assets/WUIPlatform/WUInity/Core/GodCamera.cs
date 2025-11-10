@@ -37,9 +37,11 @@ namespace WUInity
         public void SetInput(PREACT.IO.PREACTInput input)
         {
             _input = input;
+
+            SetCameraStartPosition(_input.Simulation.DomainSize);
         }
 
-        public void SetCameraStartPosition(PREACT.Utility.Math.Vector2d mapSize)
+        private void SetCameraStartPosition(PREACT.Utility.Math.Vector2d mapSize)
         {
             _mapSize = mapSize;
             float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * cam.fieldOfView * 0.5f);

@@ -78,14 +78,14 @@ namespace WUInity.UI
         {
             menuBarHeight = Screen.height - consoleHeight;
 
-            mainMenu = new MenuButton(buttonHeight, "Main Menu");
-            toolsMenu = new MenuButton(buttonHeight, "Tools");
-            mapMenu = new MenuButton(buttonHeight, "Map");            
-            //GUIButton farsiteMenu = new GUIButton(1, buttonHeight, "Farsite Menu");
+            //this builds the order
+            mainMenu = new MenuButton(buttonHeight, "Main Menu");            
+            mapMenu = new MenuButton(buttonHeight, "Map");  
             fireMenu = new MenuButton(buttonHeight, "Fire spread");
             evacMenu = new MenuButton(buttonHeight, "Evacuation");
             routingMenu = new MenuButton(buttonHeight, "Routing");
             trafficMenu = new MenuButton(buttonHeight, "Traffic");
+            toolsMenu = new MenuButton(buttonHeight, "Tools");
             outputMenu = new MenuButton(buttonHeight, "Output");
             hideMenu = new MenuButton(buttonHeight, "Hide Menu");
             exitMenu = new MenuButton(buttonHeight, "Exit");
@@ -96,10 +96,11 @@ namespace WUInity.UI
         Engine _engine;
         private PREACT.IO.PREACTInput _input;
         private PREACT.Runtime.WorkingData _workingData;
-        public void SetManager(WUInityManager wuinityManager, Engine engine)
+        public void SetManager(WUInityManager wuinityManager, Engine engine, PREACT.Runtime.WorkingData workingData)
         {
             _wuinityManager = wuinityManager;
             _engine = engine;
+            _workingData = workingData;
         }
 
         public void UpdateInput(PREACT.IO.PREACTInput input)

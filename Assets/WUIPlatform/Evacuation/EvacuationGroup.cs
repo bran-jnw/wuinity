@@ -51,7 +51,7 @@ namespace PREACT.Evacuation
 
             for (int i = 0; i < evacuationGroupFiles.Count; i++)
             {
-                string path = Path.Combine(rootFolder, evacuationGroupFiles[i] + ".eg");
+                string path = Path.Combine(rootFolder, evacuationGroupFiles[i]);
                 bool fileExists = File.Exists(path);
                 EvacuationGroup eG = null;
                 if (fileExists)

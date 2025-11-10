@@ -34,6 +34,13 @@ namespace PREACT.IO
         public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, string rootFolder, out bool success)
         {
             EvacuationInput newInput = new EvacuationInput(simulationInput);
+            if (!simulationInput.RunPedestrianModule && !simulationInput.RunTrafficModule)
+            {
+                success = true;
+                return newInput;
+            }
+
+            success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;

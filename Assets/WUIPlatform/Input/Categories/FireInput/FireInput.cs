@@ -43,13 +43,15 @@ namespace PREACT.IO
                 return newInput;
             }
 
-            success = false;          
+            success = false;
+            int issues = 0;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string inputName, userInput;
 
             inputName = nameof(FireModule);
             if (inputToParse.TryGetValue(inputName, out userInput))
             {
+                success = true;
                 switch (userInput)
                 {
                     case nameof(FireModuleChoice.AscImport):
@@ -62,6 +64,7 @@ namespace PREACT.IO
                         newInput.FireModule = FireModuleChoice.FireCell2;
                         break;
                     default:
+                        success = false;
                         PREACTInput.CouldNotInterpretInputMessage(inputName, userInput);
                         break;
                 }
@@ -126,7 +129,7 @@ namespace PREACT.IO
                 {
                     //critical
                     PREACTInput.InputNotFoundMessage(inputName);
-                    return null;
+                    return newInput;
                 }
             }
             else if (newInput.FireModule == FireModuleChoice.FireCell)
@@ -142,12 +145,11 @@ namespace PREACT.IO
                 {
                     //critical
                     PREACTInput.InputNotFoundMessage(inputName);
-                    return null;
+                    return newInput;
                 }
             }
 
             newInput._data.LoadAll(simulationInput, newInput, rootFolder, out success);
-
             return newInput;
         }
     }

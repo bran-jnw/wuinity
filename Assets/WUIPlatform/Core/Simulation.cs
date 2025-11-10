@@ -85,9 +85,11 @@ namespace PREACT
         /// </summary>
         public void Run()
         {
+            _state = SimulationState.Initializing;
             PreRun();
 
             //actual time step loop
+            _state = SimulationState.Running;
             while (!_stopRun)
             {
                 if (_isPaused)
@@ -99,8 +101,9 @@ namespace PREACT
                     Step();
                 }
             }
-            
+                        
             PostRun();
+            _state = SimulationState.Finished;
         }
 
         bool _talkToWUIShow = false;
@@ -118,7 +121,7 @@ namespace PREACT
         /// Sets up all modules and timing of simulation.
         /// </summary>
         private void PreRun()
-        {
+        {            
             _simulationStopWatch.Restart();
             _trafficStopwatch.Reset();
             _pedestrianStopwatch.Reset();
@@ -192,7 +195,6 @@ namespace PREACT
             if (!_stoppedDueToError)
             {
                 _haveResults = true;
-
                 CreateAndRunTriggerBufferModule();
             }
 

@@ -29,8 +29,8 @@ namespace PREACT.IO
         public static TriggerBufferInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
         {
             TriggerBufferInput newInput = new TriggerBufferInput();
-            int issues = 0;   
             success = false;
+            int issues = 0;             
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 

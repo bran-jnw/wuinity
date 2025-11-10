@@ -26,8 +26,8 @@ namespace PREACT.IO
         public static EventsInput Parse(string[] inputLines, int startIndex, string rootFolder, out bool success)
         {
             EventsInput newInput = new EventsInput();
-            int issues = 0;
-            success = false;            
+            success = false;
+            int issues = 0;                     
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 

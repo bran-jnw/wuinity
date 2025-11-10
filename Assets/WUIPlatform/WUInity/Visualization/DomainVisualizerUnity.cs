@@ -12,15 +12,16 @@ namespace WUInity.Visualization
 {
     public static class DomainVisualizerUnity
     {
-        public static void CreateDomainPlane(GameObject gameObject, MeshRenderer renderer, Vector2d size, Vector2d originOffset)
+        public static MeshRenderer CreateDomainPlane(GameObject gameObject, MeshRenderer renderer, Vector2d size, Vector2d originOffset)
         {            
             MeshFilter filter;
             Mesh mesh;
+            MeshRenderer mR;
 
             if (renderer == null)
             {
                 filter = gameObject.AddComponent<MeshFilter>();
-                MeshRenderer mR = gameObject.AddComponent<MeshRenderer>();
+                mR = gameObject.AddComponent<MeshRenderer>();
                 mR.receiveShadows = false;
                 mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 mesh = new Mesh(); // filter.mesh;
@@ -32,6 +33,7 @@ namespace WUInity.Visualization
             {
                 filter = gameObject.GetComponent<MeshFilter>();
                 mesh = filter.mesh;
+                mR = renderer;
             }
 
             float width = (float)size.x;
@@ -39,6 +41,8 @@ namespace WUInity.Visualization
             Vector3 offset = new Vector3((float)originOffset.x, 0.0f, (float)originOffset.y);
             mesh.Clear();
             VisualizeUtilities.CreateSimplePlane(mesh, width, length, 0.0f, offset);
+
+            return mR;
         }
 
         public static bool NeedNewPlane(Vector2d oldSize, Vector2d newSize, Vector2d oldLatLon, Vector2d newLatLon)

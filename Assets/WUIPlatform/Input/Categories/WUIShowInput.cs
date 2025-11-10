@@ -22,9 +22,10 @@ namespace PREACT.IO
         {
         }
 
-        public static WUIShowInput Parse(string[] inputLines, int startIndex)
+        public static WUIShowInput Parse(string[] inputLines, int startIndex, out bool success)
         {
             WUIShowInput newInput = new WUIShowInput();
+            success = false;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
@@ -68,6 +69,7 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
+            success = true;
             return newInput;
         }
     }

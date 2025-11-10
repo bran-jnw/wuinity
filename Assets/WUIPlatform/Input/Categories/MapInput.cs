@@ -21,10 +21,11 @@ namespace PREACT.IO
         { 
         }
 
-        public static MapInput Parse(string[] inputLines, int startIndex)
+        public static MapInput Parse(string[] inputLines, int startIndex, out bool success)
         {
-            int issues = 0;
-            var newInput = new MapInput();
+            MapInput newInput = new MapInput();
+            success = false;
+            int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
             
@@ -66,6 +67,7 @@ namespace PREACT.IO
             {
             }
 
+            success = true;
             return newInput;
         }
     }

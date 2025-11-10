@@ -35,135 +35,148 @@ namespace PREACT.IO
 
         public static SimulationInput Parse(string[] inputLines, int startIndex, out bool success)
         {
-            success = false;
-            int criticalIssues = 0;
             SimulationInput newInput = new SimulationInput();
+            success = false;
+            int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
             //critical
-            input = nameof(Name);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(Name);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.Name = userInput;
-                ++criticalIssues;
+                if(newInput.Name.Length == 0)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    ++issues;
+                }                
             }
             else
             {
-                ++criticalIssues;
-                PREACTInput.InputNotFoundMessage(input, true);
+                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
-            if (criticalIssues > 0)
+            if (issues > 0)
             {
                 success = false;
                 return newInput;
             }
 
             //critical
-            input = nameof(LowerLeftLatLon);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(LowerLeftLatLon);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                criticalIssues += double.TryParse(data[0], out newInput._lowerLeftLatLon.x) ? 0 : 1;
-                criticalIssues += double.TryParse(data[1], out newInput._lowerLeftLatLon.y) ? 0 : 1;
+                issues += double.TryParse(data[0], out newInput._lowerLeftLatLon.x) ? 0 : 1;
+                issues += double.TryParse(data[1], out newInput._lowerLeftLatLon.y) ? 0 : 1;
+                if(issues > 0)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input, true);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
-            if(criticalIssues > 0)
+            if(issues > 0)
             {
                 success = false;
                 return newInput;
             }
 
             //critical
-            input = nameof(DomainSize);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(DomainSize);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                criticalIssues += double.TryParse(data[0], out newInput.DomainSize.x) ? 0 : 1;
-                criticalIssues += double.TryParse(data[1], out newInput.DomainSize.y) ? 0 : 1;
+                issues += double.TryParse(data[0], out newInput.DomainSize.x) ? 0 : 1;
+                issues += double.TryParse(data[1], out newInput.DomainSize.y) ? 0 : 1;
+                if (issues > 0)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
             }
             else
             {
-                ++criticalIssues;
-                PREACTInput.InputNotFoundMessage(input, true);
+                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
-            if (criticalIssues > 0)
+            if (issues > 0)
             {
                 success = false;
                 return newInput;
             }
 
-            input = nameof(DeltaTime);
-            if(inputToParse.TryGetValue(input, out userInput))
+            //not critical
+            nameOfInput = nameof(DeltaTime);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.DeltaTime);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(MaxSimTime);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(MaxSimTime);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.MaxSimTime);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(RunPedestrianModule);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(RunPedestrianModule);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.RunPedestrianModule);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(RunTrafficModule);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(RunTrafficModule);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.RunTrafficModule);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(RunFireModule);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(RunFireModule);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.RunFireModule);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(RunSmokeModule);
-            if(inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(RunSmokeModule);
+            if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.RunSmokeModule);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(StopWhenEvacuated);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(StopWhenEvacuated);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.StopWhenEvacuated);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             newInput._data.UpdateData(newInput.LowerLeftLatLon);

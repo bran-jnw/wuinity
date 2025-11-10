@@ -34,7 +34,7 @@ namespace PREACT.IO
 
             for (int i = 0; i < evacuationGoalFiles.Count; i++)
             {
-                string path = Path.Combine(rootFolder, evacuationGoalFiles[i] + ".ed");
+                string path = Path.Combine(rootFolder, evacuationGoalFiles[i]);
                 bool fileExists = File.Exists(path);
                 if (fileExists)
                 {

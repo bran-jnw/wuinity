@@ -32,6 +32,13 @@ namespace PREACT.IO
         public static PopulationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, string rootFolder, out bool success)
         {
             PopulationInput newInput = new PopulationInput();
+
+            if (!simulationInput.RunPedestrianModule)
+            {
+                success = true;
+                return newInput;
+            }
+
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;

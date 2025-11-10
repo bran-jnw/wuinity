@@ -6,6 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.IO;
 
 namespace PREACT.IO
 {
@@ -43,6 +44,7 @@ namespace PREACT.IO
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
+            rootFolder = Path.Combine(rootFolder, newInput.RootFolder);
 
             //critical
             nameOfInput = nameof(TimeOfArrivalFile);
@@ -119,7 +121,7 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-
+            success = true;
             return newInput;
         }
     }

@@ -64,7 +64,6 @@ namespace WUInity
         public Painter Painter{ get => _painter; }
 
         [SerializeField] private GodCamera _godCamera;
-        public GodCamera WUICamera { get => _godCamera; }
 
         [Header("Options")]
         public bool DeveloperMode = false;
@@ -100,7 +99,6 @@ namespace WUInity
         public FireDomainVisualizerUnity FireDomainVisualizer { get => _fireDomainVisualizer; }
         
         //List<GameObject> drawnRoad_s;
-        GameObject[] _goalMarkers;
         GameObject _directionsGO;
 
         bool _renderHouseholds = false;
@@ -113,7 +111,7 @@ namespace WUInity
         {
             return dataSampleString;
         }
-
+        PREACT.Runtime.WorkingData _workingData;
         Engine _engine;
         public Engine Engine { get => _engine; }
         private void Awake()
@@ -133,12 +131,13 @@ namespace WUInity
             _engine = new Engine(this);
 
             //gui
+            _workingData = new PREACT.Runtime.WorkingData();
             _wuiGUI = GetComponent<WUInityGUI>();
             if (_wuiGUI == null)
             {
                 gameObject.AddComponent<WUInityGUI>();
             }
-            _wuiGUI.SetManager(this, _engine);
+            _wuiGUI.SetManager(this, _engine, _workingData);
 
             //map
             _mapboxMap = FindFirstObjectByType<Mapbox.Unity.Map.AbstractMap>();
@@ -178,7 +177,7 @@ namespace WUInity
             if (AutoLoadExample && DeveloperMode)
             {
                 bool success = false;
-                string file = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "example\\example.wui");                
+                string file = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "Examples\\Roxborough\\Roxborough_example.wui");                
                 if (File.Exists(file))
                 {                    
                     _engine.LoadInputFromFile(file, out success);
@@ -589,35 +588,7 @@ namespace WUInity
             _simulationDomainVisualizer.SetVisibility(false);
             _fireDomainVisualizer.SetVisibility(false);
         }
-
-        public void SpawnEvacuationGoalMarkers()
-        {
-            if (_goalMarkers != null)
-            {
-                for (int i = 0; i < _goalMarkers.Length; i++)
-                {
-                    if(_goalMarkers[i] != null)
-                    {
-                        Destroy(_goalMarkers[i]);
-                    }                    
-                }
-            }
-
-            _goalMarkers = new GameObject[_input.Evacuation.Data.EvacuationDestinationInputs.Count];
-            for (int i = 0; i < _input.Evacuation.Data.EvacuationDestinationInputs.Count; i++)
-            {
-                EvacuationDestinationInput eG = _input.Evacuation.Data.EvacuationDestinationInputs[i];
-                _goalMarkers[i] = Instantiate<GameObject>(_markerPrefab);
-                PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(eG.LatLon.x, eG.LatLon.y);
-                PREACT.Utility.Math.Vector2d pos = new PREACT.Utility.Math.Vector2d(utmPos.Easting, utmPos.Northing) - _input.Simulation.Data.UTMOrigin;
-
-                float scale = 0.02f * (float)_input.Simulation.DomainSize.y;
-                _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
-                _goalMarkers[i].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
-                MeshRenderer mR = _goalMarkers[i].GetComponentInChildren<MeshRenderer>();
-                mR.material.color = eG.Color.UnityColor;
-            }            
-        }        
+        
                 
         TrafficCellData[] currenttrafficDensityData;
         int[] currentPeopleInCells;
@@ -800,13 +771,13 @@ namespace WUInity
         public void UpdateInput(PREACTInput input)
         {
             _input = input;
+            _painter.SetLCPData(_input.Fire.Data.LCPData);            
+            _godCamera.SetInput(_input);
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
-            SpawnEvacuationGoalMarkers();
+            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _markerPrefab);
             UpdateMap();
             UpdateSimBorders();
-            WUICamera.SetCameraStartPosition(_input.Simulation.DomainSize);
-            _painter.SetLCPData(input.Fire.Data.LCPData);
         }
 
         public void UpdateMap()

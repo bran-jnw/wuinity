@@ -10,6 +10,7 @@ using PREACT.Population;
 using PREACT;
 using PREACT.Runtime;
 using PREACT.Utility.Math;
+using PREACT.IO;
 
 namespace WUInity.Visualization
 {
@@ -30,15 +31,19 @@ namespace WUInity.Visualization
         private Vector2d _simulationDomainSize, _simulationDomainLatLon;
         private Vector2d _gpwDomanSize, _gpwDomainLatLon;
 
+        //markers
+        GameObject[] _goalMarkers;
+
         public SimulationDomainVisualizerUnity(Transform parent)
         {
-            _simulationDomainPlane = new GameObject("SimulationDomain");
+            _simulationDomainPlane = new GameObject("SimulationDomain");            
             _simulationDomainPlane.transform.parent = parent;
-
+            _simulationDomainPlane.transform.position += Vector3.up;
             _simulationDomainPlane.isStatic = true;
 
-            _gpwDomainPlane = new GameObject("GPWDomain");
+            _gpwDomainPlane = new GameObject("GPWDomain");            
             _gpwDomainPlane.transform.parent = parent;
+            _gpwDomainPlane.transform.position += Vector3.up;
             _gpwDomainPlane.isStatic = true;            
         }
 
@@ -56,7 +61,7 @@ namespace WUInity.Visualization
         {
             if (DomainVisualizerUnity.NeedNewPlane(_simulationDomainSize, data._size, _simulationDomainLatLon, data._lowerLeftLatLong))
             {
-                DomainVisualizerUnity.CreateDomainPlane(_simulationDomainPlane, _simulationDomainMeshRenderer, data._size, Vector2d.zero);
+                _simulationDomainMeshRenderer = DomainVisualizerUnity.CreateDomainPlane(_simulationDomainPlane, _simulationDomainMeshRenderer, data._size, Vector2d.zero);
             }
             _simulationDomainSize = data._size;
             _simulationDomainLatLon = data._lowerLeftLatLong;
@@ -65,7 +70,7 @@ namespace WUInity.Visualization
         {
             if (DomainVisualizerUnity.NeedNewPlane(_gpwDomanSize, data.RealWorldSize, _gpwDomainLatLon, data.ActualOriginLatLon))
             {
-                DomainVisualizerUnity.CreateDomainPlane(_gpwDomainPlane, _gpwDomainMeshRenderer, data.RealWorldSize, data.OriginOffset);
+                _gpwDomainMeshRenderer = DomainVisualizerUnity.CreateDomainPlane(_gpwDomainPlane, _gpwDomainMeshRenderer, data.RealWorldSize, data.OriginOffset);
             }
             _gpwDomanSize = data.RealWorldSize;
             _gpwDomainLatLon = data.ActualOriginLatLon;
@@ -210,6 +215,35 @@ namespace WUInity.Visualization
         public override object GetGPWTexture()
         {
             return _localGPWTexture;
-        }        
+        }
+
+        public void SpawnEvacuationGoalMarkers(PREACT.IO.PREACTInput input, GameObject markerPrefab)
+        {
+            if (_goalMarkers != null)
+            {
+                for (int i = 0; i < _goalMarkers.Length; i++)
+                {
+                    if (_goalMarkers[i] != null)
+                    {
+                        MonoBehaviour.Destroy(_goalMarkers[i]);
+                    }
+                }
+            }
+
+            _goalMarkers = new GameObject[input.Evacuation.Data.EvacuationDestinationInputs.Count];
+            for (int i = 0; i < input.Evacuation.Data.EvacuationDestinationInputs.Count; i++)
+            {
+                EvacuationDestinationInput eG = input.Evacuation.Data.EvacuationDestinationInputs[i];
+                _goalMarkers[i] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
+                PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(eG.LatLon.x, eG.LatLon.y);
+                Vector2d pos = new Vector2d(utmPos.Easting, utmPos.Northing) - input.Simulation.Data.UTMOrigin;
+
+                float scale = 0.02f * (float)input.Simulation.DomainSize.y;
+                _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
+                _goalMarkers[i].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
+                MeshRenderer mR = _goalMarkers[i].GetComponentInChildren<MeshRenderer>();
+                mR.material.color = eG.Color.UnityColor;
+            }
+        }
     }
 }

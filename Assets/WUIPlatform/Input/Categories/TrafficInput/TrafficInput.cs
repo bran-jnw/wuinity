@@ -49,6 +49,7 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string input, userInput;
 
+            //critical
             input = nameof(TrafficModule);
             if (inputToParse.TryGetValue(input, out userInput))
             {
@@ -61,6 +62,7 @@ namespace PREACT.IO
                         newInput.TrafficModule = TrafficModuleChoice.MacroTrafficSim;
                         break;
                     default:
+                        ++issues;
                         PREACTInput.CouldNotInterpretInputMessage(input, userInput);
                         break;
                 }
@@ -69,6 +71,10 @@ namespace PREACT.IO
             {
                 ++issues;
                 Engine.Message(null, Engine.LogType.SimulationError, "No traffic module choice was set.");
+            }
+            if(issues > 0)
+            {
+                return newInput;
             }
 
             input = nameof(VisibilityAffectsSpeed);
@@ -94,7 +100,7 @@ namespace PREACT.IO
                 {
                     //critical
                     Engine.Message(null, Engine.LogType.SimulationError, nameof(Simulation) + " header not found." + PREACTInput.pleaseCheckInput);
-                    return null;
+                    return newInput;
                 }
             }
             else if(newInput.TrafficModule == TrafficModuleChoice.MacroTrafficSim)
@@ -107,7 +113,6 @@ namespace PREACT.IO
             }
 
             newInput._data.LoadAll(newInput, rootFolder, out success);
-
             return newInput;
         }
     }

@@ -78,16 +78,16 @@ namespace WUInity.Visualization
         }
         private void CheckIfNeedNewFireDomainPlane(LCPData newLCPData)
         {
-            if (DomainVisualizerUnity.NeedNewPlane(_lcpData.GetSize(), newLCPData.GetSize(), _lcpData.GetLowerLeftUTM(), newLCPData.GetLowerLeftUTM()))
+            if (_lcpData == null || DomainVisualizerUnity.NeedNewPlane(_lcpData.GetSize(), newLCPData.GetSize(), _lcpData.GetLowerLeftUTM(), newLCPData.GetLowerLeftUTM()))
             {
-                DomainVisualizerUnity.CreateDomainPlane(_lcpDomainPlane, _lcpDomainMeshRenderer, newLCPData.GetSize(), newLCPData.OriginOffset);
+                _lcpDomainMeshRenderer = DomainVisualizerUnity.CreateDomainPlane(_lcpDomainPlane, _lcpDomainMeshRenderer, newLCPData.GetSize(), newLCPData.OriginOffset);
             }
         }
 
         public override void SetAndDisplayLCP(LCPData newLCPData, LcpViewMode lcpViewMode = LcpViewMode.FuelModel)
         {   
-            int xDim = _lcpData.GetCellCountX();
-            int yDim = _lcpData.GetCellCountY();
+            int xDim = newLCPData.GetCellCountX();
+            int yDim = newLCPData.GetCellCountY();
 
             if (DomainVisualizerUnity.NeedNewTexture(newLCPData.GetCellCount(), _fuelModelsTexture))
             {

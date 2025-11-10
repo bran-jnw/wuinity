@@ -140,6 +140,11 @@ namespace WUInity.Visualization
 
         public void SetFireDisplayMode(FireDisplayMode mode)
         {
+            if(_fireMaterial == null)
+            {
+                return;
+            }
+
             _fireDisplayMode = mode;
             if(_fireDisplayMode == FireDisplayMode.FirelineIntensity)
             {
@@ -338,7 +343,7 @@ namespace WUInity.Visualization
                 sootBuffer = null;
             }
 
-            if(!creationCall && simulation.SmokeModule != null)
+            if(!creationCall && simulation != null && simulation.SmokeModule != null)
             {
                 if (simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                 {

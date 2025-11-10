@@ -13,7 +13,6 @@ using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
-    [System.Serializable]
     public class EvacuationDestination
     {
         //properties

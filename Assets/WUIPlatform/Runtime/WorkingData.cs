@@ -16,8 +16,8 @@ namespace PREACT.Runtime
 
         public bool HaveSimulationInput { get => SimulationInput != null; }
         public bool HaveLocalGPW { get => LocalGPWData != null; }
-        public bool HavePopulationMap { get => PopulationMap.HaveData; }
-        public bool PopulationMapCorrectedForRoadAccess { get => PopulationMap.CorrectedForRoadAccess; }
+        public bool HavePopulationMap { get => PopulationMap != null && PopulationMap.HaveData; }
+        public bool PopulationMapCorrectedForRoadAccess { get => PopulationMap != null && PopulationMap.CorrectedForRoadAccess; }
         public bool HaveRouterDb { get => RouterDb == null ? false : true; }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace WUInity.UI
             int buttonIndex = 0;
 
             string lcpExistsStatus = "LCP file NOT found"; 
-            if(_wuinityManager.Engine.DataStatus.LcpLoaded)
+            if(_input.Fire.Data.LCPData != null)
             {
                 lcpExistsStatus = "LCP file found";
             }
@@ -172,6 +172,7 @@ namespace WUInity.UI
         void LoadLCP(string[] paths)
         {
             _input.Fire.Data.LoadLCPFile(_input.Fire, paths[0], _input.Simulation.Data.UTMOrigin, true, out success);
+            _wuinityManager.FireDomainVisualizer.SetAndDisplayLCP(_input.Fire.Data.LCPData);
         }
 
         void OpenLoadFuelsModelFile()

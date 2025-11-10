@@ -79,6 +79,7 @@ namespace PREACT
         {
             //needed for proper reading of input files on all systems
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            _dataStatus = new DataStatus();
             _output = new PREACTOutput();
             _workingData = new WorkingData();
             _externalManager = externalManager;
@@ -90,15 +91,23 @@ namespace PREACT
        
         public async void RunSimulations(EngineTask engineTask, bool runInParallel = false)
         {
+            if(_input == null)
+            {
+                Message(null, LogType.SimulationError, "No input has been set, aborting.");
+                return;
+            }
+
             try
             {    
                 System.Threading.Tasks.Task task;
                 if(runInParallel)
                 {
+                    Message(null, LogType.Log, "Starting simlations/s in parallel mode.");
                     task = System.Threading.Tasks.Task.Run(() => RunSimulationsParallel(engineTask));
                 }
                 else
                 {
+                    Message(null, LogType.Log, "Starting simlations/s in serial mode.");
                     task = System.Threading.Tasks.Task.Run(() => RunSimulationsSerial(engineTask));
                 }
                 await task;
@@ -114,12 +123,12 @@ namespace PREACT
         {
             PreSimulations(engineTask);
             
-            for (int i = 0; i < _simulations.Length; ++i)
+            for (int i = 0; i < engineTask.NumberOfRuns; ++i)
             {
-                _simulations[i] = new Simulation(this, _input, i);
-                _mainSimulation = _simulations[i];
-                _simulations[i].Run();
-                CollectSimulationStatistics(_simulations[i], engineTask);
+                Simulation simulation = new Simulation(this, _input, i);
+                _mainSimulation = simulation;
+                simulation.Run();
+                CollectSimulationStatistics(simulation, engineTask);
                 if (_stopSimulations)
                 {
                     break;
@@ -250,16 +259,20 @@ namespace PREACT
                     yData[i] = i + 1;
                 }
                 CreatePlotData(xData, yData);
-            }
 
-            if (convergedInSequence >= 10)
-            {
-                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
+                if (convergedInSequence >= 10)
+                {
+                    Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulations before converging according to user set criteria.");
 
+                }
+                else
+                {
+                    Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                }
             }
             else
             {
-                Message(null, LogType.Log, " Average total evacuation time: " + cumulativeTotalEvacTime / actualRuns + " seconds, ran " + actualRuns + " simulation/s.");
+                Message(null, LogType.Log, " No completed simulations were performed.");
             }
 
             PREACTOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
@@ -436,20 +449,23 @@ namespace PREACT
         public void CloseSimulations(bool stoppedDueToError)
         {
             _stopSimulations = true;
-            for (int i = 0; i < _simulations.Length; ++i)
+            if(_simulations != null)
             {
-                if(_simulations[i] != null)
+                for (int i = 0; i < _simulations.Length; ++i)
                 {
-                    if(stoppedDueToError)
+                    if (_simulations[i] != null)
                     {
-                        _simulations[i].Stop("Critical error in simulation, aborting.", true);
-                    }
-                    else
-                    {
-                        _simulations[i].Stop("User has requested closing.", false);
+                        if (stoppedDueToError)
+                        {
+                            _simulations[i].Stop("Critical error in simulation, aborting.", true);
+                        }
+                        else
+                        {
+                            _simulations[i].Stop("User has requested closing.", false);
+                        }
                     }
                 }
-            }
+            }            
         }
 
         //TODO: these below here are misplaced, but need to figure out where they fit better
