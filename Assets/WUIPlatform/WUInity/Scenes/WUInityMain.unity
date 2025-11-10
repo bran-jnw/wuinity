@@ -479,6 +479,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4108702072321546033, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: _fireMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 87ac1fb82528e4d4a8ffdb31041b7bb8, type: 2}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: WindTex

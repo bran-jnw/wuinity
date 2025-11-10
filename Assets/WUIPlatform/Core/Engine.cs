@@ -375,9 +375,17 @@ namespace PREACT
                 return;
             }
 
-            if (simulation != null && simulation.State == Simulation.SimulationState.Running)
+            if (simulation != null)
             {
-                message = "[Simulation# " + simulation.SimulationIndex + ", " +(int)simulation.CurrentTime + "s] " + message;
+                if(simulation.State == Simulation.SimulationState.Running)
+                {
+                    message = "[Simulation# " + simulation.SimulationIndex + ", " + (int)simulation.CurrentTime + "s] " + message;
+                }
+                else
+                {
+                    message = "[Simulation# " + simulation.SimulationIndex +"]" + message;
+                }
+                
             }
 
             if (logType == LogType.Warning)
@@ -396,12 +404,13 @@ namespace PREACT
             {
                 message = "!!!DEBUG!!!: " + message;
             }
-            else
+            /*else
             {
                 message = "LOG: " + message;
-            }
+            }*/
+            message = "[" + DateTime.Now.ToLongTimeString() + "] " + message;
 
-            _ENGINE._consoleLog.Add("[" + DateTime.Now.ToLongTimeString() + "] " + message);
+            _ENGINE._consoleLog.Add(message);
 
             if(_ENGINE._externalManager != null)
             {

@@ -489,11 +489,11 @@ namespace PREACT.Traffic
 
                 if(carsToUpdate.Count == 0)
                 {
-                    Engine.Message(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+                    Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
                 }
                 else
                 {
-                    Engine.Message(null, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
+                    Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
                 }
 
                 //then do update for affected cars

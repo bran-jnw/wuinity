@@ -109,6 +109,7 @@ namespace WUInity.UI
             SetDirty();
         }
 
+        string[] _messagesBuffer;
         List<string> _messages = new List<string>();
         public void NewMessage(string message)
         {
@@ -124,6 +125,18 @@ namespace WUInity.UI
         public void SimulationStopped()
         {
             _simulationRunning = true;
+        }
+
+        private void Update()
+        {
+
+            if(_messagesBuffer == null || _messages.Count != _messagesBuffer.Length)
+            {
+                //lock(_messages)
+                //{
+                    _messagesBuffer = _messages.ToArray();
+                //}                
+            }
         }
 
         void OnGUI()
@@ -250,10 +263,10 @@ namespace WUInity.UI
             GUI.Box(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
-            
-            for (int i = _messages.Count - 1; i >= 0; i--)
+
+            for (int i = _messagesBuffer.Length - 1; i >= 0; i--)
             {
-                GUILayout.Label(_messages[i]);
+                GUILayout.Label(_messagesBuffer[i]);
             }
             
             GUILayout.EndScrollView();
