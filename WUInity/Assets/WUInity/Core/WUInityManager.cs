@@ -797,9 +797,9 @@ namespace WUInity
         {
             _wuiGUI.SimulationStarted();
         }
-        public void SimulationStopped()
+        public void SimulationsFinished()
         {
-            _wuiGUI.SimulationStopped();
+            _wuiGUI.SimulationsFinished();
         }
 
         public void PauseSimulations()

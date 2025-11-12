@@ -3,6 +3,9 @@ using System.Net;
 using System.Text;
 using LIBSUMO = Eclipse.Sumo.Libsumo;
 using PREACT.Math;
+using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 
 namespace PREACT.Visualization
 {
@@ -44,7 +47,7 @@ namespace PREACT.Visualization
         private byte[] GetTriggerBufferData(out bool success)
         {
             byte[] result = null;
-            int[,] data = _engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success);
+            float[,] data = _engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success);
             if (!success)
             {
                 return result;

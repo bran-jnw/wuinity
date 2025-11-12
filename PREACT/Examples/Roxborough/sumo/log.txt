@@ -1,35 +1,27 @@
-Loading net-file from 'E:\_UNITY\WUInity\PREACT\Examples\Roxborough\sumo/rox_big.net.xml' ... done (453ms).
+Loading net-file from 'E:\_UNITY\WUInity\wui-nity\PREACT\Examples\Roxborough\sumo/rox_big.net.xml' ... done (415ms).
 Warning: At actuated tlLogic '88510203', linkIndex 0,1,2,3,4,5 has no controlling detector.
 Loading done.
 Simulation version 1.24.0 started via libsumo with time: 0.00.
-Warning: Teleporting vehicle '125'; waited too long (yield), lane=':cluster_88490764_88490766_2_0', time=783.00.
-Warning: Vehicle '125' ends teleporting on edge '133729130#8', time=783.00.
-Warning: Teleporting vehicle '178'; waited too long (yield), lane='-277852126#2_0', time=851.00.
-Warning: Teleporting vehicle '177'; waited too long (yield), lane='10388967#0_0', time=852.00.
-Warning: Vehicle '177' ends teleporting on edge '10386729#4', time=852.00.
-Warning: Vehicle '178' ends teleporting on edge '10388967#0', time=852.00.
-Warning: Teleporting vehicle '201'; waited too long (jam), lane='10386723#0_0', time=872.00.
-Warning: Vehicle '201' ends teleporting on edge '10386729#4', time=887.00.
-Warning: Teleporting vehicle '299'; waited too long (yield), lane=':cluster_88490764_88490766_2_0', time=1088.00.
-Warning: Vehicle '299' ends teleporting on edge '133729130#8', time=1088.00.
-Warning: Teleporting vehicle '178'; waited too long (yield), lane='10388967#0_0', time=1154.00.
-Warning: Vehicle '178' ends teleporting on edge '10386729#4', time=1154.00.
-Warning: Teleporting vehicle '225'; waited too long (yield), lane='-277852126#2_0', time=1157.00.
-Warning: Vehicle '225' ends teleporting on edge '10388967#0', time=1157.00.
-Warning: Teleporting vehicle '505'; waited too long (yield), lane=':88510819_8_0', time=1332.00.
-Warning: Vehicle '505' ends teleporting on edge '-419998995#1', time=1334.00.
-Warning: Teleporting vehicle '521'; waited too long (yield), lane=':88510819_8_0', time=1636.00.
-Warning: Vehicle '521' ends teleporting on edge '-419998995#1', time=1636.00.
-Simulation ended at time: 7120.00.
+Warning: Teleporting vehicle '280'; waited too long (yield), lane=':88511213_8_0', time=985.00.
+Warning: Vehicle '280' ends teleporting on edge '277852127#2', time=989.00.
+Warning: Teleporting vehicle '292'; waited too long (yield), lane='-277852126#2_0', time=1073.00.
+Warning: Teleporting vehicle '268'; waited too long (yield), lane='10388967#0_0', time=1075.00.
+Warning: Vehicle '268' ends teleporting on edge '10386729#4', time=1075.00.
+Warning: Vehicle '292' ends teleporting on edge '10388967#0', time=1075.00.
+Warning: Teleporting vehicle '441'; waited too long (yield), lane=':88510819_8_0', time=1187.00.
+Warning: Vehicle '441' ends teleporting on edge '-419998995#1', time=1189.00.
+Warning: Teleporting vehicle '575'; waited too long (yield), lane=':88510819_8_0', time=1493.00.
+Warning: Vehicle '575' ends teleporting on edge '-419998995#1', time=1493.00.
+Simulation ended at time: 7399.00.
 Reason: Libsumo requested termination.
 Performance:
- Duration: 16.04s
- Real time factor: 443.78
- UPS: 86351.408626
+ Duration: 12.79s
+ Real time factor: 578.68
+ UPS: 106350.305021
 Vehicles:
  Inserted: 1000
  Running: 0
  Waiting: 0
- Teleports: 9 (Jam: 1, Yield: 8)
+ Teleports: 5 (Yield: 5)
 DijkstraRouter answered 1000 queries and explored 1862.49 edges on average.
-DijkstraRouter spent 2.71s answering queries (2.71ms on average).
+DijkstraRouter spent 1.83s answering queries (1.83ms on average).

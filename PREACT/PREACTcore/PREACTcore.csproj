@@ -1,62 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
-    <BaseOutputPath></BaseOutputPath>
     <RootNamespace>PREACT</RootNamespace>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="Source\Traffic\Modules\CityFlow\CityFlow_license.txt" />
     <Content Include="Source\Traffic\Modules\CityFlow\cityflow_unity.dll" />
     <Content Include="Source\Traffic\Modules\SUMO\Build_notes.txt" />
-    <Content Include="ThirdParty\Eclipse.Sumo.Libsumo\libsumoCSHARP_wrap.cxx" />
     <Content Include="Source\Traffic\Modules\SUMO\version_info.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GDAL" Version="3.11.3">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="GDAL.Native" Version="3.11.3">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ILGPU" Version="1.5.3">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ILGPU.Algorithms" Version="1.5.3">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Itinero" Version="1.5.1">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Itinero.IO.Osm" Version="1.5.1">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="kPERIL" Version="1.0.0">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4">
-      <IncludeAssets></IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="GDAL" Version="3.11.3" />
+    <PackageReference Include="GDAL.Native" Version="3.11.3" />
+    <PackageReference Include="ILGPU" Version="1.5.3" />
+    <PackageReference Include="ILGPU.Algorithms" Version="1.5.3" />
+    <PackageReference Include="Itinero" Version="1.5.1" />
+    <PackageReference Include="Itinero.IO.Osm" Version="1.5.1" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <Reference Include="kPERILcore">
+      <HintPath>..\..\..\kperil\kPERILcore\bin\Release\netstandard2.1\kPERILcore.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

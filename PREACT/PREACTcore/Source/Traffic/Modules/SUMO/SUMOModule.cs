@@ -1,4 +1,4 @@
-//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//This file is part of PREACT Copyright (C) 2025 Jonathan Wahlqvist
 //WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
 //the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 //This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -319,6 +319,7 @@ namespace PREACT.Traffic
                 int xDim = _usageMap.GetLength(0);
                 int yDim = _usageMap.GetLength(1);
 
+                GdalConfiguration.ConfigureGdal();
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
                 OSGeo.GDAL.Dataset output = driver.Create(filePath, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);

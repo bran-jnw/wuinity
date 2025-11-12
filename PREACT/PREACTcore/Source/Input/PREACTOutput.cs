@@ -1,4 +1,4 @@
-//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//This file is part of PREACT Copyright (C) 2025 Jonathan Wahlqvist
 //WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
 //the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 //This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,7 +19,7 @@ namespace PREACT.IO
         public EvacOutput Evac { get => _evac; }
         private List<float> _averageEvacTimes;
 
-        Dictionary<int, int[,]> _triggerBuffers = new Dictionary<int, int[,]>();
+        Dictionary<int, float[,]> _triggerBuffers = new Dictionary<int, float[,]>();
 
 
         public PREACTOutput()
@@ -38,14 +38,14 @@ namespace PREACT.IO
             _totalAverageEvacTime /= _averageEvacTimes.Count;
         }
 
-        public void AddTriggerBufferOutput(int[,] triggerBufferOutput, int simulationIndex)
+        public void AddTriggerBufferOutput(float[,] triggerBufferOutput, int simulationIndex)
         {
             _triggerBuffers.Add(simulationIndex, triggerBufferOutput);
         }
 
-        public int[,] GetTriggerBufferOutput(int simulationIndex, out bool success)
+        public float[,] GetTriggerBufferOutput(int simulationIndex, out bool success)
         {
-            int[,] buffer = null;
+            float[,] buffer = null;
             success = _triggerBuffers.TryGetValue(simulationIndex, out buffer);
             return buffer;
         }
@@ -54,7 +54,7 @@ namespace PREACT.IO
         {
             float bufferCountInverse = 1f / _triggerBuffers.Count;
             float[,] perilOutput = null;         
-            foreach (KeyValuePair<int, int[,]> buffer in _triggerBuffers)
+            foreach (KeyValuePair<int, float[,]> buffer in _triggerBuffers)
             {
                 int xDim = buffer.Value.GetLength(0);
                 int yDim = buffer.Value.GetLength(1);

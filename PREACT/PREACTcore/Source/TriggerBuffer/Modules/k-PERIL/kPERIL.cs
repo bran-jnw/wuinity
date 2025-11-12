@@ -1,4 +1,4 @@
-//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//This file is part of PREACT Copyright (C) 2025 Jonathan Wahlqvist
 //WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
 //the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 //This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -8,6 +8,8 @@
 using PREACT.Fire.Behave;
 using PREACT.Fire;
 using PREACT.Math;
+using kPERIL;
+using System.IO;
 
 namespace PREACT
 {
@@ -23,7 +25,7 @@ namespace PREACT
         private const WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
 
         private int _xDim, _yDim;
-        private global::kPERIL.kPERIL _peril;
+        private kPERILcore _peril;
         private bool _calculateROS;
         private LCPData? _lcpData;
         private float _RSET;
@@ -33,15 +35,15 @@ namespace PREACT
 
         private float[,] _maxROS;
         private float[,] _rosAzimuth;
+        private float[,] _elevation;
         private InitialFuelMoistureLibrary? _fuelMoisture;
         private FuelModelInput? _fuelModel;
 
 
-        //LCPData lcpData, bool[] wuiArea, float midflameWindspeed, float windDirection, float RSET, string outputFile, InitialFuelMoistureLibrary fuelMoisture, FuelModelInput fuelModel, float[,] maxROS = null, float[,] rosAzimuth = null)
         public kPERIL(float RSET, bool[] wuiArea, float midflameWindspeed, float windDirection, float[,] maxROS, float[,] rosAzimuth)
         {
             _calculateROS = false;
-            _peril = new global::kPERIL.kPERIL();
+            _peril = new kPERILcore();
             _xDim = maxROS.GetLength(0);
             _yDim = maxROS.GetLength(1);
      
@@ -57,9 +59,9 @@ namespace PREACT
         public kPERIL(LCPData lcpData, float RSET, bool[] wuiArea, float midflameWindspeed, float windDirection,  InitialFuelMoistureLibrary fuelMoisture, FuelModelInput fuelModel)
         {
             _calculateROS = true;
-            _peril = new global::kPERIL.kPERIL();
+            _peril = new kPERILcore();
             _xDim = lcpData.GetCellCountX();
-            _yDim = lcpData.GetCellCountY();
+            _yDim = lcpData.GetCellCountY();           
 
             _lcpData = lcpData;
             _RSET = RSET;
@@ -77,33 +79,36 @@ namespace PREACT
         /// <param name="_midflameWindspeed">User have to pick a representative mid flame wind speed as k-PERIL does not take changing weather into account</param>
         public override void Run()
         {
-            Engine.Message(null, Engine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");
+            Engine.Message(null, Engine.LogType.Log, "Starting calculation of trigger buffer using k-PERIL.");            
 
             //assume cell/raster is square
             int cellSize = Mathf.RoundToInt((float)_lcpData.RasterCellResolutionX);
-            //get wuiarea from a user defined map painted in wuinity
-            int[,] perilWUIArea = GetPerilWUIArea(_xDim, _yDim, _wuiArea);
 
             if (_calculateROS)
             {
                 Engine.Message(null, Engine.LogType.Log, "k-PERIL is calculating ROS using Behave.");
-                bool[,] wuiArea2D = GetWUIArea2D(_wuiArea, _xDim, _yDim);
+                bool[,] wuiArea2D = GetWUIArea2D(_wuiArea, _xDim, _yDim, false);
                 CalculateAllRateOfSpreadsAndDirections(_lcpData, out _maxROS, out _rosAzimuth, _midflameWindspeed, _windDirection, true, _fuelMoisture, wuiArea2D, _fuelModel);
             }
             else
             {    
                 Engine.Message(null, Engine.LogType.Log, "k-PERIL is using ROS (and azimuth) from provided data.");
+                _peril.perilData.importFireRastersByVariable(FlipOnYAxis(_maxROS), FlipOnYAxis(_rosAzimuth));
+                float[,] perilWUIArea = GetPerilWUIArea(_xDim, _yDim, _wuiArea);
+                _peril.perilData.importWuiRastersByVariable(FlipOnYAxis(perilWUIArea));
+                _peril.perilData.importTopographyRastersByVariable(FlipOnYAxis(_elevation));
+                _peril.perilData.rasteriseWindFromScalars(_midflameWindspeed, _windDirection);
             }
 
             using (StringWriter output = new StringWriter())
             {
-                //_triggerBufferOutput = _peril.CalculateBoundary(cellSize, _RSET, _midflameWindspeed, perilWUIArea, _maxROS, _rosAzimuth, output);
+                _triggerBufferOutput = _peril.Run(_RSET);
                 Engine.Message(null, Engine.LogType.Log, "k-PERIL output, RSET= " + _RSET + " minutes.\n" + output.ToString());
             }
 
             //k-PERIL returns flipped x/y and inversed y, so fix this here
-            int[,] temp = _triggerBufferOutput;
-            _triggerBufferOutput = new int[_xDim, _yDim];
+            float[,] temp = _triggerBufferOutput;
+            _triggerBufferOutput = new float[_xDim, _yDim];
             for (int y = 0; y < _yDim; ++y)
             {
                 for (int x = 0; x < _xDim; ++x)
@@ -113,7 +118,7 @@ namespace PREACT
             }            
         }   
 
-        public static void SaveToFile(int[,] data, float cellsize, string outputFilePath)
+        public static void SaveToFile(float[,] data, float cellsize, string outputFilePath)
         {
             try
             {
@@ -211,7 +216,7 @@ namespace PREACT
             }
         }
 
-        private static bool[,] GetWUIArea2D(bool[] wuiArea, int xDim, int yDim)
+        private static bool[,] GetWUIArea2D(bool[] wuiArea, int xDim, int yDim, bool flipY)
         {
             bool[,] result = new bool[xDim, yDim];
             for (int i = 0; i < wuiArea.Length; i++)
@@ -220,6 +225,10 @@ namespace PREACT
                 int yIndex = i / xDim;
                 if (wuiArea[i] == true)
                 {
+                    if(flipY)
+                    {
+                        int yFlipped = yDim - 1 - yIndex;
+                    }
                     result[xIndex, yIndex] = true;
                 }
             }
@@ -227,21 +236,9 @@ namespace PREACT
             return result;
         }
 
-        private static int[,] GetPerilWUIArea(int xDim, int yDim, bool[] wuiArea)
+        private static float[,] GetPerilWUIArea(int xDim, int yDim, bool[] wuiArea)
         {
-            //first count how many cells we have to add to array
-            int count = 0;
-            for (int i = 0; i < wuiArea.Length; i++)
-            {
-                if (wuiArea[i] == true)
-                {
-                    ++count;
-                }
-            }
-
-            //then create array of correct size and fill it
-            int[,] newWuiArea = new int[2, count];
-            int position = 0;
+            float[,] newWuiArea = new float[xDim, yDim];
             for (int i = 0; i < wuiArea.Length; i++)
             {
                 int xIndex = i % xDim;
@@ -249,12 +246,27 @@ namespace PREACT
                 int yFlipped = yDim - 1 - yIndex;
                 if (wuiArea[i])
                 {
-                    newWuiArea[0, position] = xIndex;
-                    newWuiArea[1, position] = yFlipped;
-                    ++position;    
+                    newWuiArea[xIndex, yIndex] = 1f;
                 }
             }
             return newWuiArea;
+        }
+
+        private static float[,] FlipOnYAxis(float[,] input)
+        {
+            int xDim = input.GetLength(0);
+            int yDim = input.GetLength(1);  
+
+            float[,] output = new float[xDim, yDim];
+            for (int y = 0; y < yDim; y++)
+            {
+                for (int x = 0; x < xDim; x++)
+                {
+                    int yFlipped = yDim - 1 - y;
+                    output[x, y] = input[x, yFlipped];
+                }
+            }
+            return output;
         }
     }    
 }

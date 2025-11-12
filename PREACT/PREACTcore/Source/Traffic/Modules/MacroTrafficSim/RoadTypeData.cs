@@ -1,11 +1,12 @@
-//This file is part of WUIPlatform Copyright (C) 2024 Jonathan Wahlqvist
+//This file is part of PREACT Copyright (C) 2025 Jonathan Wahlqvist
 //WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
 //the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 //This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.IO;
 
 namespace PREACT.Traffic
 {
@@ -104,7 +105,7 @@ namespace PREACT.Traffic
             if (File.Exists(path))
             {
                 string input = File.ReadAllText(path);
-                results = JsonConvert.DeserializeObject<RoadTypeData>(input);
+                results = JsonSerializer.Deserialize<RoadTypeData>(input);
                 loadedDefaults = false;            
             }
 

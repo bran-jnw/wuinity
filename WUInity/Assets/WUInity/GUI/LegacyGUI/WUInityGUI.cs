@@ -122,9 +122,9 @@ namespace WUInity.UI
             _simulationRunning = true;
         }
 
-        public void SimulationStopped()
+        public void SimulationsFinished()
         {
-            _simulationRunning = true;
+            _simulationRunning = false;
         }
 
         private void Update()
@@ -132,10 +132,7 @@ namespace WUInity.UI
 
             if(_messagesBuffer == null || _messages.Count != _messagesBuffer.Length)
             {
-                //lock(_messages)
-                //{
-                    _messagesBuffer = _messages.ToArray();
-                //}                
+                _messagesBuffer = _messages.ToArray();           
             }
         }
 
