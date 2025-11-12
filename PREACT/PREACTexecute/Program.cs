@@ -10,7 +10,7 @@
             {
             }
 
-            if(args.Length > 1)
+            if(args.Length > 3)
             {
                 Console.WriteLine("Press enter to close...");
                 Console.ReadLine();

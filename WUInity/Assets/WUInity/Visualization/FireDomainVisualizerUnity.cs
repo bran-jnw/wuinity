@@ -10,7 +10,6 @@ using PREACT;
 using PREACT.Fire;
 using PREACT.Math;
 using PREACT.Visualization;
-using PREACT.Runtime;
 
 namespace WUInity.Visualization
 {
@@ -152,7 +151,7 @@ namespace WUInity.Visualization
             SetVisibility(true);
         }
 
-        public override void DisplayTriggerBuffer(int[,] data)
+        public override void DisplayTriggerBuffer(float[,] data)
         {
             if(_lcpData == null)
             {

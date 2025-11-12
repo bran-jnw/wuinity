@@ -721,6 +721,7 @@ namespace PREACT
             {
                 Engine.Message(this, Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
                 _trafficModule.SaveToFile(_simulationIndex);
+                SaveArrivalData();
             }
             if (_input.Simulation.RunPedestrianModule)
             {
@@ -730,7 +731,21 @@ namespace PREACT
                     string file = Path.Combine(_engine.OutputFolder, _input.Simulation.Name + "_pedestrian_output_" + _simulationIndex + ".csv");
                     mHS.SaveToFile(file);
                 }                    
-            }                        
+            }
+            
+        }
+
+        private void SaveArrivalData()
+        {
+            string outputFilePath = Path.Combine(_engine.OutputFolder, _input.Simulation.Name + "_" + _simulationIndex + "_arrivalData.csv");
+            using (StreamWriter outputFile = new StreamWriter(outputFilePath))
+            {
+                List<float> data = _trafficModule.GetArrivalData();
+                foreach (float value in data)
+                {
+                    outputFile.WriteLine(value.ToString());
+                }                
+            }
         }
 
         public Vector2d GetSimulationPosition(Vector2d latLon)

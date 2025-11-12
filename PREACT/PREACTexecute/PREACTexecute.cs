@@ -34,8 +34,27 @@ namespace PREACT
             bool success;
             _engine.LoadInputFromFile(args[0], out success);
             if (success)
-            {                
-                EngineTask engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, 1, true, 1, 0.02f);
+            {
+                EngineTask engineTask;
+                if (args.Length >= 3)
+                {
+                    int numberOfRuns = 1, simulationIndexOffset;
+                    int.TryParse(args[1], out numberOfRuns);
+                    int.TryParse(args[2], out simulationIndexOffset);
+                    if(simulationIndexOffset == 0)
+                    {
+                        engineTask = new EngineTask(EngineTask.ExecutionMode.ParallelProcess, numberOfRuns);
+                    }
+                    else
+                    {
+                        engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, 1, simulationIndexOffset);
+                    } 
+                }
+                else
+                {
+                    engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, 1, 1);
+                }
+                 
                 _isDone = false;
                 _engine.RunSimulations(engineTask);                
             }
