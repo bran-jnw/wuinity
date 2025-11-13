@@ -77,7 +77,15 @@ namespace PREACT
                 _ENGINE = this;
             }
 
-            GdalConfiguration.ConfigureGdal();
+            /*try
+            {
+                GdalConfiguration.ConfigureGdal();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }*/
+            
         }      
        
         public async void RunSimulations(EngineTask engineTask, int startIndexOffset = 0)
@@ -89,6 +97,7 @@ namespace PREACT
             }
 
             Message(null, LogType.Log, "Will try to run a max total of " + engineTask.NumberOfRuns + " simulations unless aborted early (convergence met, user stoppage or simulation error)." );
+            _consoleLog.Clear();
 
             try
             {    
@@ -419,11 +428,6 @@ namespace PREACT
             }
         }
 
-        private void EvaluateSimulationStatistics(float simulationRSET, EngineTask engineTask)
-        {
-            
-        }
-
         public void SetInput(PREACTInput input)
         {
             _dataStatus.HaveInput = true;
@@ -518,22 +522,6 @@ namespace PREACT
             }           
         }
 
-        static string[] logBuffer;
-        public string[] GetMessageLog()
-        {
-            if (logBuffer == null || logBuffer.Length != _consoleLog.Count)
-            {
-                logBuffer = _consoleLog.ToArray();
-            }
-
-            return logBuffer;
-        }
-
-        public void ClearLog()
-        {
-            _consoleLog.Clear();
-        }
-
         public void PauseSimulations()
         {
             for (int i = 0; i < _simulations.Length; ++i)
@@ -583,7 +571,7 @@ namespace PREACT
                 output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
             }
             string path = Path.Combine(OutputFolder, _input.Simulation.Name + "_traffic_average.csv");
-            System.IO.File.WriteAllLines(path, output);
+            File.WriteAllLines(path, output);
         }
 
         byte[] _plotBytes;
