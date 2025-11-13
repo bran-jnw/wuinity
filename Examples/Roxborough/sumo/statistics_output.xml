@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-11-13 10:16:52 by Eclipse SUMO libsumo Version 1.24.0
+<!-- generated on 2025-11-13 16:00:09 by Eclipse SUMO libsumo Version 1.24.0
 <libsumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/libsumoConfiguration.xsd">
 
     <input>
-        <net-file value="E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\sumo/rox_big.net.xml"/>
+        <net-file value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/rox_big.net.xml"/>
     </input>
 
     <output>
-        <statistic-output value="E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\sumo/statistics_output.xml"/>
+        <statistic-output value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/statistics_output.xml"/>
     </output>
 
     <time>
@@ -18,18 +18,17 @@
 
     <report>
         <verbose value="true"/>
-        <log value="E:\_UNITY\WUInity\wui-nity\Examples\Roxborough\sumo/log.txt"/>
+        <log value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/log.txt"/>
     </report>
 
 </libsumoConfiguration>
 -->
 
 <statistics xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/statistic_file.xsd">
-    <performance clockBegin="121561.96" clockEnd="121580.52" clockDuration="18.56" traciDuration="9.40" realTimeFactor="393.57" vehicleUpdatesPerSecond="69659.89" personUpdatesPerSecond="0.00" begin="0.00" end="7303.00" duration="7303.00"/>
+    <performance clockBegin="142158.62" clockEnd="142180.30" clockDuration="21.67" traciDuration="32.34" realTimeFactor="344.99" vehicleUpdatesPerSecond="62281.32" personUpdatesPerSecond="0.00" begin="0.00" end="7477.00" duration="7477.00"/>
     <vehicles loaded="1000" inserted="1000" running="0" waiting="0"/>
-    <teleports total="2" jam="0" yield="2" wrongLane="0"/>
+    <teleports total="6" jam="0" yield="6" wrongLane="0"/>
     <safety collisions="0" emergencyStops="0" emergencyBraking="0"/>
     <persons loaded="0" running="0" jammed="0"/>
     <personTeleports total="0" abortWait="0" wrongDest="0"/>
 </statistics>
-

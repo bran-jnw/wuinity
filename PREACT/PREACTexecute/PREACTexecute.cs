@@ -25,38 +25,50 @@ namespace PREACT
 
         public void Execute(string[] args)
         {
-            if (args.Length == 0 || !File.Exists(args[0]))
+            if (args.Length == 0)
             {
-                Console.WriteLine("Specified input file does not exist.");
+                Console.WriteLine("Incorrect input parameters.");
                 return;
+            }
+            else if(!File.Exists(args[0]))
+            {
+                Console.WriteLine("Specified file does not exist.");
             }
 
             bool success;
             _engine.LoadInputFromFile(args[0], out success);
             if (success)
             {
-                EngineTask engineTask;
-                if (args.Length >= 3)
+                EngineTask engineTask = null;
+                //simple serial run
+                if(args.Length == 1)
                 {
-                    int numberOfRuns = 1, simulationIndexOffset;
+                    engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, 1, 0);
+                }
+                //parallel run and its following processes
+                else if(args.Length >= 3)
+                {
+                    int numberOfRuns, batchSize, simulationIndexOffset;
+
                     int.TryParse(args[1], out numberOfRuns);
-                    int.TryParse(args[2], out simulationIndexOffset);
-                    if(simulationIndexOffset == 0)
+                    int.TryParse(args[2], out batchSize);
+                    int.TryParse(args[3], out simulationIndexOffset);
+
+                    if (numberOfRuns > 1)
                     {
-                        engineTask = new EngineTask(EngineTask.ExecutionMode.ParallelProcess, numberOfRuns);
+                        engineTask = new EngineTask(EngineTask.ExecutionMode.ParallelProcess, numberOfRuns, simulationIndexOffset, batchSize);
                     }
                     else
                     {
-                        engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, 1, simulationIndexOffset);
-                    } 
-                }
-                else
-                {
-                    engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, 1, 1);
-                }
+                        engineTask = new EngineTask(EngineTask.ExecutionMode.Serial, numberOfRuns, simulationIndexOffset, batchSize);
+                    }
+                }                
                  
-                _isDone = false;
-                _engine.RunSimulations(engineTask);                
+                if(engineTask != null)
+                {
+                    _isDone = false;
+                    _engine.RunSimulations(engineTask);
+                }                               
             }
             else
             {

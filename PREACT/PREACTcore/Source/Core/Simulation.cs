@@ -43,6 +43,7 @@ namespace PREACT
 
         //Data
         private int _simulationIndex;
+        private bool _visualize;
         private float _startTime;
         private float _currentTime;
         private bool _isPaused = false;
@@ -62,7 +63,8 @@ namespace PREACT
         public PREACTInput Input { get => _input; }
 
         //Data
-        public int SimulationIndex { get => _simulationIndex; }        
+        public int SimulationIndex { get => _simulationIndex; }
+        public bool Visualize { get => _visualize; }
         public bool IsPaused { get => _isPaused; }        
         public bool HaveResults { get => _haveResults; }          
         public float StartTime { get => _startTime; }        

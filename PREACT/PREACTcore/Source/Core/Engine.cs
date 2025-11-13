@@ -186,11 +186,11 @@ namespace PREACT
                     {
                         try
                         {
-                            Message(null, LogType.Log, "Starting quiet PREACT process...");
+                            Message(null, LogType.Log, "Starting PREACT process...");
                             ProcessStartInfo preactRun = new ProcessStartInfo();
                             preactRun.FileName = "preact.exe";
                             outputFilePaths[j - 1] = Path.Combine(OutputFolder, _input.Simulation.Name + "_" + simulationIndex + "_arrivalData.csv");
-                            preactRun.Arguments = WorkingFile + " " + 1 + " " + simulationIndex;//filePath, 1 run, index offset
+                            preactRun.Arguments = WorkingFile + " " + 1 + " " + 1 + " " + simulationIndex;//filePath, number of runs, batchsize, simulation index offset
                             preactRun.CreateNoWindow = false;
                             preactRun.UseShellExecute = true;
                             tasks[j] = Task.Run(() => Process.Start(preactRun).WaitForExit());
@@ -407,11 +407,11 @@ namespace PREACT
                 if (convergenceCriteria < engineTask.ConvergenceMaxDifference)
                 {
                     ++convergedInSequence;
-                    Message(null, LogType.Log, "RSET for simulation " + simulationIndex + " was within covergence criteria, total runs in convergence sequence: " + convergedInSequence);
+                    Message(null, LogType.Log, "RSET for simulation " + simulationIndex + " was within convergence criteria, total runs in convergence sequence: " + convergedInSequence);
                     //we are done
-                    if (engineTask.StopAfterConverging && convergedInSequence >= engineTask.ConvergenceMinSequence)
+                    if (!_stopSimulations && engineTask.StopAfterConverging && convergedInSequence >= engineTask.ConvergenceMinSequence)
                     {
-                        Message(null, LogType.Log, "Complete convergence has been met, shutting down...");
+                        Message(null, LogType.Log, "Convergence critiera has been met, shutting down after this batch finishes.");
                         _stopSimulations = true; //needed for serial run
                         CloseSimulations(false); //needed for parallel run
                     }
@@ -419,7 +419,7 @@ namespace PREACT
                 else
                 {
                     Message(null, LogType.Log, "Convergence has not been met.");
-                    convergedInSequence = 0;
+                    convergedInSequence = 1;
                 }
             }
             else

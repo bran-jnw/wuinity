@@ -10,11 +10,7 @@
             {
             }
 
-            if(args.Length > 3)
-            {
-                Console.WriteLine("Press enter to close...");
-                Console.ReadLine();
-            }            
+            Console.WriteLine("Simulation run executed, shutting down.");           
         }
     }
 }
