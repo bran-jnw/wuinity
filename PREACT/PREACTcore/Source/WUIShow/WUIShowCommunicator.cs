@@ -28,11 +28,16 @@ namespace PREACT.Visualization
 
         public WUIShowCommunicator(Engine engine, string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
         {
+            Initiate(engine, serverIP, udpPort, tcpPort, origoLongitude, origoLatitude, maxNumberOfCars);
+        }
+
+        public void Initiate(Engine engine, string serverIP, int udpPort, int tcpPort = 0, double origoLongitude = -105.104505, double origoLatitude = 39.409924, int maxNumberOfCars = 10000)
+        {
             _engine = engine;
             _engine.Simulation.SetPause(true);
 
             udpClient = new UdpClient(serverIP, udpPort);
-            Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest)); 
+            Task.Run(() => TcpServer.StartServer(tcpPort == 0 ? udpPort + 1 : tcpPort, HandleTcpRequest));
 
             this.origoLongitude = origoLongitude;
             this.origoLatitude = origoLatitude;
@@ -41,7 +46,6 @@ namespace PREACT.Visualization
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentVehiclePositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
-            
         }
 
         private byte[] GetTriggerBufferData(out bool success)

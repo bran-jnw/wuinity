@@ -1,0 +1,66 @@
+[09:33:02]  Reading input file E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\Roxborough_example.wui.
+[09:33:02] Simulation input is being read...
+[09:33:02] Map input is being read...
+[09:33:02] Population input is being read...
+[09:33:02] WARNING: MinHouseholdSize was not found, default value has been used.
+[09:33:02] WARNING: MaxHouseholdSize was not found, default value has been used.
+[09:33:02] Loaded population small_population containing 2551 people and 1000 households.
+[09:33:02] WARNING: Events header not found, no events will be added.
+[09:33:02] Evacuation input is being read...
+[09:33:02] Loading Evacuation data...
+[09:33:02]  Loaded response curve from E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\responseCurves/Observed_average.csv named Observed_average
+[09:33:02]  1 valid evacuation goal files were succesfully loaded.
+[09:33:02]  Evacuation group files loaded, 1 valid evacuation groups were found.
+[09:33:02] WARNING: Evac groups file does not match current mesh.
+[09:33:02] WARNING: Creating default group map.
+[09:33:02] Pedestrian input is being read...
+[09:33:02] Traffic input is being read...
+[09:33:02] SUMO input is being read...
+[09:33:02] WARNING: OutputRasterSize was not found, default value has been used.
+[09:33:02] Fire input is being read...
+[09:33:02] AscImport input is being read...
+[09:33:02] Loading Fire data...
+[09:33:02]  LCP found in E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\fire/rox_big_burning_city.lcp, read succesfully.
+[09:33:02] Present fuel model numbers are 1, 2, 3, 4, 5, 6, 8, 9, 10, 93, 98, 99.
+[09:33:02] WARNING: Could read GFI data but there was a mismatch with the LCP file colums/rows, creating empty default.
+[09:33:02] Smoke input is being read...
+[09:33:02] GlobalSmoke input is being read...
+[09:33:02] TriggerBuffer input is being read...
+[09:33:02] WUIShow input is being read...
+[09:33:02]  Input file E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\Roxborough_example.wui loaded.
+[09:33:02] Starting to load Mapbox map.
+[09:33:02] Map loaded succesfully.
+[09:33:40] Starting simlations/s in serial mode.
+[09:33:40] [Simulation# 0]Simulation  0 started, please wait.
+[09:33:41] Wildfire ASCII data offset by (x/y) meters: -4.17539980873698, 6.896528609097
+[09:33:41] [Simulation# 0]Fire module AscImport initiated.
+[09:33:41] [Simulation# 0] Total households: 1000
+[09:33:41] [Simulation# 0] Total cars: 1000
+[09:33:41] [Simulation# 0] Total people who will not evacuate: 0
+[09:33:41] [Simulation# 0]Pedestrian module MacroPedestrianSim initiated.
+[09:33:42] Number of fire cells that have road junctions and will affect traffic:974
+[09:33:42] [Simulation# 0]Traffic module SUMO initiated.
+[09:33:42] [Simulation# 0]All requested sub-modules initiated successfully.
+[09:33:42] [Simulation# 0, 420s] Cell 278,91 has been ignited and affects roads but did not affect any vehicles.
+[09:33:47] [Simulation# 0, 960s] Cell 274,90 has been ignited and affects roads but did not affect any vehicles.
+[09:33:47] [Simulation# 0, 1020s] Cell 286,96 has been ignited and affects roads but did not affect any vehicles.
+[09:33:52] [Simulation# 0, 1500s] Cell 303,110 has been ignited and affects roads but did not affect any vehicles.
+[09:33:58] [Simulation# 0, 2280s] Cell 282,100 has been ignited and affects roads but did not affect any vehicles.
+[09:33:59] [Simulation# 0, 2400s] Cell 300,91 has been ignited and affects roads but did not affect any vehicles.
+[09:33:59] [Simulation# 0, 2520s] Cell 284,107 has been ignited and affects roads but did not affect any vehicles.
+[09:34:03] [Simulation# 0, 4200s] Cell 293,118 has been ignited and affects roads but did not affect any vehicles.
+[09:34:04] [Simulation# 0, 4920s] Cell 311,123 has been ignited and affects roads but did not affect any vehicles.
+[09:34:04] [Simulation# 0, 5160s] Cell 204,73 has been ignited and affects roads but did not affect any vehicles.
+[09:34:05] [Simulation# 0, 5820s] Cell 268,115 has been ignited and affects roads but did not affect any vehicles.
+[09:34:05] [Simulation# 0, 7239s] Both pedestrian and traffic simulations are done, stopping as per user settings.
+[09:34:05] [Simulation# 0, 7239s]  Total cars in simulation: 1000
+[09:34:05] WARNING: The type initializer for 'OSGeo.GDAL.GdalPINVOKE' threw an exception.
+[09:34:05] [Simulation# 0, 7239s] Trigger buffer module was enabled.
+[09:34:05] [Simulation# 0, 7239s] Total time spent [s]:24.969
+[09:34:05] [Simulation# 0, 7239s] Total time spent in pedestrian module [s]:0.684 [2%]
+[09:34:05] [Simulation# 0, 7239s] Total time spent in traffic module [s]:18.187 [72%]
+[09:34:05] [Simulation# 0, 7239s] Total time spent in fire module [s]:0.36 [1%]
+[09:34:05] [Simulation# 0, 7239s] Total time spent in smoke module [s]:0.009 [0%]
+[09:34:05] [Simulation# 0, 7239s] Total time spent on initial traffic route pathfinding [s]:4.422 [17%]
+[09:34:05] [Simulation# 0] Simulation done.
+[09:34:05]  Average total evacuation time: 7239 seconds, ran 1 simulation/s.

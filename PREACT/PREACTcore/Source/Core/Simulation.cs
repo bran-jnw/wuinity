@@ -446,7 +446,7 @@ namespace PREACT
             //increase time
             float deltaTime = _input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (_input.Simulation.RunFireModule && !_input.Simulation.RunPedestrianModule && !_input.Simulation.RunTrafficModule && !_input.Simulation.RunSmokeModule)
+            if (_fireModule != null && _input.Simulation.RunFireModule && !_input.Simulation.RunPedestrianModule && !_input.Simulation.RunTrafficModule && !_input.Simulation.RunSmokeModule)
             {
                 deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
