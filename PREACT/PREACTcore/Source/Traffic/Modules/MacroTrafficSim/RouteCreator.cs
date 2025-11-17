@@ -1,0 +1,332 @@
+//This file is part of PREACT Copyright (C) 2025 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System.Numerics;
+using System.Collections.Generic;
+using PREACT.Evacuation;
+using Itinero;
+using Itinero.Osm.Vehicles;
+using PREACT.Population;
+using PREACT.IO;
+using PREACT.Math;
+
+namespace PREACT.Traffic
+{
+    [System.Serializable]
+    public class RouteCreator
+    {
+        private Router _router;
+        private RouterDb _routerDb;
+        private List<RouterPoint> _validEvacuationGoalRouterPoints;
+        private List<EvacuationDestination> _validEvacuationGoals;
+
+        public RouteCreator(RouterDb routerDb)
+        {
+            _routerDb = routerDb;
+        }      
+
+        Itinero.Profiles.Profile GetRouterProfile(MacroTrafficSimInput.RoutingPriority routingPriority)
+        {
+            Itinero.Profiles.Profile p;
+
+            if (routingPriority == MacroTrafficSimInput.RoutingPriority.Closest || routingPriority == MacroTrafficSimInput.RoutingPriority.EvacGroup)
+            {
+                p = Vehicle.Car.Shortest();
+            }
+            else
+            {
+                p = Vehicle.Car.Fastest();
+            }
+
+            return p;
+        }
+
+        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput.RoutingPriority routingPriority,  List<EvacuationDestination> evacuatonGoals, bool logMessages)
+        {
+            Itinero.Profiles.Profile routerProfile = GetRouterProfile(routingPriority);
+
+            //check that evac goals are valid
+            _validEvacuationGoalRouterPoints = new List<RouterPoint>();
+            _validEvacuationGoals = new List<EvacuationDestination>();
+            for (int i = 0; i < evacuatonGoals.Count; i++)
+            {
+                try
+                {
+                    //TODO: hard-coded search of 200 meters, setup as option?
+                    RouterPoint rP = _router.Resolve(routerProfile, (float)evacuatonGoals[i].LatLon.x, (float)evacuatonGoals[i].LatLon.y, 200f);
+                    _validEvacuationGoalRouterPoints.Add(rP);
+                    _validEvacuationGoals.Add(evacuatonGoals[i]);
+                    if (logMessages)
+                    {
+                        Engine.Message(null, Engine.LogType.Log, "Evac goal start position valid: " + evacuatonGoals[i].Name);
+                    }
+                }
+                catch (Itinero.Exceptions.ResolveFailedException)
+                {
+                    if (logMessages)
+                    {
+                        Engine.Message(null, Engine.LogType.Warning, "Evac goal start position NOT valid: " + evacuatonGoals[i].Name);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if any valid point on the network can be found within the cell, returns null if not, else a point with Lat/Lon that is valid.
+        /// </summary>
+        /// <param name="latLon"></param>
+        /// <param name="p"></param>
+        /// <param name="cellSize"></param>
+        /// <returns></returns>
+        public static RouterPoint GetValidRouterPoint(Router router, Vector2d latLon, Itinero.Profiles.Profile p, float cellSize)
+        {
+            //check within the radius of the diagonal of the cell (so complete cell plus some parts of neighboring cells)
+            RouterPoint start = null;
+            try
+            {
+                start = router.Resolve(p, (float)latLon.x, (float)latLon.y, cellSize * 0.70711f); //half cell size * sqrt 2
+                //for some reason Itinero does not return the actual point on the network, so we have to get it and overwrite
+                Itinero.LocalGeo.Coordinate temp = start.LocationOnNetwork(router.Db);
+                start = new RouterPoint(temp.Latitude, temp.Longitude, start.EdgeId, start.Offset);
+            }
+            catch (Itinero.Exceptions.ResolveFailedException)
+            {
+                //WUIEngine.LOG(WUIEngine.LogType.Warning, "Itinero could not resolve requested position (point is too far from road network). Lat/long: " + latLon.x + ", " + latLon.y);
+            }
+
+            return start;
+        }
+
+        /// <summary>
+        /// See if the wanted route is already calculated (to save computaional time).
+        /// </summary>
+        /// <param name="startRouterPoint"></param>
+        /// <param name="evacGoal"></param>
+        /// <param name="currentIndex"></param>
+        /// <param name="router"></param>
+        /// <param name="rasterRoutes"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        static RouteCollection CheckIfNeighborsHaveSameStart(RouterPoint startRouterPoint, int currentIndex, RouteCollection[] rasterRoutes, float cellSize)
+        {
+            //TODO: only check 8 neighbors (or actually all previous neighbors, so 4 neighbors)
+            for (int i = 0; i < currentIndex; i++)
+            {
+                if (rasterRoutes[i] != null)
+                {
+                    for (int j = 0; j < rasterRoutes[i].routes.Length; j++)
+                    {
+                        if (rasterRoutes[i].routes[j] != null)
+                        {
+                            //check if they are approx. the same start coordinates
+                            float latDelta = Mathf.Abs(rasterRoutes[i].routes[j].route.Shape[0].Latitude - startRouterPoint.Latitude);
+                            float longDelta = Mathf.Abs(rasterRoutes[i].routes[j].route.Shape[0].Longitude - startRouterPoint.Longitude);
+
+                            //https://www.usna.edu/Users/oceano/pguth/md_help/html/approx_equivalents.htm
+                            float maxDelta = cellSize * 0.5f; //TODO: reasonable?
+                            Vector2d v = LocalGPWData.SizeToDegrees(new Vector2d(startRouterPoint.Latitude, startRouterPoint.Longitude), new Vector2d(maxDelta, maxDelta));
+
+                            if (latDelta < v.x && longDelta < v.y)
+                            {
+                                return rasterRoutes[i];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Tries to return valid route data, if not null is returned. Should only be null if there is no physical connection between points (as we check of start and end is valid).
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="goal"></param>
+        /// <param name="evacGoal"></param>
+        /// <param name="routerProfile"></param>
+        /// <returns></returns>
+        private RouteData TryCalcRoute(RouterPoint start, RouterPoint goal, EvacuationDestination evacGoal, Itinero.Profiles.Profile routerProfile)
+        {
+            //still calculate for now as a goal might become accessible later in simulation
+            /*//if goal is not accessible we have nothing to return
+            if (evacGoal.blocked)
+            {
+                return null;
+            }*/
+            RouteData routeData = null;
+
+            try
+            {
+                if (_router == null)
+                {
+                    _router = new Router(_routerDb);
+                }
+                Route route = _router.Calculate(routerProfile, start, goal);
+                routeData = new RouteData(route, evacGoal);
+            }
+            /*catch (Itinero.Exceptions.ResolveFailedException)
+            {
+                //print("resolve failed");
+            }*/
+            catch (Itinero.Exceptions.RouteNotFoundException)
+            {
+                //print("no route found");
+            }
+
+            return routeData;
+        }
+
+        /// <summary>
+        /// Called when a general route to any available evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long
+        /// Used mainly by traffic simulator.
+        /// </summary>
+        /// <param name="startLatLon"></param>
+        /// <returns></returns>
+        public RouteData CalcTrafficRoute(Simulation simulation, Vector2d startLatLon)
+        {
+            float cellSize = simulation.Input.Evacuation.PaintCellSize;
+            Itinero.Profiles.Profile routerProfile = GetRouterProfile(simulation.Input.Traffic.MacroTrafficSimInput.Routing);
+
+            //TODO: reasonable? maybe also check if street is same or actual distance between points?
+            //this is a quick way of getting a route from an approximate position of the car
+            //we just check if cell we are in has a good route and use that
+            //TODO: fix
+            RouteCollection rC = null;// WUIEngine.RUNTIME_DATA.Routing.GetCellRouteCollection(startLatLon);
+            if (rC != null && rC.GetSelectedRoute() != null)
+            {
+                return rC.GetSelectedRoute();
+            }
+
+            //check if valid start was found
+            RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(startLatLon.x, startLatLon.y), routerProfile, cellSize);
+
+            //no need in calculating route when start is not resolved
+            if (startRouterPoint == null)
+            {
+                simulation.Stop("WARNING! Car could not find a valid start position, abort!", true);
+                return null;
+            }
+
+            bool foundOneValidRoute = false;
+
+            //list that will contain all valid routes to avoid null ref in route collections
+            List<RouteData> routeData = new List<RouteData>();
+            //loop through all defined goals and save them for potential use later (old way only saved the currently needed route and the re-calced if needed)
+            if (_validEvacuationGoals == null || _validEvacuationGoalRouterPoints == null)
+            {
+                DetermineValidGoalsAndRouterPoints(simulation.Input.Traffic.MacroTrafficSimInput.Routing, simulation.Destinations, false);
+            }
+            for (int i = 0; i < _validEvacuationGoals.Count; i++)
+            {
+                //TODO: use this as a quick out? this route should be both closest and fastest
+                //This is no longer an issue since any goal that is being blocked is altready flagged
+                //(we update new evac goals after full update), just keep going to goal (car does not change route)
+                /*if(HasApproxSameCoordinate(startRouterPoint, validEvacuationGoalRouterPoints[i]))
+                {
+                    //WUInity.WUINITY_SIM.LogMessage("WARNING: Route has same start and end, will get you into trouble, skipping goal!");
+                    continue;
+                }*/
+
+                //skip blocked goals
+                if (_validEvacuationGoals[i].Blocked)
+                {
+                    continue;
+                }
+
+                RouteData rD = TryCalcRoute(startRouterPoint, _validEvacuationGoalRouterPoints[i], _validEvacuationGoals[i], routerProfile);
+
+                if (rD != null)
+                {
+                    routeData.Add(rD);
+                    foundOneValidRoute = true;
+                }
+            }
+
+            //check that at least 1 route is not null to make sure we have a valid route to go somewhere
+            if (!foundOneValidRoute)
+            {
+                //TODO: fix what happens when cars get stuck
+                Engine.Message(simulation, Engine.LogType.SimulationError, "No routes found for car, will get stuck.");
+                return null;
+            }
+
+            rC = new RouteCollection(routeData.Count);
+            for (int i = 0; i < routeData.Count; i++)
+            {
+                rC.routes[i] = routeData[i];
+            }
+
+            SelectCorrectRouteFromCar(simulation, rC);
+
+            return rC.GetSelectedRoute();
+        }
+
+        bool HasApproxSameCoordinate(RouterPoint start, RouterPoint end)
+        {
+            return Mathd.Approximately(start.Latitude, end.Latitude) && Mathd.Approximately(start.Longitude, end.Longitude);
+        }
+
+        private static void SelectCorrectRouteFromCar(Simulation simulation, RouteCollection rC)
+        {
+            SelectCorrectRoute(simulation, rC, -1);
+        }
+
+        public static void UpdateRouteCollectionBasedOnRouteChoice(Simulation simulation, RouteCollection rC, int cellIndex)
+        {
+            if(simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup || simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
+            {
+                SelectCorrectRoute(simulation, rC, cellIndex);
+            }
+        }
+
+        /// <summary>
+        /// Picks the desired route froma routecollection based in inputs. 
+        /// Should only consider force map when called from a evac cell (not from a car)
+        /// </summary>
+        /// <param name="rC"></param>
+        /// <param name="considerForceMap"></param>
+        /// <param name="cellIndex"></param>
+        public static void SelectCorrectRoute(Simulation simulation, RouteCollection rC, int cellIndex)
+        {
+         //   TrafficInput tO = Engine.Input.Traffic;
+            //Vector2int cells = Engine.ScenarioData.Evacuation.CellCount;
+
+            if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup)
+            {
+                if (cellIndex >= 0)
+                {
+                    EvacuationGroup group = simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
+                    EvacuationDestination goal = group.GetWeightedRandomDestination(simulation.Destinations);
+                    rC.SelectForcedNonBlocked(goal, simulation);
+                }
+                else
+                {
+                    rC.SelectFastestNonBlocked(simulation);
+                }
+            }
+            else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
+            {
+                int randomChoice = Randomf.Range(0, simulation.Destinations.Count - 1);
+                rC.SelectForcedNonBlocked(simulation.Destinations[randomChoice], simulation);
+            }
+            else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Closest)
+            {
+                rC.SelectClosestNonBlocked(simulation);
+            }
+            else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Fastest)
+            {
+                rC.SelectFastestNonBlocked(simulation);
+            }
+        }
+
+        /*public static void SelectCorrectRoute(RouteCollection rC)
+        {
+            SelectCorrectRoute(rC, false, -1);
+        }*/
+    }        
+}

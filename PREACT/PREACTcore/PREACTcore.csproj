@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>PREACT</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Source\Traffic\Modules\CityFlow\CityFlow_license.txt" />
+    <Content Include="Source\Traffic\Modules\CityFlow\cityflow_unity.dll" />
+    <Content Include="Source\Traffic\Modules\SUMO\Build_notes.txt" />
+    <Content Include="Source\Traffic\Modules\SUMO\version_info.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GDAL" Version="3.11.3" />
+    <PackageReference Include="GDAL.Native" Version="3.11.3" />
+    <PackageReference Include="ILGPU" Version="1.5.3" />
+    <PackageReference Include="ILGPU.Algorithms" Version="1.5.3" />
+    <PackageReference Include="Itinero" Version="1.5.1" />
+    <PackageReference Include="Itinero.IO.Osm" Version="1.5.1" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="kPERILcore">
+      <HintPath>..\..\..\kperil\kPERILcore\bin\Release\netstandard2.1\kPERILcore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

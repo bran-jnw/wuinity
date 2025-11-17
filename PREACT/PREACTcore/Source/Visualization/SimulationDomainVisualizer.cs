@@ -1,0 +1,77 @@
+//This file is part of PREACT Copyright (C) 2025 Jonathan Wahlqvist
+//WUIPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using PREACT.Runtime;
+
+namespace PREACT.Population
+{
+    public abstract class SimulationDomainVisualizer
+    {
+        public abstract void SetAndDisplayPopulationMapTexture(PopulationMap data, WorkingData workingData);
+        public abstract void SetAndDisplayPopulationMapMaskTexture(PopulationMap data, WorkingData workingData);
+        public abstract void SetVisibility(bool visible);
+        public abstract bool ToggleVisibility();
+        public abstract bool IsDataPlaneActive();
+        //textures
+        public abstract object GetPopulationTexture();
+        public abstract object GetPopulationMaskTexture();
+        
+                
+        public abstract void SetAndDisplayLocalGPW(LocalGPWData data, WorkingData workingData);
+        public abstract void SetGPWVisibility(bool visible);
+        public abstract bool ToggleGPWVisibility();
+        public abstract bool IsGPWPlaneVisible();
+        //textures
+        public abstract object GetGPWTexture();
+
+        //colors from GPW website
+        static PREACTColor c0 = new PREACTColor(190f / 255f, 232f / 255f, 255f / 255f);
+        static PREACTColor c1 = new PREACTColor(1.0f, 241f / 255f, 208f / 255f);
+        static PREACTColor c2 = new PREACTColor(1.0f, 218f / 255f, 165f / 255f);
+        static PREACTColor c3 = new PREACTColor(252f / 255f, 183f / 255f, 82f / 255f);
+        static PREACTColor c4 = new PREACTColor(1.0f, 137f / 255f, 63f / 255f);
+        static PREACTColor c5 = new PREACTColor(238f / 255f, 60f / 255f, 30f / 255f);
+        static PREACTColor c6 = new PREACTColor(191f / 255f, 1f / 255f, 39f / 255f);
+
+        public static PREACTColor GetGPWColor(float density)
+        {
+            PREACTColor color;
+            if (density < 0.0f)
+            {
+                color = c0;
+            }
+            else if (density < 1.0f)
+            {
+                color = c1;
+            }
+            else if (density <= 5.0f)
+            {
+                color = c2;
+            }
+            else if (density <= 25.0f)
+            {
+                color = c3;
+            }
+            else if (density <= 250.0f)
+            {
+                color = c4;
+            }
+            else if (density <= 1000.0f)
+            {
+                color = c5;
+            }
+            else
+            {
+                color = c6;
+            }
+            color.a = 0.5f;
+            return color;
+        }
+    }
+}
+
+
