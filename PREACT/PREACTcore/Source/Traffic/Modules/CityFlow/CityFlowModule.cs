@@ -9,59 +9,33 @@ using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 using PREACT.Math;
+using CityFlowCore;
 
 namespace PREACT.Traffic
 {
     public class CityFlowModule : TrafficModule
     {
-        private IntPtr engine;
-
-        [DllImport("cityflow_unity.dll")]
-        private static extern int Test();
-        [DllImport("cityflow_unity.dll")]
-        private static extern IntPtr CreateEngine(string configFile, int threadNum);
-        [DllImport("cityflow_unity.dll")]
-        private static extern int NextStep(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern int GetVehicleCount(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern double GetCurrentTime(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern int GetSuccess(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern string GetFilePath(IntPtr engine);
-        [DllImport("cityflow_unity.dll")]
-        private static extern IntPtr GetVehicle(IntPtr engine, int index);
-        [DllImport("cityflow_unity.dll")]
-        private static extern void GetVehicles(IntPtr engine);
+        CityFlowCore.Engine _cityFlow;
 
         public CityFlowModule(Simulation simulation) : base(simulation)
         {
-            //MonoBehaviour.print(Test());
-            engine = CreateEngine("D:\\UNITY\\_PROJECTS\\CityFlow\\examples\\config.json", 1);
-            for (int i = 0; i < 600; i++)
-            {
-                
-            }
-            //MonoBehaviour.print(GetCurrentTime(engine));
-            //MonoBehaviour.print(GetSuccess(engine));
-            //print(GetFilePath(engine));
-            //print(GetFilePath(engine));
-            //print(GetVehicle(engine));
+            SWIGTYPE_p_std__string configFile;
+            //configFile = simulation.Input.Traffic.CityFlowInput.ConfigurationFile;
+            //_cityFlow = new CityFlowCore.Engine(configFile, 4);
         }
 
         public override void Step(float deltaTime, float currentTime)
         {
-            NextStep(engine);
-            int vehicles = GetVehicleCount(engine);
+            _cityFlow.nextStep();
+            var vehicles = _cityFlow.getVehicles(true);
             //GetVehicles(engine);
-            for (int j = 0; j < vehicles; ++j)
+            /*for (int j = 0; j < vehicles; ++j)
             {
-                IntPtr b = GetVehicle(engine, j);
+                IntPtr b = _cityFlow.veh
                 string c = Marshal.PtrToStringAnsi(b);
                 //MonoBehaviour.print(c);
                 //print(vehicles);
-            }
+            }*/
         }
 
         public override bool IsSimulationDone()

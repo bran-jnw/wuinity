@@ -6,24 +6,23 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Numerics;
-using PREACT.Traffic;
-using PREACT.IO;
 
 namespace PREACT.IO
 {
     [System.Serializable]
     public class TrafficInput
     {
-        public enum TrafficModuleChoice { SUMO, MacroTrafficSim }
+        public enum TrafficModuleChoice { SUMO, MacroTrafficSim, CityFlow }
 
         private TrafficData _data;
         private SUMOInput _sumoInput;
         private MacroTrafficSimInput _macroTrafficSimInput;
+        private CityFlowInput _cityFlowInput;
 
         public TrafficData Data { get => _data; }
         public SUMOInput SumoInput { get { return _sumoInput; } }
         public MacroTrafficSimInput MacroTrafficSimInput { get => _macroTrafficSimInput; }
+        public CityFlowInput CityFlowInput { get => _cityFlowInput; }
         public TrafficModuleChoice TrafficModule = TrafficModuleChoice.SUMO;      
         public bool VisibilityAffectsSpeed = false;     
 
@@ -33,6 +32,7 @@ namespace PREACT.IO
             _data = new TrafficData();
             _sumoInput = new SUMOInput();
             _macroTrafficSimInput = new MacroTrafficSimInput();
+            _cityFlowInput = new CityFlowInput();
         }
 
         public static TrafficInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, SimulationInput simulationInput, string rootFolder, out bool success)
@@ -106,6 +106,22 @@ namespace PREACT.IO
             else if(newInput.TrafficModule == TrafficModuleChoice.MacroTrafficSim)
             {
 
+            }
+            else if(newInput.TrafficModule == TrafficModuleChoice.CityFlow)
+            {
+                int lineIndex;
+                input = nameof(TrafficModuleChoice.CityFlow);
+                if (headerLineIndex.TryGetValue(input, out lineIndex))
+                {
+                    PREACTInput.ReadingInputMessage(input);
+                    newInput._cityFlowInput = CityFlowInput.Parse(inputLines, lineIndex, rootFolder, out success);
+                }
+                else
+                {
+                    //critical
+                    Engine.Message(null, Engine.LogType.SimulationError, nameof(Simulation) + " header not found." + PREACTInput.pleaseCheckInput);
+                    return newInput;
+                }
             }
             else
             {

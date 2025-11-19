@@ -29,4 +29,19 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ThirdParty\Behave\x64\Behave.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\Behave\x64\BehaveCore.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\CityFlow\x64\CityFlow.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\FOFEM\x64\FOFEM.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
