@@ -19,16 +19,23 @@ namespace PREACT.Fire
         public static bool inverseSpreadDirection = true;
         public static  readonly float sqrt2 = Mathf.Sqrt(2f);
 
-        private Stack<FireCell2> cellsToIgnite;
-        private Dictionary<int, FireCell2> activeCells;
-        private Stack<FireCell2> cellsToRemove;
+        public readonly TwoFuelModelsMethod TwoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
+        public readonly BehaveUnits.MoistureUnits.MoistureUnitsEnum MoistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
+        public readonly WindHeightInputMode WindHeightInputMode = WindHeightInputMode.TenMeter;
+        public readonly BehaveUnits.SlopeUnits.SlopeUnitsEnum SlopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
+        public readonly BehaveUnits.CoverUnits.CoverUnitsEnum CoverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
+        public readonly BehaveUnits.LengthUnits.LengthUnitsEnum LengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
+        public readonly BehaveUnits.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
+        public readonly WindAndSpreadOrientationMode WindAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
+
+        private Stack<FirePoint> cellsToIgnite;
+        private Dictionary<int, FirePoint> activeCells;
+        private Stack<FirePoint> cellsToRemove;
         private int xDim, yDim;
-        private FireCell2[,] fireCells;
+        private FirePoint[,] _firepoints;
 
         private CellularAutomata2(Simulation simulation, float windspeedTenMeters, float windDirection, float cellSize) : base(simulation)
         {
-            Engine.Message(null, Engine.LogType.Log, "Beginning backwards calculation of fire spread.");
-
             xDim = simulation.Input.Fire.Data.LCPData.GetCellCountX();
             yDim = simulation.Input.Fire.Data.LCPData.GetCellCountY();
             bool[,] wuiArea = GetWUIArea2D(simulation.Input.Fire.Data.WuiArea, xDim, yDim);
@@ -46,18 +53,18 @@ namespace PREACT.Fire
                 }
             }
             Surface surfaceFire = new Surface(fuelModelSet);
-            fireCells = new FireCell2[xDim, yDim];
+            _firepoints = new FirePoint[xDim, yDim];
 
-            //create
+            //create cells
             float maxROS = float.MinValue;
             for (int y = 0; y < yDim; ++y)
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y] = new FireCell2(x, y, surfaceFire, simulation.Input.Fire.Data.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this, simulation.Input.Fire.Data.InitialFuelMoistureData);
-                    if (fireCells[x, y]._maxROS > maxROS)
+                    _firepoints[x, y] = new FirePoint(true, x, y, surfaceFire, simulation.Input.Fire.Data.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this, simulation.Input.Fire.Data.InitialFuelMoistureData);
+                    if (_firepoints[x, y]._maxROS > maxROS)
                     {
-                        maxROS = fireCells[x, y]._maxROS;
+                        maxROS = _firepoints[x, y]._maxROS;
                     }
                 }
             }
@@ -67,13 +74,13 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y].SetNeighbors(xDim, yDim, wuiArea, surfaceFire, fireCells);
+                    _firepoints[x, y].SetNeighbors(xDim, yDim, wuiArea, surfaceFire, _firepoints);
                 }
             }
 
-            cellsToIgnite = new Stack<FireCell2>();
-            activeCells = new Dictionary<int, FireCell2>();
-            cellsToRemove = new Stack<FireCell2>();
+            cellsToIgnite = new Stack<FirePoint>();
+            activeCells = new Dictionary<int, FirePoint>();
+            cellsToRemove = new Stack<FirePoint>();
 
             //initial ignition
             for (int i = 0; i < wuiIgnitionBorder.Count; ++i)
@@ -83,7 +90,7 @@ namespace PREACT.Fire
                     Vector2int index = wuiIgnitionBorder[i] + NeighborIndices[j];
                     if (IsInside(xDim, yDim, index))
                     {
-                        fireCells[index.x, index.y].SchedurelIgnite(0f, 0f, 0);
+                        _firepoints[index.x, index.y].SchedurelIgnite(0f, 0f, 0);
                     }
                 }
             }
@@ -258,17 +265,17 @@ namespace PREACT.Fire
             throw new System.NotImplementedException();
         }
 
-        public void AddCellToIgnite(FireCell2 cell)
+        public void AddCellToIgnite(FirePoint cell)
         {
             cellsToIgnite.Push(cell);
         }
 
-        public void AddActiveCell(FireCell2 cell)
+        public void AddActiveCell(FirePoint cell)
         {
             activeCells.Add(cell._linearIndex, cell);
         }
 
-        public void AddCellToRemove(FireCell2 cell)
+        public void AddCellToRemove(FirePoint cell)
         {
             cellsToRemove.Push(cell);
         }
@@ -327,10 +334,10 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    fireCells[x, y].TryIgnite();
-                    if (fireCells[x, y]._ignited)
+                    _firepoints[x, y].TryIgnite();
+                    if (_firepoints[x, y]._ignited)
                     {
-                        triggerBuffer[x, y] = fireCells[x, y]._timeOfArrival;
+                        triggerBuffer[x, y] = _firepoints[x, y]._timeOfArrival;
                     }
                 }
             }
@@ -339,19 +346,10 @@ namespace PREACT.Fire
         }
     }
 
-    public class FireCell2
-    {
-        //private const TwoFuelModelsMethod twoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
-        private const BehaveUnits.MoistureUnits.MoistureUnitsEnum moistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
-        private const WindHeightInputMode windHeightInputMode = WindHeightInputMode.TenMeter;
-        private const BehaveUnits.SlopeUnits.SlopeUnitsEnum slopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
-        private const BehaveUnits.CoverUnits.CoverUnitsEnum coverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
-        private const BehaveUnits.LengthUnits.LengthUnitsEnum lengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
-        private const BehaveUnits.SpeedUnits.SpeedUnitsEnum windSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
-        private const WindAndSpreadOrientationMode windAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;        
-
+    public class FirePoint
+    {       
         public Vector2int _index;
-        FireCell2[] _neighbors = new FireCell2[8];
+        FirePoint[] _neighbors = new FirePoint[8];
         public bool _burntOut, _ignited;
         public LandscapeStruct _lcp;
         float[] _flamefronts = new float[8];
@@ -362,7 +360,7 @@ namespace PREACT.Fire
         public int _linearIndex;
         private CellularAutomata2 _owner;
 
-        public FireCell2(int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize, CellularAutomata2 owner, InitialFuelMoistureLibrary initialFuelMoistures)
+        public FirePoint(bool randomCenter, int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize, CellularAutomata2 owner, InitialFuelMoistureLibrary initialFuelMoistures)
         {
             _owner = owner;
             _index = new Vector2int(xIndex, yIndex);
@@ -384,8 +382,8 @@ namespace PREACT.Fire
                 float slope = _lcp.slope;
                 float aspect = _lcp.aspect;
 
-                surface.updateSurfaceInputs(fuelModel, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureUnits,
-                    midFlameWindspeed, windSpeedUnits, windHeightInputMode, windDirection, windAndSpreadOrientationMode, slope, slopeUnits, aspect, _lcp.canopy_cover, coverUnits, _lcp.crown_canopy_height, lengthUnits, crownRatio);
+                surface.updateSurfaceInputs(fuelModel, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, _owner.MoistureUnits,
+                    midFlameWindspeed, _owner.WindSpeedUnits, _owner.WindHeightInputMode, windDirection, _owner.WindAndSpreadOrientationMode, slope, _owner.SlopeUnits, aspect, _lcp.canopy_cover, _owner.CoverUnits, _lcp.crown_canopy_height, _owner.LengthUnits, crownRatio);
 
                 float spreadDirection = CellularAutomata2.SpreadDirections[i];
                 if (CellularAutomata2.inverseSpreadDirection)
@@ -399,7 +397,7 @@ namespace PREACT.Fire
                 surface.doSurfaceRunInDirectionOfInterest(spreadDirection);
 
                 //from m/min to m/s
-                _spreadRates[i] = (float)surface.getSpreadRateInDirectionOfInterest(windSpeedUnits);
+                _spreadRates[i] = (float)surface.getSpreadRateInDirectionOfInterest(_owner.WindSpeedUnits);
                 if (_spreadRates[i] > _maxROS)
                 {
                     _maxROS = _spreadRates[i];
@@ -407,7 +405,7 @@ namespace PREACT.Fire
             }           
         }
 
-        public void SetNeighbors(int xDim, int yDim, bool[,] wuiArea, Surface surface, FireCell2[,] cells)
+        public void SetNeighbors(int xDim, int yDim, bool[,] wuiArea, Surface surface, FirePoint[,] cells)
         {
             for (int i = 0; i < _neighbors.Length; ++i)
             {

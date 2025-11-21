@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using static PREACT.InterpolationLibrary;
+using static PREACT.Interpolation;
 using System.IO;
 using PREACT.Math;
 

@@ -225,6 +225,30 @@ class FOFEMPINVOKE {
   }
 
 
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_new_intArray")]
+  public static extern global::System.IntPtr new_intArray(uint jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_delete_intArray")]
+  public static extern void delete_intArray(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_intArray_getitem")]
+  public static extern int intArray_getitem(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_intArray_setitem")]
+  public static extern void intArray_setitem(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, int jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_new_floatArray")]
+  public static extern global::System.IntPtr new_floatArray(uint jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_delete_floatArray")]
+  public static extern void delete_floatArray(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_floatArray_getitem")]
+  public static extern float floatArray_getitem(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_floatArray_setitem")]
+  public static extern void floatArray_setitem(global::System.Runtime.InteropServices.HandleRef jarg1, uint jarg2, float jarg3);
+
   [global::System.Runtime.InteropServices.DllImport("FOFEM", EntryPoint="CSharp_FOFEMcore_e_DufMin_get")]
   public static extern double e_DufMin_get();
 

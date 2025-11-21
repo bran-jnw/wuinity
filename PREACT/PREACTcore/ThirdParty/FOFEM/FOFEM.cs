@@ -11,6 +11,44 @@
 namespace FOFEMcore {
 
 public class FOFEM {
+  public static SWIGTYPE_p_int new_intArray(uint nelements) {
+    global::System.IntPtr cPtr = FOFEMPINVOKE.new_intArray(nelements);
+    SWIGTYPE_p_int ret = (cPtr == global::System.IntPtr.Zero) ? null : new SWIGTYPE_p_int(cPtr, false);
+    return ret;
+  }
+
+  public static void delete_intArray(SWIGTYPE_p_int ary) {
+    FOFEMPINVOKE.delete_intArray(SWIGTYPE_p_int.getCPtr(ary));
+  }
+
+  public static int intArray_getitem(SWIGTYPE_p_int ary, uint index) {
+    int ret = FOFEMPINVOKE.intArray_getitem(SWIGTYPE_p_int.getCPtr(ary), index);
+    return ret;
+  }
+
+  public static void intArray_setitem(SWIGTYPE_p_int ary, uint index, int value) {
+    FOFEMPINVOKE.intArray_setitem(SWIGTYPE_p_int.getCPtr(ary), index, value);
+  }
+
+  public static SWIGTYPE_p_float new_floatArray(uint nelements) {
+    global::System.IntPtr cPtr = FOFEMPINVOKE.new_floatArray(nelements);
+    SWIGTYPE_p_float ret = (cPtr == global::System.IntPtr.Zero) ? null : new SWIGTYPE_p_float(cPtr, false);
+    return ret;
+  }
+
+  public static void delete_floatArray(SWIGTYPE_p_float ary) {
+    FOFEMPINVOKE.delete_floatArray(SWIGTYPE_p_float.getCPtr(ary));
+  }
+
+  public static float floatArray_getitem(SWIGTYPE_p_float ary, uint index) {
+    float ret = FOFEMPINVOKE.floatArray_getitem(SWIGTYPE_p_float.getCPtr(ary), index);
+    return ret;
+  }
+
+  public static void floatArray_setitem(SWIGTYPE_p_float ary, uint index, float value) {
+    FOFEMPINVOKE.floatArray_setitem(SWIGTYPE_p_float.getCPtr(ary), index, value);
+  }
+
   public static void CI_Init(ConsumeDataInput a_CI) {
     FOFEMPINVOKE.CI_Init(ConsumeDataInput.getCPtr(a_CI));
   }

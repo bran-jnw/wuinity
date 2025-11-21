@@ -422,6 +422,18 @@ namespace PREACT.Fire
 			return Header.NorthUtm - Header.SouthUtm;
         }
 
+		/// <summary>
+		/// Returns the elevation on local space, meaning that lower left is 0,0 meters.
+		/// </summary>
+		/// <returns></returns>
+		public double GetElevationLocalPos(double x, double y)
+		{
+			int xIndex = (int)(0.5 + x / GetLCPSizeX());
+            int yIndex = (int)(0.5 + x / GetLCPSizeX());
+
+			return Interpolation.BiliearInterpolation(0, 0, 0, 0, 0, 0);
+		}
+
 		public Vector2d GetElevationMinMax()
 		{
 			return new Vector2d(Header.loelev, Header.hielev);

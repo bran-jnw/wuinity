@@ -9,7 +9,7 @@ using static PREACT.Fire.MathWrap;
 
 namespace PREACT
 {
-    public static class InterpolationLibrary
+    public static class Interpolation
     {
         /// <summary>
         /// Only works in one dimension as in 2D it reverts to being linear.
@@ -28,6 +28,13 @@ namespace PREACT
 
             //return weighted value between y1 and y2 based on fraction
             return (y1 * (1 - frac) + y2 * frac);
+        }
+
+        public static double BiliearInterpolation(double lowerLeft, double lowerRight, double xFraction, double upperLeft, double upperRight, double yFraction)
+        {
+            double yLow = (1.0 - xFraction) * lowerLeft + xFraction * lowerRight;
+            double yHigh = (1.0 - xFraction) * upperLeft + xFraction * upperRight;
+            return (1.0 - yFraction) * yLow + yFraction * yHigh;
         }
     }
 }
