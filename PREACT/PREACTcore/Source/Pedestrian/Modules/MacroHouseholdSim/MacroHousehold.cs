@@ -51,7 +51,7 @@ namespace PREACT.Pedestrian
             {
                 if (peopleInHousehold >= 2)
                 {
-                    if (Randomf.Range(0f, 1f) <= popInput.MaxCarsProbability)
+                    if (Random.Range(0f, 1f) <= popInput.MaxCarsProbability)
                     {
                         cars = Mathf.Min(peopleInHousehold, popInput.MaxCars);
                     }

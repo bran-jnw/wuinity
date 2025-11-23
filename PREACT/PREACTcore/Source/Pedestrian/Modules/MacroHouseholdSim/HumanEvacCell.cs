@@ -45,7 +45,7 @@ namespace PREACT.Pedestrian
             List<int> personsPerHousehold = new List<int>();
             while (peopleWithoutHouseHold > 0)
             {
-                int p = Randomf.Range(eO.MinHouseholdSize, eO.MaxHouseholdSize);
+                int p = Random.Range(eO.MinHouseholdSize, eO.MaxHouseholdSize + 1);
                 if (p > peopleWithoutHouseHold)
                 {
                     p = peopleWithoutHouseHold;

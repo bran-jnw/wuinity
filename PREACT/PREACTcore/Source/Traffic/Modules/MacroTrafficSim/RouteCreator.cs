@@ -311,7 +311,7 @@ namespace PREACT.Traffic
             }
             else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
             {
-                int randomChoice = Randomf.Range(0, simulation.Destinations.Count - 1);
+                int randomChoice = Random.Range(0, simulation.Destinations.Count);
                 rC.SelectForcedNonBlocked(simulation.Destinations[randomChoice], simulation);
             }
             else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Closest)

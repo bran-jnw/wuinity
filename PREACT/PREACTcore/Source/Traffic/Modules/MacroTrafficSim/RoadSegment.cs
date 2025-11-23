@@ -108,7 +108,7 @@ namespace PREACT.Traffic
 
             float dens = vehicles.Count / (length * 0.001f * laneCount);
             //added background traffic
-            dens += Randomf.Range(tO.MacroTrafficSimInput.BackGroundDensityMinMax.X, tO.MacroTrafficSimInput.BackGroundDensityMinMax.Y);
+            dens += Math.Random.Range(tO.MacroTrafficSimInput.BackGroundDensityMinMax.X, tO.MacroTrafficSimInput.BackGroundDensityMinMax.Y);
 
             //we use the same function to check if a road is blocked due to being main road or if they reverse lanes for now
             if (mCS.stallBigRoads && MacroTrafficSim.CanReverseLanes(highwayType, simulation))

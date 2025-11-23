@@ -30,7 +30,7 @@ namespace PREACT.Evacuation
 
         public EvacuationDestination GetWeightedRandomDestination(List<EvacuationDestination> destinations)
         {
-            float randomChoice = Randomf.value;
+            float randomChoice = Random.value;
             for (int i = 0; i < DestinationCumulativeWeights.Length; i++)
             {
                 if (randomChoice <= DestinationCumulativeWeights[i])

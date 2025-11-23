@@ -355,10 +355,14 @@ namespace PREACT.Fire
         float[] _flamefronts = new float[8];
         float[] _spreadRates = new float[8];
         float[] _spreadDistances = new float[8];
+        float[] _spreadDirections = new float[8];
         public float _maxROS;
         private float _cellSize;
         public int _linearIndex;
         private CellularAutomata2 _owner;
+        private float _insideDistance;//distance within cell before crossing over to neighbor and changes fire behavior (fuel)
+
+        public Vector3d LocalPosition;
 
         public FirePoint(bool randomCenter, int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize, CellularAutomata2 owner, InitialFuelMoistureLibrary initialFuelMoistures)
         {
@@ -367,6 +371,12 @@ namespace PREACT.Fire
             _lcp = lcpData.GetCellData(_index.x, _index.y);
             _cellSize = cellSize;
             _linearIndex = xIndex + yIndex * xDim;
+
+            double xPos = Random.valued * cellSize + xIndex * cellSize;
+            double yPos = Random.valued * cellSize + yIndex * cellSize;
+            double zPos = lcpData.GetElevationLocalPos(xPos, yPos);
+            LocalPosition = new Vector3d(xPos, zPos, yPos);
+
             if (wuiArea[_index.x, _index.y] || surface.isAllFuelLoadZero(_lcp.fuel_model))
             {
                 _burntOut = true;
@@ -374,16 +384,15 @@ namespace PREACT.Fire
             }
 
             _maxROS = float.MinValue;
-            for (int i = 0; i < _spreadRates.Length; i++)
-            {
-                InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_lcp.fuel_model);
-                double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
-                int fuelModel = _lcp.fuel_model;
-                float slope = _lcp.slope;
-                float aspect = _lcp.aspect;
+            surface.doSurfaceRunInDirectionOfMaxSpread();
+            InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_lcp.fuel_model);
+            double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 
-                surface.updateSurfaceInputs(fuelModel, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, _owner.MoistureUnits,
-                    midFlameWindspeed, _owner.WindSpeedUnits, _owner.WindHeightInputMode, windDirection, _owner.WindAndSpreadOrientationMode, slope, _owner.SlopeUnits, aspect, _lcp.canopy_cover, _owner.CoverUnits, _lcp.crown_canopy_height, _owner.LengthUnits, crownRatio);
+            surface.updateSurfaceInputs(_lcp.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, _owner.MoistureUnits,
+                midFlameWindspeed, _owner.WindSpeedUnits, _owner.WindHeightInputMode, windDirection, _owner.WindAndSpreadOrientationMode, _lcp.slope, _owner.SlopeUnits, _lcp.aspect, _lcp.canopy_cover, _owner.CoverUnits, _lcp.crown_canopy_height, _owner.LengthUnits, crownRatio);
+
+            for (int i = 0; i < _spreadRates.Length; i++)
+            {               
 
                 float spreadDirection = CellularAutomata2.SpreadDirections[i];
                 if (CellularAutomata2.inverseSpreadDirection)
@@ -393,11 +402,9 @@ namespace PREACT.Fire
                     {
                         spreadDirection -= 360f;
                     }
-                }
-                surface.doSurfaceRunInDirectionOfInterest(spreadDirection);
-
-                //from m/min to m/s
-                _spreadRates[i] = (float)surface.getSpreadRateInDirectionOfInterest(_owner.WindSpeedUnits);
+                }                
+                //TODO: check unit and convert to m/s
+                _spreadRates[i] = (float)surface.calculateSpreadRateAtVector(spreadDirection);
                 if (_spreadRates[i] > _maxROS)
                 {
                     _maxROS = _spreadRates[i];
@@ -405,6 +412,14 @@ namespace PREACT.Fire
             }           
         }
 
+        /// <summary>
+        /// Needed after creation of all cells.
+        /// </summary>
+        /// <param name="xDim"></param>
+        /// <param name="yDim"></param>
+        /// <param name="wuiArea"></param>
+        /// <param name="surface"></param>
+        /// <param name="cells"></param>
         public void SetNeighbors(int xDim, int yDim, bool[,] wuiArea, Surface surface, FirePoint[,] cells)
         {
             for (int i = 0; i < _neighbors.Length; ++i)
@@ -412,22 +427,19 @@ namespace PREACT.Fire
                 Vector2int neighborIndex = _index + CellularAutomata2.NeighborIndices[i];
                 if (CellularAutomata2.IsInside(xDim, yDim, neighborIndex))
                 {
-                    _neighbors[i] = cells[neighborIndex.x, neighborIndex.y];
-
-                    float heightDifference = Mathf.Abs(_lcp.elevation - _neighbors[i]._lcp.elevation);
-                    //heightDifference = 0f;
-                    float topViewDistance = _cellSize;
-                    //if not cardinal direction we go diagonally
-                    if (i % 2 != 0)
-                    {
-                        topViewDistance *= CellularAutomata2.sqrt2;
-                    }
-                    _spreadDistances[i] = Mathf.Sqrt(heightDifference * heightDifference + topViewDistance * topViewDistance);
-
                     if (_neighbors[i]._burntOut)
                     {
                         _neighbors[i] = null;
                     }
+                    else
+                    {
+                        _neighbors[i] = cells[neighborIndex.x, neighborIndex.y];
+                        Vector3d delta = _neighbors[i].LocalPosition - LocalPosition;
+                        _spreadDistances[i] = (float)delta.magnitude;
+                        _spreadDirections[i] = (float)Vector3d.Angle(Vector3d.up, delta);
+
+                        //calculate distance within own cell
+                    }     
                 }
             }
         }
@@ -453,12 +465,7 @@ namespace PREACT.Fire
             int spreadLeft = 0;
             for (int i = 0; i < _flamefronts.Length; ++i)
             {
-                if (_flamefronts[i] < 0.5f * _spreadDistances[i])
-                {
-                    _flamefronts[i] += deltaTime * _spreadRates[i];
-                    ++spreadLeft;
-                }
-                else if (_neighbors[i] != null && !_neighbors[i]._burntOut)
+                if (_neighbors[i] != null && !_neighbors[i]._burntOut)
                 {
                     _flamefronts[i] += deltaTime * _neighbors[i].GetSpreadrate(i);
                     //flamefronts have crossed or we have reached the center of the neighbor

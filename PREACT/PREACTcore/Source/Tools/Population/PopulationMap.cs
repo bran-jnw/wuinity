@@ -277,7 +277,7 @@ namespace PREACT.Population
                 int loopCount = desiredPopulation - _totalPopulation;
                 for (int i = 0; i < loopCount; i++)
                 {
-                    int randomIndex = Randomf.Range(0, activeCellIndices.Count - 1);
+                    int randomIndex = Random.Range(0, activeCellIndices.Count);
                     ++_cellPopulations[activeCellIndices[randomIndex]];
                     ++_totalPopulation;
                 }
@@ -288,7 +288,7 @@ namespace PREACT.Population
                 int loopCount = _totalPopulation - desiredPopulation;
                 for (int i = 0; i < loopCount; i++)
                 {
-                    int randomIndex = Randomf.Range(0, activeCellIndices.Count - 1);
+                    int randomIndex = Random.Range(0, activeCellIndices.Count);
                     --_cellPopulations[activeCellIndices[randomIndex]];
                     --_totalPopulation;
                     if(_cellPopulations[activeCellIndices[randomIndex]] < 1)
@@ -453,7 +453,7 @@ namespace PREACT.Population
                         List<int> householdCounts = new List<int>();
                         while (peopleWithoutHouseHold > 0)
                         {
-                            int p = Randomf.Range(minHouseholdSize, maxHouseholdSize);
+                            int p = Random.Range(minHouseholdSize, maxHouseholdSize + 1);
                             if (p > peopleWithoutHouseHold)
                             {
                                 p = peopleWithoutHouseHold;
@@ -468,8 +468,8 @@ namespace PREACT.Population
                         for (int j = 0; j < householdCounts.Count; ++j)
                         {
                             Vector2d householdStartPos = nodeCenter;
-                            householdStartPos.x += _cellSize * Randomf.Range(-0.5f, 0.5f);
-                            householdStartPos.y += _cellSize * Randomf.Range(-0.5f, 0.5f);
+                            householdStartPos.x += _cellSize * Random.Range(-0.5f, 0.5f);
+                            householdStartPos.y += _cellSize * Random.Range(-0.5f, 0.5f);
                             Vector2d householdStartLatLon = simulationData.GetWGS84FromSimulationPosition(householdStartPos);
 
                             double goalLat = _cellRoadAccessLatLon[i].x;

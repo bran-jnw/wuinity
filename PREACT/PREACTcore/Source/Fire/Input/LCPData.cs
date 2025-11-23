@@ -423,15 +423,25 @@ namespace PREACT.Fire
         }
 
 		/// <summary>
-		/// Returns the elevation on local space, meaning that lower left is 0,0 meters.
+		/// Returns the elevation on local space bilinearly interpolated, meaning that lower left is 0,0 meters.
 		/// </summary>
 		/// <returns></returns>
 		public double GetElevationLocalPos(double x, double y)
 		{
-			int xIndex = (int)(0.5 + x / GetLCPSizeX());
-            int yIndex = (int)(0.5 + x / GetLCPSizeX());
+            int xIndexLow = (int)(x / GetCellResolutionX());
+            int yIndexLow = (int)(y / GetCellResolutionY());
+            int xIndexHigh = xIndexLow + 1;
+            int yIndexHigh = yIndexLow + 1;
+			//we assume that mid-point in cell is holding actual value
+			double xFraction = (x - (xIndexLow + 0.5) * GetCellResolutionX()) / GetCellResolutionX();
+            double yFraction = (y - (yIndexLow + 0.5) * GetCellResolutionY()) / GetCellResolutionY();
 
-			return Interpolation.BiliearInterpolation(0, 0, 0, 0, 0, 0);
+			double lowerLeft = GetCellData(xIndexLow, yIndexLow).elevation;
+            double lowerRight = GetCellData(xIndexHigh, yIndexLow).elevation;
+            double upperLeft = GetCellData(xIndexLow, yIndexHigh).elevation;
+            double upperRight = GetCellData(xIndexHigh, yIndexHigh).elevation;
+
+            return Interpolation.BilinearInterpolation(lowerLeft, lowerRight, xFraction, upperLeft, upperRight, yFraction);
 		}
 
 		public Vector2d GetElevationMinMax()
@@ -632,7 +642,7 @@ namespace PREACT.Fire
 		{
 			if (Header.GridUnits == 2)
             {
-				return Header.XResol * 1000.0;   // to kilometers
+				return Header.XResol * 1000.0;   // from kilometers
 			}				
 
 			return Header.XResol;

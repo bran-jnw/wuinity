@@ -30,7 +30,7 @@ namespace PREACT
             return (y1 * (1 - frac) + y2 * frac);
         }
 
-        public static double BiliearInterpolation(double lowerLeft, double lowerRight, double xFraction, double upperLeft, double upperRight, double yFraction)
+        public static double BilinearInterpolation(double lowerLeft, double lowerRight, double xFraction, double upperLeft, double upperRight, double yFraction)
         {
             double yLow = (1.0 - xFraction) * lowerLeft + xFraction * lowerRight;
             double yHigh = (1.0 - xFraction) * upperLeft + xFraction * upperRight;

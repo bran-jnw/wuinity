@@ -257,7 +257,7 @@ namespace PREACT.Pedestrian
                 }
                 else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.Random)
                 {
-                    int randomChoice = Randomf.Range(0, _simulation.Destinations.Count - 1);
+                    int randomChoice = Random.Range(0, _simulation.Destinations.Count);
                     goal = _simulation.Destinations[randomChoice];
                 }
             }
@@ -356,7 +356,7 @@ namespace PREACT.Pedestrian
             EvacuationInput evacIn = _simulation.Input.Evacuation;
 
             float responseTime = float.MaxValue;
-            float r = Randomf.Range(0f, 1f);
+            float r = Random.Range(0f, 1f);
             //get curve index from evac group
             int randomResponseCurveIndex = 0;
             for (int i = 0; i < _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
@@ -376,7 +376,7 @@ namespace PREACT.Pedestrian
                 if (r <= _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Randomf.Range(_simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
+                    responseTime = Random.Range(_simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }
@@ -391,7 +391,7 @@ namespace PREACT.Pedestrian
         public float GetRandomWalkingSpeed()
         {
             MacroHouseholdSimInput eO = _simulation.Input.Pedestrian.MacroHouseholdSimInput;
-            return Randomf.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
+            return Random.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 
         /// <summary>

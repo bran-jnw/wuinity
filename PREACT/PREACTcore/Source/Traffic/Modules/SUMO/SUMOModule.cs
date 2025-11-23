@@ -227,7 +227,7 @@ namespace PREACT.Traffic
                     //if we reach here we need to teleport the car to a new location as no valid route could be found
                     else if (_validStartPositions.Count > 0)
                     {
-                        int randomStart = Randomf.Range(0, _validStartPositions.Count - 1);   
+                        int randomStart = Math.Random.Range(0, _validStartPositions.Count);   
                         //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
                         route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, goalRoad.edgeID);    
                         if(route.edges.Count > 0)

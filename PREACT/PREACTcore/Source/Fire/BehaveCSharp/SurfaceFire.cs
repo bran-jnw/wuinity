@@ -254,7 +254,7 @@ namespace PREACT.Fire.Behave
                 // Calculate the fire spread rate in this azimuth
                 // if it deviates more than a tenth degree from the maximum azimuth
 
-                // Calcualte beta: the angle between the direction of max spread and the direction of interest
+                // Calculate beta: the angle between the direction of max spread and the direction of interest
                 double beta = fabs(directionOfMaxSpread_ - directionOfInterest);
 
                 // Calculate the fire spread rate in this azimuth
