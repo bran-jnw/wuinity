@@ -43,7 +43,7 @@ namespace PREACT.Fire
         private WindInput wind;                                     
         public InitialFuelMoistureLibrary initialFuelMoisture;         
         
-        public LCPData lcpData;                                     
+        public LandscapeData lcpData;                                     
         public FuelModelSet fuelModelSet;                           
         public Surface surfaceFire;                                 
         public Crown crownFire;
@@ -72,7 +72,7 @@ namespace PREACT.Fire
             this.ignitionPoints = ignitionPoints;
         }*/
 
-        public FireMesh(Simulation simulation, LCPData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints) : base(simulation)        
+        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints) : base(simulation)        
         {
 
             this.lcpData = lcpData;
@@ -167,7 +167,7 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < _cellCount.x; ++x)
                 {                    
-                    LandscapeStruct l = lcpData.GetCellDataSimulationIndex(x, y, true);                      
+                    LandscapeCellData l = lcpData.GetCellDataSimulationIndex(x, y, true);                      
                     _fireCells[GetCellIndex(x, y)] = new FireCell(this, x, y, l); 
                 }
             }

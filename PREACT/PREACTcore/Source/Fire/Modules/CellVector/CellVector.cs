@@ -23,7 +23,7 @@ namespace PREACT.Fire
             public float initialFuelMoisture;
             public float maxSpreadRate, maxSpreadRateDirection, reactionIntensity, maxReactionIntensity, firelineIntensity, maxFirelineIntensity;
             public InitialFuelMoisture fuelMoisture;
-            public LandscapeStruct lcp;
+            public LandscapeCellData lcp;
             float[] spreadDirectionAngles;
             Vector2[] spreadDirections;
             List<Vector2> ignitionVertices;
@@ -116,7 +116,7 @@ namespace PREACT.Fire
         int _cellsX, _cellsY;
         float _cellSizeX, _cellSizeY;
         CellVectorCell[] _cells;  
-        LCPData _lcpData;
+        LandscapeData _lcpData;
         WeatherInput _weather;
         WindInput _wind;
         InitialFuelMoistureLibrary _initialFuelMoisture;
@@ -164,7 +164,7 @@ namespace PREACT.Fire
                 CellVectorCell cell = _cells[i];
                 int xIndex = i % _cellsX;
                 int yIndex = i / _cellsX;
-                LandscapeStruct lcp = _lcpData.GetCellData(xIndex, yIndex);
+                LandscapeCellData lcp = _lcpData.GetCellData(xIndex, yIndex);
                 cell.lcp = lcp;
                 cell.InitiateVertices();
                 _cells[i] = cell;

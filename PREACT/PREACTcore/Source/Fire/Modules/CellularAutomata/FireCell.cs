@@ -26,7 +26,7 @@ namespace PREACT.Fire
         double[] spreadRates;
         FireCell[] neighbors;
         FireMesh fireMesh;
-        LandscapeStruct lcp;
+        LandscapeCellData lcp;
         double maxSpreadRate;
         double maxSpreadRateDirection;
         double[] maxSpreadRates;
@@ -59,7 +59,7 @@ namespace PREACT.Fire
             double canopyCover, double canopyHeight, double crownRatio);
         
 
-        public FireCell(FireMesh fireMesh, int xIndex, int yIndex, LandscapeStruct lcp)
+        public FireCell(FireMesh fireMesh, int xIndex, int yIndex, LandscapeCellData lcp)
         {
             this.fireMesh = fireMesh;
             cellIndex = new Vector2int(xIndex, yIndex);

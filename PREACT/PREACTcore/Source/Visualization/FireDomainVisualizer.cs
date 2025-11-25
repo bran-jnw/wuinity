@@ -14,7 +14,7 @@ namespace PREACT.Visualization
         public enum LcpViewMode { FuelModel, Elevation, Slope, Aspect, TriggerBuffer }
 
         //LCP
-        public abstract void SetAndDisplayLCP(LCPData lcpData, LcpViewMode lcpViewMode = LcpViewMode.FuelModel);
+        public abstract void SetAndDisplayLCP(LandscapeData lcpData, LcpViewMode lcpViewMode = LcpViewMode.FuelModel);
         public abstract void SetLCPViewMode(LcpViewMode lcpViewMode);
         public abstract void DisplayTriggerBuffer(float[,] data);        
         public abstract void SetVisibility(bool visible);

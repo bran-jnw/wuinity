@@ -43,7 +43,7 @@ namespace PREACT
             return result;
         }
 
-        public static void LoadGraphicalFireInput(string file, Fire.LCPData lcpData, out bool[] wuiArea, out bool[] randomIgnitionArea, out bool[] initialIgnitionIndices, out bool[] triggerBufferIndices, out bool success)
+        public static void LoadGraphicalFireInput(string file, Fire.LandscapeData lcpData, out bool[] wuiArea, out bool[] randomIgnitionArea, out bool[] initialIgnitionIndices, out bool[] triggerBufferIndices, out bool success)
         {
             success = false;
 
@@ -88,7 +88,7 @@ namespace PREACT
             }
         }
 
-        private static void CreateDefault(Fire.LCPData lcpData, out bool[] wuiArea, out bool[] randomIgnitionArea, out bool[] initialIgnitionIndices, out bool[] triggerBufferIndices)
+        private static void CreateDefault(Fire.LandscapeData lcpData, out bool[] wuiArea, out bool[] randomIgnitionArea, out bool[] initialIgnitionIndices, out bool[] triggerBufferIndices)
         {
             //LCP file has already been read, use that for dimensions
             int xDim = lcpData.GetCellCountX();

@@ -11,7 +11,7 @@ using PREACT.Math;
 
 namespace PREACT.Fire
 {
-	public struct LandscapeStruct
+	public struct LandscapeCellData
 	{
 		public short elevation;
 		public short slope;
@@ -50,7 +50,7 @@ namespace PREACT.Fire
 	}
 
 
-	public class LCPData
+	public class LandscapeData
 	{
 		// header for landscape file
 		[System.Serializable]
@@ -153,7 +153,7 @@ namespace PREACT.Fire
 		Vector2int _originCellOffset; //cells offset from common origin
         //public Vector2int OriginCellOffset { get => originCellOffset; }
 
-		public LCPData(Vector2d cellSize, Vector2int cellCount)								
+		public LandscapeData(Vector2d cellSize, Vector2int cellCount)								
 		{
             RasterCellResolutionX = cellSize.x;
             RasterCellResolutionY = cellSize.y;
@@ -163,7 +163,7 @@ namespace PREACT.Fire
             Header.loelev = 0;
         }
 
-		public LCPData(string filePath, Vector2d simulationUtmOrigin)					
+		public LandscapeData(string filePath, Vector2d simulationUtmOrigin)					
 		{
 			bool readGeoTIFF = false;
             if (filePath.EndsWith("tif") || filePath.EndsWith("tiff"))
@@ -408,7 +408,7 @@ namespace PREACT.Fire
 		/// In meters.
 		/// </summary>
 		/// <returns></returns>
-        public double GetLCPSizeX()
+        public double GetLandscapeSizeX()
         {
 			return Header.EastUtm - Header.WestUtm;
 ;        }
@@ -417,7 +417,7 @@ namespace PREACT.Fire
 		/// In meters.
 		/// </summary>
 		/// <returns></returns>
-        public double GetLCPSizeY()
+        public double GetLandscapeSizeY()
         {
 			return Header.NorthUtm - Header.SouthUtm;
         }
@@ -495,19 +495,19 @@ namespace PREACT.Fire
         /// <param name="xIndex"></param>
         /// <param name="yIndex"></param>
         /// <returns></returns>
-        public LandscapeStruct GetCellData(int xIndex, int yIndex)
+        public LandscapeCellData GetCellData(int xIndex, int yIndex)
         {
 			return GetCellDataSimulationIndex(xIndex, yIndex, false);
         }
 
-		public LandscapeStruct GetCellData(int linearIndex)
+		public LandscapeCellData GetCellData(int linearIndex)
 		{
             celldata cell = new celldata();
             crowndata cfuel = new crowndata();
             grounddata gfuel = new grounddata();
             GetCellDataFromMemory(linearIndex, ref cell, ref cfuel, ref gfuel);
 
-            LandscapeStruct l = new LandscapeStruct();
+            LandscapeCellData l = new LandscapeCellData();
 
             l.elevation = cell.e;
             l.slope = cell.s;
@@ -549,7 +549,7 @@ namespace PREACT.Fire
         /// <param name="yIndex"></param>
         /// <param name="correctForOrigin"></param>
         /// <returns></returns>
-        public LandscapeStruct GetCellDataSimulationIndex(int xIndex, int yIndex, bool correctForOrigin)
+        public LandscapeCellData GetCellDataSimulationIndex(int xIndex, int yIndex, bool correctForOrigin)
         {
 			if(correctForOrigin)
 			{

@@ -15,7 +15,7 @@ namespace PREACT.IO
 {
     public class FireData
     {
-        private LCPData _lcpData;
+        private LandscapeData _lcpData;
         private FuelModelInput _fuelModelsData;
         private IgnitionPoint[] _ignitionPoints;
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
@@ -28,7 +28,7 @@ namespace PREACT.IO
         public bool[] ManualTriggerBuffer;
 
                
-        public LCPData LCPData { get => _lcpData; }        
+        public LandscapeData LCPData { get => _lcpData; }        
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
         public IgnitionPoint[] IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }       
@@ -98,7 +98,7 @@ namespace PREACT.IO
 
         public void LoadLCPFile(FireInput fireInput, string filePath, Vector2d simulationUtmOrigin, bool updateInput, out bool success)
         {
-            LCPData lcpData = new LCPData(filePath, simulationUtmOrigin);
+            LandscapeData lcpData = new LandscapeData(filePath, simulationUtmOrigin);
             success = !lcpData.CantAllocLCP;
 
             if (success)
@@ -173,7 +173,7 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadGraphicalFireInput(FireInput fireInput, string filePath, LCPData lcpData, bool updateInput, out bool success)
+        public void LoadGraphicalFireInput(FireInput fireInput, string filePath, LandscapeData lcpData, bool updateInput, out bool success)
         {
             GraphicalFireInput.LoadGraphicalFireInput(filePath, lcpData, out WuiArea, out RandomIgnition, out InitialIgnition, out ManualTriggerBuffer, out success);
         }

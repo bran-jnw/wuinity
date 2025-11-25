@@ -13,7 +13,7 @@ namespace PREACT.IO
     [System.Serializable]
     public class FireInput
     {
-        public enum FireModuleChoice { None, AscImport, FireCell, FireCell2, VectorCells, FarsiteDLL, PrometheusCOM }
+        public enum FireModuleChoice { None, AscImport, FireCell, CellVertexHybrid, VectorCells, FarsiteDLL, PrometheusCOM }
 
         private FireData _data;
         private AscImportInput _ascImportInput;
@@ -60,8 +60,8 @@ namespace PREACT.IO
                     case nameof(FireModuleChoice.FireCell):
                         newInput.FireModule = FireModuleChoice.FireCell;
                         break;
-                    case nameof(FireModuleChoice.FireCell2):
-                        newInput.FireModule = FireModuleChoice.FireCell2;
+                    case nameof(FireModuleChoice.CellVertexHybrid):
+                        newInput.FireModule = FireModuleChoice.CellVertexHybrid;
                         break;
                     default:
                         success = false;

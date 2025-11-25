@@ -104,11 +104,11 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.Simulation.Input.Fire.Data.LCPData.GetLCPSizeX();
+                double xSize = _engine.Simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.Simulation.Input.Fire.Data.LCPData.GetLCPSizeY();
+                double ySize = _engine.Simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);

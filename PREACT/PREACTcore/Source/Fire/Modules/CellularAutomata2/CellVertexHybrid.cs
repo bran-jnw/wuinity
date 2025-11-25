@@ -12,12 +12,10 @@ using PREACT.Math;
 
 namespace PREACT.Fire
 {
-    public class CellularAutomata2 : FireModule
+    public class CellVertexHybrid : FireModule
     {
         public static readonly Vector2int[] NeighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
-        public static readonly float[] SpreadDirections = new float[] { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
-        public static bool inverseSpreadDirection = true;
-        public static  readonly float sqrt2 = Mathf.Sqrt(2f);
+        public static bool inverseSpreadDirection = false;
 
         public readonly TwoFuelModelsMethod TwoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
         public readonly BehaveUnits.MoistureUnits.MoistureUnitsEnum MoistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
@@ -28,19 +26,17 @@ namespace PREACT.Fire
         public readonly BehaveUnits.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
         public readonly WindAndSpreadOrientationMode WindAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
 
-        private Stack<FirePoint> cellsToIgnite;
-        private Dictionary<int, FirePoint> activeCells;
-        private Stack<FirePoint> cellsToRemove;
+        private Stack<FuelCell> _cellsToIgnite;
+        private Dictionary<int, FuelCell> _activeCells;
+        private Stack<FuelCell> _cellsToRemove;
         private int xDim, yDim;
-        private FirePoint[,] _firepoints;
+        private FuelCell[,] _fuelCells;
 
-        private CellularAutomata2(Simulation simulation, float windspeedTenMeters, float windDirection, float cellSize) : base(simulation)
+        public CellVertexHybrid(Simulation simulation) : base(simulation)
         {
             xDim = simulation.Input.Fire.Data.LCPData.GetCellCountX();
             yDim = simulation.Input.Fire.Data.LCPData.GetCellCountY();
             bool[,] wuiArea = GetWUIArea2D(simulation.Input.Fire.Data.WuiArea, xDim, yDim);
-            float distance = (float)simulation.Input.Fire.Data.LCPData.RasterCellResolutionX;
-            float distanceDiagonal = Mathf.Sqrt(2) * distance;
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea);
 
@@ -52,35 +48,25 @@ namespace PREACT.Fire
                     fuelModelSet.setFuelModelRecord(simulation.Input.Fire.Data.FuelModelsData.Fuels[i]);
                 }
             }
-            Surface surfaceFire = new Surface(fuelModelSet);
-            _firepoints = new FirePoint[xDim, yDim];
+            _fuelCells = new FuelCell[xDim, yDim];
 
-            //create cells
+            //create fuel cells
             float maxROS = float.MinValue;
             for (int y = 0; y < yDim; ++y)
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    _firepoints[x, y] = new FirePoint(true, x, y, surfaceFire, simulation.Input.Fire.Data.LCPData, wuiArea, xDim, yDim, windDirection, windspeedTenMeters, cellSize, this, simulation.Input.Fire.Data.InitialFuelMoistureData);
-                    if (_firepoints[x, y]._maxROS > maxROS)
+                    _fuelCells[x, y] = new FuelCell(true, x, y, simulation.Input.Fire.Data.LCPData, fuelModelSet, wuiArea, xDim, yDim, this, simulation.Input.Fire.Data.InitialFuelMoistureData);
+                    if (_fuelCells[x, y]._maxROS > maxROS)
                     {
-                        maxROS = _firepoints[x, y]._maxROS;
+                        maxROS = _fuelCells[x, y]._maxROS;
                     }
                 }
             }
 
-            //initialize
-            for (int y = 0; y < yDim; ++y)
-            {
-                for (int x = 0; x < xDim; ++x)
-                {
-                    _firepoints[x, y].SetNeighbors(xDim, yDim, wuiArea, surfaceFire, _firepoints);
-                }
-            }
-
-            cellsToIgnite = new Stack<FirePoint>();
-            activeCells = new Dictionary<int, FirePoint>();
-            cellsToRemove = new Stack<FirePoint>();
+            _cellsToIgnite = new Stack<FuelCell>();
+            _activeCells = new Dictionary<int, FuelCell>();
+            _cellsToRemove = new Stack<FuelCell>();
 
             //initial ignition
             for (int i = 0; i < wuiIgnitionBorder.Count; ++i)
@@ -90,20 +76,27 @@ namespace PREACT.Fire
                     Vector2int index = wuiIgnitionBorder[i] + NeighborIndices[j];
                     if (IsInside(xDim, yDim, index))
                     {
-                        _firepoints[index.x, index.y].SchedurelIgnite(0f, 0f, 0);
+                        _fuelCells[index.x, index.y].SchedulelIgnition(0f, 0f);
                     }
                 }
             }
 
-            float deltaTime = 0.5f * cellSize / maxROS;
+            float deltaTime = 0.5f * (float)simulation.Input.Fire.Data.LCPData.RasterCellResolutionX / maxROS;
             if (deltaTime <= 0.0f)
             {
                 Engine.Message(null, Engine.LogType.Log, "Something went wrong when calculating delta time (was less then/equal to zero), please check your input.");
             }
             else
             {
-                Engine.Message(null, Engine.LogType.Log, "Fire spread delta time set to: " + deltaTime);
+                Engine.Message(null, Engine.LogType.Log, "Initial fire spread delta time set to: " + deltaTime);
             }            
+        }
+
+        public FuelCell GetCell(Vector3d localPos)
+        {
+            int xIndex = (int)(localPos.x / _simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX());
+            int yIndex = (int)(localPos.y / _simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY());
+            return _fuelCells[xIndex, yIndex];
         }
 
         private static bool HasNonWUINeighbors(bool[,] wuiArea, int xDim, int yDim, Vector2int cellIndex)
@@ -265,27 +258,27 @@ namespace PREACT.Fire
             throw new System.NotImplementedException();
         }
 
-        public void AddCellToIgnite(FirePoint cell)
+        public void AddCellToIgnite(FuelCell cell)
         {
-            cellsToIgnite.Push(cell);
+            _cellsToIgnite.Push(cell);
         }
 
-        public void AddActiveCell(FirePoint cell)
+        public void AddActiveCell(FuelCell cell)
         {
-            activeCells.Add(cell._linearIndex, cell);
+            _activeCells.Add(cell._linearIndex, cell);
         }
 
-        public void AddCellToRemove(FirePoint cell)
+        public void AddCellToRemove(FuelCell cell)
         {
-            cellsToRemove.Push(cell);
+            _cellsToRemove.Push(cell);
         }
 
         public override void Step(float currentTime, float deltaTime)
         {
             //handle ignitions
-            while(cellsToIgnite.Count > 0)
+            while(_cellsToIgnite.Count > 0)
             {
-                cellsToIgnite.Pop().TryIgnite();
+                _cellsToIgnite.Pop().TryIgnite(xDim, yDim, _fuelCells);
             }
             /*for (int y = 0; y < yDim; ++y)
             {
@@ -295,8 +288,10 @@ namespace PREACT.Fire
                 }
             }*/
 
+            Parallel.ForEach(_activeCells.Values, f => f.UpdateRateOfSpread());
+
             //step forward in time
-            Parallel.ForEach(activeCells.Values, f => f.Step(currentTime, deltaTime));
+            Parallel.ForEach(_activeCells.Values, f => f.Step(currentTime, deltaTime));
             currentTime += deltaTime;
             /*for (int y = 0; y < yDim; ++y)
             {
@@ -309,12 +304,12 @@ namespace PREACT.Fire
                     }
                 }
             }*/
-            while (cellsToRemove.Count > 0)
+            while (_cellsToRemove.Count > 0)
             {
-                activeCells.Remove(cellsToRemove.Pop()._linearIndex);
+                _activeCells.Remove(_cellsToRemove.Pop()._linearIndex);
             }
 
-            if (activeCells.Count == 0 && cellsToIgnite.Count == 0)
+            if (_activeCells.Count == 0 && _cellsToIgnite.Count == 0)
             {
                 Engine.Message(null, Engine.LogType.Log, "No more active cells left, stopping fire spread simulation");
             }
@@ -334,10 +329,10 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < xDim; ++x)
                 {
-                    _firepoints[x, y].TryIgnite();
-                    if (_firepoints[x, y]._ignited)
+                    _fuelCells[x, y].TryIgnite(xDim, yDim, _fuelCells);
+                    if (_fuelCells[x, y]._ignited)
                     {
-                        triggerBuffer[x, y] = _firepoints[x, y]._timeOfArrival;
+                        triggerBuffer[x, y] = _fuelCells[x, y]._timeOfArrival;
                     }
                 }
             }
@@ -346,70 +341,120 @@ namespace PREACT.Fire
         }
     }
 
-    public class FirePoint
+    public class FireVertex
+    {
+        private FuelCell _targetCell;
+        public Vector3d _localPosition;
+        private Vector3d _spreadVector;
+        private double _spreadDirection;
+        public bool Dead;
+        private double _distanceLeftToTarget;
+
+        public FireVertex(FuelCell targetCell, Vector3d localPosition, Vector3d spreadVector, double spreadDirection)
+        {
+            _targetCell = targetCell;
+            _localPosition = localPosition;                    
+
+            if (CellVertexHybrid.inverseSpreadDirection)
+            {
+                spreadVector *= -1;
+                spreadDirection += 180f;
+                if (spreadDirection >= 360f)
+                {
+                    spreadDirection -= 360f;
+                }
+            }
+
+            _spreadVector = spreadVector;
+            _spreadDirection = spreadDirection;
+            Dead = false;
+            _distanceLeftToTarget = Vector3d.Distance(_localPosition, _targetCell.IgnitionPoint);
+        }
+
+        public void Step(float currentTime, float deltaTime, CellVertexHybrid sim)
+        {
+            if (!_targetCell._dead && !_targetCell._ignited)
+            {                
+                FuelCell currentCell = sim.GetCell(_localPosition);
+                float spreadRate = currentCell.GetSpreadRateInDirection(_spreadDirection);
+
+                double delta = deltaTime * spreadRate;
+                _localPosition += delta * _spreadVector ;
+                _distanceLeftToTarget -= delta;
+
+                //we have reached the vertex of the neighbor
+                if (_distanceLeftToTarget <= 0)
+                {
+                    if (!_targetCell._ignited)
+                    {
+                        float residualTime = (float)-_distanceLeftToTarget / spreadRate;
+                        _targetCell.SchedulelIgnition(currentTime + deltaTime, residualTime);
+                    }
+                }
+            }
+            //nothing for us to do
+            else
+            {
+                Dead = true;
+            }
+        }
+    }
+
+    public class FuelCell
     {       
         public Vector2int _index;
-        FirePoint[] _neighbors = new FirePoint[8];
-        public bool _burntOut, _ignited;
-        public LandscapeStruct _lcp;
-        float[] _flamefronts = new float[8];
-        float[] _spreadRates = new float[8];
-        float[] _spreadDistances = new float[8];
-        float[] _spreadDirections = new float[8];
+        public bool _dead, _ignited;
+        public LandscapeCellData _cellData;
         public float _maxROS;
-        private float _cellSize;
+        private double _cellSize;
         public int _linearIndex;
-        private CellularAutomata2 _owner;
+        private CellVertexHybrid _owner;
         private float _insideDistance;//distance within cell before crossing over to neighbor and changes fire behavior (fuel)
+        private bool _rateOfSpreadIsSet = false;
 
-        public Vector3d LocalPosition;
+        Surface _surface;
+        Crown _crownFire;
 
-        public FirePoint(bool randomCenter, int xIndex, int yIndex, Surface surface, LCPData lcpData, bool[,] wuiArea, int xDim, int yDim, float windDirection, float midFlameWindspeed, float cellSize, CellularAutomata2 owner, InitialFuelMoistureLibrary initialFuelMoistures)
+        public Vector3d IgnitionPoint;
+        private List<FireVertex> _fireVertices;
+        private float _residualTime;
+        private InitialFuelMoisture _moisture;
+
+        public FuelCell(bool randomCenter, int xIndex, int yIndex, LandscapeData landscape, FuelModelSet fuelModelSet, bool[,] wuiArea, int xDim, int yDim, CellVertexHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures)
         {
             _owner = owner;
             _index = new Vector2int(xIndex, yIndex);
-            _lcp = lcpData.GetCellData(_index.x, _index.y);
-            _cellSize = cellSize;
+            _cellData = landscape.GetCellData(_index.x, _index.y);
+            _cellSize = landscape.RasterCellResolutionX;
+            _moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
             _linearIndex = xIndex + yIndex * xDim;
+            _surface = new Surface(fuelModelSet);
+            _crownFire = new Crown(fuelModelSet);
 
-            double xPos = Random.valued * cellSize + xIndex * cellSize;
-            double yPos = Random.valued * cellSize + yIndex * cellSize;
-            double zPos = lcpData.GetElevationLocalPos(xPos, yPos);
-            LocalPosition = new Vector3d(xPos, zPos, yPos);
 
-            if (wuiArea[_index.x, _index.y] || surface.isAllFuelLoadZero(_lcp.fuel_model))
+            if(randomCenter)
             {
-                _burntOut = true;
+                double xPos = Random.valued * _cellSize + xIndex * _cellSize;
+                double yPos = Random.valued * _cellSize + yIndex * _cellSize;
+                double zPos = landscape.GetElevationLocalPos(xPos, yPos);
+                IgnitionPoint = new Vector3d(xPos, zPos, yPos);
+            }
+            else
+            {
+                double xPos = (xIndex + 0.5) * _cellSize;
+                double yPos = (yIndex + 0.5) * _cellSize;
+                double zPos = _cellData.elevation;
+                IgnitionPoint = new Vector3d(xPos, zPos, yPos);
+            }
+
+
+            if (wuiArea[_index.x, _index.y] || _surface.isAllFuelLoadZero(_cellData.fuel_model))
+            {
+                _dead = true;
                 return;
             }
 
             _maxROS = float.MinValue;
-            surface.doSurfaceRunInDirectionOfMaxSpread();
-            InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_lcp.fuel_model);
-            double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
-
-            surface.updateSurfaceInputs(_lcp.fuel_model, moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, _owner.MoistureUnits,
-                midFlameWindspeed, _owner.WindSpeedUnits, _owner.WindHeightInputMode, windDirection, _owner.WindAndSpreadOrientationMode, _lcp.slope, _owner.SlopeUnits, _lcp.aspect, _lcp.canopy_cover, _owner.CoverUnits, _lcp.crown_canopy_height, _owner.LengthUnits, crownRatio);
-
-            for (int i = 0; i < _spreadRates.Length; i++)
-            {               
-
-                float spreadDirection = CellularAutomata2.SpreadDirections[i];
-                if (CellularAutomata2.inverseSpreadDirection)
-                {
-                    spreadDirection += 180f;
-                    if (spreadDirection >= 360f)
-                    {
-                        spreadDirection -= 360f;
-                    }
-                }                
-                //TODO: check unit and convert to m/s
-                _spreadRates[i] = (float)surface.calculateSpreadRateAtVector(spreadDirection);
-                if (_spreadRates[i] > _maxROS)
-                {
-                    _maxROS = _spreadRates[i];
-                }
-            }           
         }
 
         /// <summary>
@@ -420,102 +465,110 @@ namespace PREACT.Fire
         /// <param name="wuiArea"></param>
         /// <param name="surface"></param>
         /// <param name="cells"></param>
-        public void SetNeighbors(int xDim, int yDim, bool[,] wuiArea, Surface surface, FirePoint[,] cells)
+        public void SpawnFireVertices(int xDim, int yDim, FuelCell[,] cells)
         {
-            for (int i = 0; i < _neighbors.Length; ++i)
+            _fireVertices = new List<FireVertex>(8);
+            for (int i = 0; i < CellVertexHybrid.NeighborIndices.Length; ++i)
             {
-                Vector2int neighborIndex = _index + CellularAutomata2.NeighborIndices[i];
-                if (CellularAutomata2.IsInside(xDim, yDim, neighborIndex))
+                Vector2int neighborIndex = _index + CellVertexHybrid.NeighborIndices[i];
+                if (CellVertexHybrid.IsInside(xDim, yDim, neighborIndex))
                 {
-                    if (_neighbors[i]._burntOut)
+                    FuelCell neighbor = cells[neighborIndex.x, neighborIndex.y];
+                    if (!neighbor._dead)
                     {
-                        _neighbors[i] = null;
+                        Vector3d delta = neighbor.IgnitionPoint - IgnitionPoint;
+                        double spreadDirection = (float)Vector3d.Angle(Vector3d.up, delta);
+                        FireVertex f = new FireVertex(neighbor, IgnitionPoint, delta.normalized, spreadDirection);
+                        _fireVertices.Add(f);
                     }
-                    else
-                    {
-                        _neighbors[i] = cells[neighborIndex.x, neighborIndex.y];
-                        Vector3d delta = _neighbors[i].LocalPosition - LocalPosition;
-                        _spreadDistances[i] = (float)delta.magnitude;
-                        _spreadDirections[i] = (float)Vector3d.Angle(Vector3d.up, delta);
-
-                        //calculate distance within own cell
-                    }     
                 }
             }
         }
 
-        public float GetSpreadrate(int index)
+        public void UpdateRateOfSpread()
         {
-            return _spreadRates[index];
+            //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
+            double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
+            double midFlameWindspeed = 0;
+            double windDirection = 0;
+
+            if(!_rateOfSpreadIsSet)
+            {
+                _surface.updateSurfaceInputs(_cellData.fuel_model, _moisture.OneHour, _moisture.TenHour, _moisture.HundredHour, _moisture.LiveHerbaceous, _moisture.LiveWoody, _owner.MoistureUnits,
+                    midFlameWindspeed, _owner.WindSpeedUnits, _owner.WindHeightInputMode, windDirection, _owner.WindAndSpreadOrientationMode, _cellData.slope, _owner.SlopeUnits, _cellData.aspect, _cellData.canopy_cover, _owner.CoverUnits, _cellData.crown_canopy_height, _owner.LengthUnits, crownRatio);
+                _rateOfSpreadIsSet = true; ;
+            }
+            else
+            {
+                //this should basically be all that is updated, maybe moisture
+                _surface.setWindDirection(windDirection);
+                _surface.setWindSpeed(midFlameWindspeed, _owner.WindSpeedUnits, _owner.WindHeightInputMode);
+            }
+
+            _surface.doSurfaceRunInDirectionOfMaxSpread();
         }
 
-        //returns the flame front in the opposite direction of who is requesting it, e.g. a neighbor north of you will have you indexed as south, so we want the north spread rate
-        public float GetFlamefront(int fromRelativeIndex)
+        public float GetSpreadRateInDirection(double spreadDirection)
         {
-            return _flamefronts[(fromRelativeIndex + 4) % 8];
+            if(!_rateOfSpreadIsSet)
+            {
+                UpdateRateOfSpread();
+            }
+            //TODO: check unit and convert to m/s
+            return (float)_surface.calculateSpreadRateAtVector(spreadDirection);
         }
 
         public void Step(float currentTime, float deltaTime)
         {
-            if (_burntOut || !_ignited)
+            if (_dead || !_ignited)
             {
                 return;
             }
 
-            int spreadLeft = 0;
-            for (int i = 0; i < _flamefronts.Length; ++i)
-            {
-                if (_neighbors[i] != null && !_neighbors[i]._burntOut)
+            //we might have a residual here from ignition, so add that time to the spread
+            deltaTime += _residualTime;
+            _residualTime = 0;
+            int aliveFlameFronts = 0;
+            for (int i = 0; i < _fireVertices.Count; ++i)
+            {                
+                _fireVertices[i].Step(currentTime, deltaTime, _owner);
+                if(!_fireVertices[i].Dead)
                 {
-                    _flamefronts[i] += deltaTime * _neighbors[i].GetSpreadrate(i);
-                    //flamefronts have crossed or we have reached the center of the neighbor
-                    if (_flamefronts[i] + _neighbors[i].GetFlamefront(i) >= _spreadDistances[i])
-                    {
-                        if (!_neighbors[i]._ignited)
-                        {
-                            //residual is only from this cell
-                            float residual = Mathf.Max(0, _flamefronts[i] - _spreadDistances[i]);
-                            _neighbors[i].SchedurelIgnite(currentTime + deltaTime, residual, i);
-                        }
-                        _neighbors[i] = null;
-                    }
-                    else
-                    {
-                        ++spreadLeft;
-                    }
+                    aliveFlameFronts++;
                 }
             }
 
             //we have nowhere left to spread, so we are done
-            if (spreadLeft == 0)
+            if (aliveFlameFronts == 0)
             {
-                _burntOut = true;
+                _dead = true;
                 _owner.AddCellToRemove(this);
             }
         }
 
         bool scheduleIgnition;
         public float _timeOfArrival;
-        public void SchedurelIgnite(float timeOfArrival, float residualFlamefront, int index)
+        public void SchedulelIgnition(float timeOfArrival, float residualTime)
         {
-            if (!_burntOut && !_ignited)
+            if (!_dead && !_ignited)
             {
                 if (!scheduleIgnition)
                 {
                     scheduleIgnition = true;
                     _owner.AddCellToIgnite(this);
-                    _timeOfArrival = timeOfArrival;
+                    _timeOfArrival = timeOfArrival - residualTime;
                 }
-                //we might be approached from more than one direction during one timestep
-                _flamefronts[index] = Mathf.Max(_flamefronts[index], residualFlamefront);
+                //we might be approached from more than one direction during one timestep, so take max residual time
+                _residualTime = Mathf.Max(_residualTime, residualTime);
             }
         }
 
-        public void TryIgnite()
+        public void TryIgnite(int xDim, int yDim, FuelCell[,] cells)
         {
             if (scheduleIgnition && !_ignited)
             {
                 _ignited = true;
+                SpawnFireVertices(xDim, yDim, cells);
                 _owner.AddActiveCell(this);
             }
         }

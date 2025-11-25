@@ -27,7 +27,7 @@ namespace PREACT
         private int _xDim, _yDim;
         private kPERILcore _peril;
         private bool _calculateROS;
-        private LCPData? _lcpData;
+        private LandscapeData? _lcpData;
         private float _RSET;
         private bool[] _wuiArea;
         private float _midflameWindspeed;
@@ -56,7 +56,7 @@ namespace PREACT
             _rosAzimuth = rosAzimuth;
         }
 
-        public kPERIL(LCPData lcpData, float RSET, bool[] wuiArea, float midflameWindspeed, float windDirection,  InitialFuelMoistureLibrary fuelMoisture, FuelModelInput fuelModel)
+        public kPERIL(LandscapeData lcpData, float RSET, bool[] wuiArea, float midflameWindspeed, float windDirection,  InitialFuelMoistureLibrary fuelMoisture, FuelModelInput fuelModel)
         {
             _calculateROS = true;
             _peril = new kPERILcore();
@@ -163,7 +163,7 @@ namespace PREACT
             }
         }
 
-        private static void CalculateAllRateOfSpreadsAndDirections(LCPData lcpData, out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, InitialFuelMoistureLibrary initialFuelMoistureLibrary, bool[,]? wuiArea = null, FuelModelInput? fuelModelInputs = null)
+        private static void CalculateAllRateOfSpreadsAndDirections(LandscapeData lcpData, out float[,] rateOfSpreads, out float[,] spreadDirections, float midFlameWindspeed, float windDirection, bool flipYaxis, InitialFuelMoistureLibrary initialFuelMoistureLibrary, bool[,]? wuiArea = null, FuelModelInput? fuelModelInputs = null)
         {
             int xDim = lcpData.GetCellCountX();
             int yDim = lcpData.GetCellCountY();
@@ -196,7 +196,7 @@ namespace PREACT
                     {
                         continue;
                     }
-                    LandscapeStruct cellData = lcpData.GetCellData(x, y);
+                    LandscapeCellData cellData = lcpData.GetCellData(x, y);
                     InitialFuelMoisture moisture = initialFuelMoistureLibrary.GetInitialFuelMoisture(cellData.fuel_model);
                     double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
 

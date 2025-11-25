@@ -258,6 +258,11 @@ namespace PREACT
                     _fireModule = new FireMesh(this, _input.Fire.Data.LCPData, _input.Fire.Data.WeatherInput, _input.Fire.Data.WindInput, _input.Fire.Data.InitialFuelMoistureData, _input.Fire.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
+                else if (_input.Fire.FireModule == FireInput.FireModuleChoice.CellVertexHybrid)
+                {
+                    _fireModule = new FireMesh(this, _input.Fire.Data.LCPData, _input.Fire.Data.WeatherInput, _input.Fire.Data.WindInput, _input.Fire.Data.InitialFuelMoistureData, _input.Fire.Data.IgnitionPoints);
+                    Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
+                }
                 else
                 {
                     Engine.Message(this, Engine.LogType.SimulationError, "Could not initiate fire mdoule, aborting.");
