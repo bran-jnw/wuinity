@@ -68,9 +68,10 @@ namespace PREACT.Fire
                     //we have reached the vertex of the neighbor
                     if (_distanceLeftToTarget <= 0.0)
                     {
-                        float residualTime = (float)-_distanceLeftToTarget / spreadRate;
-                        _targetCell.SchedulelIgnition(currentTime + deltaTime, residualTime);
                         _dead = true;
+                        float residualTime = (float)-_distanceLeftToTarget / spreadRate;
+                        float timeOfArrival = currentTime + deltaTime - residualTime;
+                        _targetCell.SchedulelIgnition(timeOfArrival, residualTime);                        
                     }
                 }
                 else

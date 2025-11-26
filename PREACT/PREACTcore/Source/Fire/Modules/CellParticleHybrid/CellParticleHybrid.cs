@@ -26,9 +26,9 @@ namespace PREACT.Fire
         public static readonly BehaveUnits.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
         public static readonly WindAndSpreadOrientationMode WindAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
 
-        private Stack<FuelCell> _cellsToIgnite;
+        private Queue<FuelCell> _cellsToIgnite;
         private Dictionary<int, FireParticle> _activeParticles;
-        private Stack<FireParticle> _verticesToRemove;
+        private Queue<FireParticle> _verticesToRemove;
         private int _xDim, _yDim;
         private FuelCell[,] _fuelCells;
         private float[] _fireLineIntensityData;
@@ -69,11 +69,11 @@ namespace PREACT.Fire
                 }
             }
 
-            _cellsToIgnite = new Stack<FuelCell>();
+            _cellsToIgnite = new Queue<FuelCell>();
             _activeParticles = new Dictionary<int, FireParticle>();
-            _verticesToRemove = new Stack<FireParticle>();
+            _verticesToRemove = new Queue<FireParticle>();
 
-            _cellsToIgnite.Push(_fuelCells[200, 50]);
+            _cellsToIgnite.Enqueue(_fuelCells[200, 50]);
 
             _done = false;            
             return;
@@ -109,6 +109,11 @@ namespace PREACT.Fire
                     }
                 }
             }          
+        }
+
+        public FuelCell[,] GetCells()
+        {
+            return _fuelCells;
         }
 
         public FuelCell GetCell(Vector3d localPos)
@@ -284,7 +289,7 @@ namespace PREACT.Fire
 
         public void AddCellToIgnite(FuelCell cell)
         {
-            _cellsToIgnite.Push(cell);
+            _cellsToIgnite.Enqueue(cell);
         }
 
         public void AddActiveFireParticle(FireParticle vertex)
@@ -294,7 +299,7 @@ namespace PREACT.Fire
 
         public void AddVertexToRemove(FireParticle vertex)
         {
-            _verticesToRemove.Push(vertex);
+            _verticesToRemove.Enqueue(vertex);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -308,7 +313,7 @@ namespace PREACT.Fire
             //handle ignitions
             while(_cellsToIgnite.Count > 0)
             {
-                FuelCell f = _cellsToIgnite.Pop();
+                FuelCell f = _cellsToIgnite.Dequeue();
                 f.Ignite(_xDim, _yDim, _fuelCells, currentTime);
                 //for communicating with other simulation modules
                 _ignitedCellIndices.Add(f.Index);               
@@ -326,7 +331,7 @@ namespace PREACT.Fire
             //remove all dead vertices
             while (_verticesToRemove.Count > 0)
             {
-                _activeParticles.Remove(_verticesToRemove.Pop().Index);
+                _activeParticles.Remove(_verticesToRemove.Dequeue().Index);
             }
 
             if (_activeParticles.Count == 0 && _cellsToIgnite.Count == 0)

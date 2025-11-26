@@ -87,12 +87,13 @@ namespace PREACT.Fire
         /// <param name="wuiArea"></param>
         /// <param name="surface"></param>
         /// <param name="cells"></param>
-        private void SpawnFireVertices(int xDim, int yDim, FuelCell[,] cells, float currentTime)
+        private void SpawnFireVertices(float currentTime)
         {
+            FuelCell[,] cells = _owner.GetCells();
             for (int i = 0; i < CellParticleHybrid.NeighborIndices.Length; ++i)
             {
                 Vector2int targetIndex = _index + CellParticleHybrid.NeighborIndices[i];
-                if (CellParticleHybrid.IsInside(xDim, yDim, targetIndex) && !cells[targetIndex.x, targetIndex.y]._dead)
+                if (CellParticleHybrid.IsInside(_owner.GetCellCountX(), _owner.GetCellCountY(), targetIndex) && !cells[targetIndex.x, targetIndex.y]._dead)
                 {
                     int particleIndex = _linearIndex * 8 + i; //assume at most 8 particles per cell
                     FuelCell targetCell = cells[targetIndex.x, targetIndex.y];
@@ -149,7 +150,7 @@ namespace PREACT.Fire
                 _owner.AddCellToIgnite(this);
             }
             //we might be approached from more than one direction during one timestep, so take max residual time and min time of arrival
-            _timeOfArrival = Mathf.Min(_timeOfArrival, timeOfArrival - residualTime);
+            _timeOfArrival = Mathf.Min(_timeOfArrival, timeOfArrival);
             _residualTime = Mathf.Max(_residualTime, residualTime);
         }
 
@@ -159,7 +160,7 @@ namespace PREACT.Fire
             {
                 _ignited = true;
                 UpdateRateOfSpread();
-                SpawnFireVertices(xDim, yDim, cells, currentTime);
+                SpawnFireVertices(currentTime);
             }
         }
     }
