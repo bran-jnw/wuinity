@@ -411,7 +411,7 @@ namespace PREACT.Math
             return true;
         }*/
 
-        static internal long RandomToLong(Random r)
+        static internal long RandomToLong(System.Random r)
         {
             var buffer = new byte[8];
             r.NextBytes(buffer);

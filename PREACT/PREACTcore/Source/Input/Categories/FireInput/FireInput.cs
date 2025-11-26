@@ -13,7 +13,7 @@ namespace PREACT.IO
     [System.Serializable]
     public class FireInput
     {
-        public enum FireModuleChoice { None, AscImport, FireCell, CellVertexHybrid, VectorCells, FarsiteDLL, PrometheusCOM }
+        public enum FireModuleChoice { None, AscImport, FireCell, CellParticleHybrid, FarsiteDLL, PrometheusCOM }
 
         private FireData _data;
         private AscImportInput _ascImportInput;
@@ -60,8 +60,8 @@ namespace PREACT.IO
                     case nameof(FireModuleChoice.FireCell):
                         newInput.FireModule = FireModuleChoice.FireCell;
                         break;
-                    case nameof(FireModuleChoice.CellVertexHybrid):
-                        newInput.FireModule = FireModuleChoice.CellVertexHybrid;
+                    case nameof(FireModuleChoice.CellParticleHybrid):
+                        newInput.FireModule = FireModuleChoice.CellParticleHybrid;
                         break;
                     default:
                         success = false;
@@ -135,6 +135,22 @@ namespace PREACT.IO
             else if (newInput.FireModule == FireModuleChoice.FireCell)
             {
                 inputName = nameof(FireModuleChoice.FireCell);
+                PREACTInput.ReadingInputMessage(inputName);
+                int lineindex;
+                if (headerLineIndex.TryGetValue(inputName, out lineindex))
+                {
+                    newInput._fireCellInput = FireCellInput.Parse(inputLines, lineindex, newInput, rootFolder, out success);
+                }
+                else
+                {
+                    //critical
+                    PREACTInput.InputNotFoundMessage(inputName);
+                    return newInput;
+                }
+            }
+            else if (newInput.FireModule == FireModuleChoice.CellParticleHybrid)
+            {
+                inputName = nameof(FireModuleChoice.CellParticleHybrid);
                 PREACTInput.ReadingInputMessage(inputName);
                 int lineindex;
                 if (headerLineIndex.TryGetValue(inputName, out lineindex))

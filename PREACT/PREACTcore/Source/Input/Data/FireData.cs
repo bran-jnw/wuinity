@@ -63,7 +63,7 @@ namespace PREACT.IO
             filePath = Path.Combine(rootFolder, fireInput.GraphicalFireInputFile);
             LoadGraphicalFireInput(fireInput, filePath, _lcpData, false, out success);
 
-            if (fireInput.FireModule == FireInput.FireModuleChoice.FireCell)
+            if (fireInput.FireModule == FireInput.FireModuleChoice.FireCell || fireInput.FireModule == FireInput.FireModuleChoice.CellParticleHybrid)
             {
                 int issues = 0;
 

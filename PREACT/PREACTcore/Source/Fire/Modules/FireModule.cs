@@ -12,6 +12,7 @@ namespace PREACT.Fire
 {
     public abstract class FireModule : SimulationModule
     {
+        protected float _internalDeltaTime;
         public FireModule(Simulation simulation) : base(simulation)
         {
 

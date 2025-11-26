@@ -4,11 +4,10 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>PREACT</RootNamespace>
+    <BaseOutputPath>E:\_UNITY\WUInity\wui-nity\WUInity\Assets\PREACT</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Source\Traffic\Modules\CityFlow\CityFlow_license.txt" />
-    <Content Include="Source\Traffic\Modules\CityFlow\cityflow_unity.dll" />
     <Content Include="Source\Traffic\Modules\SUMO\Build_notes.txt" />
     <Content Include="Source\Traffic\Modules\SUMO\version_info.txt" />
   </ItemGroup>

@@ -153,15 +153,6 @@ namespace PREACT.Fire
 		Vector2int _originCellOffset; //cells offset from common origin
         //public Vector2int OriginCellOffset { get => originCellOffset; }
 
-		public LandscapeData(Vector2d cellSize, Vector2int cellCount)								
-		{
-            RasterCellResolutionX = cellSize.x;
-            RasterCellResolutionY = cellSize.y;
-            Header.numnorth = cellCount.y;
-            Header.numeast = cellCount.x;
-            NumVals = 10;
-            Header.loelev = 0;
-        }
 
 		public LandscapeData(string filePath, Vector2d simulationUtmOrigin)					
 		{
@@ -558,6 +549,9 @@ namespace PREACT.Fire
                 xIndex += _originCellOffset.x;
                 yIndex += _originCellOffset.y;
             }
+
+			xIndex = Mathd.Clamp(xIndex, 0, GetCellCountX() - 1);
+            yIndex = Mathd.Clamp(yIndex, 0, GetCellCountY() - 1);
 
             //flip y since dataset is north down
             long posit = (xIndex + (Header.numnorth - yIndex - 1) * Header.numeast);

@@ -1,29 +1,14 @@
-Loading net-file from 'E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/rox_big.net.xml' ... done (426ms).
+Loading net-file from 'E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/rox_big.net.xml' ... done (564ms).
 Warning: At actuated tlLogic '88510203', linkIndex 0,1,2,3,4,5 has no controlling detector.
 Loading done.
 Simulation version 1.24.0 started via libsumo with time: 0.00.
-Warning: Teleporting vehicle '143'; waited too long (yield), lane=':88510819_8_0', time=825.00.
-Warning: Vehicle '143' ends teleporting on edge '-419998995#1', time=825.00.
-Warning: Teleporting vehicle '340'; waited too long (yield), lane=':cluster_88490764_88490766_2_0', time=1064.00.
-Warning: Vehicle '340' ends teleporting on edge '133729130#8', time=1064.00.
-Warning: Teleporting vehicle '491'; waited too long (yield), lane='10384669#0_0', time=1236.00.
-Warning: Vehicle '491' ends teleporting on edge '-10384669#1', time=1237.00.
-Warning: Teleporting vehicle '554'; waited too long (yield), lane=':88510819_8_0', time=1341.00.
-Warning: Vehicle '554' ends teleporting on edge '-419998995#1', time=1343.00.
-Warning: Teleporting vehicle '366'; waited too long (yield), lane=':cluster_88490764_88490766_2_0', time=1418.00.
-Warning: Vehicle '366' ends teleporting on edge '133729130#8', time=1418.00.
-Warning: Teleporting vehicle '564'; waited too long (yield), lane=':88510819_8_0', time=1646.00.
-Warning: Vehicle '564' ends teleporting on edge '-419998995#1', time=1646.00.
-Simulation ended at time: 7477.00.
+Simulation ended at time: 36001.00.
 Reason: Libsumo requested termination.
 Performance:
- Duration: 21.67s
- Real time factor: 344.991
- UPS: 62281.317769
+ Duration: 1.72s
+ Real time factor: 20894.4
+ UPS: 0.000000
 Vehicles:
- Inserted: 1000
+ Inserted: 0
  Running: 0
  Waiting: 0
- Teleports: 6 (Yield: 6)
-DijkstraRouter answered 1000 queries and explored 1862.49 edges on average.
-DijkstraRouter spent 2.73s answering queries (2.73ms on average).

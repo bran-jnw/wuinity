@@ -136,16 +136,17 @@ namespace PREACT
         private void RunSimulationsSerial(EngineTask engineTask)
         {
             PreSimulations(engineTask);
-            
+
+            _simulations = new Simulation[1];
             for (int i = 0; i < engineTask.NumberOfRuns; ++i)
             {
                 int simulationIndex = i + engineTask.SimulationIndexOffset;
-                Simulation simulation = new Simulation(this, _input, simulationIndex);
-                _mainSimulation = simulation;
-                simulation.Run();
-                if(simulation.TrafficModule != null)
+                _simulations[0] = new Simulation(this, _input, simulationIndex);
+                _mainSimulation = _simulations[0];
+                _mainSimulation.Run();
+                if(_mainSimulation.TrafficModule != null)
                 {
-                    CollectSimulationStatistics(simulation.GetTrafficArrivalData(), simulationIndex,engineTask);
+                    CollectSimulationStatistics(_mainSimulation.GetTrafficArrivalData(), simulationIndex,engineTask);
                 }                
                 if (_stopSimulations)
                 {
@@ -375,7 +376,7 @@ namespace PREACT
             }
             else
             {
-                Message(null, LogType.Log, "No completed simulations were performed.");
+                Message(null, LogType.Log, "No completed traffic simulations were performed, cannot analyse statistics.");
             }
 
             PREACTOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
@@ -540,7 +541,7 @@ namespace PREACT
 
         public void CloseSimulations(bool stoppedDueToError)
         {
-            _stopSimulations = true;
+            _stopSimulations = true;           
             if(_simulations != null)
             {
                 for (int i = 0; i < _simulations.Length; ++i)

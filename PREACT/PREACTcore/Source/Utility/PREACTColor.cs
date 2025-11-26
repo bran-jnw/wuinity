@@ -39,7 +39,7 @@ namespace PREACT
 
         public static PREACTColor Random()
         {
-            return new PREACTColor(Math.Random.value, Math.Random.value, Math.Random.value);
+            return new PREACTColor(Math.Random.valuef, Math.Random.valuef, Math.Random.valuef);
         }
 
         public static PREACTColor operator *(PREACTColor c, float f) => new PREACTColor(c.r * f, c.g * f, c.b * f, c.a * f );

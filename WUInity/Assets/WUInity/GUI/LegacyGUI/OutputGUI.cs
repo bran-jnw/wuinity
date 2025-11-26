@@ -112,10 +112,10 @@ namespace WUInity.UI
             //fire output stuff
             if (_input.Simulation.RunFireModule && _engine.Simulation.State == Simulation.SimulationState.Running)
             {               
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + _engine.Simulation.FireModule.GetCurrentWindData().speed + " m/s");
+                /*GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind speed: " + _engine.Simulation.FireModule.GetCurrentWindData().speed + " m/s");
                 ++buttonIndex;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + _engine.Simulation.FireModule.GetCurrentWindData().direction + " degrees");
-                ++buttonIndex;
+                ++buttonIndex;*/
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + _engine.Simulation.FireModule.GetActiveCellCount());
                 ++buttonIndex;
 

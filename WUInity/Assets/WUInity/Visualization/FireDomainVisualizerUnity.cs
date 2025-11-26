@@ -17,7 +17,7 @@ namespace WUInity.Visualization
     {
         private GameObject _lcpDomainPlane;
         MeshRenderer _lcpDomainMeshRenderer;
-        LCPData _lcpData;
+        LandscapeData _lcpData;
         //textures
         Texture2D _fuelModelsTexture, _elevationTexture, _slopeTexture, _aspectTexture, _triggerBufferTexture;
           
@@ -75,7 +75,7 @@ namespace WUInity.Visualization
                 _lcpDomainMeshRenderer.material.mainTexture = _triggerBufferTexture;
             }
         }
-        private void CheckIfNeedNewFireDomainPlane(LCPData newLCPData)
+        private void CheckIfNeedNewFireDomainPlane(LandscapeData newLCPData)
         {
             if (_lcpData == null || DomainVisualizerUnity.NeedNewPlane(_lcpData.GetSize(), newLCPData.GetSize(), _lcpData.GetLowerLeftUTM(), newLCPData.GetLowerLeftUTM()))
             {
@@ -83,7 +83,7 @@ namespace WUInity.Visualization
             }
         }
 
-        public override void SetAndDisplayLCP(LCPData newLCPData, LcpViewMode lcpViewMode = LcpViewMode.FuelModel)
+        public override void SetAndDisplayLCP(LandscapeData newLCPData, LcpViewMode lcpViewMode = LcpViewMode.FuelModel)
         {   
             int xDim = newLCPData.GetCellCountX();
             int yDim = newLCPData.GetCellCountY();
@@ -122,7 +122,7 @@ namespace WUInity.Visualization
             {
                 for (int x = 0; x < xDim; x++)
                 {
-                    LandscapeStruct l = _lcpData.GetCellDataSimulationIndex(x, y, false);
+                    LandscapeCellData l = _lcpData.GetCellDataSimulationIndex(x, y, false);
 
                     PREACTColor c = FuelModelColors.GetFuelColor((int)l.fuel_model);
                     c.a = alpha;

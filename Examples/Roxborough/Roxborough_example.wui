@@ -3,12 +3,12 @@ Name=Roxborough_example
 LowerLeftLatLon=39.409924,-105.104505
 DomainSize=10000.0,11000.0
 DeltaTime=1.0
-MaxSimTime=36000.0
+MaxSimTime=360000.0
 RunPedestrianModule=true
 RunTrafficModule=true
 RunFireModule=true
 RunSmokeModule=true
-StopWhenEvacuated=true
+StopWhenEvacuated=false
 
 [Map]
 MapProvider=Mapbox
@@ -16,8 +16,8 @@ ZoomLevel=13
 
 [Population]
 PopulationFile=population/small_population.csv
-HouseholdSizeMin=1
-HouseholdSizeMax=5
+MinHouseholdSize=1
+MaxHouseholdSize=5
 AllowMoreThanOneCar=false
 MaxCars=2
 MaxCarsProbability=0.3
@@ -50,9 +50,20 @@ UTMoffset=-491253.49,-4359238.56
 DestinationChoice=EvacGroup
 
 [Fire]
-FireModule=AscImport
+FireModule=CellParticleHybrid
 LcpFile=fire/rox_big_burning_city.lcp
 GraphicalFireInputFile=fire/example.gfi
+
+[CellParticleHybrid]
+RootFolder=fireCell
+FuelModelsFile=default.fuel
+InitialFuelMoistureFile=default.fmc
+IgnitionPointsFile=example.ign
+WeatherFile=example.wtr
+WindFile=example_seconds.wnd 
+UseRandomIgnitionMap=false
+RandomIgnitionPoints=0
+UseInitialIgnitionMap=false
 
 [AscImport]
 RootFolder=flammap

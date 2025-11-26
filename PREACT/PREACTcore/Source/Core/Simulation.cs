@@ -258,10 +258,10 @@ namespace PREACT
                     _fireModule = new FireMesh(this, _input.Fire.Data.LCPData, _input.Fire.Data.WeatherInput, _input.Fire.Data.WindInput, _input.Fire.Data.InitialFuelMoistureData, _input.Fire.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
-                else if (_input.Fire.FireModule == FireInput.FireModuleChoice.CellVertexHybrid)
+                else if (_input.Fire.FireModule == FireInput.FireModuleChoice.CellParticleHybrid)
                 {
-                    _fireModule = new CellVertexHybrid(this);
-                    Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
+                    _fireModule = new CellParticleHybrid(this, _input.Fire.Data.LCPData, _input.Fire.Data.WuiArea, _input.Fire.Data.FuelModelsData, _input.Fire.Data.InitialFuelMoistureData, _input.Fire.Data.IgnitionPoints);
+                    Engine.Message(this, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
                 }
                 else
                 {

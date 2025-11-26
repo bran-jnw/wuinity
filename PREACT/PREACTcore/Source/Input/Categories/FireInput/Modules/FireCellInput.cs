@@ -6,6 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.IO;
 
 namespace PREACT.IO
 {
@@ -67,11 +68,12 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.RootFolder = userInput;
+                rootFolder = Path.Combine(rootFolder, userInput);
             }
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
+            }            
 
             //not critical, uses defaults
             nameOfInput = nameof(FuelModelsFile);
@@ -89,7 +91,7 @@ namespace PREACT.IO
             nameOfInput = nameof(InitialFuelMoistureFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.FuelModelsFile = userInput;
+                newInput.InitialFuelMoistureFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -106,7 +108,7 @@ namespace PREACT.IO
             nameOfInput = nameof(WeatherFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.FuelModelsFile = userInput;
+                newInput.WeatherFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -123,7 +125,7 @@ namespace PREACT.IO
             nameOfInput = nameof(WindFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.FuelModelsFile = userInput;
+                newInput.WindFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -140,7 +142,7 @@ namespace PREACT.IO
             nameOfInput = nameof(IgnitionPointsFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.FuelModelsFile = userInput;
+                newInput.IgnitionPointsFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else

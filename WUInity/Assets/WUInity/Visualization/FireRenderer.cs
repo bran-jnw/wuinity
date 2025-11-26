@@ -235,9 +235,9 @@ namespace WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)simulation.Input.Simulation.DomainSize.x;
-            float height = (float)simulation.Input.Simulation.DomainSize.y;
-            Vector3 offset = Vector3.zero;
+            float width = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX();
+            float height = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY();
+            Vector3 offset = new Vector3((float)simulation.Input.Fire.Data.LCPData.OriginOffset.x, 0f, (float)simulation.Input.Fire.Data.LCPData.OriginOffset.y);
             Vector2 maxUV = Vector2.one;
 
             if(simulation.Input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
