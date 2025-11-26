@@ -113,8 +113,8 @@ namespace PREACT.Fire
 
         public FuelCell GetCell(Vector3d localPos)
         {
-            int xIndex = (int)(localPos.x / _landscapeData.GetLandscapeSizeX());
-            int yIndex = (int)(localPos.y / _landscapeData.GetLandscapeSizeY());
+            int xIndex = (int)(_landscapeData.GetCellCountX() * localPos.x / _landscapeData.GetLandscapeSizeX());
+            int yIndex = (int)(_landscapeData.GetCellCountY() * localPos.y / _landscapeData.GetLandscapeSizeY());
             return _fuelCells[xIndex, yIndex];
         }
 
@@ -310,7 +310,7 @@ namespace PREACT.Fire
             {
                 FuelCell f = _cellsToIgnite.Pop();
                 f.Ignite(_xDim, _yDim, _fuelCells, currentTime);
-                //for communicating with other simualtion modules
+                //for communicating with other simulation modules
                 _ignitedCellIndices.Add(f.Index);               
             }
             

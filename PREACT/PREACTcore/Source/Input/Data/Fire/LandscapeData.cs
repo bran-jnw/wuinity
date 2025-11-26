@@ -17,8 +17,7 @@ namespace PREACT.Fire
 		public short slope;
 		public short aspect;
 		public short fuel_model;
-		public short canopy_cover;               // READ OR DERIVED FROM LANDSCAPE DATA
-		public double aspectf;
+		public short canopy_cover;
 		public double crown_canopy_height;
 		public double crown_base;  //bran-jnw: added crown_ as base is taken by C#
 		public double crown_bulk_density;

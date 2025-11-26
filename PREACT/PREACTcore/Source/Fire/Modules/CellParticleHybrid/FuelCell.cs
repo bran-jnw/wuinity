@@ -39,17 +39,17 @@ namespace PREACT.Fire
 
             if (randomCenter)
             {
-                double xPos = Random.valued * _cellSize + xIndex * _cellSize;
-                double yPos = Random.valued * _cellSize + yIndex * _cellSize;
+                double xPos = (Random.valued + xIndex) * _cellSize;
+                double yPos = (Random.valued + yIndex) * _cellSize;
                 double zPos = landscape.GetElevationLocalPos(xPos, yPos);
-                IgnitionPoint = new Vector3d(xPos, zPos, yPos);
+                IgnitionPoint = new Vector3d(xPos, yPos, zPos);
             }
             else
             {
                 double xPos = (xIndex + 0.5) * _cellSize;
                 double yPos = (yIndex + 0.5) * _cellSize;
                 double zPos = _cellData.elevation;
-                IgnitionPoint = new Vector3d(xPos, zPos, yPos);
+                IgnitionPoint = new Vector3d(xPos, yPos, zPos);
             }
 
             _dead = false;
@@ -91,12 +91,12 @@ namespace PREACT.Fire
         {
             for (int i = 0; i < CellParticleHybrid.NeighborIndices.Length; ++i)
             {
-                Vector2int neighborIndex = _index + CellParticleHybrid.NeighborIndices[i];
-                if (CellParticleHybrid.IsInside(xDim, yDim, neighborIndex) && !cells[neighborIndex.x, neighborIndex.y]._dead)
+                Vector2int targetIndex = _index + CellParticleHybrid.NeighborIndices[i];
+                if (CellParticleHybrid.IsInside(xDim, yDim, targetIndex) && !cells[targetIndex.x, targetIndex.y]._dead)
                 {
                     int particleIndex = _linearIndex * 8 + i; //assume at most 8 particles per cell
-                    FuelCell neighbor = cells[neighborIndex.x, neighborIndex.y];
-                    FireParticle f = new FireParticle(neighbor, IgnitionPoint, particleIndex, currentTime, _residualTime, _owner);                    
+                    FuelCell targetCell = cells[targetIndex.x, targetIndex.y];
+                    FireParticle f = new FireParticle(this, targetCell, particleIndex, currentTime, _residualTime, _owner);                    
                 }
             }
         }
@@ -106,7 +106,11 @@ namespace PREACT.Fire
             //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
             double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
             double midFlameWindspeed = 20;
-            double windDirection = 0;
+            double windDirection = 180;
+
+            _cellData.fuel_model = 1;
+            _cellData.slope = 0;
+            _cellData.aspect = 0;
 
             if (!_rateOfSpreadIsSet)
             {

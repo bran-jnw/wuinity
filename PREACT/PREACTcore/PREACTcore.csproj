@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>PREACT</RootNamespace>
-    <BaseOutputPath>E:\_UNITY\WUInity\wui-nity\WUInity\Assets\PREACT</BaseOutputPath>
+    <BaseOutputPath>..\..\WUInity\Assets\PREACT\</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,6 +39,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ThirdParty\FOFEM\x64\FOFEM.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\kPERIL\kPERILcore.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

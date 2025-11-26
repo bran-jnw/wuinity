@@ -16,18 +16,18 @@ namespace PREACT.Fire
         public int Index { get => _index; }
         public bool Dead { get => _dead; }
 
-        public FireParticle(FuelCell targetCell, Vector3d startLocalPosition, int index, float currentTime, float residualTime, CellParticleHybrid sim)
+        public FireParticle(FuelCell startCell, FuelCell targetCell, int index, float currentTime, float residualTime, CellParticleHybrid sim)
         {            
             _index = index;
             sim.AddActiveFireParticle(this); //has to be done after index is set
             _targetCell = targetCell;
-            _localPosition = startLocalPosition;
-            _currentCell = sim.GetCell(_localPosition);
+            _localPosition = startCell.IgnitionPoint;
+            _currentCell = startCell;
             _currentCell.AddActiveVertex();
 
             Vector3d delta = _targetCell.IgnitionPoint - _localPosition;
             _spreadVector = delta.normalized;
-            _spreadDirection = (float)Vector3d.Angle(Vector3d.up, _spreadVector);
+            _spreadDirection = (float)Vector3d.Angle(Vector3d.up, _spreadVector); //TODO: correct or should be "flat" (projected onto plane) angle? 
             _distanceLeftToTarget = delta.magnitude;
 
             if (CellParticleHybrid.inverseSpreadDirection)
