@@ -11,19 +11,17 @@ namespace PREACT.Fire
         private double _spreadDirection;
         private bool _dead;
         private double _distanceLeftToTarget;
-        private int _index;
+        private float _ignitionTime;
 
-        public int Index { get => _index; }
         public bool Dead { get => _dead; }
 
-        public FireParticle(FuelCell startCell, FuelCell targetCell, int index, float currentTime, float residualTime, CellParticleHybrid sim)
-        {            
-            _index = index;
-            sim.AddActiveFireParticle(this); //has to be done after index is set
+        public FireParticle(FuelCell startCell, FuelCell targetCell, float ignitionTime, float residualTime, CellParticleHybrid sim)
+        {
+            _ignitionTime = ignitionTime;
             _targetCell = targetCell;
             _localPosition = startCell.IgnitionPoint;
             _currentCell = startCell;
-            _currentCell.AddActiveVertex();
+            sim.AddActiveFireParticle(this);            
 
             Vector3d delta = _targetCell.IgnitionPoint - _localPosition;
             _spreadVector = delta.normalized;
@@ -42,21 +40,30 @@ namespace PREACT.Fire
 
             _dead = false;
 
+            //since we might have overshot the ignition point in the ignited fuel cell, we have to take the overshot time and move the new particle to compensate
             if (residualTime > 0)
             {
-                Step(currentTime - residualTime, residualTime, sim);
+                Step(ignitionTime, residualTime, sim);
             }
+        }
+
+        public void UpdateIgnitionTime(float newIgnitionTime)
+        {
+            _ignitionTime = newIgnitionTime;
         }
 
         public void Step(float currentTime, float deltaTime, CellParticleHybrid sim)
         {
-            if (!_targetCell._dead && !_targetCell._ignited)
+            //since we are immediately added to the active queue upon ignition we do not want to step at ignition (any residual time step us done during creation) 
+            //we need to check if we are dead as we end up doing recursive calls outside of the main loop for large time steps
+            if(currentTime < _ignitionTime || _dead)
             {
-                FuelCell cell = sim.GetCell(_localPosition);
-                if (cell != _currentCell)
-                {
-                    _currentCell.RemoveDeadVertex();
-                }
+                return;
+            }
+                        
+            if (!_targetCell._dead)//the target should never be dead here as the particle will not be created then, but keep it as we might want to enable real-time changes from user
+            {
+                FuelCell cell = sim.GetCell(_localPosition);                
                 _currentCell = cell;
                 float spreadRate = _currentCell.GetSpreadRateInDirection(_spreadDirection);
                 if (spreadRate > 0)
@@ -65,30 +72,28 @@ namespace PREACT.Fire
                     _localPosition += delta * _spreadVector;
                     _distanceLeftToTarget -= delta;
 
-                    //we have reached the vertex of the neighbor
+                    //we have reached the ignition point of the target cell
                     if (_distanceLeftToTarget <= 0.0)
                     {
                         _dead = true;
                         float residualTime = (float)-_distanceLeftToTarget / spreadRate;
                         float timeOfArrival = currentTime + deltaTime - residualTime;
-                        _targetCell.SchedulelIgnition(timeOfArrival, residualTime);                        
+                        _targetCell.Ignite(timeOfArrival, residualTime);                        
                     }
+                    //we had the chance to possibly ignite the target cell earlier than any other arrivals during the same time step, but if it does not happen during this time step we kill it as the target is ignited 
+                    else if(_targetCell._ignited)
+                    {
+                        _dead = true;
+                    }                    
                 }
                 else
                 {
                     _dead = true;
                 }
-
             }
             else
             {
                 _dead = true;
-            }
-
-            if (_dead)
-            {
-                sim.AddVertexToRemove(this);
-                _currentCell.RemoveDeadVertex();
             }
         }
     }

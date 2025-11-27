@@ -26,9 +26,7 @@ namespace PREACT.Fire
         public static readonly BehaveUnits.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
         public static readonly WindAndSpreadOrientationMode WindAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
 
-        private Queue<FuelCell> _cellsToIgnite;
-        private Dictionary<int, FireParticle> _activeParticles;
-        private Queue<FireParticle> _verticesToRemove;
+        private Queue<FireParticle> _aliveParticles;
         private int _xDim, _yDim;
         private FuelCell[,] _fuelCells;
         private float[] _fireLineIntensityData;
@@ -69,11 +67,9 @@ namespace PREACT.Fire
                 }
             }
 
-            _cellsToIgnite = new Queue<FuelCell>();
-            _activeParticles = new Dictionary<int, FireParticle>();
-            _verticesToRemove = new Queue<FireParticle>();
+            _aliveParticles = new Queue<FireParticle>();
 
-            _cellsToIgnite.Enqueue(_fuelCells[200, 50]);
+            _fuelCells[200, 50].Ignite(0f, 0f);
 
             _done = false;            
             return;
@@ -105,7 +101,7 @@ namespace PREACT.Fire
                     Vector2int index = wuiIgnitionBorder[i] + NeighborIndices[j];
                     if (IsInside(_xDim, _yDim, index))
                     {
-                        _fuelCells[index.x, index.y].SchedulelIgnition(0f, 0f);
+                        _fuelCells[index.x, index.y].Ignite(0f, 0f);
                     }
                 }
             }          
@@ -162,6 +158,16 @@ namespace PREACT.Fire
         public static bool IsInside(int xDim, int yDim, Vector2int index)
         {
             if (index.x < 0 || index.x > xDim - 1 || index.y < 0 || index.y > yDim - 1)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsInside(double xPos, double yPos)
+        {
+            if (xPos < 0 || xPos > _landscapeData.GetLandscapeSizeX()  || yPos < 0 || yPos > _landscapeData.GetLandscapeSizeY())
             {
                 return false;
             }
@@ -287,19 +293,9 @@ namespace PREACT.Fire
             throw new System.NotImplementedException();
         }
 
-        public void AddCellToIgnite(FuelCell cell)
+        public void AddActiveFireParticle(FireParticle particle)
         {
-            _cellsToIgnite.Enqueue(cell);
-        }
-
-        public void AddActiveFireParticle(FireParticle vertex)
-        {
-            _activeParticles.Add(vertex.Index, vertex);
-        }
-
-        public void AddVertexToRemove(FireParticle vertex)
-        {
-            _verticesToRemove.Enqueue(vertex);
+            _aliveParticles.Enqueue(particle);
         }
 
         public override void Step(float currentTime, float deltaTime)
@@ -310,35 +306,30 @@ namespace PREACT.Fire
             }
 
             _internalDeltaTime = deltaTime;
-            //handle ignitions
-            while(_cellsToIgnite.Count > 0)
-            {
-                FuelCell f = _cellsToIgnite.Dequeue();
-                f.Ignite(_xDim, _yDim, _fuelCells, currentTime);
-                //for communicating with other simulation modules
-                _ignitedCellIndices.Add(f.Index);               
-            }
-            
+
             //step forward in time
-            //Parallel.ForEach(_activeVertices.Values, f => f.Step(currentTime, deltaTime, this));
-            foreach (KeyValuePair<int, FireParticle> fireParticle in _activeParticles)
+            Queue<FireParticle> stillAliveParticles = new Queue<FireParticle>(_aliveParticles.Count);//a reasonable guess it that particles die and gets created about the same rate?
+            while (_aliveParticles.Count > 0)
             {
-                fireParticle.Value.Step(currentTime, deltaTime, this);
+                FireParticle f = _aliveParticles.Dequeue();
+                f.Step(currentTime, deltaTime, this);
+                if(!f.Dead)
+                {
+                    stillAliveParticles.Enqueue(f);
+                }
             }
+            _aliveParticles = stillAliveParticles;
 
-            currentTime += deltaTime;
-
-            //remove all dead vertices
-            while (_verticesToRemove.Count > 0)
-            {
-                _activeParticles.Remove(_verticesToRemove.Dequeue().Index);
-            }
-
-            if (_activeParticles.Count == 0 && _cellsToIgnite.Count == 0)
+            if (_aliveParticles.Count == 0)
             {
                 _done = true;
-                Engine.Message(null, Engine.LogType.Log, "No more active fire particles left, stopping fire spread simulation after " + currentTime + " seconds.");
+                Engine.Message(null, Engine.LogType.Log, "No more active fire particles left, stopping fire spread simulation after " + (currentTime + deltaTime) + " seconds.");
             }
+        }
+
+        public void AddIgnitedCellIndex(Vector2int cellIndex)
+        {
+            _ignitedCellIndices.Add(cellIndex);
         }
 
         public override bool IsSimulationDone()

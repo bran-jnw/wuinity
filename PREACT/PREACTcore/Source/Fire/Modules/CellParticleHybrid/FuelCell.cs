@@ -1,5 +1,6 @@
 ﻿using PREACT.Math;
 using PREACT.Fire.Behave;
+using System.Collections.Generic;
 
 namespace PREACT.Fire
 {
@@ -21,9 +22,11 @@ namespace PREACT.Fire
         public Vector2int Index { get => _index; }
 
         public Vector3d IgnitionPoint;
-        private float _residualTime;
         private InitialFuelMoisture _moisture;
-        private int _activeVertexCount;
+        private float _timeOfArrival;
+        List<FireParticle> _fireParticles;
+
+        public float TimeOfArrival { get => _timeOfArrival; }
 
         public FuelCell(bool randomCenter, int xIndex, int yIndex, LandscapeData landscape, FuelModelSet fuelModelSet, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures)
         {
@@ -60,23 +63,8 @@ namespace PREACT.Fire
             }
 
             _maxROS = float.MinValue;
-            _activeVertexCount = 0;
             _rateOfSpreadIsSet = false;
             _ignited = false;
-        }
-
-        public void AddActiveVertex()
-        {
-            ++_activeVertexCount;
-        }
-
-        public void RemoveDeadVertex()
-        {
-            --_activeVertexCount;
-            if (_activeVertexCount < 1)
-            {
-
-            }
         }
 
         /// <summary>
@@ -87,17 +75,18 @@ namespace PREACT.Fire
         /// <param name="wuiArea"></param>
         /// <param name="surface"></param>
         /// <param name="cells"></param>
-        private void SpawnFireVertices(float currentTime)
+        private void SpawnFireVertices(float ignitionTime, float residualTime)
         {
             FuelCell[,] cells = _owner.GetCells();
+            _fireParticles = new List<FireParticle>();
             for (int i = 0; i < CellParticleHybrid.NeighborIndices.Length; ++i)
             {
                 Vector2int targetIndex = _index + CellParticleHybrid.NeighborIndices[i];
-                if (CellParticleHybrid.IsInside(_owner.GetCellCountX(), _owner.GetCellCountY(), targetIndex) && !cells[targetIndex.x, targetIndex.y]._dead)
+                if (CellParticleHybrid.IsInside(_owner.GetCellCountX(), _owner.GetCellCountY(), targetIndex) && !cells[targetIndex.x, targetIndex.y]._dead)// && !cells[targetIndex.x, targetIndex.y]._ignited)// TODO: think about this, connected to same check in particle Step(). 2. Needs to be gone, as earlier particle might ignite during this loop
                 {
-                    int particleIndex = _linearIndex * 8 + i; //assume at most 8 particles per cell
                     FuelCell targetCell = cells[targetIndex.x, targetIndex.y];
-                    FireParticle f = new FireParticle(this, targetCell, particleIndex, currentTime, _residualTime, _owner);                    
+                    FireParticle f = new FireParticle(this, targetCell, ignitionTime, residualTime, _owner); 
+                    _fireParticles.Add(f);
                 }
             }
         }
@@ -140,27 +129,35 @@ namespace PREACT.Fire
             return (float)BehaveUnits.SpeedUnits.fromBaseUnits(_surface.calculateSpreadRateAtVector(spreadDirection), CellParticleHybrid.WindSpeedUnits);
         }
 
-        bool _scheduleIgnition;
-        public float _timeOfArrival;
-        public void SchedulelIgnition(float timeOfArrival, float residualTime)
-        {
-            if (!_scheduleIgnition)
-            {
-                _scheduleIgnition = true;
-                _owner.AddCellToIgnite(this);
-            }
-            //we might be approached from more than one direction during one timestep, so take max residual time and min time of arrival
-            _timeOfArrival = Mathf.Min(_timeOfArrival, timeOfArrival);
-            _residualTime = Mathf.Max(_residualTime, residualTime);
-        }
-
-        public void Ignite(int xDim, int yDim, FuelCell[,] cells, float currentTime)
+        public void Ignite(float ignitionTime, float residualTime)
         {
             if (!_ignited)
             {
                 _ignited = true;
-                UpdateRateOfSpread();
-                SpawnFireVertices(currentTime);
+                _timeOfArrival = ignitionTime;
+                _owner.AddIgnitedCellIndex(_index);
+                UpdateRateOfSpread(); 
+                //only do compensation if time diff. is big enough
+                /*if(residualTime < 1.0)
+                {
+                    residualTime = 0;
+                }*/
+                SpawnFireVertices(ignitionTime, residualTime);
+            }   
+            
+            //after ignition another particle might show up during the same time step and would actually have arrived earlier, we then correct for this
+            if(ignitionTime < _timeOfArrival)
+            {
+                residualTime = _timeOfArrival - ignitionTime;
+                //if (residualTime >= 1.0)
+                //{
+                    for (int i = 0; i < _fireParticles.Count; ++i)
+                    {
+                        _fireParticles[i].UpdateIgnitionTime(ignitionTime);
+                        _fireParticles[i].Step(ignitionTime, residualTime, _owner);
+                    }
+                //}                
+                _timeOfArrival = ignitionTime;
             }
         }
     }
