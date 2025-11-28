@@ -85,79 +85,76 @@ namespace PREACT.Fire
                 if (CellParticleHybrid.IsInside(_owner.GetCellCountX(), _owner.GetCellCountY(), targetIndex) && !cells[targetIndex.x, targetIndex.y]._dead)// && !cells[targetIndex.x, targetIndex.y]._ignited)// TODO: think about this, connected to same check in particle Step(). 2. Needs to be gone, as earlier particle might ignite during this loop
                 {
                     FuelCell targetCell = cells[targetIndex.x, targetIndex.y];
-                    FireParticle f = new FireParticle(this, targetCell, ignitionTime, residualTime, _owner); 
+                    FireParticle f = new FireParticle(this, targetCell, ignitionTime, residualTime, _owner, i % 2 > 0); 
                     _fireParticles.Add(f);
                 }
             }
         }
 
-        public void UpdateRateOfSpread()
+        public void UpdateRateOfSpread(float currentTime)
         {
             //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
             double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
-            double midFlameWindspeed = 20;
-            double windDirection = 180;
-
-            _cellData.fuel_model = 1;
-            _cellData.slope = 0;
-            _cellData.aspect = 0;
+            WindData w = _owner.Simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
+            float windSPeed = w.speed;
+            double windDirection = w.direction;
 
             if (!_rateOfSpreadIsSet)
             {
                 _surface.updateSurfaceInputs(_cellData.fuel_model, _moisture.OneHour, _moisture.TenHour, _moisture.HundredHour, _moisture.LiveHerbaceous, _moisture.LiveWoody, CellParticleHybrid.MoistureUnits,
-                    midFlameWindspeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode, windDirection, CellParticleHybrid.WindAndSpreadOrientationMode, _cellData.slope, CellParticleHybrid.SlopeUnits, _cellData.aspect, _cellData.canopy_cover, CellParticleHybrid.CoverUnits, _cellData.crown_canopy_height, CellParticleHybrid.LengthUnits, crownRatio);
+                    windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode, windDirection, CellParticleHybrid.WindAndSpreadOrientationMode, _cellData.slope, CellParticleHybrid.SlopeUnits, _cellData.aspect, _cellData.canopy_cover, CellParticleHybrid.CoverUnits, _cellData.crown_canopy_height, CellParticleHybrid.LengthUnits, crownRatio);
                 _rateOfSpreadIsSet = true; ;
             }
             else
             {
                 //this should basically be all that is updated, maybe moisture
                 _surface.setWindDirection(windDirection);
-                _surface.setWindSpeed(midFlameWindspeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode);
+                _surface.setWindSpeed(windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode);
             }
 
             _surface.doSurfaceRunInDirectionOfMaxSpread();
             _owner.SetCellFirelineIntensity(_linearIndex, (float)_surface.getFirelineIntensity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter));
         }
 
-        public float GetSpreadRateInDirection(double spreadDirection)
+        public float GetSpreadRateInDirection(double spreadDirection, float currentTime)
         {
             if (!_rateOfSpreadIsSet)
             {
-                UpdateRateOfSpread();
+                UpdateRateOfSpread(currentTime);
             }
             //TODO: check unit and convert to m/s
             return (float)BehaveUnits.SpeedUnits.fromBaseUnits(_surface.calculateSpreadRateAtVector(spreadDirection), CellParticleHybrid.WindSpeedUnits);
         }
 
-        public void Ignite(float ignitionTime, float residualTime)
+        public void Ignite(float timeOfArrival, float residualTime)
         {
             if (!_ignited)
             {
                 _ignited = true;
-                _timeOfArrival = ignitionTime;
+                _timeOfArrival = timeOfArrival;
                 _owner.AddIgnitedCellIndex(_index);
-                UpdateRateOfSpread(); 
+                UpdateRateOfSpread(timeOfArrival); 
                 //only do compensation if time diff. is big enough
                 /*if(residualTime < 1.0)
                 {
                     residualTime = 0;
                 }*/
-                SpawnFireVertices(ignitionTime, residualTime);
+                SpawnFireVertices(timeOfArrival, residualTime);
             }   
             
             //after ignition another particle might show up during the same time step and would actually have arrived earlier, we then correct for this
-            if(ignitionTime < _timeOfArrival)
+            if(timeOfArrival < _timeOfArrival)
             {
-                residualTime = _timeOfArrival - ignitionTime;
+                residualTime = _timeOfArrival - timeOfArrival;
                 //if (residualTime >= 1.0)
                 //{
                     for (int i = 0; i < _fireParticles.Count; ++i)
                     {
-                        _fireParticles[i].UpdateIgnitionTime(ignitionTime);
-                        _fireParticles[i].Step(ignitionTime, residualTime, _owner);
+                        _fireParticles[i].UpdateIgnitionTime(timeOfArrival);
+                        _fireParticles[i].Step(timeOfArrival, residualTime, _owner);
                     }
                 //}                
-                _timeOfArrival = ignitionTime;
+                _timeOfArrival = timeOfArrival;
             }
         }
     }

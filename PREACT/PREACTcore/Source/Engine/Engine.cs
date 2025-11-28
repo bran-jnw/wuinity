@@ -19,7 +19,8 @@ namespace PREACT
 {    
     public class Engine
     {
-        private static Engine _ENGINE;
+        private static Engine _ENGINE; //used only for console messages
+        private EngineOutput _engineOutput;
         private IExternalManager _externalManager;
         private Simulation[] _simulations;
         private Simulation _mainSimulation; //this one talks to any visualizer         
@@ -31,7 +32,6 @@ namespace PREACT
         private WorkingData _workingData;
 
         public Simulation Simulation { get => _mainSimulation; }
-        //public PREACTScenario Scenario { get => _scenario; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
         public string WorkingFolder
@@ -68,6 +68,7 @@ namespace PREACT
         {
             //needed for proper reading of input files on all systems
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            _engineOutput = new EngineOutput(this);
             _dataStatus = new DataStatus();
             _output = new PREACTOutput();
             _workingData = new WorkingData();
@@ -141,8 +142,8 @@ namespace PREACT
             for (int i = 0; i < engineTask.NumberOfRuns; ++i)
             {
                 int simulationIndex = i + engineTask.SimulationIndexOffset;
-                _simulations[0] = new Simulation(this, _input, simulationIndex);
-                _mainSimulation = _simulations[0];
+                _mainSimulation = new Simulation(this, _input, simulationIndex);
+                _simulations[0] = _mainSimulation;
                 _mainSimulation.Run();
                 if(_mainSimulation.TrafficModule != null)
                 {
@@ -353,7 +354,7 @@ namespace PREACT
             if (actualRuns > 0)
             {
                 float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
-                SaveAverageCurve(averageCurve);
+                _engineOutput.SaveAverageCurve(averageCurve);
                 //plot results
                 double[] xData = new double[averageCurve.Length];
                 double[] yData = new double[averageCurve.Length];
@@ -362,7 +363,7 @@ namespace PREACT
                     xData[i] = averageCurve[i] / 3600.0f;
                     yData[i] = i + 1;
                 }
-                CreatePlotData(xData, yData);
+                _engineOutput.CreatePlotData(xData, yData);
 
                 if (convergedInSequence >= 10)
                 {
@@ -559,45 +560,7 @@ namespace PREACT
                     }
                 }
             }            
-        }
-
-        //TODO: these below here are misplaced, but need to figure out where they fit better
-        private void SaveAverageCurve(float[] data)
-        {
-            string[] output = new string[data.Length + 2];
-            output[0] = "Time [s],ArrivalIndex [-]";
-            output[1] = "0.0, 0";
-            for (int i = 0; i < data.Length; i++)
-            {
-                output[i + 2] = data[i].ToString() + "," + (i + 1).ToString();
-            }
-            string path = Path.Combine(OutputFolder, _input.Simulation.Name + "_traffic_average.csv");
-            File.WriteAllLines(path, output);
-        }
-
-        byte[] _plotBytes;
-        void CreatePlotData(double[] xData, double[] yData)
-        {
-            /*if (xData.Length > 0 && yData.Length > 0)
-            {
-                ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
-                timeTraffic.AddScatterLines(xData, yData);
-                timeTraffic.Title("Average cumulative arrival of cars");
-                timeTraffic.YLabel("Number of cars [-]");
-                timeTraffic.XLabel("Time [h]");
-                //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
-                byte[] byteData = timeTraffic.GetImageBytes();
-            }*/
-        }
-
-        /// <summary>
-        /// Returns bytes for bitmap to draw a plot of average curve for evacuation.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] GetArrivalPlotBytes()
-        {
-            return _plotBytes;
-        }        
+        } 
     }
 }
 

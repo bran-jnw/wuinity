@@ -139,7 +139,7 @@ namespace PREACT
             {
                 _state = SimulationState.Error;
                 return;
-            }
+            }        
 
             CreateSimulationModules();
             //when creating modules we migth have found an issue
@@ -457,10 +457,10 @@ namespace PREACT
             {
                 deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
-            _currentTime += deltaTime;
 
             //see if we are done or not
-            CheckCompletion();
+            _currentTime += deltaTime;
+            CheckCompletion();            
 
             if (_input.Simulation.RunFireModule)
             {
@@ -493,7 +493,7 @@ namespace PREACT
                 return;
             }
 
-            bool endTimeReached = CurrentTime <= _input.Simulation.MaxSimTime ? false : true;
+            bool endTimeReached = _input.Simulation.MaxSimTime - CurrentTime < 0.001f ? true : false;
 
             if(endTimeReached)
             {
@@ -515,7 +515,7 @@ namespace PREACT
 
                 if (pedestrianDone && trafficDone)
                 {
-                    Stop("Both pedestrian and traffic simulations are done, stopping as per user settings.", false);
+                    Stop("Both pedestrian and traffic simulations are completed, stopping as per user settings.", false);
                 }
             }
         }

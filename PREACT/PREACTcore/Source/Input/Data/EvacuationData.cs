@@ -24,6 +24,9 @@ namespace PREACT.IO
         {
             _simulationInput = simulationInput;
             _evacuationInput = evacuationInput;
+            ResponseCurves = new List<ResponseCurve>();
+            EvacuationDestinationInputs = new List<EvacuationDestinationInput>();
+            EvacuationGroups = new List<EvacuationGroup>();
         }
 
         //TODO: fix this getter, want to get rid of
@@ -61,17 +64,13 @@ namespace PREACT.IO
             success = false;
             Engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
             
-            if(_simulationInput.RunPedestrianModule)
-            {
-                //need goals and curves before can load groups
-                //need to load groups before indices
-                LoadResponseCurves(rootFolder, _evacuationInput.ResponseCurveFiles, out success);
-                LoadEvacuationDestinations(rootFolder, _evacuationInput.EvacuationDestinationFiles, out success);
-                LoadEvacGroupFiles(rootFolder, this, _evacuationInput.EvacuationGroupFiles, out success);
-                string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
-                LoadEvacGroupIndices(filePath, out success);
-                
-            }
+            //need goals and curves before can load groups
+            //need to load groups before indices
+            LoadResponseCurves(rootFolder, _evacuationInput.ResponseCurveFiles, out success);
+            LoadEvacuationDestinations(rootFolder, _evacuationInput.EvacuationDestinationFiles, out success);
+            LoadEvacGroupFiles(rootFolder, this, _evacuationInput.EvacuationGroupFiles, out success);
+            string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
+            LoadEvacGroupIndices(filePath, out success);
 
             success = true;
         }

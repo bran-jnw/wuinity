@@ -158,6 +158,10 @@ namespace PREACT.IO
                 Engine.Message(null, Engine.LogType.InputError, nameOfInput + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                 return null;
             }
+            else
+            {
+                newInput.Population = new PopulationInput();
+            }
             if (!success)
             {
                 return null;
@@ -193,6 +197,10 @@ namespace PREACT.IO
                 //critical
                 success = false;
                 Engine.Message(null, Engine.LogType.InputError, nameOfInput + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
+            }
+            else
+            {
+                newInput.Evacuation = new EvacuationInput(newInput.Simulation);
             }
             if (!success)
             {
@@ -299,6 +307,7 @@ namespace PREACT.IO
             else
             {
                 //does not matter
+                newInput.WUIShow = new WUIShowInput();
                 Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, using defaults (disabled).");
             }
             if (!success)

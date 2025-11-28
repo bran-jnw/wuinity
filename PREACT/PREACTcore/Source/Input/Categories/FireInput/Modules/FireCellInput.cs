@@ -22,7 +22,6 @@ namespace PREACT.IO
         public string WeatherFile = string.Empty;
         public string WindFile = string.Empty;
         public string IgnitionPointsFile = string.Empty;
-        public float WindMultiplier = 1f;
         public bool UseRandomIgnitionMap = false;
         public int RandomIgnitionPoints = 0;
         public bool UseInitialIgnitionMap = false;
@@ -152,17 +151,6 @@ namespace PREACT.IO
             if (!success)
             {
                 return newInput;
-            }
-
-            //not critical
-            nameOfInput = nameof(WindMultiplier);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                float.TryParse(userInput, out newInput.WindMultiplier);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             //not critical

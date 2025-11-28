@@ -60,9 +60,12 @@ namespace PREACT.IO
             nameOfInput = nameof(EvacuationDestinationFiles);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                string[] data = userInput.Split(',');
-                newInput.EvacuationDestinationFiles.AddRange(data);
+                string[] data = userInput.Split(',');                
                 PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
+                if(success)
+                {
+                    newInput.EvacuationDestinationFiles.AddRange(data);
+                }
             }
             else
             {
@@ -78,9 +81,12 @@ namespace PREACT.IO
             nameOfInput = nameof(EvacuationGroupFiles);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                string[] data = userInput.Split(',');
-                newInput.EvacuationGroupFiles.AddRange(data);
+                string[] data = userInput.Split(',');                
                 PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
+                if(success)
+                {
+                    newInput.EvacuationGroupFiles.AddRange(data);
+                }
             }
             else
             {
@@ -113,9 +119,12 @@ namespace PREACT.IO
             nameOfInput = nameof(ResponseCurveFiles);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                string[] data = userInput.Split(',');
-                newInput.ResponseCurveFiles.AddRange(data);
+                string[] data = userInput.Split(',');                
                 PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
+                if(success)
+                {
+                    newInput.ResponseCurveFiles.AddRange(data);
+                }
             }
             else
             {

@@ -217,7 +217,7 @@ namespace WUInity.Visualization
             return _localGPWTexture;
         }
 
-        public void SpawnEvacuationGoalMarkers(PREACT.IO.PREACTInput input, GameObject markerPrefab)
+        public void SpawnEvacuationGoalMarkers(PREACTInput input, GameObject markerPrefab)
         {
             if (_goalMarkers != null)
             {
@@ -229,6 +229,11 @@ namespace WUInity.Visualization
                     }
                 }
             }
+
+            if (input.Evacuation.Data.EvacuationDestinationInputs.Count == 0)
+            {
+                return;
+            }            
 
             _goalMarkers = new GameObject[input.Evacuation.Data.EvacuationDestinationInputs.Count];
             for (int i = 0; i < input.Evacuation.Data.EvacuationDestinationInputs.Count; i++)

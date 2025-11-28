@@ -34,6 +34,8 @@ namespace PREACT.Fire
         private bool _done;
         private LandscapeData _landscapeData;
 
+        public Simulation Simulation { get => _simulation; }
+
         public CellParticleHybrid(Simulation simulation, LandscapeData landscapeData, bool[] wuiArea, FuelModelInput fuelModelInput, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints) : base(simulation)
         {
             _landscapeData = landscapeData;
@@ -69,7 +71,7 @@ namespace PREACT.Fire
 
             _aliveParticles = new Queue<FireParticle>();
 
-            _fuelCells[200, 50].Ignite(0f, 0f);
+            _fuelCells[207, 203].Ignite(0f, 0f);
 
             _done = false;            
             return;

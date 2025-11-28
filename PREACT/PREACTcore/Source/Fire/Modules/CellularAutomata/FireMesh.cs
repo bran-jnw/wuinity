@@ -328,7 +328,7 @@ namespace PREACT.Fire
 
             //update time and wind for next time step. TODO: spread out the update over several frames
             timeSinceStart += dt;
-            _currentWindData = wind.GetWindDataAtTime((float)timeSinceStart, _simulation.Input.Fire);
+            _currentWindData = wind.GetWindDataAtTime((float)timeSinceStart);
             //TODO: only update if any input has changed, re-calculate spread rates
             UpdateCellSpreadRates();
 

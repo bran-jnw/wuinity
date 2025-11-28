@@ -71,7 +71,7 @@ namespace PREACT.Fire
             this.dataPoints = dataPoints;
         }
 
-        public WindData GetWindDataAtTime(float time, IO.FireInput fireInput)           
+        public WindData GetWindDataAtTime(float time)           
         {
             if(dataPoints.Length > 1 && (directionSpline == null || speedSpline == null || cloudSpline == null))
             {
@@ -83,10 +83,7 @@ namespace PREACT.Fire
             if(dataPoints.Length > 1)       
             {
                 w.direction = directionSpline.GetYValue(time);
-                if(fireInput.FireModule == IO.FireInput.FireModuleChoice.FireCell)
-                {
-                    w.speed = speedSpline.GetYValue(time) * fireInput.FireCellInput.WindMultiplier;
-                }                
+                w.speed = speedSpline.GetYValue(time);               
                 w.cloudCover = cloudSpline.GetYValue(time);
             }
 
@@ -115,15 +112,6 @@ namespace PREACT.Fire
                 cloud[i] = new Vector2(dataPoints[i].time, dataPoints[i].cloudCover);
             }
             cloudSpline = new CatmullRomSpline1D(cloud);
-        }
-
-        public static WindInput GetTemplate()                                           
-        {
-            WindData[] w = new WindData[2];
-            w[0] = new WindData(0f, 0f, 2f, 0f);
-            w[1] = w[0];
-            WindInput wI = new WindInput(w);
-            return wI;
         }
 
         public static WindInput LoadWindInputFile(string file, out bool success)

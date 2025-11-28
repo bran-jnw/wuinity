@@ -12,7 +12,7 @@ namespace WUInity.UI
 
         void OutputMenu()
         {
-            if(_engine.Simulation.State == Simulation.SimulationState.Error || _engine.Simulation.State == Simulation.SimulationState.Initializing)
+            if(_engine.Simulation == null || _engine.Simulation.State == Simulation.SimulationState.Error || _engine.Simulation.State == Simulation.SimulationState.Initializing)
             {
                 return;
             }
