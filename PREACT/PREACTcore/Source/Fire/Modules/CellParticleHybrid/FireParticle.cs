@@ -26,7 +26,9 @@ namespace PREACT.Fire
 
             Vector3d delta = _targetCell.IgnitionPoint - _localPosition;
             _spreadVector = delta.normalized;
-            _spreadDirection = (float)Vector3d.Angle(Vector3d.up, _spreadVector) * Mathd.Sign(Vector3d.Dot(Vector3d.right, _spreadVector)); //TODO: correct or should be "flat" (projected onto plane) angle?, and see if better way to determine sign
+            //TODO: correct or should be "flat" (projected onto plane) angle?, and see if better way to determine sign
+            //maybe use? https://stackoverflow.com/questions/14066933/direct-way-of-computing-the-clockwise-angle-between-two-vectors
+            _spreadDirection = (float)Vector3d.Angle(Vector3d.up, _spreadVector) * Mathd.Sign(Vector3d.Dot(Vector3d.right, _spreadVector)); 
             _distanceLeftToTarget = delta.magnitude;
 
             //these are the factors to compensate for the average distance being longer

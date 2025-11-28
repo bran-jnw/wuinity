@@ -1,9 +1,9 @@
 [Simulation]
-Name=Flat_west_wind
+Name=Flat_rotating_wind
 LowerLeftLatLon=39.409924,-105.104505
 DomainSize=10000,10000.0
 DeltaTime=1.0
-MaxSimTime=203000.0
+MaxSimTime=28800.0
 RunPedestrianModule=false
 RunTrafficModule=false
 RunFireModule=true
@@ -25,7 +25,7 @@ FuelModelsFile=default.fuel
 InitialFuelMoistureFile=default.fmc
 IgnitionPointsFile=example.ign
 WeatherFile=example.wtr
-WindFile=west_wind.wnd 
+WindFile=rotating_wind.wnd 
 UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
