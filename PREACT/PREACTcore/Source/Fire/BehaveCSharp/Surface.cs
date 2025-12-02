@@ -59,10 +59,10 @@ namespace PREACT.Fire.Behave
             return *this;
         }*/
 
-        void memberwiseCopyAssignment(Surface rhs)
+        public void memberwiseCopyAssignment(Surface rhs)
         {
-            surfaceInputs_ = rhs.surfaceInputs_;
-            surfaceFire_ = rhs.surfaceFire_;
+            surfaceInputs_.memberwiseCopyAssignment(rhs.surfaceInputs_);
+            surfaceFire_.memberwiseCopyAssignment( rhs.surfaceFire_);
             size_ = rhs.size_;
         }
 

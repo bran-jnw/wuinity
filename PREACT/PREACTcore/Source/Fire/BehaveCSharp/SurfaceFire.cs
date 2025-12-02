@@ -103,8 +103,7 @@ namespace PREACT.Fire.Behave
                 }
             return *this;
         }*/
-
-        void memberwiseCopyAssignment(SurfaceFire rhs)
+        public void memberwiseCopyAssignment(SurfaceFire rhs)
         {
             surfaceFireReactionIntensity_ = rhs.surfaceFireReactionIntensity_;
             surfaceFuelbedIntermediates_ = rhs.surfaceFuelbedIntermediates_;

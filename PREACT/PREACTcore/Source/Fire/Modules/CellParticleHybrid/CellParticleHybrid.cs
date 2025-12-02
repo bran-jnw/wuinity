@@ -17,14 +17,15 @@ namespace PREACT.Fire
         public static readonly Vector2int[] NeighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
         public static bool inverseSpreadDirection = false;
 
-        public static readonly TwoFuelModelsMethod TwoFuelModelsMethod = TwoFuelModelsMethod.NoMethod;
-        public static readonly BehaveUnits.MoistureUnits.MoistureUnitsEnum MoistureUnits = BehaveUnits.MoistureUnits.MoistureUnitsEnum.Percent;
-        public static readonly WindHeightInputMode WindHeightInputMode = WindHeightInputMode.TenMeter;
-        public static readonly BehaveUnits.SlopeUnits.SlopeUnitsEnum SlopeUnits = BehaveUnits.SlopeUnits.SlopeUnitsEnum.Degrees;
-        public static readonly BehaveUnits.CoverUnits.CoverUnitsEnum CoverUnits = BehaveUnits.CoverUnits.CoverUnitsEnum.Fraction;
-        public static readonly BehaveUnits.LengthUnits.LengthUnitsEnum LengthUnits = BehaveUnits.LengthUnits.LengthUnitsEnum.Meters;
-        public static readonly BehaveUnits.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveUnits.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
-        public static readonly WindAndSpreadOrientationMode WindAndSpreadOrientationMode = WindAndSpreadOrientationMode.RelativeToNorth;
+        public static readonly BehaveCore.TwoFuelModelsMethod.TwoFuelModelsMethodEnum TwoFuelModelsMethod = BehaveCore.TwoFuelModelsMethod.TwoFuelModelsMethodEnum.NoMethod;
+        public static readonly BehaveCore.FractionUnits.FractionUnitsEnum MoistureUnits = BehaveCore.FractionUnits.FractionUnitsEnum.Percent;
+        public static readonly BehaveCore.WindHeightInputMode.WindHeightInputModeEnum WindHeightInputMode = BehaveCore.WindHeightInputMode.WindHeightInputModeEnum.TenMeter;
+        public static readonly BehaveCore.SlopeUnits.SlopeUnitsEnum SlopeUnits = BehaveCore.SlopeUnits.SlopeUnitsEnum.Degrees;
+        public static readonly BehaveCore.FractionUnits.FractionUnitsEnum FractionUnits = BehaveCore.FractionUnits.FractionUnitsEnum.Fraction;
+        public static readonly BehaveCore.LengthUnits.LengthUnitsEnum LengthUnits = BehaveCore.LengthUnits.LengthUnitsEnum.Meters;
+        public static readonly BehaveCore.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
+        public static readonly BehaveCore.WindAndSpreadOrientationMode.WindAndSpreadOrientationModeEnum WindAndSpreadOrientationMode = BehaveCore.WindAndSpreadOrientationMode.WindAndSpreadOrientationModeEnum.RelativeToNorth;
+        public static readonly BehaveCore.DensityUnits.DensityUnitsEnum DensityUnits = BehaveCore.DensityUnits.DensityUnitsEnum.KilogramsPerCubicMeter;
 
         private Queue<FireParticle> _aliveParticles;
         private int _xDim, _yDim;
@@ -33,6 +34,7 @@ namespace PREACT.Fire
         private List<Vector2int> _ignitedCellIndices;
         private bool _done;
         private LandscapeData _landscapeData;
+        private BehaveCore.FuelModels _fuelModels;
 
         public Simulation Simulation { get => _simulation; }
 
@@ -49,14 +51,14 @@ namespace PREACT.Fire
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea2D);
 
-            FuelModelSet fuelModelSet = new FuelModelSet();
-            if (fuelModelInput != null)
+            _fuelModels = new BehaveCore.FuelModels();
+            /*if (fuelModelInput != null)
             {
                 for (int i = 0; i < fuelModelInput.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(fuelModelInput.Fuels[i]);
+                    fuelModels.setFuelModelRecord(fuelModelInput.Fuels[i]);
                 }
-            }
+            }*/
             _fuelCells = new FuelCell[_xDim, _yDim];
             _ignitedCellIndices = new List<Vector2int>();
 
@@ -65,7 +67,7 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < _xDim; ++x)
                 {
-                    _fuelCells[x, y] = new FuelCell(true, x, y, landscapeData, fuelModelSet, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture);
+                    _fuelCells[x, y] = new FuelCell(true, x, y, landscapeData, _fuelModels, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture);
                 }
             }
 

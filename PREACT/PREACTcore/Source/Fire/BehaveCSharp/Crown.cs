@@ -174,14 +174,15 @@ namespace PREACT.Fire.Behave
             surfaceFuel_.setUserProvidedWindAdjustmentFactor(windAdjustmentFactor);
 
             // Step 2: Create the crown fuel model (fire behavior fuel model 10)
-            surfaceFuel_.setFuelModelNumber(10); // Set the fuel model used to fuel model 10
-            surfaceFuel_.setSlope(0.0, SlopeUnits.SlopeUnitsEnum.Degrees); // Slope is assumed to be zero
-            surfaceFuel_.setWindAndSpreadOrientationMode(WindAndSpreadOrientationMode.RelativeToUpslope);
-            surfaceFuel_.setWindDirection(0.0); // Wind direction is assumed to be upslope
+            crownFuel_.memberwiseCopyAssignment(surfaceFuel_);
+            crownFuel_.setFuelModelNumber(10); // Set the fuel model used to fuel model 10
+            crownFuel_.setSlope(0.0, SlopeUnits.SlopeUnitsEnum.Degrees); // Slope is assumed to be zero
+            crownFuel_.setWindAndSpreadOrientationMode(WindAndSpreadOrientationMode.RelativeToUpslope);
+            crownFuel_.setWindDirection(0.0); // Wind direction is assumed to be upslope
 
             // Step 3: Determine crown fire behavior
-            surfaceFuel_.doSurfaceRunInDirectionOfMaxSpread();
-            crownFireSpreadRate_ = 3.34 * surfaceFuel_.getSpreadRate(SpeedUnits.SpeedUnitsEnum.FeetPerMinute); // Rothermel 1991
+            crownFuel_.doSurfaceRunInDirectionOfMaxSpread();
+            crownFireSpreadRate_ = 3.34 * crownFuel_.getSpreadRate(SpeedUnits.SpeedUnitsEnum.FeetPerMinute); // Rothermel 1991
 
             // Step 4: Calculate remaining crown fire characteristics
             calculateCrownFuelLoad();
@@ -229,7 +230,7 @@ namespace PREACT.Fire.Behave
             surfaceFireEccentricity_ = surfaceFuel_.getFireEccentricity();
 
             // Step 2: Create the crown fuel model (fire behavior fuel model 10)
-            crownFuel_ = surfaceFuel_;
+            crownFuel_.memberwiseCopyAssignment(surfaceFuel_);
             crownFuel_.setFuelModelNumber(10); // Set the crown fuel model used to fuel model 10
             crownFuel_.setUserProvidedWindAdjustmentFactor(0.4); // Wind adjustment factor is assumed to be 0.4
             crownFuel_.setWindAdjustmentFactorCalculationMethod(WindAdjustmentFactorCalculationMethod.UserInput);

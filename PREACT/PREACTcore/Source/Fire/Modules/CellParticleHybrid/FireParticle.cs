@@ -12,7 +12,6 @@ namespace PREACT.Fire
         private bool _dead;
         private double _distanceLeftToTarget;
         private float _ignitionTime;
-        private float _distanceCorrection;
 
         public bool Dead { get => _dead; }
 
@@ -32,11 +31,12 @@ namespace PREACT.Fire
             _distanceLeftToTarget = delta.magnitude;
 
             //these are the factors to compensate for the average distance being longer
-            _distanceCorrection = 1.088f;
+            float distanceCorrection = 1.088f;
             if (diagonal)
             {
-                _distanceCorrection = 1.042f;
+                distanceCorrection = 1.042f;
             }
+            _distanceLeftToTarget /= distanceCorrection;
 
             if (CellParticleHybrid.inverseSpreadDirection)
             {
@@ -75,7 +75,7 @@ namespace PREACT.Fire
             {
                 FuelCell cell = sim.GetCell(_localPosition);                
                 _currentCell = cell;
-                float spreadRate = _distanceCorrection * _currentCell.GetSpreadRateInDirection(_spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?
+                float spreadRate = _currentCell.GetSpreadRateInDirection(_spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?
                 if (spreadRate > 0)
                 {
                     double delta = deltaTime * spreadRate;

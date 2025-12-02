@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <None Update="ThirdParty\Behave\x64\Behave.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ThirdParty\Behave\x64\BehaveCore.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -16,8 +16,9 @@ namespace PREACT.Fire
         private CellParticleHybrid _owner;
         private bool _rateOfSpreadIsSet;
 
-        Surface _surface;
-        Crown _crownFire;
+        //Surface _surfaceOnly;
+        //Crown _crownAndSurface;
+        BehaveCore.Crown _crownBehave;
 
         public Vector2int Index { get => _index; }
 
@@ -25,20 +26,25 @@ namespace PREACT.Fire
         private InitialFuelMoisture _moisture;
         private float _timeOfArrival;
         List<FireParticle> _fireParticles;
+        double _forwardSpreadRate;
+        double _directionOfMaxSpread;
+        double _eccentricity;
+
 
         public float TimeOfArrival { get => _timeOfArrival; }
 
-        public FuelCell(bool randomCenter, int xIndex, int yIndex, LandscapeData landscape, FuelModelSet fuelModelSet, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures)
+        public FuelCell(bool randomCenter, int xIndex, int yIndex, LandscapeData landscape, BehaveCore.FuelModels fuelModels, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures)
         {
             _owner = owner;
             _index = new Vector2int(xIndex, yIndex);
+            _linearIndex = xIndex + yIndex * xDim;
             _cellData = landscape.GetCellData(_index.x, _index.y);
             _cellSize = landscape.RasterCellResolutionX;
             _moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
-            _linearIndex = xIndex + yIndex * xDim;
-            _surface = new Surface(fuelModelSet);
-            _crownFire = new Crown(fuelModelSet);
 
+            //_surfaceOnly = new Surface(fuelModels);
+            //_crownAndSurface = new Crown(fuelModels);
+            _crownBehave = new BehaveCore.Crown(fuelModels);
 
             if (randomCenter)
             {
@@ -56,12 +62,10 @@ namespace PREACT.Fire
             }
 
             _dead = false;
-            if (wuiArea[_index.x, _index.y] || _surface.isAllFuelLoadZero(_cellData.fuel_model))
+            if (wuiArea[_index.x, _index.y] || _crownBehave.isAllFuelLoadZero(_cellData.fuel_model))
             {
                 _dead = true;
-                return;
             }
-
             _maxROS = float.MinValue;
             _rateOfSpreadIsSet = false;
             _ignited = false;
@@ -94,36 +98,88 @@ namespace PREACT.Fire
         public void UpdateRateOfSpread(float currentTime)
         {
             //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
-            double crownRatio = 1.5; //TODO: how to get this data? LCP does not seem to carry it
+            double crownRatio = 1.0; //This can be whatever as Behave clauclates it internally each time anyway, so not sure why it is an input
             WindData w = _owner.Simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
             float windSPeed = w.speed;
             double windDirection = w.direction;
+            double moistureFoliar = 0;
 
             if (!_rateOfSpreadIsSet)
             {
-                _surface.updateSurfaceInputs(_cellData.fuel_model, _moisture.OneHour, _moisture.TenHour, _moisture.HundredHour, _moisture.LiveHerbaceous, _moisture.LiveWoody, CellParticleHybrid.MoistureUnits,
-                    windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode, windDirection, CellParticleHybrid.WindAndSpreadOrientationMode, _cellData.slope, CellParticleHybrid.SlopeUnits, _cellData.aspect, _cellData.canopy_cover, CellParticleHybrid.CoverUnits, _cellData.crown_canopy_height, CellParticleHybrid.LengthUnits, crownRatio);
-                _rateOfSpreadIsSet = true; ;
+                /*_surfaceOnly.updateSurfaceInputs(_cellData.fuel_model, _moisture.OneHour, _moisture.TenHour, _moisture.HundredHour, _moisture.LiveHerbaceous, _moisture.LiveWoody, CellParticleHybrid.MoistureUnits,
+                    windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode, windDirection, CellParticleHybrid.WindAndSpreadOrientationMode, _cellData.slope, CellParticleHybrid.SlopeUnits, 
+                    _cellData.aspect, _cellData.canopy_cover, CellParticleHybrid.CoverUnits, _cellData.crown_canopy_height, CellParticleHybrid.LengthUnits, crownRatio);
+
+                _crownAndSurface.updateCrownInputs(_cellData.fuel_model, _moisture.OneHour, _moisture.TenHour, _moisture.HundredHour, _moisture.LiveHerbaceous, _moisture.LiveWoody, moistureFoliar, CellParticleHybrid.MoistureUnits,
+                    windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode, windDirection, CellParticleHybrid.WindAndSpreadOrientationMode, _cellData.slope, CellParticleHybrid.SlopeUnits,
+                    _cellData.aspect, _cellData.canopy_cover, CellParticleHybrid.CoverUnits, _cellData.crown_canopy_height, _cellData.crown_base, CellParticleHybrid.LengthUnits, crownRatio, _cellData.crown_bulk_density, CellParticleHybrid.DensityUnits);*/
+
+                _crownBehave.updateCrownInputs(_cellData.fuel_model, _moisture.OneHour, _moisture.TenHour, _moisture.HundredHour, _moisture.LiveHerbaceous, _moisture.LiveWoody, moistureFoliar, CellParticleHybrid.MoistureUnits,
+                    windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode, windDirection, CellParticleHybrid.WindAndSpreadOrientationMode, _cellData.slope, CellParticleHybrid.SlopeUnits,
+                    _cellData.aspect, _cellData.canopy_cover, CellParticleHybrid.FractionUnits, _cellData.crown_canopy_height, _cellData.crown_base, CellParticleHybrid.LengthUnits, crownRatio, CellParticleHybrid.FractionUnits, _cellData.crown_bulk_density, CellParticleHybrid.DensityUnits);
+
+                _rateOfSpreadIsSet = true;
             }
             else
             {
-                //this should basically be all that is updated, maybe moisture
-                _surface.setWindDirection(windDirection);
-                _surface.setWindSpeed(windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode);
+                //this should basically be all that is updated after intitial set, maybe moisture
+                /*_surfaceOnly.setWindDirection(windDirection);
+                _surfaceOnly.setWindSpeed(windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode);*/
+                _crownBehave.setWindDirection(windDirection);
+                _crownBehave.setWindSpeed(windSPeed, CellParticleHybrid.WindSpeedUnits, CellParticleHybrid.WindHeightInputMode);
             }
 
-            _surface.doSurfaceRunInDirectionOfMaxSpread();
-            _owner.SetCellFirelineIntensity(_linearIndex, (float)_surface.getFirelineIntensity(BehaveUnits.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter));
+            _crownBehave.doCrownRunRothermel();
+            _forwardSpreadRate = _crownBehave.getFinalSpreadRate(BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond);
+            _eccentricity = _crownBehave.getFireEccentricity();
+            _directionOfMaxSpread = _crownBehave.getDirectionOfMaxSpread();
+            _owner.SetCellFirelineIntensity(_linearIndex, (float)_crownBehave.getFinalFirelineIntesity(BehaveCore.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter));
         }
 
+        /// <summary>
+        /// Ported from Behave as Crown does not expose this.
+        /// </summary>
+        /// <param name="directionOfInterest"></param>
+        /// <returns></returns>
+        private double CalculateSpreadRateInDirection(double directionOfInterest)
+        {
+            double rosDirection = _forwardSpreadRate;
+            if (_forwardSpreadRate != 0.0) // if forward spread rate is not zero
+            {
+                // Calculate the fire spread rate in this azimuth
+                // if it deviates more than a tenth degree from the maximum azimuth
+
+                // Calculate beta: the angle between the direction of max spread and the direction of interest
+                double beta = Mathd.Abs(_directionOfMaxSpread - directionOfInterest);
+
+                // Calculate the fire spread rate in this azimuth
+                // if it deviates more than a tenth degree from the maximum azimuth
+                if (beta > 180.0)
+                {
+                    beta = (360.0 - beta);
+                }
+                if (Mathd.Abs(beta) > 0.1)
+                {
+                    double radians = beta * Mathd.PI / 180.0;
+                    rosDirection = _forwardSpreadRate * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
+                }
+            }
+            return rosDirection;
+        }
+
+        /// <summary>
+        /// Returns spread rate in meters per second in direction of interest.
+        /// </summary>
+        /// <param name="spreadDirection"></param>
+        /// <param name="currentTime"></param>
+        /// <returns></returns>
         public float GetSpreadRateInDirection(double spreadDirection, float currentTime)
         {
             if (!_rateOfSpreadIsSet)
             {
                 UpdateRateOfSpread(currentTime);
             }
-            //TODO: check unit and convert to m/s
-            return (float)BehaveUnits.SpeedUnits.fromBaseUnits(_surface.calculateSpreadRateAtVector(spreadDirection), CellParticleHybrid.WindSpeedUnits);
+            return (float)CalculateSpreadRateInDirection(spreadDirection);
         }
 
         public void Ignite(float timeOfArrival, float residualTime)
