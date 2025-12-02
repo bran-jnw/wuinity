@@ -12,111 +12,22 @@ using PREACT.Math;
 namespace PREACT.Fire
 {
     [System.Serializable]                           
-    public struct IgnitionPoint
+    public struct IgnitionPointInput
     {
-        public Vector2d LatLong;                    
-        public float IgnitionTime;                     
+        public Vector2d LatLon;                    
+        public float IgnitionTime;           
 
-        private int x;
-        private int y;
-
-        private bool _hasBeenIgnited;
-
-        public int GetX()                           
+        public IgnitionPointInput(Vector2d latLong, float ignitionTime)    
         {
-            return x;
-        }
-
-        public int GetY()
-        {
-            return y;
-        }
-
-        public bool HasBeenIgnited()
-        {
-            return _hasBeenIgnited;
-        }
-
-        public void MarkAsIgnited()
-        {
-            _hasBeenIgnited = true;
-        }
-
-        /// <summary>
-        /// Only used for testing, creates ignition point directly on mesh
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        public IgnitionPoint(int x, int y, float ignitionTime)    
-        {
-            this.x = x;
-            this.y = y;
+            this.LatLon = latLong;
             this.IgnitionTime = ignitionTime;
-
-            LatLong = Vector2d.zero;
-
-            _hasBeenIgnited = false;
         }
 
-        public IgnitionPoint(Vector2d latLong, float ignitionTime)    
+        public IgnitionPointInput(double lat, double lon, float ignitionTime)
         {
-            this.LatLong = latLong;
-            x = -1;
-            y = -1;
+            this.LatLon = new Vector2d(lat, lon);
             this.IgnitionTime = ignitionTime;
-
-            _hasBeenIgnited = false;
         }
-
-        /// <summary>
-        /// Used when creating something dynamically during runtime.
-        /// </summary>
-        /// <param name="latLong"></param>
-        /// <param name="mesh"></param>
-        public IgnitionPoint(Simulation simulation, Vector2d latLong, FireMesh mesh, float ignitionTime)      
-        {
-            this.LatLong = latLong;
-
-            Vector2d pos = simulation.GetSimulationPosition(latLong);
-
-            x = (int)(pos.x / mesh._cellSize.x);
-            y = (int)(pos.y / mesh._cellSize.y);
-
-            this.IgnitionTime = ignitionTime;
-
-            _hasBeenIgnited = false;
-        }
-
-        /// <summary>
-        /// Called when starting fire since we only specify lat/long in input file
-        /// </summary>
-        /// <param name="mesh"></param>
-        public void CalculateMeshIndex(Simulation simulation, FireMesh mesh)        
-        {
-            if(x < 0 && y < 0)
-            {
-                Vector2d pos = simulation.GetSimulationPosition(LatLong);
-
-                x = (int)(pos.x / mesh._cellSize.x);
-                y = (int)(pos.y / mesh._cellSize.y);
-            }            
-        }
-
-        public bool IsInsideFire(Vector2int cells)                  
-        {
-            if (x >= 0 && x < cells.x && y >= 0 && y < cells.y)     
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /*public static IgnitionPoint[] GetDefault()           
-        {
-            IgnitionPoint[] ignitions = new IgnitionPoint[1];                   
-            ignitions[0] = new IgnitionPoint(new Vector2d(39.479633, -105.037355), 0.0f); 
-            return ignitions;
-        }*/
 
         /// <summary>
         /// Tries to load ignition points froma file defined in the general input file.
@@ -124,11 +35,11 @@ namespace PREACT.Fire
         /// Sends message to the WUI_LOG to inform the user.
         /// </summary>
         /// <returns></returns>
-        public static IgnitionPoint[] LoadIgnitionPointsFile(string path, out bool success)
+        public static IgnitionPointInput[] LoadIgnitionPointsFile(string path, out bool success)
         {
             success = false;
-            IgnitionPoint[] result = null;
-            List<IgnitionPoint> ignitionPoints= new List<IgnitionPoint>();
+            IgnitionPointInput[] result = null;
+            List<IgnitionPointInput> ignitionPoints= new List<IgnitionPointInput>();
             
             bool fileExists = File.Exists(path);
             if (fileExists)
@@ -140,16 +51,16 @@ namespace PREACT.Fire
                     string[] data = dataLines[j].Split(',');
                     if (data.Length >= 3)
                     {
-                        double lati, longi;
+                        double lat, lon;
                         float ignitionTime;
 
-                        bool b1 = double.TryParse(data[0], out lati);
-                        bool b2 = double.TryParse(data[1], out longi);
+                        bool b1 = double.TryParse(data[0], out lat);
+                        bool b2 = double.TryParse(data[1], out lon);
                         bool b3 = float.TryParse(data[2], out ignitionTime);
 
                         if (b1 && b2 && b3)
                         {
-                            IgnitionPoint iP = new IgnitionPoint(new Vector2d(lati, longi), ignitionTime);
+                            IgnitionPointInput iP = new IgnitionPointInput(lat, lon, ignitionTime);
                             ignitionPoints.Add(iP);
                         }
                     }

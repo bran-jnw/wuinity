@@ -17,7 +17,7 @@ namespace PREACT.IO
     {
         private LandscapeData _lcpData;
         private FuelModelInput _fuelModelsData;
-        private IgnitionPoint[] _ignitionPoints;
+        private IgnitionPointInput[] _ignitionPoints;
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
         private WeatherInput _weatherInput;
         private WindInput _windInput;
@@ -30,7 +30,7 @@ namespace PREACT.IO
                
         public LandscapeData LCPData { get => _lcpData; }        
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
-        public IgnitionPoint[] IgnitionPoints { get => _ignitionPoints; }       
+        public IgnitionPointInput[] IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }       
         public WeatherInput WeatherInput { get => _weatherInput; }       
         public WindInput WindInput { get => _windInput; }        
@@ -139,7 +139,7 @@ namespace PREACT.IO
 
         public void LoadIgnitionPoints(FireInput fireInput, string filePath, bool updateInput, out bool success)
         {
-            _ignitionPoints = IgnitionPoint.LoadIgnitionPointsFile(filePath, out success);
+            _ignitionPoints = IgnitionPointInput.LoadIgnitionPointsFile(filePath, out success);
             if (success && updateInput)
             {
                 fireInput.FireCellInput.IgnitionPointsFile = Path.GetFileName(filePath);

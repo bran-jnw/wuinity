@@ -16,7 +16,7 @@ namespace PREACT.Fire
     {
         Vector2int _cellCount;                                
         public FireCellInput.SpreadModeEnum spreadMode;                               
-        public IgnitionPoint[] ignitionPoints;                
+        public IgnitionPointInput[] ignitionPoints;                
         FireCell[] _fireCells;                                
         public Vector2d _cellSize;
         float cellArea;
@@ -72,7 +72,7 @@ namespace PREACT.Fire
             this.ignitionPoints = ignitionPoints;
         }*/
 
-        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints) : base(simulation)        
+        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPointInput[] ignitionPoints) : base(simulation)        
         {
 
             this.lcpData = lcpData;
@@ -389,7 +389,7 @@ namespace PREACT.Fire
             {
                 for (int i = 0; i < ignitionPoints.Length; ++i)
                 {
-                    if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
+                    /*if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
                     {
                         ignitionPoints[i].CalculateMeshIndex(_simulation, this);
                         if (ignitionPoints[i].IsInsideFire(_cellCount))
@@ -404,7 +404,7 @@ namespace PREACT.Fire
                             Engine.Message(null, Engine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
                         }
                         ++activatedIgnitions;
-                    }
+                    }*/
                 }
 
                 if (activatedIgnitions == ignitionPoints.Length)

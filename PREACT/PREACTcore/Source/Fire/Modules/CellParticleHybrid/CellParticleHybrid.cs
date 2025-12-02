@@ -38,7 +38,7 @@ namespace PREACT.Fire
 
         public Simulation Simulation { get => _simulation; }
 
-        public CellParticleHybrid(Simulation simulation, LandscapeData landscapeData, bool[] wuiArea, FuelModelInput fuelModelInput, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPoint[] ignitionPoints) : base(simulation)
+        public CellParticleHybrid(Simulation simulation, LandscapeData landscapeData, bool[] wuiArea, FuelModelInput fuelModelInput, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPointInput[] ignitionPoints) : base(simulation)
         {
             _landscapeData = landscapeData;
             _originOffset = landscapeData.OriginOffset;
@@ -51,6 +51,7 @@ namespace PREACT.Fire
 
             List<Vector2int> wuiIgnitionBorder = GetWUIEdgeCellIndices(wuiArea2D);
 
+            //need to keep this in memory
             _fuelModels = new BehaveCore.FuelModels();
             /*if (fuelModelInput != null)
             {
@@ -71,44 +72,48 @@ namespace PREACT.Fire
                 }
             }
 
-            _aliveParticles = new Queue<FireParticle>();
+            _aliveParticles = new Queue<FireParticle>();            
 
-            _fuelCells[207, 203].Ignite(0f, 0f);
+            _done = false;      
 
-            _done = false;            
-            return;
-
-            for (int i = 0; i < ignitionPoints.Length; ++i)
+            if(!inverseSpreadDirection)
             {
-                if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= 0)
+                for (int i = 0; i < ignitionPoints.Length; ++i)
                 {
-                    /*ignitionPoints[i].CalculateMeshIndex(_simulation, this);
-                    if (ignitionPoints[i].IsInsideFire(_cellCount))
+                    if (ignitionPoints[i].IgnitionTime <= 0)
                     {
-                        int x = ignitionPoints[i].GetX();
-                        int y = ignitionPoints[i].GetY();
-                        FireCell f = _fireCells[GetCellIndex(x, y)];
-                        f.Ignite(currentTime);
-                        activeCells.Add(f);
-                        ignitionPoints[i].MarkAsIgnited();
-
-                        Engine.Message(null, Engine.LogType.Log, " Ignition started in cell " + x + ", " + y + " which has fuel model number " + f.GetFuelModelNumber());
-                    }*/
-                }
-            }
-            return;
-            //initial ignition
-            for (int i = 0; i < wuiIgnitionBorder.Count; ++i)
-            {
-                for (int j = 0; j < NeighborIndices.Length; ++j)
-                {
-                    Vector2int index = wuiIgnitionBorder[i] + NeighborIndices[j];
-                    if (IsInside(_xDim, _yDim, index))
-                    {
-                        _fuelCells[index.x, index.y].Ignite(0f, 0f);
+                        IgniteAtLatLon(ignitionPoints[i].LatLon, 0f);
                     }
                 }
-            }          
+            }
+            else
+            {
+                //initial ignition backwards spread is the wui area border
+                for (int i = 0; i < wuiIgnitionBorder.Count; ++i)
+                {
+                    for (int j = 0; j < NeighborIndices.Length; ++j)
+                    {
+                        Vector2int index = wuiIgnitionBorder[i] + NeighborIndices[j];
+                        if (IsInside(_xDim, _yDim, index))
+                        {
+                            _fuelCells[index.x, index.y].Ignite(0f, 0f);
+                        }
+                    }
+                }
+            }                   
+        }
+
+        private void IgniteAtLatLon(Vector2d latLon, float currentTime)
+        {
+            Vector2d pos = _simulation.GetSimulationPosition(latLon);
+            pos += _originOffset;
+            int xIndex = (int)(_landscapeData.GetCellCountX() * pos.x / _landscapeData.GetLandscapeSizeX());
+            int yIndex = (int)(_landscapeData.GetCellCountY() * pos.y / _landscapeData.GetLandscapeSizeY());
+
+            if(IsInside(xIndex, yIndex))
+            {
+                _fuelCells[xIndex, yIndex].Ignite(currentTime, 0f);
+            }
         }
 
         public FuelCell[,] GetCells()
