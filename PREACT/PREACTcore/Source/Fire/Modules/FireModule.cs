@@ -50,7 +50,6 @@ namespace PREACT.Fire
         /// <param name="latLong"></param>
         /// <returns></returns>
         public abstract FireCellState GetFireCellState(Vector2d latLong);
-        public abstract WindData GetCurrentWindData();
     }
 }
 

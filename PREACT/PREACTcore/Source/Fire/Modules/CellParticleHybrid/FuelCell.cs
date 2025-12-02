@@ -133,7 +133,9 @@ namespace PREACT.Fire
             _forwardSpreadRate = _crownBehave.getFinalSpreadRate(BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond);
             _eccentricity = _crownBehave.getFireEccentricity();
             _directionOfMaxSpread = _crownBehave.getDirectionOfMaxSpread();
-            _owner.SetCellFirelineIntensity(_linearIndex, (float)_crownBehave.getFinalFirelineIntesity(BehaveCore.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter));
+
+            float firelineIntensity = (float)_crownBehave.getFinalFirelineIntesity(BehaveCore.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter);
+            _owner.UpdateCellData(_index, _linearIndex, firelineIntensity, (float)_forwardSpreadRate);
         }
 
         /// <summary>
@@ -212,6 +214,8 @@ namespace PREACT.Fire
                 //}                
                 _timeOfArrival = timeOfArrival;
             }
+
+            _owner.SetTimeOfArrival(_linearIndex, timeOfArrival);
         }
     }
 }

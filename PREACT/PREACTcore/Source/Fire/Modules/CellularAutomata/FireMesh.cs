@@ -548,11 +548,6 @@ namespace PREACT.Fire
             return (float)_cellSize.y;
         }
 
-        public override WindData GetCurrentWindData()
-        {
-            return _currentWindData;
-        }
-
         public override List<Vector2int> GetIgnitedFireCells()
         {
             return _ignitedCells;

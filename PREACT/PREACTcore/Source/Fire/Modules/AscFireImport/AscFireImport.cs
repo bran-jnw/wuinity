@@ -326,11 +326,6 @@ namespace PREACT.Fire
             return _activeCells;
         }
 
-        public override WindData GetCurrentWindData()
-        {
-            return new WindData(0f, 150f, 20f, 0f);
-        }
-
         public override void Stop()
         {
             //throw new System.NotImplementedException();

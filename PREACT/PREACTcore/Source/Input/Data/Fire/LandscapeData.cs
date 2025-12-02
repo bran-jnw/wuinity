@@ -156,7 +156,7 @@ namespace PREACT.Fire
 		public LandscapeData(string filePath, Vector2d simulationUtmOrigin)					
 		{
 			bool readGeoTIFF = false;
-            if (filePath.EndsWith("tif") || filePath.EndsWith("tiff"))
+            if (filePath.ToLower().EndsWith("tif") || filePath.EndsWith("tiff"))
 			{
 				readGeoTIFF = true;
 			}
@@ -383,7 +383,7 @@ namespace PREACT.Fire
 		}
 
 		/// <summary>
-		/// In meters.
+		/// Entire landscape dimensions in meters.
 		/// </summary>
 		/// <returns></returns>
         public Vector2d GetSize()
@@ -394,19 +394,19 @@ namespace PREACT.Fire
 			return new Vector2d(x, y);
         }
 
-		/// <summary>
-		/// In meters.
-		/// </summary>
-		/// <returns></returns>
+        /// <summary>
+        /// Entire landscape dimensions in meters.
+        /// </summary>
+        /// <returns></returns>
         public double GetLandscapeSizeX()
         {
 			return Header.EastUtm - Header.WestUtm;
 ;        }
 
-		/// <summary>
-		/// In meters.
-		/// </summary>
-		/// <returns></returns>
+        /// <summary>
+        /// Entire landscape dimensions in meters.
+        /// </summary>
+        /// <returns></returns>
         public double GetLandscapeSizeY()
         {
 			return Header.NorthUtm - Header.SouthUtm;

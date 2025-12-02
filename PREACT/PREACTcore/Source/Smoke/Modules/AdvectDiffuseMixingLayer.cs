@@ -131,7 +131,7 @@ namespace PREACT.Smoke
             }
 
             //update wind
-            Fire.WindData windData = _simulation.FireModule.GetCurrentWindData();
+            Fire.WindData windData = _simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
             _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;

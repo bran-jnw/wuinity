@@ -450,8 +450,8 @@ namespace PREACT.Fire
             int slope = lcp.slope;
             int aspect = lcp.aspect;
 
-            double windSpeed = fireMesh.GetCurrentWindData().speed;
-            double windDirection = fireMesh.GetCurrentWindData().direction;
+            double windSpeed = 0;// fireMesh.GetCurrentWindData().speed;
+            double windDirection = 0;// fireMesh.GetCurrentWindData().direction;
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
             double canopyHeight = lcp.crown_canopy_height;
@@ -555,8 +555,8 @@ namespace PREACT.Fire
             double canopyBulkDensity = lcp.crown_bulk_density;
 
 
-            double windSpeed = fireMesh.GetCurrentWindData().speed;
-            double windDirection = fireMesh.GetCurrentWindData().direction;
+            double windSpeed = 0;// fireMesh.GetCurrentWindData().speed;
+            double windDirection = 0;// fireMesh.GetCurrentWindData().direction;
             // Wind adjustment factor parameters
             double canopyCover = lcp.canopy_cover;
             double canopyHeight = lcp.crown_canopy_height;

@@ -31,6 +31,8 @@ namespace PREACT.Fire
         private int _xDim, _yDim;
         private FuelCell[,] _fuelCells;
         private float[] _fireLineIntensityData;
+        private float[,] _maxRosData;
+        private float[] _timeOfArrivalData;
         private List<Vector2int> _ignitedCellIndices;
         private bool _done;
         private LandscapeData _landscapeData;
@@ -46,6 +48,8 @@ namespace PREACT.Fire
             _yDim = _landscapeData.GetCellCountY();
 
             _fireLineIntensityData = new float[_xDim * _yDim];
+            _maxRosData = new float[_xDim, _yDim];
+            _timeOfArrivalData = new float[_xDim * _yDim];
 
             bool[,] wuiArea2D = GetWUIArea2D(wuiArea, _xDim, _yDim);
 
@@ -150,9 +154,15 @@ namespace PREACT.Fire
             return hasNonWUINeighbors;
         }
 
-        public void SetCellFirelineIntensity(int linearIndex, float value)
+        public void UpdateCellData(Vector2int index, int linearIndex, float firelineIntensity, float rateOfSpread)
         {
-            _fireLineIntensityData[linearIndex] = value;
+            _fireLineIntensityData[linearIndex] = firelineIntensity;
+            _maxRosData[index.x, index.y] = Mathf.Max(rateOfSpread, _maxRosData[index.x, index.y]);            
+        }
+
+        public void SetTimeOfArrival(int linearIndex, float timeOfArrival)
+        {
+            _timeOfArrivalData[linearIndex] = Mathf.Min(timeOfArrival, _timeOfArrivalData[linearIndex]);
         }
 
         //Checks if we are outside of border in any direction, if so we return the "origin"
@@ -234,7 +244,7 @@ namespace PREACT.Fire
 
         public override float[,] GetMaxROS()
         {
-            throw new System.NotImplementedException();
+            return _maxRosData;
         }
 
         public override float[,] GetMaxROSAzimuth()
@@ -254,12 +264,12 @@ namespace PREACT.Fire
 
         public override float GetCellSizeX()
         {
-            throw new System.NotImplementedException();
+            return (float)_landscapeData.RasterCellResolutionX;
         }
 
         public override float GetCellSizeY()
         {
-            throw new System.NotImplementedException();
+            return (float)_landscapeData.RasterCellResolutionY;
         }
 
         public override float[] GetFireLineIntensityData()
@@ -295,11 +305,6 @@ namespace PREACT.Fire
         public override FireCellState GetFireCellState(Vector2d latLong)
         {
             return FireCellState.Dead;
-        }
-
-        public override WindData GetCurrentWindData()
-        {
-            throw new System.NotImplementedException();
         }
 
         public void AddActiveFireParticle(FireParticle particle)

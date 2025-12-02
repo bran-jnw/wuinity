@@ -108,7 +108,6 @@ namespace PREACT.Fire
         under the direction of Systems for Environmental Management.
        \brief The SEM common source C++ namespace identifier.
      */
-    [System.Serializable]
     public class DeadFuelMoisture
     {
         // Non-integral static data members must be initialized outside the class

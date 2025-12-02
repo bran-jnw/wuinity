@@ -44,7 +44,7 @@ namespace PREACT.Fire
             double stickMoisture100 = startFuelMoisture.HundredHour;
 
             long startDate = 0;
-            long cloudCover = (long)cell.GetMesh().GetCurrentWindData().cloudCover;
+            long cloudCover = 0;// (long)cell.GetMesh().GetCurrentWindData().cloudCover;
             double startSolarRad = SunRadiation.SimpleRadiation(latitude, longitude, startDate, startHour, cloudCover, (long)cell.GetElevation(), (long)cell.GetSlope(), (long)cell.GetAspect(), cell.GetCanopyCover());
 
             dfm1h = DeadFuelMoisture.createDeadFuelMoisture1("stick_1hr");
@@ -98,7 +98,7 @@ namespace PREACT.Fire
             double CumRain = cumRain;
 
             long Date = 0;
-            long cloudCover = (long)cell.GetMesh().GetCurrentWindData().cloudCover;
+            long cloudCover = 0;// (long)cell.GetMesh().GetCurrentWindData().cloudCover;
             double SolarRad = SunRadiation.SimpleRadiation(latitude, longitude, Date, Hour, cloudCover, (long)cell.GetElevation(), (long)cell.GetSlope(), (long)cell.GetAspect(), cell.GetCanopyCover());
 
             dfm1h.update(Year, Month, Day, Hour, Minute, Second,
