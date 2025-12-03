@@ -80,7 +80,7 @@ namespace PREACT.IO
             }
 
             //might not always need lcp file
-            if (newInput.FireModule != FireModuleChoice.None || newInput.FireModule != FireModuleChoice.AscImport)
+            if (newInput.FireModule != FireModuleChoice.None && newInput.FireModule != FireModuleChoice.AscImport)
             {
                 inputName = nameof(LcpFile);
                 if (inputToParse.TryGetValue(inputName, out userInput))
