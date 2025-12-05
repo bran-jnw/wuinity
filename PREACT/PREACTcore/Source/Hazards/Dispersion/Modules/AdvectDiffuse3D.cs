@@ -299,7 +299,7 @@ namespace PREACT.Smoke
         static float psi_M(float z, GlobalData data)
         {
             float value;
-            if (L < 0.0)
+            if (data.L < 0.0)
             {
                 float zeta = z * data.L_inverse;
                 float zeta_squared = zeta * zeta;
