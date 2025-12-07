@@ -32,7 +32,7 @@ namespace PREACT
 
             if (input.Simulation.RunFireModule)
             {
-                if (!LcpLoaded)
+                if (!LcpLoaded && input.Fire.FireModule != FireInput.FireModuleChoice.AscImport)
                 {
                     canRun = false;
                     Engine.Message(null, Engine.LogType.SimulationError, "No LCP file loaded but fire spread is activated.");
