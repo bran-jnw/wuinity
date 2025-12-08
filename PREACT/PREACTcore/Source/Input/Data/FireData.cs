@@ -52,8 +52,8 @@ namespace PREACT.IO
             Engine.Message(null, Engine.LogType.Log, "Loading Fire data...");
 
             //we need LCP for all fires except straight import of results
-            if (fireInput.FireModule == FireInput.FireModuleChoice.AscImport)
-            {
+            if (fireInput.FireModule == FireInput.FireModuleChoice.AscImport) 
+            { 
                 Engine.Message(null, Engine.LogType.Log, "Skipping loading LCP data as user has specified straight import of fire results.");
                 success = true;
                 return;

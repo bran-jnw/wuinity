@@ -235,20 +235,22 @@ namespace WUInity.Visualization
             mR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mesh.Clear();
 
-            float width = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX();
-            float height = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY();
-            Vector3 offset = new Vector3((float)simulation.Input.Fire.Data.LCPData.OriginOffset.x, 0f, (float)simulation.Input.Fire.Data.LCPData.OriginOffset.y);
+            float width;
+            float height;
+            Vector3 offset;
             Vector2 maxUV = Vector2.one;
-
             if(simulation.Input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
             {
-                float xScale, yScale;
-                Vector2d offsetFire;
-                ((AscFireImport)simulation.FireModule).GetOffsetAndSize(out offsetFire, out xScale, out yScale);
-                offset.x += (float)offsetFire.x;
-                offset.y += (float)offsetFire.y;
-                width *= xScale;
-                height *= yScale;
+                ((AscFireImport)simulation.FireModule).GetOffsetAndScale(out Vector2d offsetFire, out float xScale, out float yScale);
+                width = (float)simulation.Input.Simulation.DomainSize.x * xScale;
+                height = (float)simulation.Input.Simulation.DomainSize.y * yScale;             
+                offset = new Vector3((float)offsetFire.x, (float)offsetFire.y);
+            }
+            else
+            {
+                width = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX();
+                height = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY();
+                offset = new Vector3((float)simulation.Input.Fire.Data.LCPData.OriginOffset.x, 0f, (float)simulation.Input.Fire.Data.LCPData.OriginOffset.y);
             }
 
             VisualizeUtilities.CreateSimplePlane(mesh, width, height, 0.0f, offset);
