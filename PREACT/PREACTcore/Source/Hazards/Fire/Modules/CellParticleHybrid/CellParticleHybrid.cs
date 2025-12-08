@@ -33,6 +33,7 @@ namespace PREACT.Fire
         private float[] _fireLineIntensityData;
         private float[,] _maxRosData;
         private float[] _timeOfArrivalData;
+        private float[] _sootInjection;
         private List<Vector2int> _ignitedCellIndices;
         private bool _done;
         private LandscapeData _landscapeData;
@@ -65,6 +66,7 @@ namespace PREACT.Fire
                 }
             }*/
             _fuelCells = new FuelCell[_xDim, _yDim];
+            _sootInjection = new float[_xDim * _yDim];
             _ignitedCellIndices = new List<Vector2int>();
 
             //create fuel cells
@@ -284,7 +286,7 @@ namespace PREACT.Fire
 
         public override float[] GetSootProduction()
         {
-            throw new System.NotImplementedException();
+            return _sootInjection;
         }
 
         public override int GetActiveCellCount()
@@ -299,7 +301,13 @@ namespace PREACT.Fire
 
         public override void ConsumeIgnitedFireCells()
         {
+            for(int i = 0; i < _ignitedCellIndices.Count; ++i)
+            {
+                Vector2int index = _ignitedCellIndices[i];
+                _sootInjection[index.x + index.y * _xDim] = 0;
+            }
             _ignitedCellIndices.Clear();
+            
         }
 
         public override FireCellState GetFireCellState(Vector2d latLong)
@@ -344,6 +352,7 @@ namespace PREACT.Fire
         public void AddIgnitedCellIndex(Vector2int cellIndex)
         {
             _ignitedCellIndices.Add(cellIndex);
+            _sootInjection[cellIndex.x + cellIndex.y * _xDim] = 1;
         }
 
         public override bool IsSimulationDone()

@@ -120,7 +120,8 @@ namespace PREACT.Smoke
             _accelerator.Dispose();
             _context.Dispose();
         }
-                
+
+        bool _lockOutput = false;
         public override void Step(float currentTime, float deltaTime)
         {
             //if fire has been updated we need to update the injection buffer
@@ -155,8 +156,7 @@ namespace PREACT.Smoke
             _lockOutput = true;
             _density[READ].CopyToCPU(_sootOutput);
             _lockOutput = false;
-        }
-        bool _lockOutput = false;
+        }        
 
         void Swap(MemoryBuffer1D<float, Stride1D.Dense>[] buffer)
         {
