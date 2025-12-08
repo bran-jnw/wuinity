@@ -84,10 +84,13 @@ InitialFuelMoistureFile=fireCell/default.fmc
 OutputName=trigger_buffer.asc
 
 [Smoke]
-SmokeModule=GlobalSmoke
+SmokeModule=AdvectDiffuse3D
 
 [GlobalSmoke]
 ExtinctionFile=globalSmoke/opticalDensity.odr
+
+[AdvectDiffuse3D]
+MixingLayerHeight=250.0
 
 [AdvectDiffuseMixingLayer]
 MixingLayerHeight=250.0

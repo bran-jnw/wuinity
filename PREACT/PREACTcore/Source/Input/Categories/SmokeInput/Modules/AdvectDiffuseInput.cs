@@ -20,17 +20,21 @@ namespace PREACT.IO
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(MixingLayerHeight);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(MixingLayerHeight);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 issues += float.TryParse(userInput, out newInput.MixingLayerHeight) ? 0 : 1;
+                if(issues > 0)
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
             }
             else
             {
                 ++issues;
-                PREACTInput.InputNotFoundMessage(input, true);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
             if(issues > 0)
             {
@@ -38,6 +42,7 @@ namespace PREACT.IO
                 return newInput;
             }
 
+            success = true;
             return newInput;
         }
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-12-08 13:22:21 by Eclipse SUMO libsumo Version 1.24.0
+<!-- generated on 2025-12-08 15:09:35 by Eclipse SUMO libsumo Version 1.24.0
 <libsumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/libsumoConfiguration.xsd">
 
     <input>
@@ -22,13 +22,3 @@
     </report>
 
 </libsumoConfiguration>
--->
-
-<statistics xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/statistic_file.xsd">
-    <performance clockBegin="-2002293.12" clockEnd="-2002243.37" clockDuration="49.75" traciDuration="91.54" realTimeFactor="359.30" vehicleUpdatesPerSecond="26187.00" personUpdatesPerSecond="0.00" begin="0.00" end="17875.00" duration="17875.00"/>
-    <vehicles loaded="1000" inserted="1000" running="0" waiting="0"/>
-    <teleports total="2" jam="0" yield="2" wrongLane="0"/>
-    <safety collisions="0" emergencyStops="0" emergencyBraking="0"/>
-    <persons loaded="0" running="0" jammed="0"/>
-    <personTeleports total="0" abortWait="0" wrongDest="0"/>
-</statistics>

@@ -125,7 +125,28 @@ namespace PREACT.IO
                 }
             }
 
-            ///critical
+            if (newInput.SmokeModule == SmokeModuleChoice.AdvectDiffuse3D)
+            {
+                int lineIndex;
+                nameOfInput = nameof(SmokeModuleChoice.AdvectDiffuse3D);
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
+                {
+                    PREACTInput.ReadingInputMessage(nameOfInput);
+                    newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    Engine.Message(null, Engine.LogType.InputError, "The AdvectDiffuse3D model cannot find all needed input parameters.");
+                    return newInput;
+                }
+            }
+
+            //critical
             if (newInput.SmokeModule == SmokeModuleChoice.Lagrangian)
             {
                 int lineIndex;

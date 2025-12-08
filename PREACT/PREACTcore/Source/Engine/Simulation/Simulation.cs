@@ -223,7 +223,7 @@ namespace PREACT
                 return;
             }
             
-            CreateSmokeModule();
+            CreateDispersionModule();
             if (_stopRun)
             {
                 return;
@@ -274,7 +274,7 @@ namespace PREACT
             }
         }
 
-        private void CreateSmokeModule()
+        private void CreateDispersionModule()
         {
             //can only run together
             if (_input.Simulation.RunSmokeModule)
@@ -298,12 +298,8 @@ namespace PREACT
                     }
                     else if (_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuse3D)
                     {
-                        /*if (_smokeModule != null)
-                        {
-                            ((Smoke.AdvectDiffuseModel)_smokeModule).Release();
-                        }
-                        //_smokeModule = new Smoke.AdvectDiffuseModel(_fireModule, 250f, WUInity.INSTANCE.AdvectDiffuseCompute, WUInity.INSTANCE.NoiseTex, WUInity.INSTANCE.WindTex);*/                            
-                        Engine.Message(this, Engine.LogType.Log, "Smoke module AdvectDiffuse initiated.");
+                        _smokeModule = new AdvectDiffuse3D(this);                         
+                        Engine.Message(this, Engine.LogType.Log, "Smoke module AdvectDiffuse3D initiated.");
                     }
                     else if (_input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.BoxModel)
                     {

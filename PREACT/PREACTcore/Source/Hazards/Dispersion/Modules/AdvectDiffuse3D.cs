@@ -19,7 +19,7 @@ namespace PREACT.Smoke
     {
         const int READ = 0;
         const int WRITE = 1;
-        MemoryBuffer1D<float, Stride1D.Dense>[] _density = new MemoryBuffer1D<float, Stride1D.Dense>[2];
+        MemoryBuffer1D<float, Stride1D.Dense>[] _speciesDensity = new MemoryBuffer1D<float, Stride1D.Dense>[2];
         MemoryBuffer1D<float, Stride1D.Dense> _injection;
         MemoryBuffer1D<float, Stride1D.Dense> _heightMap;
         MemoryBuffer1D<Vector3, Stride1D.Dense> _wind;
@@ -66,7 +66,7 @@ namespace PREACT.Smoke
         public AdvectDiffuse3D(Simulation simulation) : base(simulation)
         {
             //initiate device to run on
-            _context = Context.CreateDefault();
+            _context = Context.Create(b => b.Default().EnableAlgorithms());
             int deviceIndex = -1;
             for (int i = 0; i < _context.Devices.Length; i++)
             {
@@ -114,15 +114,16 @@ namespace PREACT.Smoke
 
             _globalData.mixingLayerHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
 
+            //3D data
             bufferSize = _globalData.xDim * _globalData.yDim * _globalData.zDim;
+            _speciesDensity[READ] = _accelerator.Allocate1D(new float[bufferSize]);
+            _speciesDensity[READ].MemSetToZero();
+            _floatBuffers.Add(_speciesDensity[READ]);
+            _speciesDensity[WRITE] = _accelerator.Allocate1D(new float[bufferSize]);
+            _speciesDensity[WRITE].MemSetToZero();
+            _floatBuffers.Add(_speciesDensity[WRITE]);
 
-            _density[READ] = _accelerator.Allocate1D(new float[bufferSize]);
-            _density[READ].MemSetToZero();
-            _floatBuffers.Add(_density[READ]);
-            _density[WRITE] = _accelerator.Allocate1D(new float[bufferSize]);
-            _density[WRITE].MemSetToZero();
-            _floatBuffers.Add(_density[WRITE]);
-
+            //2D data
             bufferSize = _globalData.xDim * _globalData.yDim;
             _injection = _accelerator.Allocate1D(new float[bufferSize]);
             _injection.MemSetToZero();
@@ -133,12 +134,13 @@ namespace PREACT.Smoke
             _floatBuffers.Add(_heightMap);
 
             _wind = _accelerator.Allocate1D(new Vector3[bufferSize]);
-            _heightMap.MemSetToZero();
+            _wind.MemSetToZero();
 
-            //compile advection kernel
-            _advectDiffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(AdvectDiffuseFTU);
             //we need this to send data to WUIEngine and evaluative visibility
             _sootOutput = new float[bufferSize];
+
+            //compile kernel
+            _advectDiffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(AdvectDiffuseFTU);            
         }
 
         ~AdvectDiffuse3D()
@@ -178,12 +180,12 @@ namespace PREACT.Smoke
             _globalData.Kz = KzClasses[stability];
 
             //run advection kernel
-            _advectDiffuseKernel(bufferSize, _density[READ].View, _density[WRITE].View, _heightMap.View, _injection.View, _globalData);
-            Swap(_density);
+            _advectDiffuseKernel(bufferSize, _speciesDensity[READ].View, _speciesDensity[WRITE].View, _heightMap.View, _injection.View, _globalData);
+            Swap(_speciesDensity);
 
             _accelerator.Synchronize();
             _lockOutput = true;
-            _density[READ].CopyToCPU(_sootOutput);
+            _injection.CopyToCPU(_sootOutput); //injection works as input and output to save on memory
             _lockOutput = false;
         }
 
@@ -200,17 +202,16 @@ namespace PREACT.Smoke
         /// <param name="i"></param>
         /// <param name="read"></param>
         /// <param name="write"></param>
-        /// <param name="source"></param>
+        /// <param name="sourceTerm"></param>
         /// <param name="globalData"></param>
-        static void AdvectDiffuseFTU(Index1D i, ArrayView<float> read, ArrayView<float> write, ArrayView<float> heightMap, ArrayView<float> source, GlobalData globalData)
+        static void AdvectDiffuseFTU(Index1D i, ArrayView<float> read, ArrayView<float> write, ArrayView<float> heightMap, ArrayView<float> sourceTerm, GlobalData globalData)
         {
             int x = i % globalData.xDim;
             int y = i / globalData.xDim;
             int z = i / globalData.xyDim;
 
             float C = read[i];
-            float xNeg = 0, xPos = 0, yNeg = 0, yPos = 0, zNeg = 0, zPos = 0; //assume 0 concentration on the outside
-            //float L = C, R = C, D = C, U = C; //never diffuse to outside? creates problem of pulling in soot from boundary
+            float xNeg = 0, xPos = 0, yNeg = 0, yPos = 0, zNeg = 0, zPos = 0; //assume 0 density on the outside
             if (x > 0)
             {
                 xNeg = read[i - 1];
@@ -246,25 +247,29 @@ namespace PREACT.Smoke
 
             //TODO: need to use wind speed at cell faces
             float diffusion = Kxy * globalData.inverseCellSizeXSq * (xPos - 2 * C + xNeg);
-            float upwind = globalData.windX > 0 ? (C - xNeg) : (xPos - C);
-            float advection = -globalData.windX * globalData.inverseCellSizeX * upwind;
+            float upwindGradient = globalData.windX > 0 ? (C - xNeg) : (xPos - C);
+            float advection = -globalData.windX * globalData.inverseCellSizeX * upwindGradient;
             float xFlux = globalData.cellSizeXSq * (advection + diffusion);
 
             diffusion = Kxy * globalData.inverseCellSizeYSq * (yPos - 2 * C + yNeg);
-            upwind = globalData.windY > 0 ? (C - yNeg) : (yPos - C);
-            advection = -globalData.windY * globalData.inverseCellSizeY * upwind;
+            upwindGradient = globalData.windY > 0 ? (C - yNeg) : (yPos - C);
+            advection = -globalData.windY * globalData.inverseCellSizeY * upwindGradient;
             float yFlux = globalData.cellSizeYSq * (advection + diffusion);
 
             diffusion = Kz * globalData.inverseCellSizeZSq * (zPos - 2 * C + zNeg);
-            upwind = globalData.windZ > 0 ? (C - zNeg) : (zPos - C);
-            advection = -globalData.windZ * globalData.inverseCellSizeX * upwind;
+            upwindGradient = globalData.windZ > 0 ? (C - zNeg) : (zPos - C);
+            advection = -globalData.windZ * globalData.inverseCellSizeX * upwindGradient;
             float zFlux = globalData.cellSizeZSq * (advection + diffusion);
 
             //injection
-            float injection = XMath.Max(0.0f, source[twoDindex] * globalData.cellVolume); // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+            float injection = XMath.Max(0.0f, sourceTerm[twoDindex] * globalData.cellVolume); // kg * s / m3, kg/s soot injection controlled/taken from firemesh
 
             float flux = xFlux + yFlux + zFlux;
             write[i] = C + injection + globalData.dt * globalData.cellSizeXSq * flux; //here cell size squared represents cell surface area
+            if(z == 0)
+            {
+                sourceTerm[twoDindex] = write[i];
+            }            
         }
 
 

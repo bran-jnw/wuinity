@@ -22,7 +22,6 @@ namespace PREACT.IO
 
             if(!simulationInput.RunSmokeModule)
             {
-                success = true;
                 return;
             }
 
@@ -30,7 +29,11 @@ namespace PREACT.IO
             {
                 string filePath = Path.Combine(rootFolder, smokeInput.GlobalSmokeInput.ExtinctionFile);
                 LoadExtinctionRamp(filePath, out success);
-            }            
+            }
+            else
+            {
+                success = true;
+            }
         }
 
         public void LoadExtinctionRamp(string filePath, out bool success)

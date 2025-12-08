@@ -204,8 +204,7 @@ namespace WUInity.Visualization
 
             if (renderSoot)
             {
-                if(simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
-                    || simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+                if(simulation.Input.Smoke.SmokeModule != SmokeInput.SmokeModuleChoice.None)
                 {
                     float[] newSoot = simulation.SmokeModule.GetExtinctionCoefficientDensity();
                     if(newSoot != null)
