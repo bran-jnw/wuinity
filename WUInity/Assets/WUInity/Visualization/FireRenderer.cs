@@ -244,7 +244,7 @@ namespace WUInity.Visualization
             {
                 float xScale, yScale;
                 Vector2d offsetFire;
-                ((AscFireImport)simulation.FireModule).GetOffsetAndScale(out offsetFire, out xScale, out yScale);
+                ((AscFireImport)simulation.FireModule).GetOffsetAndSize(out offsetFire, out xScale, out yScale);
                 offset.x += (float)offsetFire.x;
                 offset.y += (float)offsetFire.y;
                 width *= xScale;

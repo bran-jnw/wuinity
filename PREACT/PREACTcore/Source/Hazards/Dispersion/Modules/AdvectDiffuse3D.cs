@@ -160,12 +160,7 @@ namespace PREACT.Smoke
         bool _lockOutput = false;
         public override void Step(float currentTime, float deltaTime)
         {
-            //if fire has been updated we need to update the injection buffer
-            bool fireHasUpdated = true;
-            if (fireHasUpdated)
-            {
-                _injection.CopyFromCPU(_simulation.FireModule.GetSootProduction());
-            }
+            _injection.CopyFromCPU(_simulation.FireModule.GetSootProduction());
 
             //update wind
             Fire.WindData windData = _simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
@@ -340,7 +335,7 @@ namespace PREACT.Smoke
         static float phi_H(float z, GlobalData data)
         {
             float value;
-            if (L < 0.0)
+            if (data.L < 0.0)
             {
                 float zeta = z * data.L_inverse;
                 value = XMath.Rsqrt(1.0f - 16.0f * zeta);
@@ -363,7 +358,7 @@ namespace PREACT.Smoke
         static float phi_M(float z, GlobalData data)
         {
             float value;
-            if (L < 0.0)
+            if (data.L < 0.0)
             {
                 float zeta = z * data.L_inverse;
                 value = XMath.Sqrt(XMath.Rsqrt(1.0f - 16.0f * zeta));
