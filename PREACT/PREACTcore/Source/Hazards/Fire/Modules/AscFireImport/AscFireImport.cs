@@ -89,11 +89,10 @@ namespace PREACT.Fire
             _newlyIgnitedCells.Clear();
         }
 
-        public void GetOffsetAndSize(out Vector2d offset, out float xSize, out float ySize)
+        public override void GetOffsetAndSize(out Vector2d offset, out Vector2d size)
         {
             offset = _originOffset;
-            xSize = (float)(_cellsize * ncols);
-            ySize = (float)(_cellsize * nrows);
+            size = new Vector2d(_cellsize * ncols, _cellsize * nrows);
         }
 
         public override bool IsSimulationDone()

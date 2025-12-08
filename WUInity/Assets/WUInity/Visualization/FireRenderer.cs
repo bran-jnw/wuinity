@@ -239,19 +239,11 @@ namespace WUInity.Visualization
             float height;
             Vector3 offset;
             Vector2 maxUV = Vector2.one;
-            if(simulation.Input.Fire.FireModule == FireInput.FireModuleChoice.AscImport)
-            {
-                ((AscFireImport)simulation.FireModule).GetOffsetAndScale(out Vector2d offsetFire, out float xScale, out float yScale);
-                width = (float)simulation.Input.Simulation.DomainSize.x * xScale;
-                height = (float)simulation.Input.Simulation.DomainSize.y * yScale;             
-                offset = new Vector3((float)offsetFire.x, (float)offsetFire.y);
-            }
-            else
-            {
-                width = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX();
-                height = (float)simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY();
-                offset = new Vector3((float)simulation.Input.Fire.Data.LCPData.OriginOffset.x, 0f, (float)simulation.Input.Fire.Data.LCPData.OriginOffset.y);
-            }
+
+            simulation.FireModule.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
+            width = (float)size.x;
+            height = (float)size.y;             
+            offset = new Vector3((float)offsetFire.x, 0f, (float)offsetFire.y);
 
             VisualizeUtilities.CreateSimplePlane(mesh, width, height, 0.0f, offset);
 

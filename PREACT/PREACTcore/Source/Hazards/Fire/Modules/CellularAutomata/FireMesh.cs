@@ -562,5 +562,11 @@ namespace PREACT.Fire
         {
             //nothing to do
         }
+
+        public override void GetOffsetAndSize(out Vector2d offset, out Vector2d size)
+        {
+            offset = _originOffset;
+            size = new Vector2d(lcpData.GetLandscapeSizeX(), lcpData.GetLandscapeSizeY());
+        }
     }
 }

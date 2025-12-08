@@ -379,5 +379,11 @@ namespace PREACT.Fire
 
             Engine.Message(null, Engine.LogType.Log, "Finished backwards calculation of fire spread.");*/
         }
+
+        public override void GetOffsetAndSize(out Vector2d offset, out Vector2d size)
+        {
+            offset = _originOffset;
+            size = new Vector2d(_landscapeData.GetLandscapeSizeX(), _landscapeData.GetLandscapeSizeY());
+        }
     }    
 }

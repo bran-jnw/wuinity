@@ -44,6 +44,8 @@ namespace PREACT.Fire
         public abstract List<Vector2int> GetIgnitedFireCells();
         public abstract void ConsumeIgnitedFireCells();
 
+        public abstract void GetOffsetAndSize(out Vector2d offset, out Vector2d size);
+
         /// <summary>
         /// Returns state of cell on mesh based on lat/long. Returns dead if outside of mesh.
         /// </summary>
