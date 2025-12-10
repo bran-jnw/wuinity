@@ -222,16 +222,16 @@ namespace PREACT.Smoke
         static void AdvectDiffuseFTU(Index1D i, ArrayView<float> read, ArrayView<float> write, ArrayView<float> heightMap, ArrayView<float> sourceTerm, GlobalData globalData)
         {
             int x = i % globalData.xDim;
-            int y = i / globalData.xDim;
+            int y = (i / globalData.xDim) % globalData.yDim;
             int z = i / globalData.xyDim;
 
             if (x >= globalData.xDim || y >= globalData.yDim || z >= globalData.zDim)
             {
-                //return;
+                return;
             }
 
             float C = read[i];
-            float xNeg = 0, xPos = 0, yNeg = 0, yPos = 0, zNeg = 0, zPos = 0; //assume 0 density on the outside, ground is zero gradient
+            float xNeg = C, xPos = C, yNeg = C, yPos = C, zNeg = C, zPos = C; //zero gradient diffusion
             if (x > 0)
             {
                 xNeg = read[i - 1];
@@ -266,24 +266,48 @@ namespace PREACT.Smoke
             float Kxy = 5 * Kz;
 
             //TODO: need to use wind speed at cell faces
+            //x
             float diffusion = Kxy * globalData.inverseCellSizeXSq * (xPos - 2 * C + xNeg);
+            if(x == 0)
+            {
+                xNeg = 0;
+            }
+            if (x == globalData.xDim - 1)
+            {
+                xPos = 0;
+            }
             float upwind = globalData.windX > 0 ? (C - xNeg) : (C - xPos);
             float advection = XMath.Abs(globalData.windX) * upwind * globalData.inverseCellSizeX;
             float xFlux = -advection + diffusion;
 
+            //y
             diffusion = Kxy * globalData.inverseCellSizeYSq * (yPos - 2 * C + yNeg);
+            if (y == 0)
+            {
+                yNeg = 0;
+            }
+            if (y == globalData.yDim - 1)
+            {
+                yPos = 0;
+            }
             upwind = globalData.windY > 0 ? (C - yNeg) : (C - yPos);
             advection = XMath.Abs(globalData.windY) * upwind * globalData.inverseCellSizeY;
             float yFlux = -advection + diffusion;
 
-            diffusion = Kxy * globalData.inverseCellSizeZSq * (zPos - 2 * C + zNeg);
+            //z
+            diffusion = Kz * globalData.inverseCellSizeZSq * (zPos - 2 * C + zNeg);
+            //z == 0 not needed as zNeg = C by default meaning advection is 0 as desired (solid)
+            if (z == globalData.zDim - 1)
+            {
+                zPos = 0;
+            }
             upwind = globalData.windZ > 0 ? (C - zNeg) : (C - zPos);
             advection = XMath.Abs(globalData.windZ) * upwind * globalData.inverseCellSizeZ;
-            float zFlux = -advection;// + diffusion;
+            float zFlux = -advection + diffusion;
 
             //injection
             float injection = 0;
-            if(globalData.loopCount == 0)
+            if(z == 4 && globalData.loopCount == 0)
             {
                 injection = XMath.Max(0.0f, sourceTerm[twoDindex]) * globalData.invertedCellVolume; // injection should come in kg
             }
@@ -292,7 +316,7 @@ namespace PREACT.Smoke
             write[i] = C + injection + globalData.dt * flux;
 
             //density at ground/first cell
-            if (z == 1)
+            if (z == 7)
             {
                 sourceTerm[twoDindex] = write[i]; //save 
             }
