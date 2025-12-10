@@ -101,8 +101,7 @@ namespace WUInity.Visualization
 
         private void CreateSootBuffer(Simulation simulation)
         {
-            if(simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer
-                || simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            if(simulation.Input.Smoke.SmokeModule != SmokeInput.SmokeModuleChoice.None )
             {
                 sootCellCountX = simulation.FireModule.GetCellCountX();
                 sootCellCountY = simulation.FireModule.GetCellCountY();

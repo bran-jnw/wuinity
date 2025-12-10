@@ -304,7 +304,7 @@ namespace PREACT.Fire
             for(int i = 0; i < _ignitedCellIndices.Count; ++i)
             {
                 Vector2int index = _ignitedCellIndices[i];
-                _sootInjection[index.x + index.y * _xDim] = 0;
+                //_sootInjection[index.x + index.y * _xDim] = 0;
             }
             _ignitedCellIndices.Clear();
             
@@ -352,7 +352,7 @@ namespace PREACT.Fire
         public void AddIgnitedCellIndex(Vector2int cellIndex)
         {
             _ignitedCellIndices.Add(cellIndex);
-            _sootInjection[cellIndex.x + cellIndex.y * _xDim] = 1;
+            _sootInjection[cellIndex.x + cellIndex.y * _xDim] = 50;
         }
 
         public override bool IsSimulationDone()

@@ -27,7 +27,7 @@ namespace PREACT.Smoke
         Context _context;
         Accelerator _accelerator;
         Action<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData> _advectDiffuseKernel;
-        int bufferSize;
+        int _3DbufferSize;
         float[] _sootOutput;
 
         //calculated from https://www.ready.noaa.gov/READYpgclass.php and from 
@@ -59,6 +59,8 @@ namespace PREACT.Smoke
             public float z_0;//= 1.0; //Davenport-Wierenga roughness length classification
             public float theta_zero; //ground level potential temperature
             public float theta_star; //scaling potential temperature
+
+            public int loopCount;
         }
         GlobalData _globalData;
 
@@ -66,7 +68,7 @@ namespace PREACT.Smoke
         public AdvectDiffuse3D(Simulation simulation) : base(simulation)
         {
             //initiate device to run on
-            _context = Context.Create(b => b.Default().EnableAlgorithms());
+            _context = Context.CreateDefault();// Context.Create(b => b.Default().EnableAlgorithms());
             int deviceIndex = -1;
             for (int i = 0; i < _context.Devices.Length; i++)
             {
@@ -95,18 +97,25 @@ namespace PREACT.Smoke
             _globalData.zDim = (int)(0.5f + _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight / 30.0f);
             _globalData.xyDim = _globalData.xDim * _globalData.yDim;
 
+            Engine.Message(_simulation, Engine.LogType.Log, "AdvectDiffuse3D cell count [x,y,x]: " + _globalData.xDim + ", " + _globalData.yDim + ", " + _globalData.zDim);
+
             _globalData.cellSizeX = _simulation.FireModule.GetCellSizeX();
             _globalData.cellSizeY = _simulation.FireModule.GetCellSizeY();
-            _globalData.cellSizeZ = 
+            _globalData.cellSizeZ = _globalData.cellSizeX;
 
-            _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
-            _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
-
-            _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
-            _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
+            Engine.Message(_simulation, Engine.LogType.Debug, "Cell sizes: " + _globalData.cellSizeX + ", " + _globalData.cellSizeY + ", " + _globalData.cellSizeZ);
 
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
+            _globalData.inverseCellSizeZ = 1f / _globalData.cellSizeZ;
+
+            _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
+            _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
+            _globalData.cellSizeZSq = _globalData.cellSizeZ * _globalData.cellSizeZ;
+
+            _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
+            _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
+            _globalData.inverseCellSizeZSq = 1f / _globalData.cellSizeZSq;            
 
             _globalData.cellVolume = _globalData.cellSizeX * _globalData.cellSizeY * _globalData.cellSizeZ;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
@@ -115,29 +124,29 @@ namespace PREACT.Smoke
             _globalData.mixingLayerHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
 
             //3D data
-            bufferSize = _globalData.xDim * _globalData.yDim * _globalData.zDim;
-            _speciesDensity[READ] = _accelerator.Allocate1D(new float[bufferSize]);
+            _3DbufferSize = _globalData.xDim * _globalData.yDim * _globalData.zDim;
+            _speciesDensity[READ] = _accelerator.Allocate1D(new float[_3DbufferSize]);
             _speciesDensity[READ].MemSetToZero();
             _floatBuffers.Add(_speciesDensity[READ]);
-            _speciesDensity[WRITE] = _accelerator.Allocate1D(new float[bufferSize]);
+            _speciesDensity[WRITE] = _accelerator.Allocate1D(new float[_3DbufferSize]);
             _speciesDensity[WRITE].MemSetToZero();
             _floatBuffers.Add(_speciesDensity[WRITE]);
 
             //2D data
-            bufferSize = _globalData.xDim * _globalData.yDim;
-            _injection = _accelerator.Allocate1D(new float[bufferSize]);
+            int _2DbufferSize = _globalData.xDim * _globalData.yDim;
+            _injection = _accelerator.Allocate1D(new float[_2DbufferSize]);
             _injection.MemSetToZero();
             _floatBuffers.Add(_injection);
 
-            _heightMap = _accelerator.Allocate1D(new float[bufferSize]);
+            _heightMap = _accelerator.Allocate1D(new float[_2DbufferSize]);
             _heightMap.MemSetToZero();
             _floatBuffers.Add(_heightMap);
 
-            _wind = _accelerator.Allocate1D(new Vector3[bufferSize]);
+            _wind = _accelerator.Allocate1D(new Vector3[_2DbufferSize]);
             _wind.MemSetToZero();
 
             //we need this to send data to WUIEngine and evaluative visibility
-            _sootOutput = new float[bufferSize];
+            _sootOutput = new float[_2DbufferSize];
 
             //compile kernel
             _advectDiffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(AdvectDiffuseFTU);            
@@ -170,20 +179,26 @@ namespace PREACT.Smoke
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;
             _globalData.windY = _globalData.windDirectionY * windData.speed;
-
-            _globalData.dt = deltaTime;
-            _globalData.dtdx = _globalData.cellSizeX / deltaTime;
+            _globalData.windZ = 0f;
 
             https://www.ready.noaa.gov/READYpgclass.php
             int stability = 4; //0-6 represents stability class A-G
             _globalData.Kxy = KzClasses[stability];
             _globalData.Kz = KzClasses[stability];
 
+            int subSteps = 5;
+            _globalData.dt = deltaTime / subSteps;
+            _globalData.dtdx = _globalData.dt / _globalData.cellSizeX;
             //run advection kernel
-            _advectDiffuseKernel(bufferSize, _speciesDensity[READ].View, _speciesDensity[WRITE].View, _heightMap.View, _injection.View, _globalData);
-            Swap(_speciesDensity);
-
-            _accelerator.Synchronize();
+            for (int i = 0; i < subSteps; ++i)
+            {
+                _globalData.loopCount = i;
+                _advectDiffuseKernel(_3DbufferSize, _speciesDensity[READ].View, _speciesDensity[WRITE].View, _heightMap.View, _injection.View, _globalData);
+                _accelerator.Synchronize();
+                Swap(_speciesDensity);
+            }
+            
+            //transfer to CPU, not ideal as we render again on the GPU, but OK for now
             _lockOutput = true;
             _injection.CopyToCPU(_sootOutput); //injection works as input and output to save on memory
             _lockOutput = false;
@@ -210,8 +225,13 @@ namespace PREACT.Smoke
             int y = i / globalData.xDim;
             int z = i / globalData.xyDim;
 
+            if (x >= globalData.xDim || y >= globalData.yDim || z >= globalData.zDim)
+            {
+                //return;
+            }
+
             float C = read[i];
-            float xNeg = 0, xPos = 0, yNeg = 0, yPos = 0, zNeg = 0, zPos = 0; //assume 0 density on the outside
+            float xNeg = 0, xPos = 0, yNeg = 0, yPos = 0, zNeg = 0, zPos = 0; //assume 0 density on the outside, ground is zero gradient
             if (x > 0)
             {
                 xNeg = read[i - 1];
@@ -242,34 +262,40 @@ namespace PREACT.Smoke
             float windSpeed = get_wind_speed(heighAboveTerrain, globalData);
 
             //calculated from https://www.ready.noaa.gov/READYpgclass.php and from "Point source atmospheric diffusion model with variable wind and diffusivity profiles" which describes relation between K_z and K_y
-            float Kz = get_K_z(heighAboveTerrain, globalData);
+            float Kz = 100f;// get_K_z(heighAboveTerrain, globalData);
             float Kxy = 5 * Kz;
 
             //TODO: need to use wind speed at cell faces
             float diffusion = Kxy * globalData.inverseCellSizeXSq * (xPos - 2 * C + xNeg);
-            float upwindGradient = globalData.windX > 0 ? (C - xNeg) : (xPos - C);
-            float advection = -globalData.windX * globalData.inverseCellSizeX * upwindGradient;
-            float xFlux = globalData.cellSizeXSq * (advection + diffusion);
+            float upwind = globalData.windX > 0 ? (C - xNeg) : (C - xPos);
+            float advection = XMath.Abs(globalData.windX) * upwind * globalData.inverseCellSizeX;
+            float xFlux = -advection + diffusion;
 
             diffusion = Kxy * globalData.inverseCellSizeYSq * (yPos - 2 * C + yNeg);
-            upwindGradient = globalData.windY > 0 ? (C - yNeg) : (yPos - C);
-            advection = -globalData.windY * globalData.inverseCellSizeY * upwindGradient;
-            float yFlux = globalData.cellSizeYSq * (advection + diffusion);
+            upwind = globalData.windY > 0 ? (C - yNeg) : (C - yPos);
+            advection = XMath.Abs(globalData.windY) * upwind * globalData.inverseCellSizeY;
+            float yFlux = -advection + diffusion;
 
-            diffusion = Kz * globalData.inverseCellSizeZSq * (zPos - 2 * C + zNeg);
-            upwindGradient = globalData.windZ > 0 ? (C - zNeg) : (zPos - C);
-            advection = -globalData.windZ * globalData.inverseCellSizeX * upwindGradient;
-            float zFlux = globalData.cellSizeZSq * (advection + diffusion);
+            diffusion = Kxy * globalData.inverseCellSizeZSq * (zPos - 2 * C + zNeg);
+            upwind = globalData.windZ > 0 ? (C - zNeg) : (C - zPos);
+            advection = XMath.Abs(globalData.windZ) * upwind * globalData.inverseCellSizeZ;
+            float zFlux = -advection;// + diffusion;
 
             //injection
-            float injection = XMath.Max(0.0f, sourceTerm[twoDindex] * globalData.cellVolume); // kg * s / m3, kg/s soot injection controlled/taken from firemesh
+            float injection = 0;
+            if(globalData.loopCount == 0)
+            {
+                injection = XMath.Max(0.0f, sourceTerm[twoDindex]) * globalData.invertedCellVolume; // injection should come in kg
+            }
 
             float flux = xFlux + yFlux + zFlux;
-            write[i] = C + injection + globalData.dt * globalData.cellSizeXSq * flux; //here cell size squared represents cell surface area
-            if(z == 0)
+            write[i] = C + injection + globalData.dt * flux;
+
+            //density at ground/first cell
+            if (z == 1)
             {
-                sourceTerm[twoDindex] = write[i];
-            }            
+                sourceTerm[twoDindex] = write[i]; //save 
+            }
         }
 
 

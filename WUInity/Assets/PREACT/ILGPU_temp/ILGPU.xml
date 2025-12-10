@@ -23758,7 +23758,7 @@
             </summary>
             <returns>The enumerator.</returns>
         </member>
-        <member name="M:ILGPU.IR.BasicBlockMap`1.System#Collections#Generic#IEnumerable{(ILGPU#IR#BasicBlock,T)}#GetEnumerator">
+        <member name="M:ILGPU.IR.BasicBlockMap`1.System#Collections#Generic#IEnumerable{System#ValueTuple{ILGPU#IR#BasicBlock,T}}#GetEnumerator">
             <summary>
             Returns an enumerator to enumerator all actual (not replaced) parameters.
             </summary>
@@ -34371,7 +34371,7 @@
             </summary>
             <returns>The enumerator.</returns>
         </member>
-        <member name="M:ILGPU.IR.Types.StructureType.OffsetCollection.System#Collections#Generic#IEnumerable{(ILGPU#IR#Values#FieldAccess,System#Int32,System#Int32)}#GetEnumerator">
+        <member name="M:ILGPU.IR.Types.StructureType.OffsetCollection.System#Collections#Generic#IEnumerable{System#ValueTuple{ILGPU#IR#Values#FieldAccess,System#Int32,System#Int32}}#GetEnumerator">
             <summary>
             Returns an enumerator to enumerate all offsets in the parent type.
             </summary>
@@ -34611,7 +34611,7 @@
             </summary>
             <returns>The enumerator.</returns>
         </member>
-        <member name="M:ILGPU.IR.Types.StructureType.System#Collections#Generic#IEnumerable{(ILGPU#IR#Types#TypeNode,ILGPU#IR#Values#FieldAccess)}#GetEnumerator">
+        <member name="M:ILGPU.IR.Types.StructureType.System#Collections#Generic#IEnumerable{System#ValueTuple{ILGPU#IR#Types#TypeNode,ILGPU#IR#Values#FieldAccess}}#GetEnumerator">
             <summary>
             Returns an enumerator to enumerate all fields in this type.
             </summary>
