@@ -27,7 +27,9 @@ namespace PREACT.Smoke
         Context _context;
         Accelerator _accelerator;
         Action<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData> _advectDiffuseKernel;
+        Action<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData> _injectionKernel;
         int _3DbufferSize;
+        int _2DbufferSize;
         float[] _sootOutput;
 
         //calculated from https://www.ready.noaa.gov/READYpgclass.php and from 
@@ -133,7 +135,7 @@ namespace PREACT.Smoke
             _floatBuffers.Add(_speciesDensity[WRITE]);
 
             //2D data
-            int _2DbufferSize = _globalData.xDim * _globalData.yDim;
+            _2DbufferSize = _globalData.xDim * _globalData.yDim;
             _injection = _accelerator.Allocate1D(new float[_2DbufferSize]);
             _injection.MemSetToZero();
             _floatBuffers.Add(_injection);
@@ -148,8 +150,9 @@ namespace PREACT.Smoke
             //we need this to send data to WUIEngine and evaluative visibility
             _sootOutput = new float[_2DbufferSize];
 
-            //compile kernel
-            _advectDiffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(AdvectDiffuseFTU);            
+            //compile kernels
+            _advectDiffuseKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(AdvectDiffuseFTU);
+            _injectionKernel = _accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView<float>, ArrayView<float>, ArrayView<float>, GlobalData>(Inject);
         }
 
         ~AdvectDiffuse3D()
@@ -189,6 +192,11 @@ namespace PREACT.Smoke
             int subSteps = 5;
             _globalData.dt = deltaTime / subSteps;
             _globalData.dtdx = _globalData.dt / _globalData.cellSizeX;
+
+            //inject soot
+            _injectionKernel(_2DbufferSize, _injection.View, _heightMap.View, _speciesDensity[READ].View, _globalData);
+            _accelerator.Synchronize();
+
             //run advection kernel
             for (int i = 0; i < subSteps; ++i)
             {
@@ -209,6 +217,22 @@ namespace PREACT.Smoke
             MemoryBuffer1D<float, Stride1D.Dense> tmp = buffer[READ];
             buffer[READ] = buffer[WRITE];
             buffer[WRITE] = tmp;
+        }
+
+        static void Inject(Index1D i, ArrayView<float> sourceTerm, ArrayView<float> heightMap, ArrayView<float> density, GlobalData globalData)
+        {
+            int x = i % globalData.xDim;
+            int y = i / globalData.xDim;
+
+            if (x >= globalData.xDim || y >= globalData.yDim)
+            {
+                return;
+            }
+
+            //injection
+            float injection = sourceTerm[i];
+            int index = i + 7 * globalData.xyDim;
+            density[index] += XMath.Max(0.0f, injection) * globalData.invertedCellVolume; // injection should come in kg
         }
 
         /// <summary>
@@ -303,20 +327,13 @@ namespace PREACT.Smoke
             }
             upwind = globalData.windZ > 0 ? (C - zNeg) : (C - zPos);
             advection = XMath.Abs(globalData.windZ) * upwind * globalData.inverseCellSizeZ;
-            float zFlux = -advection + diffusion;
-
-            //injection
-            float injection = 0;
-            if(z == 4 && globalData.loopCount == 0)
-            {
-                injection = XMath.Max(0.0f, sourceTerm[twoDindex]) * globalData.invertedCellVolume; // injection should come in kg
-            }
+            float zFlux = -advection + diffusion;                       
 
             float flux = xFlux + yFlux + zFlux;
-            write[i] = C + injection + globalData.dt * flux;
+            write[i] = C + globalData.dt * flux;
 
             //density at ground/first cell
-            if (z == 7)
+            if (z == 0)
             {
                 sourceTerm[twoDindex] = write[i]; //save 
             }
