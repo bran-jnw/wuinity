@@ -1,25 +1,27 @@
-Loading net-file from 'E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/rox_big.net.xml' ... done (457ms).
+Loading net-file from 'E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/rox_big.net.xml' ... done (509ms).
 Warning: At actuated tlLogic '88510203', linkIndex 0,1,2,3,4,5 has no controlling detector.
 Loading done.
 Simulation version 1.24.0 started via libsumo with time: 0.00.
-Warning: Teleporting vehicle '96'; waited too long (yield), lane='10388967#0_0', time=758.00.
-Warning: Vehicle '96' ends teleporting on edge '10386729#4', time=758.00.
-Warning: Teleporting vehicle '430'; waited too long (yield), lane=':88510819_8_0', time=1215.00.
-Warning: Vehicle '430' ends teleporting on edge '-419998995#1', time=1217.00.
-Warning: Teleporting vehicle '490'; waited too long (yield), lane=':cluster_88483136_88483138_5_0', time=1272.00.
-Warning: Vehicle '490' ends teleporting on edge '133729130#3', time=1281.00.
-Warning: Teleporting vehicle '461'; waited too long (yield), lane=':88510819_8_0', time=1520.00.
-Warning: Vehicle '461' ends teleporting on edge '-419998995#1', time=1522.00.
+Warning: Teleporting vehicle '411'; waited too long (yield), lane=':cluster_88490764_88490766_2_0', time=1191.00.
+Warning: Vehicle '411' ends teleporting on edge '133729130#8', time=1193.00.
+Warning: Teleporting vehicle '497'; waited too long (yield), lane=':88510819_8_0', time=1237.00.
+Warning: Vehicle '497' ends teleporting on edge '-419998995#1', time=1239.00.
+Warning: Teleporting vehicle '607'; waited too long (yield), lane='-228856497#1_0', time=1410.00.
+Warning: Teleporting vehicle '658'; waited too long (yield), lane='228856497#0_0', time=1461.00.
+Warning: Vehicle '607' ends teleporting on edge '-419999008#0', time=1499.00.
+Warning: Teleporting vehicle '652'; waited too long (yield), lane=':88510819_8_0', time=1542.00.
+Warning: Vehicle '652' ends teleporting on edge '-419998995#1', time=1542.00.
+Warning: Vehicle '658' ends teleporting on edge '-419999008#0', time=1548.00.
 Simulation ended at time: 36000.00.
 Reason: Libsumo requested termination.
 Performance:
- Duration: 76.99s
- Real time factor: 467.569
- UPS: 17522.326415
+ Duration: 102.32s
+ Real time factor: 351.855
+ UPS: 13146.723354
 Vehicles:
  Inserted: 1000
  Running: 0
  Waiting: 0
- Teleports: 4 (Yield: 4)
+ Teleports: 5 (Yield: 5)
 DijkstraRouter answered 1000 queries and explored 1862.49 edges on average.
-DijkstraRouter spent 3.20s answering queries (3.20ms on average).
+DijkstraRouter spent 3.25s answering queries (3.25ms on average).

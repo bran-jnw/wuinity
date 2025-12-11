@@ -434,6 +434,23 @@ namespace PREACT.Fire
             return Interpolation.BilinearInterpolation(lowerLeft, lowerRight, xFraction, upperLeft, upperRight, yFraction);
 		}
 
+		/// <summary>
+		/// Return a 1D array with offset elevation (meaning lowest point is zero and not actual elevation), leading x-dimension.
+		/// </summary>
+		/// <returns></returns>
+		public float[] Get1DElevation()
+		{
+			float[] elevation = new float[Header.numeast * Header.numnorth];
+
+			for(int i = 0; i < elevation.Length; ++i)
+			{
+				LandscapeCellData c = GetCellData(i);
+                elevation[i] = c.elevation - Header.loelev;
+			}
+
+			return elevation;
+		}
+
 		public Vector2d GetElevationMinMax()
 		{
 			return new Vector2d(Header.loelev, Header.hielev);
