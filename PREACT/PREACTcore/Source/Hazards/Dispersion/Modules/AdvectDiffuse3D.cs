@@ -147,7 +147,7 @@ namespace PREACT.Smoke
             //determine height of domain
             Vector2d elevationMinMax = _simulation.Input.Fire.Data.LCPData.GetElevationMinMax();
             float domainHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight + (float)elevationMinMax.y - (float)elevationMinMax.x;
-            _globalData.zDim = (int)(0.5f + domainHeight / _globalData.cellSizeZ);
+            _globalData.zDim = (int)(0.5f + domainHeight * _globalData.inverseCellSizeZ);
 
             //buffer sizes
             _3DbufferSize = _globalData.xDim * _globalData.yDim * _globalData.zDim;
@@ -179,7 +179,7 @@ namespace PREACT.Smoke
                     for (int x = 0; x < _globalData.xDim; ++x)
                     {
                         int index = x + y * _globalData.xDim;
-                        float elevation = (float)l.GetElevationLocalPos((x + 0.5f) * _globalData.cellSizeX, (x + 0.5f) * _globalData.cellSizeY);
+                        float elevation = (float)(l.GetElevationLocalPos((x + 0.5f) * _globalData.cellSizeX, (y + 0.5f) * _globalData.cellSizeY) - elevationMinMax.x);
                         heightMap[index] = elevation;
                     }
                 }
@@ -264,7 +264,7 @@ namespace PREACT.Smoke
             //run advection kernel
             for (int i = 0; i < subSteps; ++i)
             {
-                _advectDiffuseKernel(_3DbufferSize, _speciesDensity[READ].View, _speciesDensity[WRITE].View, _heightMap.View, _cpuInjection.View, _globalData);
+                _advectDiffuseKernel(_3DbufferSize, _speciesDensity[READ].View, _speciesDensity[WRITE].View, _heightMap.View, _result.View, _globalData);
                 _accelerator.Synchronize();
                 Swap(_speciesDensity);
             }
@@ -285,9 +285,9 @@ namespace PREACT.Smoke
         static void Inject(Index1D i, ArrayView<float> sourceTerm, ArrayView<float> heightMap, ArrayView<float> density, GlobalData globalData, int fireXDim, int fireYDim)
         {
             int fireX = i % fireXDim;
-            int fireY = i / fireYDim;
+            int fireY = i / fireXDim;
 
-            if (fireX >= fireXDim || fireY >= fireYDim)
+            if (fireX > fireXDim - 1 || fireY > fireYDim - 1)
             {
                 return;
             }
@@ -295,10 +295,10 @@ namespace PREACT.Smoke
             float injection = sourceTerm[i];
             int smokeX = fireX / globalData.fireSmokeCellRatio;
             int smokeY = fireY / globalData.fireSmokeCellRatio;
-            int smoke2DIndex = smokeX + smokeY * globalData.xDim;
-            int groundIndex = (int)(0.5f + heightMap[smoke2DIndex] * globalData.inverseCellSizeZ);
-            int smoke3DIndex = smoke2DIndex + groundIndex * globalData.xyDim;
-            density[smoke3DIndex] += XMath.Max(0.0f, injection) * globalData.invertedCellVolume; // injection should come in kg
+            int smokeIndex2D = smokeX + smokeY * globalData.xDim;
+            int injectionHeightIndex = (int)(0.5f + heightMap[smokeIndex2D] * globalData.inverseCellSizeZ);
+            int injectionIndex3D = smokeIndex2D + injectionHeightIndex * globalData.xyDim;
+            density[injectionIndex3D] += XMath.Max(0.0f, injection) * globalData.invertedCellVolume; // injection should come in kg
         }
 
         /// <summary>
@@ -314,11 +314,11 @@ namespace PREACT.Smoke
             int x = i % globalData.xDim;
             int y = (i / globalData.xDim) % globalData.yDim;
             int z = i / globalData.xyDim;
-            int twoDindex = i - z * globalData.xyDim;
-            int groundIndex = (int)(0.5f + heightMap[twoDindex] * globalData.inverseCellSizeZ);
+            int index2D = i - z * globalData.xyDim;
+            int groundIndex = (int)(0.5f + heightMap[index2D] * globalData.inverseCellSizeZ);
 
             //due to gpu warp size some cores will be outside, also check to see if we are inside terrain
-            if (x >= globalData.xDim || y >= globalData.yDim || z >= globalData.zDim || z < groundIndex)
+            if (x > globalData.xDim - 1 || y > globalData.yDim - 1 || z > globalData.zDim - 1 || z < groundIndex)
             {
                 return;
             }
@@ -357,7 +357,7 @@ namespace PREACT.Smoke
                 zPosAdv = zPos;
             }
             
-            float heighAboveTerrain = z * globalData.cellSizeZ - heightMap[twoDindex];
+            float heighAboveTerrain = z * globalData.cellSizeZ - heightMap[index2D];
             float windSpeed = get_wind_speed(heighAboveTerrain, globalData);
 
             //calculated from https://www.ready.noaa.gov/READYpgclass.php and from "Point source atmospheric diffusion model with variable wind and diffusivity profiles" which describes relation between K_z and K_y
@@ -392,7 +392,7 @@ namespace PREACT.Smoke
             //density at ground/first cell
             if (z == groundIndex)
             {
-                result[twoDindex] = write[i]; //save 
+                result[index2D] = write[i]; //save 
             }
         }
 

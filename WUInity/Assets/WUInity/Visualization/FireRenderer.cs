@@ -103,8 +103,8 @@ namespace WUInity.Visualization
         {
             if(simulation.Input.Smoke.SmokeModule != SmokeInput.SmokeModuleChoice.None )
             {
-                sootCellCountX = simulation.FireModule.GetCellCountX();
-                sootCellCountY = simulation.FireModule.GetCellCountY();
+                sootCellCountX = simulation.SmokeModule.GetCellsX();
+                sootCellCountY = simulation.SmokeModule.GetCellsY();
                 sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);
@@ -119,7 +119,7 @@ namespace WUInity.Visualization
                 }
                 else
                 {
-                    sootMaterial.SetFloat("_DataMultiplier", 1f); // getting exticntion coefficient directly
+                    sootMaterial.SetFloat("_DataMultiplier", 1f); // getting extinction coefficient directly
                 }
                 
                 if (sootMeshRenderer == null)
