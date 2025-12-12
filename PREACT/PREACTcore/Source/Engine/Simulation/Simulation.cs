@@ -617,22 +617,22 @@ namespace PREACT
         {
             //_stopThreadsToken.Cancel();
 
-            if (_input.Simulation.RunPedestrianModule && _pedestrianModule != null)
+            if (_pedestrianModule != null)
             {
                 _pedestrianModule.Stop();
             }
 
-            if (_input.Simulation.RunTrafficModule && _trafficModule != null)
+            if (_trafficModule != null)
             {
                 _trafficModule.Stop();
             }
 
-            if (_input.Simulation.RunFireModule && _fireModule != null)
+            if (_fireModule != null)
             {
                 _fireModule.Stop();
             }
 
-            if (_input.Simulation.RunSmokeModule && _smokeModule != null)
+            if (_smokeModule != null)
             {
                 _smokeModule.Stop();
             }

@@ -413,7 +413,7 @@ namespace PREACT.Fire
         }
 
 		/// <summary>
-		/// Returns the elevation on local space bilinearly interpolated, meaning that lower left is 0,0 meters.
+		/// Returns the elevation on local space bilinearly interpolated, meaning that lower left is 0,0 meters. Clamps elevation outside domain.
 		/// </summary>
 		/// <returns></returns>
 		public double GetElevationLocalPos(double x, double y)

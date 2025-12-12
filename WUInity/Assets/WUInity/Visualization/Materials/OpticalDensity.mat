@@ -73,7 +73,7 @@ Material:
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _LowerCutOff: 0
-    - _MaxValue: 0.26086956
+    - _MaxValue: 0
     - _Metallic: 0
     - _MinValue: 0.002608695
     - _Mode: 0
@@ -82,7 +82,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Transparency: 0.8
+    - _Transparency: 0.57
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
