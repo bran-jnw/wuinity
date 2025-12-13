@@ -351,8 +351,20 @@ namespace WUInity
                 }
             }    
 
+            //temp hack for changing height in smoke sim
+            if(Input.GetKeyDown(KeyCode.KeypadPlus))
+            {
+                print("Going up.");
+                ((PREACT.Smoke.AdvectDiffuse3D)_engine.Simulation.SmokeModule).IncreaseOutputHeight();
+            }
+            else if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            {
+                print("Going down.");
+                ((PREACT.Smoke.AdvectDiffuse3D)_engine.Simulation.SmokeModule).DecreaseOutputHeight();
+            }
+
             //always update visuals, even when paused
-            if(_engine.Simulation != null)
+            if (_engine.Simulation != null)
             {
                 if (_engine.Simulation.State == Simulation.SimulationState.Running) // !WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && 
                 {
