@@ -552,7 +552,7 @@ namespace PREACT.Smoke
             throw new System.NotImplementedException();
         }
 
-        public override float GetGroundExtinctionCoefficientAtCoordinate(Vector2d latLon)
+        public override float GetSootDensityAtCoordinate(Vector2d latLon)
         {
             throw new System.NotImplementedException();
         }

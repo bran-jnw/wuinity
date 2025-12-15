@@ -51,7 +51,7 @@ namespace PREACT.Smoke
             return _extinctionCoefficientOutput[0];
         }
 
-        public override float GetGroundExtinctionCoefficientAtCoordinate(Vector2d latLon)
+        public override float GetSootDensityAtCoordinate(Vector2d latLon)
         {
             return _extinctionCoefficientOutput[0];
         }

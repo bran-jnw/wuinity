@@ -27,7 +27,7 @@ namespace PREACT
 
         //References
         private Engine _engine;
-        private HazardManager _hazardCommunicator;
+        private HazardManager _hazardManager;
         private PREACTInput _input;
         private SimulationState _state;
         private TrafficModule _trafficModule;
@@ -56,7 +56,7 @@ namespace PREACT
         //References
         public Engine Engine { get => _engine; }
         public SimulationState State { get => _state; }
-        public HazardManager Hazards { get => _hazardCommunicator; }
+        public HazardManager Hazards { get => _hazardManager; }
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
         public FireModule FireModule { get => _fireModule; }
@@ -82,6 +82,7 @@ namespace PREACT
             _engine = engine;
             _input = input;
             _simulationIndex = simulationIndex;
+            _hazardManager = new HazardManager(this);
         }
 
         /// <summary>
