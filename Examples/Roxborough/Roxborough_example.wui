@@ -87,7 +87,7 @@ OutputName=trigger_buffer.asc
 SmokeModule=AdvectDiffuse3D
 
 [GlobalSmoke]
-ExtinctionFile=globalSmoke/opticalDensity.odr
+ExtinctionFile=globalSmoke/extCoeffRamp.exc
 
 [AdvectDiffuse3D]
 MixingLayerHeight=250.0

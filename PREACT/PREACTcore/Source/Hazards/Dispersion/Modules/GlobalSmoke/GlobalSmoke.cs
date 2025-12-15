@@ -41,12 +41,12 @@ namespace PREACT.Smoke
             return 1;
         }
 
-        public override float[] GetExtinctionCoefficientDensity()
+        public override float[] GetSootDensity()
         {
             return _extinctionCoefficientOutput;
         }        
 
-        public override float GetGroundExtinctionCoefficientAtWorldPos(Vector2d pos)
+        public override float GetSootDensityAtPos(Vector2d pos)
         {
             return _extinctionCoefficientOutput[0];
         }

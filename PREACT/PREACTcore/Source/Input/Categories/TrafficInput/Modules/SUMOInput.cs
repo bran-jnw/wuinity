@@ -15,11 +15,14 @@ namespace PREACT.IO
     public class SUMOInput
     {
         public enum DestinationChoiceEnum { Random, EvacGroup };
+        public enum SmokeSpeedReductionModelEnum { Exponential, Smokanza};
 
         public string ConfigurationFile;
         public Vector2d UTMoffset;
         public double OutputRasterSize = 25.0;        
         public DestinationChoiceEnum DestinationChoice = DestinationChoiceEnum.EvacGroup;
+        public float SmokeAlpha = 0f;
+        public float SmokeBeta = 0f;
 
         public SUMOInput()
         {
@@ -92,7 +95,27 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(input);
             }
 
-            if(issues == 0)
+            input = nameof(SmokeAlpha);
+            if (inputToParse.TryGetValue(input, out userInput))
+            {
+                float.TryParse(userInput, out newInput.SmokeAlpha);
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(input);
+            }
+
+            input = nameof(SmokeBeta);
+            if (inputToParse.TryGetValue(input, out userInput))
+            {
+                float.TryParse(userInput, out newInput.SmokeBeta);
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(input);
+            }
+
+            if (issues == 0)
             {
                 success = true;
             }

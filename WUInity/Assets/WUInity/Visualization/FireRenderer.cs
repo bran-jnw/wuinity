@@ -23,8 +23,8 @@ namespace WUInity.Visualization
 
         ComputeBuffer _fireBuffer, sootBuffer;
         MeshRenderer fireMeshRenderer, sootMeshRenderer;
-        float lowerSootValue = 0.002608695f; //500 meters with C = 3
-        float upperSootValue = 0.260869565f; //5 meters with C = 3
+        float lowerExtCoeff = 0.002608695f; //500 meters with C = 3
+        float upperExtCoeff = 0.260869565f; //5 meters with C = 3
         float lowerFirelineIntensityValue = 0.0f;
         float upperFirelineIntensityValue = 6000.0f;
 
@@ -109,12 +109,12 @@ namespace WUInity.Visualization
                 sootMaterial.SetInteger("_CellsX", sootCellCountX);
                 sootMaterial.SetInteger("_CellsY", sootCellCountY);
                 sootMaterial.SetFloat("_LowerCutOff", 0.0f);
-                sootMaterial.SetFloat("_MinValue", lowerSootValue); //500 meters with C = 3
-                sootMaterial.SetFloat("_MaxValue", upperSootValue); //5 meters with C = 3
+                sootMaterial.SetFloat("_MinValue", lowerExtCoeff); //500 meters with C = 3
+                sootMaterial.SetFloat("_MaxValue", upperExtCoeff); //5 meters with C = 3
 
                 if(simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
                 {
-                    // arrives in soot density, * 8700.0 for extinction coefficient
+                    // arrives in soot density, * 8700.0 (kg/m2, mass specific ext. coeff.) for extinction coefficient
                     sootMaterial.SetFloat("_DataMultiplier", 8700f); 
                 }
                 else
@@ -205,7 +205,7 @@ namespace WUInity.Visualization
             {
                 if(simulation.Input.Smoke.SmokeModule != SmokeInput.SmokeModuleChoice.None)
                 {
-                    float[] newSoot = simulation.SmokeModule.GetExtinctionCoefficientDensity();
+                    float[] newSoot = simulation.SmokeModule.GetSootDensity();
                     if(newSoot != null)
                     {
                         sootBuffer.SetData(newSoot);
@@ -290,9 +290,9 @@ namespace WUInity.Visualization
             _fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
         }
 
-        public float GetUpperOpticalDensityLimit()
+        public float GetUpperExtCoeff()
         {
-            return upperSootValue;
+            return upperExtCoeff;
         }
 
         public void SetUpperOpticalDensityLimit(float value)
@@ -300,9 +300,9 @@ namespace WUInity.Visualization
             sootMaterial.SetFloat("_MaxValue", value); //5 meters with C = 3
         }
 
-        public float GetLowerOpticalDensityLimit()
+        public float GetLowerExtCoeff()
         {
-            return lowerSootValue;
+            return lowerExtCoeff;
         }
 
         public void SetLowerOpticalDensityLimit(float value)

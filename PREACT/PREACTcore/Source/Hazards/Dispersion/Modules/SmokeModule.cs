@@ -17,9 +17,26 @@ namespace PREACT.Smoke
         }
         public abstract int GetCellsX();
         public abstract int GetCellsY();
-        public abstract float[] GetExtinctionCoefficientDensity();
-        public abstract float GetGroundExtinctionCoefficientAtWorldPos(Vector2d pos);
-        public abstract float GetGroundExtinctionCoefficientAtCoordinate(Vector2d latLon);
+
+        /// <summary>
+        /// Returns a linearized (x-axis leading) 2D map at ground level (or level of interest if available) of soot density in kg/m3.
+        /// </summary>
+        /// <returns></returns>
+        public abstract float[] GetSootDensity();
+
+        /// <summary>
+        /// Returns soot density in kg/m3 at specified simulation position. Could return interpolated or point wise value (depends on module).
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public abstract float GetSootDensityAtPos(Vector2d pos);
+
+        /// <summary>
+        /// Returns soot density in kg/m3 at specified WGS84 coordinate. Could return interpolated or point wise value (depends on module).
+        /// </summary>
+        /// <param name="latLon"></param>
+        /// <returns></returns>
+        public abstract float GetSootDensityAtCoordinate(Vector2d latLon);
     }
 
 }

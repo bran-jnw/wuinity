@@ -18,7 +18,7 @@ namespace PREACT.Traffic
         protected float _totalTravelTime;
         protected string _vehicleClass;
         protected EvacuationDestination _destination;
-        protected float _speedRatio;
+        protected float _speedRatio;       
 
         public uint VehicleId { get => _vehicleId; }
         public Vector2d WorldPosition { get => _worldPosition; }
@@ -26,7 +26,7 @@ namespace PREACT.Traffic
         public float TotalTravelTime { get => _totalTravelTime; }
         public string VehicleClass { get => _vehicleClass; }
         public EvacuationDestination Destination { get => _destination; }
-        public float SpeedRatio { get => _speedRatio; }
+        public float SpeedRatio { get => _speedRatio; }      
 
 
         public TrafficModuleVehicle(uint vehicleId, uint numberOfPeopleInCar, EvacuationDestination destination, string vehicleClass = "passenger")

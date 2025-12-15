@@ -16,7 +16,7 @@ namespace PREACT.Traffic
 {
     public class SUMOModule : TrafficModule
     {
-        private Dictionary<string, SUMOVehicle> _vehicles;        
+        private Dictionary<string, SUMOVehicle> _sumoVehicles;        
         List<LIBSUMO.TraCIRoadPosition> _validStartPositions;
 
         //output
@@ -30,13 +30,14 @@ namespace PREACT.Traffic
         private uint[,] _carCount;
         private float[,] _accumulatedLevelOfService;
         private float[,] _accumulatedWatingTime;
+        private bool _checkSmoke = false;
 
         public SUMOModule(Simulation simulation, out bool success) : base(simulation)
         {
             success = true;
             try
             {
-                _vehicles = new Dictionary<string, SUMOVehicle>();
+                _sumoVehicles = new Dictionary<string, SUMOVehicle>();
                 string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Traffic.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Input.Simulation.MaxSimTime.ToString() }));
@@ -66,6 +67,11 @@ namespace PREACT.Traffic
                 _accumulatedLevelOfService = new float[xDim, yDim];
                 _accumulatedWatingTime = new float[xDim, yDim];
 
+                if(_simulation.Input.Traffic.SumoInput.SmokeAlpha != 0f || _simulation.Input.Traffic.SumoInput.SmokeBeta != 0f)
+                {
+                    _checkSmoke = true;
+                }
+
                 SortEdgesInFireCells();
             }
             catch(Exception e)
@@ -82,8 +88,24 @@ namespace PREACT.Traffic
             LIBSUMO.Simulation.close();
         }*/
 
+        float GetSmokeSpeedReductionFactor(Vector2d pos)
+        {
+            float extCoeff = _simulation.Hazards.GetExtinctionCoefficientAtPos(pos);
+            return 1f - _simulation.Input.Traffic.SumoInput.SmokeAlpha * Mathf.Exp(_simulation.Input.Traffic.SumoInput.SmokeBeta / extCoeff);
+        }
+
         public override void Step(float deltaTime, float currentTime)
-        {  
+        {
+            if(_checkSmoke)
+            {
+                foreach (KeyValuePair<string, SUMOVehicle> sV in _sumoVehicles)
+                {
+                    SUMOVehicle vehicle = sV.Value;
+                    double speedFactor = vehicle.InitialSpeedFactor * GetSmokeSpeedReductionFactor(vehicle.WorldPosition);
+                    LIBSUMO.Vehicle.setSpeedFactor(vehicle.GetSumoVehicleID(), speedFactor);
+                }
+            }           
+
             //https://sumo.dlr.de/doxygen/d0/d17/classlibsumo_1_1_simulation.html
             LIBSUMO.Simulation.step(currentTime + deltaTime); // advances sim up to given time
 
@@ -96,7 +118,7 @@ namespace PREACT.Traffic
                 {
                     string sumoID = activeVehicles[i];
                     SUMOVehicle vehicle;
-                    _vehicles.TryGetValue(sumoID, out vehicle);
+                    _sumoVehicles.TryGetValue(sumoID, out vehicle);
                     if(vehicle != null)
                     {
                         LIBSUMO.TraCIPosition pos = LIBSUMO.Vehicle.getPosition(sumoID);
@@ -109,8 +131,8 @@ namespace PREACT.Traffic
                     //this can happen since SUMO can have control of car injection as well, not only injected from WUInity
                     else
                     {
-                        vehicle = new SUMOVehicle(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null);
-                        _vehicles.Add(sumoID, vehicle);
+                        vehicle = new SUMOVehicle(GetNewCarID(), sumoID, LIBSUMO.Vehicle.getPosition(sumoID), LIBSUMO.Vehicle.getAngle(sumoID), 0, null, LIBSUMO.Vehicle.getSpeedFactor(sumoID));
+                        _sumoVehicles.Add(sumoID, vehicle);
                         _activeVehicles.Add(vehicle.VehicleId, vehicle);
                         ++totalSumoVehiclesInjected;
                     }
@@ -126,12 +148,12 @@ namespace PREACT.Traffic
                 for (int i = 0; i < arrivedVehicles.Count; i++)
                 {
                     SUMOVehicle vehicle;
-                    _vehicles.TryGetValue(arrivedVehicles[i], out vehicle);
+                    _sumoVehicles.TryGetValue(arrivedVehicles[i], out vehicle);
                     if(vehicle != null)
                     {
                         vehicle.Arrive(deltaTime, currentTime);
                     }
-                    _vehicles.Remove(arrivedVehicles[i]);
+                    _sumoVehicles.Remove(arrivedVehicles[i]);
                     _activeVehicles.Remove(vehicle.VehicleId);
                     //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
                     if (vehicle.NumberOfPeople > 0)
@@ -253,8 +275,8 @@ namespace PREACT.Traffic
                         LIBSUMO.Route.add(routeID, route.edges);
                         LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
                         LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
-                        SUMOVehicle car = new SUMOVehicle(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal);
-                        _vehicles.Add(sumoID, car);
+                        SUMOVehicle car = new SUMOVehicle(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal, LIBSUMO.Vehicle.getSpeedFactor(sumoID));
+                        _sumoVehicles.Add(sumoID, car);
                         _activeVehicles.Add(car.VehicleId, car);
                         ++totalVehiclesInjected;
                     }
@@ -477,7 +499,7 @@ namespace PREACT.Traffic
                     LIBSUMO.Edge.adaptTraveltime(fireCellEdges[x, y][i], double.MaxValue);
 
                     //collect cars in system that has the edge in their route
-                    foreach (SUMOVehicle car in _vehicles.Values)
+                    foreach (SUMOVehicle car in _sumoVehicles.Values)
                     {
                         LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
                         if (route.Contains(fireCellEdges[x, y][i]))

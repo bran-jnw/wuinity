@@ -537,7 +537,7 @@ namespace PREACT.Smoke
             return _globalData.yDim;
         }
 
-        public override float[] GetExtinctionCoefficientDensity()
+        public override float[] GetSootDensity()
         {
             if (_lockOutput)
             {
@@ -547,7 +547,7 @@ namespace PREACT.Smoke
             return _sootOutput;
         }
 
-        public override float GetGroundExtinctionCoefficientAtWorldPos(Vector2d pos)
+        public override float GetSootDensityAtPos(Vector2d pos)
         {
             throw new System.NotImplementedException();
         }

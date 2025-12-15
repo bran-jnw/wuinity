@@ -265,11 +265,11 @@ namespace WUInity.UI
             {
                 GUI.BeginGroup(new Rect(Screen.width - 125, Screen.height * 0.5f + 5, 120, 300));
 
-                GUI.Box(new Rect(0, 0, 120, 300), "Optical dens.");
+                GUI.Box(new Rect(0, 0, 120, 300), "Ext. coeff.");
                 GUI.DrawTexture(new Rect(40, 50, 40, 200), verticalColorGradient);
-                string upperLimit = _wuinityManager.FireRenderer.GetUpperOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string upperLimit = _wuinityManager.FireRenderer.GetUpperExtCoeff().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 20, 120, 20), upperLimit, styleAlignedCenter);
-                string lowerLimit = _wuinityManager.FireRenderer.GetLowerOpticalDensityLimit().ToString("e3") + " [-/m]";
+                string lowerLimit = _wuinityManager.FireRenderer.GetLowerExtCoeff().ToString("e3") + " [-/m]";
                 GUI.Label(new Rect(0, 260, 120, 20), lowerLimit, styleAlignedCenter);
 
                 GUI.EndGroup();

@@ -22,8 +22,11 @@ namespace PREACT.Traffic
         Vector3 oldVisualPos;
         Vector3 newVisualPos;
         float oldRotation, newRotation;
+        protected double _initialSpeedFactor;
 
-        public SUMOVehicle(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationDestination goal) : base(carID, peopleInCar, goal)
+        public double InitialSpeedFactor { get => _initialSpeedFactor; }
+
+        public SUMOVehicle(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationDestination goal, double individialSpeedFactor) : base(carID, peopleInCar, goal)
         {
             _vehicleId = carID;
             _sumoId = sumoID;
@@ -35,6 +38,8 @@ namespace PREACT.Traffic
             oldVisualPos = new Vector3((float)_worldPosition.x, 0.0f, (float)_worldPosition.y);
             newVisualPos = oldVisualPos;
             rotation = (float)angle;
+
+            _initialSpeedFactor = individialSpeedFactor;
         }
 
         public string GetSumoVehicleID()
