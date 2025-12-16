@@ -26,15 +26,20 @@ namespace PREACT
         public enum SimulationState { Initializing, Running, Finished, Error };
 
         //References
+        private SimulationState _state;
         private Engine _engine;
+        private TimeManager _timeManager;
+        private WeatherManager _weatherManager;
+        private SpatialManager _spatialManager;
         private HazardManager _hazardManager;
         private PREACTInput _input;
-        private SimulationState _state;
+        
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
         private FireModule _fireModule;
         private SmokeModule _smokeModule;
         private TriggerBufferModule _triggerBufferModule;
+
         private Stopwatch _simulationStopWatch = new Stopwatch();
         private Stopwatch _trafficStopwatch = new Stopwatch();
         private Stopwatch _pedestrianStopwatch = new Stopwatch();
@@ -56,6 +61,9 @@ namespace PREACT
         //References
         public Engine Engine { get => _engine; }
         public SimulationState State { get => _state; }
+        public TimeManager Time { get => _timeManager; }
+        public WeatherManager Weather { get => _weatherManager; }
+        public SpatialManager Spatial { get => _spatialManager; }
         public HazardManager Hazards { get => _hazardManager; }
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
@@ -82,6 +90,9 @@ namespace PREACT
             _engine = engine;
             _input = input;
             _simulationIndex = simulationIndex;
+            _timeManager = new TimeManager();
+            _spatialManager = new SpatialManager(this);
+            _weatherManager = new WeatherManager();
             _hazardManager = new HazardManager(this);
         }
 

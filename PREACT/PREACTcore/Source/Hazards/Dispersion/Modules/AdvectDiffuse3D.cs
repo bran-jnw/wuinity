@@ -76,6 +76,7 @@ namespace PREACT.Smoke
 
         public AdvectDiffuse3D(Simulation simulation) : base(simulation)
         {
+            _originOffset = _simulation.Spatial.GetFireModuleOffset();
             try
             {
                 Initialize();
@@ -546,15 +547,27 @@ namespace PREACT.Smoke
 
             return _sootOutput;
         }
-
+                
         public override float GetSootDensityAtPos(Vector2d pos)
         {
-            throw new System.NotImplementedException();
+            //TODO: interpolation?
+            float result = 0f;
+            Vector2d localPos = pos + _originOffset;
+            int xIndex = (int)(localPos.x * _globalData.inverseCellSizeX);
+            int yIndex = (int)(localPos.y / _globalData.inverseCellSizeY);
+
+            if(xIndex > 0 && xIndex < _globalData.xDim && yIndex > 0 && yIndex < _globalData.yDim)
+            {
+                result = _sootOutput[xIndex + yIndex * _globalData.xDim];
+            }
+
+            return result;
         }
 
         public override float GetSootDensityAtCoordinate(Vector2d latLon)
         {
-            throw new System.NotImplementedException();
+            Vector2d v = _simulation.Input.Simulation.Data.GetSimulationPosition(latLon);
+            return GetSootDensityAtPos(v);
         }
 
         public override void Stop()

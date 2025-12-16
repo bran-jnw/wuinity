@@ -25,14 +25,14 @@ namespace PREACT.Smoke
         public abstract float[] GetSootDensity();
 
         /// <summary>
-        /// Returns soot density in kg/m3 at specified simulation position. Could return interpolated or point wise value (depends on module).
+        /// Returns soot density in kg/m3 at specified simulation position. Could return interpolated or point wise value (depends on module implementation).
         /// </summary>
         /// <param name="pos"></param>
         /// <returns></returns>
         public abstract float GetSootDensityAtPos(Vector2d pos);
 
         /// <summary>
-        /// Returns soot density in kg/m3 at specified WGS84 coordinate. Could return interpolated or point wise value (depends on module).
+        /// Returns soot density in kg/m3 at specified WGS84 coordinate. Could return interpolated or point wise value (depends on module implementation).
         /// </summary>
         /// <param name="latLon"></param>
         /// <returns></returns>

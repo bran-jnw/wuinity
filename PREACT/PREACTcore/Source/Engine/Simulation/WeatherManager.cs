@@ -2,7 +2,7 @@
 
 namespace PREACT
 {
-    internal class WeatherManager
+    public class WeatherManager
     {
         public WeatherManager() 
         {
