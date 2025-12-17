@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-12-12 16:22:23 by Eclipse SUMO libsumo Version 1.24.0
+<!-- generated on 2025-12-17 14:50:57 by Eclipse SUMO libsumo Version 1.24.0
 <libsumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/libsumoConfiguration.xsd">
 
     <input>
-        <net-file value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/rox_big.net.xml"/>
+        <net-file value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Development\Playground\sumo/rox_big.net.xml"/>
     </input>
 
     <output>
-        <statistic-output value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/statistics_output.xml"/>
+        <statistic-output value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Development\Playground\sumo/statistics_output.xml"/>
     </output>
 
     <time>
@@ -18,7 +18,17 @@
 
     <report>
         <verbose value="true"/>
-        <log value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Roxborough\sumo/log.txt"/>
+        <log value="E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Development\Playground\sumo/log.txt"/>
     </report>
 
 </libsumoConfiguration>
+-->
+
+<statistics xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/statistic_file.xsd">
+    <performance clockBegin="-1219383.87" clockEnd="-1219292.19" clockDuration="91.68" traciDuration="320.17" realTimeFactor="392.69" vehicleUpdatesPerSecond="14494.82" personUpdatesPerSecond="0.00" begin="0.00" end="36000.00" duration="36000.00"/>
+    <vehicles loaded="1000" inserted="1000" running="0" waiting="0"/>
+    <teleports total="2" jam="0" yield="2" wrongLane="0"/>
+    <safety collisions="0" emergencyStops="0" emergencyBraking="0"/>
+    <persons loaded="0" running="0" jammed="0"/>
+    <personTeleports total="0" abortWait="0" wrongDest="0"/>
+</statistics>

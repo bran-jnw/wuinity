@@ -1,0 +1,21 @@
+Loading net-file from 'E:\_UNITY\WUInity\wui-nity\WUInity\..\Examples\Development\Playground\sumo/rox_big.net.xml' ... done (573ms).
+Warning: At actuated tlLogic '88510203', linkIndex 0,1,2,3,4,5 has no controlling detector.
+Loading done.
+Simulation version 1.24.0 started via libsumo with time: 0.00.
+Warning: Teleporting vehicle '199'; waited too long (yield), lane='-277852126#2_0', time=1015.00.
+Warning: Vehicle '199' ends teleporting on edge '10386729#4', time=1028.00.
+Warning: Teleporting vehicle '634'; waited too long (yield), lane=':88510819_8_0', time=1463.00.
+Warning: Vehicle '634' ends teleporting on edge '-419998995#1', time=1463.00.
+Simulation ended at time: 36000.00.
+Reason: Libsumo requested termination.
+Performance:
+ Duration: 91.68s
+ Real time factor: 392.687
+ UPS: 14494.818709
+Vehicles:
+ Inserted: 1000
+ Running: 0
+ Waiting: 0
+ Teleports: 2 (Yield: 2)
+DijkstraRouter answered 1000 queries and explored 1862.49 edges on average.
+DijkstraRouter spent 2.83s answering queries (2.83ms on average).
