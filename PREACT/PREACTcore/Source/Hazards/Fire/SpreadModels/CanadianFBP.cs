@@ -119,12 +119,10 @@ namespace PREACT.Fire
     /// </summary>
     public class CanadianFBP
     {
-
-        string version = "Last modified June 2015,  by BMW ";
-        string ver = "Version 5.0001  ";
-
-        const double slopelimit_isi = 0.01;
-        const int numfuels = 18;
+        static readonly double slopelimit_isi = 0.01;
+        static readonly int numfuels = 18;
+        static readonly string version = "Last modified June 2015,  by BMW ";
+        static readonly string ver = "Version 5.0001  ";       
 
         Dictionary<string, fuel_coefs> _fuels;
 
@@ -133,19 +131,18 @@ namespace PREACT.Fire
             setup_const();
         }
 
-        public void calculate(inputs input, fuel_coefs pt, main_outs mainOuts, snd_outs secondaryOuts, fire_struc headfire, fire_struc flankfire, fire_struc backfire)
+        public void calculate(inputs input, fuel_coefs[] fuels, main_outs mainOuts, snd_outs secondaryOuts, fire_struc headfire, fire_struc flankfire, fire_struc backfire)
         {
             char firetype = ' ';
             double accn;
-            fuel_coefs ptr = pt;
-            zero_main(mainOuts); 
+            zero_main(mainOuts);
             zero_sec(secondaryOuts);
             zero_fire(headfire);
             zero_fire(flankfire);
             zero_fire(backfire);
-            mainOuts.covertype = get_fueltype_number(ptr, input.fueltype);
+            mainOuts.covertype = get_fueltype_number(input.fueltype);
             mainOuts.ff = ffmc_effect(input.ffmc);
-            mainOuts.rss = rate_of_spread(input, ptr, mainOuts);
+            mainOuts.rss = rate_of_spread(input, fuels, mainOuts);
             headfire.rss = mainOuts.rss;
             mainOuts.sfc = surf_fuel_consump(input);
             mainOuts.sfi = fire_intensity(mainOuts.sfc, mainOuts.rss);
@@ -153,7 +150,7 @@ namespace PREACT.Fire
             if (mainOuts.covertype == 'c')
             {
                 mainOuts.fmc = foliar_moisture(input, mainOuts);
-                mainOuts.csi = crit_surf_intensity((ptr), mainOuts.fmc);
+                mainOuts.csi = crit_surf_intensity(fuels, mainOuts.fmc);
                 mainOuts.rso = critical_ros(input.fueltype, mainOuts.sfc, mainOuts.csi);
                 firetype = fire_type(mainOuts.csi, mainOuts.sfi);
 
@@ -163,7 +160,7 @@ namespace PREACT.Fire
                     headfire.cfb = crown_frac_burn(mainOuts.rss, mainOuts.rso);
                     headfire.fd = fire_description(headfire.cfb);
                     headfire.ros = final_ros(input, mainOuts.fmc, mainOuts.isi, headfire.cfb, mainOuts.rss);
-                    headfire.cfc = crown_consump(input, (ptr), headfire.cfb);
+                    headfire.cfc = crown_consump(input, fuels, headfire.cfb);
                     headfire.fc = headfire.cfc + mainOuts.sfc;
                     headfire.fi = fire_intensity(headfire.fc, headfire.ros);
                 }
@@ -178,11 +175,11 @@ namespace PREACT.Fire
             }
             secondaryOuts.lb = l_to_b(input.fueltype, mainOuts.wsv);
             backfire.isi = backfire_isi(mainOuts);
-            backfire.rss = backfire_ros(input, ptr, mainOuts, backfire.isi);
+            backfire.rss = backfire_ros(input, fuels, mainOuts, backfire.isi);
             flankfire.rss = flankfire_ros(headfire.rss, backfire.rss, secondaryOuts.lb);
-            backfire.fi = fire_behaviour(input, ptr, mainOuts, backfire);
+            backfire.fi = fire_behaviour(input, fuels, mainOuts, backfire);
             flankfire.ros = flankfire_ros(headfire.ros, backfire.ros, secondaryOuts.lb);
-            flankfire.fi = flank_fire_behaviour(input, ptr, mainOuts, flankfire);
+            flankfire.fi = flank_fire_behaviour(input, fuels, mainOuts, flankfire);
 
             if (input.pattern == 1 && input.time > 0)
             {
@@ -336,27 +333,23 @@ namespace PREACT.Fire
             _fuels.Add(fuel.fueltype, fuel);
         }
 
-        char get_fueltype_number(fuel_coefs ptr, string fuel)
+        char get_fueltype_number(string fuel)
         {
             int i;
-            char cover;
-            if (fuel[0] >= 'a' && fuel[0] <= 'z') fuel[0] += 'A' - 'a';
-            if (fuel[2] >= 'A' && fuel[2] <= 'Z') fuel[2] += 'a' - 'A';
-            for (i = 0; i < numfuels && (strncmp(ptr.fueltype, fuel, 3) != 0); i++) (*ptr)++;
+            char cover = ' ';
 
-            if (i >= numfuels)
+            fuel_coefs f;
+            if (_fuels.TryGetValue(fuel, out f))
             {
-                //printf(" %s not a recognizable fuel type\n ", fuel);
+                if (fuel[0] == 'C' || fuel[0] == 'M')
+                {
+                    cover = 'c';
+                }
+                else
+                {
+                    cover = 'n';
+                }
             }
-            if (fuel[0] == 'C' || fuel[0] == 'M')
-            {
-                cover = 'c';
-            }            
-            else
-            {
-                cover = 'n';
-            }              
-
             return (cover);
         }
 
@@ -368,7 +361,7 @@ namespace PREACT.Fire
             return ff;
         }
 
-        double rate_of_spread(inputs inp, fuel_coefs ptr, main_outs at)
+        double rate_of_spread(inputs inp, fuel_coefs[] ptr, main_outs at)
         {
             double fw, isz, mult = 0, rsi;
             at.ff = ffmc_effect(inp.ffmc);
@@ -384,49 +377,49 @@ namespace PREACT.Fire
             return (at.rss);
         }
 
-        double ros_calc(inputs inp, fuel_coefs ptr, double isi, ref double mult)
+        double ros_calc(inputs inp, fuel_coefs[] ptr, double isi, ref double mult)
         {
             double ros;
             if (inp.fueltype == "O1")
             {
                 return grass(ptr, inp.cur, isi, ref mult);
-            }                
+            }
             if (inp.fueltype == "M1" || inp.fueltype == "M2")
             {
                 return (mixed_wood(ptr, isi, ref mult, inp.pc));
-            }                
+            }
             if (inp.fueltype == "M3" || inp.fueltype == "M4")
             {
                 return (dead_fir(ptr, inp.pdf, isi, ref mult));
-            }                
+            }
             if (inp.fueltype == "D2")
             {
                 return (D2_ROS(ptr, isi, inp.bui, ref mult));
             }
-                
+
             /* if all else has fail its a conifer   */
             return conifer(ptr, isi, ref mult);
         }
 
 
-        double grass(fuel_coefs ptr, double cur, double isi, ref double mult)
+        double grass(fuel_coefs[] ptr, double cur, double isi, ref double mult)
         {
             double mu, ros;
             if ((double)(cur) >= 58.8) mu = 0.176 + 0.02 * ((double)(cur) - 58.8);
             else mu = 0.005 * (Mathd.Exp(0.061 * (double)(cur)) - 1.0);
-            ros = mu * (ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isi)), ptr.c));
+            ros = mu * (ptr[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[0].b * isi)), ptr[0].c));
             if (mu < 0.001) mu = 0.001;  /* to have some value here*/
             mult = mu;
             return (ros);
         }
 
-        double mixed_wood(fuel_coefs ptr, double isi, ref double mu, int pc)
+        double mixed_wood(fuel_coefs[] ptr, double isi, ref double mu, int pc)
         {
             double ros, mult, ros_d1, ros_c2;
             int i;
             mu = pc / 100.0;
-            ros_c2 = ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isi)), ptr.c);
-            if (ptr.fueltype == "M2")
+            ros_c2 = ptr[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[0].b * isi)), ptr[0].c);
+            if (ptr[0].fueltype == "M2")
             {
                 mult = 0.2;
             }
@@ -435,30 +428,40 @@ namespace PREACT.Fire
                 mult = 1.0;
             }
 
-            for (i = 0; strncmp(ptr->fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++) ;
-            if (i >= numfuels) { printf(" prob in mixedwood   d1 not found \n"); exit(9); }
-            ros_d1 = ptr->a * pow((1.0 - exp(-1.0 * ptr->b * isi)), ptr->c);
+
+            if (ptr[1].fueltype != "D1")
+            {
+                //bad
+                //printf(" prob in mixedwood   d1 not found \n"); exit(9);
+                return 0;
+            }
+
+            ros_d1 = ptr[1].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[1].b * isi)), ptr[1].c);
 
             ros = (pc / 100.0) * ros_c2 + mult * (100 - pc) / 100.0 * ros_d1;
             return (ros);
         }
 
-        double dead_fir(fuel_coefs ptr, int pdf, double isi, ref double mu)
+        double dead_fir(fuel_coefs[] ptr, int pdf, double isi, ref double mu)
         {
             double a, b, c;
             int i;
             double ros, rosm3or4_max, ros_d1, greenness = 1.0;
 
-            if (ptr.fueltype == "M4")
+            if (ptr[0].fueltype == "M4")
             {
                 greenness = 0.2;
-            }            
+            }
 
-            rosm3or4_max = ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isi)), ptr.c);
+            rosm3or4_max = ptr[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[0].b * isi)), ptr[0].c);
 
-            for (i = 0; strncmp(ptr.fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++) ;
-            if (i >= numfuels) { printf(" prob in mixedwood   d1 not found \n"); exit(9); }
-            ros_d1 = ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isi)), ptr.c);
+            if (ptr[1].fueltype != "D1")
+            {
+                //bad
+                //printf(" prob in mixedwood   d1 not found \n"); exit(9);
+                return 0;
+            }
+            ros_d1 = ptr[1].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[1].b * isi)), ptr[1].c);
 
             ros = (double)(pdf) / 100.0 * rosm3or4_max + (100.0 - (double)(pdf)) / 100.0 * greenness * ros_d1;
 
@@ -467,29 +470,38 @@ namespace PREACT.Fire
             return (ros);
         }
 
-        double D2_ROS(fuel_coefs ptr, double isi, double bui, ref double mu)
+        double D2_ROS(fuel_coefs[] ptr, double isi, double bui, ref double mu)
         {
             mu = 1.0;
-            if (bui >= 80) return (ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isi)), ptr.c));
-            else return (0.0);
+            if (bui >= 80)
+            {
+                return (ptr[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[0].b * isi)), ptr[0].c));
+            }
+            else
+            {
+                return (0.0);
+            }
         }
 
-        double conifer(fuel_coefs ptr, double isi, ref double mu)
+        double conifer(fuel_coefs[] ptr, double isi, ref double mu)
         {
             mu = 1.0;
-            return (ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isi)), ptr.c));
+            return (ptr[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[0].b * isi)), ptr[0].c));
         }
 
-        double bui_effect(fuel_coefs ptr, main_outs at, double bui)
+        double bui_effect(fuel_coefs[] ptr, main_outs at, double bui)
         {
             double bui_avg = 50.0;
 
-            if (bui == 0) bui = 1.0;
-            at.be = Mathd.Exp(bui_avg * Mathd.Log(ptr.q) * ((1.0 / bui) - (1.0 / ptr.bui0)));
+            if (bui == 0)
+            {
+                bui = 1.0;
+            }
+            at.be = Mathd.Exp(bui_avg * Mathd.Log(ptr[0].q) * ((1.0 / bui) - (1.0 / ptr[0].bui0)));
             return (at.be);
         }
 
-        double slope_effect(inputs inp, fuel_coefs ptr, main_outs at, double isi)
+        double slope_effect(inputs inp, fuel_coefs[] ptr, main_outs at, double isi)
         /* ISI is ISZ really */
         {
             double isf, rsf, wse, ps, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy,
@@ -500,35 +512,50 @@ namespace PREACT.Fire
             if (ps > 70.0)
             {
                 ps = 70.0;   /* edited in version 4.6*/
-            }            
+            }
             at.sf = Mathd.Exp(3.533 * Mathd.Pow(ps / 100.0, 1.2));
+
             if (at.sf > 10.0)
             {
                 at.sf = 10.00;  /* added to ensure maximum is correct in version 4.6  */
             }
 
-            if (ptr.fueltype == "M1" || ptr.fueltype == "M2")
+            if (ptr[0].fueltype == "M1" || ptr[0].fueltype == "M2")
             {
                 isf = ISF_mixedwood(ptr, isi, inp.pc, at.sf);
-            }                
-            else if (ptr.fueltype == "M3" || ptr.fueltype == "M4")
+            }
+            else if (ptr[0].fueltype == "M3" || ptr[0].fueltype == "M4")
             {
                 isf = ISF_deadfir(ptr, isi, inp.pdf, at.sf);
-            }                
+            }
             else
             {
                 rsz = ros_calc(inp, ptr, isi, ref mu);
                 rsf = rsz * at.sf;
 
-                if (rsf > 0.0) check = 1.0 - Mathd.Pow((rsf / (mu * ptr.a)), (1.0 / ptr.c));
-                else check = 1.0;
-                if (check < slopelimit_isi) check = slopelimit_isi;
+                if (rsf > 0.0)
+                {
+                    check = 1.0 - Mathd.Pow((rsf / (mu * ptr[0].a)), (1.0 / ptr[0].c));
+                }
+                else
+                {
+                    check = 1.0;
+                }
 
-                isf = (1.0 / (-1.0 * ptr.b)) * Mathd.Log(check);
+                if (check < slopelimit_isi)
+                {
+                    check = slopelimit_isi;
+                }
+
+                isf = (1.0 / (-1.0 * ptr[0].b)) * Mathd.Log(check);
             }
+
             if (isf == 0.0) isf = isi;  /* should this be 0.0001 really  */
             wse1 = Mathd.Log(isf / (0.208 * at.ff)) / 0.05039;
-            if (wse1 <= 40.0) wse = wse1;
+            if (wse1 <= 40.0)
+            {
+                wse = wse1;
+            }
             else
             {
                 if (isf > (0.999 * 2.496 * at.ff)) isf = 0.999 * 2.496 * at.ff;
@@ -551,18 +578,28 @@ namespace PREACT.Fire
             return ((double)(wsv));
         }
 
-        double ISF_mixedwood(fuel_coefs ptr, double isz, int pc, double sf)
+        double ISF_mixedwood(fuel_coefs[] fuels, double isz, int pc, double sf)
         {
             double check, mult, rsf_d1, rsf_c2, isf_d1, isf_c2;
             int i;
 
-            rsf_c2 = sf * ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isz)), ptr.c);
-            if (rsf_c2 > 0.0) check = 1.0 - Mathd.Pow((rsf_c2 / (ptr.a)), (1.0 / ptr.c));
-            else check = 1.0;
-            if (check < slopelimit_isi) check = slopelimit_isi;
-            isf_c2 = (1.0 / (-1.0 * ptr.b)) * Mathd.Log(check);
+            rsf_c2 = sf * fuels[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * fuels[0].b * isz)), fuels[0].c);
+            if (rsf_c2 > 0.0)
+            {
+                check = 1.0 - Mathd.Pow((rsf_c2 / (fuels[0].a)), (1.0 / fuels[0].c));
+            }
+            else
+            { 
+                check = 1.0;
+            }
 
-            if (ptr.fueltype == "M2")
+            if (check < slopelimit_isi)
+            {
+                check = slopelimit_isi;
+            }
+            isf_c2 = (1.0 / (-1.0 * fuels[0].b)) * Mathd.Log(check);
+
+            if (fuels[0].fueltype == "M2")
             {
                 mult = 0.2;
             }
@@ -570,44 +607,90 @@ namespace PREACT.Fire
             {
                 mult = 1.0;
             }
-            for (i = 0; strncmp(ptr.fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++);
-            rsf_d1 = sf * (mult * ptr.a) * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isz)), ptr.c);
 
-            if (rsf_d1 > 0.0) check = 1.0 - Mathd.Pow((rsf_d1 / (mult * ptr.a)), (1.0 / ptr.c));
-            else check = 1.0;
-            if (check < slopelimit_isi) check = slopelimit_isi;
-            isf_d1 = (1.0 / (-1.0 * ptr.b)) * Mathd.Log(check);
+            if (fuels[1].fueltype != "D1")
+            {
+                //bad
+                return 0;
+            }
+            rsf_d1 = sf * (mult * fuels[1].a) * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * fuels[1].b * isz)), fuels[1].c);
 
-            return (((double)(pc) / 100.0) * isf_c2 + (100 - pc)) / 100.0 * isf_d1);
+            if (rsf_d1 > 0.0)
+            { check = 1.0 - Mathd.Pow((rsf_d1 / (mult * fuels[1].a)), (1.0 / fuels[1].c));
+            }
+            else
+            {
+                check = 1.0;
+            }
+
+            if (check < slopelimit_isi)
+            {
+                check = slopelimit_isi;
+            }
+            isf_d1 = (1.0 / (-1.0 * fuels[1].b)) * Mathd.Log(check);
+
+            return ((((double)(pc) / 100.0) * isf_c2 + (100 - pc)) / 100.0 * isf_d1);
         }
 
-        double ISF_deadfir(fuel_coefs ptr, double isz, int pdf, double sf)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ptr">Assumes first fuel in array is M type fuel, second D1.</param>
+        /// <param name="isz"></param>
+        /// <param name="pdf"></param>
+        /// <param name="sf"></param>
+        /// <returns></returns>
+        double ISF_deadfir(fuel_coefs[] ptr, double isz, int pdf, double sf)
         {
             double check, mult, rsf_d1, rsf_max, isf_d1, isf_max;
             int i;
 
-            rsf_max = sf * ptr.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isz)), ptr.c);
-            if (rsf_max > 0.0) check = 1.0 - Mathd.Pow((rsf_max / (ptr.a)), (1.0 / ptr.c));
-            else check = 1.0;
-            if (check < slopelimit_isi) check = slopelimit_isi;
-            isf_max = (1.0 / (-1.0 * ptr.b)) * Mathd.Log(check);
+            rsf_max = sf * ptr[0].a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[0].b * isz)), ptr[0].c);
+            if (rsf_max > 0.0)
+            {
+                check = 1.0 - Mathd.Pow((rsf_max / (ptr[0].a)), (1.0 / ptr[0].c));
+            }
+            else
+            {
+                check = 1.0;
+            }
 
-            if (ptr.fueltype == "M4")
+            if (check < slopelimit_isi)
+            {
+                check = slopelimit_isi;
+            }
+            isf_max = (1.0 / (-1.0 * ptr[0].b)) * Mathd.Log(check);
+
+            if (ptr[0].fueltype == "M4")
             {
                 mult = 0.2;
             }
             else
             {
                 mult = 1.0;
-            }            
+            }
 
-            for (i = 0; strncmp(ptr.fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++) ;
-            rsf_d1 = sf * (mult * ptr.a) * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr.b * isz)), ptr.c);
+            if (ptr[1].fueltype != "D1")
+            {
+                //bad
+                return 0;
+            }
+            rsf_d1 = sf * (mult * ptr[1].a) * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * ptr[1].b * isz)), ptr[1].c);
 
-            if (rsf_d1 > 0.0) check = 1.0 - Mathd.Pow((rsf_d1 / (mult * ptr.a)), (1.0 / ptr.c));
-            else check = 1.0;
-            if (check < slopelimit_isi) check = slopelimit_isi;
-            isf_d1 = (1.0 / (-1.0 * ptr.b)) * Mathd.Log(check);
+            if (rsf_d1 > 0.0)
+            {
+                check = 1.0 - Mathd.Pow((rsf_d1 / (mult * ptr[1].a)), (1.0 / ptr[1].c));
+            }
+            else
+            {
+                check = 1.0;
+            }
+
+            if (check < slopelimit_isi)
+            {
+                check = slopelimit_isi;
+            }
+            isf_d1 = (1.0 / (-1.0 * ptr[1].b)) * Mathd.Log(check);
 
             return (((double)(pdf) / 100.0) * isf_max + (100.0 - (double)(pdf)) / 100.0 * isf_d1);
         }
@@ -728,9 +811,9 @@ namespace PREACT.Fire
         }
 
 
-        double crit_surf_intensity(fuel_coefs ptr, double fmc)
+        double crit_surf_intensity(fuel_coefs[] ptr, double fmc)
         {
-            return (0.001 * Mathd.Pow(ptr.cbh * (460.0 + 25.9 * fmc), 1.5));
+            return (0.001 * Mathd.Pow(ptr[0].cbh * (460.0 + 25.9 * fmc), 1.5));
         }
 
         double critical_ros(string ft, double sfc, double csi)
@@ -779,10 +862,10 @@ namespace PREACT.Fire
             return (rsc);
         }
 
-        double crown_consump(inputs inp, fuel_coefs ptr, double cfb)
+        double crown_consump(inputs inp, fuel_coefs[] ptr, double cfb)
         {
             double cfc;
-            cfc = ptr.cfl * cfb;
+            cfc = ptr[0].cfl * cfb;
             if (inp.fueltype == "M1" || inp.fueltype == "M2")
             {
                 cfc = inp.pc / 100.0 * cfc;
@@ -821,7 +904,7 @@ namespace PREACT.Fire
             return (0.208 * at.ff * bfw);
         }
 
-        double backfire_ros(inputs inp, fuel_coefs ptr, main_outs at, double bisi)
+        double backfire_ros(inputs inp, fuel_coefs[] ptr, main_outs at, double bisi)
         {
             double mult = 0.0, bros;
             bros = ros_calc(inp, ptr, bisi, ref mult);
@@ -850,13 +933,20 @@ namespace PREACT.Fire
         double acceleration(inputs inp, double cfb)
         {
             int i;
-            char canopy = 'c',
-             open_list[10][3] ={ "O1","C1","S1","S2","S3","o1","c1","s1","s2","s3"}
-            ;
-            for (i = 0; strncmp(inp.fueltype, open_list[i], 2) != 0 && i < 10; i++) ;
-            if (i < 10) canopy = 'o';
-            if (canopy == 'o') return (0.115);
-            else return (0.115 - 18.8 * Mathd.Pow(cfb, 2.5) * Mathd.Exp(-8.0 * cfb));
+            char canopy = 'c';
+
+            if (inp.fueltype == "O1" || inp.fueltype == "C1" || inp.fueltype == "S1" || inp.fueltype == "S2" || inp.fueltype == "S3")
+            {
+                canopy = 'o';
+            }
+            if (canopy == 'o')
+            {
+                return (0.115);
+            }
+            else
+            {
+                return (0.115 - 18.8 * Mathd.Pow(cfb, 2.5) * Mathd.Exp(-8.0 * cfb));
+            }
         }
 
         double flankfire_ros(double ros, double bros, double lb)
@@ -887,7 +977,7 @@ namespace PREACT.Fire
             else return (99);
         }
 
-        double fire_behaviour(inputs inp, fuel_coefs ptr, main_outs at, fire_struc f)
+        double fire_behaviour(inputs inp, fuel_coefs[] ptr, main_outs at, fire_struc f)
         {
             double sfi, fi = 0;
             char firetype;
@@ -913,7 +1003,7 @@ namespace PREACT.Fire
             return (fi);
         }
 
-        double flank_fire_behaviour(inputs inp, fuel_coefs ptr, main_outs at, fire_struc f)
+        double flank_fire_behaviour(inputs inp, fuel_coefs[] ptr, main_outs at, fire_struc f)
         {
             double sfi, fi = 0;
             char firetype;

@@ -90,7 +90,7 @@ namespace PREACT
             _engine = engine;
             _input = input;
             _simulationIndex = simulationIndex;
-            _timeManager = new TimeManager();
+            _timeManager = new TimeManager(_input);
             _spatialManager = new SpatialManager(this);
             _weatherManager = new WeatherManager();
             _hazardManager = new HazardManager(this);

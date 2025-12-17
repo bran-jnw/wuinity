@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<PAMDataset>
+<Metadata>
+<MDI key="Creator">FlamMap6 Desktop Application</MDI>
+</Metadata>
+  <PAMRasterBand band="1">
+    <Description>Farsite Arrival Time</Description>
+    <UnitType>Minutes</UnitType>
+  </PAMRasterBand>
+</PAMDataset>

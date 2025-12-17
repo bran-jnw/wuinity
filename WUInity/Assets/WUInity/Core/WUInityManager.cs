@@ -177,7 +177,7 @@ namespace WUInity
             if (AutoLoadExample && DeveloperMode)
             {
                 bool success = false;
-                string file = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "..\\Examples\\Roxborough\\Roxborough_example.wui");                
+                string file = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "..\\Examples\\Development\\Playground\\Playground.wui");                
                 if (File.Exists(file))
                 {                    
                     _engine.LoadInputFromFile(file, out success);

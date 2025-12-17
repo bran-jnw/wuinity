@@ -1,5 +1,5 @@
 [Simulation]
-Name=Roxborough_example
+Name=Playground
 LowerLeftLatLon=39.409924,-105.104505
 DomainSize=10000.0,11000.0
 DeltaTime=1.0
@@ -50,9 +50,20 @@ UTMoffset=-491253.49,-4359238.56
 DestinationChoice=EvacGroup
 
 [Fire]
-FireModule=AscImport
+FireModule=CellParticleHybrid
 LcpFile=fire/rox_big_burning_city.lcp
 GraphicalFireInputFile=fire/example.gfi
+
+[CellParticleHybrid]
+RootFolder=fireCell
+FuelModelsFile=default.fuel
+InitialFuelMoistureFile=default.fmc
+IgnitionPointsFile=example.ign
+WeatherFile=example.wtr
+WindFile=example_seconds.wnd 
+UseRandomIgnitionMap=false
+RandomIgnitionPoints=0
+UseInitialIgnitionMap=false
 
 [AscImport]
 RootFolder=flammap
@@ -73,10 +84,16 @@ InitialFuelMoistureFile=fireCell/default.fmc
 OutputName=trigger_buffer.asc
 
 [Smoke]
-SmokeModule=GlobalSmoke
+SmokeModule=AdvectDiffuse3D
 
 [GlobalSmoke]
 ExtinctionFile=globalSmoke/extCoeffRamp.exc
+
+[AdvectDiffuse3D]
+MixingLayerHeight=250.0
+
+[AdvectDiffuseMixingLayer]
+MixingLayerHeight=250.0
 
 [WUIShow]
 SendDataToWUIShow=false
