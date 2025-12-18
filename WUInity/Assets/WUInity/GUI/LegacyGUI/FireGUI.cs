@@ -153,13 +153,13 @@ namespace WUInity.UI
                 ++buttonIndex;                
             }
 
-            ++buttonIndex;
+            /*++buttonIndex;
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Farsite import"))
             {
                 menuChoice = ActiveMenu.Farsite;
                 _wuinityManager.SetSampleMode(DataSampleMode.Farsite);
             }
-            ++buttonIndex;
+            ++buttonIndex;*/
         }
 
         void OpenLoadLCP()

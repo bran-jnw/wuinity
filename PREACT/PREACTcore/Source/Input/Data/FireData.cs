@@ -137,7 +137,7 @@ namespace PREACT.IO
 
         public void LoadFuelModelsInput(FireInput fireInput, string filePath, bool updateInput, out bool success)
         {
-            _fuelModelsData = FuelModelInput.LoadFuelModelInputFile(filePath, out success);
+            _fuelModelsData = FuelModelInput.LoadFromFile(filePath, out success);
             if (success && updateInput)
             {
                 fireInput.FireCellInput.FuelModelsFile = Path.GetFileName(filePath);

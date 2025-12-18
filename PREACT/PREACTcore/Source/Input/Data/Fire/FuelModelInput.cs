@@ -54,19 +54,19 @@ namespace PREACT.Fire
             Fuels = fuels;
         }
 
-        public static FuelModelInput LoadFuelModelInputFile(string file, out bool success)
+        public static FuelModelInput LoadFromFile(string filePath, out bool success)
         {
             Engine.Message(null, Engine.LogType.Log, " Attempting to load fuel model file.");
             success = false;
 
             string[] fuelLines;
-            if (File.Exists(file))
+            if (File.Exists(filePath))
             {
-                fuelLines = File.ReadAllLines(file);
+                fuelLines = File.ReadAllLines(filePath);
             }
             else
             {
-                Engine.Message(null, Engine.LogType.Warning, "Fuel model file " + file + " not found." );
+                Engine.Message(null, Engine.LogType.Warning, "Fuel model file " + filePath + " not found." );
                 return null;
             }
 
