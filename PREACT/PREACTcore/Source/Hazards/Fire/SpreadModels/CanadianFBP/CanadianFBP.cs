@@ -1,138 +1,15 @@
 ﻿//Adapted from https://github.com/bran-jnw/Cell2Fire/blob/main/cell2fire/Cell2FireC/FBPfunc5_NoDebug.c 2025 by Jonathan Wahlqvist
-using System.Collections.Generic;
-using PREACT.Math;
-using System;
-using System.IO;
-
-namespace PREACT.Fire
-{  
-    public class Inputs
-    {
-        public double FFMC, WindSpeed, gfl, BUI, Lat, Lon;
-        public int Time, Pattern, mon, jd, jd_min, WindAzimuth, PercentSlope, saz, pc, pdf, cur, elev, hour, hourly;
-    }
-
-    public class CFBPFuel
-    {
-        public string DescriptiveName;
-        public CanadianFBP.FuelTypes FuelType;
-        public FuelCoefficients Coefficients;
-        public PREACTColor Color;
-
-        public CFBPFuel(string fuel_type_column, string descriptiveName, PREACTColor color)
-        {
-            DescriptiveName = descriptiveName;
-
-            if (fuel_type_column.StartsWith("C-1")) FuelType = CanadianFBP.FuelTypes.C1;
-            else if (fuel_type_column.StartsWith("C-2")) FuelType = CanadianFBP.FuelTypes.C2;
-            else if (fuel_type_column.StartsWith("C-3")) FuelType = CanadianFBP.FuelTypes.C3;
-            else if (fuel_type_column.StartsWith("C-4")) FuelType = CanadianFBP.FuelTypes.C4;
-            else if (fuel_type_column.StartsWith("C-5")) FuelType = CanadianFBP.FuelTypes.C5;
-            else if (fuel_type_column.StartsWith("C-6")) FuelType = CanadianFBP.FuelTypes.C6;
-            else if (fuel_type_column.StartsWith("C-7")) FuelType = CanadianFBP.FuelTypes.C7;
-
-            else if (fuel_type_column.StartsWith("D-1")) FuelType = CanadianFBP.FuelTypes.D1;
-            else if (fuel_type_column.StartsWith("D-2")) FuelType = CanadianFBP.FuelTypes.D2;
-
-            else if (fuel_type_column.StartsWith("S-1")) FuelType = CanadianFBP.FuelTypes.S1;
-            else if (fuel_type_column.StartsWith("S-2")) FuelType = CanadianFBP.FuelTypes.S2;
-            else if (fuel_type_column.StartsWith("S-3")) FuelType = CanadianFBP.FuelTypes.S3;
-
-            else if (fuel_type_column.StartsWith("O-1a")) FuelType = CanadianFBP.FuelTypes.O1a;
-            else if (fuel_type_column.StartsWith("O-1b")) FuelType = CanadianFBP.FuelTypes.O1b;
-
-            else if (fuel_type_column.StartsWith("M-1")) FuelType = CanadianFBP.FuelTypes.M1;
-            else if (fuel_type_column.StartsWith("M-2")) FuelType = CanadianFBP.FuelTypes.M2;
-            else if (fuel_type_column.StartsWith("M-3")) FuelType = CanadianFBP.FuelTypes.M3;
-            else if (fuel_type_column.StartsWith("M-4")) FuelType = CanadianFBP.FuelTypes.M4;
-
-            Coefficients = new FuelCoefficients(CanadianFBP.GetFuelCoefficients(nameof(FuelType)));
-
-            //extra information that might be required
-            int percent_conifer = 0, percent_dead_fir = 0;
-            if (FuelType == CanadianFBP.FuelTypes.M1 || FuelType == CanadianFBP.FuelTypes.M2)
-            {
-                string[] split = fuel_type_column.Split('(');
-                if (split.Length > 1)
-                {
-                    split = split[1].Split(' ');
-                    if (int.TryParse(split[0], out percent_conifer)) ;
-                }
-            }
-            Coefficients.PercentConifer = percent_conifer;
-
-            if (FuelType == CanadianFBP.FuelTypes.M3 || FuelType == CanadianFBP.FuelTypes.M4)
-            {
-                string[] split = fuel_type_column.Split('(');
-                if (split.Length > 1)
-                {
-                    split = split[1].Split(' ');
-                    int.TryParse(split[0], out percent_dead_fir);
-                }
-            }
-            Coefficients.PercentDeadFir = percent_dead_fir;
-        }
-    }
-
-    public class FuelCoefficients
-    {        
-        public string FuelType = string.Empty;
-        public double q, bui0, CrownBaseHeight, cfl;
-        public int PercentConifer, PercentDeadFir;
-        public double a, b, c;
-
-        public FuelCoefficients()
-        {
-
-        }
-        
-        public FuelCoefficients(FuelCoefficients copyFrom)
-        {
-            if(copyFrom != null)
-            {
-                FuelType = copyFrom.FuelType;
-                q = copyFrom.q;
-                bui0 = copyFrom.bui0;
-                CrownBaseHeight = copyFrom.CrownBaseHeight;
-                cfl = copyFrom.cfl;
-                PercentConifer = copyFrom.PercentConifer;
-                PercentDeadFir = copyFrom.PercentDeadFir;
-                a = copyFrom.a;
-                b = copyFrom.b;
-                c = copyFrom.c;
-            }            
-        }
-    }
-
-    public class FireStruct
-    {
-        public double ros, dist, rost, cfb, fc, cfc, time, rss, isi;
-        public char fd;
-        public double fi;
-    }
-
-    public class MainOutputs
-    {
-        public double hffmc, sfc, csi, rso, fmc, sfi, rss, isi, be, sf, raz, wsv, ff;
-        public int jd_min, jd;
-        public char covertype;
-    }
-
-    public class SecondaryOutputs
-    {
-        public double lb, area, perm, pgr, lbt;
-    }
-
-    /*   Subroutine of  FBP.C   version 4.4   Aug,2007
+//Original comments
+/*   Subroutine of  FBP.C   version 4.4   Aug,2007
     Canadian Forest Fire Behaviour Prediction System
     This code is copyright of the Canadian Forest Service, Natural Resources Canada (1992-2005)
     It is provide free of charge to anyone who wishes to incorporate it within their 
     forest fire management applications, however users should note in their application that
-    the FBP calucaltions come from the Canadianf Forest Services Fire Behaviour Prediction
+    the FBP calucaltions come from the Canadian Forest Services Fire Behaviour Prediction
     System. The Canadian Forest Service has gone through considerable testing to ensure that
     these computer functions duplicate the system as laid out in ST-X-3 (The Development
     and Structure of the Canadian Forest Fire Behaviour Prediction System (1992)) and the subsequent corrections and additions to the system (the draft "FBP Note"), however no
-    guarentte is given as to the absolute accuracy of the code.
+    guarentee is given as to the absolute accuracy of the code.
     This file contains a series of functions that go thru all the
     FBP System calculations.
     Originally  Written at P.N.F.I.  December 91, by Mike Wotton
@@ -199,6 +76,14 @@ namespace PREACT.Fire
     5.0001  June 2015
     - forgot to change the encoded version number to 5.0.  now 5.0001
     - updated header to FBP5.h */
+
+using System.Collections.Generic;
+using PREACT.Math;
+using System.IO;
+
+namespace PREACT.Fire
+{    
+    
     /// <summary>
     /// Canadian Fire Behavior Prediction
     /// </summary>
@@ -296,7 +181,7 @@ namespace PREACT.Fire
             return result;
         }
 
-        public static void Calculate(Inputs input, CFBPFuel fuel, MainOutputs mainOuts, SecondaryOutputs secondaryOuts, FireStruct headfire, FireStruct flankfire, FireStruct backfire)
+        public static void Calculate(CFBPInputs input, CFBPFuel fuel, MainOutputs mainOuts, SecondaryOutputs secondaryOuts, FireData headfire, FireData flankfire, FireData backfire)
         {
             char firetype = ' ';
             double accn;
@@ -305,56 +190,55 @@ namespace PREACT.Fire
             zero_fire(headfire);
             zero_fire(flankfire);
             zero_fire(backfire);
-            mainOuts.covertype = get_fueltype_number(fuel.Coefficients.FuelType);
+            mainOuts.CoverType = get_fueltype_number(fuel.Coefficients.FuelType);
             mainOuts.ff = ffmc_effect(input.FFMC);
-            mainOuts.rss = rate_of_spread(input, fuel, mainOuts);
-            headfire.rss = mainOuts.rss;
-            mainOuts.sfc = surf_fuel_consump(input, fuel);
-            mainOuts.sfi = fire_intensity(mainOuts.sfc, mainOuts.rss);            
+            mainOuts.SurfaceRateOfSpread = rate_of_spread(input, fuel, mainOuts);
+            headfire.SurfaceRateOfSpread = mainOuts.SurfaceRateOfSpread;
+            mainOuts.SurfaceFuelConsumption = surf_fuel_consump(input, fuel);
+            mainOuts.SurfaceFireIntensity = fire_intensity(mainOuts.SurfaceFuelConsumption, mainOuts.SurfaceRateOfSpread);            
 
-            if (mainOuts.covertype == 'c')
+            if (mainOuts.CoverType == 'c')
             {
-                mainOuts.fmc = foliar_moisture(input, mainOuts);
-                mainOuts.csi = crit_surf_intensity(fuel, mainOuts.fmc);
-                mainOuts.rso = critical_ros(mainOuts.sfc, mainOuts.csi);
-                firetype = fire_type(mainOuts.csi, mainOuts.sfi);
-
+                mainOuts.FoliarMoistureContent = foliar_moisture(input, mainOuts);
+                mainOuts.CriticalSurfaceIntensity = crit_surf_intensity(fuel, mainOuts.FoliarMoistureContent);
+                mainOuts.RSO = critical_ros(mainOuts.SurfaceFuelConsumption, mainOuts.CriticalSurfaceIntensity); //critical spread rate for crowning
+                firetype = fire_type(mainOuts.CriticalSurfaceIntensity, mainOuts.SurfaceFireIntensity); //crown fire or surface fire
 
                 if (firetype == 'c')
                 {
-                    headfire.cfb = crown_frac_burn(mainOuts.rss, mainOuts.rso);
-                    headfire.fd = fire_description(headfire.cfb);
-                    headfire.ros = final_ros(fuel, mainOuts.fmc, mainOuts.isi, headfire.cfb, mainOuts.rss);
-                    headfire.cfc = crown_consump(fuel, headfire.cfb);
-                    headfire.fc = headfire.cfc + mainOuts.sfc;
-                    headfire.fi = fire_intensity(headfire.fc, headfire.ros);
+                    headfire.CrownFractionBurned = crown_frac_burn(mainOuts.SurfaceRateOfSpread, mainOuts.RSO);
+                    headfire.FireDescription = fire_description(headfire.CrownFractionBurned);
+                    headfire.RateOfSpread = final_ros(fuel, mainOuts.FoliarMoistureContent, mainOuts.ISI, headfire.CrownFractionBurned, mainOuts.SurfaceRateOfSpread);
+                    headfire.CrownFuelConsumed = crown_consump(fuel, headfire.CrownFractionBurned);
+                    headfire.FuelConsumption = headfire.CrownFuelConsumed + mainOuts.SurfaceFuelConsumption;
+                    headfire.FireIntensity = fire_intensity(headfire.FuelConsumption, headfire.RateOfSpread);
                 }
             }
-            if (mainOuts.covertype == 'n' || firetype == 's')
+            if (mainOuts.CoverType == 'n' || firetype == 's')
             {
-                headfire.fd = 'S';
-                headfire.ros = mainOuts.rss;
-                headfire.fc = mainOuts.sfc;
-                headfire.fi = mainOuts.sfi;
-                headfire.cfb = 0.0;
+                headfire.FireDescription = 'S';
+                headfire.RateOfSpread = mainOuts.SurfaceRateOfSpread;
+                headfire.FuelConsumption = mainOuts.SurfaceFuelConsumption;
+                headfire.FireIntensity = mainOuts.SurfaceFireIntensity;
+                headfire.CrownFractionBurned = 0.0;
             }
-            secondaryOuts.lb = l_to_b(fuel.FuelType, mainOuts.wsv);
-            backfire.isi = backfire_isi(mainOuts);
-            backfire.rss = backfire_ros(input, fuel, mainOuts, backfire.isi);
-            flankfire.rss = flankfire_ros(headfire.rss, backfire.rss, secondaryOuts.lb);
-            backfire.fi = fire_behaviour(input, fuel, mainOuts, backfire);
-            flankfire.ros = flankfire_ros(headfire.ros, backfire.ros, secondaryOuts.lb);
-            flankfire.fi = flank_fire_behaviour(fuel, mainOuts, flankfire);
+            secondaryOuts.LengthToBreadth = l_to_b(fuel.FuelType, mainOuts.WindSlopeVector);
+            backfire.ISI = backfire_isi(mainOuts);
+            backfire.SurfaceRateOfSpread = backfire_ros(input, fuel, mainOuts, backfire.ISI);
+            flankfire.SurfaceRateOfSpread = flankfire_ros(headfire.SurfaceRateOfSpread, backfire.SurfaceRateOfSpread, secondaryOuts.LengthToBreadth);
+            backfire.FireIntensity = fire_behaviour(input, fuel, mainOuts, backfire);
+            flankfire.RateOfSpread = flankfire_ros(headfire.RateOfSpread, backfire.RateOfSpread, secondaryOuts.LengthToBreadth);
+            flankfire.FireIntensity = flank_fire_behaviour(fuel, mainOuts, flankfire);
 
             if (input.Pattern == 1 && input.Time > 0)
             {
-                accn = acceleration(fuel, headfire.cfb);
-                headfire.dist = spread_distance(input, headfire, accn);
-                backfire.dist = spread_distance(input, backfire, accn);
-                flankfire.dist = flank_spread_distance(input, flankfire, secondaryOuts, headfire.rost, backfire.rost, headfire.dist, backfire.dist, secondaryOuts.lb, accn);
-                headfire.time = time_to_crown(headfire.ros, mainOuts.rso, accn);
-                flankfire.time = time_to_crown(flankfire.ros, mainOuts.rso, accn);
-                backfire.time = time_to_crown(backfire.ros, mainOuts.rso, accn);
+                accn = acceleration(fuel, headfire.CrownFractionBurned);
+                headfire.Distance = spread_distance(input, headfire, accn);
+                backfire.Distance = spread_distance(input, backfire, accn);
+                flankfire.Distance = flank_spread_distance(input, flankfire, secondaryOuts, headfire.rost, backfire.rost, headfire.Distance, backfire.Distance, secondaryOuts.LengthToBreadth, accn);
+                headfire.Time = time_to_crown(headfire.RateOfSpread, mainOuts.RSO, accn);
+                flankfire.Time = time_to_crown(flankfire.RateOfSpread, mainOuts.RSO, accn);
+                backfire.Time = time_to_crown(backfire.RateOfSpread, mainOuts.RSO, accn);
             }
             else
             {
@@ -362,14 +246,14 @@ namespace PREACT.Fire
                 set_all(flankfire, input.Time);
                 set_all(backfire, input.Time);
             }
-            secondaryOuts.area = area((headfire.dist + backfire.dist), flankfire.dist);
+            secondaryOuts.Area = area((headfire.Distance + backfire.Distance), flankfire.Distance);
             if (input.Pattern == 1 && input.Time > 0)
             {
-                secondaryOuts.perm = perimeter(headfire, backfire, secondaryOuts, secondaryOuts.lbt);
+                secondaryOuts.Perimeter = perimeter(headfire, backfire, secondaryOuts, secondaryOuts.lbt);
             }
             else
             {
-                secondaryOuts.perm = perimeter(headfire, backfire, secondaryOuts, secondaryOuts.lb);
+                secondaryOuts.Perimeter = perimeter(headfire, backfire, secondaryOuts, secondaryOuts.LengthToBreadth);
             }
         }
 
@@ -397,38 +281,38 @@ namespace PREACT.Fire
             return ff;
         }
 
-        static double rate_of_spread(Inputs inputs, CFBPFuel fuel, MainOutputs outputs)
+        static double rate_of_spread(CFBPInputs inputs, CFBPFuel fuel, MainOutputs outputs)
         {
             double fw, isz, mult = 0, rsi;
             outputs.ff = ffmc_effect(inputs.FFMC);
-            outputs.raz = inputs.WindAzimuth;
+            outputs.SpreadAzimuth = inputs.WindAzimuth;
             isz = 0.208 * outputs.ff;
 
             if (inputs.PercentSlope > 0)
             {
-                outputs.wsv = slope_effect(inputs, fuel, outputs, isz);
+                outputs.WindSlopeVector = slope_effect(inputs, fuel, outputs, isz);
             }
             else
             {
-                outputs.wsv = inputs.WindSpeed;
+                outputs.WindSlopeVector = inputs.WindSpeed;
             }
 
-            if (outputs.wsv < 40.0)
+            if (outputs.WindSlopeVector < 40.0)
             {
-                fw = Mathd.Exp(0.05039 * outputs.wsv);
+                fw = Mathd.Exp(0.05039 * outputs.WindSlopeVector);
             }
             else
             {
-                fw = 12.0 * (1.0 - Mathd.Exp(-0.0818 * (outputs.wsv - 28)));
+                fw = 12.0 * (1.0 - Mathd.Exp(-0.0818 * (outputs.WindSlopeVector - 28)));
             }
 
-            outputs.isi = isz * fw;
-            rsi = ros_calc(inputs, fuel, outputs.isi, ref mult);
-            outputs.rss = rsi * bui_effect(fuel, outputs, inputs.BUI);
-            return (outputs.rss);
+            outputs.ISI = isz * fw;
+            rsi = ros_calc(inputs, fuel, outputs.ISI, ref mult);
+            outputs.SurfaceRateOfSpread = rsi * bui_effect(fuel, outputs, inputs.BUI);
+            return (outputs.SurfaceRateOfSpread);
         }
 
-        static double ros_calc(Inputs input, CFBPFuel fuel, double isi, ref double mult)
+        static double ros_calc(CFBPInputs input, CFBPFuel fuel, double isi, ref double mult)
         {
             double ros;
 
@@ -439,12 +323,12 @@ namespace PREACT.Fire
 
             if (fuel.FuelType == FuelTypes.M1 || fuel.FuelType == FuelTypes.M2)
             {
-                return (mixed_wood(fuel, isi, ref mult, input.pc));
+                return (mixed_wood(fuel, isi, ref mult, fuel.Coefficients.PercentConifer));
             }
 
             if (fuel.FuelType == FuelTypes.M3 || fuel.FuelType == FuelTypes.M4)
             {
-                return (dead_fir(fuel, input.pdf, isi, ref mult));
+                return (dead_fir(fuel, fuel.Coefficients.PercentDeadFir, isi, ref mult));
             }
 
             if (fuel.FuelType == FuelTypes.D2)
@@ -567,14 +451,14 @@ namespace PREACT.Fire
             {
                 bui = 1.0;
             }
-            at.be = Mathd.Exp(bui_avg * Mathd.Log(fuel.Coefficients.q) * ((1.0 / bui) - (1.0 / fuel.Coefficients.bui0)));
+            at.be = Mathd.Exp(bui_avg * Mathd.Log(fuel.Coefficients.q) * ((1.0 / bui) - (1.0 / fuel.Coefficients.BUI0)));
             return (at.be);
         }
 
-        static double slope_effect(Inputs input, CFBPFuel fuel, MainOutputs output, double isi)
+        static double slope_effect(CFBPInputs input, CFBPFuel fuel, MainOutputs output, double isi)
         /* ISI is ISZ really */
         {
-            double isf, rsf, wse, percentSlope, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, wsv, raz, check, wse2, wse1;
+            double isf, rsf, wse, percentSlope, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, WindSlopeVector, raz, check, wse2, wse1;
             double mu = 0.0;
 
             percentSlope = input.PercentSlope * 1.0;
@@ -582,25 +466,25 @@ namespace PREACT.Fire
             {
                 percentSlope = 70.0;   /* edited in version 4.6*/
             }
-            output.sf = Mathd.Exp(3.533 * Mathd.Pow(percentSlope / 100.0, 1.2));
+            output.SpreadFactor = Mathd.Exp(3.533 * Mathd.Pow(percentSlope / 100.0, 1.2));
 
-            if (output.sf > 10.0)
+            if (output.SpreadFactor > 10.0)
             {
-                output.sf = 10.00;  /* added to ensure maximum is correct in version 4.6  */
+                output.SpreadFactor = 10.00;  /* added to ensure maximum is correct in version 4.6  */
             }
 
             if (fuel.FuelType == FuelTypes.M1 || fuel.FuelType == FuelTypes.M2)
             {
-                isf = ISF_mixedwood(fuel, isi, fuel.Coefficients.PercentConifer, output.sf);
+                isf = ISF_mixedwood(fuel, isi, fuel.Coefficients.PercentConifer, output.SpreadFactor);
             }
             else if (fuel.FuelType == FuelTypes.M3 || fuel.FuelType == FuelTypes.M4)
             {
-                isf = ISF_deadfir(fuel, isi, input.pdf, output.sf);
+                isf = ISF_deadfir(fuel, isi, fuel.Coefficients.PercentDeadFir, output.SpreadFactor);
             }
             else
             {
                 rsz = ros_calc(input, fuel, isi, ref mu);
-                rsf = rsz * output.sf;
+                rsf = rsz * output.SpreadFactor;
 
                 if (rsf > 0.0)
                 {
@@ -619,8 +503,12 @@ namespace PREACT.Fire
                 isf = (1.0 / (-1.0 * fuel.Coefficients.b)) * Mathd.Log(check);
             }
 
-            if (isf == 0.0) isf = isi;  /* should this be 0.0001 really  */
+            if (isf == 0.0)
+            {
+                isf = isi;  /* should this be 0.0001 really  */
+            }
             wse1 = Mathd.Log(isf / (0.208 * output.ff)) / 0.05039;
+
             if (wse1 <= 40.0)
             {
                 wse = wse1;
@@ -634,20 +522,21 @@ namespace PREACT.Fire
             wrad = input.WindAzimuth / 180.0 * 3.1415926;
             wsx = input.WindSpeed * Mathd.Sin(wrad);
             wsy = input.WindSpeed * Mathd.Cos(wrad);
-            srad = input.saz / 180.0 * 3.1415926;
+            srad = input.SlopeAzimuth / 180.0 * 3.1415926;
             wsex = wse * Mathd.Sin(srad);
             wsey = wse * Mathd.Cos(srad);
             wsvx = wsx + wsex;
             wsvy = wsy + wsey;
-            wsv = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);
-            raz = Mathd.Acos(wsvy / wsv);
+            WindSlopeVector = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);
+            raz = Mathd.Acos(wsvy / WindSlopeVector);
             raz = raz / 3.1415926 * 180.0;
+
             if (wsvx < 0)
             {
                 raz = 360 - raz;
             }
-            output.raz = raz;
-            return ((double)(wsv));
+            output.SpreadAzimuth = raz;
+            return WindSlopeVector;
         }
 
         static double ISF_mixedwood(CFBPFuel fuel, double isz, int pc, double sf)
@@ -771,7 +660,7 @@ namespace PREACT.Fire
             return (300.0 * fc * ros);
         }
 
-        static double foliar_moisture(Inputs inp, MainOutputs at)
+        static double foliar_moisture(CFBPInputs inp, MainOutputs at)
         {
             double latn;
             int nd;
@@ -779,7 +668,7 @@ namespace PREACT.Fire
             at.jd_min = inp.jd_min;
             if (inp.jd_min <= 0)
             {
-                if (inp.elev < 0)
+                if (inp.Elevation < 0)
                 {
                     latn = 23.4 * Mathd.Exp(-0.0360 * (150 - inp.Lon)) + 46.0;
                     at.jd_min = (int)(0.5 + 151.0 * inp.Lat / latn);
@@ -787,7 +676,7 @@ namespace PREACT.Fire
                 else
                 {
                     latn = 33.7 * Mathd.Exp(-0.0351 * (150 - inp.Lon)) + 43.0;
-                    at.jd_min = (int)(0.5 + 142.1 * inp.Lat / latn + (0.0172 * inp.elev));
+                    at.jd_min = (int)(0.5 + 142.1 * inp.Lat / latn + (0.0172 * inp.Elevation));
                 }
             }
             nd = Mathd.Abs(inp.jd - at.jd_min);
@@ -796,7 +685,7 @@ namespace PREACT.Fire
             return (85.0 + 0.0189 * nd * nd);
         }
 
-        static double surf_fuel_consump(Inputs inp, CFBPFuel fuel)
+        static double surf_fuel_consump(CFBPInputs inp, CFBPFuel fuel)
         {
             double sfc, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
             FuelTypes ft;
@@ -840,13 +729,13 @@ namespace PREACT.Fire
             }
             if (ft == FuelTypes.O1a || ft == FuelTypes.O1b)
             {
-                return ((inp.gfl) /* change this*/ );
+                return ((inp.GrassFuelLoad) /* change this*/ );
             }
             if (ft == FuelTypes.M1 || ft == FuelTypes.M2)
             {
                 sfc_c2 = 5.0 * (1.0 - Mathd.Exp(-0.0115 * bui));
                 sfc_d1 = 1.5 * (1.0 - Mathd.Exp(-0.0183 * bui));
-                sfc = inp.pc / 100.0 * sfc_c2 + (100.0 - inp.pc) / 100.0 * sfc_d1;
+                sfc = fuel.Coefficients.PercentConifer / 100.0 * sfc_c2 + (100.0 - fuel.Coefficients.PercentConifer) / 100.0 * sfc_d1;
                 return (sfc);
             }
             if (ft == FuelTypes.S1)
@@ -941,7 +830,7 @@ namespace PREACT.Fire
         static double crown_consump(CFBPFuel fuel, double cfb)
         {
             double cfc;
-            cfc = fuel.Coefficients.cfl * cfb;
+            cfc = fuel.Coefficients.CrownFuelLoad * cfb;
             if (fuel.FuelType == FuelTypes.M1|| fuel.FuelType == FuelTypes.M2)
             {
                 cfc = fuel.Coefficients.PercentConifer / 100.0 * cfc;
@@ -953,37 +842,37 @@ namespace PREACT.Fire
                 
             return (cfc);
         }
-        static double l_to_b(FuelTypes fuelType, double ws)
+        static double l_to_b(FuelTypes fuelType, double WindSlopeVector)
         {
             if (fuelType == FuelTypes.O1a || fuelType == FuelTypes.O1b)
             {
-                return (ws < 1.0 ? 1.0 : (1.1 * Mathd.Pow(ws, 0.464)));
+                return (WindSlopeVector < 1.0 ? 1.0 : (1.1 * Mathd.Pow(WindSlopeVector, 0.464)));
             }
             else
             {
-                return (1.0 + 8.729 * Mathd.Pow(1.0 - Mathd.Exp(-0.030 * ws), 2.155));
+                return (1.0 + 8.729 * Mathd.Pow(1.0 - Mathd.Exp(-0.030 * WindSlopeVector), 2.155));
             }            
         }
 
-        static void set_all(FireStruct ptr, int time)
+        static void set_all(FireData fire, int time)
         {
-            ptr.time = 0;
-            ptr.rost = ptr.ros;
-            ptr.dist = time * ptr.ros;
+            fire.Time = 0;
+            fire.rost = fire.RateOfSpread;
+            fire.Distance = time * fire.RateOfSpread;
         }
 
-        static double backfire_isi(MainOutputs at)
+        static double backfire_isi(MainOutputs output)
         {
             double bfw;
-            bfw = Mathd.Exp(-0.05039 * at.wsv);
-            return (0.208 * at.ff * bfw);
+            bfw = Mathd.Exp(-0.05039 * output.WindSlopeVector);
+            return (0.208 * output.ff * bfw);
         }
 
-        static double backfire_ros(Inputs inp, CFBPFuel fuel, MainOutputs at, double bisi)
+        static double backfire_ros(CFBPInputs input, CFBPFuel fuel, MainOutputs output, double bisi)
         {
             double mult = 0.0, bros;
-            bros = ros_calc(inp, fuel, bisi, ref mult);
-            bros *= bui_effect(fuel, at, inp.BUI);
+            bros = ros_calc(input, fuel, bisi, ref mult);
+            bros *= bui_effect(fuel, output, input.BUI);
             return (bros);
         }
 
@@ -995,11 +884,11 @@ namespace PREACT.Fire
             return (a * b * 3.1415926 / 10000.0);
         }
 
-        static double perimeter(FireStruct h, FireStruct b, SecondaryOutputs sec, double lb)
+        static double perimeter(FireData h, FireData b, SecondaryOutputs sec, double lb)
         {
             double mult, p;
             mult = 3.1415926 * (1.0 + 1.0 / lb) * (1.0 + Mathd.Pow(((lb - 1.0) / (2.0 * (lb + 1.0))), 2.0));
-            p = (h.dist + b.dist) / 2.0 * mult;
+            p = (h.Distance + b.Distance) / 2.0 * mult;
             sec.pgr = (h.rost + b.rost) / 2.0 * mult;
 
             return (p);
@@ -1029,17 +918,17 @@ namespace PREACT.Fire
             return ((ros + bros) / (lb * 2.0));
         }
 
-        static double flank_spread_distance(Inputs inp, FireStruct ptr, SecondaryOutputs sec, double hrost, double brost, double hd, double bd, double lb, double a)
+        static double flank_spread_distance(CFBPInputs inp, FireData ptr, SecondaryOutputs sec, double hrost, double brost, double hd, double bd, double lb, double a)
         {
             sec.lbt = (lb - 1.0) * (1.0 - Mathd.Exp(-a * inp.Time)) + 1.0;
             ptr.rost = (hrost + brost) / (sec.lbt * 2.0);
             return ((hd + bd) / (2.0 * sec.lbt));
         }
 
-        static double spread_distance(Inputs inp, FireStruct ptr, double a)
+        static double spread_distance(CFBPInputs inp, FireData ptr, double a)
         {
-            ptr.rost = ptr.ros * (1.0 - Mathd.Exp(-a * inp.Time));
-            return (ptr.ros * (inp.Time + (Mathd.Exp(-a * inp.Time) / a) - 1.0 / a));
+            ptr.rost = ptr.RateOfSpread * (1.0 - Mathd.Exp(-a * inp.Time));
+            return (ptr.RateOfSpread * (inp.Time + (Mathd.Exp(-a * inp.Time) / a) - 1.0 / a));
         }
 
         static int time_to_crown(double ros, double rso, double a)
@@ -1052,52 +941,52 @@ namespace PREACT.Fire
             else return (99);
         }
 
-        static double fire_behaviour(Inputs input, CFBPFuel fuel, MainOutputs output, FireStruct f)
+        static double fire_behaviour(CFBPInputs input, CFBPFuel fuel, MainOutputs output, FireData f)
         {
             double sfi, fi = 0;
             char firetype;
-            sfi = fire_intensity(output.sfc, f.rss);
-            firetype = fire_type(output.csi, sfi);
+            sfi = fire_intensity(output.SurfaceFuelConsumption, f.SurfaceRateOfSpread);
+            firetype = fire_type(output.CriticalSurfaceIntensity, sfi);
             if (firetype == 'c')
             {
-                f.cfb = crown_frac_burn(f.rss, output.rso);
-                f.fd = fire_description(f.cfb);
-                f.ros = final_ros(fuel, output.fmc, f.isi, f.cfb, f.rss);
-                f.cfc = crown_consump(fuel, f.cfb);
-                f.fc = f.cfc + output.sfc;
-                fi = fire_intensity(f.fc, f.ros);
+                f.CrownFractionBurned = crown_frac_burn(f.SurfaceRateOfSpread, output.RSO);
+                f.FireDescription = fire_description(f.CrownFractionBurned);
+                f.RateOfSpread = final_ros(fuel, output.FoliarMoistureContent, f.ISI, f.CrownFractionBurned, f.SurfaceRateOfSpread);
+                f.CrownFuelConsumed = crown_consump(fuel, f.CrownFractionBurned);
+                f.FuelConsumption = f.CrownFuelConsumed + output.SurfaceFuelConsumption;
+                fi = fire_intensity(f.FuelConsumption, f.RateOfSpread);
             }
-            if (firetype != 'c' || output.covertype == 'n')
+            if (firetype != 'c' || output.CoverType == 'n')
             {
-                f.fc = output.sfc;
+                f.FuelConsumption = output.SurfaceFuelConsumption;
                 fi = sfi;
-                f.cfb = 0.0;
-                f.fd = 'S';
-                f.ros = f.rss;
+                f.CrownFractionBurned = 0.0;
+                f.FireDescription = 'S';
+                f.RateOfSpread = f.SurfaceRateOfSpread;
             }
             return (fi);
         }
 
-        static double flank_fire_behaviour(CFBPFuel fuel, MainOutputs at, FireStruct f)
+        static double flank_fire_behaviour(CFBPFuel fuel, MainOutputs at, FireData f)
         {
             double sfi, fi = 0;
             char firetype;
-            sfi = fire_intensity(at.sfc, f.rss);
-            firetype = fire_type(at.csi, sfi);
+            sfi = fire_intensity(at.SurfaceFuelConsumption, f.SurfaceRateOfSpread);
+            firetype = fire_type(at.CriticalSurfaceIntensity, sfi);
             if (firetype == 'c')
             {
-                f.cfb = crown_frac_burn(f.rss, at.rso);
-                f.fd = fire_description(f.cfb);
-                f.cfc = crown_consump(fuel, f.cfb);
-                f.fc = f.cfc + at.sfc;
-                fi = fire_intensity(f.fc, f.ros);
+                f.CrownFractionBurned = crown_frac_burn(f.SurfaceRateOfSpread, at.RSO);
+                f.FireDescription = fire_description(f.CrownFractionBurned);
+                f.CrownFuelConsumed = crown_consump(fuel, f.CrownFractionBurned);
+                f.FuelConsumption = f.CrownFuelConsumed + at.SurfaceFuelConsumption;
+                fi = fire_intensity(f.FuelConsumption, f.RateOfSpread);
             }
-            if (firetype != 'c' || at.covertype == 'n')
+            if (firetype != 'c' || at.CoverType == 'n')
             {
-                f.fc = at.sfc;
+                f.FuelConsumption = at.SurfaceFuelConsumption;
                 fi = sfi;
-                f.cfb = 0.0;
-                f.fd = 'S';
+                f.CrownFractionBurned = 0.0;
+                f.FireDescription = 'S';
                 /*   f.ros=f.rss;  removed...v4.5   should not have been here ros set in flankfire_ros()  */
             }
             return (fi);
@@ -1105,26 +994,26 @@ namespace PREACT.Fire
 
         static void zero_main(MainOutputs m)
         {
-            m.sfc = 0.0;
-            m.csi = 0.0; m.rso = 0.0; m.fmc = 0; m.sfi = 0.0;
-            m.rss = 0.0; m.isi = 0.0; m.be = 0.0; m.sf = 1.0; m.raz = 0.0; m.wsv = 0.0;
+            m.SurfaceFuelConsumption = 0.0;
+            m.CriticalSurfaceIntensity = 0.0; m.RSO = 0.0; m.FoliarMoistureContent = 0; m.SurfaceFireIntensity = 0.0;
+            m.SurfaceRateOfSpread = 0.0; m.ISI = 0.0; m.be = 0.0; m.SpreadFactor = 1.0; m.SpreadAzimuth = 0.0; m.WindSlopeVector = 0.0;
             m.ff = 0.0; m.jd = 0; m.jd_min = 0;
-            m.covertype = ' ';
+            m.CoverType = ' ';
         }
 
         static void zero_sec(SecondaryOutputs s)
         {
-            s.lb = 0.0;
-            s.area = 0.0;
-            s.perm = 0.0;
+            s.LengthToBreadth = 0.0;
+            s.Area = 0.0;
+            s.Perimeter = 0.0;
             s.pgr = 0.0;
         }
 
-        static void zero_fire(FireStruct a)
+        static void zero_fire(FireData a)
         {
-            a.ros = 0.0;
-            a.dist = 0.0; a.rost = 0.0; a.cfb = 0.0; a.fi = 0.0;
-            a.fc = 0.0; a.cfc = 0.0; a.time = 0.0;
+            a.RateOfSpread = 0.0;
+            a.Distance = 0.0; a.rost = 0.0; a.CrownFractionBurned = 0.0; a.FireIntensity = 0.0;
+            a.FuelConsumption = 0.0; a.CrownFuelConsumed = 0.0; a.Time = 0.0;
         }
 
         private static void CreateDefaultDatabase()
@@ -1133,126 +1022,126 @@ namespace PREACT.Fire
             FuelCoefficients fuel = new FuelCoefficients();
             fuel.FuelType = "M1";
             fuel.a = 110.0; fuel.b = 0.0282; fuel.c = 1.5;
-            fuel.q = 0.80; fuel.bui0 = 50; fuel.CrownBaseHeight = 6; fuel.cfl = 0.80;
+            fuel.q = 0.80; fuel.BUI0 = 50; fuel.CrownBaseHeight = 6; fuel.CrownFuelLoad = 0.80;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*   fuel type 1 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "M2";
             fuel.a = 110.0; fuel.b = 0.0282; fuel.c = 1.5;
-            fuel.q = 0.80; fuel.bui0 = 50; fuel.CrownBaseHeight = 6; fuel.cfl = 0.80;
+            fuel.q = 0.80; fuel.BUI0 = 50; fuel.CrownBaseHeight = 6; fuel.CrownFuelLoad = 0.80;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*   fuel type 2 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "M3";
             fuel.a = 120.0; fuel.b = 0.0572; fuel.c = 1.4;
-            fuel.q = 0.80; fuel.bui0 = 50; fuel.CrownBaseHeight = 6; fuel.cfl = 0.80;
+            fuel.q = 0.80; fuel.BUI0 = 50; fuel.CrownBaseHeight = 6; fuel.CrownFuelLoad = 0.80;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*   fuel type 3 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "M4";
             fuel.a = 100.0; fuel.b = 0.0404; fuel.c = 1.48;
-            fuel.q = 0.80; fuel.bui0 = 50; fuel.CrownBaseHeight = 6; fuel.cfl = 0.80;
+            fuel.q = 0.80; fuel.BUI0 = 50; fuel.CrownBaseHeight = 6; fuel.CrownFuelLoad = 0.80;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*   fuel type 4 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C1";
             fuel.a = 90.0; fuel.b = 0.0649; fuel.c = 4.5;
-            fuel.q = 0.90; fuel.bui0 = 72; fuel.CrownBaseHeight = 2; fuel.cfl = 0.75;
+            fuel.q = 0.90; fuel.BUI0 = 72; fuel.CrownBaseHeight = 2; fuel.CrownFuelLoad = 0.75;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 5 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C2";
             fuel.a = 110.0; fuel.b = 0.0282; fuel.c = 1.5;
-            fuel.q = 0.70; fuel.bui0 = 64; fuel.CrownBaseHeight = 3; fuel.cfl = 0.80;
+            fuel.q = 0.70; fuel.BUI0 = 64; fuel.CrownBaseHeight = 3; fuel.CrownFuelLoad = 0.80;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*   fuel type 6 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C3";
             fuel.a = 110.0; fuel.b = 0.0444; fuel.c = 3.0;
-            fuel.q = 0.75; fuel.bui0 = 62; fuel.CrownBaseHeight = 8; fuel.cfl = 1.15;
+            fuel.q = 0.75; fuel.BUI0 = 62; fuel.CrownBaseHeight = 8; fuel.CrownFuelLoad = 1.15;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*   fuel type 7 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C4";
             fuel.a = 110.0; fuel.b = 0.0293; fuel.c = 1.5;
-            fuel.q = 0.80; fuel.bui0 = 66; fuel.CrownBaseHeight = 4; fuel.cfl = 1.20;
+            fuel.q = 0.80; fuel.BUI0 = 66; fuel.CrownBaseHeight = 4; fuel.CrownFuelLoad = 1.20;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 8 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C5";
             fuel.a = 30.0; fuel.b = 0.0697; fuel.c = 4.0;
-            fuel.q = 0.80; fuel.bui0 = 56; fuel.CrownBaseHeight = 18; fuel.cfl = 1.20;
+            fuel.q = 0.80; fuel.BUI0 = 56; fuel.CrownBaseHeight = 18; fuel.CrownFuelLoad = 1.20;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 9 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C6";
             fuel.a = 30.0; fuel.b = 0.0800; fuel.c = 3.0;
-            fuel.q = 0.80; fuel.bui0 = 62; fuel.CrownBaseHeight = 7; fuel.cfl = 1.80;
+            fuel.q = 0.80; fuel.BUI0 = 62; fuel.CrownBaseHeight = 7; fuel.CrownFuelLoad = 1.80;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 10 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "C7";
             fuel.a = 45.0; fuel.b = 0.0305; fuel.c = 2.0;
-            fuel.q = 0.85; fuel.bui0 = 106; fuel.CrownBaseHeight = 10; fuel.cfl = 0.50;
+            fuel.q = 0.85; fuel.BUI0 = 106; fuel.CrownBaseHeight = 10; fuel.CrownFuelLoad = 0.50;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 11 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "D1";
             fuel.a = 30.0; fuel.b = 0.0232; fuel.c = 1.6;
-            fuel.q = 0.90; fuel.bui0 = 32; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 0.90; fuel.BUI0 = 32; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 12 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "S1";
             fuel.a = 75.0; fuel.b = 0.0297; fuel.c = 1.3;
-            fuel.q = 0.75; fuel.bui0 = 38; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 0.75; fuel.BUI0 = 38; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 13 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "S2";
             fuel.a = 40.0; fuel.b = 0.0438; fuel.c = 1.7;
-            fuel.q = 0.75; fuel.bui0 = 63; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 0.75; fuel.BUI0 = 63; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 14 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "S3";
             fuel.a = 55.0; fuel.b = 0.0829; fuel.c = 3.2;
-            fuel.q = 0.75; fuel.bui0 = 31; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 0.75; fuel.BUI0 = 31; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 15 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "O1a";
             fuel.a = 190.0; fuel.b = 0.0310; fuel.c = 1.40;
-            fuel.q = 1.000; fuel.bui0 = 01; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 1.000; fuel.BUI0 = 01; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 16 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "O1b";
             fuel.a = 250.0; fuel.b = 0.0350; fuel.c = 1.7;
-            fuel.q = 1.000; fuel.bui0 = 1; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 1.000; fuel.BUI0 = 1; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
 
             /*  fuel type 17 */
             fuel = new FuelCoefficients();
             fuel.FuelType = "D2";
             fuel.a = 6.0; fuel.b = 0.0232; fuel.c = 1.6;
-            fuel.q = 0.90; fuel.bui0 = 32; fuel.CrownBaseHeight = 0; fuel.cfl = 0.0;
+            fuel.q = 0.90; fuel.BUI0 = 32; fuel.CrownBaseHeight = 0; fuel.CrownFuelLoad = 0.0;
             _fuelCoeffs.Add(fuel.FuelType, fuel);
         }
     }
