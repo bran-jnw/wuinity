@@ -48,6 +48,8 @@ VisibilityAffectsSpeed=false
 ConfigurationFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
 DestinationChoice=EvacGroup
+SmokeAlpha=0.4967
+SmokeBeta=-0.02910
 
 [Fire]
 FireModule=AscImport

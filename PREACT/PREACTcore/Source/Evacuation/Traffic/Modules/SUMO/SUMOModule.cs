@@ -67,7 +67,7 @@ namespace PREACT.Traffic
                 _accumulatedLevelOfService = new float[xDim, yDim];
                 _accumulatedWatingTime = new float[xDim, yDim];
 
-                if(_simulation.Input.Traffic.SumoInput.SmokeAlpha != 0f || _simulation.Input.Traffic.SumoInput.SmokeBeta != 0f)
+                if(_simulation.Input.Simulation.RunSmokeModule && (simulation.Input.Traffic.SumoInput.SmokeAlpha != 0f || _simulation.Input.Traffic.SumoInput.SmokeBeta != 0f))
                 {
                     _checkSmoke = true;
                 }
