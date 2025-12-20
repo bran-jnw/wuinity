@@ -250,12 +250,17 @@ namespace PREACT.Pedestrian
 
             if (_simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
             {                
-                if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EvacGroup)
+                if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.EvacGroupWeighted)
                 {
                     EvacuationGroup group = _simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
                     goal = group.GetWeightedRandomDestination(_simulation.Destinations);
                 }
-                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoiceEnum.EuclideanClosest)
+                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.EvacGroupClosestEuclidean)
+                {
+                    EvacuationGroup group = _simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
+                    goal = group.GetClosestDestination(_simulation.Destinations, household.GetVehicleLatLon(), _simulation);
+                }
+                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.ClosestEuclidean)
                 {
                     int closestIndex = 0;
                     double closestDistance = double.MaxValue;

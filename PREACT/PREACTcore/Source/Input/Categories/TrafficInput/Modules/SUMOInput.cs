@@ -14,13 +14,13 @@ namespace PREACT.IO
     [System.Serializable]
     public class SUMOInput
     {
-        public enum DestinationChoiceEnum { Random, EvacGroup, EuclideanClosest };
-        public enum SmokeSpeedReductionModelEnum { Exponential, Smokanza};
+        public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupWeighted, EvacGroupClosestEuclidean };
+        public enum SmokeSpeedReductionModels { Exponential, Smokanza};
 
         public string ConfigurationFile;
         public Vector2d UTMoffset;
         public double OutputRasterSize = 25.0;        
-        public DestinationChoiceEnum DestinationChoice = DestinationChoiceEnum.EvacGroup;
+        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupWeighted;
         public float SmokeAlpha = 0f;
         public float SmokeBeta = 0f;
 
@@ -77,14 +77,14 @@ namespace PREACT.IO
             {
                 switch (userInput)
                 {
-                    case nameof(DestinationChoiceEnum.EvacGroup):
-                        newInput.DestinationChoice = DestinationChoiceEnum.EvacGroup;
+                    case nameof(DestinationChoices.EvacGroupWeighted):
+                        newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
                         break;
-                    case nameof(DestinationChoiceEnum.EuclideanClosest):
-                        newInput.DestinationChoice = DestinationChoiceEnum.EuclideanClosest;
+                    case nameof(DestinationChoices.ClosestEuclidean):
+                        newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
                         break;
-                    case nameof(DestinationChoiceEnum.Random):
-                        newInput.DestinationChoice = DestinationChoiceEnum.Random;
+                    case nameof(DestinationChoices.Random):
+                        newInput.DestinationChoice = DestinationChoices.Random;
                         break;
                     default:
                         ++issues;

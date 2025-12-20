@@ -44,6 +44,25 @@ namespace PREACT.Evacuation
             return destinations[DestinationIndices[DestinationIndices.Length - 1]];
         }
 
+        public EvacuationDestination GetClosestDestination(List<EvacuationDestination> destinations, Vector2d startLatLon, Simulation simulation)
+        {
+            Vector2d householdPos = simulation.Input.Simulation.Data.GetSimulationPosition(startLatLon);
+            int closestIndex = 0;
+            double closestDistance = double.MaxValue;
+            for (int i = 0; i < DestinationIndices.Length; ++i)
+            {
+                Vector2d destPos = simulation.Input.Simulation.Data.GetSimulationPosition(destinations[DestinationIndices[i]].LatLon);
+                double distance = Vector2d.SqrMagnitude(destPos - householdPos);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestIndex = DestinationIndices[i];
+                }                
+            }
+            
+            return simulation.Destinations[DestinationIndices[closestIndex]];
+        }
+
         public static List<EvacuationGroup> LoadEvacGroupFiles(string rootFolder, IO.EvacuationData evacuationData, List<string> evacuationGroupFiles, out bool success)
         {
             success = false;
