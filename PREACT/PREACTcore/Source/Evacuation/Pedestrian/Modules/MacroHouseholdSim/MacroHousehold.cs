@@ -38,7 +38,7 @@ namespace PREACT.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(IO.PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
+        public MacroHousehold(PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
         {
             PopulationInput popInput = simulation.Input.Population;
             MacroHouseholdSimInput houseInput = simulation.Input.Pedestrian.MacroHouseholdSimInput;
@@ -77,7 +77,7 @@ namespace PREACT.Pedestrian
             isMoving = false;            
         }
 
-        public Vector2d GetCarLatLon()
+        public Vector2d GetVehicleLatLon()
         {
             return _houseHoldData.roadAccessLatLon;
         }

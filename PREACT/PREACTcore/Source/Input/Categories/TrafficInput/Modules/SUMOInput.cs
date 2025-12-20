@@ -14,7 +14,7 @@ namespace PREACT.IO
     [System.Serializable]
     public class SUMOInput
     {
-        public enum DestinationChoiceEnum { Random, EvacGroup };
+        public enum DestinationChoiceEnum { Random, EvacGroup, EuclideanClosest };
         public enum SmokeSpeedReductionModelEnum { Exponential, Smokanza};
 
         public string ConfigurationFile;
@@ -79,6 +79,9 @@ namespace PREACT.IO
                 {
                     case nameof(DestinationChoiceEnum.EvacGroup):
                         newInput.DestinationChoice = DestinationChoiceEnum.EvacGroup;
+                        break;
+                    case nameof(DestinationChoiceEnum.EuclideanClosest):
+                        newInput.DestinationChoice = DestinationChoiceEnum.EuclideanClosest;
                         break;
                     case nameof(DestinationChoiceEnum.Random):
                         newInput.DestinationChoice = DestinationChoiceEnum.Random;

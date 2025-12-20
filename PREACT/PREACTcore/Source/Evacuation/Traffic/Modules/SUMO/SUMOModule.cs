@@ -230,7 +230,7 @@ namespace PREACT.Traffic
                     LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLon.y, startLatLon.x, true);
                     LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalLatLon.y, goalLatLon.x, true);
                     LIBSUMO.TraCIStage route;
-                    //do we find route based on empty network/pure speed limits or do we take into account curretn state of network
+                    //TODO:do we find route based on empty network/pure speed limits or do we take into account current state of network
                     if(true)
                     {
                         route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, goalRoad.edgeID);
@@ -533,7 +533,14 @@ namespace PREACT.Traffic
 
         public override void Stop()
         {
-            LIBSUMO.Simulation.close();
+            try
+            {
+                LIBSUMO.Simulation.close();
+            }
+            catch (Exception e)
+            {
+                Engine.Message(_simulation, Engine.LogType.Log, "Could not stop SUMO. " + e.Message + ". " + e.InnerException);
+            }
         }
     }
 }

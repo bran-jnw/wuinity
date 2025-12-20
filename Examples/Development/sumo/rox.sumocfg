@@ -7,9 +7,9 @@
 
     <input>
         <net-file value="rox_big.net.xml"/>
-		<statistic-output value="statistics_output.xml"/>
+		<statistic-output value="../_outputstatistics_output.xml"/>
 		<verbose value="true"/>
-		<log value="log.txt"/>
+		<log value="../_output/log.txt"/>
     </input>
 
 </configuration>
