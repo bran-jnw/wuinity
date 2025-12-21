@@ -77,14 +77,17 @@ namespace PREACT.IO
             {
                 switch (userInput)
                 {
-                    case nameof(DestinationChoices.EvacGroupWeighted):
-                        newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
+                    case nameof(DestinationChoices.Random):
+                        newInput.DestinationChoice = DestinationChoices.Random;
                         break;
                     case nameof(DestinationChoices.ClosestEuclidean):
                         newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
                         break;
-                    case nameof(DestinationChoices.Random):
-                        newInput.DestinationChoice = DestinationChoices.Random;
+                    case nameof(DestinationChoices.EvacGroupWeighted):
+                        newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
+                        break;
+                    case nameof(DestinationChoices.EvacGroupClosestEuclidean):
+                        newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
                         break;
                     default:
                         ++issues;
