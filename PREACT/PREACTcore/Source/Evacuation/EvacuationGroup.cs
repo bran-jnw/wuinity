@@ -60,7 +60,7 @@ namespace PREACT.Evacuation
                 }                
             }
             
-            return simulation.Destinations[DestinationIndices[closestIndex]];
+            return simulation.Destinations[closestIndex];
         }
 
         public static List<EvacuationGroup> LoadEvacGroupFiles(string rootFolder, IO.EvacuationData evacuationData, List<string> evacuationGroupFiles, out bool success)

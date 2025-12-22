@@ -210,9 +210,8 @@ namespace PREACT.Pedestrian
                         }
                     }
                 }
-                Vector2d carLatLon = household.GetVehicleLatLon();
 
-
+                Vector2d vehicleLatLon = household.GetVehicleLatLon();
                 if (household.cars > 1)
                 {
                     int peopleLeftInHousehold = household.peopleInHousehold;
@@ -232,12 +231,12 @@ namespace PREACT.Pedestrian
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        _simulation.InsertNewCar(carLatLon, evacGoal, (uint)peopleInCar[i]);
+                        _simulation.InsertNewCar(vehicleLatLon, evacGoal, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    _simulation.InsertNewCar(carLatLon, evacGoal, (uint)household.peopleInHousehold);
+                    _simulation.InsertNewCar(vehicleLatLon, evacGoal, (uint)household.peopleInHousehold);
                 }
             }
             
@@ -260,7 +259,13 @@ namespace PREACT.Pedestrian
                     EvacuationGroup group = _simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
                     goal = group.GetClosestDestination(_simulation.Destinations, household.GetVehicleLatLon(), _simulation);
                 }
-                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.ClosestEuclidean)
+                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.Random)
+                {
+                    int randomChoice = Random.Range(0, _simulation.Destinations.Count);
+                    goal = _simulation.Destinations[randomChoice];
+                    
+                }
+                else //default to closest
                 {
                     int closestIndex = 0;
                     double closestDistance = double.MaxValue;
@@ -269,18 +274,13 @@ namespace PREACT.Pedestrian
                     {
                         Vector2d destPos = _simulation.Input.Simulation.Data.GetSimulationPosition(_simulation.Destinations[i].LatLon);
                         double distance = Vector2d.SqrMagnitude(destPos - householdPos);
-                        if(distance < closestDistance)
+                        if (distance < closestDistance)
                         {
                             closestDistance = distance;
                             closestIndex = i;
                         }
                     }
                     goal = _simulation.Destinations[closestIndex];
-                }
-                else //default to random
-                {
-                    int randomChoice = Random.Range(0, _simulation.Destinations.Count);
-                    goal = _simulation.Destinations[randomChoice];
                 }
             }
             else if(cell != null && _simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)

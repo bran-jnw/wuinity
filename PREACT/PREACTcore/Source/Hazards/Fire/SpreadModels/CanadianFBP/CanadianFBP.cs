@@ -191,7 +191,6 @@ namespace PREACT.Fire
             zero_fire(flankfire);
             zero_fire(backfire);
             mainOuts.CoverType = get_fueltype_number(fuel.Coefficients.FuelType);
-            mainOuts.ff = ffmc_effect(input.FFMC);
             mainOuts.SurfaceRateOfSpread = rate_of_spread(input, fuel, mainOuts);
             headfire.SurfaceRateOfSpread = mainOuts.SurfaceRateOfSpread;
             mainOuts.SurfaceFuelConsumption = surf_fuel_consump(input, fuel);
@@ -222,7 +221,7 @@ namespace PREACT.Fire
                 headfire.FireIntensity = mainOuts.SurfaceFireIntensity;
                 headfire.CrownFractionBurned = 0.0;
             }
-            secondaryOuts.LengthToBreadth = l_to_b(fuel.FuelType, mainOuts.WindSlopeVector);
+            secondaryOuts.LengthToBreadth = l_to_b(fuel.FuelType, mainOuts.WSV);
             backfire.ISI = backfire_isi(mainOuts);
             backfire.SurfaceRateOfSpread = backfire_ros(input, fuel, mainOuts, backfire.ISI);
             flankfire.SurfaceRateOfSpread = flankfire_ros(headfire.SurfaceRateOfSpread, backfire.SurfaceRateOfSpread, secondaryOuts.LengthToBreadth);
@@ -271,15 +270,7 @@ namespace PREACT.Fire
             }
 
             return (cover);
-        }
-
-        static double ffmc_effect(double ffmc)
-        {
-            double mc, ff;
-            mc = 147.2 * (101.0 - ffmc) / (59.5 + ffmc);
-            ff = 91.9 * Mathd.Exp(-0.1386 * mc) * (1 + Mathd.Pow(mc, 5.31) / 49300000.0);
-            return ff;
-        }
+        }       
 
         static double rate_of_spread(CFBPInputs inputs, CFBPFuel fuel, MainOutputs outputs)
         {
@@ -290,20 +281,20 @@ namespace PREACT.Fire
 
             if (inputs.PercentSlope > 0)
             {
-                outputs.WindSlopeVector = slope_effect(inputs, fuel, outputs, isz);
+                outputs.WSV = slope_effect(inputs, fuel, outputs, isz);
             }
             else
             {
-                outputs.WindSlopeVector = inputs.WindSpeed;
+                outputs.WSV = inputs.WindSpeed;
             }
 
-            if (outputs.WindSlopeVector < 40.0)
+            if (outputs.WSV < 40.0)
             {
-                fw = Mathd.Exp(0.05039 * outputs.WindSlopeVector);
+                fw = Mathd.Exp(0.05039 * outputs.WSV);
             }
             else
             {
-                fw = 12.0 * (1.0 - Mathd.Exp(-0.0818 * (outputs.WindSlopeVector - 28)));
+                fw = 12.0 * (1.0 - Mathd.Exp(-0.0818 * (outputs.WSV - 28)));
             }
 
             outputs.ISI = isz * fw;
@@ -312,13 +303,21 @@ namespace PREACT.Fire
             return (outputs.SurfaceRateOfSpread);
         }
 
+        static double ffmc_effect(double ffmc)
+        {
+            double mc, ff;
+            mc = 147.2 * (101.0 - ffmc) / (59.5 + ffmc);
+            ff = 91.9 * Mathd.Exp(-0.1386 * mc) * (1.0 + Mathd.Pow(mc, 5.31) / 49300000.0);
+            return ff;
+        }
+
         static double ros_calc(CFBPInputs input, CFBPFuel fuel, double isi, ref double mult)
         {
             double ros;
 
             if (fuel.FuelType == FuelTypes.O1a || fuel.FuelType == FuelTypes.O1b)
             {
-                return grass(fuel, input.cur, isi, ref mult);
+                return grass(fuel, input.PercentCuring, isi, ref mult);
             }
 
             if (fuel.FuelType == FuelTypes.M1 || fuel.FuelType == FuelTypes.M2)
@@ -341,16 +340,16 @@ namespace PREACT.Fire
         }
 
 
-        static double grass(CFBPFuel fuel, double cur, double isi, ref double mult)
+        static double grass(CFBPFuel fuel, double PercentCuring, double isi, ref double mult)
         {
             double mu, ros;
-            if ((double)(cur) >= 58.8)
+            if ((double)(PercentCuring) >= 58.8)
             {
-                mu = 0.176 + 0.02 * ((double)(cur) - 58.8);
+                mu = 0.176 + 0.02 * ((double)(PercentCuring) - 58.8);
             }
             else
             {
-                mu = 0.005 * (Mathd.Exp(0.061 * (double)(cur)) - 1.0);
+                mu = 0.005 * (Mathd.Exp(0.061 * (double)(PercentCuring)) - 1.0);
             }
 
             ros = mu * (fuel.Coefficients.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * fuel.Coefficients.b * isi)), fuel.Coefficients.c));
@@ -458,19 +457,16 @@ namespace PREACT.Fire
         static double slope_effect(CFBPInputs input, CFBPFuel fuel, MainOutputs output, double isi)
         /* ISI is ISZ really */
         {
-            double isf, rsf, wse, percentSlope, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, WindSlopeVector, raz, check, wse2, wse1;
+            double isf, rsf, wse, percentSlope, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, WSV, raz, check, wse2, wse1;
             double mu = 0.0;
 
-            percentSlope = input.PercentSlope * 1.0;
-            if (percentSlope > 70.0)
+            if (input.PercentSlope > 70.0)
             {
-                percentSlope = 70.0;   /* edited in version 4.6*/
+                output.SpreadFactor = 10.00;
             }
-            output.SpreadFactor = Mathd.Exp(3.533 * Mathd.Pow(percentSlope / 100.0, 1.2));
-
-            if (output.SpreadFactor > 10.0)
+            else
             {
-                output.SpreadFactor = 10.00;  /* added to ensure maximum is correct in version 4.6  */
+                output.SpreadFactor = Mathd.Exp(3.533 * Mathd.Pow(input.PercentSlope / 100.0, 1.2));
             }
 
             if (fuel.FuelType == FuelTypes.M1 || fuel.FuelType == FuelTypes.M2)
@@ -515,7 +511,10 @@ namespace PREACT.Fire
             }
             else
             {
-                if (isf > (0.999 * 2.496 * output.ff)) isf = 0.999 * 2.496 * output.ff;
+                if (isf > (0.999 * 2.496 * output.ff))
+                {
+                    isf = 0.999 * 2.496 * output.ff;
+                }
                 wse2 = 28.0 - Mathd.Log(1.0 - isf / (2.496 * output.ff)) / 0.0818;
                 wse = wse2;
             }
@@ -527,8 +526,8 @@ namespace PREACT.Fire
             wsey = wse * Mathd.Cos(srad);
             wsvx = wsx + wsex;
             wsvy = wsy + wsey;
-            WindSlopeVector = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);
-            raz = Mathd.Acos(wsvy / WindSlopeVector);
+            WSV = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);
+            raz = Mathd.Acos(wsvy / WSV);
             raz = raz / 3.1415926 * 180.0;
 
             if (wsvx < 0)
@@ -536,7 +535,7 @@ namespace PREACT.Fire
                 raz = 360 - raz;
             }
             output.SpreadAzimuth = raz;
-            return WindSlopeVector;
+            return WSV;
         }
 
         static double ISF_mixedwood(CFBPFuel fuel, double isz, int pc, double sf)
@@ -842,15 +841,16 @@ namespace PREACT.Fire
                 
             return (cfc);
         }
-        static double l_to_b(FuelTypes fuelType, double WindSlopeVector)
+
+        static double l_to_b(FuelTypes fuelType, double WSV)
         {
             if (fuelType == FuelTypes.O1a || fuelType == FuelTypes.O1b)
             {
-                return (WindSlopeVector < 1.0 ? 1.0 : (1.1 * Mathd.Pow(WindSlopeVector, 0.464)));
+                return (WSV < 1.0 ? 1.0 : (1.1 * Mathd.Pow(WSV, 0.464)));
             }
             else
             {
-                return (1.0 + 8.729 * Mathd.Pow(1.0 - Mathd.Exp(-0.030 * WindSlopeVector), 2.155));
+                return (1.0 + 8.729 * Mathd.Pow(1.0 - Mathd.Exp(-0.030 * WSV), 2.155));
             }            
         }
 
@@ -864,7 +864,7 @@ namespace PREACT.Fire
         static double backfire_isi(MainOutputs output)
         {
             double bfw;
-            bfw = Mathd.Exp(-0.05039 * output.WindSlopeVector);
+            bfw = Mathd.Exp(-0.05039 * output.WSV);
             return (0.208 * output.ff * bfw);
         }
 
@@ -996,7 +996,7 @@ namespace PREACT.Fire
         {
             m.SurfaceFuelConsumption = 0.0;
             m.CriticalSurfaceIntensity = 0.0; m.RSO = 0.0; m.FoliarMoistureContent = 0; m.SurfaceFireIntensity = 0.0;
-            m.SurfaceRateOfSpread = 0.0; m.ISI = 0.0; m.be = 0.0; m.SpreadFactor = 1.0; m.SpreadAzimuth = 0.0; m.WindSlopeVector = 0.0;
+            m.SurfaceRateOfSpread = 0.0; m.ISI = 0.0; m.be = 0.0; m.SpreadFactor = 1.0; m.SpreadAzimuth = 0.0; m.WSV = 0.0;
             m.ff = 0.0; m.jd = 0; m.jd_min = 0;
             m.CoverType = ' ';
         }
