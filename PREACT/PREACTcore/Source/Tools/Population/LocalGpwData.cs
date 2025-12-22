@@ -72,14 +72,14 @@ namespace PREACT.Population
             File.WriteAllLines(filePath, data);
         }
 
-        public static LocalGPWData LoadFromFile(string localGpwFile, out bool success)
+        public static LocalGPWData LoadFromFile(string localGpwFilePath, out bool success)
         {
             success = false;
             LocalGPWData localGPWData = null;
 
-            if (File.Exists(localGpwFile))
+            if (File.Exists(localGpwFilePath))
             {
-                string[] d = File.ReadAllLines(localGpwFile);
+                string[] d = File.ReadAllLines(localGpwFilePath);
 
                 Vector2d actualOriginDegrees;
                 Vector2d originOffset;
@@ -123,7 +123,7 @@ namespace PREACT.Population
 
                 localGPWData = new LocalGPWData(actualOriginDegrees, originOffset, realWorldSize, _cellCount, totalPopulation, density);
                 success = true;
-                Engine.Message(null, Engine.LogType.Log, " Loaded local GPW data from " + localGpwFile);
+                Engine.Message(null, Engine.LogType.Log, " Loaded local GPW data from " + localGpwFilePath);
             }
             else
             {

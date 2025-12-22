@@ -18,26 +18,45 @@ namespace PREACT.Tools
         public static void GlobalGPWToPopulation(string globalGPWFolder, Vector2d lowerLeftLatLon, Vector2d domainSize, string osmFilePath, int minHouseholdSize, int maxHouseholdSize, string populationOutputFilePath)
         {
             bool success;
-            LocalGPWData localGPWData = CreateLocalGPWData(lowerLeftLatLon, domainSize, globalGPWFolder, out success);
 
+            LocalGPWData localGPWData = CreateLocalGPWData(lowerLeftLatLon, domainSize, globalGPWFolder, out success);
             if (success)
             {
-                PopulationMap populationMap = new PopulationMap();
-                populationMap.CreateFromLocalGPW(lowerLeftLatLon, domainSize, localGPWData, 200f, out success);
+                LocalGPWToPopulation(localGPWData, lowerLeftLatLon, domainSize, osmFilePath, minHouseholdSize, maxHouseholdSize, populationOutputFilePath);
+            }
+        }
+
+        public static void LocalGPWToPopulation(string localGPWFilePath, Vector2d lowerLeftLatLon, Vector2d domainSize, string osmFilePath, int minHouseholdSize, int maxHouseholdSize, string populationOutputFilePath)
+        {
+            bool success;
+
+            LocalGPWData localGPWData = LoadLocalGPWData(localGPWFilePath, out success);
+            if (success)
+            {
+                LocalGPWToPopulation(localGPWData, lowerLeftLatLon, domainSize, osmFilePath, minHouseholdSize, maxHouseholdSize, populationOutputFilePath);
+            }
+        }
+
+        public static void LocalGPWToPopulation(LocalGPWData localGPWData, Vector2d lowerLeftLatLon, Vector2d domainSize, string osmFilePath, int minHouseholdSize, int maxHouseholdSize, string populationOutputFilePath)
+        {
+            bool success;
+
+            PopulationMap populationMap = new PopulationMap();
+            populationMap.CreateFromLocalGPW(lowerLeftLatLon, domainSize, localGPWData, 200f, out success);
+            if (success)
+            {
+                Itinero.RouterDb routerDb = RoutingData.CreateRouterDb(osmFilePath, out success);
 
                 if (success)
                 {
-                    Itinero.RouterDb routerDb = RoutingData.CreateRouterDb(osmFilePath, out success);
-
-                    if (success)
-                    {
-                        SimulationData simulationData = new SimulationData(lowerLeftLatLon);
-                        populationMap.UpdatePopulationMapBasedOnRoadAccess(simulationData, routerDb);
-                        populationMap.CreatePopulation(minHouseholdSize, maxHouseholdSize, simulationData, populationOutputFilePath, out success);
-                    }
+                    SimulationData simulationData = new SimulationData(lowerLeftLatLon);
+                    populationMap.UpdatePopulationMapBasedOnRoadAccess(simulationData, routerDb);
+                    populationMap.CreatePopulation(minHouseholdSize, maxHouseholdSize, simulationData, populationOutputFilePath, out success);
                 }
             }
         }
+
+        
 
         public static LocalGPWData CreateLocalGPWData(Vector2d lowerLeftLatLon, Vector2d domainSize, string globalGPWFolder, out bool success)
         {
@@ -49,9 +68,9 @@ namespace PREACT.Tools
             localGPWData.SaveToDisk(filePath);
         }
 
-        public static LocalGPWData LoadLocalGPWData(string localGpwFile, out bool success)
+        public static LocalGPWData LoadLocalGPWData(string localGpwFilePath, out bool success)
         {           
-            return LocalGPWData.LoadFromFile(localGpwFile, out success);   
+            return LocalGPWData.LoadFromFile(localGpwFilePath, out success);   
         }
 
         public static PopulationMap CreateAndSavePopulationMap(SimulationInput simulationInput, string localGPWFile, string cellSize, string filePath, out bool success)
