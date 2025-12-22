@@ -133,11 +133,8 @@ namespace PREACT.Population
             return localGPWData;
         }
 
-        public static LocalGPWData CreateLocalGPWData(PREACTInput input, string globalGpwFolder, out bool success)
+        public static LocalGPWData CreateLocalGPWData(Vector2d lowerLeftLatLon, Vector2d domainSize, string globalGpwFolder, out bool success)
         {
-            Vector2d latLon = input.Simulation.LowerLeftLatLon;
-            Vector2d size = input.Simulation.DomainSize;
-
             success = false;
             LocalGPWData localGPWData = null;
 
@@ -148,21 +145,21 @@ namespace PREACT.Population
                 Array.Sort(AscFiles);   // Sort the array in case it is not already sorted.
                 string relevantAscFile;
 
-                if (latLon.x >= -3.4106051316485e-012)
+                if (lowerLeftLatLon.x >= -3.4106051316485e-012)
                 {
-                    if (latLon.y < -90.000000000005)
+                    if (lowerLeftLatLon.y < -90.000000000005)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_1.asc");
                         relevantAscFile = AscFiles[0];
                         Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 1");
                     }
-                    else if (latLon.y < -1.0231815394945e-011)
+                    else if (lowerLeftLatLon.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_2.asc");
                         relevantAscFile = AscFiles[1];
                         Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 2");
                     }
-                    else if (latLon.y < 89.999999999985)
+                    else if (lowerLeftLatLon.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_3.asc");
                         relevantAscFile = AscFiles[2];
@@ -177,19 +174,19 @@ namespace PREACT.Population
                 }
                 else
                 {
-                    if (latLon.y < -90.000000000005)
+                    if (lowerLeftLatLon.y < -90.000000000005)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_5.asc");
                         relevantAscFile = AscFiles[4];
                         Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 5");
                     }
-                    else if (latLon.y < -1.0231815394945e-011)
+                    else if (lowerLeftLatLon.y < -1.0231815394945e-011)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_6.asc");
                         relevantAscFile = AscFiles[5];
                         Engine.Message(null, Engine.LogType.Log, "Loading GPW from sector 6");
                     }
-                    else if (latLon.y < 89.999999999985)
+                    else if (lowerLeftLatLon.y < 89.999999999985)
                     {
                         //path = Path.Combine(path, "gpw_v4_population_density_rev10_2015_30_sec_7.asc");
                         relevantAscFile = AscFiles[6];
@@ -203,7 +200,7 @@ namespace PREACT.Population
                     }
                 }
 
-                localGPWData = CreateFromGlobalGPWSector(relevantAscFile, latLon, size, out success);
+                localGPWData = CreateFromGlobalGPWSector(relevantAscFile, lowerLeftLatLon, domainSize, out success);
                 localGPWData.CalculateTotalPopulation();
             }
 

@@ -15,9 +15,33 @@ namespace PREACT.Tools
 {
     public static class PopulationTools
     {
-        public static LocalGPWData CreateLocalGPWData(PREACTInput input, string globalGpwFolder, out bool success)
+        public static void GlobalGPWToPopulation(string globalGPWFolder, Vector2d lowerLeftLatLon, Vector2d domainSize, string osmFilePath, int minHouseholdSize, int maxHouseholdSize, string populationOutputFilePath)
         {
-            return LocalGPWData.CreateLocalGPWData(input, globalGpwFolder, out success);
+            bool success;
+            LocalGPWData localGPWData = CreateLocalGPWData(lowerLeftLatLon, domainSize, globalGPWFolder, out success);
+
+            if (success)
+            {
+                PopulationMap populationMap = new PopulationMap();
+                populationMap.CreateFromLocalGPW(lowerLeftLatLon, domainSize, localGPWData, 200f, out success);
+
+                if (success)
+                {
+                    Itinero.RouterDb routerDb = RoutingData.CreateRouterDb(osmFilePath, out success);
+
+                    if (success)
+                    {
+                        SimulationData simulationData = new SimulationData(lowerLeftLatLon);
+                        populationMap.UpdatePopulationMapBasedOnRoadAccess(simulationData, routerDb);
+                        populationMap.CreatePopulation(minHouseholdSize, maxHouseholdSize, simulationData, populationOutputFilePath, out success);
+                    }
+                }
+            }
+        }
+
+        public static LocalGPWData CreateLocalGPWData(Vector2d lowerLeftLatLon, Vector2d domainSize, string globalGPWFolder, out bool success)
+        {
+            return LocalGPWData.CreateLocalGPWData(lowerLeftLatLon, domainSize, globalGPWFolder, out success);
         }
 
         public static void SaveLocalGPWData(string filePath, LocalGPWData localGPWData)
@@ -55,7 +79,7 @@ namespace PREACT.Tools
         private static PopulationMap CreateAndSavePopulationMap(SimulationInput simulationInput, LocalGPWData localGPWData, float cellSize, string filePath, out bool success)
         {
             PopulationMap populationMap = new PopulationMap();
-            populationMap.CreateFromLocalGPW(simulationInput, localGPWData, cellSize, out success);
+            populationMap.CreateFromLocalGPW(simulationInput.LowerLeftLatLon, simulationInput.DomainSize, localGPWData, cellSize, out success);
             populationMap.SaveToFile(filePath);
             return populationMap;
         }
@@ -136,7 +160,7 @@ namespace PREACT.Tools
             WUIengine.RUNTIME_DATA.Population.PopulationMap.LoadPopulationMask(populationMaskFile);
         }*/ 
 
-        public static void CreatePopulation(string minHouseholdSize, string maxHouseholdSize, PopulationMap populationMap, SimulationData simulationData, string filePath, out bool success)
+        public static void CreatePopulation(string minHouseholdSize, string maxHouseholdSize, PopulationMap populationMap, SimulationData simulationData, string outputFilePath, out bool success)
         {
             success = false;
 
@@ -145,7 +169,7 @@ namespace PREACT.Tools
                 int min, max;
                 if(int.TryParse(minHouseholdSize, out min) && int.TryParse(maxHouseholdSize, out max) && min <= max)
                 {
-                    populationMap.CreatePopulation(min, max, simulationData, filePath, out success);
+                    populationMap.CreatePopulation(min, max, simulationData, outputFilePath, out success);
                 }    
             }
             else

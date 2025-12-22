@@ -330,7 +330,7 @@ namespace WUInity.UI
         }
         void CreateLocalGPW(string[] paths)
         {
-            LocalGPWData data = PopulationTools.CreateLocalGPWData(_input, paths[0], out success);
+            LocalGPWData data = PopulationTools.CreateLocalGPWData(_input.Simulation.LowerLeftLatLon, _input.Simulation.DomainSize, paths[0], out success);
             if (success)
             {
                 _wuinityManager.SimulationDomainVisualizer.SetAndDisplayLocalGPW(data, _workingData);

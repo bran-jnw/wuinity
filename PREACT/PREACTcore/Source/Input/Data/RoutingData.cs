@@ -44,17 +44,18 @@ namespace PREACT.IO
             return routerDb;
         }
 
-        public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFilePath)
+        public static RouterDb CreateRouterDb(string osmInputFilePath, out bool success)
         {
-            bool success = false;
+            success = false;
+            RouterDb routerDb = null;
 
-            if (File.Exists(osmInputFile))
+            if (File.Exists(osmInputFilePath))
             {
                 //stream in data from OSM
-                using (FileStream stream = new FileInfo(osmInputFile).OpenRead())
+                using (FileStream stream = new FileInfo(osmInputFilePath).OpenRead())
                 {
                     OsmStreamSource source;
-                    if (osmInputFile.EndsWith("pbf"))
+                    if (osmInputFilePath.ToLower().EndsWith("pbf"))
                     {
                         source = new PBFOsmStreamSource(stream);
                     }
@@ -70,9 +71,24 @@ namespace PREACT.IO
                     settings.OptimizeNetwork = true;
 
                     //build db from OSM betwork, TODO: allocate och heap instead? keep track                    
-                    RouterDb routerDb = new RouterDb();
+                    routerDb = new RouterDb();
                     routerDb.LoadOsmData(source, settings, Vehicle.Car);
+                    success = true;
+                }                
+            }
 
+            return routerDb;
+        }
+
+        public static bool CreateAndSaveRouterDb(string osmInputFilePath, string outputFilePath)
+        {
+            bool success = false;
+
+            if (File.Exists(osmInputFilePath))
+            {                
+                RouterDb routerDb = CreateRouterDb(osmInputFilePath, out success);
+                if (success)
+                {
                     // write the new routerdb to disk.
                     using (FileStream outputStream = new FileInfo(outputFilePath).Open(FileMode.Create))
                     {

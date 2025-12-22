@@ -35,8 +35,8 @@ namespace PREACT.Population
         public bool HaveData { get => _haveData; }
         private bool _correctedForRoadAccess;
         public bool CorrectedForRoadAccess { get => _correctedForRoadAccess; }
-        private string _fileName;
-        public string FileName{ get => _fileName; }
+        private string _filePath;
+        public string FileName{ get => _filePath; }
 
         public PopulationMap()
         {
@@ -73,12 +73,12 @@ namespace PREACT.Population
             return _mask[x + y * _cells.x];
         }
 
-        public void CreateFromLocalGPW(SimulationInput simulationInput, LocalGPWData localGPWData, float cellSize, out bool success)
+        public void CreateFromLocalGPW(Vector2d lowerLeftLatLon, Vector2d domainSize, LocalGPWData localGPWData, float cellSize, out bool success)
         {
             success = false;
 
-            _lowerLeftLatLong = simulationInput.LowerLeftLatLon;
-            _size = simulationInput.DomainSize;
+            _lowerLeftLatLong = lowerLeftLatLon;
+            _size = domainSize;
             _cellSize = cellSize;
             _cells = new Vector2int((int)(0.5f + _size.x / cellSize), (int)(0.5f + _size.y / cellSize));
             _size = new Vector2d(cellSize * _cells.x, cellSize * _cells.y); 
@@ -125,7 +125,7 @@ namespace PREACT.Population
             _haveData = true;
             success = true;
             _correctedForRoadAccess = false;
-            _fileName = simulationInput.Name;            
+            //_filePath = simulationInput.Name;            
             Engine.Message(null, Engine.LogType.Log, "Created population map from local GPW data.");
         }
 
@@ -428,7 +428,7 @@ namespace PREACT.Population
                 _haveData = true;
                 _correctedForRoadAccess = false;
                 success = true;           
-                _fileName = Path.GetFileNameWithoutExtension(path);
+                _filePath = Path.GetFileNameWithoutExtension(path);
                 Engine.Message(null, Engine.LogType.Log, " Loaded population from file " + path + ".");
             }
             else
@@ -437,11 +437,11 @@ namespace PREACT.Population
             }
         }
 
-        public void CreatePopulation(int minHouseholdSize, int maxHouseholdSize, SimulationData simulationData, string file, out bool success)
+        public void CreatePopulation(int minHouseholdSize, int maxHouseholdSize, SimulationData simulationData, string outputFilePath, out bool success)
         {
             success = false;
 
-            using (StreamWriter sW = new StreamWriter(file))
+            using (StreamWriter sW = new StreamWriter(outputFilePath))
             {
                 sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");
 
@@ -480,7 +480,7 @@ namespace PREACT.Population
                 }
 
                 success = true;
-                Engine.Message(null, Engine.LogType.Log, "Generated and saved population to file " + file);
+                Engine.Message(null, Engine.LogType.Log, "Generated and saved population to file " + outputFilePath);
             }
         }
     }
