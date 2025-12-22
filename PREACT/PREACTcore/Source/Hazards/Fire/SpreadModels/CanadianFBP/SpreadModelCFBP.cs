@@ -41,7 +41,23 @@ namespace PREACT.Fire
 
         public override double GetSpreadRateInDirection(double directionOfInterest)
         {
-            double rosDirection = _head.RateOfSpread;
+            double theta = Mathd.Abs(_outputs.SpreadAzimuth - directionOfInterest) * Mathd.Deg2Rad;
+            double ROS = _head.RateOfSpread;
+            double BROS = _back.RateOfSpread;
+            double FROS = _flank.RateOfSpread;            
+
+            double c1 = Mathd.Cos(theta);
+            if (c1 == 0.0)
+            {
+                c1 = Mathd.Cos(theta + .001);
+            }
+            double s1 = Mathd.Sin(theta);
+            
+            double ROStheta = (((ROS - BROS) / (2 * c1) + (ROS + BROS) / (2 * c1)) * ((FROS * c1 * Mathd.Sqrt(FROS * FROS * c1 * c1 + (ROS * BROS) * s1 * s1) - ((ROS * ROS - BROS * BROS) / 4) * s1 * s1) / (FROS * FROS * c1 * c1 + ((ROS + BROS) / 2) * ((ROS + BROS) / 2) * s1 * s1)));
+            
+            return ROStheta;
+
+            /* double rosDirection = _head.RateOfSpread;
             if (_head.RateOfSpread != 0.0) // if forward spread rate is not zero
             {
                 // Calculate the fire spread rate in this azimuth
@@ -62,7 +78,9 @@ namespace PREACT.Fire
                     rosDirection = _head.RateOfSpread * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
                 }
             }
-            return rosDirection;
+            
+            return rosDirection; */
+
         }
 
         public override void SetWind(double direction, double speed)

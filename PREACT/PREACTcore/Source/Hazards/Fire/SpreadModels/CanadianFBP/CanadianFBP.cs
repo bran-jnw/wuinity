@@ -184,7 +184,7 @@ namespace PREACT.Fire
         public static void Calculate(CFBPInputs input, CFBPFuel fuel, MainOutputs mainOuts, SecondaryOutputs secondaryOuts, FireData headfire, FireData flankfire, FireData backfire)
         {
             char firetype = ' ';
-            double accn;
+            double acceleration;
             zero_main(mainOuts);
             zero_sec(secondaryOuts);
             zero_fire(headfire);
@@ -221,7 +221,7 @@ namespace PREACT.Fire
                 headfire.FireIntensity = mainOuts.SurfaceFireIntensity;
                 headfire.CrownFractionBurned = 0.0;
             }
-            secondaryOuts.LengthToBreadth = l_to_b(fuel.FuelType, mainOuts.WSV);
+            secondaryOuts.LengthToBreadth = LengthToBreadth(fuel.FuelType, mainOuts.WSV);
             backfire.ISI = backfire_isi(mainOuts);
             backfire.SurfaceRateOfSpread = backfire_ros(input, fuel, mainOuts, backfire.ISI);
             flankfire.SurfaceRateOfSpread = flankfire_ros(headfire.SurfaceRateOfSpread, backfire.SurfaceRateOfSpread, secondaryOuts.LengthToBreadth);
@@ -231,13 +231,13 @@ namespace PREACT.Fire
 
             if (input.Pattern == 1 && input.Time > 0)
             {
-                accn = acceleration(fuel, headfire.CrownFractionBurned);
-                headfire.Distance = spread_distance(input, headfire, accn);
-                backfire.Distance = spread_distance(input, backfire, accn);
-                flankfire.Distance = flank_spread_distance(input, flankfire, secondaryOuts, headfire.rost, backfire.rost, headfire.Distance, backfire.Distance, secondaryOuts.LengthToBreadth, accn);
-                headfire.Time = time_to_crown(headfire.RateOfSpread, mainOuts.RSO, accn);
-                flankfire.Time = time_to_crown(flankfire.RateOfSpread, mainOuts.RSO, accn);
-                backfire.Time = time_to_crown(backfire.RateOfSpread, mainOuts.RSO, accn);
+                acceleration = Acceleration(fuel, headfire.CrownFractionBurned);
+                headfire.Distance = SpreadDistance(input, headfire, acceleration);
+                backfire.Distance = SpreadDistance(input, backfire, acceleration);
+                flankfire.Distance = flank_spread_distance(input, flankfire, secondaryOuts, headfire.rost, backfire.rost, headfire.Distance, backfire.Distance, secondaryOuts.LengthToBreadth, acceleration);
+                headfire.Time = time_to_crown(headfire.RateOfSpread, mainOuts.RSO, acceleration);
+                flankfire.Time = time_to_crown(flankfire.RateOfSpread, mainOuts.RSO, acceleration);
+                backfire.Time = time_to_crown(backfire.RateOfSpread, mainOuts.RSO, acceleration);
             }
             else
             {
@@ -245,14 +245,14 @@ namespace PREACT.Fire
                 set_all(flankfire, input.Time);
                 set_all(backfire, input.Time);
             }
-            secondaryOuts.Area = area((headfire.Distance + backfire.Distance), flankfire.Distance);
+            secondaryOuts.Area = Area((headfire.Distance + backfire.Distance), flankfire.Distance);
             if (input.Pattern == 1 && input.Time > 0)
             {
-                secondaryOuts.Perimeter = perimeter(headfire, backfire, secondaryOuts, secondaryOuts.lbt);
+                secondaryOuts.Perimeter = Perimeter(headfire, backfire, secondaryOuts, secondaryOuts.lbt);
             }
             else
             {
-                secondaryOuts.Perimeter = perimeter(headfire, backfire, secondaryOuts, secondaryOuts.LengthToBreadth);
+                secondaryOuts.Perimeter = Perimeter(headfire, backfire, secondaryOuts, secondaryOuts.LengthToBreadth);
             }
         }
 
@@ -850,7 +850,7 @@ namespace PREACT.Fire
             return (cfc);
         }
 
-        static double l_to_b(FuelTypes fuelType, double WSV)
+        static double LengthToBreadth(FuelTypes fuelType, double WSV)
         {
             if (fuelType == FuelTypes.O1a || fuelType == FuelTypes.O1b)
             {
@@ -884,7 +884,7 @@ namespace PREACT.Fire
             return (bros);
         }
 
-        static double area(double dt, double df)
+        static double Area(double dt, double df)
         {
             double a, b;
             a = dt / 2.0;
@@ -892,7 +892,7 @@ namespace PREACT.Fire
             return (a * b * 3.1415926 / 10000.0);
         }
 
-        static double perimeter(FireData h, FireData b, SecondaryOutputs sec, double lb)
+        static double Perimeter(FireData h, FireData b, SecondaryOutputs sec, double lb)
         {
             double mult, p;
             mult = 3.1415926 * (1.0 + 1.0 / lb) * (1.0 + Mathd.Pow(((lb - 1.0) / (2.0 * (lb + 1.0))), 2.0));
@@ -902,7 +902,7 @@ namespace PREACT.Fire
             return (p);
         }
 
-        static double acceleration(CFBPFuel fuel, double cfb)
+        static double Acceleration(CFBPFuel fuel, double CrownFractionBurned)
         {
             int i;
             char canopy = 'c';
@@ -911,13 +911,14 @@ namespace PREACT.Fire
             {
                 canopy = 'o';
             }
+
             if (canopy == 'o')
             {
                 return (0.115);
             }
             else
             {
-                return (0.115 - 18.8 * Mathd.Pow(cfb, 2.5) * Mathd.Exp(-8.0 * cfb));
+                return (0.115 - 18.8 * Mathd.Pow(CrownFractionBurned, 2.5) * Mathd.Exp(-8.0 * CrownFractionBurned));
             }
         }
 
@@ -933,10 +934,10 @@ namespace PREACT.Fire
             return ((hd + bd) / (2.0 * sec.lbt));
         }
 
-        static double spread_distance(CFBPInputs inp, FireData ptr, double a)
+        static double SpreadDistance(CFBPInputs inp, FireData fire, double a)
         {
-            ptr.rost = ptr.RateOfSpread * (1.0 - Mathd.Exp(-a * inp.Time));
-            return (ptr.RateOfSpread * (inp.Time + (Mathd.Exp(-a * inp.Time) / a) - 1.0 / a));
+            fire.rost = fire.RateOfSpread * (1.0 - Mathd.Exp(-a * inp.Time));
+            return (fire.RateOfSpread * (inp.Time + (Mathd.Exp(-a * inp.Time) / a) - 1.0 / a));
         }
 
         static int time_to_crown(double ros, double rso, double a)
