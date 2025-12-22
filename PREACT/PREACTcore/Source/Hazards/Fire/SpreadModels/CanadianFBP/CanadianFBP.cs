@@ -193,13 +193,13 @@ namespace PREACT.Fire
             mainOuts.CoverType = get_fueltype_number(fuel.Coefficients.FuelType);
             mainOuts.SurfaceRateOfSpread = rate_of_spread(input, fuel, mainOuts);
             headfire.SurfaceRateOfSpread = mainOuts.SurfaceRateOfSpread;
-            mainOuts.SurfaceFuelConsumption = surf_fuel_consump(input, fuel);
+            mainOuts.SurfaceFuelConsumption = SurfaceFuelConsumption(input, fuel);
             mainOuts.SurfaceFireIntensity = fire_intensity(mainOuts.SurfaceFuelConsumption, mainOuts.SurfaceRateOfSpread);            
 
             if (mainOuts.CoverType == 'c')
             {
-                mainOuts.FoliarMoistureContent = foliar_moisture(input, mainOuts);
-                mainOuts.CriticalSurfaceIntensity = crit_surf_intensity(fuel, mainOuts.FoliarMoistureContent);
+                mainOuts.FoliarMoistureContent = FoliarMoisture(input, mainOuts);
+                mainOuts.CriticalSurfaceIntensity = CriticalSurfaceIntensity(fuel, mainOuts.FoliarMoistureContent);
                 mainOuts.RSO = critical_ros(mainOuts.SurfaceFuelConsumption, mainOuts.CriticalSurfaceIntensity); //critical spread rate for crowning
                 firetype = fire_type(mainOuts.CriticalSurfaceIntensity, mainOuts.SurfaceFireIntensity); //crown fire or surface fire
 
@@ -659,64 +659,72 @@ namespace PREACT.Fire
             return (300.0 * fc * ros);
         }
 
-        static double foliar_moisture(CFBPInputs inp, MainOutputs at)
+        static double FoliarMoisture(CFBPInputs input, MainOutputs output)
         {
-            double latn;
-            int nd;
-            at.jd = inp.jd;
-            at.jd_min = inp.jd_min;
-            if (inp.jd_min <= 0)
+            double LATN;
+            int ND;
+            output.JulianDate = input.JulianDate;
+            output.JulianDateMin = input.jd_min;
+            if (input.jd_min <= 0)
             {
-                if (inp.Elevation < 0)
+                if (input.Elevation < 0)
                 {
-                    latn = 23.4 * Mathd.Exp(-0.0360 * (150 - inp.Lon)) + 46.0;
-                    at.jd_min = (int)(0.5 + 151.0 * inp.Lat / latn);
+                    LATN = 46.0 + 23.4 * Mathd.Exp(-0.0360 * (150 - input.Lon));
+                    output.JulianDateMin = (int)(0.5 + 151.0 * input.Lat / LATN);
                 }
                 else
                 {
-                    latn = 33.7 * Mathd.Exp(-0.0351 * (150 - inp.Lon)) + 43.0;
-                    at.jd_min = (int)(0.5 + 142.1 * inp.Lat / latn + (0.0172 * inp.Elevation));
+                    LATN = 43.0 + 33.7 * Mathd.Exp(-0.0351 * (150 - input.Lon));
+                    output.JulianDateMin = (int)(0.5 + 142.1 * input.Lat / LATN + (0.0172 * input.Elevation));
                 }
             }
-            nd = Mathd.Abs(inp.jd - at.jd_min);
-            if (nd >= 50) return (120.0);
-            if (nd >= 30 && nd < 50) return (32.9 + 3.17 * nd - 0.0288 * nd * nd);
-            return (85.0 + 0.0189 * nd * nd);
+            ND = Mathd.Abs(input.JulianDate - output.JulianDateMin);
+            if (ND >= 50)
+            {
+                return (120.0);
+            }
+
+            if (ND >= 30 && ND < 50)
+            {
+                return (32.9 + 3.17 * ND - 0.0288 * ND * ND);
+            }
+
+            return (85.0 + 0.0189 * ND * ND);
         }
 
-        static double surf_fuel_consump(CFBPInputs inp, CFBPFuel fuel)
+        static double SurfaceFuelConsumption(CFBPInputs input, CFBPFuel fuel)
         {
-            double sfc, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
-            FuelTypes ft;
-            ft = fuel.FuelType;
-            bui = inp.BUI;
-            ffmc = inp.FFMC;
-            if (ft == FuelTypes.C1)
+            double SFC, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
+            FuelTypes fuelType;
+            fuelType = fuel.FuelType;
+            bui = input.BUI;
+            ffmc = input.FFMC;
+            if (fuelType == FuelTypes.C1)
             {
                 /*       sfc=1.5*(1.0-Mathd.Exp(-0.23*(ffmc-81.0)));*/
                 if (ffmc > 84)
                 {
-                    sfc = 0.75 + 0.75 * Mathd.Sqrt(1 - Mathd.Exp(-0.23 * (ffmc - 84)));
+                    SFC = 0.75 + 0.75 * Mathd.Sqrt(1 - Mathd.Exp(-0.23 * (ffmc - 84)));
                 }
                 else
                 {
-                    sfc = 0.75 - 0.75 * Mathd.Sqrt(1 - Mathd.Exp(0.23 * (ffmc - 84)));
+                    SFC = 0.75 - 0.75 * Mathd.Sqrt(1 - Mathd.Exp(0.23 * (ffmc - 84)));
                 }
-                return (sfc >= 0 ? sfc : 0.0);
+                return (SFC >= 0 ? SFC : 0.0);
             }
-            if (ft == FuelTypes.C2|| ft == FuelTypes.M3|| ft == FuelTypes.M4)
+            if (fuelType == FuelTypes.C2|| fuelType == FuelTypes.M3|| fuelType == FuelTypes.M4)
             {
                 return (5.0 * (1.0 - Mathd.Exp(-0.0115 * bui)));
             }
-            if (ft == FuelTypes.C3|| ft == FuelTypes.C4)
+            if (fuelType == FuelTypes.C3|| fuelType == FuelTypes.C4)
             {
                 return (5.0 * Mathd.Pow((1.0 - Mathd.Exp(-0.0164 * bui)), 2.24));
             }
-            if (ft == FuelTypes.C5|| ft == FuelTypes.C6)
+            if (fuelType == FuelTypes.C5|| fuelType == FuelTypes.C6)
             {
                 return (5.0 * Mathd.Pow((1.0 - Mathd.Exp(-0.0149 * bui)), 2.48));
             }                
-            if (ft == FuelTypes.C7)
+            if (fuelType == FuelTypes.C7)
             {
                 ffc = 2.0 * (1.0 - Mathd.Exp(-0.104 * (ffmc - 70.0)));
                 if (ffc < 0)
@@ -726,40 +734,40 @@ namespace PREACT.Fire
                 wfc = 1.5 * (1.0 - Mathd.Exp(-0.0201 * bui));
                 return (ffc + wfc);
             }
-            if (ft == FuelTypes.O1a || ft == FuelTypes.O1b)
+            if (fuelType == FuelTypes.O1a || fuelType == FuelTypes.O1b)
             {
-                return ((inp.GrassFuelLoad) /* change this*/ );
+                return ((input.GrassFuelLoad) /* change this*/ );
             }
-            if (ft == FuelTypes.M1 || ft == FuelTypes.M2)
+            if (fuelType == FuelTypes.M1 || fuelType == FuelTypes.M2)
             {
                 sfc_c2 = 5.0 * (1.0 - Mathd.Exp(-0.0115 * bui));
                 sfc_d1 = 1.5 * (1.0 - Mathd.Exp(-0.0183 * bui));
-                sfc = fuel.Coefficients.PercentConifer / 100.0 * sfc_c2 + (100.0 - fuel.Coefficients.PercentConifer) / 100.0 * sfc_d1;
-                return (sfc);
+                SFC = fuel.Coefficients.PercentConifer / 100.0 * sfc_c2 + (100.0 - fuel.Coefficients.PercentConifer) / 100.0 * sfc_d1;
+                return (SFC);
             }
-            if (ft == FuelTypes.S1)
+            if (fuelType == FuelTypes.S1)
             {
                 ffc = 4.0 * (1.0 - Mathd.Exp(-0.025 * bui));
                 wfc = 4.0 * (1.0 - Mathd.Exp(-0.034 * bui));
                 return (ffc + wfc);
             }
-            if (ft == FuelTypes.S2)
+            if (fuelType == FuelTypes.S2)
             {
                 ffc = 10.0 * (1.0 - Mathd.Exp(-0.013 * bui));
                 wfc = 6.0 * (1.0 - Mathd.Exp(-0.060 * bui));
                 return (ffc + wfc);
             }
-            if (ft == FuelTypes.S3)
+            if (fuelType == FuelTypes.S3)
             {
                 ffc = 12.0 * (1.0 - Mathd.Exp(-0.0166 * bui));
                 wfc = 20.0 * (1.0 - Mathd.Exp(-0.0210 * bui));
                 return (ffc + wfc);
             }
-            if (ft == FuelTypes.D1)
+            if (fuelType == FuelTypes.D1)
             {
                 return (1.5 * (1.0 - Mathd.Exp(-0.0183 * bui)));
             }
-            if (ft == FuelTypes.D2)
+            if (fuelType == FuelTypes.D2)
             {
                 return (bui >= 80 ? 1.5 * (1.0 - Mathd.Exp(-0.0183 * bui)) : 0.0);
             }
@@ -769,7 +777,7 @@ namespace PREACT.Fire
         }
 
 
-        static double crit_surf_intensity(CFBPFuel fuel, double fmc)
+        static double CriticalSurfaceIntensity(CFBPFuel fuel, double fmc)
         {
             return (0.001 * Mathd.Pow(fuel.Coefficients.CrownBaseHeight * (460.0 + 25.9 * fmc), 1.5));
         }
@@ -997,7 +1005,7 @@ namespace PREACT.Fire
             m.SurfaceFuelConsumption = 0.0;
             m.CriticalSurfaceIntensity = 0.0; m.RSO = 0.0; m.FoliarMoistureContent = 0; m.SurfaceFireIntensity = 0.0;
             m.SurfaceRateOfSpread = 0.0; m.ISI = 0.0; m.be = 0.0; m.SpreadFactor = 1.0; m.SpreadAzimuth = 0.0; m.WSV = 0.0;
-            m.ff = 0.0; m.jd = 0; m.jd_min = 0;
+            m.ff = 0.0; m.JulianDate = 0; m.JulianDateMin = 0;
             m.CoverType = ' ';
         }
 

@@ -24,10 +24,10 @@ MaxCarsProbability=0.3
 
 [Evacuation]
 EvacuationOrderStart=0.0
-EvacuationDestinationFiles=destinations/goal_highway.ed,destinations/route121.ed
+EvacuationDestinationFiles=destinations/route85.ed,destinations/route121.ed
 ResponseCurveFiles=responseCurves/Observed_average.csv
-EvacuationGroupFiles=groups/group_highway.eg
-EvacuationGroupsMapFile=groups/example.egs
+EvacuationGroupFiles=groups/group_highways.eg
+EvacuationGroupsMapFile=groups/Development.egs
 PaintCellSize=200.0
 UseTriggerBufferEvacuation=false
 TriggerBufferFile=fire/trigger_buffer.asc
@@ -47,7 +47,7 @@ VisibilityAffectsSpeed=false
 [SUMO]
 ConfigurationFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
-DestinationChoice=ClosestEuclidean
+DestinationChoice=EvacGroupWeighted
 
 [Fire]
 FireModule=CellParticleHybrid

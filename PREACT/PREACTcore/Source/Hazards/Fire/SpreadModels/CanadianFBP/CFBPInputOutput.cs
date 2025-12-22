@@ -7,7 +7,7 @@ namespace PREACT.Fire
     public struct CFBPInputs
     {
         public double FFMC, WindSpeed, GrassFuelLoad, BUI, Lat, Lon;
-        public int Time, Pattern, mon, jd, jd_min, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation, hour, hourly;
+        public int Time, Pattern, mon, JulianDate, jd_min, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation, hour, hourly;
     }
     public class FireData
     {
@@ -19,7 +19,7 @@ namespace PREACT.Fire
     public class MainOutputs
     {
         public double hffmc, SurfaceFuelConsumption, CriticalSurfaceIntensity, RSO, FoliarMoistureContent, SurfaceFireIntensity, SurfaceRateOfSpread, ISI, be, SpreadFactor, SpreadAzimuth, WSV, ff;
-        public int jd_min, jd;
+        public int JulianDateMin, JulianDate;
         public char CoverType;
     }
 
