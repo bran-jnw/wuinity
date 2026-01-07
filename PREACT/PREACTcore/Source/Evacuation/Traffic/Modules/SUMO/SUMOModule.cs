@@ -339,8 +339,8 @@ namespace PREACT.Traffic
             try
             {
                 int xDim = _usageMap.GetLength(0);
-                int yDim = _usageMap.GetLength(1);
-                                
+                int yDim = _usageMap.GetLength(1);        
+                
                 OSGeo.GDAL.Gdal.AllRegister();
                 OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff");
                 OSGeo.GDAL.Dataset output = driver.Create(filePath, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);

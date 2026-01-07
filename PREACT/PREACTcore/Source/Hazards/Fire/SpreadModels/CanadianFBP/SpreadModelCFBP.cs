@@ -57,7 +57,8 @@ namespace PREACT.Fire
             
             return ROStheta;
 
-            /* double rosDirection = _head.RateOfSpread;
+            /* FARSITE approach
+            double rosDirection = _head.RateOfSpread;
             if (_head.RateOfSpread != 0.0) // if forward spread rate is not zero
             {
                 // Calculate the fire spread rate in this azimuth

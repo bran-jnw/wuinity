@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="GDAL" Version="3.11.3" />
-    <PackageReference Include="GDAL.Native" Version="3.11.3" />
     <PackageReference Include="ILGPU" Version="1.5.3" />
     <PackageReference Include="ILGPU.Algorithms" Version="1.5.3" />
     <PackageReference Include="Itinero" Version="1.5.1" />
@@ -23,8 +21,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="gdalconst_csharp">
+      <HintPath>ThirdParty\GDAL\x64\gdalconst_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="gdal_csharp">
+      <HintPath>ThirdParty\GDAL\x64\gdal_csharp.dll</HintPath>
+    </Reference>
     <Reference Include="kPERILcore">
       <HintPath>..\..\..\kperil\kPERILcore\bin\Release\netstandard2.1\kPERILcore.dll</HintPath>
+    </Reference>
+    <Reference Include="ogr_csharp">
+      <HintPath>ThirdParty\GDAL\x64\ogr_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="osr_csharp">
+      <HintPath>ThirdParty\GDAL\x64\osr_csharp.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -40,6 +50,18 @@
     </None>
     <None Update="ThirdParty\FOFEM\x64\FOFEM.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\gdalconst_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\gdal_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\ogr_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\osr_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ThirdParty\kPERIL\kPERILcore.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
