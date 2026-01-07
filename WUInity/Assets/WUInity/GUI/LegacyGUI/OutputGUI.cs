@@ -198,7 +198,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle k-PERIL results"))
                 {
-                    _wuinityManager.FireDomainVisualizer.DisplayTriggerBuffer(_engine.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success));
+                    _wuinityManager.FireDomainVisualizer.DisplayTriggerBuffer(_engine.Simulation.Output.GetTriggerBufferOutput(_engine.Simulation.SimulationIndex, out success));
                 }
                 ++buttonIndex;
             }

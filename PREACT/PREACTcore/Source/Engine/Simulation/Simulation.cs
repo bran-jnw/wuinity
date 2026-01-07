@@ -33,7 +33,8 @@ namespace PREACT
         private SpatialManager _spatialManager;
         private HazardManager _hazardManager;
         private PREACTInput _input;
-        
+        private SimulationOutput _output;        
+
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
         private FireModule _fireModule;
@@ -71,6 +72,7 @@ namespace PREACT
         public SmokeModule SmokeModule { get => _smokeModule; }
         public TriggerBufferModule TriggerBufferModule { get => _triggerBufferModule; }
         public PREACTInput Input { get => _input; }
+        public SimulationOutput Output { get => _output; }
 
         //Data
         public int SimulationIndex { get => _simulationIndex; }
@@ -201,7 +203,7 @@ namespace PREACT
         private void PostRun()
         {
             StopModules();
-            _engine.Output.AddEvacTime(CurrentTime);           
+            _output.AddEvacTime(CurrentTime);           
 
             if (!_stoppedDueToError)
             {
@@ -414,7 +416,7 @@ namespace PREACT
 
                 if(_triggerBufferModule != null)
                 {
-                    _engine.Output.AddTriggerBufferOutput(_triggerBufferModule.TriggerBufferOutput, _simulationIndex);
+                    _output.AddTriggerBufferOutput(_triggerBufferModule.TriggerBufferOutput, _simulationIndex);
                 }
             }
             else

@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace PREACT.IO
 {
     [System.Serializable]
-    public class PREACTOutput
+    public class SimulationOutput
     {
         private float _totalAverageEvacTime;
         public float TotalAverageEvacTime { get => _totalAverageEvacTime; }
@@ -22,7 +22,7 @@ namespace PREACT.IO
         Dictionary<int, float[,]> _triggerBuffers = new Dictionary<int, float[,]>();
 
 
-        public PREACTOutput()
+        public SimulationOutput()
         {
             _evac = new EvacOutput();
             _averageEvacTimes = new List<float>();

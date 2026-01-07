@@ -26,7 +26,7 @@ namespace PREACT
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private PREACTInput _input;
         private DataStatus _dataStatus;
-        private PREACTOutput _output;        
+        private SimulationOutput _output;        
         private string _workingFile;
         private Visualization.WUIShowCommunicator _wuiShow;
         private WorkingData _workingData;
@@ -60,8 +60,7 @@ namespace PREACT
                 return path;
             }
         }
-        public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }        
-        public PREACTOutput Output { get => _output; }     
+        public Visualization.WUIShowCommunicator WUIShow { get => _wuiShow; }    
         public WorkingData WorkingData { get => _workingData; }
 
         public Engine(IExternalManager externalManager, bool mainEngine = true)
@@ -70,7 +69,7 @@ namespace PREACT
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             _engineOutput = new EngineOutput(this);
             _dataStatus = new DataStatus();
-            _output = new PREACTOutput();
+            _output = new SimulationOutput();
             _workingData = new WorkingData();
             _externalManager = externalManager;
             if(mainEngine)
@@ -78,17 +77,16 @@ namespace PREACT
                 _ENGINE = this;
             }
 
-            /*try
+            try
             {
-                GdalConfiguration.ConfigureGdal();
+                OSGeo.GDAL.Gdal.AllRegister();
             }
             catch (Exception e)
             {
                 throw e;
-            }*/
-            
-        }      
-       
+            }
+        }
+
         public async void RunSimulations(EngineTask engineTask, int startIndexOffset = 0)
         {
             if(_input == null)
@@ -380,7 +378,7 @@ namespace PREACT
                 Message(null, LogType.Log, "No completed traffic simulations were performed, cannot analyse statistics.");
             }
 
-            PREACTOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
+            SimulationOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
         }
 
         float cumulativeTotalEvacTime = 0.0f;
