@@ -169,7 +169,7 @@ namespace PREACT
             _currentTime = 0f;
             for (int i = 0; i < _input.Evacuation.Data.ResponseCurves.Count; i++)
             {
-                float t = _input.Evacuation.Data.ResponseCurves[i].dataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
+                float t = _input.Evacuation.Data.ResponseCurves[i].DataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;

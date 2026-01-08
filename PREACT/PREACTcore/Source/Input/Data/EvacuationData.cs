@@ -17,7 +17,7 @@ namespace PREACT.IO
         SimulationInput _simulationInput;
         EvacuationInput _evacuationInput;
         public List<ResponseCurve> ResponseCurves;
-        public List<EvacuationDestinationInput> EvacuationDestinationInputs;        
+        //public List<EvacuationDestinationInput> EvacuationDestinationInputs;        
         public List<EvacuationGroup> EvacuationGroups;
 
         public EvacuationData(SimulationInput simulationInput, EvacuationInput evacuationInput)
@@ -25,7 +25,7 @@ namespace PREACT.IO
             _simulationInput = simulationInput;
             _evacuationInput = evacuationInput;
             ResponseCurves = new List<ResponseCurve>();
-            EvacuationDestinationInputs = new List<EvacuationDestinationInput>();
+            //EvacuationDestinationInputs = new List<EvacuationDestinationInput>();
             EvacuationGroups = new List<EvacuationGroup>();
         }
 
@@ -63,11 +63,11 @@ namespace PREACT.IO
         {
             success = false;
             Engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
-            
+
             //need goals and curves before can load groups
             //need to load groups before indices
-            LoadResponseCurves(rootFolder, _evacuationInput.ResponseCurveFiles, out success);
-            LoadEvacuationDestinations(rootFolder, _evacuationInput.EvacuationDestinationFiles, out success);
+            //LoadEvacuationDestinations(rootFolder, _evacuationInput.EvacuationDestinationFiles, out success);
+            LoadResponseCurves(rootFolder, _evacuationInput.ResponseCurveFiles, out success);            
             LoadEvacGroupFiles(rootFolder, this, _evacuationInput.EvacuationGroupFiles, out success);
             string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
             LoadEvacGroupIndices(filePath, out success);
@@ -80,10 +80,10 @@ namespace PREACT.IO
             ResponseCurves = ResponseCurve.LoadResponseCurves(rootFolder, responseCurveFiles, out success);
         }
 
-        public void LoadEvacuationDestinations(string rootFolder, List<string> evacuationGoalFiles, out bool success)
+        /*public void LoadEvacuationDestinations(string rootFolder, List<string> evacuationGoalFiles, out bool success)
         {
             EvacuationDestinationInputs = EvacuationDestinationInput.LoadEvacuationDestinationFiles(rootFolder, evacuationGoalFiles, out success);
-        }
+        }*/
 
         public void LoadEvacGroupFiles(string rootFolder, EvacuationData evacuationData, List<string> evacuationGroupFiles, out bool success)
         {
@@ -115,6 +115,11 @@ namespace PREACT.IO
             }
         }
 
+        public EvacuationDestinationInput GetEvacGoalFromName()
+        {
+            _evacuationInput.EvacuationDestinationInputs.
+        }
+
         public int GetEvacGoalIndexFromName(string name)
         {
             int index = -1;
@@ -140,7 +145,7 @@ namespace PREACT.IO
             int index = -1;
             for (int i = 0; i < ResponseCurves.Count; i++)
             {
-                if (name == ResponseCurves[i].name)
+                if (name == ResponseCurves[i].Name)
                 {
                     index = i;
                     break;

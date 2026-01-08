@@ -35,22 +35,22 @@ namespace PREACT.IO
             int issues = 0;
             SUMOInput newInput = new SUMOInput();
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            input = nameof(ConfigurationFile);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(ConfigurationFile);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 newInput.ConfigurationFile = userInput;
-                PREACTInput.CheckIfFileExist(input, userInput, rootFolder, out success);
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {
                 ++issues;
-                PREACTInput.InputNotFoundMessage(input, true);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
 
-            input = nameof(UTMoffset);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(UTMoffset);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
                 double.TryParse(data[0], out newInput.UTMoffset.x);
@@ -59,21 +59,21 @@ namespace PREACT.IO
             else
             {
                 ++issues;
-                PREACTInput.InputNotFoundMessage(input, true);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
 
-            input = nameof(OutputRasterSize);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(OutputRasterSize);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 double.TryParse(userInput, out newInput.OutputRasterSize);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(DestinationChoice);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(DestinationChoice);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
@@ -91,34 +91,34 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        Engine.Message(null, Engine.LogType.SimulationError, input + " was not recognized." + PREACTInput.pleaseCheckInput);
+                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
                         break;
                 }
             }
             else
             {
                 ++issues;
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(SmokeAlpha);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(SmokeAlpha);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.SmokeAlpha);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            input = nameof(SmokeBeta);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(SmokeBeta);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 float.TryParse(userInput, out newInput.SmokeBeta);
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             if (issues == 0)

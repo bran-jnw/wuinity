@@ -6,8 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.IO;
-using PREACT.IO;
+using PREACT.Evacuation;
 
 namespace PREACT.IO
 {
@@ -18,9 +17,15 @@ namespace PREACT.IO
 
         public EvacuationData Data { get => _data; }
         public float EvacuationOrderStart = 0.0f;
-        public List<string> EvacuationDestinationFiles = new List<string>();
-        public List<string> ResponseCurveFiles = new List<string>();      
-        public List<string> EvacuationGroupFiles = new List<string>();        
+
+        //public List<string> EvacuationDestinationFiles = new List<string>();
+        //public List<string> ResponseCurveFiles = new List<string>();      
+        //public List<string> EvacuationGroupFiles = new List<string>();
+
+        public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs;
+        public Dictionary<string, ResponseCurve> ResponseCurves;        
+        public Dictionary<string, EvacuationGroup> EvacuationGroups;
+
         public string EvacuationGroupsMapFile = string.Empty;
         public float PaintCellSize = 200f;
         public bool UseTriggerBufferEvacuation = false;
@@ -31,7 +36,7 @@ namespace PREACT.IO
             _data = new EvacuationData(simulationInput, this);
         }
 
-        public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, string rootFolder, out bool success)
+        public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupIndices, string rootFolder, out bool success)
         {
             EvacuationInput newInput = new EvacuationInput(simulationInput);
             if (!simulationInput.RunPedestrianModule && !simulationInput.RunTrafficModule)
@@ -45,6 +50,34 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
+            //critical
+            newInput.EvacuationDestinationInputs = EvacuationDestinationInput.Parse(inputLines, destinationLineIndices, rootFolder, out success);
+            if (!success)
+            {
+                return newInput;
+            }
+
+            //critical
+            newInput.ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, rootFolder, out success);
+            if (!success)
+            {
+                return newInput;
+            }
+
+            //critical, must be done after response curves and destinations
+            newInput.EvacuationGroups = EvacuationGroup.Parse(inputLines, evacuationGroupIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, rootFolder, out success);
+            if (!success)
+            {
+                return newInput;
+            }
+
+            //critical
+            newInput.ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, rootFolder, out success);
+            if (!success)
+            {
+                return newInput;
+            }
+
             //not critical
             nameOfInput = nameof(EvacuationOrderStart);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
@@ -56,7 +89,7 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(nameOfInput);            
             }
 
-            //critical
+            /*//critical
             nameOfInput = nameof(EvacuationDestinationFiles);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -134,7 +167,7 @@ namespace PREACT.IO
             if(!success)
             {
                 return newInput;
-            }
+            }*/
 
             nameOfInput = nameof(PaintCellSize);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
@@ -175,7 +208,6 @@ namespace PREACT.IO
                 {
                     return newInput;
                 }
-
             }
 
             newInput._data.LoadAll(rootFolder, out success);

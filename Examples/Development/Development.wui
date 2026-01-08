@@ -45,7 +45,6 @@ Color=1.0,1.0,1.0
 [Destination]
 Name=route121
 Default=true
-ShapeFile=groups/east.shp
 LatLon=39.503415, -105.092083
 Type=Exit
 MaxFlow=-1.0
@@ -56,8 +55,8 @@ Color=1.0,0.0,0.0
 
 [EvacuationGroup]
 Name=route85_group
-ShapeFile=groups/west.shp
-ResponseCurves=fast, slow
+ShapeFile=groups/east.shp
+ResponseCurves=east_fast, west_slow
 ResponseCurveProbabilites=0.9, 1.0
 Destinations=route85, route121
 DestinationProbabilites=0.9, 1.0
@@ -65,20 +64,21 @@ Color=1.0,1.0,0.0
 
 [EvacuationGroup]
 Name=route121_group
-ResponseCurves=fast, slow
+ShapeFile=groups/west.shp
+ResponseCurves=east_fast, west_slow
 ResponseCurveProbabilites=0.1, 1.0
 Destinations=route121, route85
 DestinationProbabilites=0.9, 1.0
 Color=1.0,1.0,0.0
 
 [ResponseCurve]
-Name=slow
+Name=west_slow
 0, 0
 4500, 0.8
 9000, 1.0
 
 [ResponseCurve]
-Name=fast
+Name=east_fast
 0, 0
 450, 0.8
 900, 1.0

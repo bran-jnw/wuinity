@@ -393,12 +393,12 @@ namespace PREACT.Pedestrian
 
 
             //skip first as that is always zero probability
-            for (int i = 1; i < _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints.Length; i++)
+            for (int i = 1; i < _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints.Length; i++)
             {
-                if (r <= _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].probability)
+                if (r <= _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints[i].probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(_simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].dataPoints[i].time) + evacIn.EvacuationOrderStart;
+                    responseTime = Random.Range(_simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints[i].time) + evacIn.EvacuationOrderStart;
                     break;
                 }
             }

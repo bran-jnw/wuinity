@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
@@ -30,20 +31,105 @@ namespace PREACT.Evacuation
     [System.Serializable]
     public struct ResponseCurve
     {
-        public string name;
-        public ResponseDataPoint[] dataPoints;
+        public string Name;
+        public ResponseDataPoint[] DataPoints;
 
 
         public ResponseCurve(ResponseDataPoint[] dataPoints, string name)
         {
-            this.name = name;
-            this.dataPoints = dataPoints;
+            this.Name = name;
+            this.DataPoints = dataPoints;
         }
 
         public ResponseCurve(List<ResponseDataPoint> dataPoints, string name)
         {
-            this.name = name;
-            this.dataPoints = dataPoints.ToArray();
+            Name = name;
+            DataPoints = dataPoints.ToArray();
+        }
+
+        public void SetDataPoints(List<ResponseDataPoint> dataPoints)
+        {
+            DataPoints = dataPoints.ToArray();
+        }
+
+        public static Dictionary<string, ResponseCurve> Parse(string[] inputLines, List<int> responseCurveLineIndices, string rootFolder, out bool success)
+        {
+            Dictionary<string, ResponseCurve> newInputs = new Dictionary<string, ResponseCurve>();
+            success = false;
+
+            for (int i = 0; i < responseCurveLineIndices.Count; ++i)
+            {
+                ResponseCurve newInput = new ResponseCurve();
+                success = true;
+                int issues = 0;
+                Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, responseCurveLineIndices[i]);
+                string nameOfInput, userInput;
+
+                //critical
+                nameOfInput = nameof(Name);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    newInput.Name = userInput;
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    break;
+                }
+
+                //this one is a bit special as each line does not have a name
+                int startIndex = responseCurveLineIndices[i] + 2; //skip header and name line
+                int endIndex = startIndex + inputToParse.Count - 1; //remove name line from count
+                List<ResponseDataPoint> points = new List<ResponseDataPoint>();
+                for (int j = startIndex; j < endIndex; ++j)
+                {
+                    string[] data = userInput.Split(',');
+                    if(data.Length == 2)
+                    {
+                        ResponseDataPoint dataPoint = new ResponseDataPoint();
+
+                        issues += float.TryParse(data[0], out dataPoint.time) ? 0 : 1;
+                        issues += float.TryParse(data[1], out dataPoint.probability) ? 0 : 1;
+
+                        if (issues > 0)
+                        {
+                            PREACTInput.CouldNotInterpretInputMessage("Response curve data point on line " + j, userInput);
+                        }
+                        else
+                        {
+                            points.Add(new ResponseDataPoint());
+                        }
+                    }
+                    else
+                    {
+                        issues++;
+                    }
+                    
+                    if(points.Count > 1 && issues == 0)
+                    {
+                        newInput.SetDataPoints(points);
+                    }
+                    else
+                    {
+                        success = false;
+                    }
+                }
+
+                if(success)
+                {
+                    newInputs.Add(newInput.Name, newInput);
+                }                
+            }
+
+            if (newInputs.Count > 0)
+            {
+                success = true;
+            }
+            return newInputs;
         }
 
         public static List<ResponseCurve> LoadResponseCurves(string rootFolder, List<string> responseCurveFiles, out bool success)
@@ -82,7 +168,7 @@ namespace PREACT.Evacuation
                         string file = Path.Combine(rootFolder, responseCurveFiles[i]);
                         string name = Path.GetFileNameWithoutExtension(file);
                         responseCurves.Add(new ResponseCurve(dataPoints, name));
-                        Engine.Message(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].name);
+                        Engine.Message(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].Name);
                     }                    
                 }
                 else

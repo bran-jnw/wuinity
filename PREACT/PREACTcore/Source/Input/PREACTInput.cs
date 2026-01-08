@@ -91,17 +91,36 @@ namespace PREACT.IO
         {
             success = false;
             PREACTInput newInput = new PREACTInput(rootFolder, true);
-            Dictionary<string, int> headerLineIndex = new Dictionary<string, int>();
+            Dictionary<string, int> headerLineIndices = new Dictionary<string, int>();
+
+            List<int> destinationLineIndices = new List<int>();            
+            List<int> responseLineIndices = new List<int>();
+            List<int> groupLineIndices = new List<int>();
 
             //first index all headers
-            for(int i = 0; i < inputLines.Length; ++i)
+            for (int i = 0; i < inputLines.Length; ++i)
             {
                 inputLines[i] = inputLines[i].Trim();
                 string line = inputLines[i];
                 if (inputLines[i].StartsWith("["))
                 {
                     line = line.Trim(headerBrackets);
-                    headerLineIndex.Add(line, i);
+                    if (line.Equals("Destination"))
+                    {
+                        destinationLineIndices.Add(i);
+                    }                    
+                    else if (line.Equals("ResponseCurve"))
+                    {
+                        responseLineIndices.Add(i);
+                    }
+                    else if (line.Equals("EvacuationGroup"))
+                    {
+                        groupLineIndices.Add(i);
+                    }
+                    else
+                    {
+                        headerLineIndices.Add(line, i);
+                    }                       
                 }
             }
 
@@ -111,7 +130,7 @@ namespace PREACT.IO
 
             //simulation
             nameOfInput = nameof(Simulation);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);                
                 newInput.Simulation = SimulationInput.Parse(inputLines, lineindex, out success);
@@ -129,7 +148,7 @@ namespace PREACT.IO
 
             //map
             nameOfInput = nameof(Map);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
                 newInput.Map = MapInput.Parse(inputLines, lineindex, out success);
@@ -147,7 +166,7 @@ namespace PREACT.IO
 
             //population      
             nameOfInput = nameof(Population);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
                 newInput.Population = PopulationInput.Parse(inputLines, lineindex, newInput.Simulation, rootFolder, out success);
@@ -169,7 +188,7 @@ namespace PREACT.IO
 
             //events
             nameOfInput = nameof(Events);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
                 newInput.Events = EventsInput.Parse(inputLines, lineindex, rootFolder, out success);
@@ -187,10 +206,10 @@ namespace PREACT.IO
 
             //evacuation            
             nameOfInput = nameof(Evacuation);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {                    
                 ReadingInputMessage(nameOfInput);
-                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, rootFolder, out success);
+                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
             }
             else if(newInput.Simulation.RunPedestrianModule || newInput.Simulation.RunTrafficModule)
             {
@@ -209,10 +228,10 @@ namespace PREACT.IO
 
             //pedestrian
             nameOfInput = nameof(Pedestrian);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Pedestrian = PedestrianInput.Parse(inputLines, lineindex, headerLineIndex, newInput.Simulation, out success);
+                newInput.Pedestrian = PedestrianInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, out success);
             }
             else if(newInput.Simulation.RunPedestrianModule)
             {
@@ -227,10 +246,10 @@ namespace PREACT.IO
 
             //traffic
             nameOfInput = nameof(Traffic);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Traffic = TrafficInput.Parse(inputLines, lineindex, headerLineIndex, newInput.Simulation, rootFolder, out success);
+                newInput.Traffic = TrafficInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, rootFolder, out success);
             }
             else if(newInput.Simulation.RunTrafficModule)
             {
@@ -245,10 +264,10 @@ namespace PREACT.IO
 
             //fire
             nameOfInput = nameof(Fire);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Fire = FireInput.Parse(inputLines, lineindex, headerLineIndex, newInput.Simulation, rootFolder, out success);
+                newInput.Fire = FireInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, rootFolder, out success);
             }
             else if(newInput.Simulation.RunFireModule)
             {
@@ -263,10 +282,10 @@ namespace PREACT.IO
 
             //smoke
             nameOfInput = nameof(Smoke);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Smoke = SmokeInput.Parse(inputLines, lineindex, headerLineIndex, newInput.Simulation, rootFolder, out success);
+                newInput.Smoke = SmokeInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, rootFolder, out success);
             }
             else if (newInput.Simulation.RunSmokeModule)
             {
@@ -281,10 +300,10 @@ namespace PREACT.IO
 
             //trigger buffer
             nameOfInput = nameof(TriggerBuffer);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex, headerLineIndex, rootFolder, out success);
+                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex, headerLineIndices, rootFolder, out success);
             }
             else
             {
@@ -299,7 +318,7 @@ namespace PREACT.IO
 
             //WUIShow
             nameOfInput = nameof(WUIShow);
-            if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
                 newInput.WUIShow = WUIShowInput.Parse(inputLines, lineindex, out success);
@@ -377,6 +396,16 @@ namespace PREACT.IO
             {
                 Engine.Message(null, Engine.LogType.Warning, nameOfInput + " was not found, default value has been used.");
             }                
+        }
+
+        public static void MissingReferenceToOtherInput(string nameOfInput, string missingReference)
+        {
+            Engine.Message(null, Engine.LogType.InputError, nameOfInput + " reference another input (" + missingReference + ") that could not be found." + pleaseCheckInput);
+        }
+
+        public static void IncorrectInputCount(string nameOfInput)
+        {
+            Engine.Message(null, Engine.LogType.InputError, nameOfInput + " does not contain the expected number of inputs." + pleaseCheckInput);
         }
 
         public static void CouldNotInterpretInputMessage(string nameOfInput, string userInput)
