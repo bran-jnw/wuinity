@@ -13,6 +13,7 @@ namespace PREACT.IO
     public class TrafficInput
     {
         public enum TrafficModuleChoice { SUMO, MacroTrafficSim, CityFlow }
+        public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupWeighted, EvacGroupClosestEuclidean };
 
         private TrafficData _data;
         private SUMOInput _sumoInput;
@@ -23,7 +24,8 @@ namespace PREACT.IO
         public SUMOInput SumoInput { get { return _sumoInput; } }
         public MacroTrafficSimInput MacroTrafficSimInput { get => _macroTrafficSimInput; }
         public CityFlowInput CityFlowInput { get => _cityFlowInput; }
-        public TrafficModuleChoice TrafficModule = TrafficModuleChoice.SUMO;      
+        public TrafficModuleChoice TrafficModule = TrafficModuleChoice.SUMO;
+        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupWeighted;
         public bool VisibilityAffectsSpeed = false;     
 
 
@@ -47,11 +49,11 @@ namespace PREACT.IO
             success = false;
             int issues = 0;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
             //critical
-            input = nameof(TrafficModule);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(TrafficModule);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
@@ -63,7 +65,7 @@ namespace PREACT.IO
                         break;
                     default:
                         ++issues;
-                        PREACTInput.CouldNotInterpretInputMessage(input, userInput);
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                         break;
                 }
             }
@@ -77,8 +79,37 @@ namespace PREACT.IO
                 return newInput;
             }
 
-            input = nameof(VisibilityAffectsSpeed);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(DestinationChoice);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                switch (userInput)
+                {
+                    case nameof(DestinationChoices.Random):
+                        newInput.DestinationChoice = DestinationChoices.Random;
+                        break;
+                    case nameof(DestinationChoices.ClosestEuclidean):
+                        newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
+                        break;
+                    case nameof(DestinationChoices.EvacGroupWeighted):
+                        newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
+                        break;
+                    case nameof(DestinationChoices.EvacGroupClosestEuclidean):
+                        newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
+                        break;
+                    default:
+                        ++issues;
+                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
+                        break;
+                }
+            }
+            else
+            {
+                ++issues;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+
+            nameOfInput = nameof(VisibilityAffectsSpeed);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 bool.TryParse(userInput, out newInput.VisibilityAffectsSpeed);
             }
@@ -90,10 +121,10 @@ namespace PREACT.IO
             if(newInput.TrafficModule == TrafficModuleChoice.SUMO)
             {
                 int lineIndex;
-                input = nameof(TrafficModuleChoice.SUMO);
-                if (headerLineIndex.TryGetValue(input, out lineIndex))
+                nameOfInput = nameof(TrafficModuleChoice.SUMO);
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
-                    PREACTInput.ReadingInputMessage(input);
+                    PREACTInput.ReadingInputMessage(nameOfInput);
                     newInput._sumoInput = SUMOInput.Parse(inputLines, lineIndex, rootFolder, out success);
                 }
                 else
@@ -110,10 +141,10 @@ namespace PREACT.IO
             else if(newInput.TrafficModule == TrafficModuleChoice.CityFlow)
             {
                 int lineIndex;
-                input = nameof(TrafficModuleChoice.CityFlow);
-                if (headerLineIndex.TryGetValue(input, out lineIndex))
+                nameOfInput = nameof(TrafficModuleChoice.CityFlow);
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
-                    PREACTInput.ReadingInputMessage(input);
+                    PREACTInput.ReadingInputMessage(nameOfInput);
                     newInput._cityFlowInput = CityFlowInput.Parse(inputLines, lineIndex, rootFolder, out success);
                 }
                 else

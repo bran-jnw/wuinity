@@ -67,19 +67,19 @@ namespace PREACT.Evacuation
             _blocked = input.Blocked; 
         }
 
-        public static List<EvacuationDestination> CreateEvacacuationDestinations(Simulation simulation, List<EvacuationDestinationInput> destinationsInput)
+        public static Dictionary<string, EvacuationDestination> CreateEvacacuationDestinationsFromInput(Simulation simulation, Dictionary<string, EvacuationDestinationInput> destinationsInput)
         {
-            List<EvacuationDestination> destinations = new List<EvacuationDestination>(destinationsInput.Count);
+            Dictionary<string, EvacuationDestination> destinations = new Dictionary<string, EvacuationDestination>(destinationsInput.Count);
 
-            foreach (EvacuationDestinationInput e in destinationsInput)
+            foreach (KeyValuePair<string, EvacuationDestinationInput> e in destinationsInput)
             {
-                destinations.Add(new EvacuationDestination(simulation, e));
+                destinations.Add(e.Key, new EvacuationDestination(simulation, e.Value));
             }
 
             return destinations;
         }
 
-        public void BlockDestination(Simulation simulation)
+        public void BlockDestination()
         {
             _blocked = true;
         }
@@ -122,7 +122,7 @@ namespace PREACT.Evacuation
                 {
                     _blocked = true;
                     Engine.Message(null, Engine.LogType.Event, "Evacuation goal " + _name + " has reached vehivle capacity, re-routing");
-                    _simulation.GoalBlocked();
+                    _simulation.Evacuation.GoalBlocked();
                 }
                 else if (_maxCars > 0 && _vehicles.Count > _maxCars)
                 {
@@ -134,7 +134,7 @@ namespace PREACT.Evacuation
                 {
                     _blocked = true;
                     Engine.Message(null, Engine.LogType.Event, "Evacuation goal " + _name + " has reached people capacity, re-routing");
-                    _simulation.GoalBlocked();
+                    _simulation.Evacuation.GoalBlocked();
                 }
                 else if (_maxPeople > -1 && _currentPeople > _maxPeople)
                 {

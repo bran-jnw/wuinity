@@ -41,7 +41,7 @@ namespace PREACT
 
             if (input.Simulation.RunPedestrianModule)
             {
-                if (input.Evacuation.Data.ResponseCurves == null)
+                if (input.Evacuation.ResponseCurves == null)
                 {
                     canRun = false;
                     Engine.Message(null, Engine.LogType.SimulationError, "No valid response curves have been loaded.");

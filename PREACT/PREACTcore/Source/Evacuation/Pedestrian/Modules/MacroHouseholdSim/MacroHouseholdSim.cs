@@ -108,7 +108,7 @@ namespace PREACT.Pedestrian
                         if(!household.reachedCar)
                         {                                                                      
                             //see if the household has reacted yet, if so, set them in motion
-                            if (!household.isMoving && household.responseTime <= currentTime)
+                            if (!household.isMoving && household.ResponseTime <= currentTime)
                             {
                                 household.isMoving = true;
                                 ++totalHouseholdsResponded;
@@ -194,21 +194,12 @@ namespace PREACT.Pedestrian
             if(_simulation.Input.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
-                EvacuationDestination evacGoal = GetEvacuationGoal(null, household.GetCellIndex(), household);
+                EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household);
 
                 //TODO: more sophisticated choice of new goal
-                if (evacGoal.Blocked)
+                if (evacDest.Blocked)
                 {
-                    for (int i = 0; i < _simulation.Destinations.Count; i++)
-                    {
-                        if (_simulation.Destinations[i] != evacGoal)
-                        {
-                            if(!_simulation.Destinations[i].Blocked)
-                            {
-                                evacGoal = _simulation.Destinations[i];
-                            }
-                        }
-                    }
+                    _simulation.Evacuation.GetBestAvailableDestination(household.EvacuationGroup);
                 }
 
                 Vector2d vehicleLatLon = household.GetVehicleLatLon();
@@ -231,70 +222,16 @@ namespace PREACT.Pedestrian
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        _simulation.InsertNewCar(vehicleLatLon, evacGoal, (uint)peopleInCar[i]);
+                        _simulation.InsertNewCar(vehicleLatLon, evacDest, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    _simulation.InsertNewCar(vehicleLatLon, evacGoal, (uint)household.peopleInHousehold);
+                    _simulation.InsertNewCar(vehicleLatLon, evacDest, (uint)household.peopleInHousehold);
                 }
             }
             
             household.reachedCar = true;
-        }
-
-        private EvacuationDestination GetEvacuationGoal(HumanEvacCell cell, int cellIndex, MacroHousehold household)
-        {
-            EvacuationDestination goal = null;
-
-            if (_simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.SUMO)
-            {                
-                if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.EvacGroupWeighted)
-                {
-                    EvacuationGroup group = _simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
-                    goal = group.GetWeightedRandomDestination(_simulation.Destinations);
-                }
-                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.EvacGroupClosestEuclidean)
-                {
-                    EvacuationGroup group = _simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
-                    goal = group.GetClosestDestination(_simulation.Destinations, household.GetVehicleLatLon(), _simulation);
-                }
-                else if (_simulation.Input.Traffic.SumoInput.DestinationChoice == SUMOInput.DestinationChoices.Random)
-                {
-                    int randomChoice = Random.Range(0, _simulation.Destinations.Count);
-                    goal = _simulation.Destinations[randomChoice];
-                    
-                }
-                else //default to closest
-                {
-                    int closestIndex = 0;
-                    double closestDistance = double.MaxValue;
-                    Vector2d householdPos = _simulation.Input.Simulation.Data.GetSimulationPosition(household.GetVehicleLatLon());
-                    for (int i = 0; i < _simulation.Destinations.Count; ++i)
-                    {
-                        Vector2d destPos = _simulation.Input.Simulation.Data.GetSimulationPosition(_simulation.Destinations[i].LatLon);
-                        double distance = Vector2d.SqrMagnitude(destPos - householdPos);
-                        if (distance < closestDistance)
-                        {
-                            closestDistance = distance;
-                            closestIndex = i;
-                        }
-                    }
-                    goal = _simulation.Destinations[closestIndex];
-                }
-            }
-            else if(cell != null && _simulation.Input.Traffic.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
-            {
-                //this call picks new random route from route collection based on group goal probabilities (if groups are in use)
-                Traffic.RouteCreator.UpdateRouteCollectionBasedOnRouteChoice(_simulation, cell.routeCollection, cell.GetCellIndex());
-            }
-
-            if(goal == null)
-            {
-                Engine.Message(_simulation, Engine.LogType.SimulationError, "Issue with assigning evacuation goal in MacroHouseholdSim, traffic simulation will not run.");
-            }
-
-            return goal;
         }
 
         public void SaveToFile(string file)
@@ -302,14 +239,13 @@ namespace PREACT.Pedestrian
             System.IO.File.WriteAllLines(file, output);
         }
 
-        public void PopulateSimulation(IO.PopulationData.HouseholdData[] householdData)
+        public void PopulateSimulation(PopulationData.HouseholdData[] householdData)
         {
             cellsX = _simulation.Input.Evacuation.Data.CellCount.x;
             cellsY = _simulation.Input.Evacuation.Data.CellCount.y;
             realWorldSize = _simulation.Input.Simulation.DomainSize;            
             population = new int[cellsX * cellsY];
             _householdData = householdData;
-
 
             double cellSizeX = realWorldSize.x / cellsX;
             double cellSizeY = realWorldSize.y / cellsY;
@@ -334,8 +270,8 @@ namespace PREACT.Pedestrian
                 {
                     int cellIndex = xIndex + cellsX * yIndex;
                     population[cellIndex] += _householdData[i].peopleCount;
-                    int evacGroupIndex = _simulation.Input.Evacuation.Data.EvacGroupIndices[cellIndex];
-                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), GetRandomResponseTime(evacGroupIndex), cellIndex, _simulation);
+                    EvacuationGroup eG = _simulation.Evacuation.GetEvacuationGroup(_householdData[i].originLatLon);
+                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), eG, cellIndex, _simulation);
                     _macroHouseholds.Add(mH);
                 }
                 else
@@ -351,7 +287,7 @@ namespace PREACT.Pedestrian
             totalCars = 0;
             for (int i = 0; i < _macroHouseholds.Count; ++i)
             {
-                if (_macroHouseholds[i].responseTime < float.MaxValue)
+                if (_macroHouseholds[i].ResponseTime < float.MaxValue)
                 {
                     totalCars += _macroHouseholds[i].cars;
                 }
@@ -367,43 +303,6 @@ namespace PREACT.Pedestrian
             Engine.Message(_simulation, Engine.LogType.Log, " Total households: " + totalHouseholds);
             Engine.Message(_simulation, Engine.LogType.Log, " Total cars: " + totalCars);
             Engine.Message(_simulation, Engine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
-        }
-
-        /// <summary>
-        /// Pulls random response time along a response time curve
-        /// </summary>
-        /// <returns></returns>
-        public float GetRandomResponseTime(int evacGroupIndex)
-        {
-            EvacuationInput evacIn = _simulation.Input.Evacuation;
-
-            float responseTime = float.MaxValue;
-            float r = Random.Range(0f, 1f);
-            //get curve index from evac group
-            int randomResponseCurveIndex = 0;
-            for (int i = 0; i < _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].ResponseCurveIndices.Length; i++)
-            {
-                if(r <= _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].DestinationCumulativeWeights[i])
-                {
-                    randomResponseCurveIndex = i;
-                    break;
-                }
-            }
-            int curveIndex = _simulation.Input.Evacuation.Data.EvacuationGroups[evacGroupIndex].ResponseCurveIndices[randomResponseCurveIndex];
-
-
-            //skip first as that is always zero probability
-            for (int i = 1; i < _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints.Length; i++)
-            {
-                if (r <= _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints[i].probability)
-                {
-                    //offset with evacuation order time
-                    responseTime = Random.Range(_simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints[i - 1].time + evacIn.EvacuationOrderStart, _simulation.Input.Evacuation.Data.ResponseCurves[curveIndex].DataPoints[i].time) + evacIn.EvacuationOrderStart;
-                    break;
-                }
-            }
-
-            return responseTime;
         }
 
         /// <summary>

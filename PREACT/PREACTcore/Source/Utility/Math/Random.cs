@@ -21,14 +21,13 @@ namespace PREACT.Math
         /// <returns></returns>
         public static int Range(int minInclusive, int maxExclusive)
         {
-            //adding 1 as Next has exclusive upper bound
             return RANDOM.Next(minInclusive, maxExclusive);
         }
 
         /// <summary>
         /// Random float from 0 (inclusive) to 1 (exclusive).
         /// </summary>
-        public static float valuef
+        public static float valueF
         {
             get{ return (float)RANDOM.NextDouble(); }
         }
@@ -36,7 +35,7 @@ namespace PREACT.Math
         /// <summary>
         /// Random double from 0 (inclusive) to 1 (exclusive).
         /// </summary>
-        public static double valued
+        public static double valueD
         {
             get { return RANDOM.NextDouble(); }
         }

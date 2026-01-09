@@ -48,8 +48,8 @@ namespace PREACT.Fire
 
             if (randomCenter)
             {
-                double xPos = (Random.valued + xIndex) * _cellSize;
-                double yPos = (Random.valued + yIndex) * _cellSize;
+                double xPos = (Random.valueD + xIndex) * _cellSize;
+                double yPos = (Random.valueD + yIndex) * _cellSize;
                 double zPos = landscape.GetElevationLocalPos(xPos, yPos);
                 IgnitionPoint = new Vector3d(xPos, yPos, zPos);
             }

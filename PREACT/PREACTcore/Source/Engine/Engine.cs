@@ -85,6 +85,15 @@ namespace PREACT
             {
                 throw e;
             }
+
+            try
+            {
+                OSGeo.OGR.Ogr.RegisterAll();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }            
         }
 
         public async void RunSimulations(EngineTask engineTask, int startIndexOffset = 0)

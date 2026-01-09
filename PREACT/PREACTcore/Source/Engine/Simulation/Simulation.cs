@@ -31,6 +31,7 @@ namespace PREACT
         private TimeManager _timeManager;
         private WeatherManager _weatherManager;
         private SpatialManager _spatialManager;
+        private EvacuationManager _evacuationManager;
         private HazardManager _hazardManager;
         private PREACTInput _input;
         private SimulationOutput _output;        
@@ -57,7 +58,7 @@ namespace PREACT
         private bool _stopRun;
         private bool _haveResults = false;
         private float _stepExecutionTime;
-        private List<EvacuationDestination> _evacuationDestinations;
+        
 
         //References
         public Engine Engine { get => _engine; }
@@ -65,6 +66,7 @@ namespace PREACT
         public TimeManager Time { get => _timeManager; }
         public WeatherManager Weather { get => _weatherManager; }
         public SpatialManager Spatial { get => _spatialManager; }
+        public EvacuationManager Evacuation { get => _evacuationManager; }
         public HazardManager Hazards { get => _hazardManager; }
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
@@ -82,7 +84,6 @@ namespace PREACT
         public float StartTime { get => _startTime; }        
         public float CurrentTime { get => _currentTime; }  
         public float StepExecutionTime { get => _stepExecutionTime; }        
-        public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
         public Vector2d UTMOrigin { get => _input.Simulation.Data.UTMOrigin; }
         public LatLngUTMConverter.UTMResult UTMData { get => _input.Simulation.Data.UTMData; }
 
@@ -150,7 +151,7 @@ namespace PREACT
 
             Engine.Message(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
 
-            _evacuationDestinations = EvacuationDestination.CreateEvacacuationDestinations(this, _input.Evacuation.Data.EvacuationDestinationInputs);
+            
             if (_stopRun)
             {
                 _state = SimulationState.Error;
@@ -167,9 +168,9 @@ namespace PREACT
 
             //pick start time based on curve or 0 (fire start)
             _currentTime = 0f;
-            for (int i = 0; i < _input.Evacuation.Data.ResponseCurves.Count; i++)
+            foreach (ResponseCurve rC in _input.Evacuation.ResponseCurves.Values)
             {
-                float t = _input.Evacuation.Data.ResponseCurves[i].DataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
+                float t = rC.DataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
                 _currentTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
@@ -477,7 +478,7 @@ namespace PREACT
             if (_input.Simulation.RunFireModule)
             {
                 //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
-                CheckEvacuationGoalStatus();
+                _evacuationManager.CheckEvacuationGoalStatus();
                 //can get set when evac goals are all gone
                 if (_stopRun)
                 {
@@ -654,22 +655,7 @@ namespace PREACT
             }
         }
 
-        void CheckEvacuationGoalStatus()
-        {
-            for (int i = 0; i < _evacuationDestinations.Count; i++)
-            {
-                EvacuationDestination eG = _evacuationDestinations[i];
-                if(!eG.Blocked)
-                {
-                    FireCellState cellState = _fireModule.GetFireCellState(eG.LatLon);
-                    if (cellState == FireCellState.Burning)
-                    {
-                        Engine.Message(this, Engine.LogType.Log, " Goal blocked by fire: " + eG.Name);
-                        BlockEvacGoal(i);
-                    }
-                }                
-            }
-        }
+        
 
         bool _stoppedDueToError = false;
         public bool StoppedDueToError { get => _stoppedDueToError; }
@@ -691,48 +677,6 @@ namespace PREACT
                 _trafficModule.InsertNewCar(startLatLon, evacuationGoal, numberOfPeopleInCar);
             }
         }
-
-        public void BlockEvacGoal(int index)
-        {
-            if (!_evacuationDestinations[index].Blocked)
-            {
-                _evacuationDestinations[index].BlockDestination(this);
-                UpdateRoutes();
-            }
-        }        
-
-        /// <summary>
-        /// Called from goal when blocked internally.
-        /// </summary>
-        public void GoalBlocked()
-        {
-            UpdateRoutes();
-        }
-
-        private void UpdateRoutes()
-        {
-            //check that we have at least one goal left
-            bool allBlocked = true;
-            for (int i = 0; i < _evacuationDestinations.Count; i++)
-            {
-                if(!_evacuationDestinations[i].Blocked)
-                {
-                    allBlocked = false;
-                    break;
-                }
-            }
-            if(allBlocked)
-            {
-                Stop("No evacuation goals available, stopping simulation.", false);
-                return;
-            }
-
-            //update raster evac routes first as traffic might use some of the updated choices
-            //TODO
-
-            //update cars already in traffic
-            _trafficModule.UpdateEvacuationGoals();              
-        }        
 
         private void SaveOutput()
         {
@@ -777,16 +721,7 @@ namespace PREACT
             return _input.Simulation.Data.GetWGS84FromSimulationPosition(pos);
         }        
 
-        public uint GetTotalEvacuated()
-        {
-            uint result = 0;
-            for (int i = 0; i < _evacuationDestinations.Count; i++)
-            {
-                result += _evacuationDestinations[i].CurrentPeople;
-            }
-
-            return result;
-        }
+       
 
         List<float> _emptyArrivalData = new List<float>();
         public List<float> GetTrafficArrivalData()

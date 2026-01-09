@@ -8,6 +8,7 @@
 using System.Numerics;
 using PREACT.IO;
 using PREACT.Math;
+using PREACT.Evacuation;
 
 namespace PREACT.Pedestrian
 {
@@ -18,16 +19,19 @@ namespace PREACT.Pedestrian
     public class MacroHousehold
     {
         public float evacuationTime;
-        public float responseTime;
+        public float ResponseTime;
         public int peopleInHousehold;
         public bool reachedCar;
         public int cars;
         public bool isMoving;
         public float walkingDistance;
 
-        IO.PopulationData.HouseholdData _houseHoldData;
+        PopulationData.HouseholdData _houseHoldData;
         Vector2 homePosition, carPosition;
+        EvacuationGroup _evacuationGroup;
         int _cellIndex;
+
+        public EvacuationGroup EvacuationGroup { get => _evacuationGroup; }
 
         /// <summary>
         /// Creates a household that will move as a unit.
@@ -38,10 +42,11 @@ namespace PREACT.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(PopulationData.HouseholdData householdData, float walkingSpeed, float responseTime, int cellIndex, Simulation simulation)
+        public MacroHousehold(PopulationData.HouseholdData householdData, float walkingSpeed, EvacuationGroup evacuationGroup, int cellIndex, Simulation simulation)
         {
             PopulationInput popInput = simulation.Input.Population;
             MacroHouseholdSimInput houseInput = simulation.Input.Pedestrian.MacroHouseholdSimInput;
+            _evacuationGroup = evacuationGroup;            
 
             _houseHoldData = householdData;
             _cellIndex = cellIndex;
@@ -64,15 +69,17 @@ namespace PREACT.Pedestrian
             temp = simulation.GetSimulationPosition(householdData.roadAccessLatLon);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
+
+            ResponseTime = _evacuationGroup.GetWeightedRandomResponseTime(simulation.Input.Evacuation.EvacuationOrderStart);
+
             float travelTime = walkingDistance / walkingSpeed;
-            this.responseTime = responseTime;
-            if (responseTime == float.MaxValue)
+            if (ResponseTime == float.MaxValue)
             {
                 evacuationTime = float.MaxValue;
             }
             else
             {
-                evacuationTime = travelTime + responseTime;
+                evacuationTime = travelTime + ResponseTime;
             }
             isMoving = false;            
         }
@@ -89,7 +96,7 @@ namespace PREACT.Pedestrian
 
         public Vector4 GetPositionAndState(float time)
         {
-            //states are use din shader to apply color
+            //states are used in shader to apply color
             float state = 0.375f;
             if(evacuationTime == float.MaxValue)
             {
@@ -104,7 +111,7 @@ namespace PREACT.Pedestrian
                 state = 0.625f;
             }
 
-            float ratio = (time - responseTime) / (evacuationTime - responseTime);
+            float ratio = (time - ResponseTime) / (evacuationTime - ResponseTime);
             ratio = Mathf.Clamp01(ratio);
             Vector2 position = Vector2.Lerp(homePosition, carPosition, ratio);
             return new Vector4(position.X, position.Y, peopleInHousehold, state);

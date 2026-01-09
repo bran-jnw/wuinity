@@ -16,17 +16,14 @@ namespace PREACT.IO
     {
         SimulationInput _simulationInput;
         EvacuationInput _evacuationInput;
-        public List<ResponseCurve> ResponseCurves;
-        //public List<EvacuationDestinationInput> EvacuationDestinationInputs;        
-        public List<EvacuationGroup> EvacuationGroups;
 
         public EvacuationData(SimulationInput simulationInput, EvacuationInput evacuationInput)
         {
             _simulationInput = simulationInput;
             _evacuationInput = evacuationInput;
-            ResponseCurves = new List<ResponseCurve>();
+            //ResponseCurves = new List<ResponseCurve>();
             //EvacuationDestinationInputs = new List<EvacuationDestinationInput>();
-            EvacuationGroups = new List<EvacuationGroup>();
+            //EvacuationGroups = new List<EvacuationGroup>();
         }
 
         //TODO: fix this getter, want to get rid of
@@ -64,42 +61,10 @@ namespace PREACT.IO
             success = false;
             Engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
 
-            //need goals and curves before can load groups
-            //need to load groups before indices
-            //LoadEvacuationDestinations(rootFolder, _evacuationInput.EvacuationDestinationFiles, out success);
-            LoadResponseCurves(rootFolder, _evacuationInput.ResponseCurveFiles, out success);            
-            LoadEvacGroupFiles(rootFolder, this, _evacuationInput.EvacuationGroupFiles, out success);
             string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
-            LoadEvacGroupIndices(filePath, out success);
 
             success = true;
-        }
-
-        public void LoadResponseCurves(string rootFolder, List<string> responseCurveFiles, out bool success)
-        {
-            ResponseCurves = ResponseCurve.LoadResponseCurves(rootFolder, responseCurveFiles, out success);
-        }
-
-        /*public void LoadEvacuationDestinations(string rootFolder, List<string> evacuationGoalFiles, out bool success)
-        {
-            EvacuationDestinationInputs = EvacuationDestinationInput.LoadEvacuationDestinationFiles(rootFolder, evacuationGoalFiles, out success);
-        }*/
-
-        public void LoadEvacGroupFiles(string rootFolder, EvacuationData evacuationData, List<string> evacuationGroupFiles, out bool success)
-        {
-            EvacuationGroups = EvacuationGroup.LoadEvacGroupFiles(rootFolder, this, evacuationGroupFiles, out success);
-        }        
-
-        public void LoadEvacGroupIndices(string filePath, out bool success)
-        {
-            //fills with first group if "failed", as in could not load but creates default            
-            EvacuationGroup.LoadEvacGroupIndices(filePath, this, out _evacGroupIndices, out success);
-            if(!success)
-            {       
-                //TODO: this is bad, fix in better way
-                DefaultEvacGroupIndices();
-            }            
-        }
+        }   
 
         private void DefaultEvacGroupIndices()
         {
@@ -113,76 +78,6 @@ namespace PREACT.IO
                     _evacGroupIndices[index] = 0;
                 }
             }
-        }
-
-        public EvacuationDestinationInput GetEvacGoalFromName()
-        {
-            _evacuationInput.EvacuationDestinationInputs.
-        }
-
-        public int GetEvacGoalIndexFromName(string name)
-        {
-            int index = -1;
-            for (int i = 0; i < EvacuationDestinationInputs.Count; i++)
-            {
-                if (name == EvacuationDestinationInputs[i].Name)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index < 0)
-            {
-                Engine.Message(null, Engine.LogType.Warning, " User has specified an evacuation goal named " + name + " but no such evacuation goal has been defined.");
-            }
-
-            return index;
-        }
-
-        public int GetResponseCurveIndexFromName(string name)
-        {
-            int index = -1;
-            for (int i = 0; i < ResponseCurves.Count; i++)
-            {
-                if (name == ResponseCurves[i].Name)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index < 0)
-            {
-                Engine.Message(null, Engine.LogType.Warning, " User has specified a response curve named " + name + " but no such response curve has been defined.");
-            }
-
-            return index;
-        }
-
-        public EvacuationGroup GetEvacGroup(int cellIndex)
-        {
-            if (EvacGroupIndices.Length < CellCount.x * CellCount.y)
-            {
-                return null;
-            }
-
-            cellIndex = EvacGroupIndices[cellIndex];
-
-            return EvacuationGroups[cellIndex];
-        }
-
-        public EvacuationGroup GetEvacGroup(int x, int y)
-        {
-            if (EvacGroupIndices.Length < CellCount.x * CellCount.y)
-            {
-                return null;
-            }
-
-            int index = x + y * CellCount.x;
-            index = EvacGroupIndices[index];
-
-            return EvacuationGroups[index];
-        }        
+        }      
     }
 }

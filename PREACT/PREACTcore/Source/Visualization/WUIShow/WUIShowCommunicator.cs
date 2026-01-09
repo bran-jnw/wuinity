@@ -168,10 +168,10 @@ namespace PREACT.Visualization
 
         private byte[] GetDestinationsData()
         {            
-            List<Evacuation.EvacuationDestination> destinations = _engine.Simulation.Destinations;
+            Evacuation.EvacuationDestination[] destinations = _engine.Simulation.Evacuation.DestinationsArray;
             //name, type, total cars, total people, total travel time, average travel time
             List<byte> data = new List<byte>();
-            for(int i = 0; i < destinations.Count; ++i)
+            for(int i = 0; i < destinations.Length; ++i)
             {
                 data.AddRange(Encoding.UTF8.GetBytes(destinations[i].Name.PadRight(_maxNameLengths)));
                 data.AddRange(Encoding.UTF8.GetBytes(destinations[i].GoalType.ToString().PadRight(_maxNameLengths)));

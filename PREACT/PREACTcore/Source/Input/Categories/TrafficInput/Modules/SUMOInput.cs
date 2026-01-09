@@ -14,13 +14,11 @@ namespace PREACT.IO
     [System.Serializable]
     public class SUMOInput
     {
-        public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupWeighted, EvacGroupClosestEuclidean };
         public enum SmokeSpeedReductionModels { Exponential, Smokanza};
 
         public string ConfigurationFile;
         public Vector2d UTMoffset;
         public double OutputRasterSize = 25.0;        
-        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupWeighted;
         public float SmokeAlpha = 0f;
         public float SmokeBeta = 0f;
 
@@ -69,35 +67,6 @@ namespace PREACT.IO
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            nameOfInput = nameof(DestinationChoice);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                switch (userInput)
-                {
-                    case nameof(DestinationChoices.Random):
-                        newInput.DestinationChoice = DestinationChoices.Random;
-                        break;
-                    case nameof(DestinationChoices.ClosestEuclidean):
-                        newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
-                        break;
-                    case nameof(DestinationChoices.EvacGroupWeighted):
-                        newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
-                        break;
-                    case nameof(DestinationChoices.EvacGroupClosestEuclidean):
-                        newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
-                        break;
-                    default:
-                        ++issues;
-                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
-                        break;
-                }
-            }
-            else
-            {
-                ++issues;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 

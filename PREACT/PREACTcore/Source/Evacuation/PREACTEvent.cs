@@ -23,11 +23,11 @@ namespace PREACT
 
     public class BlockDestinationEvent : PREACTEvent
     {
-        public int GoalIndex;
-        public BlockDestinationEvent(float startTime, int goalIndex)
+        public string DestinationName;
+        public BlockDestinationEvent(float startTime, string destinationIndex)
         {
             StartTime = startTime;
-            GoalIndex = goalIndex;
+            DestinationName = destinationIndex;
             Triggered = false;
         }
 
@@ -36,8 +36,8 @@ namespace PREACT
             if(!Triggered)
             {
                 Triggered = true;
-                Engine.Message(null, Engine.LogType.Event, "Goal blocked: " + _simulation.Destinations[GoalIndex].Name);
-                _simulation.BlockEvacGoal(GoalIndex);
+                Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked: " + _simulation.Evacuation.Destinations[DestinationName].Name);
+                _simulation.Evacuation.BlockDestination(DestinationName);
             }            
         }
 
@@ -55,7 +55,7 @@ namespace PREACT
                     //TODO:                    
                 }
 
-                blockDestinationEvent = new BlockDestinationEvent(0, -1);
+                blockDestinationEvent = new BlockDestinationEvent(0, string.Empty);
                 success = true;
             }
             else

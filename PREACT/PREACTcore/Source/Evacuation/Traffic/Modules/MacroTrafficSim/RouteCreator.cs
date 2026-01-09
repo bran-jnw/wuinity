@@ -219,7 +219,7 @@ namespace PREACT.Traffic
             //loop through all defined goals and save them for potential use later (old way only saved the currently needed route and the re-calced if needed)
             if (_validEvacuationGoals == null || _validEvacuationGoalRouterPoints == null)
             {
-                DetermineValidGoalsAndRouterPoints(simulation.Input.Traffic.MacroTrafficSimInput.Routing, simulation.Destinations, false);
+                DetermineValidGoalsAndRouterPoints(simulation.Input.Traffic.MacroTrafficSimInput.Routing, simulation.Evacuation.Destinations, false);
             }
             for (int i = 0; i < _validEvacuationGoals.Count; i++)
             {
