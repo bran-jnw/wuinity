@@ -45,14 +45,14 @@ namespace PREACT.Traffic
             return p;
         }
 
-        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput.RoutingPriority routingPriority,  List<EvacuationDestination> evacuatonGoals, bool logMessages)
+        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput.RoutingPriority routingPriority,  EvacuationDestination[] evacuatonGoals, bool logMessages)
         {
             Itinero.Profiles.Profile routerProfile = GetRouterProfile(routingPriority);
 
             //check that evac goals are valid
             _validEvacuationGoalRouterPoints = new List<RouterPoint>();
             _validEvacuationGoals = new List<EvacuationDestination>();
-            for (int i = 0; i < evacuatonGoals.Count; i++)
+            for (int i = 0; i < evacuatonGoals.Length; i++)
             {
                 try
                 {
@@ -185,9 +185,9 @@ namespace PREACT.Traffic
         /// Called when a general route to any available evac goal is desired, resolves (at least tries) start and end. Startpos in Lat/Long
         /// Used mainly by traffic simulator.
         /// </summary>
-        /// <param name="startLatLon"></param>
+        /// <param name="atLatLon"></param>
         /// <returns></returns>
-        public RouteData CalcTrafficRoute(Simulation simulation, Vector2d startLatLon)
+        public RouteData CalcTrafficRoute(Simulation simulation, Vector2d atLatLon)
         {
             float cellSize = simulation.Input.Evacuation.PaintCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile(simulation.Input.Traffic.MacroTrafficSimInput.Routing);
@@ -203,7 +203,7 @@ namespace PREACT.Traffic
             }
 
             //check if valid start was found
-            RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(startLatLon.x, startLatLon.y), routerProfile, cellSize);
+            RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(atLatLon.x, atLatLon.y), routerProfile, cellSize);
 
             //no need in calculating route when start is not resolved
             if (startRouterPoint == null)
@@ -261,7 +261,7 @@ namespace PREACT.Traffic
                 rC.routes[i] = routeData[i];
             }
 
-            SelectCorrectRouteFromCar(simulation, rC);
+            SelectCorrectRoute(simulation, rC, null);
 
             return rC.GetSelectedRoute();
         }
@@ -271,19 +271,6 @@ namespace PREACT.Traffic
             return Mathd.Approximately(start.Latitude, end.Latitude) && Mathd.Approximately(start.Longitude, end.Longitude);
         }
 
-        private static void SelectCorrectRouteFromCar(Simulation simulation, RouteCollection rC)
-        {
-            SelectCorrectRoute(simulation, rC, -1);
-        }
-
-        public static void UpdateRouteCollectionBasedOnRouteChoice(Simulation simulation, RouteCollection rC, int cellIndex)
-        {
-            if(simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup || simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
-            {
-                SelectCorrectRoute(simulation, rC, cellIndex);
-            }
-        }
-
         /// <summary>
         /// Picks the desired route froma routecollection based in inputs. 
         /// Should only consider force map when called from a evac cell (not from a car)
@@ -291,17 +278,16 @@ namespace PREACT.Traffic
         /// <param name="rC"></param>
         /// <param name="considerForceMap"></param>
         /// <param name="cellIndex"></param>
-        public static void SelectCorrectRoute(Simulation simulation, RouteCollection rC, int cellIndex)
+        private static void SelectCorrectRoute(Simulation simulation, RouteCollection rC, EvacuationGroup evacGroup)
         {
          //   TrafficInput tO = Engine.Input.Traffic;
             //Vector2int cells = Engine.ScenarioData.Evacuation.CellCount;
 
             if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.EvacGroup)
             {
-                if (cellIndex >= 0)
+                if (evacGroup != null)
                 {
-                    EvacuationGroup group = simulation.Input.Evacuation.Data.GetEvacGroup(cellIndex);
-                    EvacuationDestination goal = group.GetWeightedRandomDestination(simulation.Destinations);
+                    EvacuationDestination goal = evacGroup.GetWeightedRandomDestination();
                     rC.SelectForcedNonBlocked(goal, simulation);
                 }
                 else
@@ -311,8 +297,8 @@ namespace PREACT.Traffic
             }
             else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
             {
-                int randomChoice = Random.Range(0, simulation.Destinations.Count);
-                rC.SelectForcedNonBlocked(simulation.Destinations[randomChoice], simulation);
+                int randomChoice = Random.Range(0, simulation.Evacuation.Destinations.Length);
+                rC.SelectForcedNonBlocked(simulation.Evacuation.Destinations[randomChoice], simulation);
             }
             else if (simulation.Input.Traffic.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Closest)
             {

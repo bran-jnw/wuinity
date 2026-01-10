@@ -57,18 +57,18 @@ Color=1.0,0.0,0.0
 Name=route85_group
 ShapeFile=groups/east.shp
 ResponseCurves=east_fast, west_slow
-ResponseCurveProbabilites=0.9, 1.0
+ResponseCurvesCDF=0.9, 1.0
 Destinations=route85, route121
-DestinationProbabilites=0.9, 1.0
+DestinationsCDF=0.9, 1.0
 Color=1.0,1.0,0.0
 
 [EvacuationGroup]
 Name=route121_group
 ShapeFile=groups/west.shp
 ResponseCurves=east_fast, west_slow
-ResponseCurveProbabilites=0.1, 1.0
+ResponseCurvesCDF=0.1, 1.0
 Destinations=route121, route85
-DestinationProbabilites=0.9, 1.0
+DestinationsCDF=0.9, 1.0
 Color=1.0,1.0,0.0
 
 [ResponseCurve]

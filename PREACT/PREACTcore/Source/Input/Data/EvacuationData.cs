@@ -21,9 +21,6 @@ namespace PREACT.IO
         {
             _simulationInput = simulationInput;
             _evacuationInput = evacuationInput;
-            //ResponseCurves = new List<ResponseCurve>();
-            //EvacuationDestinationInputs = new List<EvacuationDestinationInput>();
-            //EvacuationGroups = new List<EvacuationGroup>();
         }
 
         //TODO: fix this getter, want to get rid of
@@ -64,20 +61,6 @@ namespace PREACT.IO
             string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
 
             success = true;
-        }   
-
-        private void DefaultEvacGroupIndices()
-        {
-            Engine.Message(null, Engine.LogType.Warning, "Creating default group map.");
-            _evacGroupIndices = new int[CellCount.x * CellCount.y];
-            for (int y = 0; y < CellCount.y; y++)
-            {
-                for (int x = 0; x < CellCount.x; x++)
-                {
-                    int index = x + y * CellCount.x;
-                    _evacGroupIndices[index] = 0;
-                }
-            }
-        }      
+        }       
     }
 }

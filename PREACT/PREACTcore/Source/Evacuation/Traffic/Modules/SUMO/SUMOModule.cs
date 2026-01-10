@@ -50,11 +50,11 @@ namespace PREACT.Traffic
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
-                for (int i = 0; i < _simulation.Evacuation.DestinationsArray.Length; ++i)
+                for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
                 {
-                    header += "," + _simulation.Evacuation.DestinationsArray[i].Name + " people arrived";
-                    header += "," + _simulation.Evacuation.DestinationsArray[i].Name + " cars arrived";
-                    header += "," + _simulation.Evacuation.DestinationsArray[i].Name + " flow [veh./h]";
+                    header += "," + _simulation.Evacuation.Destinations[i].Name + " people arrived";
+                    header += "," + _simulation.Evacuation.Destinations[i].Name + " cars arrived";
+                    header += "," + _simulation.Evacuation.Destinations[i].Name + " flow [veh./h]";
                 }
                 output.Add(header);
 
@@ -171,11 +171,11 @@ namespace PREACT.Traffic
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
-            for (int i = 0; i < _simulation.Evacuation.DestinationsArray.Length; ++i)
+            for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
             {
-                dataLine += "," + _simulation.Evacuation.DestinationsArray[i].CurrentPeople;
-                dataLine += "," + _simulation.Evacuation.DestinationsArray[i].Vehicles.Count;
-                dataLine += "," + _simulation.Evacuation.DestinationsArray[i].CurrentVehicleFlow;
+                dataLine += "," + _simulation.Evacuation.Destinations[i].CurrentPeople;
+                dataLine += "," + _simulation.Evacuation.Destinations[i].Vehicles.Count;
+                dataLine += "," + _simulation.Evacuation.Destinations[i].CurrentVehicleFlow;
             }
             output.Add(dataLine);
         }

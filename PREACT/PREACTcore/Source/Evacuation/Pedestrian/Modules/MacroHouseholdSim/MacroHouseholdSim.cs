@@ -194,12 +194,12 @@ namespace PREACT.Pedestrian
             if(_simulation.Input.Simulation.RunTrafficModule)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
-                EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household);
+                EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household.GetVehicleLatLon(), household.EvacuationGroup);
 
                 //TODO: more sophisticated choice of new goal
                 if (evacDest.Blocked)
                 {
-                    _simulation.Evacuation.GetBestAvailableDestination(household.EvacuationGroup);
+                    _simulation.Evacuation.GetBestAvailableDestination(household.EvacuationGroup, household.GetVehicleLatLon());
                 }
 
                 Vector2d vehicleLatLon = household.GetVehicleLatLon();

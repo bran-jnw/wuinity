@@ -17,15 +17,9 @@ namespace PREACT.IO
 
         public EvacuationData Data { get => _data; }
         public float EvacuationOrderStart = 0.0f;
-
-        //public List<string> EvacuationDestinationFiles = new List<string>();
-        //public List<string> ResponseCurveFiles = new List<string>();      
-        //public List<string> EvacuationGroupFiles = new List<string>();
-
         public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs;
         public Dictionary<string, ResponseCurve> ResponseCurves;        
-        public Dictionary<string, EvacuationGroup> EvacuationGroups;
-
+        public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs;
         public string EvacuationGroupsMapFile = string.Empty;
         public float PaintCellSize = 200f;
         public bool UseTriggerBufferEvacuation = false;
@@ -65,7 +59,7 @@ namespace PREACT.IO
             }
 
             //critical, must be done after response curves and destinations
-            newInput.EvacuationGroups = EvacuationGroup.Parse(inputLines, simulationInput, evacuationGroupLineIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, rootFolder, out success);
+            newInput.EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, simulationInput, evacuationGroupLineIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, rootFolder, out success);
             if (!success)
             {
                 return newInput;

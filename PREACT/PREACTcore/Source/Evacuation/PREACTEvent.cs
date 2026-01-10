@@ -35,9 +35,8 @@ namespace PREACT
         {
             if(!Triggered)
             {
-                Triggered = true;
-                Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked: " + _simulation.Evacuation.Destinations[DestinationName].Name);
-                _simulation.Evacuation.BlockDestination(DestinationName);
+                Triggered = true;                
+                _simulation.Evacuation.BlockDestinationEvent(DestinationName);
             }            
         }
 

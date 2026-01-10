@@ -39,10 +39,10 @@ namespace PREACT.Traffic
             output = new List<string>();            
             string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
-            for (int i = 0; i < _simulation.Evacuation.DestinationsArray.Length; ++i)
+            for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
             {
-                start += ", Goal: " + _simulation.Evacuation.DestinationsArray[i].Name;
-                start += ", " + _simulation.Evacuation.DestinationsArray[i].Name + " flow";
+                start += ", Goal: " + _simulation.Evacuation.Destinations[i].Name;
+                start += ", " + _simulation.Evacuation.Destinations[i].Name + " flow";
             }
             output.Add(start);
             //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
@@ -321,10 +321,10 @@ namespace PREACT.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < _simulation.Evacuation.DestinationsArray.Length; ++i)
+            for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
             {
-                newOut += "," + _simulation.Evacuation.DestinationsArray[i].CurrentPeople;
-                newOut += "," + _simulation.Evacuation.DestinationsArray[i].CurrentVehicleFlow;
+                newOut += "," + _simulation.Evacuation.Destinations[i].CurrentPeople;
+                newOut += "," + _simulation.Evacuation.Destinations[i].CurrentVehicleFlow;
             }
 
             output.Add(newOut);
