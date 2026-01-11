@@ -7,36 +7,40 @@
 
 using System.Collections.Generic;
 using PREACT.Math;
-using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
     public class EvacuationGroup
     {
+        private string _name;
+        public PREACTColor _color;
+        public bool _default;
+        public List<EvacuationDestination> _destinations;
+        public List<double> _destinationsCDF;
+        public List<ResponseCurve> _responseCurves;
+        public List<double> _responseCurvesCDF;
         List<Vector2d> _shapePolygonLocal;
         Vector2d _boundingBoxMin;
-        Vector2d _boundingBoxMax;
+        Vector2d _boundingBoxMax;        
 
-        public string Name;
-        public PREACTColor Color;
-        public bool Default;
-        public List<EvacuationDestination> Destinations;
-        public List<double> DestinationsCDF;
-        public List<ResponseCurve> ResponseCurves;
-        public List<double> ResponseCurvesCDF; 
+        public string Name { get => _name; }
+        public PREACTColor Color { get => _color; }
+        public bool Default { get => _default; }
+        public List<EvacuationDestination> Destinations { get => _destinations; }
 
-        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Simulation simulation)
+
+        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Simulation simulation)
         {
-            Name = groupInput.Name;
-            Color = groupInput.Color;
-            Default = groupInput.Default;
+            _name = groupInput.Name;
+            _color = groupInput.Color;
+            _default = groupInput.Default;
 
-            //this is where we need to "re-build" the information
-            Destinations = new List<EvacuationDestination>(groupInput.DestinationNames.Count);
-            for(int i = 0; i < groupInput.DestinationNames.Count; ++i)
+            //this is where we need to "re-build" the information from input
+            _destinations = new List<EvacuationDestination>(groupInput.Destinations.Count);
+            for(int i = 0; i < groupInput.Destinations.Count; ++i)
             {
                 EvacuationDestination eD;
-                if (allDestinations.TryGetValue(groupInput.DestinationNames[i], out eD))
+                if (allDestinations.TryGetValue(groupInput.Destinations[i], out eD))
                 {
                     Destinations.Add(eD);
                 }
@@ -45,20 +49,33 @@ namespace PREACT.Evacuation
                     Engine.Message(simulation, Engine.LogType.SimulationError, "When creating evacuation groups a referenced group name was not found.");
                 }
             }
+            _destinationsCDF = groupInput.DestinationsCDF;
 
-            DestinationsCDF = groupInput.DestinationsCDF;
-            ResponseCurves = groupInput.ResponseCurves;
-            ResponseCurvesCDF = groupInput.ResponseCurvesCDF;            
+            _responseCurves = new List<ResponseCurve>(groupInput.ResponseCurves.Count);
+            for (int i = 0; i < groupInput.ResponseCurves.Count; ++i)
+            {
+                ResponseCurve rC;
+                if (allResponseCurves.TryGetValue(groupInput.ResponseCurves[i], out rC))
+                {
+                    _responseCurves.Add(rC);
+                }
+                else
+                {
+                    Engine.Message(simulation, Engine.LogType.SimulationError, "When creating evacuation groups a referenced response curve was not found.");
+                }
+            }
+
+            _responseCurvesCDF = groupInput.ResponseCurvesCDF;            
             CreateShapeFilePolygon(simulation, groupInput.ShapeFilePath);
         }
 
-        public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, EvacuationDestination> allDestinations, Simulation simulation)
+        public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Simulation simulation)
         {
             EvacuationGroup[] groups = new EvacuationGroup[groupsInput.Count];
             int index = 0;
             foreach(EvacuationGroupInput eGI in groupsInput.Values)
             {
-                groups[index] = new EvacuationGroup(eGI, allDestinations, simulation);
+                groups[index] = new EvacuationGroup(eGI, allDestinations, allResponseCurves, simulation);
                 ++index;
             }
 
@@ -156,9 +173,9 @@ namespace PREACT.Evacuation
             float randomChoice = Random.valueF;
             EvacuationDestination eD = Destinations[0];            
 
-            for (int i = 0; i < DestinationsCDF.Count; i++)
+            for (int i = 0; i < _destinationsCDF.Count; i++)
             {
-                if (randomChoice <= DestinationsCDF[i])
+                if (randomChoice <= _destinationsCDF[i])
                 {
                     return Destinations[i];
                 }
@@ -194,12 +211,12 @@ namespace PREACT.Evacuation
             float responseTime = float.MaxValue;
             float r = Random.valueF;
             //get curve index from evac group
-            ResponseCurve pickedCurve = ResponseCurves[0];
-            for (int i = 0; i < ResponseCurves.Count; i++)
+            ResponseCurve pickedCurve = _responseCurves[0];
+            for (int i = 0; i < _responseCurves.Count; i++)
             {
-                if (r <= ResponseCurvesCDF[i])
+                if (r <= _responseCurvesCDF[i])
                 {
-                    pickedCurve = ResponseCurves[i];
+                    pickedCurve = _responseCurves[i];
                     break;
                 }
             }

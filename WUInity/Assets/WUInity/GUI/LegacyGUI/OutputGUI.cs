@@ -99,13 +99,13 @@ namespace WUInity.UI
 
             if(_input.Simulation.RunPedestrianModule)
             {
-                for (int i = 0; i < _engine.Simulation.Destinations.Count; i++)
+                for (int i = 0; i < _engine.Simulation.Evacuation.Destinations.Length; i++)
                 {
-                    string name = _engine.Simulation.Destinations[i].Name;
-                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.Simulation.Destinations[i].CurrentPeople + " (" + _engine.Simulation.Destinations[i].Vehicles.Count + ")");
+                    string name = _engine.Simulation.Evacuation.Destinations[i].Name;
+                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.Simulation.Evacuation.Destinations[i].CurrentPeople + " (" + _engine.Simulation.Evacuation.Destinations[i].Vehicles.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 

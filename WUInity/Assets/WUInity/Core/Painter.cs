@@ -13,8 +13,8 @@ namespace WUInity
 {
     public class Painter : MonoBehaviour
     {
-        public enum PaintMode { EvacGroup, WUIArea, RandomIgnitionArea, InitialIgnition, PopulationMask };
-        PaintMode paintMode = PaintMode.EvacGroup;
+        public enum PaintMode { WUIArea, RandomIgnitionArea, InitialIgnition, PopulationMask };
+        PaintMode paintMode = PaintMode.WUIArea;
 
         Color currentColor = Color.red;
         const float transparency = 0.5f;
@@ -165,21 +165,11 @@ namespace WUInity
                 currentColor = arrayIndex == 1 ? activeAreaColor : inactiveAreaColor;
                 addingArea = arrayIndex == 1;
             }
-            else if(paintMode == PaintMode.EvacGroup)
-            {
-                evacGroupIndex = arrayIndex;
-                currentColor = _manager.PREACTInput.Evacuation.Data.EvacuationGroups[evacGroupIndex].Color.UnityColor();
-                currentColor.a = transparency;
-            }
         }
 
         public void SetPainterMode(PaintMode mode)
         {
-            if (mode == PaintMode.EvacGroup)
-            {
-                SetPainterEvacGroups();
-            }
-            else if (mode == PaintMode.WUIArea)
+            if (mode == PaintMode.WUIArea)
             {
                 SetPainterWUIArea();
             }
@@ -199,17 +189,6 @@ namespace WUInity
             {
                 Engine.Message(null, Engine.LogType.SimulationError, "Desired paint mode not yet implemented.");
             }
-        }
-
-        void SetPainterEvacGroups()
-        {
-            paintMode = PaintMode.EvacGroup;
-            CheckDataResources(evacGroupTex, evacGroupColorArray);
-            //select first zone
-            evacGroupIndex = 0;
-            currentColor = _manager.PREACTInput.Evacuation.Data.EvacuationGroups[evacGroupIndex].Color.UnityColor();
-            currentColor.a = 0.5f;
-            _brushSize = 1;
         }
 
         void SetPainterPopulationMask()
@@ -310,11 +289,6 @@ namespace WUInity
                         {
                             c = _manager.PREACTInput.Fire.Data.InitialIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
-                        else if (paintMode == PaintMode.EvacGroup)
-                        {
-                            c = _manager.PREACTInput.Evacuation.Data.GetEvacGroup(x, y).Color.UnityColor();
-                            c.a = transparency;
-                        }
                         else if (paintMode == PaintMode.PopulationMask)
                         {
                             c = _manager.Engine.WorkingData.PopulationMap.Mask[x + y * evacDataCellCount.x] == true ? activeAreaColor : inactiveAreaColor;
@@ -340,11 +314,6 @@ namespace WUInity
                 {
                     initialIgnitionTex = requestedTexture;
                     initialIgnitionColorArray = requestedColorArray;
-                }
-                else if (paintMode == PaintMode.EvacGroup)
-                {
-                    evacGroupTex = requestedTexture;
-                    evacGroupColorArray = requestedColorArray;
                 }
                 else if (paintMode == PaintMode.PopulationMask)
                 {
@@ -469,11 +438,7 @@ namespace WUInity
             }
             colorArray[x + y * activeTexture.width] = c;
 
-            if(paintMode == PaintMode.EvacGroup)
-            {
-                _manager.PREACTInput.Evacuation.Data.EvacGroupIndices[x + y * activeCellCount.x] = evacGroupIndex;
-            }
-            else if(paintMode == PaintMode.WUIArea)
+            if(paintMode == PaintMode.WUIArea)
             {
                 _manager.PREACTInput.Fire.Data.WuiArea[x + y * activeCellCount.x] = addingArea;
             }

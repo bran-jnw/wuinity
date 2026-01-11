@@ -7,13 +7,13 @@ namespace PREACT.Evacuation
 {
     public class EvacuationGroupInput
     {
-        public string Name;
-        public PREACTColor Color;
-        public List<string> DestinationNames;
-        public List<double> DestinationsCDF;
-        public List<ResponseCurve> ResponseCurves;
-        public List<double> ResponseCurvesCDF;
-        public string ShapeFilePath;
+        public string Name = string.Empty;
+        public PREACTColor Color = PREACTColor.white;
+        public List<string> Destinations = new List<string>(16);
+        public List<double> DestinationsCDF = new List<double>(16);
+        public List<string> ResponseCurves = new List<string>(16);
+        public List<double> ResponseCurvesCDF = new List<double>(16);
+        public string ShapeFilePath = string.Empty;
         public bool Default = false;
 
         public EvacuationGroupInput()
@@ -51,15 +51,15 @@ namespace PREACT.Evacuation
                 }
 
                 //critical
-                nameOfInput = nameof(DestinationNames);
+                nameOfInput = nameof(Destinations);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     string[] data = userInput.Split(',');
-                    for (int j = 0; j < data.Length; ++i)
+                    for (int j = 0; j < data.Length; ++j)
                     {
                         if (destinationInputs.ContainsKey(data[j]))
                         {
-                            newInput.DestinationNames.Add(data[j]);
+                            newInput.Destinations.Add(data[j]);
                         }
                         else
                         {
@@ -79,7 +79,7 @@ namespace PREACT.Evacuation
                 }
 
                 //maybe critical
-                if (newInput.DestinationNames.Count == 1)
+                if (newInput.Destinations.Count == 1)
                 {
                     newInput.DestinationsCDF.Add(1.0);
                 }
@@ -89,7 +89,7 @@ namespace PREACT.Evacuation
                     if (inputToParse.TryGetValue(nameOfInput, out userInput))
                     {
                         string[] data = userInput.Split(',');
-                        for (int j = 0; j < data.Length; ++i)
+                        for (int j = 0; j < data.Length; ++j)
                         {
                             double cumulativeProbability;
                             success = double.TryParse(data[j], out cumulativeProbability);
@@ -108,7 +108,7 @@ namespace PREACT.Evacuation
                         success = false;
                         PREACTInput.InputNotFoundMessage(nameOfInput, true);
                     }
-                    if (newInput.DestinationNames.Count != newInput.DestinationsCDF.Count)
+                    if (newInput.Destinations.Count != newInput.DestinationsCDF.Count)
                     {
                         success = false;
                         PREACTInput.IncorrectInputCount(nameOfInput);
@@ -124,18 +124,9 @@ namespace PREACT.Evacuation
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     string[] data = userInput.Split(',');
-                    for (int j = 0; j < data.Length; ++i)
+                    for (int j = 0; j < data.Length; ++j)
                     {
-                        ResponseCurve rC;
-                        if (responseCurves.TryGetValue(data[j], out rC))
-                        {
-                            newInput.ResponseCurves.Add(rC);
-                        }
-                        else
-                        {
-                            success = false;
-                            PREACTInput.MissingReferenceToOtherInput(nameOfInput, data[j]);
-                        }
+                        newInput.ResponseCurves.Add(data[i]);
                     }
                 }
                 else
@@ -159,7 +150,7 @@ namespace PREACT.Evacuation
                     if (inputToParse.TryGetValue(nameOfInput, out userInput))
                     {
                         string[] data = userInput.Split(',');
-                        for (int j = 0; j < data.Length; ++i)
+                        for (int j = 0; j < data.Length; ++j)
                         {
                             double cumulativeProbability;
                             success = double.TryParse(data[j], out cumulativeProbability);

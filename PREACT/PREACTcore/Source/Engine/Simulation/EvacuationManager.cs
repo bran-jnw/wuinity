@@ -23,7 +23,7 @@ namespace PREACT.Evacuation
             _simulation = simulation;
             _input = _simulation.Input;
             _evacuationDestinationsDict = EvacuationDestination.CreateEvacacuationDestinationsFromInput(_simulation, _input.Evacuation.EvacuationDestinationInputs);
-            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _simulation);
+            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _simulation);
             SetDefaulEvacuationtGroup(); //just sets default group fallback
             BuildEvacuationDestinationArray(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
@@ -144,6 +144,26 @@ namespace PREACT.Evacuation
             return _availableEvacuationDestinations[randomChoice];
         }
 
+        private EvacuationDestination GetClosestEuclideanAvailableDestination(Vector2d vehicleLatLon)
+        {
+            double closestDistance = double.MaxValue;
+            Vector2d householdPos = _input.Simulation.Data.GetSimulationPosition(vehicleLatLon);
+            EvacuationDestination pickedDestination = null;
+
+            foreach (EvacuationDestination eD in _availableEvacuationDestinations)
+            {
+                Vector2d destPos = _input.Simulation.Data.GetSimulationPosition(eD.LatLon);
+                double distance = Vector2d.SqrMagnitude(destPos - householdPos);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    pickedDestination = eD;
+                }
+            }
+
+            return pickedDestination;
+        }
+
         private EvacuationDestination GetClosestEuclideanDestination(Vector2d vehicleLatLon)
         {
             double closestDistance = double.MaxValue;
@@ -240,7 +260,7 @@ namespace PREACT.Evacuation
             //all group choices are blocked, pick something else
             if(result == null)
             {
-                result = GetRandomAvailableEvacuationDestination();
+                result = GetClosestEuclideanAvailableDestination(latLon);
             }
 
             return result;
