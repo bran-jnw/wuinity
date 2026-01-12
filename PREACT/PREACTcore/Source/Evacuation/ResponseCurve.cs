@@ -104,7 +104,7 @@ namespace PREACT.Evacuation
                         }
                         else
                         {
-                            points.Add(new ResponseDataPoint());
+                            points.Add(dataPoint);
                         }
                     }
                     else

@@ -98,6 +98,7 @@ namespace PREACT
             _weatherManager = new WeatherManager();
             _evacuationManager = new EvacuationManager(this);
             _hazardManager = new HazardManager(this);
+            _output = new SimulationOutput();
         }
 
         /// <summary>
