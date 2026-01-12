@@ -10,7 +10,7 @@ using PREACT.Population;
 using PREACT;
 using PREACT.Runtime;
 using PREACT.Math;
-using PREACT.IO;
+using PREACT.Evacuation;
 
 namespace WUInity.Visualization
 {
@@ -217,7 +217,7 @@ namespace WUInity.Visualization
             return _localGPWTexture;
         }
 
-        public void SpawnEvacuationGoalMarkers(PREACTInput input, GameObject markerPrefab)
+        public void SpawnEvacuationGoalMarkers(Simulation simulation, GameObject markerPrefab)
         {
             if (_goalMarkers != null)
             {
@@ -230,20 +230,19 @@ namespace WUInity.Visualization
                 }
             }
 
-            if (input.Evacuation.Data.EvacuationDestinationInputs.Count == 0)
+            if (simulation.Evacuation.Destinations.Length == 0)
             {
                 return;
             }            
 
-            _goalMarkers = new GameObject[input.Evacuation.Data.EvacuationDestinationInputs.Count];
-            for (int i = 0; i < input.Evacuation.Data.EvacuationDestinationInputs.Count; i++)
+            _goalMarkers = new GameObject[simulation.Evacuation.Destinations.Length];
+            for (int i = 0; i < simulation.Evacuation.Destinations.Length; i++)
             {
-                EvacuationDestinationInput eG = input.Evacuation.Data.EvacuationDestinationInputs[i];
+                EvacuationDestination eG = simulation.Evacuation.Destinations[i];
                 _goalMarkers[i] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
-                PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(eG.LatLon.x, eG.LatLon.y);
-                Vector2d pos = new Vector2d(utmPos.Easting, utmPos.Northing) - input.Simulation.Data.UTMOrigin;
+                Vector2d pos = simulation.Input.Simulation.Data.GetSimulationPosition(eG.LatLon);
 
-                float scale = 0.02f * (float)input.Simulation.DomainSize.y;
+                float scale = 0.02f * (float)Mathd.Max(simulation.Input.Simulation.DomainSize.x, simulation.Input.Simulation.DomainSize.y);
                 _goalMarkers[i].transform.localScale = new Vector3(scale, 100f, scale);
                 _goalMarkers[i].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
                 MeshRenderer mR = _goalMarkers[i].GetComponentInChildren<MeshRenderer>();

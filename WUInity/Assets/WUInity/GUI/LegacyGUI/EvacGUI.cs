@@ -74,35 +74,7 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Evacuation order [time after fire]");
             ++buttonIndex;
             evacOrderTime = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), evacOrderTime);
-            ++buttonIndex;            
-
-            if (!_wuinityManager.IsPainterActive())
-            {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Edit evac group"))
-                {
-                    _wuinityManager.StartPainter(Painter.PaintMode.EvacGroup);
-                }
-                ++buttonIndex;                
-            }
-            else
-            {
-                for (int i = 0; i < _input.Evacuation.Data.EvacuationGroups.Count; i++)
-                {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Evacuation.Data.EvacuationGroups[i].Name))
-                    {
-                        _wuinityManager.Painter.SetEvacGroupColor(i);
-                    }
-                    ++buttonIndex;
-                }
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Finish editing"))
-                {
-                    string filePath = Path.Combine(_input.RootFolder, _input.Simulation.Name + ".egs");
-                    EvacuationGroup.SaveEvacGroupIndices(filePath, _input.Evacuation.Data.CellCount, _input.Evacuation.Data.EvacuationGroups.Count, _input.Evacuation.Data.EvacGroupIndices);
-                    _wuinityManager.StopPainter();
-                }
-                ++buttonIndex;
-            }
+            ++buttonIndex;     
         }
 
         void ParseEvacInput()

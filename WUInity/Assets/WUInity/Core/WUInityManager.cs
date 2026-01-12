@@ -567,10 +567,6 @@ namespace WUInity
                 fireEdit = true;
                 DisplayInitialIgnitionMap();
             }
-            else if(paintMode == Painter.PaintMode.EvacGroup)
-            {
-                DisplayEvacGroupMap();
-            }
             else if (paintMode == Painter.PaintMode.PopulationMask)
             {
                 DisplayPopulationMask();
@@ -787,7 +783,7 @@ namespace WUInity
             _godCamera.SetInput(_input);
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
-            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _markerPrefab);
+            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_engine.Simulation, _markerPrefab);
             UpdateMap();
             UpdateSimBorders();
         }
