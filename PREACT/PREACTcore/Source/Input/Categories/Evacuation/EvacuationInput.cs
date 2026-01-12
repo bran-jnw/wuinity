@@ -20,8 +20,6 @@ namespace PREACT.IO
         public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs;
         public Dictionary<string, ResponseCurve> ResponseCurves;        
         public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs;
-        public string EvacuationGroupsMapFile = string.Empty;
-        public float PaintCellSize = 200f;
         public bool UseTriggerBufferEvacuation = false;
         public string TriggerBufferFile = string.Empty;
 
@@ -45,14 +43,14 @@ namespace PREACT.IO
             string nameOfInput, userInput;
 
             //critical
-            newInput.EvacuationDestinationInputs = EvacuationDestinationInput.Parse(inputLines, destinationLineIndices, rootFolder, out success);
+            newInput.EvacuationDestinationInputs = EvacuationDestinationInput.Parse(inputLines, destinationLineIndices, out success);
             if (!success)
             {
                 return newInput;
             }
 
             //critical
-            newInput.ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, rootFolder, out success);
+            newInput.ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, out success);
             if (!success)
             {
                 return newInput;
@@ -60,13 +58,6 @@ namespace PREACT.IO
 
             //critical, must be done after response curves and destinations
             newInput.EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, simulationInput, evacuationGroupLineIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, rootFolder, out success);
-            if (!success)
-            {
-                return newInput;
-            }
-
-            //critical
-            newInput.ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, rootFolder, out success);
             if (!success)
             {
                 return newInput;
@@ -81,96 +72,6 @@ namespace PREACT.IO
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);            
-            }
-
-            /*//critical
-            nameOfInput = nameof(EvacuationDestinationFiles);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                string[] data = userInput.Split(',');                
-                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
-                if(success)
-                {
-                    newInput.EvacuationDestinationFiles.AddRange(data);
-                }
-            }
-            else
-            {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput, true);
-            }
-            if(!success)
-            {
-                return newInput;
-            }
-
-            //critical
-            nameOfInput = nameof(EvacuationGroupFiles);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                string[] data = userInput.Split(',');                
-                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
-                if(success)
-                {
-                    newInput.EvacuationGroupFiles.AddRange(data);
-                }
-            }
-            else
-            {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput, true);
-            }
-            if(!success)
-            {
-                return newInput;
-            }
-
-            //critical sometimes
-            nameOfInput = nameof(EvacuationGroupsMapFile);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                newInput.EvacuationGroupsMapFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-            }
-            else
-            {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-            if(!success && newInput.EvacuationGroupFiles.Count > 1)
-            {
-                return newInput;
-            }
-
-            //critical
-            nameOfInput = nameof(ResponseCurveFiles);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                string[] data = userInput.Split(',');                
-                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
-                if(success)
-                {
-                    newInput.ResponseCurveFiles.AddRange(data);
-                }
-            }
-            else
-            {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput, true);
-            }
-            if(!success)
-            {
-                return newInput;
-            }*/
-
-            nameOfInput = nameof(PaintCellSize);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                float.TryParse(userInput, out newInput.PaintCellSize);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             //not critical

@@ -339,7 +339,7 @@ namespace WUInity
                 float enter = 0.0f;
                 if (_yPlane.Raycast(ray, out enter))
                 {
-                    Vector3 hitPoint = ray.GetPoint(enter);
+                    /*Vector3 hitPoint = ray.GetPoint(enter);
                     float xNorm = hitPoint.x / (float)_input.Simulation.DomainSize.x;
                     //xNorm = Mathf.Clamp01(xNorm);
                     int x = (int)(_input.Evacuation.Data.CellCount.x * xNorm);
@@ -347,7 +347,7 @@ namespace WUInity
                     float yNorm = hitPoint.z / (float)_input.Simulation.DomainSize.y;
                     //yNorm = Mathf.Clamp01(yNorm);
                     int y = (int)(_input.Evacuation.Data.CellCount.y * yNorm);
-                    GetCellInfo(hitPoint, x, y);
+                    GetCellInfo(hitPoint, x, y);*/
                 }
             }    
 
@@ -492,11 +492,11 @@ namespace WUInity
                     dataSampleString = "GPW data not visible, activate to sample data.";
                 }
             }
-            else if (x < 0 || x > _input.Evacuation.Data.CellCount.x || y < 0 || y > _input.Evacuation.Data.CellCount.y)
+            /*else if (x < 0 || x > _input.Evacuation.Data.CellCount.x || y < 0 || y > _input.Evacuation.Data.CellCount.y)
             {
                 //dataSampleString = "Outside of data range.";
                 return;
-            }
+            }*/
             else if (dataSampleMode == DataSampleMode.Paint)
             {
 
@@ -511,14 +511,7 @@ namespace WUInity
                 {
                     dataSampleString = "Interpolated people count: " + _engine.WorkingData.PopulationMap.GetPeopleCount(x, y);
                 }
-                else if (dataSampleMode == DataSampleMode.Relocated)
-                {
-                    if (_engine.Simulation.PedestrianModule != null)
-                    {
-                        dataSampleString = "Rescaled and relocated people count: " + ((MacroHouseholdSim)_engine.Simulation.PedestrianModule).GetPopulation(x, y);
-                    }
-                }
-                else if (dataSampleMode == DataSampleMode.TrafficDens)
+                /*else if (dataSampleMode == DataSampleMode.TrafficDens)
                 {
                     int people = currentPeopleInCells[x + y * _input.Evacuation.Data.CellCount.x];
                     dataSampleString = "People: " + people;
@@ -529,7 +522,7 @@ namespace WUInity
 
                         dataSampleString += " | People in cars: " + peopleInCars + " (Cars: " + cars + "). Total people " + (people + peopleInCars);
                     }
-                }
+                }*/
             }
             else
             {
@@ -566,10 +559,6 @@ namespace WUInity
             {
                 fireEdit = true;
                 DisplayInitialIgnitionMap();
-            }
-            else if (paintMode == Painter.PaintMode.PopulationMask)
-            {
-                DisplayPopulationMask();
             }
             else
             {
@@ -772,8 +761,6 @@ namespace WUInity
             return c;
         }
 
-        List<TrafficCellData[]> trafficDensityData;
-        List<int[]> peopleInCells;
         public List<Texture2D> outputTextures;
         
         public void UpdateInput(PREACTInput input)
@@ -783,7 +770,7 @@ namespace WUInity
             _godCamera.SetInput(_input);
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
-            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_engine.Simulation, _markerPrefab);
+            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _markerPrefab);
             UpdateMap();
             UpdateSimBorders();
         }

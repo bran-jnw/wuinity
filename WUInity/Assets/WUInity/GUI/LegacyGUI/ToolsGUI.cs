@@ -209,49 +209,7 @@ namespace WUInity.UI
                     OpenRoadAccessCorrectPopulationMap();
                 }
                 ++buttonIndex;                
-            }
-
-            //paint population mask
-            if(_workingData.HavePopulationMap)
-            {
-                if (!_wuinityManager.IsPainterActive())
-                {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population mask"))
-                    {
-                        _wuinityManager.StartPainter(Painter.PaintMode.PopulationMask);
-                    }
-                    ++buttonIndex;
-                }
-                else
-                {
-                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population mask edit");
-                    ++buttonIndex;
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Add area"))
-                    {
-                        _wuinityManager.Painter.SetMaskGPWColor(true);
-                    }
-                    ++buttonIndex;
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Remove area"))
-                    {
-                        _wuinityManager.Painter.SetMaskGPWColor(false);
-                    }
-                    ++buttonIndex;
-
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Close & save"))
-                    {
-                        
-                        _wuinityManager.StopPainter();
-                    }
-                    ++buttonIndex;
-                    ++buttonIndex;
-                }
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply population mask"))
-                {
-                    OpenApplyMaskOnPopulationMap();
-                }
-                ++buttonIndex;
-            }            
+            }          
 
             //Population stuff
             ++buttonIndex;

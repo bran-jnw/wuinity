@@ -21,45 +21,12 @@ namespace PREACT.IO
         {
             _simulationInput = simulationInput;
             _evacuationInput = evacuationInput;
-        }
-
-        //TODO: fix this getter, want to get rid of
-        private Vector2int _cellCount;
-        public Vector2int CellCount
-        {
-            get
-            {
-                _cellCount.x = Mathf.CeilToInt((float)_simulationInput.DomainSize.x / _evacuationInput.PaintCellSize);
-                _cellCount.y = Mathf.CeilToInt((float)_simulationInput.DomainSize.y / _evacuationInput.PaintCellSize);
-                return _cellCount;
-            }
-        }
-
-        BlockDestinationEvent[] _blockGoalEvents;
-        public BlockDestinationEvent[] BlockGoalEvents
-        {
-            get
-            {                
-                return _blockGoalEvents;
-            }
-        }
-
-        int[] _evacGroupIndices;
-        public int[] EvacGroupIndices
-        {
-            get
-            {
-                return _evacGroupIndices;
-            }
-        }               
+        }           
 
         public void LoadAll(string rootFolder, out bool success)
         {
             success = false;
             Engine.Message(null, Engine.LogType.Log, "Loading Evacuation data...");
-
-            string filePath = Path.Combine(rootFolder, _evacuationInput.EvacuationGroupsMapFile);
-
             success = true;
         }       
     }

@@ -29,7 +29,6 @@ namespace PREACT.Pedestrian
         PopulationData.HouseholdData _houseHoldData;
         Vector2 homePosition, carPosition;
         EvacuationGroup _evacuationGroup;
-        int _cellIndex;
 
         public EvacuationGroup EvacuationGroup { get => _evacuationGroup; }
 
@@ -42,14 +41,13 @@ namespace PREACT.Pedestrian
         /// <param name="peopleInHousehold"></param>
         /// <param name="walkingSpeed"></param>
         /// <param name="responseTime"></param>
-        public MacroHousehold(PopulationData.HouseholdData householdData, float walkingSpeed, EvacuationGroup evacuationGroup, int cellIndex, Simulation simulation)
+        public MacroHousehold(PopulationData.HouseholdData householdData, float walkingSpeed, EvacuationGroup evacuationGroup, Simulation simulation)
         {
             PopulationInput popInput = simulation.Input.Population;
             MacroHouseholdSimInput houseInput = simulation.Input.Pedestrian.MacroHouseholdSimInput;
             _evacuationGroup = evacuationGroup;            
 
             _houseHoldData = householdData;
-            _cellIndex = cellIndex;
             peopleInHousehold = householdData.peopleCount;
             cars = 1;
             if (popInput.AllowMoreThanOneCar)
@@ -87,11 +85,6 @@ namespace PREACT.Pedestrian
         public Vector2d GetVehicleLatLon()
         {
             return _houseHoldData.roadAccessLatLon;
-        }
-
-        public int GetCellIndex()
-        {
-            return _cellIndex;
         }
 
         public Vector4 GetPositionAndState(float time)

@@ -21,12 +21,12 @@ namespace PREACT.Pedestrian
     [System.Serializable]
     public class MacroHouseholdSim : PedestrianModule
     {
-        int[] population;
-        int cellsX;
-        int cellsY;
+        //int[] population;
+        //int cellsX;
+        //int cellsY;
 
-        Vector2d realWorldSize;
-        public Vector2d cellWorldSize;
+        //Vector2d realWorldSize;
+        //public Vector2d cellWorldSize;
 
         IO.PopulationData.HouseholdData[] _householdData;
         List<MacroHousehold> _macroHouseholds;
@@ -54,16 +54,6 @@ namespace PREACT.Pedestrian
             output.Add("Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total cars activated,Avg. walking dist.");
         }
 
-        public int GetCellsX()
-        {
-            return cellsX;
-        }
-
-        public int GetCellsY()
-        {
-            return cellsY;
-        }
-
         public override int GetTotalPopulation()
         {
             return totalPopulation;
@@ -72,11 +62,6 @@ namespace PREACT.Pedestrian
         public override int GetTotalHouseHolds()
         {
             return totalHouseholds; 
-        }
-
-        public int[] GetPopulation() 
-        {
-            return population;
         }
 
         /// <summary>
@@ -240,16 +225,8 @@ namespace PREACT.Pedestrian
         }
 
         public void PopulateSimulation(PopulationData.HouseholdData[] householdData)
-        {
-            cellsX = _simulation.Input.Evacuation.Data.CellCount.x;
-            cellsY = _simulation.Input.Evacuation.Data.CellCount.y;
-            realWorldSize = _simulation.Input.Simulation.DomainSize;            
-            population = new int[cellsX * cellsY];
+        {       
             _householdData = householdData;
-
-            double cellSizeX = realWorldSize.x / cellsX;
-            double cellSizeY = realWorldSize.y / cellsY;
-            cellWorldSize = new Vector2d(cellSizeX, cellSizeY);
             totalPopulation = 0;
             totalHouseholds = _householdData.Length;
 
@@ -262,16 +239,12 @@ namespace PREACT.Pedestrian
             for (int i = 0; i < _householdData.Length; ++i)
             {
                 Vector2d pos = _simulation.GetSimulationPosition(_householdData[i].originLatLon);
-                int xIndex = (int)(pos.x / cellSizeX);
-                int yIndex = (int)(pos.y / cellSizeY);
 
                 //check that we are inside
-                if(xIndex >= 0 && xIndex < cellsX && yIndex >= 0 && yIndex < cellsY)
+                if(pos.x >= 0.0 && pos.x <= _simulation.Input.Simulation.DomainSize.x && pos.y >= 0.0 && pos.y <= _simulation.Input.Simulation.DomainSize.y)
                 {
-                    int cellIndex = xIndex + cellsX * yIndex;
-                    population[cellIndex] += _householdData[i].peopleCount;
                     EvacuationGroup eG = _simulation.Evacuation.GetEvacuationGroup(_householdData[i].originLatLon);
-                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), eG, cellIndex, _simulation);
+                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), eG, _simulation);
                     _macroHouseholds.Add(mH);
                 }
                 else
@@ -313,24 +286,6 @@ namespace PREACT.Pedestrian
         {
             MacroHouseholdSimInput eO = _simulation.Input.Pedestrian.MacroHouseholdSimInput;
             return Random.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
-        }
-
-        /// <summary>
-        /// Gets number of poeple in a cell. Clamps x and y to be within array.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public int GetPopulation(int x, int y)
-        {
-            if (x < 0 || x > cellsX - 1 || y < 0 || y > cellsY - 1)
-            {
-                //Debug.Log("Population density was polled outside of data coverage.");
-                return 0;
-            }
-            //x = Mathf.Clamp(x, 0, xSize - 1);
-            //y = Mathf.Clamp(y, 0, ySize - 1);
-            return population[x + y * cellsX];
         }
 
         public override void Stop()

@@ -24,11 +24,6 @@ MaxCarsProbability=0.3
 
 [Evacuation]
 EvacuationOrderStart=0.0
-EvacuationDestinationFiles=destinations/route85.ed,destinations/route121.ed
-ResponseCurveFiles=responseCurves/Observed_average.csv
-EvacuationGroupFiles=groups/group_highways.eg
-EvacuationGroupsMapFile=groups/Development.egs
-PaintCellSize=200.0
 UseTriggerBufferEvacuation=false
 TriggerBufferFile=fire/trigger_buffer.asc
 

@@ -52,7 +52,7 @@ namespace PREACT.Evacuation
             DataPoints = dataPoints.ToArray();
         }
 
-        public static Dictionary<string, ResponseCurve> Parse(string[] inputLines, List<int> responseCurveLineIndices, string rootFolder, out bool success)
+        public static Dictionary<string, ResponseCurve> Parse(string[] inputLines, List<int> responseCurveLineIndices, out bool success)
         {
             Dictionary<string, ResponseCurve> newInputs = new Dictionary<string, ResponseCurve>();
             success = false;
@@ -62,7 +62,7 @@ namespace PREACT.Evacuation
                 ResponseCurve newInput = new ResponseCurve();
                 success = true;
                 int issues = 0;
-                Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, responseCurveLineIndices[i]);
+                Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, responseCurveLineIndices[i], true);
                 string nameOfInput, userInput;
 
                 //critical
@@ -70,6 +70,7 @@ namespace PREACT.Evacuation
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     newInput.Name = userInput;
+                    success = true;
                 }
                 else
                 {
@@ -84,10 +85,11 @@ namespace PREACT.Evacuation
                 //this one is a bit special as each line does not have a name
                 int startIndex = responseCurveLineIndices[i] + 2; //skip header and name line
                 int endIndex = startIndex + inputToParse.Count - 1; //remove name line from count
-                List<ResponseDataPoint> points = new List<ResponseDataPoint>();
+                List<ResponseDataPoint> points = new List<ResponseDataPoint>(endIndex - startIndex);
                 for (int j = startIndex; j < endIndex; ++j)
                 {
-                    string[] data = userInput.Split(',');
+                    issues = 0;
+                    string[] data = inputLines[j].Split(',');
                     if(data.Length == 2)
                     {
                         ResponseDataPoint dataPoint = new ResponseDataPoint();
@@ -98,6 +100,7 @@ namespace PREACT.Evacuation
                         if (issues > 0)
                         {
                             PREACTInput.CouldNotInterpretInputMessage("Response curve data point on line " + j, userInput);
+                            break;
                         }
                         else
                         {
@@ -107,86 +110,35 @@ namespace PREACT.Evacuation
                     else
                     {
                         issues++;
-                    }
-                    
-                    if(points.Count > 1 && issues == 0)
-                    {
-                        newInput.SetDataPoints(points);
-                    }
-                    else
-                    {
-                        success = false;
-                    }
+                        PREACTInput.CouldNotInterpretInputMessage("Response curve data point on line " + j, userInput);
+                        break;
+                    }    
+                }
+                if (points.Count > 1 && issues == 0)
+                {
+                    newInput.SetDataPoints(points);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.CouldNotInterpretInputMessage("Response curve could not be constructed, too few points.", userInput);
                 }
 
-                if(success)
+                if (success)
                 {
                     newInputs.Add(newInput.Name, newInput);
                 }                
             }
 
-            if (newInputs.Count > 0)
+            if (newInputs.Count == responseCurveLineIndices.Count)
             {
                 success = true;
-            }
-            return newInputs;
-        }
-
-        public static List<ResponseCurve> LoadResponseCurves(string rootFolder, List<string> responseCurveFiles, out bool success)
-        {
-            success = false;
-            List<ResponseCurve> responseCurves = new List<ResponseCurve>();
-            for (int i = 0; i < responseCurveFiles.Count; i++)
-            {
-                string path = Path.Combine(rootFolder, responseCurveFiles[i]);
-                if (File.Exists(path))
-                {
-                    string[] dataLines = File.ReadAllLines(path);
-                    List<ResponseDataPoint> dataPoints = new List<ResponseDataPoint>();
-                    //skip first line (header)
-                    for (int j = 1; j < dataLines.Length; j++)
-                    {
-                        string[] data = dataLines[j].Split(',');
-
-                        if(data.Length >= 2)
-                        {
-                            float time, probability;
-
-                            bool timeRead = float.TryParse(data[0], out time);
-                            bool probabilityRead = float.TryParse(data[1], out probability);
-                            if (timeRead && probabilityRead)
-                            {
-                                ResponseDataPoint dataPoint = new ResponseDataPoint(time, probability);
-                                dataPoints.Add(dataPoint);
-                            }
-                        }                                            
-                    }
-
-                    //need at least two to make a curve
-                    if(dataPoints.Count >= 2)
-                    {
-                        string file = Path.Combine(rootFolder, responseCurveFiles[i]);
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        responseCurves.Add(new ResponseCurve(dataPoints, name));
-                        Engine.Message(null, Engine.LogType.Log, " Loaded response curve from " + path + " named " + responseCurves[i].Name);
-                    }                    
-                }
-                else
-                {
-                    Engine.Message(null, Engine.LogType.Warning, "Response curve file not found in " + path + " and could not be loaded, might be issues with evacuation (will not run).");
-                }
-            }
-
-            if(responseCurves.Count > 0)
-            {
-                success = true;
-                return responseCurves;
             }
             else
             {
-                Engine.Message(null, Engine.LogType.InputError, " No response curves could be loaded, simulation will stall.");
-                return null;
-            }   
+                Engine.Message(null, Engine.LogType.InputError, "Could not read all specified ResponseCurves.");
+            }
+            return newInputs;
         }
     }
 }

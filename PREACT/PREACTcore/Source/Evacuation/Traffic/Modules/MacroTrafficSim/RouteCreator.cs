@@ -189,7 +189,6 @@ namespace PREACT.Traffic
         /// <returns></returns>
         public RouteData CalcTrafficRoute(Simulation simulation, Vector2d atLatLon)
         {
-            float cellSize = simulation.Input.Evacuation.PaintCellSize;
             Itinero.Profiles.Profile routerProfile = GetRouterProfile(simulation.Input.Traffic.MacroTrafficSimInput.Routing);
 
             //TODO: reasonable? maybe also check if street is same or actual distance between points?
@@ -203,7 +202,7 @@ namespace PREACT.Traffic
             }
 
             //check if valid start was found
-            RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(atLatLon.x, atLatLon.y), routerProfile, cellSize);
+            RouterPoint startRouterPoint = GetValidRouterPoint(_router, new Vector2d(atLatLon.x, atLatLon.y), routerProfile, 100f);
 
             //no need in calculating route when start is not resolved
             if (startRouterPoint == null)

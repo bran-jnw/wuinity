@@ -13,7 +13,7 @@ namespace WUInity
 {
     public class Painter : MonoBehaviour
     {
-        public enum PaintMode { WUIArea, RandomIgnitionArea, InitialIgnition, PopulationMask };
+        public enum PaintMode { WUIArea, RandomIgnitionArea, InitialIgnition };
         PaintMode paintMode = PaintMode.WUIArea;
 
         Color currentColor = Color.red;
@@ -159,8 +159,7 @@ namespace WUInity
 
         private void SetColor(int arrayIndex = 0)
         {
-            if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition 
-                || paintMode == PaintMode.PopulationMask)
+            if(paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
             {
                 currentColor = arrayIndex == 1 ? activeAreaColor : inactiveAreaColor;
                 addingArea = arrayIndex == 1;
@@ -181,23 +180,10 @@ namespace WUInity
             {
                 SetPainterInitialIgnition();
             }
-            else if (mode == PaintMode.PopulationMask)
-            {
-                SetPainterPopulationMask();
-            }
             else
             {
                 Engine.Message(null, Engine.LogType.SimulationError, "Desired paint mode not yet implemented.");
             }
-        }
-
-        void SetPainterPopulationMask()
-        {
-            paintMode = PaintMode.PopulationMask;
-            CheckDataResources(populationMaskTex, populationMaskColorArray);
-            //select first zone
-            SetMaskGPWColor(true);
-            _brushSize = 1;
         }
 
         void SetPainterWUIArea()
@@ -247,26 +233,16 @@ namespace WUInity
             {
                 Vector2int cellCount;
                 //get correct size, fire mesh or evac mesh
-                if (paintMode == PaintMode.WUIArea || paintMode == PaintMode.RandomIgnitionArea || paintMode == PaintMode.InitialIgnition)
+                if(_manager.PREACTInput.Fire.Data.LCPData != null)
                 {
-                    if(_manager.PREACTInput.Fire.Data.LCPData != null)
-                    {
-                        fireDataCellCount = _manager.PREACTInput.Fire.Data.LCPData.GetCellCount();
-                        cellCount = fireDataCellCount;
-                        fireDataRealSize = _manager.PREACTInput.Fire.Data.LCPData.GetSize();
-                    }
-                    else
-                    {
-                        Engine.Message(null, Engine.LogType.Warning, "Painter is trying to access LCP data but it is not loaded.");
-                        return;
-                    }
+                    fireDataCellCount = _manager.PREACTInput.Fire.Data.LCPData.GetCellCount();
+                    cellCount = fireDataCellCount;
+                    fireDataRealSize = _manager.PREACTInput.Fire.Data.LCPData.GetSize();
                 }
                 else
                 {
-                    //WUIEngine.SIM.UpdateNeededData();
-                    evacDataCellCount = _manager.PREACTInput.Evacuation.Data.CellCount;
-                    cellCount = evacDataCellCount;
-                    evacDataRealSize = _manager.PREACTInput.Simulation.DomainSize;
+                    Engine.Message(null, Engine.LogType.Warning, "Painter is trying to access LCP data but it is not loaded.");
+                    return;
                 }
                 //painter
                 requestedColorArray = new Color[cellCount.x * cellCount.y];
@@ -289,10 +265,6 @@ namespace WUInity
                         {
                             c = _manager.PREACTInput.Fire.Data.InitialIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
-                        else if (paintMode == PaintMode.PopulationMask)
-                        {
-                            c = _manager.Engine.WorkingData.PopulationMap.Mask[x + y * evacDataCellCount.x] == true ? activeAreaColor : inactiveAreaColor;
-                        }
                         requestedColorArray[x + y * cellCount.x] = c;
                         requestedTexture.SetPixel(x, y, c);
                     }
@@ -314,11 +286,6 @@ namespace WUInity
                 {
                     initialIgnitionTex = requestedTexture;
                     initialIgnitionColorArray = requestedColorArray;
-                }
-                else if (paintMode == PaintMode.PopulationMask)
-                {
-                    populationMaskTex = requestedTexture;
-                    populationMaskColorArray = requestedColorArray;
                 }
             }
 
@@ -449,10 +416,6 @@ namespace WUInity
             else if (paintMode == PaintMode.InitialIgnition)
             {
                 _manager.PREACTInput.Fire.Data.InitialIgnition[x + y * activeCellCount.x] = addingArea;
-            }
-            else if (paintMode == PaintMode.PopulationMask)
-            {
-                _manager.Engine.WorkingData.PopulationMap.Mask[x + y * activeCellCount.x] = addingArea;
             }
         }
 

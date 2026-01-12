@@ -66,7 +66,7 @@ namespace PREACT.Evacuation
             }
 
             _responseCurvesCDF = groupInput.ResponseCurvesCDF;            
-            CreateShapeFilePolygon(simulation, groupInput.ShapeFilePath);
+            CreateShapeFilePolygon(simulation, groupInput.ShapeFile);
         }
 
         public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Simulation simulation)

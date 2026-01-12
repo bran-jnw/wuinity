@@ -15,7 +15,7 @@ namespace PREACT.IO
     {
         private EventsData _data;
 
-        public EventsData EventsData { get => _data; }
+        public EventsData Data { get => _data; }
         public List<string> BlockGoalEventFiles = new List<string>();
 
         public EventsInput()

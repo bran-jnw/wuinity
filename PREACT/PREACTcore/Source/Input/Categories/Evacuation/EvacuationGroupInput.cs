@@ -13,7 +13,7 @@ namespace PREACT.Evacuation
         public List<double> DestinationsCDF = new List<double>(16);
         public List<string> ResponseCurves = new List<string>(16);
         public List<double> ResponseCurvesCDF = new List<double>(16);
-        public string ShapeFilePath = string.Empty;
+        public string ShapeFile = string.Empty;
         public bool Default = false;
 
         public EvacuationGroupInput()
@@ -39,6 +39,7 @@ namespace PREACT.Evacuation
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     newInput.Name = userInput;
+                    success = true;
                 }
                 else
                 {
@@ -54,6 +55,7 @@ namespace PREACT.Evacuation
                 nameOfInput = nameof(Destinations);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
+                    success = true;
                     string[] data = userInput.Split(',');
                     for (int j = 0; j < data.Length; ++j)
                     {
@@ -99,6 +101,7 @@ namespace PREACT.Evacuation
                             }
                             else
                             {
+                                PREACTInput.CouldNotInterpretInputMessage(nameOfInput, data[j]);
                                 break;
                             }
                         }
@@ -123,6 +126,7 @@ namespace PREACT.Evacuation
                 nameOfInput = nameof(ResponseCurves);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
+                    success = true;
                     string[] data = userInput.Split(',');
                     for (int j = 0; j < data.Length; ++j)
                     {
@@ -142,7 +146,7 @@ namespace PREACT.Evacuation
                 //maybe critical
                 if (newInput.ResponseCurves.Count == 1)
                 {
-                    newInput.DestinationsCDF.Add(1.0);
+                    newInput.ResponseCurvesCDF.Add(1.0);
                 }
                 else
                 {
@@ -156,10 +160,11 @@ namespace PREACT.Evacuation
                             success = double.TryParse(data[j], out cumulativeProbability);
                             if (success)
                             {
-                                newInput.DestinationsCDF.Add(cumulativeProbability);
+                                newInput.ResponseCurvesCDF.Add(cumulativeProbability);
                             }
                             else
                             {
+                                PREACTInput.CouldNotInterpretInputMessage(nameOfInput, data[j]);
                                 break;
                             }
                         }
@@ -181,10 +186,10 @@ namespace PREACT.Evacuation
                 }
 
                 //maybe critical
-                nameOfInput = nameof(ShapeFilePath);
+                nameOfInput = nameof(ShapeFile);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    newInput.ShapeFilePath = userInput;
+                    newInput.ShapeFile = userInput;
                     PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
                 }
                 else
@@ -207,7 +212,7 @@ namespace PREACT.Evacuation
                     nameOfInput = nameof(Default);
                     if (inputToParse.TryGetValue(nameOfInput, out userInput))
                     {
-                        bool.TryParse(userInput, out newInput.Default);
+                        success = bool.TryParse(userInput, out newInput.Default);
                     }
                     else
                     {
@@ -220,16 +225,16 @@ namespace PREACT.Evacuation
                     }
                     else if (newInput.Default)
                     {
-                        foreach (KeyValuePair<string, EvacuationGroupInput> prevInput in newInputs)
+                        foreach (EvacuationGroupInput prevInput in newInputs.Values)
                         {
-                            EvacuationGroupInput eG = prevInput.Value;
-                            eG.Default = false;
+                            prevInput.Default = false;
                         }
                     }
                 }
 
                 //not critical
                 nameOfInput = nameof(Color);
+                success = true;
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     string[] data = userInput.Split(',');
@@ -253,12 +258,22 @@ namespace PREACT.Evacuation
                     success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
-                if (!success)
+                if (!success || issues > 0)
                 {
                     newInput.Color = PREACTColor.Random();
                 }
-            }
 
+                newInputs.Add(newInput.Name, newInput);
+            }
+            
+            if(newInputs.Count == evacGroupLineIndices.Count)
+            {
+                success = true;
+            }
+            else
+            {
+                Engine.Message(null, Engine.LogType.InputError, "Could not read all specified EvacuationGroups.");
+            }
             return newInputs;
         }
 

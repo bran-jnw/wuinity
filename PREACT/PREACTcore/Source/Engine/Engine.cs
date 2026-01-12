@@ -477,7 +477,6 @@ namespace PREACT
         /// <param name="message"></param>
         public static void Message(Simulation? simulation, LogType logType, string message)
         {
-            //TODO: ReaderWriteLock
             if (_ENGINE == null)
             {
                 return;

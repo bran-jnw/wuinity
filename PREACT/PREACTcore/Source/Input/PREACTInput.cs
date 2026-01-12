@@ -85,7 +85,21 @@ namespace PREACT.IO
 
         public static readonly char[] inputSplit = { '=', '#' };
         static readonly char[] headerBrackets = new char[] { '[', ']' };
-        public const string pleaseCheckInput = " Please check your input file.";
+        public const string pleaseCheckInput = " Please check your input file.";  
+        
+        private static string RemoveSpace(string input)
+        {
+            List<char> chars = new List<char>();
+            for(int i = 0; i < input.Length; ++i)
+            {
+                if (input[i] != ' ')
+                {
+                    chars.Add(input[i]);
+                }
+            }
+
+            return new string(chars.ToArray());
+        }
 
         private static PREACTInput ParseInput(string rootFolder, string[] inputLines, out bool success)
         {
@@ -100,10 +114,16 @@ namespace PREACT.IO
             //first index all headers
             for (int i = 0; i < inputLines.Length; ++i)
             {
-                inputLines[i] = inputLines[i].Trim();
-                string line = inputLines[i];
-                if (inputLines[i].StartsWith("["))
+                if (string.IsNullOrWhiteSpace(inputLines[i]))
                 {
+                    continue;
+                }
+
+                //inputLines[i] = inputLines[i].Trim();
+                inputLines[i] = RemoveSpace(inputLines[i]);
+                string line = inputLines[i];
+                if (line.StartsWith("["))
+                {      
                     line = line.Trim(headerBrackets);
                     if (line.Equals("Destination"))
                     {
@@ -344,7 +364,7 @@ namespace PREACT.IO
         /// <param name="inputLines"></param>
         /// <param name="startIndex"></param>
         /// <returns></returns>
-        public static Dictionary<string, string> GetHeaderInput(string[] inputLines, int startIndex)
+        public static Dictionary<string, string> GetHeaderInput(string[] inputLines, int startIndex, bool collectPureDataLines = false)
         {
             Dictionary<string, string> inputToParse = new Dictionary<string, string>();
             //first line is header
@@ -375,6 +395,17 @@ namespace PREACT.IO
                 {
                     inputToParse.Add(input[0], input[1]);
                 }
+
+                //this is e.g. ramps that have no Variable=value structure
+                if(collectPureDataLines)
+                {                    
+                    input = line.Split(',');
+                    if (input.Length >= 2)
+                    {
+                        inputToParse.Add("dataLine" + lineIndex, line);
+                    }
+                }
+
                 ++lineIndex;
             }
 

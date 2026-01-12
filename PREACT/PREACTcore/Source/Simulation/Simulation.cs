@@ -96,6 +96,7 @@ namespace PREACT
             _timeManager = new TimeManager(_input);
             _spatialManager = new SpatialManager(this);
             _weatherManager = new WeatherManager();
+            _evacuationManager = new EvacuationManager(this);
             _hazardManager = new HazardManager(this);
         }
 
@@ -553,11 +554,11 @@ namespace PREACT
             if (_input.Simulation.RunTrafficModule)
             {
                 //check for global events
-                if (_input.Evacuation.Data.BlockGoalEvents != null)
+                if (_input.Events.Data.BlockDestinationEvents != null)
                 {
-                    for (int i = 0; i < _input.Evacuation.Data.BlockGoalEvents.Length; i++)
+                    for (int i = 0; i < _input.Events.Data.BlockDestinationEvents.Count; i++)
                     {
-                        BlockDestinationEvent bGE = _input.Evacuation.Data.BlockGoalEvents[i];
+                        BlockDestinationEvent bGE = _input.Events.Data.BlockDestinationEvents[i];
                         if (CurrentTime >= bGE.StartTime && !bGE.Triggered)
                         {
                             bGE.ApplyEffects();
