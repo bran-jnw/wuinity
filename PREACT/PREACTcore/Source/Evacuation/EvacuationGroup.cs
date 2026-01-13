@@ -13,6 +13,7 @@ namespace PREACT.Evacuation
     public class EvacuationGroup
     {
         private string _name;
+        public DestinationChoices _destinationChoice;
         public PREACTColor _color;
         public bool _default;
         public List<EvacuationDestination> _destinations;
@@ -27,11 +28,13 @@ namespace PREACT.Evacuation
         public PREACTColor Color { get => _color; }
         public bool Default { get => _default; }
         public List<EvacuationDestination> Destinations { get => _destinations; }
+        public DestinationChoices DestinationChoice { get => _destinationChoice; }
 
 
         public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Simulation simulation)
         {
             _name = groupInput.Name;
+            _destinationChoice = groupInput.DestinationChoice;
             _color = groupInput.Color;
             _default = groupInput.Default;
 

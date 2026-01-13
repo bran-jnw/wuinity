@@ -13,7 +13,6 @@ namespace PREACT.IO
     public class TrafficInput
     {
         public enum TrafficModuleChoice { SUMO, MacroTrafficSim, CityFlow }
-        public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupWeighted, EvacGroupClosestEuclidean };
 
         private TrafficData _data;
         private SUMOInput _sumoInput;
@@ -25,7 +24,6 @@ namespace PREACT.IO
         public MacroTrafficSimInput MacroTrafficSimInput { get => _macroTrafficSimInput; }
         public CityFlowInput CityFlowInput { get => _cityFlowInput; }
         public TrafficModuleChoice TrafficModule = TrafficModuleChoice.SUMO;
-        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupWeighted;
         public bool VisibilityAffectsSpeed = false;     
 
 
@@ -77,35 +75,6 @@ namespace PREACT.IO
             if(issues > 0)
             {
                 return newInput;
-            }
-
-            nameOfInput = nameof(DestinationChoice);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                switch (userInput)
-                {
-                    case nameof(DestinationChoices.Random):
-                        newInput.DestinationChoice = DestinationChoices.Random;
-                        break;
-                    case nameof(DestinationChoices.ClosestEuclidean):
-                        newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
-                        break;
-                    case nameof(DestinationChoices.EvacGroupWeighted):
-                        newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
-                        break;
-                    case nameof(DestinationChoices.EvacGroupClosestEuclidean):
-                        newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
-                        break;
-                    default:
-                        ++issues;
-                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
-                        break;
-                }
-            }
-            else
-            {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
             nameOfInput = nameof(VisibilityAffectsSpeed);

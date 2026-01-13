@@ -201,15 +201,15 @@ namespace PREACT.Evacuation
         {
             EvacuationDestination goal = null;
 
-            if (_input.Traffic.DestinationChoice == TrafficInput.DestinationChoices.EvacGroupWeighted)
+            if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupWeighted)
             {
                 goal = evacuationGroup.GetWeightedRandomDestination();
             }
-            else if (_input.Traffic.DestinationChoice == TrafficInput.DestinationChoices.EvacGroupClosestEuclidean)
+            else if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean)
             {
                 goal = evacuationGroup.GetClosestEuclideanDestination(latLon, _simulation);
             }
-            else if (_input.Traffic.DestinationChoice == TrafficInput.DestinationChoices.Random)
+            else if (evacuationGroup.DestinationChoice == DestinationChoices.Random)
             {
                 goal = GetRandomEvacuationDestination();
 

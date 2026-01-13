@@ -26,7 +26,7 @@ namespace PREACT
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private PREACTInput _input;
         private DataStatus _dataStatus;
-        private SimulationOutput _output;        
+        private EngineOutput _output;        
         private string _workingFile;
         private Visualization.WUIShowCommunicator _wuiShow;
         private WorkingData _workingData;
@@ -69,7 +69,7 @@ namespace PREACT
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             _engineOutput = new EngineOutput(this);
             _dataStatus = new DataStatus();
-            _output = new SimulationOutput();
+            _output = new EngineOutput(this);
             _workingData = new WorkingData();
             _externalManager = externalManager;
             if(mainEngine)
@@ -154,7 +154,7 @@ namespace PREACT
                 _mainSimulation.Run();
                 if(_mainSimulation.TrafficModule != null)
                 {
-                    CollectSimulationStatistics(_mainSimulation.GetTrafficArrivalData(), simulationIndex,engineTask);
+                    CollectSimulationStatistics(_mainSimulation.Output.GetTrafficArrivalData(), simulationIndex,engineTask);
                 }                
                 if (_stopSimulations)
                 {
@@ -221,7 +221,7 @@ namespace PREACT
                 {
                     if (j == 0)
                     {
-                        CollectSimulationStatistics(_mainSimulation.GetTrafficArrivalData(), startIndex + j , engineTask);                      
+                        CollectSimulationStatistics(_mainSimulation.Output.GetTrafficArrivalData(), startIndex + j , engineTask);                      
                     }
                     else
                     {
@@ -304,7 +304,7 @@ namespace PREACT
 
                 for(int j = startIndex; j < endIndex; ++j)
                 {
-                    CollectSimulationStatistics(_simulations[j].GetTrafficArrivalData(), simulationIndex, engineTask);                  
+                    CollectSimulationStatistics(_simulations[j].Output.GetTrafficArrivalData(), simulationIndex, engineTask);                  
                 }
                 if(_stopSimulations)
                 {

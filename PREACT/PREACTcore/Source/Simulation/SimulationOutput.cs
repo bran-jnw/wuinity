@@ -13,6 +13,8 @@ namespace PREACT.IO
     [System.Serializable]
     public class SimulationOutput
     {
+        private Simulation _simulation;
+
         private float _totalAverageEvacTime;
         public float TotalAverageEvacTime { get => _totalAverageEvacTime; }
         private EvacOutput _evac;
@@ -22,10 +24,25 @@ namespace PREACT.IO
         Dictionary<int, float[,]> _triggerBuffers = new Dictionary<int, float[,]>();
 
 
-        public SimulationOutput()
+        public SimulationOutput(Simulation simulation)
         {
             _evac = new EvacOutput();
             _averageEvacTimes = new List<float>();
+
+            _simulation = simulation;
+        }
+
+        List<float> _emptyArrivalData = new List<float>();
+        public List<float> GetTrafficArrivalData()
+        {
+            if (_simulation.TrafficModule != null)
+            {
+                return _simulation.TrafficModule.GetArrivalData();
+            }
+            else
+            {
+                return _emptyArrivalData;
+            }
         }
 
         public void AddEvacTime(float totalEvacTime)

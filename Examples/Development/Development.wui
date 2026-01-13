@@ -49,8 +49,10 @@ Color=1.0,0.0,0.0
 
 [EvacuationGroup]
 Name=route85_group
+Default=true
+DestinationChoice=EvacGroupWeighted
 ShapeFile=groups/east.shp
-ResponseCurves=east_fast, west_slow
+ResponseCurves=slow, fast
 ResponseCurvesCDF=0.9, 1.0
 Destinations=route85, route121
 DestinationsCDF=0.9, 1.0
@@ -58,22 +60,22 @@ Color=1.0,1.0,0.0
 
 [EvacuationGroup]
 Name=route121_group
-Default=true
+DestinationChoice=EvacGroupWeighted
 ShapeFile=groups/west.shp
-ResponseCurves=east_fast, west_slow
+ResponseCurves=slow, fast 
 ResponseCurvesCDF=0.1, 1.0
 Destinations=route121, route85
 DestinationsCDF=0.9, 1.0
 Color=1.0,1.0,0.0
 
 [ResponseCurve]
-Name=west_slow
+Name=slow
 0, 0
 12000, 0.0
 12500, 1.0
 
 [ResponseCurve]
-Name=east_fast
+Name=fast
 0, 0
 450, 0.8
 900, 1.0
@@ -89,7 +91,6 @@ WalkingDistanceModifier=1.0
 [Traffic]
 TrafficModule=SUMO      
 VisibilityAffectsSpeed=false  
-DestinationChoice=EvacGroupWeighted
 
 [SUMO]
 ConfigurationFile=sumo/rox.sumocfg

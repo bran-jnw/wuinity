@@ -98,7 +98,7 @@ namespace PREACT
             _weatherManager = new WeatherManager();
             _evacuationManager = new EvacuationManager(this);
             _hazardManager = new HazardManager(this);
-            _output = new SimulationOutput();
+            _output = new SimulationOutput(this);
         }
 
         /// <summary>
@@ -721,21 +721,6 @@ namespace PREACT
         public Vector2d GetWGS84FromSimulationPosition(Vector2d pos)
         {
             return _input.Simulation.Data.GetWGS84FromSimulationPosition(pos);
-        }        
-
-       
-
-        List<float> _emptyArrivalData = new List<float>();
-        public List<float> GetTrafficArrivalData()
-        {
-            if (_trafficModule != null)
-            {
-                return _trafficModule.GetArrivalData();
-            }
-            else
-            {
-                return _emptyArrivalData;
-            }
-        }
+        }     
     }    
 }

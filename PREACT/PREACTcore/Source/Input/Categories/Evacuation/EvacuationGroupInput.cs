@@ -5,10 +5,13 @@ using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
+    public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupWeighted, EvacGroupClosestEuclidean };
+
     public class EvacuationGroupInput
     {
         public string Name = string.Empty;
         public PREACTColor Color = PREACTColor.white;
+        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupWeighted;
         public List<string> Destinations = new List<string>(16);
         public List<double> DestinationsCDF = new List<double>(16);
         public List<string> ResponseCurves = new List<string>(16);
@@ -52,6 +55,40 @@ namespace PREACT.Evacuation
                 }
 
                 //critical
+                nameOfInput = nameof(DestinationChoice);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    switch (userInput)
+                    {
+                        case nameof(DestinationChoices.Random):
+                            newInput.DestinationChoice = DestinationChoices.Random;
+                            break;
+                        case nameof(DestinationChoices.ClosestEuclidean):
+                            newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
+                            break;
+                        case nameof(DestinationChoices.EvacGroupWeighted):
+                            newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
+                            break;
+                        case nameof(DestinationChoices.EvacGroupClosestEuclidean):
+                            newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
+                            break;
+                        default:
+                            ++issues;
+                            Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
+                            break;
+                    }
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+                if (!success)
+                {
+                    break;
+                }
+
+                //maybe critical
                 nameOfInput = nameof(Destinations);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
@@ -75,7 +112,7 @@ namespace PREACT.Evacuation
                     success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput, true);
                 }
-                if (!success)
+                if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupWeighted || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
                 {
                     break;
                 }
@@ -116,7 +153,7 @@ namespace PREACT.Evacuation
                         success = false;
                         PREACTInput.IncorrectInputCount(nameOfInput);
                     }
-                    if (!success)
+                    if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupWeighted || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
                     {
                         break;
                     }
