@@ -89,11 +89,11 @@ WalkingDistanceModifier=1.0
 [Traffic]
 TrafficModule=SUMO      
 VisibilityAffectsSpeed=false  
+DestinationChoice=EvacGroupWeighted
 
 [SUMO]
 ConfigurationFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
-DestinationChoice=EvacGroupWeighted
 
 [Fire]
 FireModule=CellParticleHybrid

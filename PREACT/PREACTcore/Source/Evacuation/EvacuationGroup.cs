@@ -90,35 +90,88 @@ namespace PREACT.Evacuation
             _boundingBoxMin = new Vector2d(double.MaxValue, double.MaxValue);
             _boundingBoxMax = new Vector2d(double.MinValue, double.MinValue);
 
+            List<Vector2d> rawPoints = new List<Vector2d>();
+
             using (OSGeo.OGR.Driver driver = OSGeo.OGR.Ogr.GetDriverByName("ESRI Shapefile"))
             {
                 OSGeo.OGR.DataSource dataSource = driver.Open(shapeFilePath, 0);
-                OSGeo.OGR.Layer layer = dataSource.GetLayerByIndex(0);
-                OSGeo.OGR.Feature feature = layer.GetFeature(0);
-                OSGeo.OGR.Geometry geometry = feature.GetGeometryRef();
-                for (int i = 0; i < geometry.GetPointCount(); ++i)
+                int layerCount = dataSource.GetLayerCount();
+                for (int i = 0; i < layerCount; ++i)
                 {
-                    double[] geopoint = { 0, 0, 0 };
-                    geometry.GetPoint(i, geopoint);
-                    Vector2d wgs84LatLon = new Vector2d(geopoint[0], geopoint[1]);
-                    Vector2d localPos = simulation.Input.Simulation.Data.GetSimulationPosition(wgs84LatLon);
-                    _shapePolygonLocal.Add(localPos);
-
-                    //update bounding box
-                    _boundingBoxMin.x = Mathd.Min(localPos.x, _boundingBoxMin.x);
-                    _boundingBoxMax.x = Mathd.Max(localPos.x, _boundingBoxMax.x);
-                    _boundingBoxMin.y = Mathd.Min(localPos.y, _boundingBoxMin.y);
-                    _boundingBoxMax.y = Mathd.Max(localPos.y, _boundingBoxMax.y);
-                }
-
-                //clean up
-                geometry.Dispose();
-                feature.Dispose();
-                layer.Dispose();
+                    OSGeo.OGR.Layer layer = dataSource.GetLayerByIndex(i);
+                    int featureCount = (int)layer.GetFeatureCount(0);
+                    for (int j = 0; j < featureCount; ++j)
+                    {
+                        OSGeo.OGR.Feature feature = layer.GetFeature(j);
+                        OSGeo.OGR.Geometry geometry = feature.GetGeometryRef();
+                        WalkGeometry(geometry, rawPoints);
+                        
+                        geometry.Dispose();
+                        feature.Dispose();
+                    }
+                    layer.Dispose();
+                }                
                 dataSource.FlushCache();
                 dataSource.Dispose();
             }
+
+            for(int i = 0; i < rawPoints.Count; ++i)
+            {
+                Vector2d localPos = simulation.Input.Simulation.Data.GetSimulationPosition(rawPoints[i]);
+
+                Engine.Message(simulation, Engine.LogType.Debug, localPos.x + ", " + localPos.y);
+
+                _shapePolygonLocal.Add(localPos);
+
+                //update bounding box
+                _boundingBoxMin.x = Mathd.Min(localPos.x, _boundingBoxMin.x);
+                _boundingBoxMax.x = Mathd.Max(localPos.x, _boundingBoxMax.x);
+                _boundingBoxMin.y = Mathd.Min(localPos.y, _boundingBoxMin.y);
+                _boundingBoxMax.y = Mathd.Max(localPos.y, _boundingBoxMax.y);
+            }
         }
+
+        private void WalkGeometry(OSGeo.OGR.Geometry geom, List<Vector2d> result)
+        {
+            OSGeo.OGR.wkbGeometryType type = geom.GetGeometryType();
+
+            if (type == OSGeo.OGR.wkbGeometryType.wkbPoint)
+            {
+                double x = geom.GetX(0);
+                double y = geom.GetY(0);
+                result.Add(new Vector2d(y, x)); //LonLat in data, LatLon needed
+            }
+            else if (type == OSGeo.OGR.wkbGeometryType.wkbLineString)
+            {
+                int n = geom.GetPointCount();
+                for (int i = 0; i < n; i++)
+                {
+                    double x = geom.GetX(i);
+                    double y = geom.GetY(i);
+                    result.Add(new Vector2d(y, x)); //LonLat in data, LatLon needed
+                }
+            }
+            else if (type == OSGeo.OGR.wkbGeometryType.wkbPolygon)
+            {
+                int rings = geom.GetGeometryCount();
+                for (int r = 0; r < rings; r++)
+                {
+                    OSGeo.OGR.Geometry ring = geom.GetGeometryRef(r);
+                    WalkGeometry(ring, result);
+                }
+            }
+            else
+            {
+                /* MultiLineString, MultiPolygon, GeometryCollection, etc. */
+                int parts = geom.GetGeometryCount();
+                for (int i = 0; i < parts; i++)
+                {
+                    OSGeo.OGR.Geometry sub = geom.GetGeometryRef(i);
+                    WalkGeometry(sub, result);
+                }
+            }
+        }
+
 
         //https://en.wikipedia.org/wiki/Point_in_polygon
         //https://stackoverflow.com/questions/4243042/c-sharp-point-in-polygon
