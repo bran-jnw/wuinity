@@ -399,6 +399,11 @@ namespace PREACT
         /// <param name="simulation"></param>
         private void CollectSimulationStatistics(List<float> arrivalData, int simulationIndex, EngineTask engineTask)
         {
+            if(arrivalData.Count < 1)
+            {
+                return;
+            }
+
             trafficArrivalDataCollection.Add(arrivalData);
             float RSET = arrivalData[arrivalData.Count - 1];
 
