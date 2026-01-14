@@ -10,7 +10,7 @@ namespace PREACT
 
         public TimeManager(IO.PREACTInput input)
         {
-            //find the lowest DateTime and us ethat as starting time
+            //find the lowest DateTime and use that as starting time
             _startDateTime = DateTime.Now;
         }
 

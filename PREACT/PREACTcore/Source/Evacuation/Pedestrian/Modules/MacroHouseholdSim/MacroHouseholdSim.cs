@@ -21,14 +21,6 @@ namespace PREACT.Pedestrian
     [System.Serializable]
     public class MacroHouseholdSim : PedestrianModule
     {
-        //int[] population;
-        //int cellsX;
-        //int cellsY;
-
-        //Vector2d realWorldSize;
-        //public Vector2d cellWorldSize;
-
-        //PopulationData.HouseholdData[] _householdData;
         List<MacroHousehold> _macroHouseholds;
         int totalPopulation;
         int totalCars;
