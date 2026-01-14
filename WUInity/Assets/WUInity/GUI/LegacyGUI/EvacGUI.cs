@@ -7,7 +7,7 @@ namespace WUInity.UI
 {
     public partial class WUInityGUI
     {
-        string totalPop, maxCars, maxCarsProb, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
+        string totalPop, walkingDistMod, walkSpeedMin, walkSpeedMax, walkSpeedMod, evacOrderTime;
         bool evacMenuDirty = true;
 
         void EvacMenu()
@@ -19,8 +19,6 @@ namespace WUInity.UI
             if (evacMenuDirty)
             {
                 evacMenuDirty = false;
-                maxCars = popIn.MaxCars.ToString();
-                maxCarsProb = popIn.MaxCarsProbability.ToString();
                 walkSpeedMin = macroIn.WalkingSpeedMinMax.X.ToString();
                 walkSpeedMax = macroIn.WalkingSpeedMinMax.Y.ToString();
                 walkSpeedMod = macroIn.WalkingSpeedModifier.ToString();
@@ -32,23 +30,7 @@ namespace WUInity.UI
             int buttonIndex = 0;
 
             int buttonColumnStart = 140;
-
-            //
-            popIn.AllowMoreThanOneCar = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), popIn.AllowMoreThanOneCar, "Allow more than one car");
-            ++buttonIndex;
-
-            //
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Max cars [-]");
-            ++buttonIndex;
-            maxCars = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), maxCars);
-            ++buttonIndex;
-
-            //
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Probability for max cars");
-            ++buttonIndex;
-            maxCarsProb = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), maxCarsProb);
-            ++buttonIndex;
-                        
+                                    
             //
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min. walking speed");
             ++buttonIndex;
@@ -88,8 +70,6 @@ namespace WUInity.UI
             MacroHouseholdSimInput macroIn = _input.Pedestrian.MacroHouseholdSimInput;
             EvacuationInput evacIn = _input.Evacuation;
 
-            int.TryParse(maxCars, out popIn.MaxCars);
-            float.TryParse(maxCarsProb, out popIn.MaxCarsProbability);
             float.TryParse(walkSpeedMin, out macroIn.WalkingSpeedMinMax.X);
             float.TryParse(walkSpeedMax, out macroIn.WalkingSpeedMinMax.Y);
             float.TryParse(walkSpeedMod, out macroIn.WalkingSpeedModifier);

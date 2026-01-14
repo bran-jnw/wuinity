@@ -110,6 +110,7 @@ namespace PREACT.IO
             List<int> destinationLineIndices = new List<int>();            
             List<int> responseLineIndices = new List<int>();
             List<int> groupLineIndices = new List<int>();
+            List<int> demographicsLineIndices = new List<int>();
 
             //first index all headers
             for (int i = 0; i < inputLines.Length; ++i)
@@ -136,6 +137,10 @@ namespace PREACT.IO
                     else if (line.Equals("EvacuationGroup"))
                     {
                         groupLineIndices.Add(i);
+                    }
+                    else if (line.Equals("Demographics"))
+                    {
+                        demographicsLineIndices.Add(i);
                     }
                     else
                     {
@@ -184,12 +189,12 @@ namespace PREACT.IO
                 return null;
             }
 
-            //population      
+            //population, must be before evacuation die to dependence on demographics      
             nameOfInput = nameof(Population);
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Population = PopulationInput.Parse(inputLines, lineindex, newInput.Simulation, rootFolder, out success);
+                newInput.Population = PopulationInput.Parse(inputLines, lineindex, demographicsLineIndices, newInput.Simulation, rootFolder, out success);
             }
             else if(newInput.Simulation.RunPedestrianModule)
             {
@@ -229,7 +234,7 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {                    
                 ReadingInputMessage(nameOfInput);
-                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
+                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, newInput.Population, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
             }
             else if(newInput.Simulation.RunPedestrianModule || newInput.Simulation.RunTrafficModule)
             {

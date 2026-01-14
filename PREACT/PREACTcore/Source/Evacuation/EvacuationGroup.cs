@@ -13,30 +13,38 @@ namespace PREACT.Evacuation
     public class EvacuationGroup
     {
         private string _name;
-        public DestinationChoices _destinationChoice;
-        public PREACTColor _color;
-        public bool _default;
-        public List<EvacuationDestination> _destinations;
-        public List<double> _destinationsCDF;
-        public List<ResponseCurve> _responseCurves;
-        public List<double> _responseCurvesCDF;
-        List<Vector2d> _shapePolygonLocal;
-        Vector2d _boundingBoxMin;
-        Vector2d _boundingBoxMax;        
+        private DestinationChoices _destinationChoice;
+        private PREACTColor _color;
+        private bool _default;
+        private List<EvacuationDestination> _destinations;
+        private List<double> _destinationsCDF;
+        private List<ResponseCurve> _responseCurves;
+        private List<double> _responseCurvesCDF;
+        private Demographics _demographics;
+
+        private List<Vector2d> _shapePolygonLocal;
+        private Vector2d _boundingBoxMin;
+        private Vector2d _boundingBoxMax;
 
         public string Name { get => _name; }
         public PREACTColor Color { get => _color; }
         public bool Default { get => _default; }
         public List<EvacuationDestination> Destinations { get => _destinations; }
         public DestinationChoices DestinationChoice { get => _destinationChoice; }
+        public Demographics Demographics { get => _demographics; }
 
 
-        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Simulation simulation)
+        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
         {
             _name = groupInput.Name;
             _destinationChoice = groupInput.DestinationChoice;
             _color = groupInput.Color;
             _default = groupInput.Default;
+
+            if(!allDemographics.TryGetValue(groupInput.Demographics, out _demographics))
+            {
+                _demographics = simulation.Evacuation.DefaultDemographics;
+            }
 
             //this is where we need to "re-build" the information from input
             _destinations = new List<EvacuationDestination>(groupInput.Destinations.Count);
@@ -74,13 +82,14 @@ namespace PREACT.Evacuation
             CreateShapeFilePolygon(simulation, shapeFilePath);
         }
 
-        public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Simulation simulation)
+        public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, 
+            EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
         {
             EvacuationGroup[] groups = new EvacuationGroup[groupsInput.Count];
             int index = 0;
             foreach(EvacuationGroupInput eGI in groupsInput.Values)
             {
-                groups[index] = new EvacuationGroup(eGI, allDestinations, allResponseCurves, simulation);
+                groups[index] = new EvacuationGroup(eGI, allDestinations, allResponseCurves, allDemographics, simulation);
                 ++index;
             }
 

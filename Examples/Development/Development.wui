@@ -16,11 +16,19 @@ ZoomLevel=13
 
 [Population]
 PopulationFile=population/big_population.csv
-MinHouseholdSize=1
-MaxHouseholdSize=5
+
+[Demographics]
+Name=one_car
+Default=true
 AllowMoreThanOneCar=false
+MaxCars=1
+MaxCarsProbability=0.0
+
+[Demographics]
+Name=two_cars
+AllowMoreThanOneCar=true
 MaxCars=2
-MaxCarsProbability=0.3
+MaxCarsProbability=1.0
 
 [Evacuation]
 EvacuationOrderStart=0.0
@@ -50,6 +58,7 @@ Color=1.0,0.0,0.0
 [EvacuationGroup]
 Name=route85_group
 Default=true
+Demographics=two_cars
 DestinationChoice=EvacGroupWeighted
 ShapeFile=groups/east.shp
 ResponseCurves=slow, fast
@@ -60,6 +69,7 @@ Color=1.0,1.0,0.0
 
 [EvacuationGroup]
 Name=route121_group
+Demographics=one_car
 DestinationChoice=EvacGroupWeighted
 ShapeFile=groups/west.shp
 ResponseCurves=slow, fast 

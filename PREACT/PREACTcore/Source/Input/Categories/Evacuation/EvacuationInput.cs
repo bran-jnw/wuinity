@@ -28,7 +28,7 @@ namespace PREACT.IO
             _data = new EvacuationData(simulationInput, this);
         }
 
-        public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, string rootFolder, out bool success)
+        public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, PopulationInput population, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, string rootFolder, out bool success)
         {
             EvacuationInput newInput = new EvacuationInput(simulationInput);
             if (!simulationInput.RunPedestrianModule && !simulationInput.RunTrafficModule)
@@ -57,7 +57,7 @@ namespace PREACT.IO
             }
 
             //critical, must be done after response curves and destinations
-            newInput.EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, simulationInput, evacuationGroupLineIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, rootFolder, out success);
+            newInput.EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, simulationInput, evacuationGroupLineIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, population, rootFolder, out success);
             if (!success)
             {
                 return newInput;

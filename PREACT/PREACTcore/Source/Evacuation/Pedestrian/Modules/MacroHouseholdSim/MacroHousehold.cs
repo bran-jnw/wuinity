@@ -50,13 +50,13 @@ namespace PREACT.Pedestrian
             _houseHoldData = householdData;
             peopleInHousehold = householdData.peopleCount;
             cars = 1;
-            if (popInput.AllowMoreThanOneCar)
+            if (evacuationGroup.Demographics.AllowMoreThanOneCar)
             {
                 if (peopleInHousehold >= 2)
                 {
-                    if (Random.Range(0f, 1f) <= popInput.MaxCarsProbability)
+                    if (Random.valueF <= evacuationGroup.Demographics.MaxCarsProbability)
                     {
-                        cars = Mathf.Min(peopleInHousehold, popInput.MaxCars);
+                        cars = Mathf.Min(peopleInHousehold, evacuationGroup.Demographics.MaxCars);
                     }
                 }
             }

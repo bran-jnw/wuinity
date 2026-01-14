@@ -16,14 +16,18 @@ namespace PREACT.Evacuation
         List<EvacuationDestination> _availableEvacuationDestinations;
         EvacuationGroup[] _evacuationGroups;
 
+        Demographics _defaultDemographics;
+
         public EvacuationDestination[] Destinations { get => _evacuationDestinations; }
+        public Demographics DefaultDemographics { get => _defaultDemographics; }
 
         public EvacuationManager(Simulation simulation)
         {
             _simulation = simulation;
             _input = _simulation.Input;
             _evacuationDestinationsDict = EvacuationDestination.CreateEvacacuationDestinationsFromInput(_simulation, _input.Evacuation.EvacuationDestinationInputs);
-            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _simulation);
+            SetDefaulDemographics(_input.Population.Demographics);
+            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _input.Population.Demographics, _simulation);
             SetDefaulEvacuationtGroup(); //just sets default group fallback
             BuildEvacuationDestinationArray(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
@@ -192,6 +196,18 @@ namespace PREACT.Evacuation
                 if (_evacuationGroups[i].Default)
                 {
                     _defaultEvacutionGroup = _evacuationGroups[i];
+                    break;
+                }
+            }
+        }
+
+        private void SetDefaulDemographics(Dictionary<string, Demographics> demographics)
+        {
+            foreach(Demographics d in demographics.Values)
+            {
+                if(d.Default)
+                {
+                    _defaultDemographics = d;
                     break;
                 }
             }

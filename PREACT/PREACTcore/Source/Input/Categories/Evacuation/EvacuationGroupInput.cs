@@ -16,6 +16,7 @@ namespace PREACT.Evacuation
         public List<double> DestinationsCDF = new List<double>(16);
         public List<string> ResponseCurves = new List<string>(16);
         public List<double> ResponseCurvesCDF = new List<double>(16);
+        public string Demographics = string.Empty;
         public string ShapeFile = string.Empty;
         public bool Default = false;
 
@@ -24,7 +25,8 @@ namespace PREACT.Evacuation
 
         }
 
-        public static Dictionary<string, EvacuationGroupInput> Parse(string[] inputLines, SimulationInput simulationInput, List<int> evacGroupLineIndices, Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, string rootFolder, out bool success)
+        public static Dictionary<string, EvacuationGroupInput> Parse(string[] inputLines, SimulationInput simulationInput, List<int> evacGroupLineIndices, 
+            Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, PopulationInput population, string rootFolder, out bool success)
         {
             Dictionary<string, EvacuationGroupInput> newInputs = new Dictionary<string, EvacuationGroupInput>();
             success = false;
@@ -87,6 +89,32 @@ namespace PREACT.Evacuation
                 {
                     break;
                 }
+
+                //not critical, uses default
+                nameOfInput = nameof(Demographics);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    newInput.Demographics = userInput;
+                    if (population.Demographics.ContainsKey(userInput))
+                    {
+                        success = true;
+                    }
+                    else
+                    {
+                        success = false;
+                        PREACTInput.MissingReferenceToOtherInput(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    newInput.Demographics = string.Empty;
+                }
+
 
                 //maybe critical
                 nameOfInput = nameof(Destinations);
@@ -312,26 +340,6 @@ namespace PREACT.Evacuation
                 Engine.Message(null, Engine.LogType.InputError, "Could not read all specified EvacuationGroups.");
             }
             return newInputs;
-        }
-
-        public static void SaveEvacGroupIndices(string filePath, Vector2int cells, int groupCount, int[] EvacGroupIndices)
-        {
-
-            string[] data = new string[4];
-            //nrows
-            data[0] = cells.x.ToString();
-            //ncols
-            data[1] = cells.y.ToString();
-            //how many evac groups
-            data[2] = groupCount.ToString();
-            //actual data
-            data[3] = "";
-            for (int i = 0; i < EvacGroupIndices.Length; ++i)
-            {
-                data[3] += EvacGroupIndices[i] + " ";
-            }
-
-            File.WriteAllLines(filePath, data);
         }
     }
 }
