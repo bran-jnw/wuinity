@@ -71,5 +71,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 #WUInity stuff
-/[Ee]xamples/[Rr]oxborough/[Rr]oxborough_example_output
 [Mm]apbox[Cc]onfiguration.txt
+/[Aa]ssets/[Pp]REACT/[Dd]ebug/*
+/[Aa]ssets/[Pp]REACT/[Rr]elease/*
