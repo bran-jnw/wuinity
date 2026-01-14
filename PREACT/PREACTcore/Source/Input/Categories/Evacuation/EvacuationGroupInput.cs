@@ -195,7 +195,7 @@ namespace PREACT.Evacuation
                     string[] data = userInput.Split(',');
                     for (int j = 0; j < data.Length; ++j)
                     {
-                        newInput.ResponseCurves.Add(data[i]);
+                        newInput.ResponseCurves.Add(data[j]);
                     }
                 }
                 else

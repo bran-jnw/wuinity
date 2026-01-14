@@ -16,6 +16,7 @@ namespace PREACT.IO
         public PopulationData Data { get => _data; }
         public string PopulationFile = string.Empty;
         public Dictionary<string, Evacuation.Demographics> Demographics;
+        public bool CullOutsideGroups = false;
 
         public PopulationInput()
         {
@@ -51,6 +52,21 @@ namespace PREACT.IO
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+
+            nameOfInput = nameof(CullOutsideGroups);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = bool.TryParse(userInput, out newInput.CullOutsideGroups);
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if(!success)
+            {
+                newInput.CullOutsideGroups = false;
             }
 
             newInput.Data.LoadAll(simulationInput, newInput, rootFolder, out success);

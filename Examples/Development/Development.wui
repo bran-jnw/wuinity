@@ -16,6 +16,7 @@ ZoomLevel=13
 
 [Population]
 PopulationFile=population/big_population.csv
+CullOutsideGroups=false
 
 [Demographics]
 Name=one_car

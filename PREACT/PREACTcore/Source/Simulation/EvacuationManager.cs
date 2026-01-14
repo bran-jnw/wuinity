@@ -243,15 +243,17 @@ namespace PREACT.Evacuation
             return goal;
         }
 
-        public EvacuationGroup GetEvacuationGroup(Vector2d latLon)
+        public EvacuationGroup GetEvacuationGroup(Vector2d latLon, out bool insideGroup)
         {
             EvacuationGroup pickedGroup = _defaultEvacutionGroup;
+            insideGroup = false;
 
             for (int i = 0; i < _evacuationGroups.Length; ++i)
             {
                 if (_evacuationGroups[i].LatLonBelongsToGroup(latLon, _simulation))
                 {
                     pickedGroup = _evacuationGroups[i];
+                    insideGroup = true;
                     break;
                 }
             }

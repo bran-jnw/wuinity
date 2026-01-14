@@ -15,22 +15,111 @@ MapProvider=Mapbox
 ZoomLevel=13
 
 [Population]
-PopulationFile=population/small_population.csv
-MinHouseholdSize=1
-MaxHouseholdSize=5
+PopulationFile=population/big_population.csv
+CullOutsideGroups=true
+
+[Demographics]
+Name=one_car
+Default=true
 AllowMoreThanOneCar=false
-MaxCars=2
+MaxCars=1
 MaxCarsProbability=0.3
 
 [Evacuation]
 EvacuationOrderStart=0.0
-EvacuationDestinationFiles=destinations/goal_highway.ed
-ResponseCurveFiles=responseCurves/Observed_average.csv
-EvacuationGroupFiles=groups/group_highway.eg
-EvacuationGroupsMapFile=groups/example.egs
-PaintCellSize=200.0
 UseTriggerBufferEvacuation=false
 TriggerBufferFile=fire/trigger_buffer.asc
+
+[Destination]
+Name=goal_highway
+LatLon=39.5071781907873, -105.02231033756013
+Type=Exit
+MaxFlow=-1.0
+MaxVehicles=-1
+MaxPeople=-1
+Blocked=false
+Color=1.0,1.0,1.0
+
+[Destination]
+Name=goalE
+LatLon=39.427991, -105.073289
+Type=Exit
+MaxFlow=-1.0
+MaxVehicles=-1
+MaxPeople=-1
+Blocked=false
+Color=1.0,0.0,0.0
+
+[Destination]
+Name=goalF
+LatLon=39.466157, -105.082197
+Type=Exit
+MaxFlow=-1.0
+MaxVehicles=-1
+MaxPeople=-1
+Blocked=false
+Color=.0,1.0,0.0
+
+[Destination]
+Name=goalR
+LatLon=39.473858, -105.092137
+Type=Exit
+MaxFlow=-1.0
+MaxVehicles=-1
+MaxPeople=-1
+Blocked=false
+Color=0.0,0.0,1.0
+
+[ResponseCurve]
+Name=observed_average
+0, 0
+300, 0.037
+1080, 0.67
+1860, 0.76
+1980, 0.85
+6300, 1.0
+
+[ResponseCurve]
+Name=reported_average
+0, 0
+900, 0.79
+1800, 0.91
+2700, 0.93
+3600, 0.97
+5400, 1.0
+
+[EvacuationGroup]
+Name=groupA
+Demographics=one_car
+DestinationChoice=EvacGroupWeighted
+ShapeFile=groups/groupA.shp
+ResponseCurves=observed_average 
+ResponseCurvesCDF=1.0
+Destinations=goalE, goalR, goalF
+DestinationsCDF=0.4,0.7,1.0
+Color=1.0,1.0,0.0
+
+[EvacuationGroup]
+Name=groupB
+Demographics=one_car
+ShapeFile=groups/groupB.shp
+DestinationChoice=EvacGroupWeighted
+Destinations=goalE, goalR, goalF
+DestinationsCDF=0.25, 0.75, 1.0
+ResponseCurves=observed_average 
+ResponseCurvesCDF=1.0
+Color=1.0,1.0,0.0
+
+[EvacuationGroup]
+Name=groupC
+Demographics=one_car
+ShapeFile=groups/groupC.shp
+DestinationChoice=EvacGroupWeighted
+Destinations=goalE, goalR, goalF
+DestinationsCDF=0.1, 0.2, 1.0
+ResponseCurves=observed_average 
+ResponseCurvesCDF=1.0
+Color=0.0,1.0,0.0
 
 [Pedestrian]
 PedestrianModule=MacroHouseholdSim

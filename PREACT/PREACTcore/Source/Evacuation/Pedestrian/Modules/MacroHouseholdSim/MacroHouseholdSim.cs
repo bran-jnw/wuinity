@@ -28,7 +28,7 @@ namespace PREACT.Pedestrian
         //Vector2d realWorldSize;
         //public Vector2d cellWorldSize;
 
-        IO.PopulationData.HouseholdData[] _householdData;
+        //PopulationData.HouseholdData[] _householdData;
         List<MacroHousehold> _macroHouseholds;
         int totalPopulation;
         int totalCars;
@@ -181,7 +181,6 @@ namespace PREACT.Pedestrian
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household.GetVehicleLatLon(), household.EvacuationGroup);
 
-                //TODO: more sophisticated choice of new goal
                 if (evacDest.Blocked)
                 {
                     _simulation.Evacuation.GetBestAvailableDestination(household.EvacuationGroup, household.GetVehicleLatLon());
@@ -226,34 +225,48 @@ namespace PREACT.Pedestrian
 
         public void PopulateSimulation(PopulationData.HouseholdData[] householdData)
         {       
-            _householdData = householdData;
             totalPopulation = 0;
-            totalHouseholds = _householdData.Length;
+            totalHouseholds = householdData.Length;
 
-            for (int i = 0; i < _householdData.Length; i++)
+            for (int i = 0; i < householdData.Length; i++)
             {
-                totalPopulation += _householdData[i].peopleCount;
+                totalPopulation += householdData[i].peopleCount;
             }    
 
             _macroHouseholds = new List<MacroHousehold>();
-            for (int i = 0; i < _householdData.Length; ++i)
+            int culledOutsideDomain = 0;
+            int culledOutsideGroups = 0;
+            for (int i = 0; i < householdData.Length; ++i)
             {
-                Vector2d pos = _simulation.GetSimulationPosition(_householdData[i].originLatLon);
+                Vector2d pos = _simulation.GetSimulationPosition(householdData[i].originLatLon);
 
                 //check that we are inside
                 if(pos.x >= 0.0 && pos.x <= _simulation.Input.Simulation.DomainSize.x && pos.y >= 0.0 && pos.y <= _simulation.Input.Simulation.DomainSize.y)
                 {
-                    EvacuationGroup eG = _simulation.Evacuation.GetEvacuationGroup(_householdData[i].originLatLon);
-                    MacroHousehold mH = new MacroHousehold(_householdData[i], GetRandomWalkingSpeed(), eG, _simulation);
-                    _macroHouseholds.Add(mH);
+                    bool insideGroup;
+                    EvacuationGroup eG = _simulation.Evacuation.GetEvacuationGroup(householdData[i].originLatLon, out insideGroup);
+                    if(!insideGroup && _simulation.Input.Population.CullOutsideGroups)
+                    {
+                        totalPopulation -= householdData[i].peopleCount;
+                        --totalHouseholds;
+                        ++culledOutsideGroups;
+                    }
+                    else
+                    {
+                        MacroHousehold mH = new MacroHousehold(householdData[i], GetRandomWalkingSpeed(), eG, _simulation);
+                        _macroHouseholds.Add(mH);
+                    }                        
                 }
                 else
                 {
-                    totalPopulation -= _householdData[i].peopleCount;
+                    totalPopulation -= householdData[i].peopleCount;
                     --totalHouseholds;
-                    Engine.Message(_simulation, Engine.LogType.Warning, "Household is outside simulation boundary, ignoring. Lat/Lon/row: " + _householdData[i].originLatLon.x + ", " + _householdData[i].originLatLon.y + ", " + (i + 2));
+                    ++culledOutsideDomain;
                 }
-            }            
+            }
+
+            Engine.Message(_simulation, Engine.LogType.Warning, "Number of households culled outside of defined groups: " + culledOutsideGroups);
+            Engine.Message(_simulation, Engine.LogType.Warning, "Number of households culled outside of defined simulation domain: " + culledOutsideDomain);
 
             //sum up the number of people which will not evacuate and total cars
             totalPeopleWhoWillNotEvacuate = 0;
