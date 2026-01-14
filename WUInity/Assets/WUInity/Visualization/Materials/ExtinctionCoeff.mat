@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: OpticalDensity
+  m_Name: ExtinctionCoeff
   m_Shader: {fileID: 4800000, guid: 463efa8e861326647be1628565b7fb78, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -73,9 +73,9 @@ Material:
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _LowerCutOff: 0
-    - _MaxValue: 0
+    - _MaxValue: 0.0001
     - _Metallic: 0
-    - _MinValue: 0.002608695
+    - _MinValue: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02

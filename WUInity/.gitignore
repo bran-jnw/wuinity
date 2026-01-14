@@ -73,4 +73,5 @@ crashlytics-build.properties
 #WUInity stuff
 [Mm]apbox[Cc]onfiguration.txt
 /[Aa]ssets/[Pp]REACT/[Dd]ebug/*
-/[Aa]ssets/[Pp]REACT/[Rr]elease/*
+/[Aa]ssets/[Pp]REACT/[Dd]ebug.meta
+/[Aa]ssets/[Pp]REACT/[Rr]elease.meta
