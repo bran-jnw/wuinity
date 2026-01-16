@@ -168,7 +168,7 @@ namespace PREACT.Pedestrian
 
         private void ReachedCar(MacroHousehold household)
         {
-            if(_simulation.Input.TrafficModule.Active)
+            if(_simulation.Input.TrafficModule.Enabled)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household.GetVehicleLatLon(), household.EvacuationGroup);

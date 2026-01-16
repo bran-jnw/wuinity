@@ -395,15 +395,15 @@ namespace WUInity
         {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EvacuationRenderer.CreateBuffers(_input.PedestrianModule.Active, _input.TrafficModule.Active, _input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
+            EvacuationRenderer.CreateBuffers(_input.PedestrianModule.Enabled, _input.TrafficModule.Enabled, _input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
 
-            _renderHouseholds = _input.PedestrianModule.Active;
-            _renderTraffic = _input.TrafficModule.Active;
+            _renderHouseholds = _input.PedestrianModule.Enabled;
+            _renderTraffic = _input.TrafficModule.Enabled;
 
             //and then for fire rendering
             FireRenderer.CreateBuffers(_engine.Simulation);
-            _renderFireSpread = _input.WildfireModule.Active;
-            _renderSmokeDispersion = _input.SmokeModule.Active;
+            _renderFireSpread = _input.WildfireModule.Enabled;
+            _renderSmokeDispersion = _input.SmokeModule.Enabled;
 
             _visualsExist = true;
 
@@ -609,22 +609,22 @@ namespace WUInity
 
         public void ActivateSuitableVisuals()
         {
-            if(_input.PedestrianModule.Active)
+            if(_input.PedestrianModule.Enabled)
             {
                 SetHouseholdRendering(true);
             }
 
-            if (_input.TrafficModule.Active)
+            if (_input.TrafficModule.Enabled)
             {
                 SetTrafficRendering(true);
             }
 
-            if (_input.WildfireModule.Active)
+            if (_input.WildfireModule.Enabled)
             {
                 SetFireSpreadRendering(true);
             }
 
-            if (_input.SmokeModule.Active)
+            if (_input.SmokeModule.Enabled)
             {
                 SetSootRendering(true);
             }

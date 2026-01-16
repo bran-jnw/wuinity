@@ -44,7 +44,7 @@ namespace PREACT.IO
         {
             success = false;
             
-            if(pedestrianInput.Active)
+            if(pedestrianInput.Enabled)
             {
                 string filePath = Path.Combine(rootFolder, populationInput.PopulationFile);
                 _householdData = LoadPopulation(filePath, out _totalPopulation, out success);

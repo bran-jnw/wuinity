@@ -43,7 +43,7 @@ namespace PREACT.IO
         {
             success = false;
 
-            if(!fireInput.Active)
+            if(!fireInput.Enabled)
             {
                 Engine.Message(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
                 success = true;

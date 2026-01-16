@@ -67,7 +67,7 @@ namespace PREACT.Traffic
                 _accumulatedLevelOfService = new float[xDim, yDim];
                 _accumulatedWatingTime = new float[xDim, yDim];
 
-                if(_simulation.Input.SmokeModule.Active && (simulation.Input.TrafficModule.SumoInput.SmokeAlpha != 0f || _simulation.Input.TrafficModule.SumoInput.SmokeBeta != 0f))
+                if(_simulation.Input.SmokeModule.Enabled && (simulation.Input.TrafficModule.SumoInput.SmokeAlpha != 0f || _simulation.Input.TrafficModule.SumoInput.SmokeBeta != 0f))
                 {
                     _checkSmoke = true;
                 }
@@ -429,7 +429,7 @@ namespace PREACT.Traffic
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
-            if(!_simulation.Input.WildfireModule.Active)
+            if(!_simulation.Input.WildfireModule.Enabled)
             {
                 Engine.Message(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
                 return;

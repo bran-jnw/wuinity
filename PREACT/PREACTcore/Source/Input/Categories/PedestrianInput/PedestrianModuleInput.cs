@@ -14,7 +14,7 @@ namespace PREACT.IO
     {
         private MacroHouseholdSimInput _macroHouseholdSimInput;
 
-        public bool Active = false;
+        public bool Enabled = false;
         public enum PedestrianModules { MacroHouseholdSim, JupedSimSUMO }
         public PedestrianModules Module = PedestrianModules.MacroHouseholdSim;
 
@@ -33,10 +33,10 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            nameOfInput = nameof(Active);
+            nameOfInput = nameof(Enabled);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                success = bool.TryParse(userInput, out Active);
+                success = bool.TryParse(userInput, out Enabled);
             }
             else
             {

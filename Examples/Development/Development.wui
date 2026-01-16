@@ -88,7 +88,7 @@ Name=fast
 900, 1.0
 
 [PedestrianModule]
-Active=true
+Enabled=true
 Module=MacroHouseholdSim
 
 [MacroHouseholdSim]
@@ -97,7 +97,7 @@ WalkingSpeedModifier=1.0
 WalkingDistanceModifier=1.0
 
 [TrafficModule]
-Active=true
+Enabled=true
 Module=SUMO      
 VisibilityAffectsSpeed=false  
 
@@ -108,7 +108,7 @@ SmokeAlpha=0.4967
 SmokeBeta=-0.02910
 
 [WildfireModule]
-Active=true
+Enabled=true
 Module=CellParticleHybrid
 LcpFile=fire/rox_big_burning_city.lcp
 GraphicalFireInputFile=fire/example.gfi
@@ -133,7 +133,7 @@ FirelineIntensityFile=output/FI.asc
 WeatherStreamFile=weather_stream.wxs
 
 [TriggerBufferModule]
-Active=false
+Enabled=false
 Module=kPERIL
 
 [kPERIL]
@@ -143,7 +143,7 @@ InitialFuelMoistureFile=fireCell/default.fmc
 OutputName=trigger_buffer.asc
 
 [SmokeModule]
-Active=true
+Enabled=true
 Module=AdvectDiffuse3D
 
 [GlobalSmoke]

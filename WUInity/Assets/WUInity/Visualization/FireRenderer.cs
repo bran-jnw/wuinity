@@ -44,7 +44,7 @@ namespace WUInity.Visualization
 
         public bool ToggleFire(PREACTInput input)
         {
-            if(input.WildfireModule.Active)
+            if(input.WildfireModule.Enabled)
             {
                 fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
                 return fireMeshRenderer.gameObject.activeSelf;
@@ -57,7 +57,7 @@ namespace WUInity.Visualization
 
         public bool ToggleSoot(PREACTInput input)
         {
-            if(input.SmokeModule.Active)
+            if(input.SmokeModule.Enabled)
             {
                 sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
                 return sootMeshRenderer.gameObject.activeSelf;
@@ -72,12 +72,12 @@ namespace WUInity.Visualization
         {
             Release(simulation, true);
 
-            if (simulation.Input.WildfireModule.Active)
+            if (simulation.Input.WildfireModule.Enabled)
             {
                 CreateFireBuffer(simulation);
             }
             
-            if(simulation.Input.SmokeModule.Active)
+            if(simulation.Input.SmokeModule.Enabled)
             {
                 CreateSootBuffer(simulation);
             }            

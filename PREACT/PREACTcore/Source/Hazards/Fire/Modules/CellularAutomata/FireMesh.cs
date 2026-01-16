@@ -315,7 +315,7 @@ namespace PREACT.Fire
             for (int i = 0; i < _fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
-                if(_simulation.Input.SmokeModule.Active)
+                if(_simulation.Input.SmokeModule.Enabled)
                 {
                     sootProduction[i] = 0.0f;
                     if (_fireCells[i].cellState == FireCellState.Burning)

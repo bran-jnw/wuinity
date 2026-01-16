@@ -178,7 +178,7 @@ namespace PREACT
             _startTime = CurrentTime;
 
             //inject any traffic events into traffic module
-            if (_input.TrafficModule.Active && _input.TrafficModule.Module == TrafficModuleInput.TrafficModules.MacroTrafficSim)
+            if (_input.TrafficModule.Enabled && _input.TrafficModule.Module == TrafficModuleInput.TrafficModules.MacroTrafficSim)
             {
                 for (int i = 0; i < _input.TrafficModule.MacroTrafficSimInput.TrafficAccidents.Count; i++)
                 {
@@ -265,7 +265,7 @@ namespace PREACT
 
         private void CreateFireModule()
         {            
-            if (_input.WildfireModule.Active)
+            if (_input.WildfireModule.Enabled)
             {
                 if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.AscImport)
                 {
@@ -296,7 +296,7 @@ namespace PREACT
         private void CreateDispersionModule()
         {
             //can only run together
-            if (_input.SmokeModule.Active)
+            if (_input.SmokeModule.Enabled)
             {
                 //this module does not need the fire
                 if (_input.SmokeModule.Module == SmokeInput.SmokeModules.GlobalSmoke)
@@ -305,7 +305,7 @@ namespace PREACT
                     return;
                 }                
 
-                if (!_input.WildfireModule.Active)
+                if (!_input.WildfireModule.Enabled)
                 {
                     Engine.Message(this, Engine.LogType.SimulationError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
                 }
@@ -335,7 +335,7 @@ namespace PREACT
         private void CreatePedestrianModule()
         {
 
-            if (_input.PedestrianModule.Active)
+            if (_input.PedestrianModule.Enabled)
             {
                 if (_input.PedestrianModule.Module == PedestrianModuleInput.PedestrianModules.JupedSimSUMO)
                 {
@@ -359,7 +359,7 @@ namespace PREACT
 
         private void CreateTrafficModule()
         {
-            if (_input.TrafficModule.Active)
+            if (_input.TrafficModule.Enabled)
             {
                 if (_input.TrafficModule.Module == TrafficModuleInput.TrafficModules.SUMO)
                 {
@@ -388,11 +388,11 @@ namespace PREACT
 
         private void CreateAndRunTriggerBufferModule()
         {
-            if (_input.TriggerBufferModule.Active)
+            if (_input.TriggerBufferModule.Enabled)
             {
                 if (_input.TriggerBufferModule.Module == TriggerBufferModuleInput.TriggerBufferModules.kPERIL)
                 {                    
-                    if( !_input.WildfireModule.Active && !_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
+                    if( !_input.WildfireModule.Enabled && !_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
                     {
                         Engine.Message(this, Engine.LogType.Warning, "Can't run kPERIL without fire module (user set not to use BEHAVE).");
                         return;
@@ -468,7 +468,7 @@ namespace PREACT
             //increase time
             float deltaTime = _input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (_fireModule != null && _input.WildfireModule.Active && !_input.PedestrianModule.Active && !_input.TrafficModule.Active && !_input.SmokeModule.Active)
+            if (_fireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
             {
                 deltaTime = (float)_fireModule.GetInternalDeltaTime();
             }
@@ -477,7 +477,7 @@ namespace PREACT
             _currentTime += deltaTime;
             CheckCompletion();            
 
-            if (_input.WildfireModule.Active)
+            if (_input.WildfireModule.Enabled)
             {
                 //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
                 _evacuationManager.CheckEvacuationGoalStatus();
@@ -518,12 +518,12 @@ namespace PREACT
             if (!_stopRun && _input.Simulation.StopWhenEvacuated)
             {
                 bool pedestrianDone = true;
-                if (_input.PedestrianModule.Active)
+                if (_input.PedestrianModule.Enabled)
                 {
                     pedestrianDone = _pedestrianModule.IsSimulationDone();
                 }
                 bool trafficDone = true;
-                if (_input.TrafficModule.Active)
+                if (_input.TrafficModule.Enabled)
                 {
                     trafficDone = _trafficModule.IsSimulationDone();
                 }
@@ -552,7 +552,7 @@ namespace PREACT
 
         private void UpdateEvents()
         {
-            if (_input.TrafficModule.Active)
+            if (_input.TrafficModule.Enabled)
             {
                 //check for global events
                 if (_input.Events.Data.BlockDestinationEvents != null)
@@ -575,7 +575,7 @@ namespace PREACT
         {
             //update fire mesh if needed
             fireUpdated = false;
-            if (_input.WildfireModule.Active)
+            if (_input.WildfireModule.Enabled)
             {
                 if (CurrentTime >= nextFireUpdate && CurrentTime >= 0.0f)
                 {
@@ -593,7 +593,7 @@ namespace PREACT
         private void StepSmokeModule()
         {
             //sync with fire
-            if (_input.SmokeModule.Active && CurrentTime >= 0.0f)
+            if (_input.SmokeModule.Enabled && CurrentTime >= 0.0f)
             {
                 _smokeStopwatch.Start();
                 if (_input.SmokeModule.Module == SmokeInput.SmokeModules.BoxModel)
@@ -611,7 +611,7 @@ namespace PREACT
         private void StepPedestrianModule()
         {
             //advance pedestrian
-            if (_input.PedestrianModule.Active)
+            if (_input.PedestrianModule.Enabled)
             {
                 _pedestrianStopwatch.Start();
                 _pedestrianModule.Step(CurrentTime, _input.Simulation.DeltaTime);
@@ -622,7 +622,7 @@ namespace PREACT
         private void StepTrafficModule()
         {
             //advance traffic
-            if (_input.TrafficModule.Active)
+            if (_input.TrafficModule.Enabled)
             {
                 _trafficStopwatch.Start();
                 _trafficModule.Step(_input.Simulation.DeltaTime, CurrentTime);
@@ -682,13 +682,13 @@ namespace PREACT
 
         private void SaveOutput()
         {
-            if (_input.TrafficModule.Active)
+            if (_input.TrafficModule.Enabled)
             {
                 Engine.Message(this, Engine.LogType.Log, " Total cars in simulation: " + _trafficModule.GetTotalCarsSimulated());
                 _trafficModule.SaveToFile(_simulationIndex);
                 SaveArrivalData();
             }
-            if (_input.PedestrianModule.Active)
+            if (_input.PedestrianModule.Enabled)
             {
                 if (_input.PedestrianModule.Module == PedestrianModuleInput.PedestrianModules.MacroHouseholdSim)
                 {

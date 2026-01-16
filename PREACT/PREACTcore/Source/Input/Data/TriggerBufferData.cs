@@ -21,7 +21,7 @@ namespace PREACT.IO
         {
             success = false;
 
-            if (triggerBufferInput.Active
+            if (triggerBufferInput.Enabled
                 && triggerBufferInput.Module == TriggerBufferModuleInput.TriggerBufferModules.kPERIL
                 && triggerBufferInput.kPERILInput.CalculateROSFromBehave)
             {

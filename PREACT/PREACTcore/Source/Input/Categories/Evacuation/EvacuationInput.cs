@@ -30,7 +30,7 @@ namespace PREACT.IO
 
         public void Parse(string[] inputLines, int startIndex, EventsInput eventsInput, PopulationInput population, PedestrianModuleInput pedestrianInput, TrafficModuleInput trafficInput, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, string rootFolder, out bool success)
         {
-            if (!pedestrianInput.Active && !trafficInput.Active)
+            if (!pedestrianInput.Enabled && !trafficInput.Enabled)
             {
                 success = true;
                 return;

@@ -24,13 +24,13 @@ namespace PREACT
         {
             bool canRun = true;
 
-            if (input.PedestrianModule.Active && !PopulationLoaded)
+            if (input.PedestrianModule.Enabled && !PopulationLoaded)
             {
                 canRun = false;
                 Engine.Message(null, Engine.LogType.SimulationError, "Population is not loaded but user has requested pedestrian model.");
             }
 
-            if (input.WildfireModule.Active)
+            if (input.WildfireModule.Enabled)
             {
                 if (!LcpLoaded && input.WildfireModule.Module != WildfireModuleInput.WildfireModules.AscImport)
                 {
@@ -39,7 +39,7 @@ namespace PREACT
                 }
             }
 
-            if (input.PedestrianModule.Active)
+            if (input.PedestrianModule.Enabled)
             {
                 if (input.Evacuation.ResponseCurves == null)
                 {

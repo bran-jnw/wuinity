@@ -20,7 +20,7 @@ namespace PREACT.IO
         private AdvectDiffuseInput _advectDiffuseInput;
         private LagrangianInput _lagrangianInput;
 
-        public bool Active = false;
+        public bool Enabled = false;
         public SmokeData Data { get =>  _data; } 
         public SmokeModules Module = SmokeModules.None;
         public GlobalSmokeInput GlobalSmokeInput { get => _globalSmokeInput; }
@@ -42,10 +42,10 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            nameOfInput = nameof(Active);
+            nameOfInput = nameof(Enabled);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                success = bool.TryParse(userInput, out Active);
+                success = bool.TryParse(userInput, out Enabled);
             }
             else
             {

@@ -14,11 +14,12 @@ namespace PREACT.IO
     {
         public enum TriggerBufferModules { None, kPERIL, BackwardsFireCell2 }
 
-        public kPERILInput _kPERILInput;
+        private kPERILInput _kPERILInput;
 
-        public kPERILInput kPERILInput { get => _kPERILInput; }
-        public bool Active = false;        
+        public bool Enabled = false;
         public TriggerBufferModules Module = TriggerBufferModules.None;
+        public kPERILInput kPERILInput { get => _kPERILInput; }             
+        
         
 
         public TriggerBufferModuleInput() 
@@ -33,10 +34,10 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            nameOfInput = nameof(Active);
+            nameOfInput = nameof(Enabled);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                success = bool.TryParse(userInput, out Active);
+                success = bool.TryParse(userInput, out Enabled);
             }
             else
             {
@@ -48,7 +49,7 @@ namespace PREACT.IO
                 return;
             }
 
-            if (Active)
+            if (Enabled)
             {
                 nameOfInput = nameof(Module);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))

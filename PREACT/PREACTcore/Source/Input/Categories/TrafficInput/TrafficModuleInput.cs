@@ -19,7 +19,7 @@ namespace PREACT.IO
         private MacroTrafficSimInput _macroTrafficSimInput;
         private CityFlowInput _cityFlowInput;
 
-        public bool Active = false;
+        public bool Enabled = false;
         public TrafficData Data { get => _data; }
         public SUMOInput SumoInput { get { return _sumoInput; } }
         public MacroTrafficSimInput MacroTrafficSimInput { get => _macroTrafficSimInput; }
@@ -43,10 +43,10 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            nameOfInput = nameof(Active);
+            nameOfInput = nameof(Enabled);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                success = bool.TryParse(userInput, out Active);
+                success = bool.TryParse(userInput, out Enabled);
             }
             else
             {

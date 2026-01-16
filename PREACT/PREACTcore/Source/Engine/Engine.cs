@@ -328,7 +328,7 @@ namespace PREACT
                 trafficArrivalDataCollection = new List<List<float>>();
             }                     
 
-            if (_input.WUIShow.SendDataToWUIShow && _input.TrafficModule.Active)
+            if (_input.WUIShow.SendDataToWUIShow && _input.TrafficModule.Enabled)
             {
                 if(_wuiShow == null)
                 {

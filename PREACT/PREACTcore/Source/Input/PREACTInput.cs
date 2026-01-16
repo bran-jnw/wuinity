@@ -276,7 +276,7 @@ namespace PREACT.IO
                 ReadingInputMessage(nameOfInput);
                 newInput.Population.Parse(inputLines, lineindex, demographicsLineIndices, newInput.PedestrianModule, rootFolder, out success);
             }
-            else if(newInput.PedestrianModule.Active)
+            else if(newInput.PedestrianModule.Enabled)
             {
                 //critical
                 Engine.Message(null, Engine.LogType.InputError, nameOfInput + " header not found but user has requested pedestrian module." + pleaseCheckInput);
@@ -310,7 +310,7 @@ namespace PREACT.IO
                 ReadingInputMessage(nameOfInput);
                 newInput.Evacuation.Parse(inputLines, lineindex, newInput.Events, newInput.Population, newInput.PedestrianModule, newInput.TrafficModule, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
             }
-            else if(newInput.PedestrianModule.Active || newInput.TrafficModule.Active)
+            else if(newInput.PedestrianModule.Enabled || newInput.TrafficModule.Enabled)
             {
                 //critical
                 success = false;

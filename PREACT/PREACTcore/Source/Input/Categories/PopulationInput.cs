@@ -25,7 +25,7 @@ namespace PREACT.IO
 
         public void Parse(string[] inputLines, int startIndex, List<int> demographicsLinesIndices, PedestrianModuleInput pedestrianInput, string rootFolder, out bool success)
         {
-            if (!pedestrianInput.Active)
+            if (!pedestrianInput.Enabled)
             {
                 success = true;
                 return;

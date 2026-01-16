@@ -19,7 +19,7 @@ namespace PREACT.IO
         private AscImportInput _ascImportInput;
         private FireCellInput _fireCellInput;
 
-        public bool Active = false;
+        public bool Enabled = false;
         public WildfireData Data { get => _data; }
         public AscImportInput AscImportInput { get => _ascImportInput; }
         public FireCellInput FireCellInput { get => _fireCellInput; }
@@ -42,10 +42,10 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            nameOfInput = nameof(Active);
+            nameOfInput = nameof(Enabled);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                success = bool.TryParse(userInput, out Active);
+                success = bool.TryParse(userInput, out Enabled);
             }
             else
             {
