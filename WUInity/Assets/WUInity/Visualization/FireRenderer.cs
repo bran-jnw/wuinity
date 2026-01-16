@@ -44,7 +44,7 @@ namespace WUInity.Visualization
 
         public bool ToggleFire(PREACTInput input)
         {
-            if(input.Simulation.RunFireModule)
+            if(input.WildfireModule.Active)
             {
                 fireMeshRenderer.gameObject.SetActive(!fireMeshRenderer.gameObject.activeSelf);
                 return fireMeshRenderer.gameObject.activeSelf;
@@ -57,7 +57,7 @@ namespace WUInity.Visualization
 
         public bool ToggleSoot(PREACTInput input)
         {
-            if(input.Simulation.RunSmokeModule)
+            if(input.SmokeModule.Active)
             {
                 sootMeshRenderer.gameObject.SetActive(!sootMeshRenderer.gameObject.activeSelf);
                 return sootMeshRenderer.gameObject.activeSelf;
@@ -72,12 +72,12 @@ namespace WUInity.Visualization
         {
             Release(simulation, true);
 
-            if (simulation.Input.Simulation.RunFireModule)
+            if (simulation.Input.WildfireModule.Active)
             {
                 CreateFireBuffer(simulation);
             }
             
-            if(simulation.Input.Simulation.RunSmokeModule)
+            if(simulation.Input.SmokeModule.Active)
             {
                 CreateSootBuffer(simulation);
             }            
@@ -101,7 +101,7 @@ namespace WUInity.Visualization
 
         private void CreateSootBuffer(Simulation simulation)
         {
-            if(simulation.Input.Smoke.SmokeModule != SmokeInput.SmokeModuleChoice.None )
+            if(simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None )
             {
                 sootCellCountX = simulation.SmokeModule.GetCellsX();
                 sootCellCountY = simulation.SmokeModule.GetCellsY();
@@ -112,7 +112,7 @@ namespace WUInity.Visualization
                 sootMaterial.SetFloat("_MinValue", lowerExtCoeff); //500 meters with C = 3
                 sootMaterial.SetFloat("_MaxValue", upperExtCoeff); //5 meters with C = 3
 
-                if(simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
+                if(simulation.Input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                 {
                     // arrives in soot density, * 8700.0 (kg/m2, mass specific ext. coeff.) for extinction coefficient
                     sootMaterial.SetFloat("_DataMultiplier", 8700f); 
@@ -203,7 +203,7 @@ namespace WUInity.Visualization
 
             if (renderSoot)
             {
-                if(simulation.Input.Smoke.SmokeModule != SmokeInput.SmokeModuleChoice.None)
+                if(simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None)
                 {
                     float[] newSoot = simulation.SmokeModule.GetSootDensity();
                     if(newSoot != null)
@@ -337,7 +337,7 @@ namespace WUInity.Visualization
 
             if(!creationCall && simulation != null && simulation.SmokeModule != null)
             {
-                if (simulation.Input.Smoke.SmokeModule == SmokeInput.SmokeModuleChoice.AdvectDiffuseMixingLayer)
+                if (simulation.Input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                 {
                     /*AdvectDiffuseModel model = simulation.SmokeModule as AdvectDiffuseModel;
                     if(model != null)

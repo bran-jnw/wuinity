@@ -14,13 +14,9 @@ namespace PREACT.IO
 {
     public class EvacuationData
     {
-        SimulationInput _simulationInput;
-        EvacuationInput _evacuationInput;
 
-        public EvacuationData(SimulationInput simulationInput, EvacuationInput evacuationInput)
+        public EvacuationData()
         {
-            _simulationInput = simulationInput;
-            _evacuationInput = evacuationInput;
         }           
 
         public void LoadAll(string rootFolder, out bool success)

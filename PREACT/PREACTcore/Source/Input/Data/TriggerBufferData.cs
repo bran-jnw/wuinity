@@ -17,12 +17,12 @@ namespace PREACT.IO
             
         }
 
-        public void LoadAll(SimulationInput simulationInput, TriggerBufferInput triggerBufferInput, string rootFolder, out bool success)
+        public void LoadAll(SimulationInput simulationInput, TriggerBufferModuleInput triggerBufferInput, string rootFolder, out bool success)
         {
             success = false;
 
-            if (triggerBufferInput.CalculateTriggerBuffer
-                && triggerBufferInput.TriggerBuffer == TriggerBufferInput.TriggerBufferChoice.kPERIL
+            if (triggerBufferInput.Active
+                && triggerBufferInput.Module == TriggerBufferModuleInput.TriggerBufferModules.kPERIL
                 && triggerBufferInput.kPERILInput.CalculateROSFromBehave)
             {
 

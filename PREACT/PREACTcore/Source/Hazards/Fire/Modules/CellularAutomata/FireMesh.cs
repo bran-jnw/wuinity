@@ -87,7 +87,7 @@ namespace PREACT.Fire
 
             this.ignitionPoints = ignitionPoints;
 
-            spreadMode = _simulation.Input.Fire.FireCellInput.SpreadMode;
+            spreadMode = _simulation.Input.WildfireModule.FireCellInput.SpreadMode;
 
             InitializeMesh();
         }
@@ -96,12 +96,12 @@ namespace PREACT.Fire
         {
             fuelModelSet = new FuelModelSet();
             //set custom fuel models if present
-            if (_simulation.Input.Fire.Data.FuelModelsData != null)
+            if (_simulation.Input.WildfireModule.Data.FuelModelsData != null)
             {
                 Engine.Message(null, Engine.LogType.Log, " Adding custom fuel model specifications.");
-                for (int i = 0; i < _simulation.Input.Fire.Data.FuelModelsData.Fuels.Count; i++)
+                for (int i = 0; i < _simulation.Input.WildfireModule.Data.FuelModelsData.Fuels.Count; i++)
                 {
-                    fuelModelSet.setFuelModelRecord(_simulation.Input.Fire.Data.FuelModelsData.Fuels[i]);
+                    fuelModelSet.setFuelModelRecord(_simulation.Input.WildfireModule.Data.FuelModelsData.Fuels[i]);
                 }
             }                    
             surfaceFire = new Surface(fuelModelSet);            
@@ -315,7 +315,7 @@ namespace PREACT.Fire
             for (int i = 0; i < _fireCells.Length; i++)
             {
                 fireLineIntensityData[i] = (float)_fireCells[i].GetFireLineIntensity(false);
-                if(_simulation.Input.Simulation.RunSmokeModule)
+                if(_simulation.Input.SmokeModule.Active)
                 {
                     sootProduction[i] = 0.0f;
                     if (_fireCells[i].cellState == FireCellState.Burning)
@@ -367,11 +367,11 @@ namespace PREACT.Fire
                 return;
             }
 
-            if(_simulation.Input.Fire.FireCellInput.UseInitialIgnitionMap)
+            if(_simulation.Input.WildfireModule.FireCellInput.UseInitialIgnitionMap)
             {
                 for (int i = 0; i < _fireCells.Length; i++)
                 {
-                    if (_simulation.Input.Fire.Data.InitialIgnition[i])
+                    if (_simulation.Input.WildfireModule.Data.InitialIgnition[i])
                     {
                         FireCell f = _fireCells[i];
                         f.Ignite(currentTime);

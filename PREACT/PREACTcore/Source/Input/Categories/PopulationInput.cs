@@ -15,7 +15,7 @@ namespace PREACT.IO
 
         public PopulationData Data { get => _data; }
         public string PopulationFile = string.Empty;
-        public Dictionary<string, Evacuation.Demographics> Demographics;
+        public Dictionary<string, Evacuation.DemographicsInput> Demographics;
         public bool CullOutsideGroups = false;
 
         public PopulationInput()
@@ -23,30 +23,28 @@ namespace PREACT.IO
             _data = new PopulationData();
         }
 
-        public static PopulationInput Parse(string[] inputLines, int startIndex, List<int> demographicsLinesIndices, SimulationInput simulationInput, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, List<int> demographicsLinesIndices, PedestrianModuleInput pedestrianInput, string rootFolder, out bool success)
         {
-            PopulationInput newInput = new PopulationInput();
-
-            if (!simulationInput.RunPedestrianModule)
+            if (!pedestrianInput.Active)
             {
                 success = true;
-                return newInput;
+                return;
             }
 
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            newInput.Demographics = Evacuation.Demographics.Parse(inputLines, demographicsLinesIndices, out success);
+            Demographics = Evacuation.DemographicsInput.Parse(inputLines, demographicsLinesIndices, out success);
             if(!success)
             {
-                return null;
+                return;
             }
 
             nameOfInput = nameof(PopulationFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.PopulationFile = userInput;
+                PopulationFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -57,7 +55,7 @@ namespace PREACT.IO
             nameOfInput = nameof(CullOutsideGroups);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                success = bool.TryParse(userInput, out newInput.CullOutsideGroups);
+                success = bool.TryParse(userInput, out CullOutsideGroups);
             }
             else
             {
@@ -66,11 +64,10 @@ namespace PREACT.IO
             }
             if(!success)
             {
-                newInput.CullOutsideGroups = false;
+                CullOutsideGroups = false;
             }
 
-            newInput.Data.LoadAll(simulationInput, newInput, rootFolder, out success);
-            return newInput;
+            Data.LoadAll(pedestrianInput, this, rootFolder, out success);
         }
     }
 }

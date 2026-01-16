@@ -99,7 +99,7 @@ namespace PREACT.Fire
         {
             //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
             double crownRatio = 1.0; //This can be whatever as Behave clauclates it internally each time anyway, so not sure why it is an input
-            WindData w = _owner.Simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
+            WindData w = _owner.Simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
             float windSPeed = w.speed;
             double windDirection = w.direction;
             double moistureFoliar = 0;

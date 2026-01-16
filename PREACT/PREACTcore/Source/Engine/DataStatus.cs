@@ -24,22 +24,22 @@ namespace PREACT
         {
             bool canRun = true;
 
-            if (input.Simulation.RunPedestrianModule && !PopulationLoaded)
+            if (input.PedestrianModule.Active && !PopulationLoaded)
             {
                 canRun = false;
                 Engine.Message(null, Engine.LogType.SimulationError, "Population is not loaded but user has requested pedestrian model.");
             }
 
-            if (input.Simulation.RunFireModule)
+            if (input.WildfireModule.Active)
             {
-                if (!LcpLoaded && input.Fire.FireModule != FireInput.FireModuleChoice.AscImport)
+                if (!LcpLoaded && input.WildfireModule.Module != WildfireModuleInput.WildfireModules.AscImport)
                 {
                     canRun = false;
                     Engine.Message(null, Engine.LogType.SimulationError, "No LCP file loaded but fire spread is activated.");
                 }
             }
 
-            if (input.Simulation.RunPedestrianModule)
+            if (input.PedestrianModule.Active)
             {
                 if (input.Evacuation.ResponseCurves == null)
                 {

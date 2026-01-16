@@ -20,11 +20,11 @@ namespace PREACT.IO
 
         }
 
-        public void LoadAll(TrafficInput trafficInput, string rootFolder, out bool success)
+        public void LoadAll(TrafficModuleInput trafficInput, string rootFolder, out bool success)
         {
             success = true;
 
-            if (trafficInput.TrafficModule == TrafficInput.TrafficModuleChoice.MacroTrafficSim)
+            if (trafficInput.Module == TrafficModuleInput.TrafficModules.MacroTrafficSim)
             {
                 LoadRoadTypeData(Path.Combine(rootFolder, trafficInput.MacroTrafficSimInput.RoadTypesFile), out success);
             }

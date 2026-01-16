@@ -23,9 +23,8 @@ namespace PREACT.IO
             _data = new EventsData();
         }
 
-        public static EventsInput Parse(string[] inputLines, int startIndex, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, string rootFolder, out bool success)
         {
-            EventsInput newInput = new EventsInput();
             success = false;
             int issues = 0;                     
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
@@ -36,7 +35,7 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                newInput.BlockGoalEventFiles.AddRange(data);
+                BlockGoalEventFiles.AddRange(data);
                 PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
             }
             else
@@ -44,8 +43,7 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            newInput._data.LoadAll(newInput, rootFolder, out success);
-            return newInput;
+            _data.LoadAll(this, rootFolder, out success);
         }
     }
 }

@@ -38,12 +38,12 @@ namespace PREACT.Traffic
             try
             {
                 _sumoVehicles = new Dictionary<string, SUMOVehicle>();
-                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Traffic.SumoInput.ConfigurationFile);
+                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.TrafficModule.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Input.Simulation.MaxSimTime.ToString() }));
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
-                Vector2d sumoUTM = new Vector2d(-_simulation.Input.Traffic.SumoInput.UTMoffset.x, -_simulation.Input.Traffic.SumoInput.UTMoffset.y);
+                Vector2d sumoUTM = new Vector2d(-_simulation.Input.TrafficModule.SumoInput.UTMoffset.x, -_simulation.Input.TrafficModule.SumoInput.UTMoffset.y);
                 _originOffset = sumoUTM - _simulation.UTMOrigin;
 
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
@@ -58,8 +58,8 @@ namespace PREACT.Traffic
                 }
                 output.Add(header);
 
-                int xDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.x / _simulation.Input.Traffic.SumoInput.OutputRasterSize);
-                int yDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.y / _simulation.Input.Traffic.SumoInput.OutputRasterSize);
+                int xDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.x / _simulation.Input.TrafficModule.SumoInput.OutputRasterSize);
+                int yDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.y / _simulation.Input.TrafficModule.SumoInput.OutputRasterSize);
 
                 _maxUsage = 0f;
                 _usageMap = new float[xDim, yDim];
@@ -67,7 +67,7 @@ namespace PREACT.Traffic
                 _accumulatedLevelOfService = new float[xDim, yDim];
                 _accumulatedWatingTime = new float[xDim, yDim];
 
-                if(_simulation.Input.Simulation.RunSmokeModule && (simulation.Input.Traffic.SumoInput.SmokeAlpha != 0f || _simulation.Input.Traffic.SumoInput.SmokeBeta != 0f))
+                if(_simulation.Input.SmokeModule.Active && (simulation.Input.TrafficModule.SumoInput.SmokeAlpha != 0f || _simulation.Input.TrafficModule.SumoInput.SmokeBeta != 0f))
                 {
                     _checkSmoke = true;
                 }
@@ -91,7 +91,7 @@ namespace PREACT.Traffic
         float GetSmokeSpeedReductionFactor(Vector2d pos)
         {
             float extCoeff = _simulation.Hazards.GetExtinctionCoefficientAtPos(pos);
-            return 1f - _simulation.Input.Traffic.SumoInput.SmokeAlpha * Mathf.Exp(_simulation.Input.Traffic.SumoInput.SmokeBeta / extCoeff);
+            return 1f - _simulation.Input.TrafficModule.SumoInput.SmokeAlpha * Mathf.Exp(_simulation.Input.TrafficModule.SumoInput.SmokeBeta / extCoeff);
         }
 
         public override void Step(float deltaTime, float currentTime)
@@ -347,7 +347,7 @@ namespace PREACT.Traffic
 
                     double leftX = _simulation.UTMOrigin.x;
                     double lowerLeftY = _simulation.UTMOrigin.y;
-                    double[] geoTransform = new double[] { leftX, _simulation.Input.Traffic.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Input.Traffic.SumoInput.OutputRasterSize };
+                    double[] geoTransform = new double[] { leftX, _simulation.Input.TrafficModule.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Input.TrafficModule.SumoInput.OutputRasterSize };
                     output.SetGeoTransform(geoTransform);
 
                     OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
@@ -429,7 +429,7 @@ namespace PREACT.Traffic
         List<string>[,] fireCellEdges;
         private void SortEdgesInFireCells()
         {
-            if(!_simulation.Input.Simulation.RunFireModule)
+            if(!_simulation.Input.WildfireModule.Active)
             {
                 Engine.Message(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
                 return;

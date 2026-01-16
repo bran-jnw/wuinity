@@ -21,7 +21,7 @@ namespace PREACT.IO
         public static GlobalSmokeInput Parse(string[] inputLines, int startIndex, string rootFolder, SmokeInput smokeInput, out bool success)
         {
             GlobalSmokeInput newInput = new GlobalSmokeInput();
-            if(smokeInput.SmokeModule != SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            if(smokeInput.Module != SmokeInput.SmokeModules.GlobalSmoke)
             {
                 success = true;
                 return newInput;

@@ -268,7 +268,7 @@ namespace WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Trigger buffer tools");
             ++buttonIndex;
-            if(_input.TriggerBuffer.kPERILInput != null)
+            if(_input.TriggerBufferModule.kPERILInput != null)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run k-PERIL"))
                 {

@@ -31,7 +31,7 @@ namespace PREACT.IO
 
         }
 
-        public static FireCellInput Parse(string[] inputLines, int startIndex, FireInput fireInput, string rootFolder, out bool success)
+        public static FireCellInput Parse(string[] inputLines, int startIndex, WildfireModuleInput fireInput, string rootFolder, out bool success)
         {
             success = false;
             FireCellInput newInput = new FireCellInput();

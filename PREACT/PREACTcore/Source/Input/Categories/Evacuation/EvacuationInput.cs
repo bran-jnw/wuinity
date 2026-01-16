@@ -23,18 +23,17 @@ namespace PREACT.IO
         public bool UseTriggerBufferEvacuation = false;
         public string TriggerBufferFile = string.Empty;
 
-        public EvacuationInput(SimulationInput simulationInput)
+        public EvacuationInput()
         {
-            _data = new EvacuationData(simulationInput, this);
+            _data = new EvacuationData();
         }
 
-        public static EvacuationInput Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, PopulationInput population, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, EventsInput eventsInput, PopulationInput population, PedestrianModuleInput pedestrianInput, TrafficModuleInput trafficInput, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, string rootFolder, out bool success)
         {
-            EvacuationInput newInput = new EvacuationInput(simulationInput);
-            if (!simulationInput.RunPedestrianModule && !simulationInput.RunTrafficModule)
+            if (!pedestrianInput.Active && !trafficInput.Active)
             {
                 success = true;
-                return newInput;
+                return;
             }
 
             success = false;
@@ -43,31 +42,31 @@ namespace PREACT.IO
             string nameOfInput, userInput;
 
             //critical
-            newInput.EvacuationDestinationInputs = EvacuationDestinationInput.Parse(inputLines, destinationLineIndices, out success);
+            EvacuationDestinationInputs = EvacuationDestinationInput.Parse(inputLines, destinationLineIndices, out success);
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //critical
-            newInput.ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, out success);
+            ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, out success);
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //critical, must be done after response curves and destinations
-            newInput.EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, simulationInput, evacuationGroupLineIndices, newInput.EvacuationDestinationInputs, newInput.ResponseCurves, population, rootFolder, out success);
+            EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, evacuationGroupLineIndices, EvacuationDestinationInputs, ResponseCurves, population, rootFolder, out success);
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //not critical
             nameOfInput = nameof(EvacuationOrderStart);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out newInput.EvacuationOrderStart);
+                float.TryParse(userInput, out EvacuationOrderStart);
             }
             else
             {
@@ -78,7 +77,7 @@ namespace PREACT.IO
             nameOfInput = nameof(UseTriggerBufferEvacuation);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.UseTriggerBufferEvacuation);
+                bool.TryParse(userInput, out UseTriggerBufferEvacuation);
             }
             else
             {
@@ -86,12 +85,12 @@ namespace PREACT.IO
             }
 
             //maybe critical
-            if(newInput.UseTriggerBufferEvacuation)
+            if(UseTriggerBufferEvacuation)
             {
                 nameOfInput = nameof(TriggerBufferFile);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    newInput.TriggerBufferFile = userInput;
+                    TriggerBufferFile = userInput;
                     PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
                 }
                 else
@@ -101,12 +100,11 @@ namespace PREACT.IO
                 }
                 if(!success)
                 {
-                    return newInput;
+                    return;
                 }
             }
 
-            newInput._data.LoadAll(rootFolder, out success);
-            return newInput;
+            _data.LoadAll(rootFolder, out success);
         }
 
         

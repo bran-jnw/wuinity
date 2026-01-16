@@ -40,11 +40,11 @@ namespace PREACT.IO
             _totalPopulation = 0;
         }
 
-        public void LoadAll(SimulationInput simulationInput, PopulationInput populationInput, string rootFolder, out bool success)
+        public void LoadAll(PedestrianModuleInput pedestrianInput, PopulationInput populationInput, string rootFolder, out bool success)
         {
             success = false;
             
-            if(simulationInput.RunPedestrianModule)
+            if(pedestrianInput.Active)
             {
                 string filePath = Path.Combine(rootFolder, populationInput.PopulationFile);
                 _householdData = LoadPopulation(filePath, out _totalPopulation, out success);

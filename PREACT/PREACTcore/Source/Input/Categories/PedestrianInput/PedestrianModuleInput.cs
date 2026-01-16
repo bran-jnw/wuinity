@@ -10,69 +10,76 @@ using System.Collections.Generic;
 namespace PREACT.IO
 {
     [System.Serializable]
-    public class PedestrianInput
+    public class PedestrianModuleInput
     {
         private MacroHouseholdSimInput _macroHouseholdSimInput;
 
-        public enum PedestrianModuleChoice { MacroHouseholdSim, JupedSimSUMO }
-        public PedestrianModuleChoice PedestrianModule = PedestrianModuleChoice.MacroHouseholdSim;
+        public bool Active = false;
+        public enum PedestrianModules { MacroHouseholdSim, JupedSimSUMO }
+        public PedestrianModules Module = PedestrianModules.MacroHouseholdSim;
 
         //module inputs
         public MacroHouseholdSimInput MacroHouseholdSimInput { get => _macroHouseholdSimInput; }
 
-        public PedestrianInput()
+        public PedestrianModuleInput()
         {
             _macroHouseholdSimInput = new MacroHouseholdSimInput();
         }
 
-        public static PedestrianInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, SimulationInput simulationInput, out bool success)
+        public void Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, out bool success)
         {
-            PedestrianInput newInput = new PedestrianInput();
-            if (!simulationInput.RunPedestrianModule)
-            {
-                success = true;
-                return newInput;
-            }
-
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string input, userInput;
+            string nameOfInput, userInput;
 
-            
+            nameOfInput = nameof(Active);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = bool.TryParse(userInput, out Active);
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return;
+            }
 
-            input = nameof(PedestrianModule);
-            if (inputToParse.TryGetValue(input, out userInput))
+            nameOfInput = nameof(Module);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
-                    case nameof(PedestrianModuleChoice.MacroHouseholdSim):
-                        newInput.PedestrianModule = PedestrianModuleChoice.MacroHouseholdSim;
+                    case nameof(PedestrianModules.MacroHouseholdSim):
+                        Module = PedestrianModules.MacroHouseholdSim;
                         break;
-                    case nameof(PedestrianModuleChoice.JupedSimSUMO):
-                        newInput.PedestrianModule = PedestrianModuleChoice.JupedSimSUMO;
+                    case nameof(PedestrianModules.JupedSimSUMO):
+                        Module = PedestrianModules.JupedSimSUMO;
                         break;
                     default:
                         ++issues;
-                        PREACTInput.CouldNotInterpretInputMessage(input, userInput);
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                         break;
                 }
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(input);
+                PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            if(newInput.PedestrianModule == PedestrianModuleChoice.MacroHouseholdSim)
+            if(Module == PedestrianModules.MacroHouseholdSim)
             {
                 int lineIndex;
-                if (headerLineIndex.TryGetValue(nameof(PedestrianModuleChoice.MacroHouseholdSim), out lineIndex))
+                if (headerLineIndex.TryGetValue(nameof(PedestrianModules.MacroHouseholdSim), out lineIndex))
                 {
-                    newInput._macroHouseholdSimInput = MacroHouseholdSimInput.Parse(inputLines, lineIndex, out success);
+                    _macroHouseholdSimInput = MacroHouseholdSimInput.Parse(inputLines, lineIndex, out success);
                 }
                 else
                 {
-                    Engine.Message(null, Engine.LogType.Warning, nameof(PedestrianModuleChoice.MacroHouseholdSim) + " input was not found, using defaults.");
+                    Engine.Message(null, Engine.LogType.Warning, nameof(PedestrianModules.MacroHouseholdSim) + " input was not found, using defaults.");
                 }
             }
             else
@@ -81,7 +88,6 @@ namespace PREACT.IO
             }
 
             success = true;
-            return newInput;
         }
     }
 }

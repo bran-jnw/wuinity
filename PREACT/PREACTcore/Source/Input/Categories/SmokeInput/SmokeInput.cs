@@ -13,15 +13,16 @@ namespace PREACT.IO
     [System.Serializable]
     public class SmokeInput
     {
-        public enum SmokeModuleChoice { None, GlobalSmoke, BoxModel, AdvectDiffuseMixingLayer, AdvectDiffuse3D, Lagrangian, GaussianPuff, GaussianPlume, FFD }
+        public enum SmokeModules { None, GlobalSmoke, BoxModel, AdvectDiffuseMixingLayer, AdvectDiffuse3D, Lagrangian, GaussianPuff, GaussianPlume, FFD }
 
         private SmokeData _data;
         private GlobalSmokeInput _globalSmokeInput;
         private AdvectDiffuseInput _advectDiffuseInput;
         private LagrangianInput _lagrangianInput;
 
-        public SmokeData Data { get { return _data; } } 
-        public SmokeModuleChoice SmokeModule = SmokeModuleChoice.None;
+        public bool Active = false;
+        public SmokeData Data { get =>  _data; } 
+        public SmokeModules Module = SmokeModules.None;
         public GlobalSmokeInput GlobalSmokeInput { get => _globalSmokeInput; }
         public AdvectDiffuseInput AdvectDiffuseInput { get => _advectDiffuseInput; }
         public LagrangianInput LagrangianInput {  get => _lagrangianInput; }
@@ -34,37 +35,45 @@ namespace PREACT.IO
             _lagrangianInput = new LagrangianInput();
         }
 
-        public static SmokeInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, SimulationInput simulationInput, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
         {
-            SmokeInput newInput = new SmokeInput();
-            if(!simulationInput.RunSmokeModule)
-            {
-                success = true;
-                return newInput;
-            }
-
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
+            nameOfInput = nameof(Active);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = bool.TryParse(userInput, out Active);
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return;
+            }
+
             //critical
-            nameOfInput = nameof(SmokeModule);
+            nameOfInput = nameof(Module);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
-                    case nameof(SmokeModuleChoice.GlobalSmoke):
-                        newInput.SmokeModule = SmokeModuleChoice.GlobalSmoke;
+                    case nameof(SmokeModules.GlobalSmoke):
+                        Module = SmokeModules.GlobalSmoke;
                         break;
-                    case nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer):
-                        newInput.SmokeModule = SmokeModuleChoice.AdvectDiffuseMixingLayer;
+                    case nameof(SmokeModules.AdvectDiffuseMixingLayer):
+                        Module = SmokeModules.AdvectDiffuseMixingLayer;
                         break;
-                    case nameof(SmokeModuleChoice.AdvectDiffuse3D):
-                        newInput.SmokeModule = SmokeModuleChoice.AdvectDiffuse3D;
+                    case nameof(SmokeModules.AdvectDiffuse3D):
+                        Module = SmokeModules.AdvectDiffuse3D;
                         break;
-                    case nameof(SmokeModuleChoice.Lagrangian):
-                        newInput.SmokeModule = SmokeModuleChoice.Lagrangian;
+                    case nameof(SmokeModules.Lagrangian):
+                        Module = SmokeModules.Lagrangian;
                         break;
                     default:
                         ++issues;
@@ -80,18 +89,18 @@ namespace PREACT.IO
             if(issues > 0)
             {
                 success = false;
-                return newInput;
+                return;
             }
                         
             //critical
-            if (newInput.SmokeModule == SmokeModuleChoice.GlobalSmoke)
+            if (Module == SmokeModules.GlobalSmoke)
             {
                 int lineIndex;
-                nameOfInput = nameof(SmokeModuleChoice.GlobalSmoke);
+                nameOfInput = nameof(SmokeModules.GlobalSmoke);
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
                     PREACTInput.ReadingInputMessage(nameOfInput);
-                    newInput._globalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex, rootFolder, newInput, out success);
+                    _globalSmokeInput = GlobalSmokeInput.Parse(inputLines, lineIndex, rootFolder, this, out success);
                 }
                 else
                 {
@@ -100,19 +109,19 @@ namespace PREACT.IO
                 }
                 if (!success)
                 {
-                    return newInput;
+                    return;
                 }
             }
 
             //critical
-            if (newInput.SmokeModule == SmokeModuleChoice.AdvectDiffuseMixingLayer)
+            if (Module == SmokeModules.AdvectDiffuseMixingLayer)
             {
                 int lineIndex;
-                nameOfInput = nameof(SmokeModuleChoice.AdvectDiffuseMixingLayer);
+                nameOfInput = nameof(SmokeModules.AdvectDiffuseMixingLayer);
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
                     PREACTInput.ReadingInputMessage(nameOfInput);
-                    newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex, out success);
+                    _advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex, out success);
                 }
                 else
                 {
@@ -121,18 +130,18 @@ namespace PREACT.IO
                 }
                 if (!success)
                 {
-                    return newInput;
+                    return;
                 }
             }
 
-            if (newInput.SmokeModule == SmokeModuleChoice.AdvectDiffuse3D)
+            if (Module == SmokeModules.AdvectDiffuse3D)
             {
                 int lineIndex;
-                nameOfInput = nameof(SmokeModuleChoice.AdvectDiffuse3D);
+                nameOfInput = nameof(SmokeModules.AdvectDiffuse3D);
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
                     PREACTInput.ReadingInputMessage(nameOfInput);
-                    newInput._advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex, out success);
+                    _advectDiffuseInput = AdvectDiffuseInput.Parse(inputLines, lineIndex, out success);
                 }
                 else
                 {
@@ -142,19 +151,19 @@ namespace PREACT.IO
                 if (!success)
                 {
                     Engine.Message(null, Engine.LogType.InputError, "The AdvectDiffuse3D model cannot find all needed input parameters.");
-                    return newInput;
+                    return;
                 }
             }
 
             //critical
-            if (newInput.SmokeModule == SmokeModuleChoice.Lagrangian)
+            if (Module == SmokeModules.Lagrangian)
             {
                 int lineIndex;
-                nameOfInput = nameof(SmokeModuleChoice.Lagrangian);
+                nameOfInput = nameof(SmokeModules.Lagrangian);
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
                     PREACTInput.ReadingInputMessage(nameOfInput);
-                    newInput._lagrangianInput = LagrangianInput.Parse(inputLines, lineIndex, out success);
+                    _lagrangianInput = LagrangianInput.Parse(inputLines, lineIndex, out success);
                 }
                 else
                 {                    
@@ -163,12 +172,12 @@ namespace PREACT.IO
                 }
                 if (!success)
                 {
-                    return newInput;
+                    return;
                 }
             }
 
-            newInput._data.LoadAll(simulationInput, newInput, rootFolder, out success);
-            return newInput;
+            _data.LoadAll(this, rootFolder, out success);
+            return;
         }
     }    
 }

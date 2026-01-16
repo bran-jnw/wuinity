@@ -21,9 +21,8 @@ namespace PREACT.IO
         { 
         }
 
-        public static MapInput Parse(string[] inputLines, int startIndex, out bool success)
+        public void Parse(string[] inputLines, int startIndex, out bool success)
         {
-            MapInput newInput = new MapInput();
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
@@ -35,17 +34,17 @@ namespace PREACT.IO
                 switch (userInput)
                 {
                     case nameof(MapServiceProvider.Mapbox):
-                        newInput.MapProvider = MapServiceProvider.Mapbox;
+                        MapProvider = MapServiceProvider.Mapbox;
                         break;
                     case nameof(MapServiceProvider.Bing):
-                        newInput.MapProvider = MapServiceProvider.Bing;
+                        MapProvider = MapServiceProvider.Bing;
                         break;
                     case nameof(MapServiceProvider.OSM):
-                        newInput.MapProvider = MapServiceProvider.OSM;
+                        MapProvider = MapServiceProvider.OSM;
                         break;
                     default:
                         ++issues;
-                        Engine.Message(null, Engine.LogType.SimulationError, "Unknown map provider supplied by user, using " + newInput.MapProvider.ToString() + ".");
+                        Engine.Message(null, Engine.LogType.SimulationError, "Unknown map provider supplied by user, using " + MapProvider.ToString() + ".");
                         break;
                 }
             }
@@ -56,11 +55,11 @@ namespace PREACT.IO
             input = nameof(ZoomLevel);
             if (inputToParse.TryGetValue(input, out userInput))
             {
-                int.TryParse(userInput, out newInput.ZoomLevel);
-                if(newInput.ZoomLevel < 0 || newInput.ZoomLevel > 20)
+                int.TryParse(userInput, out ZoomLevel);
+                if(ZoomLevel < 0 || ZoomLevel > 20)
                 {
-                    newInput.ZoomLevel = 13;
-                    Engine.Message(null, Engine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + newInput.ZoomLevel + ".");                                       
+                    ZoomLevel = 13;
+                    Engine.Message(null, Engine.LogType.Warning, "User has specified an incorrect zoom level (" + userInput + "), using " + ZoomLevel + ".");                                       
                 }
             }
             else
@@ -68,7 +67,6 @@ namespace PREACT.IO
             }
 
             success = true;
-            return newInput;
         }
     }
 }

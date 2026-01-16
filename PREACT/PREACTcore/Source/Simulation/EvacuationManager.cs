@@ -16,10 +16,10 @@ namespace PREACT.Evacuation
         List<EvacuationDestination> _availableEvacuationDestinations;
         EvacuationGroup[] _evacuationGroups;
 
-        Demographics _defaultDemographics;
+        DemographicsInput _defaultDemographics;
 
         public EvacuationDestination[] Destinations { get => _evacuationDestinations; }
-        public Demographics DefaultDemographics { get => _defaultDemographics; }
+        public DemographicsInput DefaultDemographics { get => _defaultDemographics; }
 
         public EvacuationManager(Simulation simulation)
         {
@@ -201,9 +201,9 @@ namespace PREACT.Evacuation
             }
         }
 
-        private void SetDefaulDemographics(Dictionary<string, Demographics> demographics)
+        private void SetDefaulDemographics(Dictionary<string, DemographicsInput> demographics)
         {
-            foreach(Demographics d in demographics.Values)
+            foreach(DemographicsInput d in demographics.Values)
             {
                 if(d.Default)
                 {

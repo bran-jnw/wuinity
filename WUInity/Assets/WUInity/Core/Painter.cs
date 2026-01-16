@@ -233,11 +233,11 @@ namespace WUInity
             {
                 Vector2int cellCount;
                 //get correct size, fire mesh or evac mesh
-                if(_manager.PREACTInput.Fire.Data.LCPData != null)
+                if(_manager.PREACTInput.WildfireModule.Data.LCPData != null)
                 {
-                    fireDataCellCount = _manager.PREACTInput.Fire.Data.LCPData.GetCellCount();
+                    fireDataCellCount = _manager.PREACTInput.WildfireModule.Data.LCPData.GetCellCount();
                     cellCount = fireDataCellCount;
-                    fireDataRealSize = _manager.PREACTInput.Fire.Data.LCPData.GetSize();
+                    fireDataRealSize = _manager.PREACTInput.WildfireModule.Data.LCPData.GetSize();
                 }
                 else
                 {
@@ -255,15 +255,15 @@ namespace WUInity
                         Color c = Color.white;
                         if (paintMode == PaintMode.WUIArea)
                         {
-                            c = _manager.PREACTInput.Fire.Data.WuiArea[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
+                            c = _manager.PREACTInput.WildfireModule.Data.WuiArea[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.RandomIgnitionArea)
                         {
-                            c = _manager.PREACTInput.Fire.Data.RandomIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
+                            c = _manager.PREACTInput.WildfireModule.Data.RandomIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         else if (paintMode == PaintMode.InitialIgnition)
                         {
-                            c = _manager.PREACTInput.Fire.Data.InitialIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
+                            c = _manager.PREACTInput.WildfireModule.Data.InitialIgnition[x + y * fireDataCellCount.x] == false ? inactiveAreaColor : activeAreaColor;
                         }
                         requestedColorArray[x + y * cellCount.x] = c;
                         requestedTexture.SetPixel(x, y, c);
@@ -407,15 +407,15 @@ namespace WUInity
 
             if(paintMode == PaintMode.WUIArea)
             {
-                _manager.PREACTInput.Fire.Data.WuiArea[x + y * activeCellCount.x] = addingArea;
+                _manager.PREACTInput.WildfireModule.Data.WuiArea[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.RandomIgnitionArea)
             {
-                _manager.PREACTInput.Fire.Data.RandomIgnition[x + y * activeCellCount.x] = addingArea;
+                _manager.PREACTInput.WildfireModule.Data.RandomIgnition[x + y * activeCellCount.x] = addingArea;
             }
             else if (paintMode == PaintMode.InitialIgnition)
             {
-                _manager.PREACTInput.Fire.Data.InitialIgnition[x + y * activeCellCount.x] = addingArea;
+                _manager.PREACTInput.WildfireModule.Data.InitialIgnition[x + y * activeCellCount.x] = addingArea;
             }
         }
 

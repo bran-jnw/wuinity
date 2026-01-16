@@ -97,7 +97,7 @@ namespace PREACT.Traffic
 
         public float CalculateSpeedBasedOnDensity(MacroTrafficSim mCS, Simulation simulation)
         {
-            TrafficInput tO = simulation.Input.Traffic;
+            TrafficModuleInput tO = simulation.Input.TrafficModule;
             //reasonable? not for now
             /*if(cars.Count == 1)
             {

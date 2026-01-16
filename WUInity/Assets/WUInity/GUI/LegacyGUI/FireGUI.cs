@@ -18,13 +18,13 @@ namespace WUInity.UI
                 return;
             }
 
-            FireInput fI = _input.Fire;
+            WildfireModuleInput fI = _input.WildfireModule;
 
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
             string lcpExistsStatus = "LCP file NOT found"; 
-            if(_input.Fire.Data.LCPData != null)
+            if(_input.WildfireModule.Data.LCPData != null)
             {
                 lcpExistsStatus = "LCP file found";
             }
@@ -37,13 +37,13 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if(_input.Fire.Data.LCPData != null)
+            if(_input.WildfireModule.Data.LCPData != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP DATA");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _input.Fire.Data.LCPData.GetCellCountX() + ", " + _input.Fire.Data.LCPData.GetCellCountY());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _input.WildfireModule.Data.LCPData.GetCellCountX() + ", " + _input.WildfireModule.Data.LCPData.GetCellCountY());
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_input.Fire.Data.LCPData.RasterCellResolutionX) + ", " + Mathf.RoundToInt((float)_input.Fire.Data.LCPData.RasterCellResolutionY));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_input.WildfireModule.Data.LCPData.RasterCellResolutionX) + ", " + Mathf.RoundToInt((float)_input.WildfireModule.Data.LCPData.RasterCellResolutionY));
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle LCP display"))
@@ -61,19 +61,19 @@ namespace WUInity.UI
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
                     _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Elevation);
-                    lcpCurrentInfo = "Elevation range: " + _input.Fire.Data.LCPData.GetElevationMin() + "-" + _input.Fire.Data.LCPData.GetElevationMax() + " [m]";
+                    lcpCurrentInfo = "Elevation range: " + _input.WildfireModule.Data.LCPData.GetElevationMin() + "-" + _input.WildfireModule.Data.LCPData.GetElevationMax() + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
                     _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Slope);
-                    lcpCurrentInfo = "Slope range: " + _input.Fire.Data.LCPData.GetSlopeMin() + "-" + _input.Fire.Data.LCPData.GetSlopeMax() + " [-]";
+                    lcpCurrentInfo = "Slope range: " + _input.WildfireModule.Data.LCPData.GetSlopeMin() + "-" + _input.WildfireModule.Data.LCPData.GetSlopeMax() + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
                     _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Aspect);
-                    lcpCurrentInfo = "Aspect range: " + _input.Fire.Data.LCPData.GetAspectMin() + "-" + _input.Fire.Data.LCPData.GetAspectMax() + " [°]";
+                    lcpCurrentInfo = "Aspect range: " + _input.WildfireModule.Data.LCPData.GetAspectMin() + "-" + _input.WildfireModule.Data.LCPData.GetAspectMax() + " [°]";
                 }
                 ++buttonIndex;
 
@@ -171,8 +171,8 @@ namespace WUInity.UI
 
         void LoadLCP(string[] paths)
         {
-            _input.Fire.Data.LoadLCPFile(_input.Fire, paths[0], _input.Simulation.Data.UTMOrigin, true, out success);
-            _wuinityManager.FireDomainVisualizer.SetAndDisplayLCP(_input.Fire.Data.LCPData);
+            _input.WildfireModule.Data.LoadLCPFile(_input.WildfireModule, paths[0], _input.Simulation.Data.UTMOrigin, true, out success);
+            _wuinityManager.FireDomainVisualizer.SetAndDisplayLCP(_input.WildfireModule.Data.LCPData);
         }
 
         void OpenLoadFuelsModelFile()
@@ -184,14 +184,14 @@ namespace WUInity.UI
 
         void LoadFuelModelsFile(string[] paths)
         {
-            _input.Fire.Data.LoadFuelModelsInput(_input.Fire, paths[0], true, out success);
+            _input.WildfireModule.Data.LoadFuelModelsInput(_input.WildfireModule, paths[0], true, out success);
         }
 
         void FinishGraphicalFireInputEdit()
         {
             _wuinityManager.StopPainter();
-            string filePath = Path.Combine(_engine.WorkingFolder, _input.Fire.GraphicalFireInputFile);
-            GraphicalFireInput.SaveGraphicalFireInput(filePath, _input.Fire.Data);
+            string filePath = Path.Combine(_engine.WorkingFolder, _input.WildfireModule.GraphicalFireInputFile);
+            GraphicalFireInput.SaveGraphicalFireInput(filePath, _input.WildfireModule.Data);
         }
 
         void ResetFireGUI()

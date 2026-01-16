@@ -10,52 +10,56 @@ using System.Collections.Generic;
 namespace PREACT.IO
 {
     [System.Serializable]
-    public class TriggerBufferInput
+    public class TriggerBufferModuleInput
     {
-        public enum TriggerBufferChoice { None, kPERIL, BackwardsFireCell2 }
+        public enum TriggerBufferModules { None, kPERIL, BackwardsFireCell2 }
 
         public kPERILInput _kPERILInput;
 
         public kPERILInput kPERILInput { get => _kPERILInput; }
-        public bool CalculateTriggerBuffer = false;        
-        public TriggerBufferChoice TriggerBuffer = TriggerBufferChoice.None;
+        public bool Active = false;        
+        public TriggerBufferModules Module = TriggerBufferModules.None;
         
 
-        public TriggerBufferInput() 
+        public TriggerBufferModuleInput() 
         { 
             _kPERILInput = new kPERILInput();
         }
 
-        public static TriggerBufferInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
         {
-            TriggerBufferInput newInput = new TriggerBufferInput();
             success = false;
             int issues = 0;             
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            nameOfInput = nameof(CalculateTriggerBuffer);
+            nameOfInput = nameof(Active);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.CalculateTriggerBuffer);
+                success = bool.TryParse(userInput, out Active);
             }
             else
             {
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-
-            if (newInput.CalculateTriggerBuffer)
+            if(!success)
             {
-                nameOfInput = nameof(TriggerBuffer);
+                return;
+            }
+
+            if (Active)
+            {
+                nameOfInput = nameof(Module);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     switch (userInput)
                     {
-                        case nameof(TriggerBufferChoice.kPERIL):
-                            newInput.TriggerBuffer = TriggerBufferChoice.kPERIL;
+                        case nameof(TriggerBufferModules.kPERIL):
+                            Module = TriggerBufferModules.kPERIL;
                             break;
-                        case nameof(TriggerBufferChoice.BackwardsFireCell2):
-                            newInput.TriggerBuffer = TriggerBufferChoice.BackwardsFireCell2;
+                        case nameof(TriggerBufferModules.BackwardsFireCell2):
+                            Module = TriggerBufferModules.BackwardsFireCell2;
                             break;
                         default:
                             ++issues;
@@ -72,18 +76,18 @@ namespace PREACT.IO
                 {
                     success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput, true);
-                    return newInput;
+                    return;
                 }
 
                 //now check modules that have been selected
-                if (newInput.TriggerBuffer == TriggerBufferChoice.kPERIL)
+                if (Module == TriggerBufferModules.kPERIL)
                 {
                     //critical
-                    nameOfInput = nameof(TriggerBufferChoice.kPERIL);
+                    nameOfInput = nameof(TriggerBufferModules.kPERIL);
                     int lineindex;
                     if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
                     {
-                        newInput._kPERILInput = kPERILInput.Parse(inputLines, lineindex, rootFolder, out success);
+                        _kPERILInput = kPERILInput.Parse(inputLines, lineindex, rootFolder, out success);
                     }
                     else
                     {
@@ -92,7 +96,7 @@ namespace PREACT.IO
                     }
                     if(!success)
                     {
-                        return newInput;
+                        return;
                     }
                 }
                 else
@@ -102,7 +106,6 @@ namespace PREACT.IO
             }
 
             success = true;
-            return newInput;
         }
     }     
 }

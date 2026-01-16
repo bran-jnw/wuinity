@@ -38,10 +38,10 @@ namespace PREACT.Fire
 
         public AscFireImport(Simulation simulation) : base(simulation)
         {
-            string TOAFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.TimeOfArrivalFile);
-            string ROSFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.RateOfSpreadFile);
-            string FIFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.FirelineIntensityFile);
-            string SDFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.Fire.AscImportInput.RootFolder, _simulation.Input.Fire.AscImportInput.SpreadDirectionFile);
+            string TOAFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.TimeOfArrivalFile);
+            string ROSFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.RateOfSpreadFile);
+            string FIFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.FirelineIntensityFile);
+            string SDFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.SpreadDirectionFile);
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d ascUTM = new Vector2d(_xllcorner, _yllcorner);

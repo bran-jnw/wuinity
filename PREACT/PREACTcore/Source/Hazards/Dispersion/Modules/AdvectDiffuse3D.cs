@@ -115,7 +115,7 @@ namespace PREACT.Smoke
 
             //set up all buffers and data containers
             _globalData = new GlobalData();
-            _globalData.mixingLayerHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
+            _globalData.mixingLayerHeight = _simulation.Input.SmokeModule.AdvectDiffuseInput.MixingLayerHeight;
             _globalData.fireSmokeCellRatio = 2;
             float zCellSize = 20f;
 
@@ -147,8 +147,8 @@ namespace PREACT.Smoke
             _globalData.yDim = _fireCellsY / _globalData.fireSmokeCellRatio + _fireCellsY % _globalData.fireSmokeCellRatio;
             _globalData.xyDim = _globalData.xDim * _globalData.yDim;
             //determine height of domain
-            Vector2d elevationMinMax = _simulation.Input.Fire.Data.LCPData.GetElevationMinMax();
-            float domainHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight + (float)elevationMinMax.y - (float)elevationMinMax.x;
+            Vector2d elevationMinMax = _simulation.Input.WildfireModule.Data.LCPData.GetElevationMinMax();
+            float domainHeight = _simulation.Input.SmokeModule.AdvectDiffuseInput.MixingLayerHeight + (float)elevationMinMax.y - (float)elevationMinMax.x;
             _globalData.zDim = (int)(0.5f + domainHeight * _globalData.inverseCellSizeZ);
 
             //buffer sizes
@@ -175,7 +175,7 @@ namespace PREACT.Smoke
             uint[] heightMap = new uint[_2DbufferSize];
             if (_globalData.fireSmokeCellRatio != 1)
             {
-                Fire.LandscapeData l = _simulation.Input.Fire.Data.LCPData;
+                Fire.LandscapeData l = _simulation.Input.WildfireModule.Data.LCPData;
                 for (int y = 0; y < _globalData.yDim; ++y)
                 {
                     for (int x = 0; x < _globalData.xDim; ++x)
@@ -188,7 +188,7 @@ namespace PREACT.Smoke
             }
             else
             {
-                float[] elevation = _simulation.Input.Fire.Data.LCPData.Get1DElevation();
+                float[] elevation = _simulation.Input.WildfireModule.Data.LCPData.Get1DElevation();
                 for (int i = 0; i < _2DbufferSize; ++i)
                 {
                     heightMap[i] = (uint)(0.5f + elevation[i] * _globalData.inverseCellSizeZ);
@@ -247,7 +247,7 @@ namespace PREACT.Smoke
         public override void Step(float currentTime, float deltaTime)
         {      
             //update wind
-            Fire.WindData windData = _simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
+            Fire.WindData windData = _simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
             _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;

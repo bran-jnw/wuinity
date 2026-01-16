@@ -13,7 +13,7 @@ namespace WUInity.UI
         void EvacMenu()
         {
             PopulationInput popIn = _input.Population;
-            MacroHouseholdSimInput macroIn = _input.Pedestrian.MacroHouseholdSimInput;
+            MacroHouseholdSimInput macroIn = _input.PedestrianModule.MacroHouseholdSimInput;
             EvacuationInput evacIn = _input.Evacuation;
 
             if (evacMenuDirty)
@@ -67,7 +67,7 @@ namespace WUInity.UI
             }
 
             PopulationInput popIn = _input.Population;
-            MacroHouseholdSimInput macroIn = _input.Pedestrian.MacroHouseholdSimInput;
+            MacroHouseholdSimInput macroIn = _input.PedestrianModule.MacroHouseholdSimInput;
             EvacuationInput evacIn = _input.Evacuation;
 
             float.TryParse(walkSpeedMin, out macroIn.WalkingSpeedMinMax.X);

@@ -10,24 +10,25 @@ using System.Collections.Generic;
 namespace PREACT.IO
 {
     [System.Serializable]
-    public class TrafficInput
+    public class TrafficModuleInput
     {
-        public enum TrafficModuleChoice { SUMO, MacroTrafficSim, CityFlow }
+        public enum TrafficModules { SUMO, MacroTrafficSim, CityFlow }
 
         private TrafficData _data;
         private SUMOInput _sumoInput;
         private MacroTrafficSimInput _macroTrafficSimInput;
         private CityFlowInput _cityFlowInput;
 
+        public bool Active = false;
         public TrafficData Data { get => _data; }
         public SUMOInput SumoInput { get { return _sumoInput; } }
         public MacroTrafficSimInput MacroTrafficSimInput { get => _macroTrafficSimInput; }
         public CityFlowInput CityFlowInput { get => _cityFlowInput; }
-        public TrafficModuleChoice TrafficModule = TrafficModuleChoice.SUMO;
+        public TrafficModules Module = TrafficModules.SUMO;
         public bool VisibilityAffectsSpeed = false;     
 
 
-        public TrafficInput() 
+        public TrafficModuleInput() 
         {
             _data = new TrafficData();
             _sumoInput = new SUMOInput();
@@ -35,31 +36,39 @@ namespace PREACT.IO
             _cityFlowInput = new CityFlowInput();
         }
 
-        public static TrafficInput Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, SimulationInput simulationInput, string rootFolder, out bool success)
-        {            
-            TrafficInput newInput = new TrafficInput();
-            if (!simulationInput.RunTrafficModule)
-            {
-                success = true;
-                return newInput;
-            }
-
+        public void Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
+        {     
             success = false;
             int issues = 0;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
+            nameOfInput = nameof(Active);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = bool.TryParse(userInput, out Active);
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return;
+            }
+
             //critical
-            nameOfInput = nameof(TrafficModule);
+            nameOfInput = nameof(Module);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
-                    case nameof(TrafficModuleChoice.SUMO):
-                        newInput.TrafficModule = TrafficModuleChoice.SUMO;
+                    case nameof(TrafficModules.SUMO):
+                        Module = TrafficModules.SUMO;
                         break;
-                    case nameof(TrafficModuleChoice.MacroTrafficSim):
-                        newInput.TrafficModule = TrafficModuleChoice.MacroTrafficSim;
+                    case nameof(TrafficModules.MacroTrafficSim):
+                        Module = TrafficModules.MacroTrafficSim;
                         break;
                     default:
                         ++issues;
@@ -74,53 +83,53 @@ namespace PREACT.IO
             }
             if(issues > 0)
             {
-                return newInput;
+                return;
             }
 
             nameOfInput = nameof(VisibilityAffectsSpeed);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.VisibilityAffectsSpeed);
+                bool.TryParse(userInput, out VisibilityAffectsSpeed);
             }
             else
             {                
             }
 
             //load correct module
-            if(newInput.TrafficModule == TrafficModuleChoice.SUMO)
+            if(Module == TrafficModules.SUMO)
             {
                 int lineIndex;
-                nameOfInput = nameof(TrafficModuleChoice.SUMO);
+                nameOfInput = nameof(TrafficModules.SUMO);
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
                     PREACTInput.ReadingInputMessage(nameOfInput);
-                    newInput._sumoInput = SUMOInput.Parse(inputLines, lineIndex, rootFolder, out success);
+                    _sumoInput = SUMOInput.Parse(inputLines, lineIndex, rootFolder, out success);
                 }
                 else
                 {
                     //critical
                     Engine.Message(null, Engine.LogType.SimulationError, nameof(Simulation) + " header not found." + PREACTInput.pleaseCheckInput);
-                    return newInput;
+                    return;
                 }
             }
-            else if(newInput.TrafficModule == TrafficModuleChoice.MacroTrafficSim)
+            else if(Module == TrafficModules.MacroTrafficSim)
             {
 
             }
-            else if(newInput.TrafficModule == TrafficModuleChoice.CityFlow)
+            else if(Module == TrafficModules.CityFlow)
             {
                 int lineIndex;
-                nameOfInput = nameof(TrafficModuleChoice.CityFlow);
+                nameOfInput = nameof(TrafficModules.CityFlow);
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineIndex))
                 {
                     PREACTInput.ReadingInputMessage(nameOfInput);
-                    newInput._cityFlowInput = CityFlowInput.Parse(inputLines, lineIndex, rootFolder, out success);
+                    _cityFlowInput = CityFlowInput.Parse(inputLines, lineIndex, rootFolder, out success);
                 }
                 else
                 {
                     //critical
                     Engine.Message(null, Engine.LogType.SimulationError, nameof(Simulation) + " header not found." + PREACTInput.pleaseCheckInput);
-                    return newInput;
+                    return;
                 }
             }
             else
@@ -128,8 +137,7 @@ namespace PREACT.IO
                 Engine.Message(null, Engine.LogType.SimulationError, "Unknown traffic module has been specified.");
             }
 
-            newInput._data.LoadAll(newInput, rootFolder, out success);
-            return newInput;
+            _data.LoadAll(this, rootFolder, out success);
         }
     }
 }

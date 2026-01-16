@@ -22,9 +22,8 @@ namespace PREACT.IO
         {
         }
 
-        public static WUIShowInput Parse(string[] inputLines, int startIndex, out bool success)
+        public void Parse(string[] inputLines, int startIndex, out bool success)
         {
-            WUIShowInput newInput = new WUIShowInput();
             success = false;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
@@ -32,7 +31,7 @@ namespace PREACT.IO
             nameOfInput = nameof(SendDataToWUIShow);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.SendDataToWUIShow);
+                bool.TryParse(userInput, out SendDataToWUIShow);
             }
             else
             {
@@ -42,7 +41,7 @@ namespace PREACT.IO
             nameOfInput = nameof(WuiShowServerIP);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.WuiShowServerIP = userInput;
+                WuiShowServerIP = userInput;
             }
             else
             {
@@ -52,7 +51,7 @@ namespace PREACT.IO
             nameOfInput = nameof(WuiShowServerPort);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                int.TryParse(userInput, out newInput.WuiShowServerPort);
+                int.TryParse(userInput, out WuiShowServerPort);
             }
             else
             {
@@ -62,7 +61,7 @@ namespace PREACT.IO
             nameOfInput = nameof(WuiShowDeltaTime);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out newInput.WuiShowDeltaTime);
+                float.TryParse(userInput, out WuiShowDeltaTime);
             }
             else
             {
@@ -70,7 +69,6 @@ namespace PREACT.IO
             }
 
             success = true;
-            return newInput;
         }
     }
 }

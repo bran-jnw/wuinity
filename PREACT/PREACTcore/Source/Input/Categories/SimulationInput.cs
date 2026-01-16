@@ -22,10 +22,6 @@ namespace PREACT.IO
         public Vector2d DomainSize;
         public float DeltaTime = 1.0f;
         public float MaxSimTime= float.MaxValue;
-        public bool RunPedestrianModule = false;
-        public bool RunTrafficModule = false;
-        public bool RunFireModule = false;
-        public bool RunSmokeModule = false;
         public bool StopWhenEvacuated = true;
 
         public SimulationInput()
@@ -33,9 +29,8 @@ namespace PREACT.IO
             _data = new SimulationData(_lowerLeftLatLon);
         }
 
-        public static SimulationInput Parse(string[] inputLines, int startIndex, out bool success)
+        public void Parse(string[] inputLines, int startIndex, out bool success)
         {
-            SimulationInput newInput = new SimulationInput();
             success = false;
             int issues = 0;            
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
@@ -45,8 +40,8 @@ namespace PREACT.IO
             nameOfInput = nameof(Name);
             if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.Name = userInput;
-                if(newInput.Name.Length == 0)
+                Name = userInput;
+                if(Name.Length == 0)
                 {
                     PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                     ++issues;
@@ -60,7 +55,7 @@ namespace PREACT.IO
             if (issues > 0)
             {
                 success = false;
-                return newInput;
+                return;
             }
 
             //critical
@@ -68,8 +63,8 @@ namespace PREACT.IO
             if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                issues += double.TryParse(data[0], out newInput._lowerLeftLatLon.x) ? 0 : 1;
-                issues += double.TryParse(data[1], out newInput._lowerLeftLatLon.y) ? 0 : 1;
+                issues += double.TryParse(data[0], out _lowerLeftLatLon.x) ? 0 : 1;
+                issues += double.TryParse(data[1], out _lowerLeftLatLon.y) ? 0 : 1;
                 if(issues > 0)
                 {
                     PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
@@ -82,7 +77,7 @@ namespace PREACT.IO
             if(issues > 0)
             {
                 success = false;
-                return newInput;
+                return;
             }
 
             //critical
@@ -90,8 +85,8 @@ namespace PREACT.IO
             if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                issues += double.TryParse(data[0], out newInput.DomainSize.x) ? 0 : 1;
-                issues += double.TryParse(data[1], out newInput.DomainSize.y) ? 0 : 1;
+                issues += double.TryParse(data[0], out DomainSize.x) ? 0 : 1;
+                issues += double.TryParse(data[1], out DomainSize.y) ? 0 : 1;
                 if (issues > 0)
                 {
                     PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
@@ -105,14 +100,14 @@ namespace PREACT.IO
             if (issues > 0)
             {
                 success = false;
-                return newInput;
+                return;
             }
 
             //not critical
             nameOfInput = nameof(DeltaTime);
             if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out newInput.DeltaTime);
+                float.TryParse(userInput, out DeltaTime);
             }
             else
             {
@@ -122,66 +117,25 @@ namespace PREACT.IO
             nameOfInput = nameof(MaxSimTime);
             if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out newInput.MaxSimTime);
+                float.TryParse(userInput, out MaxSimTime);
             }
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            nameOfInput = nameof(RunPedestrianModule);
-            if(inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                bool.TryParse(userInput, out newInput.RunPedestrianModule);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            nameOfInput = nameof(RunTrafficModule);
-            if(inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                bool.TryParse(userInput, out newInput.RunTrafficModule);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            nameOfInput = nameof(RunFireModule);
-            if(inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                bool.TryParse(userInput, out newInput.RunFireModule);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            nameOfInput = nameof(RunSmokeModule);
-            if(inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                bool.TryParse(userInput, out newInput.RunSmokeModule);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
+            }            
 
             nameOfInput = nameof(StopWhenEvacuated);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.StopWhenEvacuated);
+                bool.TryParse(userInput, out StopWhenEvacuated);
             }
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            newInput._data.UpdateData(newInput.LowerLeftLatLon);
+            _data.UpdateData(LowerLeftLatLon);
             success = true;
-            return newInput;
         }
     }
 }    

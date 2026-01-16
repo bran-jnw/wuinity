@@ -395,15 +395,15 @@ namespace WUInity
         {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EvacuationRenderer.CreateBuffers(_input.Simulation.RunPedestrianModule, _input.Simulation.RunTrafficModule, _input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
+            EvacuationRenderer.CreateBuffers(_input.PedestrianModule.Active, _input.TrafficModule.Active, _input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
 
-            _renderHouseholds = _input.Simulation.RunPedestrianModule;
-            _renderTraffic = _input.Simulation.RunTrafficModule;
+            _renderHouseholds = _input.PedestrianModule.Active;
+            _renderTraffic = _input.TrafficModule.Active;
 
             //and then for fire rendering
             FireRenderer.CreateBuffers(_engine.Simulation);
-            _renderFireSpread = _input.Simulation.RunFireModule;
-            _renderSmokeDispersion = _input.Simulation.RunSmokeModule;
+            _renderFireSpread = _input.WildfireModule.Active;
+            _renderSmokeDispersion = _input.SmokeModule.Active;
 
             _visualsExist = true;
 
@@ -591,7 +591,7 @@ namespace WUInity
         int[] currentPeopleInCells;
         /*public void DisplayClosestDensityData(float time)
         {
-            if(_input.Simulation.RunTrafficModule)
+            if(_input.TrafficModule.Active)
             {
                 int index = UnityEngine.Mathf.Max(0, (int)time / 600);
                 if (index > outputTextures.Count - 1)
@@ -609,22 +609,22 @@ namespace WUInity
 
         public void ActivateSuitableVisuals()
         {
-            if(_input.Simulation.RunPedestrianModule)
+            if(_input.PedestrianModule.Active)
             {
                 SetHouseholdRendering(true);
             }
 
-            if (_input.Simulation.RunTrafficModule)
+            if (_input.TrafficModule.Active)
             {
                 SetTrafficRendering(true);
             }
 
-            if (_input.Simulation.RunFireModule)
+            if (_input.WildfireModule.Active)
             {
                 SetFireSpreadRendering(true);
             }
 
-            if (_input.Simulation.RunSmokeModule)
+            if (_input.SmokeModule.Active)
             {
                 SetSootRendering(true);
             }
@@ -766,7 +766,7 @@ namespace WUInity
         public void UpdateInput(PREACTInput input)
         {
             _input = input;
-            _painter.SetLCPData(_input.Fire.Data.LCPData);            
+            _painter.SetLCPData(_input.WildfireModule.Data.LCPData);            
             _godCamera.SetInput(_input);
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
@@ -782,7 +782,7 @@ namespace WUInity
 
         public void NewLogMessage(string message)
         {
-            if (Application.isEditor && !SuppressMessages) //&& || UnityEngine.Debug.isDebugBuild
+            if (Application.isEditor && !SuppressMessages)
             {
                 Debug.Log(message);
             }

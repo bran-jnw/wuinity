@@ -80,7 +80,7 @@ namespace PREACT.Smoke
             _globalData.inverseCellSizeYSq = 1f / _globalData.cellSizeYSq;
             _globalData.inverseCellSizeX = 1f / _globalData.cellSizeX;
             _globalData.inverseCellSizeY = 1f / _globalData.cellSizeY;
-            _globalData.cellHeight = _simulation.Input.Smoke.AdvectDiffuseInput.MixingLayerHeight;
+            _globalData.cellHeight = _simulation.Input.SmokeModule.AdvectDiffuseInput.MixingLayerHeight;
             _globalData.cellVolume = _globalData.cellHeight * _globalData.cellSizeX * _globalData.cellSizeY;
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
             _globalData.deltaTime = _simulation.Input.Simulation.DeltaTime;
@@ -132,7 +132,7 @@ namespace PREACT.Smoke
             }
 
             //update wind
-            Fire.WindData windData = _simulation.Input.Fire.Data.WindInput.GetWindDataAtTime(currentTime);
+            Fire.WindData windData = _simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
             _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;

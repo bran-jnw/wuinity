@@ -104,17 +104,17 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.Simulation.Input.Fire.Data.LCPData.GetLandscapeSizeX();
+                double xSize = _engine.Simulation.Input.WildfireModule.Data.LCPData.GetLandscapeSizeX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.Simulation.Input.Fire.Data.LCPData.GetLandscapeSizeY();
+                double ySize = _engine.Simulation.Input.WildfireModule.Data.LCPData.GetLandscapeSizeY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = _engine.Simulation.UTMOrigin + _engine.Simulation.Input.Fire.Data.LCPData.OriginOffset;
+                Vector2d lcpOriginUTM = _engine.Simulation.UTMOrigin + _engine.Simulation.Input.WildfireModule.Data.LCPData.OriginOffset;
                 var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Simulation.Input.Simulation.LowerLeftLatLon.x, _engine.Simulation.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;

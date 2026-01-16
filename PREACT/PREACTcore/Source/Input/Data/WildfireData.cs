@@ -13,7 +13,7 @@ using PREACT.Math;
 
 namespace PREACT.IO
 {
-    public class FireData
+    public class WildfireData
     {
         private LandscapeData _lcpData;
         private FuelModelInput _fuelModelsData;
@@ -35,15 +35,15 @@ namespace PREACT.IO
         public WeatherInput WeatherInput { get => _weatherInput; }       
         public WindInput WindInput { get => _windInput; }        
 
-        public FireData()
+        public WildfireData()
         {
         }
 
-        public void LoadAll(SimulationInput simulationInput, FireInput fireInput, string rootFolder, out bool success)
+        public void LoadAll(SimulationInput simulationInput, WildfireModuleInput fireInput, string rootFolder, out bool success)
         {
             success = false;
 
-            if(!simulationInput.RunFireModule)
+            if(!fireInput.Active)
             {
                 Engine.Message(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
                 success = true;
@@ -52,7 +52,7 @@ namespace PREACT.IO
             Engine.Message(null, Engine.LogType.Log, "Loading Fire data...");
 
             //we need LCP for all fires except straight import of results
-            if (fireInput.FireModule == FireInput.FireModuleChoice.AscImport) 
+            if (fireInput.Module == WildfireModuleInput.WildfireModules.AscImport) 
             { 
                 Engine.Message(null, Engine.LogType.Log, "Skipping loading LCP data as user has specified straight import of fire results.");
                 success = true;
@@ -70,7 +70,7 @@ namespace PREACT.IO
             filePath = Path.Combine(rootFolder, fireInput.GraphicalFireInputFile);
             LoadGraphicalFireInput(fireInput, filePath, _lcpData, false, out success);
 
-            if (fireInput.FireModule == FireInput.FireModuleChoice.FireCell || fireInput.FireModule == FireInput.FireModuleChoice.CellParticleHybrid)
+            if (fireInput.Module == WildfireModuleInput.WildfireModules.FireCell || fireInput.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
             {
                 int issues = 0;
 
@@ -103,7 +103,7 @@ namespace PREACT.IO
             success = true;
         }
 
-        public void LoadLCPFile(FireInput fireInput, string filePath, Vector2d simulationUtmOrigin, bool updateInput, out bool success)
+        public void LoadLCPFile(WildfireModuleInput fireInput, string filePath, Vector2d simulationUtmOrigin, bool updateInput, out bool success)
         {
             LandscapeData lcpData = new LandscapeData(filePath, simulationUtmOrigin);
             success = !lcpData.CantAllocLCP;
@@ -135,7 +135,7 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadFuelModelsInput(FireInput fireInput, string filePath, bool updateInput, out bool success)
+        public void LoadFuelModelsInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _fuelModelsData = FuelModelInput.LoadFromFile(filePath, out success);
             if (success && updateInput)
@@ -144,7 +144,7 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadIgnitionPoints(FireInput fireInput, string filePath, bool updateInput, out bool success)
+        public void LoadIgnitionPoints(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _ignitionPoints = IgnitionPointInput.LoadIgnitionPointsFile(filePath, out success);
             if (success && updateInput)
@@ -153,7 +153,7 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadInitialFuelMoistureData(FireInput fireInput, string filePath, bool updateInput, out bool success)
+        public void LoadInitialFuelMoistureData(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _initialFuelMoistureData = InitialFuelMoistureLibrary.LoadInitialFuelMoistureDataFile(filePath, out success);
             if (success && updateInput)
@@ -162,7 +162,7 @@ namespace PREACT.IO
             }
         }        
 
-        public void LoadWeatherInput(FireInput fireInput, string filePath, bool updateInput, out bool success)
+        public void LoadWeatherInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _weatherInput = WeatherInput.LoadWeatherInputFile(filePath, out success);
             if (success && updateInput)
@@ -171,7 +171,7 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadWindInput(FireInput fireInput, string filePath, bool updateInput, out bool success)
+        public void LoadWindInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _windInput = WindInput.LoadWindInputFile(filePath, out success);
             if (success && updateInput)
@@ -180,7 +180,7 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadGraphicalFireInput(FireInput fireInput, string filePath, LandscapeData lcpData, bool updateInput, out bool success)
+        public void LoadGraphicalFireInput(WildfireModuleInput fireInput, string filePath, LandscapeData lcpData, bool updateInput, out bool success)
         {
             GraphicalFireInput.LoadGraphicalFireInput(filePath, lcpData, out WuiArea, out RandomIgnition, out InitialIgnition, out ManualTriggerBuffer, out success);
         }

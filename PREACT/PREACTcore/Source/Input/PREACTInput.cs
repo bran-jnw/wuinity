@@ -20,30 +20,28 @@ namespace PREACT.IO
         public PopulationInput Population;
         public EventsInput Events;
         public EvacuationInput Evacuation;
-        public PedestrianInput Pedestrian;
-        public TrafficInput Traffic;    
-        public FireInput Fire;        
-        public SmokeInput Smoke;
-        public TriggerBufferInput TriggerBuffer;
+        public PedestrianModuleInput PedestrianModule;
+        public TrafficModuleInput TrafficModule;    
+        public WildfireModuleInput WildfireModule;        
+        public SmokeInput SmokeModule;
+        public TriggerBufferModuleInput TriggerBufferModule;
         public WUIShowInput WUIShow;        
 
-        public PREACTInput(string rootFolder, bool loadingFromDisk)
+        public PREACTInput(string rootFolder)
         {
             RootFolder = rootFolder;
-            if(!loadingFromDisk)
-            {
-                Simulation = new SimulationInput();
-                Map = new MapInput();   
-                Population = new PopulationInput();
-                Events = new EventsInput();
-                Evacuation = new EvacuationInput(Simulation);
-                Pedestrian = new PedestrianInput();
-                Traffic = new TrafficInput();                
-                Fire = new FireInput();            
-                Smoke = new SmokeInput();
-                TriggerBuffer = new TriggerBufferInput();
-                WUIShow = new WUIShowInput();
-            }
+
+            Simulation = new SimulationInput();
+            Map = new MapInput();   
+            Population = new PopulationInput();
+            Events = new EventsInput();
+            Evacuation = new EvacuationInput();
+            PedestrianModule = new PedestrianModuleInput();
+            TrafficModule = new TrafficModuleInput();                
+            WildfireModule = new WildfireModuleInput();            
+            SmokeModule = new SmokeInput();
+            TriggerBufferModule = new TriggerBufferModuleInput();
+            WUIShow = new WUIShowInput();
         }
 
         public static void SaveToDisk(PREACTInput input, string filePath)
@@ -104,7 +102,7 @@ namespace PREACT.IO
         private static PREACTInput ParseInput(string rootFolder, string[] inputLines, out bool success)
         {
             success = false;
-            PREACTInput newInput = new PREACTInput(rootFolder, true);
+            PREACTInput newInput = new PREACTInput(rootFolder);
             Dictionary<string, int> headerLineIndices = new Dictionary<string, int>();
 
             List<int> destinationLineIndices = new List<int>();            
@@ -158,7 +156,7 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);                
-                newInput.Simulation = SimulationInput.Parse(inputLines, lineindex, out success);
+                newInput.Simulation.Parse(inputLines, lineindex, out success);
             }
             else
             {
@@ -176,7 +174,7 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Map = MapInput.Parse(inputLines, lineindex, out success);
+                newInput.Map.Parse(inputLines, lineindex, out success);
             }
             else
             {
@@ -189,22 +187,100 @@ namespace PREACT.IO
                 return null;
             }
 
-            //population, must be before evacuation die to dependence on demographics      
+            //pedestrian module
+            nameOfInput = nameof(PedestrianModule);
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
+            {
+                ReadingInputMessage(nameOfInput);
+                newInput.PedestrianModule.Parse(inputLines, lineindex, headerLineIndices, out success);
+            }
+            else
+            {
+                Engine.Message(null, Engine.LogType.Log, "No pedestrian module defined.");
+            }
+            if (!success)
+            {
+                return null;
+            }
+
+            //traffic module
+            nameOfInput = nameof(TrafficModule);
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
+            {
+                ReadingInputMessage(nameOfInput);
+                newInput.TrafficModule.Parse(inputLines, lineindex, headerLineIndices, rootFolder, out success);
+            }
+            else
+            {
+                Engine.Message(null, Engine.LogType.Log, "No traffic module defined.");
+            }
+            if (!success)
+            {
+                return null;
+            }
+
+            //wildfire module
+            nameOfInput = nameof(WildfireModule);
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
+            {
+                ReadingInputMessage(nameOfInput);
+                newInput.WildfireModule.Parse(inputLines, lineindex, newInput.Simulation, headerLineIndices, rootFolder, out success);
+            }
+            else
+            {               
+                Engine.Message(null, Engine.LogType.Log, "No wildfire module defined.");
+            }
+            if (!success)
+            {
+                return null;
+            }
+
+            //smoke module
+            nameOfInput = nameof(SmokeModule);
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
+            {
+                ReadingInputMessage(nameOfInput);
+                newInput.SmokeModule.Parse(inputLines, lineindex, headerLineIndices, rootFolder, out success);
+            }
+            else
+            {
+                Engine.Message(null, Engine.LogType.Log, "No smoke module defined.");
+            }
+            if (!success)
+            {
+                return null;
+            }
+
+            //trigger buffer
+            nameOfInput = nameof(TriggerBufferModule);
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
+            {
+                ReadingInputMessage(nameOfInput);
+                newInput.TriggerBufferModule.Parse(inputLines, lineindex, headerLineIndices, rootFolder, out success);
+            }
+            else
+            {
+                //does not matter, not active per default
+                newInput.TriggerBufferModule = new TriggerBufferModuleInput();
+                Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, using defaults (disabled).");
+            }
+            if (!success)
+            {
+                return null;
+            }
+
+            //population, must be before evacuation due to dependence on demographics      
             nameOfInput = nameof(Population);
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Population = PopulationInput.Parse(inputLines, lineindex, demographicsLineIndices, newInput.Simulation, rootFolder, out success);
+                newInput.Population.Parse(inputLines, lineindex, demographicsLineIndices, newInput.PedestrianModule, rootFolder, out success);
             }
-            else if(newInput.Simulation.RunPedestrianModule)
+            else if(newInput.PedestrianModule.Active)
             {
                 //critical
                 Engine.Message(null, Engine.LogType.InputError, nameOfInput + " header not found but user has requested pedestrian module." + pleaseCheckInput);
                 return null;
-            }
-            else
-            {
-                newInput.Population = new PopulationInput();
             }
             if (!success)
             {
@@ -216,12 +292,10 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Events = EventsInput.Parse(inputLines, lineindex, rootFolder, out success);
+                newInput.Events.Parse(inputLines, lineindex, rootFolder, out success);
             }
             else
             {
-                //does not matter
-                newInput.Events = new EventsInput();
                 Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, no events will be added.");
             }
             if (!success)
@@ -234,119 +308,25 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {                    
                 ReadingInputMessage(nameOfInput);
-                newInput.Evacuation = EvacuationInput.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, newInput.Population, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
+                newInput.Evacuation.Parse(inputLines, lineindex, newInput.Events, newInput.Population, newInput.PedestrianModule, newInput.TrafficModule, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
             }
-            else if(newInput.Simulation.RunPedestrianModule || newInput.Simulation.RunTrafficModule)
+            else if(newInput.PedestrianModule.Active || newInput.TrafficModule.Active)
             {
                 //critical
                 success = false;
                 Engine.Message(null, Engine.LogType.InputError, nameOfInput + " header not found but user has requested pedestrian and/or traffic modules." + pleaseCheckInput);
             }
-            else
-            {
-                newInput.Evacuation = new EvacuationInput(newInput.Simulation);
-            }
             if (!success)
             {
                 return null;
-            }
-
-            //pedestrian
-            nameOfInput = nameof(Pedestrian);
-            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
-            {
-                ReadingInputMessage(nameOfInput);
-                newInput.Pedestrian = PedestrianInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, out success);
-            }
-            else if(newInput.Simulation.RunPedestrianModule)
-            {
-                //critical
-                Engine.Message(null, Engine.LogType.InputError, nameOfInput + " header not found but user has requested pedestrian module." + pleaseCheckInput);
-                return null;
-            }
-            if (!success)
-            {
-                return null;
-            }
-
-            //traffic
-            nameOfInput = nameof(Traffic);
-            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
-            {
-                ReadingInputMessage(nameOfInput);
-                newInput.Traffic = TrafficInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, rootFolder, out success);
-            }
-            else if(newInput.Simulation.RunTrafficModule)
-            {
-                //critical
-                Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " header not found but user has requested traffic module." + pleaseCheckInput);
-                return null;
-            }
-            if (!success)
-            {
-                return null;
-            }
-
-            //fire
-            nameOfInput = nameof(Fire);
-            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
-            {
-                ReadingInputMessage(nameOfInput);
-                newInput.Fire = FireInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, rootFolder, out success);
-            }
-            else if(newInput.Simulation.RunFireModule)
-            {
-                //critical                
-                Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " header not found but user has requested fire module." + pleaseCheckInput);
-                return null;
-            }
-            if (!success)
-            {
-                return null;
-            }
-
-            //smoke
-            nameOfInput = nameof(Smoke);
-            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
-            {
-                ReadingInputMessage(nameOfInput);
-                newInput.Smoke = SmokeInput.Parse(inputLines, lineindex, headerLineIndices, newInput.Simulation, rootFolder, out success);
-            }
-            else if (newInput.Simulation.RunSmokeModule)
-            {
-                //critical
-                Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " header not found but user has requested smoke module." + pleaseCheckInput);
-                return null;
-            }
-            if (!success)
-            {
-                return null;
-            }
-
-            //trigger buffer
-            nameOfInput = nameof(TriggerBuffer);
-            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
-            {
-                ReadingInputMessage(nameOfInput);
-                newInput.TriggerBuffer = TriggerBufferInput.Parse(inputLines, lineindex, headerLineIndices, rootFolder, out success);
-            }
-            else
-            {
-                //does not matter, not active per default
-                newInput.TriggerBuffer = new TriggerBufferInput();
-                Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, using defaults (disabled).");
-            }
-            if (!success)
-            {
-                return null;
-            }
+            }            
 
             //WUIShow
             nameOfInput = nameof(WUIShow);
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.WUIShow = WUIShowInput.Parse(inputLines, lineindex, out success);
+                newInput.WUIShow.Parse(inputLines, lineindex, out success);
             }
             else
             {

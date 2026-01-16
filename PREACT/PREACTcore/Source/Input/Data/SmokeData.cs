@@ -16,16 +16,11 @@ namespace PREACT.IO
 
         public Smoke.ExtinctionRamp ExtinctionRamp { get => _extinctionRamp; }
 
-        public void LoadAll(SimulationInput simulationInput, SmokeInput smokeInput, string rootFolder, out bool success)
+        public void LoadAll(SmokeInput smokeInput, string rootFolder, out bool success)
         {
             success = false;
 
-            if(!simulationInput.RunSmokeModule)
-            {
-                return;
-            }
-
-            if (simulationInput.RunSmokeModule && smokeInput.SmokeModule == SmokeInput.SmokeModuleChoice.GlobalSmoke)
+            if (smokeInput.Module == SmokeInput.SmokeModules.GlobalSmoke)
             {
                 string filePath = Path.Combine(rootFolder, smokeInput.GlobalSmokeInput.ExtinctionFile);
                 LoadExtinctionRamp(filePath, out success);

@@ -111,16 +111,16 @@ namespace WUInity.UI
                 }
             }            
 
-            _input.Simulation.RunPedestrianModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunPedestrianModule, "Simulate pedestrians");
+            _input.PedestrianModule.Active = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.PedestrianModule.Active, "Simulate pedestrians");
             ++buttonIndex;
 
-            _input.Simulation.RunTrafficModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunTrafficModule, "Simulate traffic");
+            _input.TrafficModule.Active = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.TrafficModule.Active, "Simulate traffic");
             ++buttonIndex;
 
-            _input.Simulation.RunFireModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunFireModule, "Simulate fire spread");
+            _input.WildfireModule.Active = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.WildfireModule.Active, "Simulate fire spread");
             ++buttonIndex;
 
-            _input.Simulation.RunSmokeModule = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.Simulation.RunSmokeModule, "Simulate smoke spread");
+            _input.SmokeModule.Active = GUI.Toggle(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _input.SmokeModule.Active, "Simulate smoke spread");
             ++buttonIndex;            
 
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Start simulation"))

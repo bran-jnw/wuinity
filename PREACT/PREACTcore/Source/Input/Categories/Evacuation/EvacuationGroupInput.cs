@@ -25,7 +25,7 @@ namespace PREACT.Evacuation
 
         }
 
-        public static Dictionary<string, EvacuationGroupInput> Parse(string[] inputLines, SimulationInput simulationInput, List<int> evacGroupLineIndices, 
+        public static Dictionary<string, EvacuationGroupInput> Parse(string[] inputLines, List<int> evacGroupLineIndices, 
             Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, PopulationInput population, string rootFolder, out bool success)
         {
             Dictionary<string, EvacuationGroupInput> newInputs = new Dictionary<string, EvacuationGroupInput>();

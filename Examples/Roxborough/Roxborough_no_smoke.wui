@@ -4,10 +4,6 @@ LowerLeftLatLon=39.409924,-105.104505
 DomainSize=10000.0,11000.0
 DeltaTime=1.0
 MaxSimTime=36000.0
-RunPedestrianModule=true
-RunTrafficModule=true
-RunFireModule=true
-RunSmokeModule=false
 StopWhenEvacuated=false
 
 [Map]
@@ -121,27 +117,29 @@ ResponseCurves=observed_average
 ResponseCurvesCDF=1.0
 Color=0.0,1.0,0.0
 
-[Pedestrian]
-PedestrianModule=MacroHouseholdSim
+[PedestrianModule]
+Active=true
+Module=MacroHouseholdSim
 
 [MacroHouseholdSim]
 WalkingSpeedMinMax=0.7,1.0
 WalkingSpeedModifier=1.0
 WalkingDistanceModifier=1.0
 
-[Traffic]
-TrafficModule=SUMO      
+[TrafficModule]
+Active=true
+Module=SUMO      
 VisibilityAffectsSpeed=false  
 
 [SUMO]
 ConfigurationFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
-DestinationChoice=EvacGroupWeighted
 SmokeAlpha=0.4967
 SmokeBeta=-0.02910
 
-[Fire]
-FireModule=AscImport
+[WildfireModule]
+Active=true
+Module=AscImport
 LcpFile=fire/rox_big_burning_city.lcp
 GraphicalFireInputFile=fire/example.gfi
 
@@ -153,9 +151,9 @@ SpreadDirectionFile=output/SD.asc
 FirelineIntensityFile=output/FI.asc
 WeatherStreamFile=weather_stream.wxs
 
-[TriggerBuffer]
-CalculateTriggerBuffer=false
-TriggerBuffer=kPERIL
+[TriggerBufferModule]
+Active=false
+Module=kPERIL
 
 [kPERIL]
 MidflameWindspeed=10.0

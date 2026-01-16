@@ -3,7 +3,7 @@ using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
-    public class Demographics
+    public class DemographicsInput
     {
         public string Name = string.Empty;
         public bool AllowMoreThanOneCar = true;
@@ -11,19 +11,19 @@ namespace PREACT.Evacuation
         public float MaxCarsProbability = 0.3f;
         public bool Default = false;
 
-        public Demographics() 
+        public DemographicsInput() 
         {
             
         }
 
-        public static Dictionary<string, Demographics> Parse(string[] inputLines, List<int> demographicsLineIndices, out bool success)
+        public static Dictionary<string, DemographicsInput> Parse(string[] inputLines, List<int> demographicsLineIndices, out bool success)
         {
-            Dictionary<string, Demographics> newInputs = new Dictionary<string, Demographics>();
+            Dictionary<string, DemographicsInput> newInputs = new Dictionary<string, DemographicsInput>();
             success = false;
 
             for (int i = 0; i < demographicsLineIndices.Count; ++i)
             {
-                Demographics newInput = new Demographics();
+                DemographicsInput newInput = new DemographicsInput();
                 success = false;
                 int issues = 0;
                 Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, demographicsLineIndices[i]);
@@ -99,7 +99,7 @@ namespace PREACT.Evacuation
                     }
                     else if (newInput.Default)
                     {
-                        foreach (Demographics prevInput in newInputs.Values)
+                        foreach (DemographicsInput prevInput in newInputs.Values)
                         {
                             prevInput.Default = false;
                         }

@@ -14,7 +14,7 @@ namespace WUInity.UI
 
         void TrafficMenu()
         {
-            TrafficInput tO = _input.Traffic;
+            TrafficModuleInput tO = _input.TrafficModule;
             if (trafficMenuDirty)
             {
                 trafficMenuDirty = false;
@@ -59,7 +59,7 @@ namespace WUInity.UI
                 return;
             }
 
-            TrafficInput tO = _input.Traffic;
+            TrafficModuleInput tO = _input.TrafficModule;
 
             float.TryParse(stallSpeed, out tO.MacroTrafficSimInput.StallSpeed);
             //float.TryParse(opticalDensity, out tO.opticalDensity);

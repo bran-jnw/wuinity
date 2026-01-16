@@ -20,7 +20,7 @@ namespace PREACT.Evacuation
         private List<double> _destinationsCDF;
         private List<ResponseCurve> _responseCurves;
         private List<double> _responseCurvesCDF;
-        private Demographics _demographics;
+        private DemographicsInput _demographics;
 
         private List<Vector2d> _shapePolygonLocal;
         private Vector2d _boundingBoxMin;
@@ -31,10 +31,10 @@ namespace PREACT.Evacuation
         public bool Default { get => _default; }
         public List<EvacuationDestination> Destinations { get => _destinations; }
         public DestinationChoices DestinationChoice { get => _destinationChoice; }
-        public Demographics Demographics { get => _demographics; }
+        public DemographicsInput Demographics { get => _demographics; }
 
 
-        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
+        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, DemographicsInput> allDemographics, Simulation simulation)
         {
             _name = groupInput.Name;
             _destinationChoice = groupInput.DestinationChoice;
@@ -83,7 +83,7 @@ namespace PREACT.Evacuation
         }
 
         public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, 
-            EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
+            EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, DemographicsInput> allDemographics, Simulation simulation)
         {
             EvacuationGroup[] groups = new EvacuationGroup[groupsInput.Count];
             int index = 0;
@@ -130,11 +130,7 @@ namespace PREACT.Evacuation
             for(int i = 0; i < rawPoints.Count; ++i)
             {
                 Vector2d localPos = simulation.Input.Simulation.Data.GetSimulationPosition(rawPoints[i]);
-
-                Engine.Message(simulation, Engine.LogType.Debug, localPos.x + ", " + localPos.y);
-
                 _shapePolygonLocal.Add(localPos);
-
                 //update bounding box
                 _boundingBoxMin.x = Mathd.Min(localPos.x, _boundingBoxMin.x);
                 _boundingBoxMax.x = Mathd.Max(localPos.x, _boundingBoxMax.x);

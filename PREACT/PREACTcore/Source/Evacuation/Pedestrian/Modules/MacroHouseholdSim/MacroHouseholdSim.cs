@@ -168,7 +168,7 @@ namespace PREACT.Pedestrian
 
         private void ReachedCar(MacroHousehold household)
         {
-            if(_simulation.Input.Simulation.RunTrafficModule)
+            if(_simulation.Input.TrafficModule.Active)
             {
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household.GetVehicleLatLon(), household.EvacuationGroup);
@@ -289,7 +289,7 @@ namespace PREACT.Pedestrian
         /// <returns></returns>
         public float GetRandomWalkingSpeed()
         {
-            MacroHouseholdSimInput eO = _simulation.Input.Pedestrian.MacroHouseholdSimInput;
+            MacroHouseholdSimInput eO = _simulation.Input.PedestrianModule.MacroHouseholdSimInput;
             return Random.Range(eO.WalkingSpeedMinMax.X, eO.WalkingSpeedMinMax.Y) * eO.WalkingSpeedModifier;
         }
 
