@@ -292,14 +292,14 @@ namespace PREACT.Visualization
                         //new vehicle not sent before
                         if (!foundVehicle)
                         {
-                            previouslySentVehiclePositions.Add(vehicle.VehicleId, vehicle.WorldPosition);
+                            previouslySentVehiclePositions.Add(vehicle.VehicleId, vehicle.SimulationPos);
                             _newVehiclesNotSent.Enqueue(vehicle);
                             sendData = true;
                         }
                         //only send if position has changed
-                        else if (vehicle.WorldPosition != oldWorldPos)
+                        else if (vehicle.SimulationPos != oldWorldPos)
                         {
-                            previouslySentVehiclePositions[vehicle.VehicleId] = vehicle.WorldPosition;
+                            previouslySentVehiclePositions[vehicle.VehicleId] = vehicle.SimulationPos;
                             sendData = true;
                         } 
 
@@ -307,7 +307,7 @@ namespace PREACT.Visualization
                         {
                             addBytes(BitConverter.GetBytes(vehicle.VehicleId));
                             //sending geodata, wgs84
-                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(vehicle.WorldPosition.x - offset.x, vehicle.WorldPosition.y - offset.y, false);
+                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(vehicle.SimulationPos.x - offset.x, vehicle.SimulationPos.y - offset.y, false);
                             //Make the lon/lat coordinates relative to conserve precision during cast to float
                             //SUMO defines lon as x and lat as y
                             double longitude = wgs84.x - origoLongitude;

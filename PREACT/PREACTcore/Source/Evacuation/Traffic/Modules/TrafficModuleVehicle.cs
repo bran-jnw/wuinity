@@ -21,7 +21,7 @@ namespace PREACT.Traffic
         protected float _speedRatio;       
 
         public uint VehicleId { get => _vehicleId; }
-        public Vector2d WorldPosition { get => _worldPosition; }
+        public Vector2d SimulationPos { get => _worldPosition; }
         public uint NumberOfPeople { get => _numberOfPeople; }
         public float TotalTravelTime { get => _totalTravelTime; }
         public string VehicleClass { get => _vehicleClass; }

@@ -101,7 +101,7 @@ namespace PREACT.Traffic
                 foreach (KeyValuePair<string, SUMOVehicle> sV in _sumoVehicles)
                 {
                     SUMOVehicle vehicle = sV.Value;
-                    double speedFactor = vehicle.InitialSpeedFactor * GetSmokeSpeedReductionFactor(vehicle.WorldPosition);
+                    double speedFactor = vehicle.InitialSpeedFactor * GetSmokeSpeedReductionFactor(vehicle.SimulationPos);
                     LIBSUMO.Vehicle.setSpeedFactor(vehicle.GetSumoVehicleID(), speedFactor);
                 }
             }           
@@ -182,7 +182,7 @@ namespace PREACT.Traffic
 
         private void UpdateOutputMaps(SUMOVehicle vehicle, float deltaTime)
         {
-            Vector2d pos = vehicle.WorldPosition;
+            Vector2d pos = vehicle.SimulationPos;
 
             int xIndex = (int)(_usageMap.GetLength(0) * pos.x / _simulation.Input.Simulation.DomainSize.x);
             int yIndex = (int)(_usageMap.GetLength(1) * pos.y / _simulation.Input.Simulation.DomainSize.y);
@@ -541,6 +541,23 @@ namespace PREACT.Traffic
             catch (Exception e)
             {
                 Engine.Message(_simulation, Engine.LogType.Log, "Could not stop SUMO. " + e.Message + ". " + e.InnerException);
+            }
+        }
+
+        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos)
+        {
+            for (int i = 0; i < vehicles.Count; ++i)
+            {
+                try
+                {
+                    //IMPORTANT!!! Longitude then latitude in SUMO
+                    LIBSUMO.TraCIRoadPosition destination = LIBSUMO.Simulation.convertRoad(simulationPos.y, simulationPos.x, true);
+                    LIBSUMO.Vehicle.changeTarget(((SUMOVehicle)vehicles[i]).VehicleId.ToString(), destination.edgeID);
+                }
+                catch (Exception e)
+                {
+                    Engine.Message(null, Engine.LogType.Warning, e.Message);
+                }
             }
         }
     }

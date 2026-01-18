@@ -7,8 +7,7 @@
 
 using System.Collections.Generic;       
 using UnityEngine;
-using PREACT.IO;
-using PREACT.Pedestrian;                     
+using PREACT.IO;                    
 using PREACT.Traffic;                          
 using System.IO;
 using PREACT;
@@ -21,8 +20,8 @@ namespace WUInity
     public enum DataSampleMode { None, LocalGPW, PopulationMap, Relocated, TrafficDens, Paint, Farsite }
 
     [RequireComponent(typeof(WUInityGUI))]
-    [RequireComponent(typeof(Visualization.EvacuationRenderer))]
-    [RequireComponent(typeof(Visualization.FireRenderer))]
+    [RequireComponent(typeof(EvacuationRenderer))]
+    [RequireComponent(typeof(FireRenderer))]
     public class WUInityManager : MonoBehaviour, IExternalManager                     
     {
         public EvacuationRenderer EvacuationRenderer
@@ -329,35 +328,77 @@ namespace WUInity
         {
             dataSampleMode = sampleMode;
         }
-        
+
+        int rightClicks = 0;
+        Vector3 rightClickPos1, rightClickPos2, manualDestination;
+        bool haveBoundingBox = false;
         void Update()
-        {
-            if (Input.GetMouseButtonDown(0) && dataSampleMode != DataSampleMode.None)
+        {            
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (haveBoundingBox)
+                {
+                    Plane _yPlane = new Plane(Vector3.up, 0f);
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    float enter;
+                    if (_yPlane.Raycast(ray, out enter))
+                    {
+                        manualDestination = ray.GetPoint(enter);
+                        haveBoundingBox = false;
+                        UpdateDestinationForVehicles();
+                    }
+                }
+                else if (dataSampleMode != DataSampleMode.None)
+                {
+                    Plane _yPlane = new Plane(Vector3.up, 0f);
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    float enter = 0.0f;
+                    if (_yPlane.Raycast(ray, out enter))
+                    {
+                        /*Vector3 hitPoint = ray.GetPoint(enter);
+                        float xNorm = hitPoint.x / (float)_input.Simulation.DomainSize.x;
+                        //xNorm = Mathf.Clamp01(xNorm);
+                        int x = (int)(_input.Evacuation.Data.CellCount.x * xNorm);
+
+                        float yNorm = hitPoint.z / (float)_input.Simulation.DomainSize.y;
+                        //yNorm = Mathf.Clamp01(yNorm);
+                        int y = (int)(_input.Evacuation.Data.CellCount.y * yNorm);
+                        GetCellInfo(hitPoint, x, y);*/
+                    }
+                }                
+            }
+
+            if (Input.GetMouseButtonDown(1))
             {
                 Plane _yPlane = new Plane(Vector3.up, 0f);
-                Ray ray = Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition);
-                float enter = 0.0f;
-                if (_yPlane.Raycast(ray, out enter))
-                {
-                    /*Vector3 hitPoint = ray.GetPoint(enter);
-                    float xNorm = hitPoint.x / (float)_input.Simulation.DomainSize.x;
-                    //xNorm = Mathf.Clamp01(xNorm);
-                    int x = (int)(_input.Evacuation.Data.CellCount.x * xNorm);
-
-                    float yNorm = hitPoint.z / (float)_input.Simulation.DomainSize.y;
-                    //yNorm = Mathf.Clamp01(yNorm);
-                    int y = (int)(_input.Evacuation.Data.CellCount.y * yNorm);
-                    GetCellInfo(hitPoint, x, y);*/
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                float enter;
+                ++rightClicks;
+                if(rightClicks % 2 == 1)                
+                {   
+                    if (_yPlane.Raycast(ray, out enter))
+                    {
+                        rightClickPos1 = ray.GetPoint(enter);
+                    }
                 }
-            }    
+                else
+                {
+                    if (_yPlane.Raycast(ray, out enter))
+                    {
+                        rightClickPos2 = ray.GetPoint(enter);
+                        haveBoundingBox = true;
+                    }
+                }
+                
+            }
 
             //temp hack for changing height in smoke sim
-            if(Input.GetKeyDown(KeyCode.KeypadPlus))
+            if (Input.GetKey(KeyCode.KeypadPlus))
             {
                 print("Going up.");
                 ((PREACT.Smoke.AdvectDiffuse3D)_engine.Simulation.SmokeModule).IncreaseOutputHeight();
             }
-            else if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            else if (Input.GetKey(KeyCode.KeypadMinus))
             {
                 print("Going down.");
                 ((PREACT.Smoke.AdvectDiffuse3D)_engine.Simulation.SmokeModule).DecreaseOutputHeight();
@@ -381,6 +422,16 @@ namespace WUInity
             {
                 //UpdateOSMBorder();
             }                
+        }
+
+        private void UpdateDestinationForVehicles()
+        {
+            PREACT.Math.Vector2d lowerLeft = new PREACT.Math.Vector2d(Mathf.Min(rightClickPos1.x, rightClickPos2.x), Mathf.Min(rightClickPos1.z, rightClickPos2.z));
+            PREACT.Math.Vector2d upperRight = new PREACT.Math.Vector2d(Mathf.Max(rightClickPos1.x, rightClickPos2.x), Mathf.Max(rightClickPos1.z, rightClickPos2.z));
+            PREACT.Math.Vector2d destination = new PREACT.Math.Vector2d(manualDestination.x, manualDestination.z);
+
+            List<TrafficModuleVehicle> vehicles = _engine.Simulation.TrafficModule.GetVehiclesInBoundingBox(lowerLeft, upperRight);
+            _engine.Simulation.TrafficModule.SetManualDestination(vehicles, destination);
         }
 
         public void RunSimulation(EngineTask engineTask)

@@ -452,5 +452,10 @@ namespace PREACT.Traffic
         {
             //throw new System.NotImplementedException();
         }
+
+        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

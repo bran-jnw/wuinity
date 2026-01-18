@@ -76,5 +76,22 @@ namespace PREACT.Traffic
         public abstract void HandleIgnitedFireCells(List<Vector2int> cellIndices);
 
         public abstract bool IsNetworkReachable(Vector2d startLatLong);
+
+        public List<TrafficModuleVehicle> GetVehiclesInBoundingBox(Vector2d lowerLeftPos, Vector2d upperRightPos)
+        {
+            List<TrafficModuleVehicle> vehicles = new List<TrafficModuleVehicle>();
+
+            foreach (TrafficModuleVehicle vehicle in _activeVehicles.Values)
+            {
+                if(vehicle.SimulationPos.x >= lowerLeftPos.x && vehicle.SimulationPos.x <= upperRightPos.x && vehicle.SimulationPos.y >= lowerLeftPos.y && vehicle.SimulationPos.y <= upperRightPos.y)
+                {
+                    vehicles.Add(vehicle);
+                }
+            }
+
+            return vehicles;
+        }
+
+        public abstract void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos);
     }
 }

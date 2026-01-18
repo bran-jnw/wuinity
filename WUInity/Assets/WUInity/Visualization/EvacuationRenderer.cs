@@ -77,7 +77,7 @@ namespace WUInity.Visualization
                     List<Vector4> dataToRender = new List<Vector4>();
                     foreach(TrafficModuleVehicle vehicle in _activeVehicles.Values)
                     {
-                        Vector2d pos = vehicle.WorldPosition;
+                        Vector2d pos = vehicle.SimulationPos;
                         float speedRatio = vehicle.SpeedRatio;
                         Vector4 data = new Vector4((float)pos.x, (float)pos.y, speedRatio, 0f);
                         dataToRender.Add(data);
