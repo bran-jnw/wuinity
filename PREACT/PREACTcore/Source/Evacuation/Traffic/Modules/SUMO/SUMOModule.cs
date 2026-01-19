@@ -551,7 +551,8 @@ namespace PREACT.Traffic
                 try
                 {
                     //IMPORTANT!!! Longitude then latitude in SUMO
-                    LIBSUMO.TraCIRoadPosition destination = LIBSUMO.Simulation.convertRoad(simulationPos.y, simulationPos.x, true);
+                    Vector2d sumoPos = simulationPos - _originOffset;
+                    LIBSUMO.TraCIRoadPosition destination = LIBSUMO.Simulation.convertRoad(sumoPos.x, sumoPos.y);
                     LIBSUMO.Vehicle.changeTarget(((SUMOVehicle)vehicles[i]).VehicleId.ToString(), destination.edgeID);
                 }
                 catch (Exception e)

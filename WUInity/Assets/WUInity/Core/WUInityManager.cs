@@ -78,6 +78,7 @@ namespace WUInity
         
         [SerializeField] private LineRenderer _simBorder;
         [SerializeField] private LineRenderer _osmBorder;
+        [SerializeField] private LineRenderer _rtsSlection;
         [SerializeField] public  ComputeShader AdvectDiffuseCompute;
         [SerializeField] public Texture2D NoiseTex;
         [SerializeField] public Texture2D WindTex;
@@ -169,6 +170,9 @@ namespace WUInity
 
             _simulationDomainVisualizer = new SimulationDomainVisualizerUnity(transform);
             _fireDomainVisualizer = new FireDomainVisualizerUnity(transform);
+
+            _rtsSlection.positionCount = 4;
+            _rtsSlection.gameObject.SetActive(false);
         }
 
         private void Start()
@@ -331,24 +335,76 @@ namespace WUInity
 
         int rightClicks = 0;
         Vector3 rightClickPos1, rightClickPos2, manualDestination;
-        bool haveBoundingBox = false;
+        bool haveBoundingBox = false, selectingVehicles;
+        Plane _yPlane = new Plane(Vector3.up, 0f);
         void Update()
-        {            
-            if (Input.GetMouseButtonDown(0))
+        {
+            //RTS stuff
+            if(_engine.Simulation != null && _engine.Simulation.State == Simulation.SimulationState.Running && _engine.Simulation.IsPaused)
             {
-                if (haveBoundingBox)
+                if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    Plane _yPlane = new Plane(Vector3.up, 0f);
+                    selectingVehicles = false;
+                    haveBoundingBox = false;
+                    _rtsSlection.gameObject.SetActive(false);
+                }
+
+                if (selectingVehicles)
+                {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     float enter;
                     if (_yPlane.Raycast(ray, out enter))
                     {
-                        manualDestination = ray.GetPoint(enter);
-                        haveBoundingBox = false;
-                        UpdateDestinationForVehicles();
+                        rightClickPos2 = ray.GetPoint(enter);
+                        _rtsSlection.SetPosition(0, new Vector3(Mathf.Min(rightClickPos1.x, rightClickPos2.x), 10f, Mathf.Min(rightClickPos1.z, rightClickPos2.z)));
+                        _rtsSlection.SetPosition(1, new Vector3(Mathf.Max(rightClickPos1.x, rightClickPos2.x), 10f, Mathf.Min(rightClickPos1.z, rightClickPos2.z)));
+                        _rtsSlection.SetPosition(2, new Vector3(Mathf.Max(rightClickPos1.x, rightClickPos2.x), 10f, Mathf.Max(rightClickPos1.z, rightClickPos2.z)));
+                        _rtsSlection.SetPosition(3, new Vector3(Mathf.Min(rightClickPos1.x, rightClickPos2.x), 10f, Mathf.Max(rightClickPos1.z, rightClickPos2.z)));
+                        if (Input.GetMouseButtonUp(0))
+                        {
+                            haveBoundingBox = true;
+                            selectingVehicles = false;
+                        }
                     }
                 }
-                else if (dataSampleMode != DataSampleMode.None)
+                else if (Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0)
+                {
+                    if (haveBoundingBox)
+                    {
+                        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                        float enter;
+                        if (_yPlane.Raycast(ray, out enter))
+                        {
+                            manualDestination = ray.GetPoint(enter);
+                            haveBoundingBox = false;
+                            UpdateDestinationForVehicles();
+                            _rtsSlection.gameObject.SetActive(false);
+                        }
+                    }
+                    else if (!selectingVehicles)
+                    {
+                        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                        float enter;
+                        if (_yPlane.Raycast(ray, out enter))
+                        {
+                            rightClickPos1 = ray.GetPoint(enter);
+                            rightClickPos2 = rightClickPos1;
+                            haveBoundingBox = false;
+                            selectingVehicles = true;
+                            _rtsSlection.SetPosition(0, rightClickPos1 + Vector3.up * 10);
+                            _rtsSlection.SetPosition(1, rightClickPos1 + Vector3.up * 10);
+                            _rtsSlection.SetPosition(2, rightClickPos1 + Vector3.up * 10);
+                            _rtsSlection.SetPosition(3, rightClickPos1 + Vector3.up * 10);
+                            _rtsSlection.gameObject.SetActive(true);
+                        }
+                    }                    
+                }
+            }
+            
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (dataSampleMode != DataSampleMode.None)
                 {
                     Plane _yPlane = new Plane(Vector3.up, 0f);
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -368,30 +424,6 @@ namespace WUInity
                 }                
             }
 
-            if (Input.GetMouseButtonDown(1))
-            {
-                Plane _yPlane = new Plane(Vector3.up, 0f);
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                float enter;
-                ++rightClicks;
-                if(rightClicks % 2 == 1)                
-                {   
-                    if (_yPlane.Raycast(ray, out enter))
-                    {
-                        rightClickPos1 = ray.GetPoint(enter);
-                    }
-                }
-                else
-                {
-                    if (_yPlane.Raycast(ray, out enter))
-                    {
-                        rightClickPos2 = ray.GetPoint(enter);
-                        haveBoundingBox = true;
-                    }
-                }
-                
-            }
-
             //temp hack for changing height in smoke sim
             if (Input.GetKey(KeyCode.KeypadPlus))
             {
@@ -407,7 +439,7 @@ namespace WUInity
             //always update visuals, even when paused
             if (_engine.Simulation != null)
             {
-                if (_engine.Simulation.State == Simulation.SimulationState.Running) // !WUIEngine.RUNTIME_DATA.Simulation.MultipleSimulations && 
+                if (_engine.Simulation.State == Simulation.SimulationState.Running)
                 {
                     if (!_visualsExist)
                     {
