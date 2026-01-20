@@ -37,6 +37,11 @@ namespace PREACT.Traffic
             _vehicleClass = vehicleClass;
         }
 
+        public void UpdateDestination(EvacuationDestination newDestination)
+        {
+            _destination = newDestination;
+        }
+
         public abstract void Arrive(float deltaTime, float currentTime);
     }
 }

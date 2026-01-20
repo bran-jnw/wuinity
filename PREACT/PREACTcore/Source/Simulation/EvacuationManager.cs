@@ -12,13 +12,13 @@ namespace PREACT.Evacuation
         PREACTInput _input;
         EvacuationGroup _defaultEvacutionGroup;        
         Dictionary<string, EvacuationDestination> _evacuationDestinationsDict;
-        EvacuationDestination[] _evacuationDestinations;
+        List<EvacuationDestination> _evacuationDestinations;
         List<EvacuationDestination> _availableEvacuationDestinations;
         EvacuationGroup[] _evacuationGroups;
 
         DemographicsInput _defaultDemographics;
 
-        public EvacuationDestination[] Destinations { get => _evacuationDestinations; }
+        public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
         public DemographicsInput DefaultDemographics { get => _defaultDemographics; }
 
         public EvacuationManager(Simulation simulation)
@@ -29,8 +29,19 @@ namespace PREACT.Evacuation
             SetDefaulDemographics(_input.Population.Demographics);
             _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _input.Population.Demographics, _simulation);
             SetDefaulEvacuationtGroup(); //just sets default group fallback
-            BuildEvacuationDestinationArray(); //duplicate of destination but in an array, needed for random pull of destination
+            BuildEvacuationDestinationList(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
+        }
+
+        int _runtimeDestinationCount = 0;
+        public EvacuationDestination AddRuntimeDestination(Vector2d latLon)
+        {
+            EvacuationDestination eD = new EvacuationDestination(_simulation, latLon, "RuntimeDestination" + _runtimeDestinationCount);
+            _evacuationDestinations.Add(eD);
+            ++_runtimeDestinationCount;
+            _simulation.Engine.UpdateEvacuationDestinations(_simulation, _evacuationDestinations);
+
+            return eD;
         }
 
         public uint GetTotalEvacuated()
@@ -113,20 +124,18 @@ namespace PREACT.Evacuation
             _simulation.TrafficModule.UpdateEvacuationGoals();
         }
 
-        private void BuildEvacuationDestinationArray()
+        private void BuildEvacuationDestinationList()
         {
-            _evacuationDestinations = new EvacuationDestination[_evacuationDestinationsDict.Count];
-            int index = 0;
+            _evacuationDestinations = new List<EvacuationDestination>(_evacuationDestinationsDict.Count);
             foreach (EvacuationDestination eD in _evacuationDestinationsDict.Values)
             {
-                _evacuationDestinations[index] = eD;
-                ++index;
+                _evacuationDestinations.Add(eD);
             }
         }
 
         private void BuildAvailableEvacuationDestinations()
         {
-            _availableEvacuationDestinations = new List<EvacuationDestination>(_evacuationDestinations.Length);
+            _availableEvacuationDestinations = new List<EvacuationDestination>(_evacuationDestinations.Count);
             foreach(EvacuationDestination eD in _evacuationDestinations)
             {
                 if(!eD.Blocked)
@@ -138,7 +147,7 @@ namespace PREACT.Evacuation
 
         private EvacuationDestination GetRandomEvacuationDestination()
         {
-            int randomChoice = Random.Range(0, _evacuationDestinations.Length);
+            int randomChoice = Random.Range(0, _evacuationDestinations.Count);
             return _evacuationDestinations[randomChoice];
         }
 

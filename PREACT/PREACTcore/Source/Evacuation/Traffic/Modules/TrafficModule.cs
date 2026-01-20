@@ -92,6 +92,6 @@ namespace PREACT.Traffic
             return vehicles;
         }
 
-        public abstract void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos);
+        public abstract void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos, EvacuationDestination evacuationDestination);
     }
 }

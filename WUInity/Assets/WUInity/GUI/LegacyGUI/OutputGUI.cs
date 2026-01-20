@@ -99,7 +99,7 @@ namespace WUInity.UI
 
             if(_input.PedestrianModule.Enabled)
             {
-                for (int i = 0; i < _engine.Simulation.Evacuation.Destinations.Length; i++)
+                for (int i = 0; i < _engine.Simulation.Evacuation.Destinations.Count; i++)
                 {
                     string name = _engine.Simulation.Evacuation.Destinations[i].Name;
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.Simulation.Evacuation.Destinations[i].CurrentPeople + " (" + _engine.Simulation.Evacuation.Destinations[i].Vehicles.Count + ")");

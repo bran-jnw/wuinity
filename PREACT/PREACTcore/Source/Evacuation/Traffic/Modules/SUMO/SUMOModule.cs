@@ -50,7 +50,7 @@ namespace PREACT.Traffic
 
                 output = new List<string>();
                 string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
-                for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
+                for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
                 {
                     header += "," + _simulation.Evacuation.Destinations[i].Name + " people arrived";
                     header += "," + _simulation.Evacuation.Destinations[i].Name + " cars arrived";
@@ -171,7 +171,7 @@ namespace PREACT.Traffic
 
             //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
-            for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
+            for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
             {
                 dataLine += "," + _simulation.Evacuation.Destinations[i].CurrentPeople;
                 dataLine += "," + _simulation.Evacuation.Destinations[i].Vehicles.Count;
@@ -544,7 +544,7 @@ namespace PREACT.Traffic
             }
         }
 
-        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos)
+        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos, EvacuationDestination evacuationDestination)
         {
             for (int i = 0; i < vehicles.Count; ++i)
             {
@@ -552,8 +552,9 @@ namespace PREACT.Traffic
                 {
                     //IMPORTANT!!! Longitude then latitude in SUMO
                     Vector2d sumoPos = simulationPos - _originOffset;
-                    LIBSUMO.TraCIRoadPosition destination = LIBSUMO.Simulation.convertRoad(sumoPos.x, sumoPos.y);
-                    LIBSUMO.Vehicle.changeTarget(((SUMOVehicle)vehicles[i]).VehicleId.ToString(), destination.edgeID);
+                    LIBSUMO.TraCIRoadPosition destinationEdge = LIBSUMO.Simulation.convertRoad(sumoPos.x, sumoPos.y);
+                    LIBSUMO.Vehicle.changeTarget(((SUMOVehicle)vehicles[i]).VehicleId.ToString(), destinationEdge.edgeID);
+                    vehicles[i].UpdateDestination(evacuationDestination);
                 }
                 catch (Exception e)
                 {

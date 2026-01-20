@@ -88,7 +88,7 @@ namespace PREACT.Traffic
             throw new NotImplementedException();
         }
 
-        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos)
+        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos, Evacuation.EvacuationDestination evacuationDestination)
         {
             throw new NotImplementedException();
         }

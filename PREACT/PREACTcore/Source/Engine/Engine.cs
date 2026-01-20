@@ -473,7 +473,16 @@ namespace PREACT
                 _externalManager.UpdateInput(input);
             }
         }
-                
+
+        public void UpdateEvacuationDestinations(Simulation simulation, List<Evacuation.EvacuationDestination> destinations)
+        {
+            if (_externalManager != null && simulation == _mainSimulation)
+            {
+                _externalManager.UpdateDestinations(destinations);
+            }
+        }
+
+
         public enum LogType { Log, Warning, SimulationError, InputError, Event, Debug };
         private List<string> _consoleLog = new List<string>();
         /// <summary>

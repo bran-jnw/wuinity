@@ -220,16 +220,7 @@ namespace WUInity.Visualization
 
         public void SpawnEvacuationGoalMarkers(PREACTInput input, GameObject markerPrefab)
         {
-            if (_goalMarkers != null)
-            {
-                for (int i = 0; i < _goalMarkers.Length; i++)
-                {
-                    if (_goalMarkers[i] != null)
-                    {
-                        MonoBehaviour.Destroy(_goalMarkers[i]);
-                    }
-                }
-            }
+            ClearMarkers();
 
             if (input.Evacuation.EvacuationDestinationInputs.Count == 0)
             {
@@ -248,6 +239,44 @@ namespace WUInity.Visualization
                 _goalMarkers[index].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
                 MeshRenderer mR = _goalMarkers[index].GetComponentInChildren<MeshRenderer>();
                 mR.material.color = eDI.Color.UnityColor();
+            }
+        }
+
+        public void SpawnEvacuationGoalMarkers(PREACTInput input, System.Collections.Generic.List<EvacuationDestination> destinations, GameObject markerPrefab)
+        {
+            ClearMarkers();
+
+            if (destinations.Count == 0)
+            {
+                return;
+            }
+
+            _goalMarkers = new GameObject[destinations.Count];
+            int index = 0;
+            foreach (EvacuationDestination eDI in destinations)
+            {
+                _goalMarkers[index] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
+                Vector2d pos = input.Simulation.Data.GetSimulationPosition(eDI.LatLon);
+
+                float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);
+                _goalMarkers[index].transform.localScale = new Vector3(scale, 100f, scale);
+                _goalMarkers[index].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
+                MeshRenderer mR = _goalMarkers[index].GetComponentInChildren<MeshRenderer>();
+                mR.material.color = eDI.Color.UnityColor();
+            }
+        }
+
+        private void ClearMarkers()
+        {
+            if (_goalMarkers != null)
+            {
+                for (int i = 0; i < _goalMarkers.Length; i++)
+                {
+                    if (_goalMarkers[i] != null)
+                    {
+                        MonoBehaviour.Destroy(_goalMarkers[i]);
+                    }
+                }
             }
         }
     }

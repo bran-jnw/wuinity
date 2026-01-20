@@ -45,14 +45,14 @@ namespace PREACT.Traffic
             return p;
         }
 
-        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput.RoutingPriority routingPriority,  EvacuationDestination[] evacuatonGoals, bool logMessages)
+        void DetermineValidGoalsAndRouterPoints(MacroTrafficSimInput.RoutingPriority routingPriority,  List<EvacuationDestination> evacuatonGoals, bool logMessages)
         {
             Itinero.Profiles.Profile routerProfile = GetRouterProfile(routingPriority);
 
             //check that evac goals are valid
             _validEvacuationGoalRouterPoints = new List<RouterPoint>();
             _validEvacuationGoals = new List<EvacuationDestination>();
-            for (int i = 0; i < evacuatonGoals.Length; i++)
+            for (int i = 0; i < evacuatonGoals.Count; i++)
             {
                 try
                 {
@@ -296,7 +296,7 @@ namespace PREACT.Traffic
             }
             else if (simulation.Input.TrafficModule.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Random)
             {
-                int randomChoice = Random.Range(0, simulation.Evacuation.Destinations.Length);
+                int randomChoice = Random.Range(0, simulation.Evacuation.Destinations.Count);
                 rC.SelectForcedNonBlocked(simulation.Evacuation.Destinations[randomChoice], simulation);
             }
             else if (simulation.Input.TrafficModule.MacroTrafficSimInput.Routing == MacroTrafficSimInput.RoutingPriority.Closest)

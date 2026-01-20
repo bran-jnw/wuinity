@@ -18,9 +18,9 @@ namespace PREACT.Evacuation
         //properties
         private Vector2d _latLon;
         private PREACTColor _color;
-        private float _maxFlow = 3600f; //cars per hour
-        private string _name = "Destination";
-        private EvacGoalType _goalType = EvacGoalType.Refugee;
+        private float _maxFlow = -1f; //cars per hour
+        private string _name = string.Empty;
+        private EvacGoalType _goalType = EvacGoalType.Exit;
         private int _maxCars = -1;
         private int _maxPeople = -1;
         private bool _blocked = false; 
@@ -54,6 +54,14 @@ namespace PREACT.Evacuation
         public float TotalTravelTime { get => _totalTravelTime; }
         public float AverageTravelTime { get => _averageTravelTime; }
         
+        public EvacuationDestination(Simulation simulation, Vector2d latLon, string name)
+        {
+            _simulation = simulation;
+            _latLon = latLon;
+            _name = name;
+            _color = PREACTColor.Random();
+        }
+
         private EvacuationDestination(Simulation simulation, EvacuationDestinationInput input)
         {
             _simulation = simulation;

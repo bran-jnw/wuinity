@@ -39,7 +39,7 @@ namespace PREACT.Traffic
             output = new List<string>();            
             string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
-            for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
+            for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
             {
                 start += ", Goal: " + _simulation.Evacuation.Destinations[i].Name;
                 start += ", " + _simulation.Evacuation.Destinations[i].Name + " flow";
@@ -321,7 +321,7 @@ namespace PREACT.Traffic
 
             //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
-            for (int i = 0; i < _simulation.Evacuation.Destinations.Length; ++i)
+            for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
             {
                 newOut += "," + _simulation.Evacuation.Destinations[i].CurrentPeople;
                 newOut += "," + _simulation.Evacuation.Destinations[i].CurrentVehicleFlow;
@@ -453,7 +453,7 @@ namespace PREACT.Traffic
             //throw new System.NotImplementedException();
         }
 
-        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos)
+        public override void SetManualDestination(List<TrafficModuleVehicle> vehicles, Vector2d simulationPos, EvacuationDestination evacuationDestination)
         {
             throw new NotImplementedException();
         }

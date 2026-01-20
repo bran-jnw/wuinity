@@ -460,10 +460,15 @@ namespace WUInity
         {
             PREACT.Math.Vector2d lowerLeft = new PREACT.Math.Vector2d(Mathf.Min(rightClickPos1.x, rightClickPos2.x), Mathf.Min(rightClickPos1.z, rightClickPos2.z));
             PREACT.Math.Vector2d upperRight = new PREACT.Math.Vector2d(Mathf.Max(rightClickPos1.x, rightClickPos2.x), Mathf.Max(rightClickPos1.z, rightClickPos2.z));
-            PREACT.Math.Vector2d destination = new PREACT.Math.Vector2d(manualDestination.x, manualDestination.z);
+            PREACT.Math.Vector2d simulationPos = new PREACT.Math.Vector2d(manualDestination.x, manualDestination.z);
 
             List<TrafficModuleVehicle> vehicles = _engine.Simulation.TrafficModule.GetVehiclesInBoundingBox(lowerLeft, upperRight);
-            _engine.Simulation.TrafficModule.SetManualDestination(vehicles, destination);
+            if(vehicles.Count > 0)
+            {
+                PREACT.Math.Vector2d wgs84 = _engine.Simulation.Input.Simulation.Data.GetWGS84FromSimulationPosition(simulationPos);
+                PREACT.Evacuation.EvacuationDestination eD = _engine.Simulation.Evacuation.AddRuntimeDestination(wgs84);
+                _engine.Simulation.TrafficModule.SetManualDestination(vehicles, simulationPos, eD);
+            }           
         }
 
         public void RunSimulation(EngineTask engineTask)
@@ -856,6 +861,11 @@ namespace WUInity
             _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _markerPrefab);
             UpdateMap();
             UpdateSimBorders();
+        }
+
+        public void UpdateDestinations(System.Collections.Generic.List<PREACT.Evacuation.EvacuationDestination> destinations)
+        {
+            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, destinations, _markerPrefab);
         }
 
         public void UpdateMap()

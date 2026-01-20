@@ -8,5 +8,6 @@ namespace PREACT
         void SimulationsFinished();
         void StopSimulations();
         void PauseSimulations();
+        void UpdateDestinations(System.Collections.Generic.List<Evacuation.EvacuationDestination> destinations);
     }
 }
