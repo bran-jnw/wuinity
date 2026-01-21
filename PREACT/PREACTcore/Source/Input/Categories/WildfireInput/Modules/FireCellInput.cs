@@ -13,9 +13,11 @@ namespace PREACT.IO
     [System.Serializable]
     public class FireCellInput
     {
-        public enum SpreadModeEnum { FourDirections, EightDirections, SixteenDirections }
+        public enum SpreadRateModels { BehavePlus, CanadianFBP }
+        public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
-        public SpreadModeEnum SpreadMode = SpreadModeEnum.SixteenDirections;
+        public SpreadRateModels SpreadRateModel = SpreadRateModels.BehavePlus;
+        public SpreadModes SpreadMode = SpreadModes.SixteenDirections;
         public string RootFolder = string.Empty;
         public string FuelModelsFile = string.Empty;
         public string InitialFuelMoistureFile = string.Empty;
@@ -31,26 +33,54 @@ namespace PREACT.IO
 
         }
 
-        public static FireCellInput Parse(string[] inputLines, int startIndex, WildfireModuleInput fireInput, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, WildfireModuleInput fireInput, string rootFolder, out bool success)
         {
             success = false;
-            FireCellInput newInput = new FireCellInput();
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
+
+            //critical
+            nameOfInput = nameof(SpreadRateModel);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = true;
+                switch (userInput)
+                {
+                    case nameof(SpreadRateModels.BehavePlus):
+                        SpreadRateModel = SpreadRateModels.BehavePlus;
+                        break;
+                    case nameof(SpreadRateModels.CanadianFBP):
+                        SpreadRateModel = SpreadRateModels.CanadianFBP;
+                        break;
+                    default:
+                        success = false;
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                        break;
+                }
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if(!success)
+            {
+                return;
+            }
 
             nameOfInput = nameof(SpreadMode);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
                 {
-                    case nameof(SpreadModeEnum.FourDirections):
-                        newInput.SpreadMode = SpreadModeEnum.FourDirections;
+                    case nameof(SpreadModes.FourDirections):
+                        SpreadMode = SpreadModes.FourDirections;
                         break;
-                    case nameof(SpreadModeEnum.EightDirections):
-                        newInput.SpreadMode = SpreadModeEnum.EightDirections;
+                    case nameof(SpreadModes.EightDirections):
+                        SpreadMode = SpreadModes.EightDirections;
                         break;
-                    case nameof(SpreadModeEnum.SixteenDirections):
-                        newInput.SpreadMode = SpreadModeEnum.SixteenDirections;
+                    case nameof(SpreadModes.SixteenDirections):
+                        SpreadMode = SpreadModes.SixteenDirections;
                         break;
                     default:
                         Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
@@ -66,7 +96,7 @@ namespace PREACT.IO
             nameOfInput = nameof(RootFolder);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.RootFolder = userInput;
+                RootFolder = userInput;
                 rootFolder = Path.Combine(rootFolder, userInput);
             }
             else
@@ -78,7 +108,7 @@ namespace PREACT.IO
             nameOfInput = nameof(FuelModelsFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.FuelModelsFile = userInput;
+                FuelModelsFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -90,7 +120,7 @@ namespace PREACT.IO
             nameOfInput = nameof(InitialFuelMoistureFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.InitialFuelMoistureFile = userInput;
+                InitialFuelMoistureFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -100,14 +130,14 @@ namespace PREACT.IO
             }
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //critical
             nameOfInput = nameof(WeatherFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.WeatherFile = userInput;
+                WeatherFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -117,14 +147,14 @@ namespace PREACT.IO
             }
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //critical
             nameOfInput = nameof(WindFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.WindFile = userInput;
+                WindFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -134,14 +164,14 @@ namespace PREACT.IO
             }
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //maybe critical
             nameOfInput = nameof(IgnitionPointsFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.IgnitionPointsFile = userInput;
+                IgnitionPointsFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
@@ -150,14 +180,14 @@ namespace PREACT.IO
             }
             if (!success)
             {
-                return newInput;
+                return;
             }
 
             //not critical
             nameOfInput = nameof(UseRandomIgnitionMap);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.UseRandomIgnitionMap);
+                bool.TryParse(userInput, out UseRandomIgnitionMap);
             }
             else
             {
@@ -168,35 +198,34 @@ namespace PREACT.IO
             nameOfInput = nameof(RandomIgnitionPoints);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                int.TryParse(userInput, out newInput.RandomIgnitionPoints);
+                int.TryParse(userInput, out RandomIgnitionPoints);
             }
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (newInput.RandomIgnitionPoints == 0 && newInput.UseRandomIgnitionMap)
+            if (RandomIgnitionPoints == 0 && UseRandomIgnitionMap)
             {
-                return newInput;
+                return;
             }
 
             //might be critical if we have not loaded a proper map in fire input
             nameOfInput = nameof(UseInitialIgnitionMap);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                bool.TryParse(userInput, out newInput.UseInitialIgnitionMap);
+                bool.TryParse(userInput, out UseInitialIgnitionMap);
             }
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (newInput.UseInitialIgnitionMap && fireInput.GraphicalFireInputFile != string.Empty)
+            if (UseInitialIgnitionMap && fireInput.GraphicalFireInputFile != string.Empty)
             {
                 success = false;
-                return newInput;
+                return;
             }
 
             success = true;
-            return newInput;
         }
     }   
 }

@@ -561,8 +561,6 @@ namespace PREACT.Traffic
                     Engine.Message(null, Engine.LogType.Warning, e.Message);
                 }
             }
-
-            return 0;
         }
     }
 }

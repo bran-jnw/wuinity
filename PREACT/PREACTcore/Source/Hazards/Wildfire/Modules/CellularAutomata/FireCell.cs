@@ -287,7 +287,7 @@ namespace PREACT.Fire
         public int GetMaxSpreadrateInDirection(int direction)
         {
             int rate = 0;
-            if (fireMesh.spreadMode == FireCellInput.SpreadModeEnum.FourDirections)
+            if (fireMesh.spreadMode == FireCellInput.SpreadModes.FourDirections)
             {
                 //interpolate?
             }

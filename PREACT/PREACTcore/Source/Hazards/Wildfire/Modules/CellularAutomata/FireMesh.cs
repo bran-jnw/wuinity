@@ -15,7 +15,7 @@ namespace PREACT.Fire
     public class FireMesh : FireModule                        
     {
         Vector2int _cellCount;                                
-        public FireCellInput.SpreadModeEnum spreadMode;                               
+        public FireCellInput.SpreadModes spreadMode;                               
         public IgnitionPointInput[] ignitionPoints;                
         FireCell[] _fireCells;                                
         public Vector2d _cellSize;
@@ -108,11 +108,11 @@ namespace PREACT.Fire
             crownFire = new Crown(fuelModelSet);                         
 
             indexSize = 4;                                      
-            if (spreadMode == FireCellInput.SpreadModeEnum.EightDirections)
+            if (spreadMode == FireCellInput.SpreadModes.EightDirections)
             {
                 indexSize = 8;
             }
-            else if (spreadMode == FireCellInput.SpreadModeEnum.SixteenDirections)
+            else if (spreadMode == FireCellInput.SpreadModes.SixteenDirections)
             {
                 indexSize = 16;
             }

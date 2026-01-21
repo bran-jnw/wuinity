@@ -148,7 +148,7 @@ namespace PREACT.IO
                 int lineindex;
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
                 {
-                    _fireCellInput = FireCellInput.Parse(inputLines, lineindex, this, rootFolder, out success);
+                    _fireCellInput.Parse(inputLines, lineindex, this, rootFolder, out success);
                 }
                 else
                 {
@@ -164,7 +164,7 @@ namespace PREACT.IO
                 int lineindex;
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
                 {
-                    _fireCellInput = FireCellInput.Parse(inputLines, lineindex, this, rootFolder, out success);
+                    _fireCellInput.Parse(inputLines, lineindex, this, rootFolder, out success);
                 }
                 else
                 {
