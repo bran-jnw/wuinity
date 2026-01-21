@@ -32,9 +32,12 @@ If you are using Visual Studio and C# it is likely that you have all required  l
 Since installed SUMO dlls are linked, the logged in user account needs to have access to the PATH pointing to them. Being administrator of the system solves this.
 
 ## How to start WUI-NITY
+WUI-NITY internally consists of two parts: WUI-NITY as a visualizer, and PREACT as the underlying simulation core. It is possible to run PREACT as a standalone command line tool which enables multiple simulations running aty the same time.
+To get WUI-NITY to function it is reequired to compile PREACTcore as it does not make sense to include under development DLLs in source control. This is done by opening the PREACT soultion in
+Visual Studio and compile the PREACTcore project. This will automatically copy all of the generated and referenced DLLs to the Unity project (WUI-NITY). Now it is time to open the WUI-NITY project in Unity.
+
 Once the Unity project is cloned and loaded, the WUI-NITY scene has to be started, it is located \Assets\WUIPlatform\WUInity\Scenes and called WUInityMain.unity.
 Once the scene is loaded, press play to start the program.
-
 
 ## Current status of modules
 ### Pedestrian modules 

@@ -6,6 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
+using PREACT;
 
 namespace WUInity
 {
@@ -16,6 +17,7 @@ namespace WUInity
         [SerializeField] float zoomSpeed = 100.0f;
         [SerializeField] float lowestY = 200f;
         [SerializeField] Camera cam;
+        [SerializeField] private LineRenderer _rtsSlection;
 
         float maximumY;
         bool dragging = false;
@@ -24,6 +26,8 @@ namespace WUInity
         PREACT.Math.Vector2d _mapSize;
         bool refreshClipPlanes = false;
         private PREACT.IO.PREACTInput _input;
+        Engine _engine;
+        WUInityManager _manager;
 
         // Use this for initialization
         void OnValidate()
@@ -34,10 +38,20 @@ namespace WUInity
             }            
         }
 
+        public void Awake()
+        {
+            _rtsSlection.positionCount = 4;
+        }
+
+        public void SetManager(WUInityManager manager)
+        {
+            _manager = manager;
+            _engine = _manager.Engine;
+        }
+
         public void SetInput(PREACT.IO.PREACTInput input)
         {
             _input = input;
-
             SetCameraStartPosition(_input.Simulation.DomainSize);
         }
 
@@ -128,6 +142,75 @@ namespace WUInity
 
             }
 
+            VehicleSelection();
+        }
+
+        Vector3 boundingBoxPos1, boundingBoxPos2, manualDestination;
+        bool haveBoundingBox = false, selectingVehicles;
+        Plane _yPlane = new Plane(Vector3.up, 0f);
+        private void VehicleSelection()
+        {
+            //RTS stuff
+            if (_engine.Simulation != null && _engine.Simulation.State == Simulation.SimulationState.Running && _engine.Simulation.IsPaused)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    selectingVehicles = false;
+                    haveBoundingBox = false;
+                    _rtsSlection.gameObject.SetActive(false);
+                }
+
+                if (selectingVehicles)
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    float enter;
+                    if (_yPlane.Raycast(ray, out enter))
+                    {
+                        boundingBoxPos2 = ray.GetPoint(enter);
+                        _rtsSlection.SetPosition(0, new Vector3(Mathf.Min(boundingBoxPos1.x, boundingBoxPos2.x), 10f, Mathf.Min(boundingBoxPos1.z, boundingBoxPos2.z)));
+                        _rtsSlection.SetPosition(1, new Vector3(Mathf.Max(boundingBoxPos1.x, boundingBoxPos2.x), 10f, Mathf.Min(boundingBoxPos1.z, boundingBoxPos2.z)));
+                        _rtsSlection.SetPosition(2, new Vector3(Mathf.Max(boundingBoxPos1.x, boundingBoxPos2.x), 10f, Mathf.Max(boundingBoxPos1.z, boundingBoxPos2.z)));
+                        _rtsSlection.SetPosition(3, new Vector3(Mathf.Min(boundingBoxPos1.x, boundingBoxPos2.x), 10f, Mathf.Max(boundingBoxPos1.z, boundingBoxPos2.z)));
+                        if (Input.GetMouseButtonUp(0))
+                        {
+                            haveBoundingBox = true;
+                            selectingVehicles = false;
+                        }
+                    }
+                }
+                else if (Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0)
+                {
+                    if (haveBoundingBox)
+                    {
+                        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                        float enter;
+                        if (_yPlane.Raycast(ray, out enter))
+                        {
+                            manualDestination = ray.GetPoint(enter);
+                            haveBoundingBox = false;
+                            _manager.UpdateDestinationForVehicles(boundingBoxPos1, boundingBoxPos2, manualDestination);
+                            _rtsSlection.gameObject.SetActive(false);
+                        }
+                    }
+                    else if (!selectingVehicles)
+                    {
+                        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                        float enter;
+                        if (_yPlane.Raycast(ray, out enter))
+                        {
+                            boundingBoxPos1 = ray.GetPoint(enter);
+                            boundingBoxPos2 = boundingBoxPos1;
+                            haveBoundingBox = false;
+                            selectingVehicles = true;
+                            _rtsSlection.SetPosition(0, boundingBoxPos1 + Vector3.up * 10);
+                            _rtsSlection.SetPosition(1, boundingBoxPos1 + Vector3.up * 10);
+                            _rtsSlection.SetPosition(2, boundingBoxPos1 + Vector3.up * 10);
+                            _rtsSlection.SetPosition(3, boundingBoxPos1 + Vector3.up * 10);
+                            _rtsSlection.gameObject.SetActive(true);
+                        }
+                    }
+                }
+            }
         }
     }
 }

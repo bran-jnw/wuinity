@@ -1,4 +1,5 @@
-﻿using PREACT.IO;
+﻿using PREACT.Evacuation;
+using PREACT.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,6 +105,11 @@ namespace PREACT
         public void UpdateInput(PREACTInput input)
         {
             _input = input;
+        }
+
+        public void UpdateDestinations(List<EvacuationDestination> destinations)
+        {
+            throw new NotImplementedException();
         }
     }
 }
