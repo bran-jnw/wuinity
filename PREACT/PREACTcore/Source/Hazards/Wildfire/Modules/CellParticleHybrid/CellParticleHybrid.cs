@@ -6,26 +6,16 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using PREACT.Fire.Behave;
+using PREACT.Wildfire.Behave;
 using System.Threading.Tasks;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     public class CellParticleHybrid : FireModule
     {
         public static readonly Vector2int[] NeighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
-        public static bool inverseSpreadDirection = false;
-
-        public static readonly BehaveCore.TwoFuelModelsMethod.TwoFuelModelsMethodEnum TwoFuelModelsMethod = BehaveCore.TwoFuelModelsMethod.TwoFuelModelsMethodEnum.NoMethod;
-        public static readonly BehaveCore.FractionUnits.FractionUnitsEnum MoistureUnits = BehaveCore.FractionUnits.FractionUnitsEnum.Percent;
-        public static readonly BehaveCore.WindHeightInputMode.WindHeightInputModeEnum WindHeightInputMode = BehaveCore.WindHeightInputMode.WindHeightInputModeEnum.TenMeter;
-        public static readonly BehaveCore.SlopeUnits.SlopeUnitsEnum SlopeUnits = BehaveCore.SlopeUnits.SlopeUnitsEnum.Degrees;
-        public static readonly BehaveCore.FractionUnits.FractionUnitsEnum FractionUnits = BehaveCore.FractionUnits.FractionUnitsEnum.Fraction;
-        public static readonly BehaveCore.LengthUnits.LengthUnitsEnum LengthUnits = BehaveCore.LengthUnits.LengthUnitsEnum.Meters;
-        public static readonly BehaveCore.SpeedUnits.SpeedUnitsEnum WindSpeedUnits = BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond;
-        public static readonly BehaveCore.WindAndSpreadOrientationMode.WindAndSpreadOrientationModeEnum WindAndSpreadOrientationMode = BehaveCore.WindAndSpreadOrientationMode.WindAndSpreadOrientationModeEnum.RelativeToNorth;
-        public static readonly BehaveCore.DensityUnits.DensityUnitsEnum DensityUnits = BehaveCore.DensityUnits.DensityUnitsEnum.KilogramsPerCubicMeter;
+        public static bool inverseSpreadDirection = false;        
 
         private Queue<FireParticle> _aliveParticles;
         private int _xDim, _yDim;
@@ -74,7 +64,7 @@ namespace PREACT.Fire
             {
                 for (int x = 0; x < _xDim; ++x)
                 {
-                    _fuelCells[x, y] = new FuelCell(true, x, y, landscapeData, _fuelModels, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture);
+                    _fuelCells[x, y] = new FuelCell(true, x, y, landscapeData, _fuelModels, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture, simulation.Input.WildfireModule.FireCellInput);
                 }
             }
 

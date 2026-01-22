@@ -10,7 +10,7 @@ using System.IO;
 using PREACT.Evacuation;
 using PREACT.Pedestrian;
 using PREACT.Traffic;
-using PREACT.Fire;
+using PREACT.Wildfire;
 using PREACT.Smoke;
 using PREACT.IO;
 using System.Threading;

@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     public abstract class FireModule : SimulationModule
     {

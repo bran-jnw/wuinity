@@ -1,29 +1,43 @@
 ﻿using System;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     public class SpreadModelCFBP : SpreadModel
     {
         private float _eccentricity;
 
-        private CFBPInputs _inputs;
+        private CanadianFBPInputs _inputs;
         private MainOutputs _outputs;
         private SecondaryOutputs _secondaryOutputs;
         private FireData _head, _flank, _back;
-        private CFBPFuel _fuel;
+        private CanadianFBPFuel _fuel;
+        private bool _hasFuelLoad = false;
 
-        public SpreadModelCFBP()
+        public SpreadModelCFBP(LandscapeCellData cellData, CanadianFBPLookupTable lookupTable)
         {
-            _inputs = new CFBPInputs();
+            _inputs = new CanadianFBPInputs();
             _outputs = new MainOutputs();
             _secondaryOutputs = new SecondaryOutputs();
             _head = new FireData();
             _flank = new FireData();
             _back = new FireData();
+            CanadianFBPLookupEntry lookupEntry = lookupTable.GetLookupEntry(cellData.fuel_model);
+            if(lookupEntry.grid_value < 0 || lookupEntry.fuel_type == "Non-fuel")
+            {
+                _hasFuelLoad = false;
+                return;
+            }
+
+            _fuel = new CanadianFBPFuel(lookupEntry);
+            _inputs.Elevation = (int)(0.5 + cellData.elevation);
+            _inputs.PercentSlope = (int)(0.5 + cellData.slope);
+            _inputs.SlopeAzimuth = (int)(0.5 + cellData.aspect);
+
+            _inputs.PercentCuring = 0;//TODO
         }
 
-        public override void DoRun()
+        public override void CalculateSpreadRate()
         {
             CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
             _eccentricity = (float)Mathd.Sqrt(1.0 - _secondaryOutputs.LengthToBreadth * _secondaryOutputs.LengthToBreadth);
@@ -34,7 +48,7 @@ namespace PREACT.Fire
             return (float)_head.RateOfSpread;
         }
 
-        public override double GetMaxSpreadRateDirection()
+        public override double GetDirectionOfMaxSpread()
         {
             return (float)_outputs.SpreadAzimuth;
         }
@@ -88,6 +102,21 @@ namespace PREACT.Fire
         {
             _inputs.WindAzimuth = (int)direction;
             _inputs.WindSpeed = speed;            
+        }
+
+        public override void SetFuelMoisture(double oneHour, double tenHour, double hundredHour, double liveHerbaceous, double liveWoody, double foliar)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool HasFuelLoad()
+        {
+            return _hasFuelLoad;
+        }
+
+        public override double GetFirelineIntensity()
+        {
+            return _head.FireIntensity;
         }
     }
 }

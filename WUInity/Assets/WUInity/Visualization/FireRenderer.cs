@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using PREACT.Fire;
+using PREACT.Wildfire;
 using PREACT.Smoke;
 using PREACT.IO;
 using PREACT.Visualization;

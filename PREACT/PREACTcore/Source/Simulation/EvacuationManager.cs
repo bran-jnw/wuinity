@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using PREACT.IO;
 using PREACT.Pedestrian;
-using PREACT.Fire;
+using PREACT.Wildfire;
 
 namespace PREACT.Evacuation
 {
@@ -226,7 +226,7 @@ namespace PREACT.Evacuation
         {
             EvacuationDestination goal = null;
 
-            if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupWeighted)
+            if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupCDF)
             {
                 goal = evacuationGroup.GetWeightedRandomDestination();
             }

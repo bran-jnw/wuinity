@@ -17,6 +17,8 @@ namespace PREACT.IO
         public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
         public SpreadRateModels SpreadRateModel = SpreadRateModels.BehavePlus;
+        public string FBPLookupTableFile = string.Empty;
+
         public SpreadModes SpreadMode = SpreadModes.SixteenDirections;
         public string RootFolder = string.Empty;
         public string FuelModelsFile = string.Empty;
@@ -38,6 +40,18 @@ namespace PREACT.IO
             success = false;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
+
+            //not critical as it can be empty
+            nameOfInput = nameof(RootFolder);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                RootFolder = userInput;
+                rootFolder = Path.Combine(rootFolder, RootFolder);
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
 
             //critical
             nameOfInput = nameof(SpreadRateModel);
@@ -68,6 +82,27 @@ namespace PREACT.IO
                 return;
             }
 
+            //maybe critical
+            if(SpreadRateModel == SpreadRateModels.CanadianFBP)
+            {
+                nameOfInput = nameof(FBPLookupTableFile);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    FBPLookupTableFile = userInput;
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+                if(!success)
+                {
+                    return; 
+                }
+            }
+            
+
             nameOfInput = nameof(SpreadMode);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -90,19 +125,7 @@ namespace PREACT.IO
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            //not critical as it can be empty
-            nameOfInput = nameof(RootFolder);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                RootFolder = userInput;
-                rootFolder = Path.Combine(rootFolder, userInput);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }            
+            }                      
 
             //not critical, uses defaults
             nameOfInput = nameof(FuelModelsFile);

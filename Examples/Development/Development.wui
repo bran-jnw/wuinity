@@ -56,7 +56,7 @@ Color=1.0,0.0,0.0
 Name=route85_group
 Default=true
 Demographics=two_cars
-DestinationChoice=EvacGroupWeighted
+DestinationChoice=EvacGroupCDF
 ShapeFile=groups/east.shp
 ResponseCurves=slow, fast
 ResponseCurvesCDF=0.9, 1.0
@@ -67,7 +67,7 @@ Color=1.0,1.0,0.0
 [EvacuationGroup]
 Name=route121_group
 Demographics=one_car
-DestinationChoice=EvacGroupWeighted
+DestinationChoice=EvacGroupCDF
 ShapeFile=groups/west.shp
 ResponseCurves=slow, fast 
 ResponseCurvesCDF=0.1, 1.0

@@ -5,10 +5,10 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using static PREACT.Fire.MathWrap;
-using static PREACT.Fire.Behave.BehaveUnits;
+using static PREACT.Wildfire.MathWrap;
+using static PREACT.Wildfire.Behave.BehaveUnits;
 
-namespace PREACT.Fire.Behave
+namespace PREACT.Wildfire.Behave
 {
     public class SurfaceFireReactionIntensity
     {

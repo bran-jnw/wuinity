@@ -5,13 +5,13 @@ using PREACT.IO;
 
 namespace PREACT.Evacuation
 {
-    public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupWeighted, EvacGroupClosestEuclidean };
+    public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupCDF, EvacGroupClosestEuclidean };
 
     public class EvacuationGroupInput
     {
         public string Name = string.Empty;
         public PREACTColor Color = PREACTColor.white;
-        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupWeighted;
+        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupCDF;
         public List<string> Destinations = new List<string>(16);
         public List<double> DestinationsCDF = new List<double>(16);
         public List<string> ResponseCurves = new List<string>(16);
@@ -68,8 +68,8 @@ namespace PREACT.Evacuation
                         case nameof(DestinationChoices.ClosestEuclidean):
                             newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
                             break;
-                        case nameof(DestinationChoices.EvacGroupWeighted):
-                            newInput.DestinationChoice = DestinationChoices.EvacGroupWeighted;
+                        case nameof(DestinationChoices.EvacGroupCDF):
+                            newInput.DestinationChoice = DestinationChoices.EvacGroupCDF;
                             break;
                         case nameof(DestinationChoices.EvacGroupClosestEuclidean):
                             newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
@@ -140,7 +140,7 @@ namespace PREACT.Evacuation
                     success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput, true);
                 }
-                if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupWeighted || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
+                if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupCDF || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
                 {
                     break;
                 }
@@ -181,7 +181,7 @@ namespace PREACT.Evacuation
                         success = false;
                         PREACTInput.IncorrectInputCount(nameOfInput);
                     }
-                    if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupWeighted || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
+                    if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupCDF || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
                     {
                         break;
                     }

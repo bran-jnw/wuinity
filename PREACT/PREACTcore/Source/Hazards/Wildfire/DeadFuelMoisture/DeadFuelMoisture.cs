@@ -6,9 +6,9 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using static PREACT.Fire.MathWrap;
+using static PREACT.Wildfire.MathWrap;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     //------------------------------------------------------------------------------
     /*! \page DeadFuelMoisture Dead Fuel Moisture

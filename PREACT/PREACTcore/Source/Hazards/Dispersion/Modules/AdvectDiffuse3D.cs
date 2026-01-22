@@ -175,7 +175,7 @@ namespace PREACT.Smoke
             uint[] heightMap = new uint[_2DbufferSize];
             if (_globalData.fireSmokeCellRatio != 1)
             {
-                Fire.LandscapeData l = _simulation.Input.WildfireModule.Data.LCPData;
+                Wildfire.LandscapeData l = _simulation.Input.WildfireModule.Data.LCPData;
                 for (int y = 0; y < _globalData.yDim; ++y)
                 {
                     for (int x = 0; x < _globalData.xDim; ++x)
@@ -247,7 +247,7 @@ namespace PREACT.Smoke
         public override void Step(float currentTime, float deltaTime)
         {      
             //update wind
-            Fire.WindData windData = _simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
+            Wildfire.WindData windData = _simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
             _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
             _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
             _globalData.windX = _globalData.windDirectionX * windData.speed;

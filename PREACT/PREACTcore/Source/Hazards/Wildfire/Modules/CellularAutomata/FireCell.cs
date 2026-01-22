@@ -5,13 +5,13 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using static PREACT.Fire.MathWrap;
+using static PREACT.Wildfire.MathWrap;
 using System.Runtime.InteropServices;
-using PREACT.Fire.Behave;
+using PREACT.Wildfire.Behave;
 using PREACT.IO;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {  
     //[System.Serializable]
     public class FireCell                

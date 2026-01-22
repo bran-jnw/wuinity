@@ -9,7 +9,7 @@ using System.IO;
 using System.Collections.Generic;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     public struct FireRasterData
     {

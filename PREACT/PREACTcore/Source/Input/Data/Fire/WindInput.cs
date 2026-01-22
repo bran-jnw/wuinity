@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     [System.Serializable]
     public struct WindData                  

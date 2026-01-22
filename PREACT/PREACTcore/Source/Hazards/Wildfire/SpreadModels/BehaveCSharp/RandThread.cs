@@ -23,9 +23,9 @@
  *  - randthread.cpp
  *  - randthread.h
  */
-using static PREACT.Fire.MathWrap;
+using static PREACT.Wildfire.MathWrap;
 
-namespace PREACT.Fire.Behave
+namespace PREACT.Wildfire.Behave
 {
     public struct PathStruct
     {

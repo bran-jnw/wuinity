@@ -1,4 +1,4 @@
-﻿namespace PREACT.Fire
+﻿namespace PREACT.Wildfire
 {
     public class FuelCoefficients
     {

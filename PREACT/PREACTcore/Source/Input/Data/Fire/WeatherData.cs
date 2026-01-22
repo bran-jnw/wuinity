@@ -10,7 +10,7 @@ using static PREACT.Interpolation;
 using System.IO;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     /// <summary>
     /// Precipitation is the daily rain amount specified in hundredths of an inch or millimeters (integer).

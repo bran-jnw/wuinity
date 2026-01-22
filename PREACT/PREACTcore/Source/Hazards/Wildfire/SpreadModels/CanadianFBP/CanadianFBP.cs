@@ -81,7 +81,7 @@ using System.Collections.Generic;
 using PREACT.Math;
 using System.IO;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {    
     
     /// <summary>
@@ -110,78 +110,7 @@ namespace PREACT.Fire
             return f;
         }
 
-        /// <summary>
-        /// Reads the user defined FBP lookup table and creates a database that can be used by the fire spread model.
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="success"></param>
-        /// <returns></returns>
-        public static Dictionary<int, CFBPFuel> CreateFuelDatabaseFromFile(string filePath, out bool success)
-        {        
-            Engine.Message(null, Engine.LogType.Log, " Attempting to load FBP lookup table.");
-            success = false;
-
-            string[] lines;
-            if (File.Exists(filePath))
-            {
-                lines = File.ReadAllLines(filePath);
-            }
-            else
-            {
-                Engine.Message(null, Engine.LogType.Warning, "FBP lookup table file " + filePath + " not found.");
-                return null;
-            }
-
-            if(lines.Length < 2)
-            {
-                Engine.Message(null, Engine.LogType.Warning, "FBP lookup table file " + filePath + " does not contain data.");
-                return null;
-            }
-
-            Dictionary<int, CFBPFuel> result = new Dictionary<int, CFBPFuel>();
-
-            //skip first line as that is just the header
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] columns = lines[i].Split(',');
-                //make sure there is some data and not just empty line
-                if (columns.Length > 1)
-                {
-                    int grid_value, export_value;
-                    string descriptive_name, fuel_type_column;
-                    int r, g, b, h, s, l;
-
-                    int.TryParse(columns[0], out grid_value);
-                    int.TryParse(columns[1], out export_value);
-                    descriptive_name = columns[2];
-                    fuel_type_column = columns[3];
-                    int.TryParse(columns[4], out r);
-                    int.TryParse(columns[5], out g);
-                    int.TryParse(columns[6], out b);
-                    //int.TryParse(columns[7], out h);
-                    //int.TryParse(columns[8], out s);
-                    //int.TryParse(columns[9], out l);
-
-                    PREACTColor c = new PREACTColor(r, g, b);
-                    CFBPFuel f = new CFBPFuel(fuel_type_column, descriptive_name, c); 
-                    result.Add(grid_value, f);
-                }
-            }
-
-            if (result.Count == 0)
-            {
-                result = null;
-                success = false;
-            }
-            else
-            {
-                success = true;
-            }
-
-            return result;
-        }
-
-        public static void Calculate(CFBPInputs input, CFBPFuel fuel, MainOutputs mainOuts, SecondaryOutputs secondaryOuts, FireData headfire, FireData flankfire, FireData backfire)
+        public static void Calculate(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs mainOuts, SecondaryOutputs secondaryOuts, FireData headfire, FireData flankfire, FireData backfire)
         {
             char firetype = ' ';
             double acceleration;
@@ -272,7 +201,7 @@ namespace PREACT.Fire
             return (cover);
         }       
 
-        static double rate_of_spread(CFBPInputs inputs, CFBPFuel fuel, MainOutputs outputs)
+        static double rate_of_spread(CanadianFBPInputs inputs, CanadianFBPFuel fuel, MainOutputs outputs)
         {
             double fw, isz, mult = 0, rsi;
             outputs.ff = ffmc_effect(inputs.FFMC);
@@ -311,7 +240,7 @@ namespace PREACT.Fire
             return ff;
         }
 
-        static double ros_calc(CFBPInputs input, CFBPFuel fuel, double isi, ref double mult)
+        static double ros_calc(CanadianFBPInputs input, CanadianFBPFuel fuel, double isi, ref double mult)
         {
             double ros;
 
@@ -340,7 +269,7 @@ namespace PREACT.Fire
         }
 
 
-        static double grass(CFBPFuel fuel, double PercentCuring, double isi, ref double mult)
+        static double grass(CanadianFBPFuel fuel, double PercentCuring, double isi, ref double mult)
         {
             double mu, ros;
             if ((double)(PercentCuring) >= 58.8)
@@ -361,7 +290,7 @@ namespace PREACT.Fire
             return (ros);
         }
 
-        static double mixed_wood(CFBPFuel fuel, double InitialSpreadIndex, ref double mu, int pc)
+        static double mixed_wood(CanadianFBPFuel fuel, double InitialSpreadIndex, ref double mu, int pc)
         {
             double ros, mult, ros_d1, ros_c2;
             int i;
@@ -392,7 +321,7 @@ namespace PREACT.Fire
             return (ros);
         }
 
-        static double dead_fir(CFBPFuel fuel, int pdf, double isi, ref double mu)
+        static double dead_fir(CanadianFBPFuel fuel, int pdf, double isi, ref double mu)
         {
             double a, b, c;
             int i;
@@ -423,7 +352,7 @@ namespace PREACT.Fire
             return (ros);
         }
 
-        static double D2_ROS(CFBPFuel fuel, double isi, double bui, ref double mu)
+        static double D2_ROS(CanadianFBPFuel fuel, double isi, double bui, ref double mu)
         {
             mu = 1.0;
             if (bui >= 80)
@@ -436,13 +365,13 @@ namespace PREACT.Fire
             }
         }
 
-        static double conifer(CFBPFuel fuel, double isi, ref double mu)
+        static double conifer(CanadianFBPFuel fuel, double isi, ref double mu)
         {
             mu = 1.0;
             return (fuel.Coefficients.a * Mathd.Pow((1.0 - Mathd.Exp(-1.0 * fuel.Coefficients.b * isi)), fuel.Coefficients.c));
         }
 
-        static double bui_effect(CFBPFuel fuel, MainOutputs at, double bui)
+        static double bui_effect(CanadianFBPFuel fuel, MainOutputs at, double bui)
         {
             double bui_avg = 50.0;
 
@@ -454,7 +383,7 @@ namespace PREACT.Fire
             return (at.be);
         }
 
-        static double slope_effect(CFBPInputs input, CFBPFuel fuel, MainOutputs output, double isi)
+        static double slope_effect(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs output, double isi)
         /* ISI is ISZ really */
         {
             double isf, rsf, wse, percentSlope, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, WSV, raz, check, wse2, wse1;
@@ -538,7 +467,7 @@ namespace PREACT.Fire
             return WSV;
         }
 
-        static double ISF_mixedwood(CFBPFuel fuel, double isz, int pc, double sf)
+        static double ISF_mixedwood(CanadianFBPFuel fuel, double isz, int pc, double sf)
         {
             double check, mult, rsf_d1, rsf_c2, isf_d1, isf_c2;
             int i;
@@ -595,7 +524,7 @@ namespace PREACT.Fire
             return ((((double)(pc) / 100.0) * isf_c2 + (100 - pc)) / 100.0 * isf_d1);
         }
 
-        static double ISF_deadfir(CFBPFuel fuel, double isz, int pdf, double sf)
+        static double ISF_deadfir(CanadianFBPFuel fuel, double isz, int pdf, double sf)
         {
             double check, mult, rsf_d1, rsf_max, isf_d1, isf_max;
             int i;
@@ -659,13 +588,13 @@ namespace PREACT.Fire
             return (300.0 * fc * ros);
         }
 
-        static double FoliarMoisture(CFBPInputs input, MainOutputs output)
+        static double FoliarMoisture(CanadianFBPInputs input, MainOutputs output)
         {
             double LATN;
             int ND;
             output.JulianDate = input.JulianDate;
-            output.JulianDateMin = input.jd_min;
-            if (input.jd_min <= 0)
+            output.JulianDateMin = input.JulianDateMin;
+            if (input.JulianDateMin <= 0)
             {
                 if (input.Elevation < 0)
                 {
@@ -692,7 +621,7 @@ namespace PREACT.Fire
             return (85.0 + 0.0189 * ND * ND);
         }
 
-        static double SurfaceFuelConsumption(CFBPInputs input, CFBPFuel fuel)
+        static double SurfaceFuelConsumption(CanadianFBPInputs input, CanadianFBPFuel fuel)
         {
             double SFC, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
             FuelTypes fuelType;
@@ -777,7 +706,7 @@ namespace PREACT.Fire
         }
 
 
-        static double CriticalSurfaceIntensity(CFBPFuel fuel, double fmc)
+        static double CriticalSurfaceIntensity(CanadianFBPFuel fuel, double fmc)
         {
             return (0.001 * Mathd.Pow(fuel.Coefficients.CrownBaseHeight * (460.0 + 25.9 * fmc), 1.5));
         }
@@ -814,7 +743,7 @@ namespace PREACT.Fire
             return ('*');
         }
 
-        static double final_ros(CFBPFuel fuel, double fmc, double isi, double cfb, double rss)
+        static double final_ros(CanadianFBPFuel fuel, double fmc, double isi, double cfb, double rss)
         {
             double rsc, ros;
             if (fuel.FuelType == FuelTypes.C6)
@@ -834,7 +763,7 @@ namespace PREACT.Fire
             return (rsc);
         }
 
-        static double crown_consump(CFBPFuel fuel, double cfb)
+        static double crown_consump(CanadianFBPFuel fuel, double cfb)
         {
             double cfc;
             cfc = fuel.Coefficients.CrownFuelLoad * cfb;
@@ -876,7 +805,7 @@ namespace PREACT.Fire
             return (0.208 * output.ff * bfw);
         }
 
-        static double backfire_ros(CFBPInputs input, CFBPFuel fuel, MainOutputs output, double bisi)
+        static double backfire_ros(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs output, double bisi)
         {
             double mult = 0.0, bros;
             bros = ros_calc(input, fuel, bisi, ref mult);
@@ -902,7 +831,7 @@ namespace PREACT.Fire
             return (p);
         }
 
-        static double Acceleration(CFBPFuel fuel, double CrownFractionBurned)
+        static double Acceleration(CanadianFBPFuel fuel, double CrownFractionBurned)
         {
             int i;
             char canopy = 'c';
@@ -927,14 +856,14 @@ namespace PREACT.Fire
             return ((ros + bros) / (lb * 2.0));
         }
 
-        static double flank_spread_distance(CFBPInputs inp, FireData ptr, SecondaryOutputs sec, double hrost, double brost, double hd, double bd, double lb, double a)
+        static double flank_spread_distance(CanadianFBPInputs inp, FireData ptr, SecondaryOutputs sec, double hrost, double brost, double hd, double bd, double lb, double a)
         {
             sec.lbt = (lb - 1.0) * (1.0 - Mathd.Exp(-a * inp.Time)) + 1.0;
             ptr.rost = (hrost + brost) / (sec.lbt * 2.0);
             return ((hd + bd) / (2.0 * sec.lbt));
         }
 
-        static double SpreadDistance(CFBPInputs inp, FireData fire, double a)
+        static double SpreadDistance(CanadianFBPInputs inp, FireData fire, double a)
         {
             fire.rost = fire.RateOfSpread * (1.0 - Mathd.Exp(-a * inp.Time));
             return (fire.RateOfSpread * (inp.Time + (Mathd.Exp(-a * inp.Time) / a) - 1.0 / a));
@@ -950,7 +879,7 @@ namespace PREACT.Fire
             else return (99);
         }
 
-        static double fire_behaviour(CFBPInputs input, CFBPFuel fuel, MainOutputs output, FireData f)
+        static double fire_behaviour(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs output, FireData f)
         {
             double sfi, fi = 0;
             char firetype;
@@ -976,7 +905,7 @@ namespace PREACT.Fire
             return (fi);
         }
 
-        static double flank_fire_behaviour(CFBPFuel fuel, MainOutputs at, FireData f)
+        static double flank_fire_behaviour(CanadianFBPFuel fuel, MainOutputs at, FireData f)
         {
             double sfi, fi = 0;
             char firetype;

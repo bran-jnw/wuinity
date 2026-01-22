@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
-    public struct CFBPInputs
+    public struct CanadianFBPInputs
     {
         public double FFMC, WindSpeed, GrassFuelLoad, BUI, Lat, Lon;
-        public int Time, Pattern, mon, JulianDate, jd_min, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation, hour, hourly;
+        public int Time, Pattern, mon, JulianDate, JulianDateMin, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation, hour, hourly;
     }
     public class FireData
     {

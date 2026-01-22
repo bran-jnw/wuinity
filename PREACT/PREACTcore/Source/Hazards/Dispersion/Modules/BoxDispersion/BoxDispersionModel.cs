@@ -17,15 +17,15 @@ namespace PREACT.Smoke
         int cellCountX, cellCountY;
         float cellSizeX, cellSizeY;
         float cellArea, cellVolume, invertedCellVolume, cellHeight;
-        Fire.FireMesh fireMesh;
+        Wildfire.FireMesh fireMesh;
         float[] concentration;
         float[] concentrationBuffer;
-        Fire.FireCell[] fireCellReferences;
+        Wildfire.FireCell[] fireCellReferences;
         int paddedCellCountX, cellCount;
 
 
         //NOT USING ANY Vector2 SINCE THEY ARE SLOWER THAN NORMAL FLOATS (each .x or .y creates Vector2.get call)
-        public BoxDispersionModel(Fire.FireMesh fireMesh, float height = 250.0f)
+        public BoxDispersionModel(Wildfire.FireMesh fireMesh, float height = 250.0f)
         {
             this.fireMesh = fireMesh;
             cellCountX = fireMesh.GetCellCountX();
@@ -45,7 +45,7 @@ namespace PREACT.Smoke
         void CacheFireCells()
         {
             //need to cache the postions as it is really slow to get them...
-            fireCellReferences = new Fire.FireCell[cellCount];
+            fireCellReferences = new Wildfire.FireCell[cellCount];
             for (int i = 0; i < cellCount; i++)
             {
                 fireCellReferences[i] = fireMesh.GetFireCell(i);
@@ -95,9 +95,9 @@ namespace PREACT.Smoke
                 {
                     for (int x = 0; x < cellCountX; x++)
                     {
-                        Fire.FireCell fireCell = fireCellReferences[x + y * cellCountX];
+                        Wildfire.FireCell fireCell = fireCellReferences[x + y * cellCountX];
                         float QA = 0.0f;
-                        if (fireCell.cellState == Fire.FireCellState.Burning) //|| fireCell.cellState == Fire.FireCellState.Dead)
+                        if (fireCell.cellState == Wildfire.FireCellState.Burning) //|| fireCell.cellState == Fire.FireCellState.Dead)
                         {
                             //when done testing, move this calc to the fire cell itself, more effective sine less frequent updates
                             QA = 0.015f * cellArea * (float)fireCell.GetReactionIntensity() / 21500.0f; //intensity is kW/m2, assume 21 500 kJ/kg HOC, soot yield 0.015 for wood founf for FDS

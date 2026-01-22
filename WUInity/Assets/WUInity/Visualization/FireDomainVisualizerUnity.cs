@@ -7,7 +7,7 @@
 
 using UnityEngine;
 using PREACT;
-using PREACT.Fire;
+using PREACT.Wildfire;
 using PREACT.Math;
 using PREACT.Visualization;
 

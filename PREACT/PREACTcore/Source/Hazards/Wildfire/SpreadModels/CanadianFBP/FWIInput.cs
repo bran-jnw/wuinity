@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using PREACT.Math;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     public class Day
     {

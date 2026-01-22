@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     public class FWICalculator
     {

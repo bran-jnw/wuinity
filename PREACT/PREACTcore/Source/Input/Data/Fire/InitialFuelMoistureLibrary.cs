@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace PREACT.Fire
+namespace PREACT.Wildfire
 {
     [System.Serializable]
     public struct InitialFuelMoisture

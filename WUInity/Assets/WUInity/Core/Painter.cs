@@ -37,7 +37,7 @@ namespace WUInity
         //general fire stuff
         Vector2d fireDataRealSize;
         Vector2int fireDataCellCount;
-        PREACT.Fire.LandscapeData _lcpData;
+        PREACT.Wildfire.LandscapeData _lcpData;
         bool addingArea;
 
         //wui area stuff
@@ -64,7 +64,7 @@ namespace WUInity
             _manager = manager;
         }
 
-        public void SetLCPData(PREACT.Fire.LandscapeData lcpData)
+        public void SetLCPData(PREACT.Wildfire.LandscapeData lcpData)
         {
             _lcpData = lcpData;
         }
