@@ -1,0 +1,54 @@
+{
+  "runtimeTarget": {
+    "name": ".NETStandard,Version=v2.1/",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETStandard,Version=v2.1": {},
+    ".NETStandard,Version=v2.1/": {
+      "kPERILcore/1.0.0": {
+        "dependencies": {
+          "GDAL": "3.9.3"
+        },
+        "runtime": {
+          "kPERILcore.dll": {}
+        }
+      },
+      "GDAL/3.9.3": {
+        "runtime": {
+          "lib/netstandard2.0/gdal_csharp.dll": {
+            "assemblyVersion": "3.9.3.0",
+            "fileVersion": "3.9.3.0"
+          },
+          "lib/netstandard2.0/gdalconst_csharp.dll": {
+            "assemblyVersion": "3.9.3.0",
+            "fileVersion": "3.9.3.0"
+          },
+          "lib/netstandard2.0/ogr_csharp.dll": {
+            "assemblyVersion": "3.9.3.0",
+            "fileVersion": "3.9.3.0"
+          },
+          "lib/netstandard2.0/osr_csharp.dll": {
+            "assemblyVersion": "3.9.3.0",
+            "fileVersion": "3.9.3.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "kPERILcore/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "GDAL/3.9.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dCUXs7igIF9RXI7AvC05crsfMt7/i3V/VcrWcWnq0jzj/G4/IsyMOePY2rIUO22Zou2SCGikZplGamcNq0ePPw==",
+      "path": "gdal/3.9.3",
+      "hashPath": "gdal.3.9.3.nupkg.sha512"
+    }
+  }
+}

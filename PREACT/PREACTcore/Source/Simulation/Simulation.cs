@@ -95,7 +95,7 @@ namespace PREACT
             _simulationIndex = simulationIndex;
             _timeManager = new TimeManager(_input);
             _spatialManager = new SpatialManager(this);
-            _weatherManager = new WeatherManager();
+            _weatherManager = new WeatherManager(_input);
             _evacuationManager = new EvacuationManager(this);
             _hazardManager = new HazardManager(this);
             _output = new SimulationOutput(this);
@@ -236,7 +236,7 @@ namespace PREACT
         {
             _state = SimulationState.Initializing;
 
-            CreateFireModule();
+            CreateWildfireModule();
             if (_stopRun)
             {
                 return;
@@ -263,7 +263,7 @@ namespace PREACT
             Engine.Message(this, Engine.LogType.Log, "All requested sub-modules initiated successfully.");
         }
 
-        private void CreateFireModule()
+        private void CreateWildfireModule()
         {            
             if (_input.WildfireModule.Enabled)
             {
@@ -488,15 +488,23 @@ namespace PREACT
                 }
             }
 
+            _timeManager.Step(deltaTime);
+            _weatherManager.Step(deltaTime);
+
+            UpdatePermanceTimer(startTime, deltaTime);
+        }
+
+        private void UpdatePermanceTimer(long startTime, float deltaTime)
+        {
             //just some stuff for controlling execution mode and timing performance
-            long timeSpent =  _simulationStopWatch.ElapsedMilliseconds - startTime;
-            if(_runRealtime)
+            long timeSpent = _simulationStopWatch.ElapsedMilliseconds - startTime;
+            if (_runRealtime)
             {
                 int sleepTime = (int)deltaTime * 1000 - (int)timeSpent;
                 if (sleepTime > 0)
                 {
                     Thread.Sleep(sleepTime);
-                }                
+                }
             }
             _stepExecutionTime = 0.01f * timeSpent + 0.99f * _stepExecutionTime;
         }

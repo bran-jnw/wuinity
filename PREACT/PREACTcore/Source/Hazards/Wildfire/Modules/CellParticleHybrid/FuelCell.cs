@@ -104,8 +104,7 @@ namespace PREACT.Wildfire
             double moistureFoliar = 0;
 
             //_spreadModel.SetFuelMoisture(
-            _spreadModel.SetWind(w.direction, w.speed);
-            _spreadModel.CalculateSpreadRate();
+            _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
             _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFirelineIntensity(), (float)_spreadModel.GetMaxSpreadRate());
         }
 

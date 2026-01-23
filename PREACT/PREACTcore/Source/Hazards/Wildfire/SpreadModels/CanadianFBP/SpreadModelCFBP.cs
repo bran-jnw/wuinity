@@ -5,8 +5,6 @@ namespace PREACT.Wildfire
 {
     public class SpreadModelCFBP : SpreadModel
     {
-        private float _eccentricity;
-
         private CanadianFBPInputs _inputs;
         private MainOutputs _outputs;
         private SecondaryOutputs _secondaryOutputs;
@@ -34,23 +32,41 @@ namespace PREACT.Wildfire
             _inputs.PercentSlope = (int)(0.5 + cellData.slope);
             _inputs.SlopeAzimuth = (int)(0.5 + cellData.aspect);
 
-            _inputs.PercentCuring = 0;//TODO
+            _inputs.Pattern = 0;
+            _inputs.Time = 0;
+            _inputs.JulianDateMin = -1; //this means it is calculated/updated first calc 
+
+            _inputs.PercentCuring = 0;//TODO, read input
         }
 
-        public override void CalculateSpreadRate()
+        public override void CalculateSpreadRate(WeatherManager weather, TimeManager timeManager)
         {
+            //wind
+            double windSpeed, windDirection;
+            weather.GetWind(out windSpeed, out windDirection);            
+            _inputs.WindAzimuth = (int)windDirection;
+            _inputs.WindSpeed = windSpeed;
+
+            //moisture related
+            double FFMC, BUI;
+            weather.GetCanadianFBPMoisture(out FFMC, out BUI); 
+            _inputs.FFMC = FFMC;
+            _inputs.BUI = BUI;
+
+            _inputs.JulianDate = timeManager.DayOfYear;
+
             CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
-            _eccentricity = (float)Mathd.Sqrt(1.0 - _secondaryOutputs.LengthToBreadth * _secondaryOutputs.LengthToBreadth);
+            _inputs.JulianDateMin = _outputs.JulianDateMin; //so that we do not have to calculate it every time
         }
 
         public override double GetMaxSpreadRate()
         {
-            return (float)_head.RateOfSpread;
+            return _head.RateOfSpread;
         }
 
         public override double GetDirectionOfMaxSpread()
         {
-            return (float)_outputs.SpreadAzimuth;
+            return _outputs.SpreadAzimuth;
         }
 
         public override double GetSpreadRateInDirection(double directionOfInterest)
@@ -70,43 +86,6 @@ namespace PREACT.Wildfire
             double ROStheta = (((ROS - BROS) / (2 * c1) + (ROS + BROS) / (2 * c1)) * ((FROS * c1 * Mathd.Sqrt(FROS * FROS * c1 * c1 + (ROS * BROS) * s1 * s1) - ((ROS * ROS - BROS * BROS) / 4) * s1 * s1) / (FROS * FROS * c1 * c1 + ((ROS + BROS) / 2) * ((ROS + BROS) / 2) * s1 * s1)));
             
             return ROStheta;
-
-            /* FARSITE approach
-            double rosDirection = _head.RateOfSpread;
-            if (_head.RateOfSpread != 0.0) // if forward spread rate is not zero
-            {
-                // Calculate the fire spread rate in this azimuth
-                // if it deviates more than a tenth degree from the maximum azimuth
-
-                // Calculate beta: the angle between the direction of max spread and the direction of interest
-                double beta = Mathd.Abs(_outputs.SpreadAzimuth - directionOfInterest);
-
-                // Calculate the fire spread rate in this azimuth
-                // if it deviates more than a tenth degree from the maximum azimuth
-                if (beta > 180.0)
-                {
-                    beta = (360.0 - beta);
-                }
-                if (Mathd.Abs(beta) > 0.1)
-                {
-                    double radians = beta * Mathd.PI / 180.0;
-                    rosDirection = _head.RateOfSpread * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
-                }
-            }
-            
-            return rosDirection; */
-
-        }
-
-        public override void SetWind(double direction, double speed)
-        {
-            _inputs.WindAzimuth = (int)direction;
-            _inputs.WindSpeed = speed;            
-        }
-
-        public override void SetFuelMoisture(double oneHour, double tenHour, double hundredHour, double liveHerbaceous, double liveWoody, double foliar)
-        {
-            throw new NotImplementedException();
         }
 
         public override bool HasFuelLoad()

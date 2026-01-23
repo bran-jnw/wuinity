@@ -23,11 +23,13 @@ namespace PREACT.Wildfire
 
         private int _fuelModelNumber;
         private LandscapeCellData _cellData;
+        InitialFuelMoisture _moisture;
 
         public SpreadModelBehave(BehaveCore.FuelModels fuelModel, LandscapeCellData cellData, InitialFuelMoisture moisture)
         {
             _crownBehave = new BehaveCore.Crown(fuelModel);
             _cellData = cellData;
+            _moisture = moisture;
 
             double crownRatio = 1.0; //This can be whatever as Behave calculates it internally each time anyway, so not sure why it is an input
             double moistureFoliar = 0;
@@ -38,8 +40,24 @@ namespace PREACT.Wildfire
                 _cellData.aspect, _cellData.canopy_cover, FractionUnits, _cellData.crown_canopy_height, _cellData.crown_base, LengthUnits, crownRatio, FractionUnits, _cellData.crown_bulk_density, DensityUnits);
         }
 
-        public override void CalculateSpreadRate()
+        public override void CalculateSpreadRate(WeatherManager weather, TimeManager timeManager)
         {
+            //wind
+            double windSpeed, windDirection;
+            weather.GetWind( out windSpeed, out windDirection);
+            _crownBehave.setWindDirection(windDirection);
+            _crownBehave.setWindSpeed(windSpeed, WindSpeedUnits, WindHeightInputMode);
+
+            //moisture update
+            //TODO: use Nelson model
+            /*_crownBehave.setMoistureOneHour(_moisture.OneHour, MoistureUnits);
+            _crownBehave.setMoistureTenHour(_moisture.TenHour, MoistureUnits);
+            _crownBehave.setMoistureHundredHour(_moisture.HundredHour, MoistureUnits);
+            _crownBehave.setMoistureLiveHerbaceous(_moisture.LiveHerbaceous, MoistureUnits);
+            _crownBehave.setMoistureLiveWoody(_moisture.LiveWoody, MoistureUnits);
+            double moistureFoliar = 0;
+            _crownBehave.setMoistureFoliar(moistureFoliar, MoistureUnits);*/
+
             _crownBehave.doCrownRunRothermel();
             _forwardSpreadRate = _crownBehave.getFinalSpreadRate(BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond);
             _eccentricity = _crownBehave.getFireEccentricity();
@@ -86,22 +104,6 @@ namespace PREACT.Wildfire
         public override double GetFirelineIntensity()
         {
             return _firelineIntensity;
-        }
-
-        public override void SetWind(double direction, double speedMetersPerSecond)
-        {
-            _crownBehave.setWindDirection(direction);
-            _crownBehave.setWindSpeed(speedMetersPerSecond, WindSpeedUnits, WindHeightInputMode);
-        }
-
-        public override void SetFuelMoisture(double oneHour, double tenHour, double hundredHour, double liveHerbaceous, double liveWoody, double foliar)
-        {
-            _crownBehave.setMoistureOneHour(oneHour, MoistureUnits);
-            _crownBehave.setMoistureTenHour(tenHour, MoistureUnits);
-            _crownBehave.setMoistureHundredHour(hundredHour, MoistureUnits);
-            _crownBehave.setMoistureLiveHerbaceous(liveHerbaceous, MoistureUnits);
-            _crownBehave.setMoistureLiveWoody(liveWoody, MoistureUnits);
-            _crownBehave.setMoistureFoliar(foliar, MoistureUnits);
         }
 
         public override bool HasFuelLoad()
