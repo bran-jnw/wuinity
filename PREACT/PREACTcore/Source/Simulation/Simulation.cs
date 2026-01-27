@@ -491,10 +491,10 @@ namespace PREACT
             _timeManager.Step(deltaTime);
             _weatherManager.Step(deltaTime);
 
-            UpdatePermanceTimer(startTime, deltaTime);
+            UpdateTiming(startTime, deltaTime);
         }
 
-        private void UpdatePermanceTimer(long startTime, float deltaTime)
+        private void UpdateTiming(long startTime, float deltaTime)
         {
             //just some stuff for controlling execution mode and timing performance
             long timeSpent = _simulationStopWatch.ElapsedMilliseconds - startTime;
