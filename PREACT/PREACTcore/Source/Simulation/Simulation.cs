@@ -95,7 +95,7 @@ namespace PREACT
             _simulationIndex = simulationIndex;
             _timeManager = new TimeManager(_input);
             _spatialManager = new SpatialManager(this);
-            _weatherManager = new WeatherManager(_input);
+            _weatherManager = new WeatherManager(this);
             _evacuationManager = new EvacuationManager(this);
             _hazardManager = new HazardManager(this);
             _output = new SimulationOutput(this);
@@ -153,7 +153,14 @@ namespace PREACT
 
             Engine.Message(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
 
-            
+            _weatherManager.Initialize();
+            if (_stopRun)
+            {
+                _state = SimulationState.Error;
+                return;
+            }
+
+
             if (_stopRun)
             {
                 _state = SimulationState.Error;

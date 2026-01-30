@@ -5,9 +5,9 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using static PREACT.Wildfire.CDT_SolarRadiationLibrary;
+using static PREACT.Weather.CDT_SolarRadiationLibrary;
 
-namespace PREACT.Wildfire
+namespace PREACT.Weather
 {
     public static class SunRadiation
     {
@@ -16,7 +16,7 @@ namespace PREACT.Wildfire
         /// Adapted from Farsite FMC-FE2.cpp, returns W/m2. Added latitude and longitide as that was not included (lat got it through reference, long was set to 0 for some reason, equator?)
         /// </summary>
         /// <param name="latitude"></param>
-        /// <param name="date"></param>
+        /// <param name="dayOfYear"></param>
         /// <param name="hour"></param>
         /// <param name="cloud"></param>
         /// <param name="elev"></param>
@@ -24,7 +24,7 @@ namespace PREACT.Wildfire
         /// <param name="aspect"></param>
         /// <param name="cover"></param>
         /// <returns></returns>
-        public static double SimpleRadiation(double latitude, double longitude, long date, double hour, long cloud, long elev, long slope, long aspect, long cover)
+        public static double SimpleRadiation(double latitude, double longitude, long dayOfYear, double hour, long cloud, long elev, long slope, long aspect, long cover)
         {
 
             // calculates solar radiation (W/m2) using Collin Bevins model
@@ -38,8 +38,8 @@ namespace PREACT.Wildfire
             {
                 switch (i)
                 {
-                    case 1: days = 0; break;            // cumulative days to begin of month
-                    case 2: days = 31; pdays = 0; break;           // except ignores leapyear, but who cares anyway,
+                    case 1: days = 0; break;            
+                    case 2: days = 31; pdays = 0; break;           
                     case 3: days = 59; pdays = 31; break;
                     case 4: days = 90; pdays = 59; break;
                     case 5: days = 120; pdays = 90; break;
@@ -52,10 +52,10 @@ namespace PREACT.Wildfire
                     case 12: days = 334; pdays = 304; break;
                     default: days = 367; pdays = 334; break;
                 }
-                if (date < days)
+                if (dayOfYear < days)
                 {
                     month = i - 1;
-                    days = date - pdays;
+                    days = dayOfYear - pdays;
                     break;
                 }
             }

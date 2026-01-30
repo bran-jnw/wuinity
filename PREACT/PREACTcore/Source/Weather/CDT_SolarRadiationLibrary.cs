@@ -7,7 +7,7 @@
 
 using static PREACT.Wildfire.MathWrap;
 
-namespace PREACT.Wildfire
+namespace PREACT.Weather
 {
     public static class CDT_SolarRadiationLibrary
     {
