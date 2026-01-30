@@ -158,6 +158,7 @@ namespace PREACT.Wildfire
             flankfire.RateOfSpread = flankfire_ros(headfire.RateOfSpread, backfire.RateOfSpread, secondaryOuts.LengthToBreadth);
             flankfire.FireIntensity = flank_fire_behaviour(fuel, mainOuts, flankfire);
 
+            //point time evolving fire, should not be needed in WUI-nity as that is taken care in actual transport model
             if (input.Pattern == 1 && input.Time > 0)
             {
                 acceleration = Acceleration(fuel, headfire.CrownFractionBurned);
@@ -174,6 +175,7 @@ namespace PREACT.Wildfire
                 set_all(flankfire, input.Time);
                 set_all(backfire, input.Time);
             }
+
             secondaryOuts.Area = Area((headfire.Distance + backfire.Distance), flankfire.Distance);
             if (input.Pattern == 1 && input.Time > 0)
             {
@@ -198,7 +200,7 @@ namespace PREACT.Wildfire
                 cover = 'n';
             }
 
-            return (cover);
+            return cover;
         }       
 
         static double rate_of_spread(CanadianFBPInputs inputs, CanadianFBPFuel fuel, MainOutputs outputs)
@@ -856,78 +858,79 @@ namespace PREACT.Wildfire
             return ((ros + bros) / (lb * 2.0));
         }
 
-        static double flank_spread_distance(CanadianFBPInputs inp, FireData ptr, SecondaryOutputs sec, double hrost, double brost, double hd, double bd, double lb, double a)
+        static double flank_spread_distance(CanadianFBPInputs input, FireData fire, SecondaryOutputs sec, double hrost, double brost, double hd, double bd, double lb, double a)
         {
-            sec.lbt = (lb - 1.0) * (1.0 - Mathd.Exp(-a * inp.Time)) + 1.0;
-            ptr.rost = (hrost + brost) / (sec.lbt * 2.0);
+            sec.lbt = (lb - 1.0) * (1.0 - Mathd.Exp(-a * input.Time)) + 1.0;
+            fire.rost = (hrost + brost) / (sec.lbt * 2.0);
             return ((hd + bd) / (2.0 * sec.lbt));
         }
 
-        static double SpreadDistance(CanadianFBPInputs inp, FireData fire, double a)
+        static double SpreadDistance(CanadianFBPInputs input, FireData fire, double acceleration)
         {
-            fire.rost = fire.RateOfSpread * (1.0 - Mathd.Exp(-a * inp.Time));
-            return (fire.RateOfSpread * (inp.Time + (Mathd.Exp(-a * inp.Time) / a) - 1.0 / a));
+            fire.rost = fire.RateOfSpread * (1.0 - Mathd.Exp(-acceleration * input.Time));
+            return (fire.RateOfSpread * (input.Time + (Mathd.Exp(-acceleration * input.Time) / acceleration) - 1.0 / acceleration));
         }
 
-        static int time_to_crown(double ros, double rso, double a)
+        static int time_to_crown(double ros, double rso, double acceleration)
         {
             double ratio;
             if (ros > 0) ratio = rso / ros;
             else ratio = 1.1;
             if (ratio > 0.9 && ratio <= 1.0) ratio = 0.9;
-            if (ratio < 1.0) return (int)(Mathd.Log(1.0 - ratio) / -a);
+            if (ratio < 1.0) return (int)(Mathd.Log(1.0 - ratio) / -acceleration);
             else return (99);
         }
 
-        static double fire_behaviour(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs output, FireData f)
+        static double fire_behaviour(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs output, FireData fire)
         {
             double sfi, fi = 0;
             char firetype;
-            sfi = fire_intensity(output.SurfaceFuelConsumption, f.SurfaceRateOfSpread);
+            sfi = fire_intensity(output.SurfaceFuelConsumption, fire.SurfaceRateOfSpread);
             firetype = fire_type(output.CriticalSurfaceIntensity, sfi);
             if (firetype == 'c')
             {
-                f.CrownFractionBurned = crown_frac_burn(f.SurfaceRateOfSpread, output.RSO);
-                f.FireDescription = fire_description(f.CrownFractionBurned);
-                f.RateOfSpread = final_ros(fuel, output.FoliarMoistureContent, f.ISI, f.CrownFractionBurned, f.SurfaceRateOfSpread);
-                f.CrownFuelConsumed = crown_consump(fuel, f.CrownFractionBurned);
-                f.FuelConsumption = f.CrownFuelConsumed + output.SurfaceFuelConsumption;
-                fi = fire_intensity(f.FuelConsumption, f.RateOfSpread);
+                fire.CrownFractionBurned = crown_frac_burn(fire.SurfaceRateOfSpread, output.RSO);
+                fire.FireDescription = fire_description(fire.CrownFractionBurned);
+                fire.RateOfSpread = final_ros(fuel, output.FoliarMoistureContent, fire.ISI, fire.CrownFractionBurned, fire.SurfaceRateOfSpread);
+                fire.CrownFuelConsumed = crown_consump(fuel, fire.CrownFractionBurned);
+                fire.FuelConsumption = fire.CrownFuelConsumed + output.SurfaceFuelConsumption;
+                fi = fire_intensity(fire.FuelConsumption, fire.RateOfSpread);
             }
             if (firetype != 'c' || output.CoverType == 'n')
             {
-                f.FuelConsumption = output.SurfaceFuelConsumption;
+                fire.FuelConsumption = output.SurfaceFuelConsumption;
                 fi = sfi;
-                f.CrownFractionBurned = 0.0;
-                f.FireDescription = 'S';
-                f.RateOfSpread = f.SurfaceRateOfSpread;
+                fire.CrownFractionBurned = 0.0;
+                fire.FireDescription = 'S';
+                fire.RateOfSpread = fire.SurfaceRateOfSpread;
             }
             return (fi);
         }
 
-        static double flank_fire_behaviour(CanadianFBPFuel fuel, MainOutputs at, FireData f)
+        static double flank_fire_behaviour(CanadianFBPFuel fuel, MainOutputs output, FireData fire)
         {
             double sfi, fi = 0;
             char firetype;
-            sfi = fire_intensity(at.SurfaceFuelConsumption, f.SurfaceRateOfSpread);
-            firetype = fire_type(at.CriticalSurfaceIntensity, sfi);
+            sfi = fire_intensity(output.SurfaceFuelConsumption, fire.SurfaceRateOfSpread);
+            firetype = fire_type(output.CriticalSurfaceIntensity, sfi);
             if (firetype == 'c')
             {
-                f.CrownFractionBurned = crown_frac_burn(f.SurfaceRateOfSpread, at.RSO);
-                f.FireDescription = fire_description(f.CrownFractionBurned);
-                f.CrownFuelConsumed = crown_consump(fuel, f.CrownFractionBurned);
-                f.FuelConsumption = f.CrownFuelConsumed + at.SurfaceFuelConsumption;
-                fi = fire_intensity(f.FuelConsumption, f.RateOfSpread);
+                fire.CrownFractionBurned = crown_frac_burn(fire.SurfaceRateOfSpread, output.RSO);
+                fire.FireDescription = fire_description(fire.CrownFractionBurned);
+                fire.CrownFuelConsumed = crown_consump(fuel, fire.CrownFractionBurned);
+                fire.FuelConsumption = fire.CrownFuelConsumed + output.SurfaceFuelConsumption;
+                fi = fire_intensity(fire.FuelConsumption, fire.RateOfSpread);
             }
-            if (firetype != 'c' || at.CoverType == 'n')
+            if (firetype != 'c' || output.CoverType == 'n')
             {
-                f.FuelConsumption = at.SurfaceFuelConsumption;
+                fire.FuelConsumption = output.SurfaceFuelConsumption;
                 fi = sfi;
-                f.CrownFractionBurned = 0.0;
-                f.FireDescription = 'S';
+                fire.CrownFractionBurned = 0.0;
+                fire.FireDescription = 'S';
                 /*   f.ros=f.rss;  removed...v4.5   should not have been here ros set in flankfire_ros()  */
             }
-            return (fi);
+
+            return fi;
         }
 
         static void zero_main(MainOutputs m)

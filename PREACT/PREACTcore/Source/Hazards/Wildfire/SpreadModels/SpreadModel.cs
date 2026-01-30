@@ -2,7 +2,7 @@
 {
     public abstract class SpreadModel
     {
-        public abstract void CalculateSpreadRate(WeatherManager weather, TimeManager timeManager);
+        public abstract void CalculateSpreadRate(WeatherManager weather, TimeManager time);
         public abstract double GetMaxSpreadRate();
         public abstract double GetSpreadRateInDirection(double directionOfInterest);
         public abstract double GetDirectionOfMaxSpread();

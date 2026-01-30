@@ -12,7 +12,7 @@ namespace PREACT.Wildfire
         private CanadianFBPFuel _fuel;
         private bool _hasFuelLoad = false;
 
-        public SpreadModelCFBP(LandscapeCellData cellData, CanadianFBPLookupTable lookupTable)
+        public SpreadModelCFBP(LandscapeCellData cellData, CanadianFBPLookupTable lookupTable, SpatialManager spatialManager)
         {
             _inputs = new CanadianFBPInputs();
             _outputs = new MainOutputs();
@@ -29,17 +29,21 @@ namespace PREACT.Wildfire
 
             _fuel = new CanadianFBPFuel(lookupEntry);
             _inputs.Elevation = (int)(0.5 + cellData.elevation);
-            _inputs.PercentSlope = (int)(0.5 + cellData.slope);
+            int percentSlope = (int)(0.5 + Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100);
+            _inputs.PercentSlope = percentSlope;
             _inputs.SlopeAzimuth = (int)(0.5 + cellData.aspect);
 
-            _inputs.Pattern = 0;
+            _inputs.Pattern = 0; //
             _inputs.Time = 0;
             _inputs.JulianDateMin = -1; //this means it is calculated/updated first calc 
+
+            _inputs.Lat = spatialManager.SimulationCenterLatLon.x;
+            _inputs.Lon = spatialManager.SimulationCenterLatLon.y;
 
             _inputs.PercentCuring = 0;//TODO, read input
         }
 
-        public override void CalculateSpreadRate(WeatherManager weather, TimeManager timeManager)
+        public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
         {
             //wind
             double windSpeed, windDirection;
@@ -48,12 +52,10 @@ namespace PREACT.Wildfire
             _inputs.WindSpeed = windSpeed;
 
             //moisture related
-            double FFMC, BUI;
-            weather.GetCanadianFBPMoisture(out FFMC, out BUI); 
-            _inputs.FFMC = FFMC;
-            _inputs.BUI = BUI;
+            _inputs.FFMC = weather.FFMCHourly;
+            _inputs.BUI = weather.FWI.BUI;
 
-            _inputs.JulianDate = timeManager.DayOfYear;
+            _inputs.JulianDate = time.CurrentDateTime.DayOfYear;
 
             CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
             _inputs.JulianDateMin = _outputs.JulianDateMin; //so that we do not have to calculate it every time

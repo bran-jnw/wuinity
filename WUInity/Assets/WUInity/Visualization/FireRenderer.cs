@@ -85,8 +85,8 @@ namespace WUInity.Visualization
 
         private void CreateFireBuffer(Simulation simulation)
         {            
-            _fireCellCountX = simulation.FireModule.GetCellCountX();
-            _fireCellCountY = simulation.FireModule.GetCellCountY();
+            _fireCellCountX = simulation.WildfireModule.GetCellCountX();
+            _fireCellCountY = simulation.WildfireModule.GetCellCountY();
             _fireBuffer = new ComputeBuffer(_fireCellCountX * _fireCellCountY, sizeof(float));
             _fireMaterial.SetInteger("_CellsX", _fireCellCountX);
             _fireMaterial.SetInteger("_CellsY", _fireCellCountY);
@@ -187,11 +187,11 @@ namespace WUInity.Visualization
                 float[] fireData = null;
                 if (_fireDisplayMode == FireDisplayMode.FirelineIntensity)
                 {
-                    fireData = simulation.FireModule.GetFireLineIntensityData();
+                    fireData = simulation.WildfireModule.GetFireLineIntensityData();
                 }
                 else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
                 {
-                    fireData = simulation.FireModule.GetFuelModelNumberData();
+                    fireData = simulation.WildfireModule.GetFuelModelNumberData();
                 }
                 
                 if (fireData != null)
@@ -238,7 +238,7 @@ namespace WUInity.Visualization
             Vector3 offset;
             Vector2 maxUV = Vector2.one;
 
-            simulation.FireModule.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
+            simulation.WildfireModule.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
             width = (float)size.x;
             height = (float)size.y;             
             offset = new Vector3((float)offsetFire.x, 0f, (float)offsetFire.y);

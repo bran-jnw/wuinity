@@ -12,7 +12,7 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire
 {
-    public class CellParticleHybrid : FireModule
+    public class CellParticleHybrid : WildfireModule
     {
         public static readonly Vector2int[] NeighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
         public static bool inverseSpreadDirection = false;        

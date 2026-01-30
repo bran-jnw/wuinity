@@ -11,9 +11,15 @@ namespace PREACT
     {
         private Simulation _simulation;
 
+        private Vector2d _simulationCenterLatLon;
+
+        public Vector2d SimulationCenterLatLon { get => _simulationCenterLatLon; }
+
         public SpatialManager(Simulation simulation)
         {
             _simulation = simulation;
+
+            _simulationCenterLatLon = simulation.Input.Simulation.Data.GetWGS84FromSimulationPosition(simulation.Input.Simulation.DomainSize * 0.5);
         }
 
         /// <summary>
@@ -23,9 +29,9 @@ namespace PREACT
         public Vector2d GetFireModuleOffset()
         {
             Vector2d result = Vector2d.zero;
-            if(_simulation.FireModule != null)
+            if(_simulation.WildfireModule != null)
             {
-                result = _simulation.FireModule.GetOriginOffset();
+                result = _simulation.WildfireModule.GetOriginOffset();
             }
 
             return result;

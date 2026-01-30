@@ -439,17 +439,17 @@ namespace PREACT.Traffic
             {
                 int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[_simulation.FireModule.GetCellCountX(), _simulation.FireModule.GetCellCountY()];
+                fireCellEdges = new List<string>[_simulation.WildfireModule.GetCellCountX(), _simulation.WildfireModule.GetCellCountY()];
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
                     //TODO: include fire module offset here, as now we assume 0,0 is aligned with fire module origin
-                    int cellIndexX = (int)((nodePos.x + _originOffset.x) / _simulation.FireModule.GetCellSizeX());
-                    int cellIndexY = (int)((nodePos.y + _originOffset.y) / _simulation.FireModule.GetCellSizeY());
+                    int cellIndexX = (int)((nodePos.x + _originOffset.x) / _simulation.WildfireModule.GetCellSizeX());
+                    int cellIndexY = (int)((nodePos.y + _originOffset.y) / _simulation.WildfireModule.GetCellSizeY());
 
-                    if (cellIndexX > 0 && cellIndexX < _simulation.FireModule.GetCellCountX() - 1 &&
-                        cellIndexY > 0 && cellIndexY < _simulation.FireModule.GetCellCountY() - 1)
+                    if (cellIndexX > 0 && cellIndexX < _simulation.WildfireModule.GetCellCountX() - 1 &&
+                        cellIndexY > 0 && cellIndexY < _simulation.WildfireModule.GetCellCountY() - 1)
                     {
                         LIBSUMO.StringVector incomingEdges = LIBSUMO.Junction.getIncomingEdges(junctions[i]);
                         for (int j = 0; j < incomingEdges.Count; j++)

@@ -38,7 +38,7 @@ namespace PREACT
 
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
-        private FireModule _fireModule;
+        private WildfireModule _wildfireModule;
         private SmokeModule _smokeModule;
         private TriggerBufferModule _triggerBufferModule;
 
@@ -53,7 +53,7 @@ namespace PREACT
         private int _simulationIndex;
         private bool _visualize;
         private float _startTime;
-        private float _currentTime;
+        private float _simulationTime;
         private bool _isPaused = false;
         private bool _stopRun;
         private bool _haveResults = false;
@@ -70,7 +70,7 @@ namespace PREACT
         public HazardManager Hazards { get => _hazardManager; }
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
-        public FireModule FireModule { get => _fireModule; }
+        public WildfireModule WildfireModule { get => _wildfireModule; }
         public SmokeModule SmokeModule { get => _smokeModule; }
         public TriggerBufferModule TriggerBufferModule { get => _triggerBufferModule; }
         public PREACTInput Input { get => _input; }
@@ -82,7 +82,7 @@ namespace PREACT
         public bool IsPaused { get => _isPaused; }        
         public bool HaveResults { get => _haveResults; }          
         public float StartTime { get => _startTime; }        
-        public float CurrentTime { get => _currentTime; }  
+        public float CurrentTime { get => _simulationTime; }  
         public float StepExecutionTime { get => _stepExecutionTime; }        
         public Vector2d UTMOrigin { get => _input.Simulation.Data.UTMOrigin; }
         public LatLngUTMConverter.UTMResult UTMData { get => _input.Simulation.Data.UTMData; }
@@ -169,11 +169,11 @@ namespace PREACT
             }
 
             //pick start time based on curve or 0 (fire start)
-            _currentTime = 0f;
+            _simulationTime = 0f;
             foreach (ResponseCurve rC in _input.Evacuation.ResponseCurves.Values)
             {
                 float t = rC.DataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
-                _currentTime = Mathf.Min(CurrentTime, t);
+                _simulationTime = Mathf.Min(CurrentTime, t);
             }
             _startTime = CurrentTime;
 
@@ -269,17 +269,17 @@ namespace PREACT
             {
                 if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.AscImport)
                 {
-                    _fireModule = new AscFireImport(this);
+                    _wildfireModule = new AscFireImport(this);
                     Engine.Message(this, Engine.LogType.Log, "Fire module AscImport initiated.");
                 }
                 else if(_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.FireCell)
                 {
-                    _fireModule = new FireMesh(this, _input.WildfireModule.Data.LCPData, _input.WildfireModule.Data.WeatherInput, _input.WildfireModule.Data.WindInput, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
+                    _wildfireModule = new FireMesh(this, _input.WildfireModule.Data.LCPData, _input.WildfireModule.Data.WeatherInput, _input.WildfireModule.Data.WindInput, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
                 else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
                 {
-                    _fireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LCPData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
+                    _wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LCPData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
                 }
                 else
@@ -401,15 +401,15 @@ namespace PREACT
                     {
                         if (_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
                         {
-                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LCPData, _currentTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
+                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LCPData, _simulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
                         }
                         else
                         {
-                            _triggerBufferModule = new kPERIL(_currentTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _fireModule.GetMaxROS(), _fireModule.GetMaxROSAzimuth());
+                            _triggerBufferModule = new kPERIL(_simulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _wildfireModule.GetMaxROS(), _wildfireModule.GetMaxROSAzimuth());
                         }
                         _triggerBufferModule.Run();
                         string outputFilePath = Path.Combine(_engine.OutputFolder, _simulationIndex + "_" + _input.TriggerBufferModule.kPERILInput.OutputName);
-                        kPERIL.SaveToFile(_triggerBufferModule.TriggerBufferOutput, _fireModule.GetCellSizeX(), outputFilePath);
+                        kPERIL.SaveToFile(_triggerBufferModule.TriggerBufferOutput, _wildfireModule.GetCellSizeX(), outputFilePath);
                     }                    
                 }
                 else
@@ -436,7 +436,7 @@ namespace PREACT
             //this state represents the positions at the start of the time step
             if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _trafficModule != null)
             {
-                _engine.WUIShow.SendData(_currentTime);
+                _engine.WUIShow.SendData(_simulationTime);
             }
 
             //step all modules forward in time
@@ -448,13 +448,13 @@ namespace PREACT
             System.Threading.Tasks.Task.WaitAll(fireTask, smokeTask,pedestrianTask, trafficTask);
 
             //handle any fire effects on road network
-            if (_fireModule != null)
+            if (_wildfireModule != null)
             {
                 if(_trafficModule != null)
                 {
-                    _trafficModule.HandleIgnitedFireCells(_fireModule.GetIgnitedFireCells());
+                    _trafficModule.HandleIgnitedFireCells(_wildfireModule.GetIgnitedFireCells());
                 }     
-                _fireModule.ConsumeIgnitedFireCells();
+                _wildfireModule.ConsumeIgnitedFireCells();
             }
 
             //handle/inject cars that arrived this timestep
@@ -468,13 +468,13 @@ namespace PREACT
             //increase time
             float deltaTime = _input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (_fireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
+            if (_wildfireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
             {
-                deltaTime = (float)_fireModule.GetInternalDeltaTime();
+                deltaTime = (float)_wildfireModule.GetInternalDeltaTime();
             }
 
             //see if we are done or not
-            _currentTime += deltaTime;
+            _simulationTime += deltaTime;
             CheckCompletion();            
 
             if (_input.WildfireModule.Enabled)
@@ -489,7 +489,7 @@ namespace PREACT
             }
 
             _timeManager.Step(deltaTime);
-            _weatherManager.Step(deltaTime);
+            _weatherManager.Step(_simulationTime, _timeManager.CurrentDateTime);
 
             UpdateTiming(startTime, deltaTime);
         }
@@ -589,9 +589,9 @@ namespace PREACT
                 {
                     fireUpdated = true;
                     _fireStopwatch.Start();
-                    _fireModule.Step(_currentTime, _input.Simulation.DeltaTime);
+                    _wildfireModule.Step(_simulationTime, _input.Simulation.DeltaTime);
                     _fireStopwatch.Stop();
-                    nextFireUpdate += _fireModule.GetInternalDeltaTime();
+                    nextFireUpdate += _wildfireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
                     // Note: we need to preprocess each cell which has a road on it
                 }
@@ -610,7 +610,7 @@ namespace PREACT
                 }
                 else
                 {
-                    _smokeModule.Step(_currentTime, _input.Simulation.DeltaTime);
+                    _smokeModule.Step(_simulationTime, _input.Simulation.DeltaTime);
                 }
                 _smokeStopwatch.Stop();
             }
@@ -654,9 +654,9 @@ namespace PREACT
                 _trafficModule.Stop();
             }
 
-            if (_fireModule != null)
+            if (_wildfireModule != null)
             {
-                _fireModule.Stop();
+                _wildfireModule.Stop();
             }
 
             if (_smokeModule != null)

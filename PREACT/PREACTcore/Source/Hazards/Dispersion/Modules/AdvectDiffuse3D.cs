@@ -120,8 +120,8 @@ namespace PREACT.Smoke
             float zCellSize = 20f;
 
             //cell size stuff
-            _globalData.cellSizeX = _simulation.FireModule.GetCellSizeX() * _globalData.fireSmokeCellRatio;
-            _globalData.cellSizeY = _simulation.FireModule.GetCellSizeY() * _globalData.fireSmokeCellRatio;
+            _globalData.cellSizeX = _simulation.WildfireModule.GetCellSizeX() * _globalData.fireSmokeCellRatio;
+            _globalData.cellSizeY = _simulation.WildfireModule.GetCellSizeY() * _globalData.fireSmokeCellRatio;
             _globalData.cellSizeZ = zCellSize;
             Engine.Message(_simulation, Engine.LogType.Debug, "Cell sizes: " + _globalData.cellSizeX + ", " + _globalData.cellSizeY + ", " + _globalData.cellSizeZ);
 
@@ -141,8 +141,8 @@ namespace PREACT.Smoke
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
 
             //cell count stuff
-            _fireCellsX = _simulation.FireModule.GetCellCountX();
-            _fireCellsY = _simulation.FireModule.GetCellCountY();
+            _fireCellsX = _simulation.WildfireModule.GetCellCountX();
+            _fireCellsY = _simulation.WildfireModule.GetCellCountY();
             _globalData.xDim = _fireCellsX / _globalData.fireSmokeCellRatio + _fireCellsX % _globalData.fireSmokeCellRatio;
             _globalData.yDim = _fireCellsY / _globalData.fireSmokeCellRatio + _fireCellsY % _globalData.fireSmokeCellRatio;
             _globalData.xyDim = _globalData.xDim * _globalData.yDim;
@@ -263,7 +263,7 @@ namespace PREACT.Smoke
             _globalData.dt = deltaTime / subSteps;
 
             //inject soot
-            _cpuInjection.CopyFromCPU(_simulation.FireModule.GetSootProduction());
+            _cpuInjection.CopyFromCPU(_simulation.WildfireModule.GetSootProduction());
             _injectionKernel(_fireCellsX * _fireCellsY, _cpuInjection.View, _groundIndex.View, _speciesDensity[READ].View, _globalData, _fireCellsX, _fireCellsY);
             _accelerator.Synchronize();
 

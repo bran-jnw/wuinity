@@ -99,11 +99,6 @@ namespace PREACT.Wildfire
         public void UpdateRateOfSpread(float currentTime)
         {
             //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
-            
-            WindData w = _owner.Simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
-            double moistureFoliar = 0;
-
-            //_spreadModel.SetFuelMoisture(
             _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
             _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFirelineIntensity(), (float)_spreadModel.GetMaxSpreadRate());
         }

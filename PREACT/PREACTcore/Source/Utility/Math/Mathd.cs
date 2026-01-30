@@ -13,6 +13,11 @@ namespace PREACT.Math
         public const double Rad2Deg = 57.29578d;
         public const double Epsilon = 1.401298E-45d;
 
+        public static double Pow2(double d)
+        {
+            return d * d;
+        }
+
         public static double Sin(double d) {
             return System.Math.Sin(d);
         }

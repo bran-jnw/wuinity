@@ -23,7 +23,7 @@ namespace PREACT.Wildfire
     /// <summary>
     /// Thus far only tested using only Flammap version of Farsite.
     /// </summary>
-    public class AscFireImport : FireModule
+    public class AscFireImport : WildfireModule
     {
         private float _maxTimeOfArrival = float.MinValue;
         private int ncols, nrows, _activeCells;

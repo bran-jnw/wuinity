@@ -6,8 +6,8 @@ namespace PREACT.Wildfire
 {
     public struct CanadianFBPInputs
     {
-        public double FFMC, WindSpeed, GrassFuelLoad, BUI, Lat, Lon;
-        public int Time, Pattern, mon, JulianDate, JulianDateMin, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation, hour, hourly;
+        public double FFMC, BUI, WindSpeed, GrassFuelLoad, Lat, Lon;
+        public int Time, Pattern, JulianDate, JulianDateMin, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation;// not used: mon, hour, hourly 
     }
     public class FireData
     {

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 namespace PREACT.Wildfire
 {
     [System.Serializable]                                           
-    public class FireMesh : FireModule                        
+    public class FireMesh : WildfireModule                        
     {
         Vector2int _cellCount;                                
         public FireCellInput.SpreadModes spreadMode;                               

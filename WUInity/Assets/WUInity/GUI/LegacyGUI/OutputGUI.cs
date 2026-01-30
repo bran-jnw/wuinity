@@ -116,7 +116,7 @@ namespace WUInity.UI
                 ++buttonIndex;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + _engine.Simulation.FireModule.GetCurrentWindData().direction + " degrees");
                 ++buttonIndex;*/
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + _engine.Simulation.FireModule.GetActiveCellCount());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + _engine.Simulation.WildfireModule.GetActiveCellCount());
                 ++buttonIndex;
 
                 //fire visual mode

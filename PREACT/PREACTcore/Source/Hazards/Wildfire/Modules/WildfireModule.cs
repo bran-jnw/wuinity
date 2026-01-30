@@ -10,10 +10,10 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire
 {
-    public abstract class FireModule : SimulationModule
+    public abstract class WildfireModule : SimulationModule
     {
         protected float _internalDeltaTime;
-        public FireModule(Simulation simulation) : base(simulation)
+        public WildfireModule(Simulation simulation) : base(simulation)
         {
 
         }

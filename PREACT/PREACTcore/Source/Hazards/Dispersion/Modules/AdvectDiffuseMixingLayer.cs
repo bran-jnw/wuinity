@@ -70,10 +70,10 @@ namespace PREACT.Smoke
 
             //set up all buffers and data containers
             _globalData = new GlobalData();
-            _globalData.cellsX = _simulation.FireModule.GetCellCountX();
-            _globalData.cellsY = _simulation.FireModule.GetCellCountY();
-            _globalData.cellSizeX = _simulation.FireModule.GetCellSizeX();
-            _globalData.cellSizeY = _simulation.FireModule.GetCellSizeY();
+            _globalData.cellsX = _simulation.WildfireModule.GetCellCountX();
+            _globalData.cellsY = _simulation.WildfireModule.GetCellCountY();
+            _globalData.cellSizeX = _simulation.WildfireModule.GetCellSizeX();
+            _globalData.cellSizeY = _simulation.WildfireModule.GetCellSizeY();
             _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
             _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
             _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
@@ -128,7 +128,7 @@ namespace PREACT.Smoke
             bool fireHasUpdated = true;
             if (fireHasUpdated)
             {
-                _injection.CopyFromCPU(_simulation.FireModule.GetSootProduction());
+                _injection.CopyFromCPU(_simulation.WildfireModule.GetSootProduction());
             }
 
             //update wind

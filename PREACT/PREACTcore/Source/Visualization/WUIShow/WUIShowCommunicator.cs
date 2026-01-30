@@ -87,7 +87,7 @@ namespace PREACT.Visualization
         private byte[] GetFinalFireTimeOfArrival()
         {
             byte[] result = null;
-            Wildfire.FireRasterData[,] data = ((Wildfire.AscFireImport)_engine.Simulation.FireModule).GetCompleteFireData();
+            Wildfire.FireRasterData[,] data = ((Wildfire.AscFireImport)_engine.Simulation.WildfireModule).GetCompleteFireData();
 
             if (data != null)
             {

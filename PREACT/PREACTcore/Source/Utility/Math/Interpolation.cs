@@ -7,10 +7,20 @@
 
 using static PREACT.Wildfire.MathWrap;
 
-namespace PREACT
+namespace PREACT.Math
 {
     public static class Interpolation
     {
+        public static float CosineInterpolate(float y1, float y2, float fraction)
+        {
+            float cosFraction;
+            //range fom 0-1 over half circle
+            cosFraction = (1.0f - Mathf.Cos(fraction * Mathf.PI)) * 0.5f;
+
+            //return weighted value between y1 and y2 based on fraction
+            return (y1 * (1f - cosFraction) + y2 * cosFraction);
+        }
+
         /// <summary>
         /// Only works in one dimension as in 2D it reverts to being linear.
         /// </summary>
@@ -24,7 +34,7 @@ namespace PREACT
         {
             double frac;
             //range fom 0-1 over half circle
-            frac = (1.0 - cos(fraction * PI)) / 2.0;
+            frac = (1.0 - cos(fraction * PI)) * 0.5;
 
             //return weighted value between y1 and y2 based on fraction
             return (y1 * (1 - frac) + y2 * frac);
