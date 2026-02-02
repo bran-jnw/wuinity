@@ -35,7 +35,7 @@ namespace PREACT.IO
             _fireCellInput = new FireCellInput();
         }
 
-        public void Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, WeatherInput weatherInput, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
         {
             success = false;
             int issues = 0;
@@ -56,6 +56,12 @@ namespace PREACT.IO
             {
                 return;
             }
+
+            if(!Enabled)
+            {
+                success = true;
+                return;
+            }            
 
             nameOfInput = nameof(Module);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
@@ -85,6 +91,14 @@ namespace PREACT.IO
             }
             if (!success)
             {
+                return;
+            }
+
+            //check if weather exists, may be critical
+            if (weatherInput.WeatherFile == string.Empty && (Module != WildfireModules.AscImport || Module != WildfireModules.None))
+            {
+                success = false;
+                PREACTInput.CriticalDependency(nameof(weatherInput.WeatherFile));
                 return;
             }
 

@@ -23,8 +23,6 @@ namespace PREACT.IO
         public string RootFolder = string.Empty;
         public string FuelModelsFile = string.Empty;
         public string InitialFuelMoistureFile = string.Empty;
-        public string WeatherFile = string.Empty;
-        public string WindFile = string.Empty;
         public string IgnitionPointsFile = string.Empty;
         public bool UseRandomIgnitionMap = false;
         public int RandomIgnitionPoints = 0;
@@ -144,40 +142,6 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 InitialFuelMoistureFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-            }
-            else
-            {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-            if (!success)
-            {
-                return;
-            }
-
-            //critical
-            nameOfInput = nameof(WeatherFile);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                WeatherFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-            }
-            else
-            {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-            if (!success)
-            {
-                return;
-            }
-
-            //critical
-            nameOfInput = nameof(WindFile);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                WindFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else

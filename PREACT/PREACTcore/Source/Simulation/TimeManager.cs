@@ -10,10 +10,12 @@ namespace PREACT
         DateTime _endDateTime;
         DateTime _currentDateTime;
         float _simulationTime;
+        float _simulationEndTime;
         string _startDateISO8601;
         string _endDateISO8601;
 
         public float SimulationTime { get => _simulationTime; }
+        public float SimulationEndTime { get => _simulationEndTime; }
         public DateTime StartDateTime { get => _startDateTime; }
         public DateTime CurrentDateTime { get => _currentDateTime; }
         public string StartDateISO8601 { get => _startDateISO8601; }
@@ -21,10 +23,11 @@ namespace PREACT
 
         public TimeManager(IO.PREACTInput input)
         {
-            //TODO: find the lowest DateTime and use that as starting time
             _simulationTime = 0;
-            _startDateTime = DateTime.Now;
+            _startDateTime = input.Simulation.StartDateTime;
             _currentDateTime = _startDateTime;
+            _endDateTime = input.Simulation.EndDateTime;
+            _simulationEndTime = (float)(_endDateTime - _startDateTime).TotalSeconds;
 
             _startDateISO8601 = new string($"{_startDateTime.Year}-{_startDateTime.Month}-{_startDateTime.Day}");
             _endDateISO8601 = new string($"{_endDateTime.Year}-{_endDateTime.Month}-{_endDateTime.Day}");

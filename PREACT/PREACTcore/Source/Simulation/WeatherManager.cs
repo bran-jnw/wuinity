@@ -1,6 +1,7 @@
 ﻿using PREACT.Math;
 using System;
 using PREACT.Weather;
+using System.IO;
 
 namespace PREACT
 {    
@@ -22,7 +23,7 @@ namespace PREACT
 
         //"temperature_2m", "precipitation", "relative_humidity_2m",  "wind_speed_10m", "wind_direction_10m", "cloud_cover", "direct_radiation", "boundary_layer_height" 
         readonly OpenMeteo.HourlyOptionsParameter[] _parameters = { OpenMeteo.HourlyOptionsParameter.temperature_2m, OpenMeteo.HourlyOptionsParameter.relativehumidity_2m, OpenMeteo.HourlyOptionsParameter.precipitation,
-            OpenMeteo.HourlyOptionsParameter.windspeed_10m, OpenMeteo.HourlyOptionsParameter.winddirection_10m, OpenMeteo.HourlyOptionsParameter.cloudcover, OpenMeteo.HourlyOptionsParameter.direct_radiation};
+            OpenMeteo.HourlyOptionsParameter.windspeed_10m, OpenMeteo.HourlyOptionsParameter.winddirection_10m, OpenMeteo.HourlyOptionsParameter.cloudcover, OpenMeteo.HourlyOptionsParameter.direct_radiation, OpenMeteo.HourlyOptionsParameter.boundary_layer_height};
 
         public Wildfire.FireWeatherIndex FWI { get => _fwi; }
         public double FFMCHourly { get => _ffmcHourly.Value; }
@@ -35,10 +36,25 @@ namespace PREACT
             _ffmcHourly = new Wildfire.FFMCHourly();                       
         }
 
-        public void Initialize()
+        public void Initialize(TimeManager timeManager)
         {
-            //TODO: check if needed, look for file first
-            DownloadWeather();
+            InitializeWeather(timeManager);
+        }
+
+        private void InitializeWeather(TimeManager timeManager)
+        {
+            string weatherFile = _simulation.Input.Weather.WeatherFile;
+            bool haveCorrectWeather = false;
+            if (File.Exists(Path.Combine(_simulation.Input.RootFolder, weatherFile)))
+            {
+
+            }            
+            
+            if(!haveCorrectWeather)
+            {
+                DownloadWeather();
+            }
+                             
         }
 
         private void DownloadWeather()
@@ -64,13 +80,30 @@ namespace PREACT
             OpenMeteo.WeatherForecast? weatherData = client.Query(options);
             if (weatherData != null)
             {
-                //weatherData
+                using (StreamWriter file = new StreamWriter("weather.csv"))
+                {
+                    file.WriteLine($"Lat/lon:{weatherData.Latitude}/{weatherData.Longitude}");
+                    if (weatherData.Hourly != null)
+                    {
+                        OpenMeteo.Hourly hour = weatherData.Hourly;
+                        if (hour.Time != null)
+                        {
+                            file.WriteLine($"{nameof(hour.Time)},{nameof(hour.Temperature_2m)} [{weatherData.HourlyUnits.Temperature_2m}],{nameof(hour.Relativehumidity_2m)} [{weatherData.HourlyUnits.Relativehumidity_2m}],{nameof(hour.Precipitation)} [{weatherData.HourlyUnits.Precipitation}]," +
+                                $"{nameof(hour.Windspeed_10m)} [{weatherData.HourlyUnits.Windspeed_10m}],{nameof(hour.Winddirection_10m)} [{weatherData.HourlyUnits.Winddirection_10m}],{nameof(hour.Cloudcover)} [{weatherData.HourlyUnits.Cloudcover}]," +
+                                $"{nameof(hour.Direct_radiation)} [{weatherData.HourlyUnits.Direct_radiation}],{nameof(hour.Boundary_layer_height)} [{weatherData.HourlyUnits.Boundary_layer_height}]");
+                            for (int i = 0; i < hour.Time.Length; i++)
+                            {
+                                file.WriteLine($"{hour.Time[i]},{hour.Temperature_2m[i]},{hour.Relativehumidity_2m[i]},{hour.Precipitation[i]},{hour.Windspeed_10m[i]},{hour.Winddirection_10m[i]},{hour.Cloudcover[i]},{hour.Direct_radiation[i]},{hour.Boundary_layer_height[i]}");
+                            }
+                        }
+                    }
+                }
             }
             else
             {
                 Engine.Message(_simulation, Engine.LogType.SimulationError, "Could not download weather and no weather file has been supplied.");
             }
-        }
+        }   
 
         public void Step(float simulationTime, DateTime currentDateTime)
         {

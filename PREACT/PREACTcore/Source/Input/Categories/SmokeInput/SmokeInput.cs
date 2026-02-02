@@ -35,7 +35,7 @@ namespace PREACT.IO
             _lagrangianInput = new LagrangianInput();
         }
 
-        public void Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, Dictionary<string, int> headerLineIndex, WeatherInput weatherInput, string rootFolder, out bool success)
         {
             success = false;
             int issues = 0;            
@@ -91,7 +91,15 @@ namespace PREACT.IO
                 success = false;
                 return;
             }
-                        
+
+            //check if weather exists
+            if (weatherInput.WeatherFile == string.Empty && (Module != SmokeModules.None || Module != SmokeModules.GlobalSmoke))
+            {
+                success = false;
+                PREACTInput.CriticalDependency(nameof(weatherInput.WeatherFile));
+                return;
+            }
+
             //critical
             if (Module == SmokeModules.GlobalSmoke)
             {

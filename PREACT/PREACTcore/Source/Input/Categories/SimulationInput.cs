@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using PREACT.IO;
+using System;
 using PREACT.Math;
 
 namespace PREACT.IO
@@ -21,7 +21,8 @@ namespace PREACT.IO
         public Vector2d LowerLeftLatLon { get => _lowerLeftLatLon; set { _lowerLeftLatLon = value; _data.UpdateData(LowerLeftLatLon); } }
         public Vector2d DomainSize;
         public float DeltaTime = 1.0f;
-        public float MaxSimTime= float.MaxValue;
+        public DateTime StartDateTime = DateTime.MinValue;
+        public DateTime EndDateTime = DateTime.MaxValue;
         public bool StopWhenEvacuated = true;
 
         public SimulationInput()
@@ -114,15 +115,43 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
 
-            nameOfInput = nameof(MaxSimTime);
+            nameOfInput = nameof(StartDateTime);
             if(inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out MaxSimTime);
+                success = DateTime.TryParse(userInput, out StartDateTime);
+                if(!success)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
             }
             else
             {
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
-            }            
+            }
+            if(!success)
+            {
+                return;
+            }
+
+            nameOfInput = nameof(EndDateTime);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = DateTime.TryParse(userInput, out EndDateTime);
+                if (!success)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }
+            if (!success)
+            {
+                return;
+            }
 
             nameOfInput = nameof(StopWhenEvacuated);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))

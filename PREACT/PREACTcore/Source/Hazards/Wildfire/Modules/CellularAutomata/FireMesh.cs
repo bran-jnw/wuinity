@@ -20,7 +20,9 @@ namespace PREACT.Wildfire
         FireCell[] _fireCells;                                
         public Vector2d _cellSize;
         float cellArea;
-        WindData _currentWindData;                            
+
+        double _windSpeed, _windDirection;
+        
         public double dt;                                           
         double[] angleOffsets;                                      
         public HashSet<FireCell> activeCells;                
@@ -39,8 +41,7 @@ namespace PREACT.Wildfire
         public double sixteenDistSquared;
         public int indexSize;                                       
 
-        private WeatherInput weather;                               
-        private WindInput wind;                                     
+        private WeatherManager _weather;                                          
         public InitialFuelMoistureLibrary initialFuelMoisture;         
         
         public LandscapeData lcpData;                                     
@@ -72,7 +73,7 @@ namespace PREACT.Wildfire
             this.ignitionPoints = ignitionPoints;
         }*/
 
-        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherInput weather, WindInput wind, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPointInput[] ignitionPoints) : base(simulation)        
+        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherManager weather, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPointInput[] ignitionPoints) : base(simulation)        
         {
 
             this.lcpData = lcpData;
@@ -81,8 +82,7 @@ namespace PREACT.Wildfire
             int yCells = lcpData.GetCellCountY();
             _cellCount = new Vector2int(xCells, yCells); //Vector2int(lcpData.Header.numeast, lcpData.Header.numnorth);           
 
-            this.weather = weather;
-            this.wind = wind;
+            this._weather = weather;
             this.initialFuelMoisture = initialFuelMoisture;
 
             this.ignitionPoints = ignitionPoints;
@@ -328,7 +328,7 @@ namespace PREACT.Wildfire
 
             //update time and wind for next time step. TODO: spread out the update over several frames
             timeSinceStart += dt;
-            _currentWindData = wind.GetWindDataAtTime((float)timeSinceStart);
+            _weather.GetWind(out _windSpeed, out _windDirection);
             //TODO: only update if any input has changed, re-calculate spread rates
             UpdateCellSpreadRates();
 

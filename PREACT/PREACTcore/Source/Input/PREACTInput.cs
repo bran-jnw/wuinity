@@ -16,7 +16,8 @@ namespace PREACT.IO
     {
         public string RootFolder;
         public SimulationInput Simulation;
-        public MapInput Map;                
+        public MapInput Map;
+        public WeatherInput Weather;
         public PopulationInput Population;
         public EventsInput Events;
         public EvacuationInput Evacuation;
@@ -33,6 +34,7 @@ namespace PREACT.IO
 
             Simulation = new SimulationInput();
             Map = new MapInput();   
+            Weather = new WeatherInput();
             Population = new PopulationInput();
             Events = new EventsInput();
             Evacuation = new EvacuationInput();
@@ -179,8 +181,24 @@ namespace PREACT.IO
             else
             {
                 //does not matter
-                newInput.Map = new MapInput();
                 Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, using defaults.");
+            }
+            if (!success)
+            {
+                return null;
+            }
+
+            //weather
+            nameOfInput = nameof(Weather);
+            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
+            {
+                ReadingInputMessage(nameOfInput);
+                newInput.Weather.Parse(inputLines, lineindex, rootFolder, out success);
+            }
+            else
+            {
+                //might not matter
+                Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, no weather will be loaded.");
             }
             if (!success)
             {
@@ -224,7 +242,7 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.WildfireModule.Parse(inputLines, lineindex, newInput.Simulation, headerLineIndices, rootFolder, out success);
+                newInput.WildfireModule.Parse(inputLines, lineindex, newInput.Simulation, newInput.Weather, headerLineIndices, rootFolder, out success);
             }
             else
             {               
@@ -240,7 +258,7 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.SmokeModule.Parse(inputLines, lineindex, headerLineIndices, rootFolder, out success);
+                newInput.SmokeModule.Parse(inputLines, lineindex, headerLineIndices, newInput.Weather, rootFolder, out success);
             }
             else
             {
@@ -412,6 +430,11 @@ namespace PREACT.IO
             {
                 Engine.Message(null, Engine.LogType.Warning, nameOfInput + " was not found, default value has been used.");
             }                
+        }
+
+        public static void CriticalDependency(string missingDependency)
+        {
+            Engine.Message(null, Engine.LogType.InputError, $"Current module requires {missingDependency} to be set." + pleaseCheckInput);
         }
 
         public static void MissingReferenceToOtherInput(string nameOfInput, string missingReference)
