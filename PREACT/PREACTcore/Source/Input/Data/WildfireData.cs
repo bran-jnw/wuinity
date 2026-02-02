@@ -19,8 +19,8 @@ namespace PREACT.IO
         private FuelModelInput _fuelModelsData;
         private IgnitionPointInput[] _ignitionPoints;
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
-        private WeatherInput _weatherInput;
-        private WindInput _windInput;
+        //private WeatherInput _weatherInput;
+        //private WindInput _windInput;
 
         public bool[] WuiArea;
         public bool[] RandomIgnition;
@@ -32,8 +32,8 @@ namespace PREACT.IO
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
         public IgnitionPointInput[] IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }       
-        public WeatherInput WeatherInput { get => _weatherInput; }       
-        public WindInput WindInput { get => _windInput; }        
+        //public WeatherInput WeatherInput { get => _weatherInput; }       
+        //public WindInput WindInput { get => _windInput; }        
 
         public WildfireData()
         {
@@ -86,13 +86,13 @@ namespace PREACT.IO
                 LoadInitialFuelMoistureData(fireInput, filePath, false, out success);
                 issues += success ? 0 : 1;
 
-                filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.WeatherFile);
+                /*filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.WeatherFile);
                 LoadWeatherInput(fireInput, filePath, false, out success);
                 issues += success ? 0 : 1;
 
                 filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.WindFile);
                 LoadWindInput(fireInput, filePath, false, out success);
-                issues += success ? 0 : 1;
+                issues += success ? 0 : 1;*/
 
                 if(issues > 0)
                 {
@@ -162,23 +162,23 @@ namespace PREACT.IO
             }
         }        
 
-        public void LoadWeatherInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
+        /*public void LoadWeatherInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _weatherInput = WeatherInput.LoadWeatherInputFile(filePath, out success);
             if (success && updateInput)
             {
                 fireInput.FireCellInput.WeatherFile = Path.GetFileName(filePath);
             }
-        }
+        }*/
 
-        public void LoadWindInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
+        /*public void LoadWindInput(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
         {
             _windInput = WindInput.LoadWindInputFile(filePath, out success);
             if (success && updateInput)
             {
                 fireInput.FireCellInput.WindFile = Path.GetFileName(filePath);
             }
-        }
+        }*/
 
         public void LoadGraphicalFireInput(WildfireModuleInput fireInput, string filePath, LandscapeData lcpData, bool updateInput, out bool success)
         {

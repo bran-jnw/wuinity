@@ -132,11 +132,12 @@ namespace PREACT.Smoke
             }
 
             //update wind
-            Wildfire.WindData windData = _simulation.Input.WildfireModule.Data.WindInput.GetWindDataAtTime(currentTime);
-            _globalData.windDirectionX = -Mathf.Sin(windData.direction * Mathf.Deg2Rad);
-            _globalData.windDirectionY = -Mathf.Cos(windData.direction * Mathf.Deg2Rad);
-            _globalData.windX = _globalData.windDirectionX * windData.speed;
-            _globalData.windY = _globalData.windDirectionY * windData.speed;
+            double windSpeed, windDirection;
+            _simulation.Weather.GetWind(out windSpeed, out windDirection);
+            _globalData.windDirectionX = -Mathf.Sin((float)windDirection * Mathf.Deg2Rad);
+            _globalData.windDirectionY = -Mathf.Cos((float)windDirection * Mathf.Deg2Rad);
+            _globalData.windX = _globalData.windDirectionX * (float)windSpeed;
+            _globalData.windY = _globalData.windDirectionY * (float)windSpeed;
 
             https://www.ready.noaa.gov/READYpgclass.php
             int stability = 4; //0-6 represents stability class A-G
