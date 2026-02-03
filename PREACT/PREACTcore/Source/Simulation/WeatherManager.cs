@@ -199,11 +199,19 @@ namespace PREACT
             _lastDateTime = currentDateTime;
         }
 
-        
+        public float GetTemperature()
+        {
+            return _interpolatedHourlyData._temp;
+        }
 
         public float GetTemperature(Vector3d simulationPosition, float elevation)
         {           
             return _interpolatedHourlyData._temp + 0.0065f * (_weatherReferenceElevation - elevation); //6.5 deg C / 1000 meters lapse rate https://en.wikipedia.org/wiki/Lapse_rate
+        }
+
+        public float GetRelativeHumidity()
+        {
+            return _interpolatedHourlyData._rh;
         }
 
         public float GetRelativeHumidity(Vector3d simulationPosition)
@@ -211,10 +219,18 @@ namespace PREACT
             return _interpolatedHourlyData._rh;
         }
 
+        public float GetPrecipitation()
+        {
+            return _interpolatedHourlyData._precip;
+        }
+
         public float GetPrecipitation(Vector3d simulationPosition)
         {
             return _interpolatedHourlyData._precip;
         }
+
+        public float WindSpeed { get => _interpolatedHourlyData._windSpeed; }
+        public float WindDirection { get => _interpolatedHourlyData._windDirection; }
 
         public void GetWind(out double speed, out double direction)
         {

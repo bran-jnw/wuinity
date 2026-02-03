@@ -23,7 +23,10 @@ namespace WUInity.UI
             int buttonIndex = 0;
 
             int dummy = (int)_engine.Simulation.CurrentTime;
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evac time: " + dummy + " s");
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation time: " + dummy + " s");
+            ++buttonIndex;
+
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), $"Actual time: {_engine.Simulation.Time.CurrentDateTime.ToString(CultureInfo.CurrentCulture)}");
             ++buttonIndex;
 
             dummy = _engine.Simulation.Input.Population.Data.TotalPopulation;
@@ -131,6 +134,15 @@ namespace WUInity.UI
                 {
                     _wuinityManager.FireRenderer.SetFireDisplayMode(Visualization.FireRenderer.FireDisplayMode.FuelModelNumber);
                 }
+                ++buttonIndex;
+
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), $"Temp.: {_engine.Simulation.Weather.GetTemperature()}");
+                ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), $"RH: {_engine.Simulation.Weather.GetRelativeHumidity()}");
+                ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), $"Wind speed: {_engine.Simulation.Weather.WindSpeed}");
+                ++buttonIndex;
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), $"Wind dir.: {_engine.Simulation.Weather.WindDirection}");
                 ++buttonIndex;
             }
 
