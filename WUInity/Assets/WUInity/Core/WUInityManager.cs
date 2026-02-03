@@ -122,21 +122,21 @@ namespace WUInity
             else
             {
                 DeveloperMode = false;
-            }
+            }            
 
             _simBorder.gameObject.SetActive(false);
             _osmBorder.gameObject.SetActive(false);
-            
-            _engine = new Engine(this);
 
-            //gui
-            _workingData = new PREACT.Runtime.WorkingData();
+            //gui            
             _wuiGUI = GetComponent<WUInityGUI>();
             if (_wuiGUI == null)
             {
                 gameObject.AddComponent<WUInityGUI>();
             }
-            _wuiGUI.SetManager(this, _engine, _workingData);
+                        
+            _engine = new Engine(this);
+            _workingData = new PREACT.Runtime.WorkingData();
+            _wuiGUI.SetManager(this, _engine, _workingData);  
 
             //map
             _mapboxMap = FindFirstObjectByType<Mapbox.Unity.Map.AbstractMap>();

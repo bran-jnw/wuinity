@@ -11,7 +11,6 @@ using System.Numerics;
 
 namespace PREACT.Wildfire
 {
-    [System.Serializable]
     public struct WindData                  
     {
         public float time;
@@ -50,14 +49,8 @@ namespace PREACT.Wildfire
             
             time = 0.0f;
         }
-
-        //TODO: implement
-        public void ConvertToSeconds(float fireStartTime)
-        {
-
-        }
     }
-    [System.Serializable]
+
     public class WindInput
     {
         private WindData[] dataPoints;         

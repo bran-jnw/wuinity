@@ -125,6 +125,7 @@ IgnitionPointsFile=example.ign
 UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
+SpreadRateModel=BehavePlus
 
 [AscImport]
 RootFolder=flammap

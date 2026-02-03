@@ -77,6 +77,10 @@ namespace PREACT
                 _ENGINE = this;
             }
 
+            Environment.SetEnvironmentVariable("Path", null);
+            Environment.SetEnvironmentVariable("Path", "C:\\Program Files (x86)\\Eclipse\\Sumo\\bin");
+            Environment.SetEnvironmentVariable("PROJ_LIB", "C:\\Program Files (x86)\\Eclipse\\Sumo\\share\\proj");
+
             try
             {
                 OSGeo.GDAL.Gdal.AllRegister();

@@ -50,7 +50,7 @@ namespace PREACT.IO
             }
             else
             {
-                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                PREACTInput.InputNotFoundMessage(nameOfInput, false);
             }
             if (issues > 0)
             {

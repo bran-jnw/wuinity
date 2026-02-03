@@ -11,17 +11,18 @@ namespace PREACT
         DateTime _currentDateTime;
         float _simulationTime;
         float _simulationEndTime;
-        string _startDateISO8601;
-        string _endDateISO8601;
+        //string _startDateISO8601;
+        //string _endDateISO8601;
 
         public float SimulationTime { get => _simulationTime; }
         public float SimulationEndTime { get => _simulationEndTime; }
         public DateTime StartDateTime { get => _startDateTime; }
+        public DateTime EndDateTime { get => _endDateTime; }
         public DateTime CurrentDateTime { get => _currentDateTime; }
-        public string StartDateISO8601 { get => _startDateISO8601; }
-        public string EndDateISO8601 { get => _endDateISO8601; }
+        //public string StartDateISO8601 { get => _startDateISO8601; }
+        //public string EndDateISO8601 { get => _endDateISO8601; }
 
-        public TimeManager(IO.PREACTInput input)
+        public TimeManager(IO.PREACTInput input, Simulation simulation)
         {
             _simulationTime = 0;
             _startDateTime = input.Simulation.StartDateTime;
@@ -29,8 +30,10 @@ namespace PREACT
             _endDateTime = input.Simulation.EndDateTime;
             _simulationEndTime = (float)(_endDateTime - _startDateTime).TotalSeconds;
 
-            _startDateISO8601 = new string($"{_startDateTime.Year}-{_startDateTime.Month}-{_startDateTime.Day}");
-            _endDateISO8601 = new string($"{_endDateTime.Year}-{_endDateTime.Month}-{_endDateTime.Day}");
+            Engine.Message(simulation, Engine.LogType.Debug, $"Simulation will run between {_startDateTime.ToString()} and {_endDateTime.ToString()} for a total of {_simulationEndTime} seconds (unless user has specified to exit early once evacuated.)");
+
+            //_startDateISO8601 = new string($"{_startDateTime.Year}-{_startDateTime.Month}-{_startDateTime.Day}");
+            //_endDateISO8601 = new string($"{_endDateTime.Year}-{_endDateTime.Month}-{_endDateTime.Day}");
         }
 
         public void Step(float deltaTime)

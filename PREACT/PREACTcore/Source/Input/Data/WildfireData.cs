@@ -39,11 +39,11 @@ namespace PREACT.IO
         {
         }
 
-        public void LoadAll(SimulationInput simulationInput, WildfireModuleInput fireInput, string rootFolder, out bool success)
+        public void LoadAll(SimulationInput simulationInput, WildfireModuleInput wildfireInput, string rootFolder, out bool success)
         {
             success = false;
 
-            if(!fireInput.Enabled)
+            if(!wildfireInput.Enabled)
             {
                 Engine.Message(null, Engine.LogType.Log, "Skipping loading fire data as user has specified not running fire module.");
                 success = true;
@@ -52,38 +52,38 @@ namespace PREACT.IO
             Engine.Message(null, Engine.LogType.Log, "Loading Fire data...");
 
             //we need LCP for all fires except straight import of results
-            if (fireInput.Module == WildfireModuleInput.WildfireModules.AscImport) 
+            if (wildfireInput.Module == WildfireModuleInput.WildfireModules.AscImport) 
             { 
                 Engine.Message(null, Engine.LogType.Log, "Skipping loading LCP data as user has specified straight import of fire results.");
                 success = true;
                 return;
             }
 
-            string filePath = Path.Combine(rootFolder, fireInput.LcpFile);
-            LoadLCPFile(fireInput, filePath, simulationInput.Data.UTMOrigin, false, out success);
+            string filePath = Path.Combine(rootFolder, wildfireInput.LcpFile);
+            LoadLCPFile(wildfireInput, filePath, simulationInput.Data.UTMOrigin, false, out success);
             if(!success)
             {
                 return;
             }
 
             //not critical
-            filePath = Path.Combine(rootFolder, fireInput.GraphicalFireInputFile);
-            LoadGraphicalFireInput(fireInput, filePath, _lcpData, false, out success);
+            filePath = Path.Combine(rootFolder, wildfireInput.GraphicalFireInputFile);
+            LoadGraphicalFireInput(wildfireInput, filePath, _lcpData, false, out success);
 
-            if (fireInput.Module == WildfireModuleInput.WildfireModules.FireCell || fireInput.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
+            if (wildfireInput.Module == WildfireModuleInput.WildfireModules.FireCell || wildfireInput.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
             {
                 int issues = 0;
 
-                filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.FuelModelsFile);
-                LoadFuelModelsInput(fireInput, filePath, false, out success);
+                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.RootFolder, wildfireInput.FireCellInput.FuelModelsFile);
+                LoadFuelModelsInput(wildfireInput, filePath, false, out success);
                 issues += success ? 0 : 1;
 
-                filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.IgnitionPointsFile);
-                LoadIgnitionPoints(fireInput, filePath , false, out success);
+                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.RootFolder, wildfireInput.FireCellInput.IgnitionPointsFile);
+                LoadIgnitionPoints(wildfireInput, filePath , false, out success);
                 issues += success ? 0 : 1;
 
-                filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.InitialFuelMoistureFile);
-                LoadInitialFuelMoistureData(fireInput, filePath, false, out success);
+                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.RootFolder, wildfireInput.FireCellInput.InitialFuelMoistureFile);
+                LoadInitialFuelMoistureData(wildfireInput, filePath, false, out success);
                 issues += success ? 0 : 1;
 
                 /*filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.WeatherFile);
