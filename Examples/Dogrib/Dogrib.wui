@@ -1,18 +1,19 @@
 [Simulation]
-Name=Development
-LowerLeftLatLon=39.409924,-105.104505
-DomainSize=10000.0,11000.0
+Name=Dogrib
+LowerLeftLatLon=51.621113,-115.609849
+DomainSize=40000.0,30000.0
 DeltaTime=1.0
-StartDateTime=2001-06-05T11:00:00
-EndDateTime=2001-06-06T11:00:00
+StartDateTime=2001-09-29T17:00:00
+EndDateTime=2001-10-17T00:00:00
 StopWhenEvacuated=false
 
 [Map]
 MapProvider=Mapbox
-ZoomLevel=13
+ZoomLevel=12
 
 [Weather]
-WeatherFile=development_weather.csv
+WeatherFile=dogrib_weather.csv
+DesiredLatLon=51.6547,-115.3617
 
 [Population]
 PopulationFile=population/big_population.csv
@@ -92,7 +93,7 @@ Name=fast
 900, 1.0
 
 [PedestrianModule]
-Enabled=true
+Enabled=false
 Module=MacroHouseholdSim
 
 [MacroHouseholdSim]
@@ -101,7 +102,7 @@ WalkingSpeedModifier=1.0
 WalkingDistanceModifier=1.0
 
 [TrafficModule]
-Enabled=true
+Enabled=false
 Module=SUMO      
 VisibilityAffectsSpeed=false  
 
@@ -114,28 +115,19 @@ SmokeBeta=-0.02910
 [WildfireModule]
 Enabled=true
 Module=CellParticleHybrid
-LcpFile=fire/rox_big_burning_city.lcp
+LcpFile=dogrib_landscape_UTM.tif
 GraphicalFireInputFile=fire/example.gfi
 
 [CellParticleHybrid]
-FuelModelsFile=fireCell/default.fuel
-InitialFuelMoistureFile=fireCell/default.fmc
-IgnitionPointsFile=fireCell/example.ign
+IgnitionPointsFile=ignitions.ign
 UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
-SpreadRateModel=BehavePlus
+SpreadRateModel=CanadianFBP
+FBPLookupTableFile=fbp_lookup_table.csv
 StartDC=482
 StartDMC=58
 StartFFMC=89
-
-[AscImport]
-RootFolder=flammap
-TimeOfArrivalFile=output/TOA.asc
-RateOfSpreadFile=output/ROS.asc
-SpreadDirectionFile=output/SD.asc
-FirelineIntensityFile=output/FI.asc
-WeatherStreamFile=weather_stream.wxs
 
 [TriggerBufferModule]
 Enabled=false
@@ -148,7 +140,7 @@ InitialFuelMoistureFile=fireCell/default.fmc
 OutputName=trigger_buffer.asc
 
 [SmokeModule]
-Enabled=true
+Enabled=false
 Module=AdvectDiffuse3D
 
 [GlobalSmoke]

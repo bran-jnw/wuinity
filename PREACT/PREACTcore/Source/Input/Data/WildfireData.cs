@@ -19,8 +19,7 @@ namespace PREACT.IO
         private FuelModelInput _fuelModelsData;
         private IgnitionPointInput[] _ignitionPoints;
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
-        //private WeatherInput _weatherInput;
-        //private WindInput _windInput;
+        private CanadianFBPLookupTable _canadianFBPLookupTable = new CanadianFBPLookupTable();
 
         public bool[] WuiArea;
         public bool[] RandomIgnition;
@@ -31,12 +30,12 @@ namespace PREACT.IO
         public LandscapeData LCPData { get => _lcpData; }        
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
         public IgnitionPointInput[] IgnitionPoints { get => _ignitionPoints; }       
-        public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }       
-        //public WeatherInput WeatherInput { get => _weatherInput; }       
-        //public WindInput WindInput { get => _windInput; }        
+        public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }   
+        public CanadianFBPLookupTable CanadianFBPLookupTable { get => _canadianFBPLookupTable; }
 
         public WildfireData()
         {
+
         }
 
         public void LoadAll(SimulationInput simulationInput, WildfireModuleInput wildfireInput, string rootFolder, out bool success)
@@ -74,25 +73,28 @@ namespace PREACT.IO
             {
                 int issues = 0;
 
-                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.RootFolder, wildfireInput.FireCellInput.FuelModelsFile);
-                LoadFuelModelsInput(wildfireInput, filePath, false, out success);
+                //common 
+                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.IgnitionPointsFile);
+                LoadIgnitionPoints(wildfireInput, filePath, false, out success);
                 issues += success ? 0 : 1;
 
-                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.RootFolder, wildfireInput.FireCellInput.IgnitionPointsFile);
-                LoadIgnitionPoints(wildfireInput, filePath , false, out success);
-                issues += success ? 0 : 1;
+                //spread model dependent
+                if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.BehavePlus)
+                {
+                    filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.FuelModelsFile);
+                    LoadFuelModelsInput(wildfireInput, filePath, false, out success);
+                    issues += success ? 0 : 1;
 
-                filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.RootFolder, wildfireInput.FireCellInput.InitialFuelMoistureFile);
-                LoadInitialFuelMoistureData(wildfireInput, filePath, false, out success);
-                issues += success ? 0 : 1;
-
-                /*filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.WeatherFile);
-                LoadWeatherInput(fireInput, filePath, false, out success);
-                issues += success ? 0 : 1;
-
-                filePath = Path.Combine(rootFolder, fireInput.FireCellInput.RootFolder, fireInput.FireCellInput.WindFile);
-                LoadWindInput(fireInput, filePath, false, out success);
-                issues += success ? 0 : 1;*/
+                    filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.InitialFuelMoistureFile);
+                    LoadInitialFuelMoistureData(wildfireInput, filePath, false, out success);
+                    issues += success ? 0 : 1;
+                }
+                else if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.CanadianFBP)
+                {
+                    filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.FBPLookupTableFile);
+                    _canadianFBPLookupTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.FBPLookupTableFile), out success);
+                    issues += success ? 0 : 1;
+                }
 
                 if(issues > 0)
                 {

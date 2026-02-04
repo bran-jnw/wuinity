@@ -16,10 +16,10 @@ namespace PREACT.Evacuation
             
         }
 
-        public static Dictionary<string, DemographicsInput> Parse(string[] inputLines, List<int> demographicsLineIndices, out bool success)
+        public static void Parse(Dictionary<string, DemographicsInput> newInputs, string[] inputLines, List<int> demographicsLineIndices, out bool success)
         {
-            Dictionary<string, DemographicsInput> newInputs = new Dictionary<string, DemographicsInput>();
             success = false;
+            newInputs.Clear();
 
             for (int i = 0; i < demographicsLineIndices.Count; ++i)
             {
@@ -117,7 +117,6 @@ namespace PREACT.Evacuation
             {
                 Engine.Message(null, Engine.LogType.InputError, "Could not read all specified Demographics.");
             }
-            return newInputs;
         }
     }
 }

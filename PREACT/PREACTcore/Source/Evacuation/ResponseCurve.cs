@@ -52,10 +52,10 @@ namespace PREACT.Evacuation
             DataPoints = dataPoints.ToArray();
         }
 
-        public static Dictionary<string, ResponseCurve> Parse(string[] inputLines, List<int> responseCurveLineIndices, out bool success)
+        public static void Parse(Dictionary<string, ResponseCurve> newInputs, string[] inputLines, List<int> responseCurveLineIndices, out bool success)
         {
-            Dictionary<string, ResponseCurve> newInputs = new Dictionary<string, ResponseCurve>();
             success = false;
+            newInputs.Clear();
 
             for (int i = 0; i < responseCurveLineIndices.Count; ++i)
             {
@@ -138,7 +138,6 @@ namespace PREACT.Evacuation
             {
                 Engine.Message(null, Engine.LogType.InputError, "Could not read all specified ResponseCurves.");
             }
-            return newInputs;
         }
     }
 }

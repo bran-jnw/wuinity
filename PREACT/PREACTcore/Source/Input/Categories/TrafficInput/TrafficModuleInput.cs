@@ -53,7 +53,7 @@ namespace PREACT.IO
                 success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (!success)
+            if (!success || !Enabled)
             {
                 return;
             }

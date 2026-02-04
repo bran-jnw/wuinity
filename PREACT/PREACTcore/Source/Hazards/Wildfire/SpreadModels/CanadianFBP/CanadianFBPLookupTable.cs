@@ -19,11 +19,11 @@ namespace PREACT.Wildfire
             
         }
 
-        public CanadianFBPLookupEntry GetLookupEntry(int fuelModelNumber)
+        public CanadianFBPLookupEntry GetLookupEntry(int fuelModelNumber, out bool success)
         {
             CanadianFBPLookupEntry entry;
             entry.grid_value = -1;
-            _database.TryGetValue(fuelModelNumber, out entry);
+            success = _database.TryGetValue(fuelModelNumber, out entry);
             return entry;
         }
 

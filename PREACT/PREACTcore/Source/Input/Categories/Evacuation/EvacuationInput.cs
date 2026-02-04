@@ -17,9 +17,9 @@ namespace PREACT.IO
 
         public EvacuationData Data { get => _data; }
         public float EvacuationOrderStart = 0.0f;
-        public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs;
-        public Dictionary<string, ResponseCurve> ResponseCurves;        
-        public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs;
+        public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs = new Dictionary<string, EvacuationDestinationInput>(5);
+        public Dictionary<string, ResponseCurve> ResponseCurves = new Dictionary<string, ResponseCurve>(5);        
+        public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs = new Dictionary<string, EvacuationGroupInput>(5);
         public bool UseTriggerBufferEvacuation = false;
         public string TriggerBufferFile = string.Empty;
 
@@ -42,21 +42,21 @@ namespace PREACT.IO
             string nameOfInput, userInput;
 
             //critical
-            EvacuationDestinationInputs = EvacuationDestinationInput.Parse(inputLines, destinationLineIndices, out success);
+            EvacuationDestinationInput.Parse(EvacuationDestinationInputs, inputLines, destinationLineIndices, out success);
             if (!success)
             {
                 return;
             }
 
             //critical
-            ResponseCurves = ResponseCurve.Parse(inputLines, responseCurveLineIndices, out success);
+            ResponseCurve.Parse(ResponseCurves, inputLines, responseCurveLineIndices, out success);
             if (!success)
             {
                 return;
             }
 
             //critical, must be done after response curves and destinations
-            EvacuationGroupInputs = EvacuationGroupInput.Parse(inputLines, evacuationGroupLineIndices, EvacuationDestinationInputs, ResponseCurves, population, rootFolder, out success);
+            EvacuationGroupInput.Parse(EvacuationGroupInputs, inputLines, evacuationGroupLineIndices, EvacuationDestinationInputs, ResponseCurves, population, rootFolder, out success);
             if (!success)
             {
                 return;

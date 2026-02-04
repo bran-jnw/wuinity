@@ -6,8 +6,6 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using PREACT.Wildfire.Behave;
-using System.Threading.Tasks;
 using PREACT.Math;
 
 namespace PREACT.Wildfire
@@ -28,6 +26,7 @@ namespace PREACT.Wildfire
         private bool _done;
         private LandscapeData _landscapeData;
         private BehaveCore.FuelModels _fuelModels;
+        private List<IgnitionPoint> _ignitionPoints;
 
         public Simulation Simulation { get => _simulation; }
 
@@ -74,11 +73,16 @@ namespace PREACT.Wildfire
 
             if(!inverseSpreadDirection)
             {
+                _ignitionPoints = new List<IgnitionPoint>(ignitionPoints.Length);
                 for (int i = 0; i < ignitionPoints.Length; ++i)
                 {
                     if (ignitionPoints[i].IgnitionTime <= 0)
                     {
                         IgniteAtLatLon(ignitionPoints[i].LatLon, 0f);
+                    }
+                    else
+                    {
+                        _ignitionPoints.Add(new IgnitionPoint(ignitionPoints[i]));
                     }
                 }
             }
@@ -319,6 +323,19 @@ namespace PREACT.Wildfire
 
             _internalDeltaTime = deltaTime;
 
+            //check ignitions
+            if (!inverseSpreadDirection)
+            {
+                for (int i = 0; i < _ignitionPoints.Count; ++i)
+                {
+                    if (_ignitionPoints[i].IgnitionTime <= currentTime)
+                    {
+                        IgniteAtLatLon(_ignitionPoints[i].LatLon, currentTime);
+                        _ignitionPoints.Remove(_ignitionPoints[i]);
+                    }
+                }
+            }
+
             //step forward in time
             Queue<FireParticle> stillAliveParticles = new Queue<FireParticle>(_aliveParticles.Count);//a reasonable guess it that particles die and gets created about the same rate?
             while (_aliveParticles.Count > 0)
@@ -332,7 +349,7 @@ namespace PREACT.Wildfire
             }
             _aliveParticles = stillAliveParticles;
 
-            if (_aliveParticles.Count == 0)
+            if (_aliveParticles.Count == 0 && _ignitionPoints.Count == 0)
             {
                 _done = true;
                 Engine.Message(null, Engine.LogType.Log, "No more active fire particles left, stopping fire spread simulation after " + (currentTime + deltaTime) + " seconds.");

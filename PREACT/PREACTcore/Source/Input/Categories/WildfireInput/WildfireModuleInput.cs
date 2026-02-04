@@ -52,7 +52,7 @@ namespace PREACT.IO
                 success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (!success)
+            if (!success || !Enabled)
             {
                 return;
             }
@@ -95,12 +95,12 @@ namespace PREACT.IO
             }
 
             //check if weather exists, may be critical
-            if (weatherInput.WeatherFile == string.Empty && (Module != WildfireModules.AscImport || Module != WildfireModules.None))
+            /*if (weatherInput.WeatherFile == string.Empty && (Module != WildfireModules.AscImport || Module != WildfireModules.None))
             {
                 success = false;
                 PREACTInput.CriticalDependency(nameof(weatherInput.WeatherFile));
                 return;
-            }
+            }*/
 
             //might not always need lcp file
             if (Module != WildfireModules.None && Module != WildfireModules.AscImport)

@@ -52,7 +52,7 @@ namespace PREACT.IO
                 success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (!success)
+            if (!success || !Enabled)
             {
                 return;
             }
@@ -93,12 +93,12 @@ namespace PREACT.IO
             }
 
             //check if weather exists
-            if (weatherInput.WeatherFile == string.Empty && (Module != SmokeModules.None || Module != SmokeModules.GlobalSmoke))
+            /*if (weatherInput.WeatherFile == string.Empty && (Module != SmokeModules.None || Module != SmokeModules.GlobalSmoke))
             {
                 success = false;
                 PREACTInput.CriticalDependency(nameof(weatherInput.WeatherFile));
                 return;
-            }
+            }*/
 
             //critical
             if (Module == SmokeModules.GlobalSmoke)

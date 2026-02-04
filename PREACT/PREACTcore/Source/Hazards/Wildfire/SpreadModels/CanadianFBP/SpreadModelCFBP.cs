@@ -20,8 +20,8 @@ namespace PREACT.Wildfire
             _head = new FireData();
             _flank = new FireData();
             _back = new FireData();
-            CanadianFBPLookupEntry lookupEntry = lookupTable.GetLookupEntry(cellData.fuel_model);
-            if(lookupEntry.grid_value < 0 || lookupEntry.fuel_type == "Non-fuel")
+            CanadianFBPLookupEntry lookupEntry = lookupTable.GetLookupEntry(cellData.fuel_model, out bool success);
+            if(!success || lookupEntry.grid_value < 0 || lookupEntry.fuel_type == "Non-fuel")
             {
                 _hasFuelLoad = false;
                 return;
@@ -49,7 +49,7 @@ namespace PREACT.Wildfire
             double windSpeed, windDirection;
             weather.GetWind(out windSpeed, out windDirection);            
             _inputs.WindAzimuth = (int)windDirection;
-            _inputs.WindSpeed = windSpeed;
+            _inputs.WindSpeed = windSpeed * 3.6; //requires km/h, input is m/s
 
             //moisture related
             _inputs.FFMC = weather.FFMCHourly;

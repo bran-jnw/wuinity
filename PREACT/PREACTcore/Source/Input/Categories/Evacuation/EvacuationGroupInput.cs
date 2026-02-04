@@ -25,11 +25,11 @@ namespace PREACT.Evacuation
 
         }
 
-        public static Dictionary<string, EvacuationGroupInput> Parse(string[] inputLines, List<int> evacGroupLineIndices, 
+        public static void Parse(Dictionary<string, EvacuationGroupInput> newInputs, string[] inputLines, List<int> evacGroupLineIndices, 
             Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, PopulationInput population, string rootFolder, out bool success)
-        {
-            Dictionary<string, EvacuationGroupInput> newInputs = new Dictionary<string, EvacuationGroupInput>();
+        {            
             success = false;
+            newInputs.Clear();
 
             for (int i = 0; i < evacGroupLineIndices.Count; ++i)
             {
@@ -339,7 +339,6 @@ namespace PREACT.Evacuation
             {
                 Engine.Message(null, Engine.LogType.InputError, "Could not read all specified EvacuationGroups.");
             }
-            return newInputs;
         }
     }
 }

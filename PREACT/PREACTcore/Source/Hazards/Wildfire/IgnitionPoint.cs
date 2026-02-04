@@ -14,7 +14,7 @@ namespace PREACT.Wildfire
     [System.Serializable]
     public struct IgnitionPoint
     {
-        public Vector2d LatLong;
+        public Vector2d LatLon;
         public float IgnitionTime;
 
         private int x;
@@ -53,14 +53,24 @@ namespace PREACT.Wildfire
             this.y = y;
             this.IgnitionTime = ignitionTime;
 
-            LatLong = Vector2d.zero;
+            LatLon = Vector2d.zero;
+
+            _hasBeenIgnited = false;
+        }
+
+        public IgnitionPoint(IgnitionPointInput input)
+        {
+            LatLon = input.LatLon;
+            x = -1;
+            y = -1;
+            IgnitionTime = input.IgnitionTime;
 
             _hasBeenIgnited = false;
         }
 
         public IgnitionPoint(Vector2d latLong, float ignitionTime)
         {
-            this.LatLong = latLong;
+            this.LatLon = latLong;
             x = -1;
             y = -1;
             this.IgnitionTime = ignitionTime;
@@ -75,7 +85,7 @@ namespace PREACT.Wildfire
         /// <param name="mesh"></param>
         public IgnitionPoint(Simulation simulation, Vector2d latLong, FireMesh mesh, float ignitionTime)
         {
-            this.LatLong = latLong;
+            this.LatLon = latLong;
 
             Vector2d pos = simulation.GetSimulationPosition(latLong);
 
@@ -95,7 +105,7 @@ namespace PREACT.Wildfire
         {
             if (x < 0 && y < 0)
             {
-                Vector2d pos = simulation.GetSimulationPosition(LatLong);
+                Vector2d pos = simulation.GetSimulationPosition(LatLon);
 
                 x = (int)(pos.x / mesh._cellSize.x);
                 y = (int)(pos.y / mesh._cellSize.y);

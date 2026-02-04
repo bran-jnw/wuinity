@@ -18,16 +18,15 @@ namespace PREACT.IO
         public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
         public SpreadRateModels SpreadRateModel = SpreadRateModels.BehavePlus;
-        public string FBPLookupTableFile = string.Empty;
 
         public SpreadModes SpreadMode = SpreadModes.SixteenDirections;
-        public string RootFolder = string.Empty;
 
         //behave
         public string FuelModelsFile = string.Empty;
         public string InitialFuelMoistureFile = string.Empty;
 
         //canadian
+        public string FBPLookupTableFile = string.Empty;
         public double StartFFMC = 85.0;
         public double StartDMC = 6.0;
         public double StartDC = 15.0;
@@ -48,18 +47,6 @@ namespace PREACT.IO
             success = false;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
-
-            //not critical as it can be empty
-            nameOfInput = nameof(RootFolder);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                RootFolder = userInput;
-                rootFolder = Path.Combine(rootFolder, RootFolder);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
 
             //critical
             nameOfInput = nameof(SpreadRateModel);
@@ -90,52 +77,7 @@ namespace PREACT.IO
                 return;
             }
 
-            //maybe critical
-            if(SpreadRateModel == SpreadRateModels.CanadianFBP)
-            {
-                nameOfInput = nameof(FBPLookupTableFile);
-                if (inputToParse.TryGetValue(nameOfInput, out userInput))
-                {
-                    FBPLookupTableFile = userInput;
-                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-                }
-                else
-                {
-                    success = false;
-                    PREACTInput.InputNotFoundMessage(nameOfInput);
-                }
-                if(!success)
-                {
-                    return; 
-                }
-            }
-            
-
-            nameOfInput = nameof(SpreadMode);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                switch (userInput)
-                {
-                    case nameof(SpreadModes.FourDirections):
-                        SpreadMode = SpreadModes.FourDirections;
-                        break;
-                    case nameof(SpreadModes.EightDirections):
-                        SpreadMode = SpreadModes.EightDirections;
-                        break;
-                    case nameof(SpreadModes.SixteenDirections):
-                        SpreadMode = SpreadModes.SixteenDirections;
-                        break;
-                    default:
-                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
-                        break;
-                }
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }                      
-
-            if(SpreadRateModel == SpreadRateModels.BehavePlus)
+            if (SpreadRateModel == SpreadRateModels.BehavePlus)
             {
                 //not critical, uses defaults
                 nameOfInput = nameof(FuelModelsFile);
@@ -168,12 +110,28 @@ namespace PREACT.IO
             }
             else if (SpreadRateModel == SpreadRateModels.CanadianFBP)
             {
+                nameOfInput = nameof(FBPLookupTableFile);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    FBPLookupTableFile = userInput;
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+                if (!success)
+                {
+                    return;
+                }
+
                 //not critical, uses defaults
                 nameOfInput = nameof(StartDC);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     success = double.TryParse(userInput, out StartDC);
-                    if(!success)
+                    if (!success)
                     {
                         PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                     }
@@ -213,6 +171,31 @@ namespace PREACT.IO
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
             }
+
+
+            nameOfInput = nameof(SpreadMode);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                switch (userInput)
+                {
+                    case nameof(SpreadModes.FourDirections):
+                        SpreadMode = SpreadModes.FourDirections;
+                        break;
+                    case nameof(SpreadModes.EightDirections):
+                        SpreadMode = SpreadModes.EightDirections;
+                        break;
+                    case nameof(SpreadModes.SixteenDirections):
+                        SpreadMode = SpreadModes.SixteenDirections;
+                        break;
+                    default:
+                        Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
+                        break;
+                }
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput);
+            }     
 
             //maybe critical
             nameOfInput = nameof(IgnitionPointsFile);

@@ -28,10 +28,10 @@ namespace PREACT.IO
             Blocked = blocked;
         }
 
-        public static Dictionary<string, EvacuationDestinationInput> Parse(string[] inputLines, List<int> destinationLineIndices, out bool success)
+        public static void Parse(Dictionary<string, EvacuationDestinationInput> newInputs, string[] inputLines, List<int> destinationLineIndices, out bool success)
         {
-            Dictionary<string, EvacuationDestinationInput> newInputs = new Dictionary<string, EvacuationDestinationInput>(destinationLineIndices.Count);
             success = false;
+            newInputs.Clear();
 
             for(int i = 0; i < destinationLineIndices.Count; ++i)
             {
@@ -212,7 +212,6 @@ namespace PREACT.IO
             {
                 Engine.Message(null, Engine.LogType.InputError, "Could not read all specified EvacuationDestinations.");
             }
-            return newInputs;
         }
     }
 }

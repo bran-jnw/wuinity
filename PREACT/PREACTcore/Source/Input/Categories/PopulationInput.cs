@@ -15,7 +15,7 @@ namespace PREACT.IO
 
         public PopulationData Data { get => _data; }
         public string PopulationFile = string.Empty;
-        public Dictionary<string, Evacuation.DemographicsInput> Demographics;
+        public Dictionary<string, Evacuation.DemographicsInput> Demographics = new Dictionary<string, Evacuation.DemographicsInput>(5);
         public bool CullOutsideGroups = false;
 
         public PopulationInput()
@@ -35,7 +35,7 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            Demographics = Evacuation.DemographicsInput.Parse(inputLines, demographicsLinesIndices, out success);
+            Evacuation.DemographicsInput.Parse(Demographics, inputLines, demographicsLinesIndices, out success);
             if(!success)
             {
                 return;

@@ -7,7 +7,7 @@ namespace PREACT.IO
     public class WeatherInput
     {
         public string WeatherFile = string.Empty;
-        public Vector2d DesiredCoordinate = Vector2d.zero;
+        public Vector2d DesiredLatLon = Vector2d.zero;
 
         public WeatherInput()
         {
@@ -20,6 +20,7 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
+            //stream in if not exists
             nameOfInput = nameof(WeatherFile);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
@@ -34,15 +35,14 @@ namespace PREACT.IO
             if (success == false)
             {
                 WeatherFile = string.Empty;
-                return;
             }
 
-            nameOfInput = nameof(DesiredCoordinate);
+            nameOfInput = nameof(DesiredLatLon);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 string[] data = userInput.Split(',');
-                issues += double.TryParse(data[0], out DesiredCoordinate.x) ? 0 : 1;
-                issues += double.TryParse(data[1], out DesiredCoordinate.y) ? 0 : 1;
+                issues += double.TryParse(data[0], out DesiredLatLon.x) ? 0 : 1;
+                issues += double.TryParse(data[1], out DesiredLatLon.y) ? 0 : 1;
                 if (issues > 0)
                 {
                     PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);

@@ -34,16 +34,16 @@ namespace PREACT.Wildfire
             _index = new Vector2int(xIndex, yIndex);
             _linearIndex = xIndex + yIndex * xDim;
             _cellData = landscape.GetCellData(_index.x, _index.y);
-            _cellSize = landscape.RasterCellResolutionX;
-            _moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
+            _cellSize = landscape.RasterCellResolutionX;            
             
             if(input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.BehavePlus)
             {
+                _moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
                 _spreadModel = new SpreadModelBehave(fuelModels, _cellData, _moisture);
             }
             else if(input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.CanadianFBP)
             {
-                //_spreadModel = new SpreadModelCFBP(_cellData, input);
+                _spreadModel = new SpreadModelCFBP(_cellData, owner.Simulation.Input.WildfireModule.Data.CanadianFBPLookupTable, _owner.Simulation.Spatial);
             }
 
 
@@ -97,8 +97,7 @@ namespace PREACT.Wildfire
         }
 
         public void UpdateRateOfSpread(float currentTime)
-        {
-            //InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
+        {            
             _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
             _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFirelineIntensity(), (float)_spreadModel.GetMaxSpreadRate());
         }
@@ -130,6 +129,12 @@ namespace PREACT.Wildfire
 
         public void Ignite(float timeOfArrival, float residualTime)
         {
+            //just in case we try to ignite a dead cell
+            if (_dead)
+            {
+                return;
+            }
+
             if (!_ignited)
             {
                 _ignited = true;
