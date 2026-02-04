@@ -14,6 +14,7 @@ namespace PREACT.IO
     public class FireCellInput
     {
         public enum SpreadRateModels { BehavePlus, CanadianFBP }
+        public enum IgnitionTypes { Point, Polygon, Random }
         public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
         public SpreadRateModels SpreadRateModel = SpreadRateModels.BehavePlus;
@@ -21,8 +22,17 @@ namespace PREACT.IO
 
         public SpreadModes SpreadMode = SpreadModes.SixteenDirections;
         public string RootFolder = string.Empty;
+
+        //behave
         public string FuelModelsFile = string.Empty;
         public string InitialFuelMoistureFile = string.Empty;
+
+        //canadian
+        public double StartFFMC = 85.0;
+        public double StartDMC = 6.0;
+        public double StartDC = 15.0;
+
+        //common
         public string IgnitionPointsFile = string.Empty;
         public bool UseRandomIgnitionMap = false;
         public int RandomIgnitionPoints = 0;
@@ -125,33 +135,83 @@ namespace PREACT.IO
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }                      
 
-            //not critical, uses defaults
-            nameOfInput = nameof(FuelModelsFile);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            if(SpreadRateModel == SpreadRateModels.BehavePlus)
             {
-                FuelModelsFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
+                //not critical, uses defaults
+                nameOfInput = nameof(FuelModelsFile);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    FuelModelsFile = userInput;
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
 
-            //critical
-            nameOfInput = nameof(InitialFuelMoistureFile);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                InitialFuelMoistureFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                //critical
+                nameOfInput = nameof(InitialFuelMoistureFile);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    InitialFuelMoistureFile = userInput;
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+                if (!success)
+                {
+                    return;
+                }
             }
-            else
+            else if (SpreadRateModel == SpreadRateModels.CanadianFBP)
             {
-                success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-            if (!success)
-            {
-                return;
+                //not critical, uses defaults
+                nameOfInput = nameof(StartDC);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    success = double.TryParse(userInput, out StartDC);
+                    if(!success)
+                    {
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+
+                //not critical, uses defaults
+                nameOfInput = nameof(StartDMC);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    success = double.TryParse(userInput, out StartDMC);
+                    if (!success)
+                    {
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+
+                //not critical, uses defaults
+                nameOfInput = nameof(StartFFMC);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    success = double.TryParse(userInput, out StartFFMC);
+                    if (!success)
+                    {
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
             }
 
             //maybe critical

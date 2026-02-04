@@ -14,17 +14,17 @@ namespace PREACT.Wildfire
         public double BUI { get => _bui; }
         public double FWI { get => _fwi; }
 
-        public FireWeatherIndex() 
+        public FireWeatherIndex(double startFFMC = 85.0, double startDMC = 6.0, double startDC = 15.0) 
         {
-            Reset();
+            Reset(startFFMC, startDMC, startDC);
         }
 
-        public void Reset()
+        public void Reset(double startFFMC = 85.0, double startDMC = 6.0, double startDC = 15.0)
         {
             // Initialize FMC, DMC, and DC
-            _ffmc0 = 85.0;
-            _dmc0 = 6.0;
-            _dc0 = 15.0;
+            _ffmc0 = startFFMC;
+            _dmc0 = startDMC;
+            _dc0 = startDC;
         }
 
         public void CalculateDay(DateTime dateTime, double temp, double rhum, double wind, double prcp)

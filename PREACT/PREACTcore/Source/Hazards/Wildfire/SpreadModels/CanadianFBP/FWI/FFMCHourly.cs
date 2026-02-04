@@ -12,9 +12,9 @@ namespace PREACT.Wildfire
 
         public double Value {  get =>  _ffmc; }
 
-        public FFMCHourly() 
+        public FFMCHourly(double initialFFMC = 85.0) 
         {
-            _ffmc0 = 85.0;
+            _ffmc0 = initialFFMC;
         }
 
         /// <summary> 

@@ -16,6 +16,8 @@ namespace PREACT
 
         private float _weatherReferenceElevation;
 
+        private const float _inverseSecondsPerHour = 1.0f / 3600.0f;
+
         //need current values and upcoming values for interpolation, assuming hourly input
         /*private float _currentTemperature, _nextTemperature, _interpolatedTemperature;
         private float _currentRelativeHumidity, _nextRelativeHumidity, _interpolatedRelativeHumidity;
@@ -38,7 +40,7 @@ namespace PREACT
         public WeatherManager(Simulation simulation)
         {
             _simulation = simulation;
-            _fwi = new Wildfire.FireWeatherIndex();
+            _fwi = new Wildfire.FireWeatherIndex(simulation.Input.WildfireModule.FireCellInput.StartFFMC, simulation.Input.WildfireModule.FireCellInput.StartDMC, simulation.Input.WildfireModule.FireCellInput.StartDC);
             _ffmcHourly = new Wildfire.FFMCHourly();                       
         }
 
@@ -66,7 +68,7 @@ namespace PREACT
             else
             {
                 //update all relevant data
-                float timeFraction = (currentDateTime.Minute * 60 + currentDateTime.Second) / 3600.0f;
+                float timeFraction = (currentDateTime.Minute * 60 + currentDateTime.Second) * _inverseSecondsPerHour;
                 HourlyWeatherData.InterpolateData(_currentHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
             }
 
@@ -82,8 +84,7 @@ namespace PREACT
             }
 
 
-
-            //lastly just update 
+            //lastly just update DateTime
             _lastDateTime = currentDateTime;
         }
 
@@ -95,7 +96,7 @@ namespace PREACT
             _interpolatedHourlyData = _currentHourlyData;
 
             //calculate FWI up until point of simulation start
-            if(_weatherData.FirstEntry.Month == 1 && _weatherData.FirstEntry.Day == 1 && _weatherData.FirstEntry.Hour == 0)
+            /*if(_weatherData.FirstEntry.Month == 1 && _weatherData.FirstEntry.Day == 1 && _weatherData.FirstEntry.Hour == 0)
             {
                 _fwi.Reset();
                 int days = (_simulation.Time.StartDateTime - _weatherData.FirstEntry).Days;
@@ -111,7 +112,7 @@ namespace PREACT
                     _fwi.CalculateDay(start, noonData._temp, noonData._rh, noonData._windSpeed, noonData._precip);
                     start.AddHours(24);
                 }
-            }
+            }*/
         }
 
         private void InitializeWeather(TimeManager timeManager)
@@ -238,14 +239,14 @@ namespace PREACT
             return _interpolatedHourlyData._rh;
         }
 
-        public float GetPrecipitation()
+        public float GetHourlyPrecipitation()
         {
-            return _interpolatedHourlyData._precip;
+            return _currentHourlyData._precip;
         }
 
-        public float GetPrecipitation(Vector3d simulationPosition)
+        public float GetHourlyPrecipitation(Vector3d simulationPosition)
         {
-            return _interpolatedHourlyData._precip;
+            return _currentHourlyData._precip;
         }
 
         public float WindSpeed { get => _interpolatedHourlyData._windSpeed; }

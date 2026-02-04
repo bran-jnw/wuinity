@@ -126,6 +126,9 @@ UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
 SpreadRateModel=BehavePlus
+StartDC=482
+StartDMC=58
+StartFFMC=89
 
 [AscImport]
 RootFolder=flammap
