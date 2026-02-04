@@ -40,7 +40,7 @@ namespace PREACT.Traffic
                 _sumoVehicles = new Dictionary<string, SUMOVehicle>();
                 string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.TrafficModule.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
-                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", _simulation.StartTime.ToString(), "-e", _simulation.Time.SimulationEndTime.ToString() }));
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", "0.0", "-e", _simulation.Time.SimulationEndTime.ToString() }));
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
                 Vector2d sumoUTM = new Vector2d(-_simulation.Input.TrafficModule.SumoInput.UTMoffset.x, -_simulation.Input.TrafficModule.SumoInput.UTMoffset.y);
@@ -94,7 +94,7 @@ namespace PREACT.Traffic
             return 1f - _simulation.Input.TrafficModule.SumoInput.SmokeAlpha * Mathf.Exp(_simulation.Input.TrafficModule.SumoInput.SmokeBeta / extCoeff);
         }
 
-        public override void Step(float deltaTime, float currentTime)
+        public override void Step(float currentTime, float deltaTime)
         {
             if(_checkSmoke)
             {

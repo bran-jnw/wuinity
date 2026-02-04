@@ -52,8 +52,6 @@ namespace PREACT
         //Data
         private int _simulationIndex;
         private bool _visualize;
-        private float _startTime;
-        private float _simulationTime;
         private bool _isPaused = false;
         private bool _stopRun;
         private bool _haveResults = false;
@@ -80,9 +78,8 @@ namespace PREACT
         public int SimulationIndex { get => _simulationIndex; }
         public bool Visualize { get => _visualize; }
         public bool IsPaused { get => _isPaused; }        
-        public bool HaveResults { get => _haveResults; }          
-        public float StartTime { get => _startTime; }        
-        public float CurrentTime { get => _simulationTime; }  
+        public bool HaveResults { get => _haveResults; }         
+        public float SimulationTime { get => _timeManager.SimulationTime; }  
         public float StepExecutionTime { get => _stepExecutionTime; }        
         public Vector2d UTMOrigin { get => _input.Simulation.Data.UTMOrigin; }
         public LatLngUTMConverter.UTMResult UTMData { get => _input.Simulation.Data.UTMData; }
@@ -175,14 +172,12 @@ namespace PREACT
                 return;
             }
 
-            //pick start time based on curve or 0 (fire start)
-            _simulationTime = 0f;
-            foreach (ResponseCurve rC in _input.Evacuation.ResponseCurves.Values)
+            //TODO: check that these are within time frame given
+            /*foreach (ResponseCurve rC in _input.Evacuation.ResponseCurves.Values)
             {
                 float t = rC.DataPoints[0].time + _input.Evacuation.EvacuationOrderStart;
-                _simulationTime = Mathf.Min(CurrentTime, t);
-            }
-            _startTime = CurrentTime;
+                //_simulationTime = Mathf.Min(SimulationTime, t);
+            }*/
 
             //inject any traffic events into traffic module
             if (_input.TrafficModule.Enabled && _input.TrafficModule.Module == TrafficModuleInput.TrafficModules.MacroTrafficSim)
@@ -213,7 +208,7 @@ namespace PREACT
         private void PostRun()
         {
             StopModules();
-            _output.AddEvacTime(CurrentTime);           
+            _output.AddEvacTime(SimulationTime);           
 
             if (!_stoppedDueToError)
             {
@@ -408,11 +403,11 @@ namespace PREACT
                     {
                         if (_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
                         {
-                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LCPData, _simulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
+                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LCPData, _timeManager.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
                         }
                         else
                         {
-                            _triggerBufferModule = new kPERIL(_simulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _wildfireModule.GetMaxROS(), _wildfireModule.GetMaxROSAzimuth());
+                            _triggerBufferModule = new kPERIL(_timeManager.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _wildfireModule.GetMaxROS(), _wildfireModule.GetMaxROSAzimuth());
                         }
                         _triggerBufferModule.Run();
                         string outputFilePath = Path.Combine(_engine.OutputFolder, _simulationIndex + "_" + _input.TriggerBufferModule.kPERILInput.OutputName);
@@ -443,7 +438,7 @@ namespace PREACT
             //this state represents the positions at the start of the time step
             if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _trafficModule != null)
             {
-                _engine.WUIShow.SendData(_simulationTime);
+                _engine.WUIShow.SendData(_timeManager.SimulationTime);
             }
 
             //step all modules forward in time
@@ -481,7 +476,8 @@ namespace PREACT
             }
 
             //see if we are done or not
-            _simulationTime += deltaTime;
+            _timeManager.Step(deltaTime);
+            _weatherManager.Step(_timeManager.SimulationTime, _timeManager.CurrentDateTime);
             CheckCompletion();            
 
             if (_input.WildfireModule.Enabled)
@@ -493,10 +489,7 @@ namespace PREACT
                 {
                     return;
                 }
-            }
-
-            _timeManager.Step(deltaTime);
-            _weatherManager.Step(_simulationTime, _timeManager.CurrentDateTime);
+            }            
 
             UpdateTiming(startTime, deltaTime);
         }
@@ -523,7 +516,7 @@ namespace PREACT
                 return;
             }
 
-            bool endTimeReached = _timeManager.SimulationEndTime - CurrentTime < 0.001f ? true : false;
+            bool endTimeReached = _timeManager.SimulationEndTime - SimulationTime < 0.001f ? true : false;
 
             if(endTimeReached)
             {
@@ -575,7 +568,7 @@ namespace PREACT
                     for (int i = 0; i < _input.Events.Data.BlockDestinationEvents.Count; i++)
                     {
                         BlockDestinationEvent bGE = _input.Events.Data.BlockDestinationEvents[i];
-                        if (CurrentTime >= bGE.StartTime && !bGE.Triggered)
+                        if (SimulationTime >= bGE.StartTime && !bGE.Triggered)
                         {
                             bGE.ApplyEffects();
                         }
@@ -592,11 +585,11 @@ namespace PREACT
             fireUpdated = false;
             if (_input.WildfireModule.Enabled)
             {
-                if (CurrentTime >= nextFireUpdate && CurrentTime >= 0.0f)
+                if (SimulationTime >= nextFireUpdate && SimulationTime >= 0.0f)
                 {
                     fireUpdated = true;
                     _fireStopwatch.Start();
-                    _wildfireModule.Step(_simulationTime, _input.Simulation.DeltaTime);
+                    _wildfireModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
                     _fireStopwatch.Stop();
                     nextFireUpdate += _wildfireModule.GetInternalDeltaTime();
                     // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
@@ -608,7 +601,7 @@ namespace PREACT
         private void StepSmokeModule()
         {
             //sync with fire
-            if (_input.SmokeModule.Enabled && CurrentTime >= 0.0f)
+            if (_input.SmokeModule.Enabled && SimulationTime >= 0.0f)
             {
                 _smokeStopwatch.Start();
                 if (_input.SmokeModule.Module == SmokeInput.SmokeModules.BoxModel)
@@ -617,7 +610,7 @@ namespace PREACT
                 }
                 else
                 {
-                    _smokeModule.Step(_simulationTime, _input.Simulation.DeltaTime);
+                    _smokeModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
                 }
                 _smokeStopwatch.Stop();
             }
@@ -629,7 +622,7 @@ namespace PREACT
             if (_input.PedestrianModule.Enabled)
             {
                 _pedestrianStopwatch.Start();
-                _pedestrianModule.Step(CurrentTime, _input.Simulation.DeltaTime);
+                _pedestrianModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
                 _pedestrianStopwatch.Stop();
             }
         }
@@ -640,7 +633,7 @@ namespace PREACT
             if (_input.TrafficModule.Enabled)
             {
                 _trafficStopwatch.Start();
-                _trafficModule.Step(_input.Simulation.DeltaTime, CurrentTime);
+                _trafficModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
                 _trafficStopwatch.Stop();
             }
         }

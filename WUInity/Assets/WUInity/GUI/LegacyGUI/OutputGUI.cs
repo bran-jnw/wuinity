@@ -22,7 +22,7 @@ namespace WUInity.UI
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            int dummy = (int)_engine.Simulation.CurrentTime;
+            int dummy = (int)_engine.Simulation.SimulationTime;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation time: " + dummy + " s");
             ++buttonIndex;
 

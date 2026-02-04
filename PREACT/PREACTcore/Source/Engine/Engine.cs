@@ -77,9 +77,9 @@ namespace PREACT
                 _ENGINE = this;
             }
 
-            Environment.SetEnvironmentVariable("Path", null);
-            Environment.SetEnvironmentVariable("Path", "C:\\Program Files (x86)\\Eclipse\\Sumo\\bin");
-            Environment.SetEnvironmentVariable("PROJ_LIB", "C:\\Program Files (x86)\\Eclipse\\Sumo\\share\\proj");
+            //Environment.SetEnvironmentVariable("Path", null);
+            //Environment.SetEnvironmentVariable("Path", "C:\\Program Files (x86)\\Eclipse\\Sumo\\bin");
+            //Environment.SetEnvironmentVariable("PROJ_LIB", "C:\\Program Files (x86)\\Eclipse\\Sumo\\share\\proj");
 
             try
             {
@@ -504,7 +504,7 @@ namespace PREACT
             {
                 if(simulation.State == Simulation.SimulationState.Running)
                 {
-                    message = "[Simulation# " + simulation.SimulationIndex + ", " + (int)simulation.CurrentTime + "s] " + message;
+                    message = "[Simulation# " + simulation.SimulationIndex + ", " + (int)simulation.SimulationTime + "s] " + message;
                 }
                 else
                 {

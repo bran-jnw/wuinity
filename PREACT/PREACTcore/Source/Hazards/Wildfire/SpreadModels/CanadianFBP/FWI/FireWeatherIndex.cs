@@ -16,6 +16,11 @@ namespace PREACT.Wildfire
 
         public FireWeatherIndex() 
         {
+            Reset();
+        }
+
+        public void Reset()
+        {
             // Initialize FMC, DMC, and DC
             _ffmc0 = 85.0;
             _dmc0 = 6.0;

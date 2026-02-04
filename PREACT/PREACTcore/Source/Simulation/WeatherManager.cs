@@ -24,7 +24,7 @@ namespace PREACT
         private float _currentWindDirection, _nextWindDirection, _interpolatedWindDirection;
         private float _currentCloudCover, _nextCloudCover, _interpolatedCloudCover;*/
 
-        private HourlyWeatherData _lastHourlyData, _nextHourlyData, _interpolatedHourlyData;
+        private HourlyWeatherData _currentHourlyData, _nextHourlyData, _interpolatedHourlyData;
 
 
         //"temperature_2m", "relative_humidity_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "cloud_cover", "direct_radiation", "boundary_layer_height" 
@@ -42,12 +42,76 @@ namespace PREACT
             _ffmcHourly = new Wildfire.FFMCHourly();                       
         }
 
+        public void Step(float simulationTime, DateTime currentDateTime)
+        {
+            bool newMinute = _lastDateTime.Minute != currentDateTime.Minute;
+            bool newHour = _lastDateTime.Hour != currentDateTime.Hour;
+            bool newDay = _lastDateTime.DayOfYear != currentDateTime.DayOfYear;
+
+
+            if (newMinute)
+            {
+
+            }
+
+            if (newHour)
+            {
+                //read new values from weather input stream
+                _weatherData.GetHourlyData(currentDateTime, out _currentHourlyData, out _nextHourlyData);
+                _interpolatedHourlyData = _currentHourlyData;
+
+                //now update hourly values
+                _ffmcHourly.Calculate(_currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed, _currentHourlyData._precip);
+            }
+            else
+            {
+                //update all relevant data
+                float timeFraction = (currentDateTime.Minute * 60 + currentDateTime.Second) / 3600.0f;
+                HourlyWeatherData.InterpolateData(_currentHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
+            }
+
+            if (newDay)
+            {
+                _fwiNeedsUpdate = true;
+            }
+
+            if (_fwiNeedsUpdate && currentDateTime.Hour == 12)
+            {
+                _fwiNeedsUpdate = false;
+                _fwi.CalculateDay(currentDateTime, _currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed, _currentHourlyData._precip);
+            }
+
+
+
+            //lastly just update 
+            _lastDateTime = currentDateTime;
+        }
+
         public void Initialize(TimeManager timeManager)
         {
             InitializeWeather(timeManager);
 
-            _weatherData.GetHourlyData(_simulation.Time.StartDateTime, out _lastHourlyData, out _nextHourlyData);
-            _interpolatedHourlyData = _lastHourlyData;
+            _weatherData.GetHourlyData(_simulation.Time.StartDateTime, out _currentHourlyData, out _nextHourlyData);
+            _interpolatedHourlyData = _currentHourlyData;
+
+            //calculate FWI up until point of simulation start
+            if(_weatherData.FirstEntry.Month == 1 && _weatherData.FirstEntry.Day == 1 && _weatherData.FirstEntry.Hour == 0)
+            {
+                _fwi.Reset();
+                int days = (_simulation.Time.StartDateTime - _weatherData.FirstEntry).Days;
+                if(_simulation.Time.StartDateTime.Hour < 12)
+                {
+                    days--; 
+                }
+
+                DateTime start = _weatherData.FirstEntry.AddHours(12); 
+                for (int i = 0; i < days; ++i)
+                {
+                    HourlyWeatherData noonData = _weatherData.HourlyData[12 + 24 * i];
+                    _fwi.CalculateDay(start, noonData._temp, noonData._rh, noonData._windSpeed, noonData._precip);
+                    start.AddHours(24);
+                }
+            }
         }
 
         private void InitializeWeather(TimeManager timeManager)
@@ -152,52 +216,7 @@ namespace PREACT
             {
                 Engine.Message(_simulation, Engine.LogType.SimulationError, "Could not download weather and no weather file has been supplied.");
             }
-        }   
-
-        public void Step(float simulationTime, DateTime currentDateTime)
-        {
-            bool newMinute = _lastDateTime.Minute != currentDateTime.Minute;
-            bool newHour = _lastDateTime.Hour != currentDateTime.Hour;
-            bool newDay = _lastDateTime.DayOfYear != currentDateTime.DayOfYear;
-
-
-            if (newMinute)
-            {
-
-            }
-
-            if (newHour)
-            {
-                //read new values from weather input stream
-                _weatherData.GetHourlyData(currentDateTime, out _lastHourlyData, out _nextHourlyData);
-                _interpolatedHourlyData = _lastHourlyData;
-
-                //now update hourly values
-                _ffmcHourly.Calculate(_lastHourlyData._temp, _lastHourlyData._rh, _lastHourlyData._windSpeed, _lastHourlyData._precip);
-            }
-            else
-            {
-                //update all relevant data
-                float timeFraction = (currentDateTime.Minute * 60 + currentDateTime.Second) / 3600.0f;
-                HourlyWeatherData.InterpolateData(_lastHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
-            }
-
-            if (newDay)
-            {
-                _fwiNeedsUpdate = true;
-            }
-
-            if (_fwiNeedsUpdate &&  currentDateTime.Hour == 12)
-            {
-                _fwiNeedsUpdate = false;
-                _fwi.CalculateDay(currentDateTime, _lastHourlyData._temp, _lastHourlyData._rh, _lastHourlyData._windSpeed, _lastHourlyData._precip);
-            }    
-
-                      
-
-            //lastly just update 
-            _lastDateTime = currentDateTime;
-        }
+        }           
 
         public float GetTemperature()
         {

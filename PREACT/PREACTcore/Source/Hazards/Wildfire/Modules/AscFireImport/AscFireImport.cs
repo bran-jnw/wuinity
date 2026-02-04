@@ -65,7 +65,7 @@ namespace PREACT.Wildfire
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        if (!_data[x, y].isActive && _simulation.CurrentTime > _data[x, y].TimeOfAArrival)
+                        if (!_data[x, y].isActive && _simulation.SimulationTime > _data[x, y].TimeOfAArrival)
                         {
                             _data[x, y].isActive = true;
                             _newlyIgnitedCells.Add(new Vector2int(x, y));
@@ -97,7 +97,7 @@ namespace PREACT.Wildfire
 
         public override bool IsSimulationDone()
         {
-            return _simulation.CurrentTime > _maxTimeOfArrival ? true : false;
+            return _simulation.SimulationTime > _maxTimeOfArrival ? true : false;
         }
 
         float[,] maxROS;
@@ -276,7 +276,7 @@ namespace PREACT.Wildfire
 
             FireCellState result = FireCellState.Burning;
 
-            if (!IsInside(x, y) || _simulation.CurrentTime < _data[x, y].TimeOfAArrival)
+            if (!IsInside(x, y) || _simulation.SimulationTime < _data[x, y].TimeOfAArrival)
             {
                 result = FireCellState.Dead;
             }

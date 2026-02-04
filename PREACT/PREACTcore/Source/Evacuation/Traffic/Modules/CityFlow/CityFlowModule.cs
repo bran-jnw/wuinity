@@ -24,7 +24,7 @@ namespace PREACT.Traffic
             //_cityFlow = new CityFlowCore.Engine(configFile, 4);
         }
 
-        public override void Step(float deltaTime, float currentTime)
+        public override void Step(float currentTime, float deltaTime)
         {
             _cityFlow.nextStep();
             var vehicles = _cityFlow.getVehicles(true);
