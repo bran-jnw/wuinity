@@ -39,7 +39,7 @@ namespace PREACT.Wildfire
             _back = new FireData();               
             _fuel = new CanadianFBPFuel(lookupEntry);
 
-            if(_fuel.FuelType == CanadianFBP.FuelTypes.NonFuel) //this shoulds never happen
+            if(_fuel.FuelType == CanadianFBP.FuelTypes.NonFuel) //this should never happen
             {
                 Engine.Message(null, Engine.LogType.Debug, $"3: No fuel, caused by fuel_model {cellData.fuel_model}.");
                 _hasFuelLoad = false;
@@ -50,19 +50,21 @@ namespace PREACT.Wildfire
                 _hasFuelLoad = true;
             }
 
+            //landscape
             _inputs.Elevation = (int)(0.5 + cellData.elevation);
             int percentSlope = (int)(0.5 + Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100);
             _inputs.PercentSlope = percentSlope;
             _inputs.SlopeAzimuth = (int)(0.5 + cellData.aspect);
 
-            _inputs.Pattern = 0; //
-            _inputs.Time = 20;
-            _inputs.JulianDateMin = -1; //this means it is calculated/updated first calc 
-
             _inputs.Lat = spatialManager.SimulationCenterLatLon.x;
             _inputs.Lon = spatialManager.SimulationCenterLatLon.y;
 
-            _inputs.PercentCuring = 100;//TODO, read input
+            _inputs.Pattern = 0; //lin = 1, point = 1
+            _inputs.Time = 20;
+            _inputs.JulianDayMin = -1; //this means it is calculated/updated first calc             
+
+            _inputs.PercentCuring = 80;//TODO, read input
+            _inputs.GrassFuelLoad = 0.35; //kg/m2
         }
 
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
@@ -77,10 +79,10 @@ namespace PREACT.Wildfire
             _inputs.FFMC = weather.FFMCHourly;
             _inputs.BUI = weather.FWI.BUI;
 
-            _inputs.JulianDate = time.CurrentDateTime.DayOfYear;
+            _inputs.JulianDay = time.CurrentDateTime.DayOfYear;
 
             CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
-            _inputs.JulianDateMin = _outputs.JulianDateMin; //so that we do not have to calculate it every time
+            _inputs.JulianDayMin = _outputs.JulianDateMin; //so that we do not have to calculate it every time
         }
 
         public override double GetMaxSpreadRate()

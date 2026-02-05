@@ -594,9 +594,9 @@ namespace PREACT.Wildfire
         {
             double LATN;
             int ND;
-            output.JulianDate = input.JulianDate;
-            output.JulianDateMin = input.JulianDateMin;
-            if (input.JulianDateMin <= 0)
+            output.JulianDate = input.JulianDay;
+            output.JulianDateMin = input.JulianDayMin;
+            if (input.JulianDayMin <= 0)
             {
                 if (input.Elevation < 0)
                 {
@@ -609,7 +609,7 @@ namespace PREACT.Wildfire
                     output.JulianDateMin = (int)(0.5 + 142.1 * input.Lat / LATN + (0.0172 * input.Elevation));
                 }
             }
-            ND = Mathd.Abs(input.JulianDate - output.JulianDateMin);
+            ND = Mathd.Abs(input.JulianDay - output.JulianDateMin);
             if (ND >= 50)
             {
                 return (120.0);

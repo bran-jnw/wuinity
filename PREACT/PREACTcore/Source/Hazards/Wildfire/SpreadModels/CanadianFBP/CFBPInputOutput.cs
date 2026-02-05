@@ -4,10 +4,11 @@ using System.Text;
 
 namespace PREACT.Wildfire
 {
+    //some help for units and variable names https://cran.r-project.org/web/packages/cffdrs/refman/cffdrs.html
     public struct CanadianFBPInputs
     {
         public double FFMC, BUI, WindSpeed, GrassFuelLoad, Lat, Lon;
-        public int Time, Pattern, JulianDate, JulianDateMin, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation;// not used: mon, hour, hourly 
+        public int Time, Pattern, JulianDay, JulianDayMin, WindAzimuth, PercentSlope, SlopeAzimuth, PercentCuring, Elevation;// not used: mon, hour, hourly 
     }
     public class FireData
     {
