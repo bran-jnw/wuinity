@@ -103,16 +103,6 @@ namespace PREACT.Wildfire
         }
 
         /// <summary>
-        /// Ported from Behave as Crown does not expose this.
-        /// </summary>
-        /// <param name="directionOfInterest"></param>
-        /// <returns></returns>
-        private double CalculateSpreadRateInDirection(double directionOfInterest)
-        {
-            return _spreadModel.GetSpreadRateInDirection(directionOfInterest);
-        }
-
-        /// <summary>
         /// Returns spread rate in meters per second in direction of interest.
         /// </summary>
         /// <param name="spreadDirection"></param>
@@ -124,7 +114,8 @@ namespace PREACT.Wildfire
             {
                 UpdateRateOfSpread(currentTime);
             }
-            return (float)CalculateSpreadRateInDirection(spreadDirection);
+
+            return (float)_spreadModel.GetSpreadRateInDirection(spreadDirection);
         }
 
         public void Ignite(float timeOfArrival, float residualTime)

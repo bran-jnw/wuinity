@@ -75,6 +75,11 @@ namespace PREACT.Wildfire
             return _directionOfMaxSpread;
         }
 
+        /// <summary>
+        /// Ported from Behave as Crown does not expose this.
+        /// </summary>
+        /// <param name="directionOfInterest"></param>
+        /// <returns></returns>
         public override double GetSpreadRateInDirection(double directionOfInterest)
         {
             double rosDirection = _forwardSpreadRate;
@@ -94,7 +99,7 @@ namespace PREACT.Wildfire
                 }
                 if (Mathd.Abs(beta) > 0.1)
                 {
-                    double radians = beta * Mathd.PI / 180.0;
+                    double radians = beta * Mathd.Deg2Rad;
                     rosDirection = _forwardSpreadRate * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
                 }
             }
