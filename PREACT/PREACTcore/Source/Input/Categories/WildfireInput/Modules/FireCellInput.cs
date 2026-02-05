@@ -30,6 +30,7 @@ namespace PREACT.IO
         public double StartFFMC = 85.0;
         public double StartDMC = 6.0;
         public double StartDC = 15.0;
+        public double StartHourlyFFMC = 85.0;
 
         //common
         public string IgnitionPointsFile = string.Empty;
@@ -161,6 +162,21 @@ namespace PREACT.IO
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     success = double.TryParse(userInput, out StartFFMC);
+                    if (!success)
+                    {
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+
+                //not critical, uses defaults
+                nameOfInput = nameof(StartHourlyFFMC);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    success = double.TryParse(userInput, out StartHourlyFFMC);
                     if (!success)
                     {
                         PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);

@@ -41,7 +41,7 @@ namespace PREACT
         {
             _simulation = simulation;
             _fwi = new Wildfire.FireWeatherIndex(simulation.Input.WildfireModule.FireCellInput.StartFFMC, simulation.Input.WildfireModule.FireCellInput.StartDMC, simulation.Input.WildfireModule.FireCellInput.StartDC);
-            _ffmcHourly = new Wildfire.FFMCHourly();                       
+            _ffmcHourly = new Wildfire.FFMCHourly(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);                       
         }
 
         public void Step(float simulationTime, DateTime currentDateTime)
@@ -63,7 +63,7 @@ namespace PREACT
                 _interpolatedHourlyData = _currentHourlyData;
 
                 //now update hourly values
-                _ffmcHourly.Calculate(_currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed, _currentHourlyData._precip);
+                _ffmcHourly.Calculate(_currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed * 3.6, _currentHourlyData._precip);
             }
             else
             {
@@ -80,7 +80,7 @@ namespace PREACT
             if (_fwiNeedsUpdate && currentDateTime.Hour == 12)
             {
                 _fwiNeedsUpdate = false;
-                _fwi.CalculateDay(currentDateTime, _currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed, _currentHourlyData._precip);
+                _fwi.CalculateDay(currentDateTime, _currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed * 3.6, _currentHourlyData._precip);
             }
 
 

@@ -128,6 +128,7 @@ FBPLookupTableFile=fbp_lookup_table.csv
 StartDC=482
 StartDMC=58
 StartFFMC=89
+StartHourlyFFMC=94
 
 [TriggerBufferModule]
 Enabled=false
