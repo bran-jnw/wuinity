@@ -13,7 +13,7 @@ namespace PREACT.IO
     [System.Serializable]
     public class FireCellInput
     {
-        public enum SpreadRateModels { BehavePlus, CanadianFBP }
+        public enum SpreadRateModels { BehavePlus, CanadianFBP, LookUpTable }
         public enum IgnitionTypes { Point, Polygon, Random }
         public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
@@ -31,6 +31,9 @@ namespace PREACT.IO
         public double StartDMC = 6.0;
         public double StartDC = 15.0;
         public double StartHourlyFFMC = 85.0;
+
+        //behave
+        public string LookUpTableFile = string.Empty;
 
         //common
         public string IgnitionPointsFile = string.Empty;
@@ -61,6 +64,9 @@ namespace PREACT.IO
                         break;
                     case nameof(SpreadRateModels.CanadianFBP):
                         SpreadRateModel = SpreadRateModels.CanadianFBP;
+                        break;
+                    case nameof(SpreadRateModels.LookUpTable):
+                        SpreadRateModel = SpreadRateModels.LookUpTable;
                         break;
                     default:
                         success = false;
@@ -187,9 +193,23 @@ namespace PREACT.IO
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
             }
+            else if (SpreadRateModel == SpreadRateModels.LookUpTable)
+            {
+                //not critical, we just use a default table
+                nameOfInput = nameof(LookUpTableFile);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    LookUpTableFile = userInput;
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+                    success = true;
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                }
+            }
 
-
-            nameOfInput = nameof(SpreadMode);
+                nameOfInput = nameof(SpreadMode);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)

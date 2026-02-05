@@ -46,6 +46,10 @@ namespace PREACT.Wildfire
             {
                 _spreadModel = new SpreadModelCFBP(_cellData, owner.Simulation.Input.WildfireModule.Data.CanadianFBPLookupTable, _owner.Simulation.Spatial);
             }
+            else
+            {
+                _spreadModel = new SpreadModelLookUpTable(_cellData, _owner.Simulation.Input.WildfireModule.Data.ConstantLookupTable);
+            }
 
 
             if (randomCenter)

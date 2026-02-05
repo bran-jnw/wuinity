@@ -4,13 +4,15 @@ using System.Text;
 
 namespace PREACT.Wildfire
 {
-    public class SpreadModelConstant : SpreadModel
+    public class SpreadModelLookUpTable : SpreadModel
     {
         double _spreadRate;
+        bool _hasFuelLoad;
 
-        public SpreadModelConstant(LandscapeCellData cellData)
+        public SpreadModelLookUpTable(LandscapeCellData cellData, SpreadRateLookUpTable lookUpTable)
         {
-            //TODO: have database to read from
+            _spreadRate = lookUpTable.GetSpreadRate(cellData.fuel_model);
+            _hasFuelLoad = _spreadRate > 0;
         }
 
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
@@ -40,7 +42,7 @@ namespace PREACT.Wildfire
 
         public override bool HasFuelLoad()
         {
-            return true;
+            return _hasFuelLoad;
         }
     }
 }

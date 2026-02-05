@@ -34,6 +34,7 @@ namespace PREACT.Wildfire
         /// <returns></returns>
         public void Parse(string filePath, out bool success)
         {
+            _database.Clear();
             Engine.Message(null, Engine.LogType.Log, " Attempting to load FBP lookup table.");
             success = false;
 
@@ -53,8 +54,6 @@ namespace PREACT.Wildfire
                 Engine.Message(null, Engine.LogType.Warning, "FBP lookup table file " + filePath + " does not contain data.");
                 return;
             }
-
-            _database.Clear();
 
             //skip first line
             for(int i = 1; i < lines.Length; ++i)

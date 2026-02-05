@@ -19,6 +19,7 @@ namespace PREACT.IO
         private IgnitionPointInput[] _ignitionPoints;
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
         private CanadianFBPLookupTable _canadianFBPLookupTable = new CanadianFBPLookupTable();
+        private SpreadRateLookUpTable _constantLookupTable = new SpreadRateLookUpTable();
 
         public bool[] WuiArea;
         public bool[] RandomIgnition;
@@ -31,6 +32,7 @@ namespace PREACT.IO
         public IgnitionPointInput[] IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }   
         public CanadianFBPLookupTable CanadianFBPLookupTable { get => _canadianFBPLookupTable; }
+        public SpreadRateLookUpTable ConstantLookupTable { get => _constantLookupTable; }
 
         public WildfireData()
         {
