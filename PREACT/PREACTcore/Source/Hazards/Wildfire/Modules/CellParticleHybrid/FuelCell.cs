@@ -7,7 +7,7 @@ namespace PREACT.Wildfire
     public class FuelCell
     {
         public Vector2int _index;
-        public bool _dead;
+        private bool _dead;
         public bool _ignited;
         public LandscapeCellData _cellData;
         public float _maxROS;
@@ -21,9 +21,10 @@ namespace PREACT.Wildfire
         public Vector2int Index { get => _index; }
 
         public Vector3d IgnitionPoint;
-        private InitialFuelMoisture _moisture;
         private float _timeOfArrival;
         List<FireParticle> _fireParticles;
+
+        public bool Dead { get => _dead; }
 
 
         public float TimeOfArrival { get => _timeOfArrival; }
@@ -34,12 +35,12 @@ namespace PREACT.Wildfire
             _index = new Vector2int(xIndex, yIndex);
             _linearIndex = xIndex + yIndex * xDim;
             _cellData = landscape.GetCellData(_index.x, _index.y);
-            _cellSize = landscape.RasterCellResolutionX;            
-            
-            if(input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.BehavePlus)
+            _cellSize = landscape.RasterCellResolutionX;                
+
+            if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.BehavePlus)
             {
-                _moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
-                _spreadModel = new SpreadModelBehave(fuelModels, _cellData, _moisture);
+                InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
+                _spreadModel = new SpreadModelBehave(fuelModels, _cellData, moisture);
             }
             else if(input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.CanadianFBP)
             {
@@ -62,24 +63,16 @@ namespace PREACT.Wildfire
                 IgnitionPoint = new Vector3d(xPos, yPos, zPos);
             }
 
-            _dead = false;
-            if (wuiArea[_index.x, _index.y] || !_spreadModel.HasFuelLoad())
+            _dead = true;
+            if (!wuiArea[_index.x, _index.y] && _spreadModel.HasFuelLoad())
             {
-                _dead = true;
+                _dead = false;
             }
             _maxROS = float.MinValue;
             _rateOfSpreadIsSet = false;
             _ignited = false;
         }
 
-        /// <summary>
-        /// Needed after creation of all cells.
-        /// </summary>
-        /// <param name="xDim"></param>
-        /// <param name="yDim"></param>
-        /// <param name="wuiArea"></param>
-        /// <param name="surface"></param>
-        /// <param name="cells"></param>
         private void SpawnFireVertices(float ignitionTime, float residualTime)
         {
             FuelCell[,] cells = _owner.GetCells();
@@ -97,9 +90,16 @@ namespace PREACT.Wildfire
         }
 
         public void UpdateRateOfSpread(float currentTime)
-        {            
+        {
+            if (_dead)
+            {
+                Engine.Message(_owner.Simulation, Engine.LogType.Log, $"Trying to update dead cell, fuel number {_cellData.fuel_model}.");
+                return;
+            }
+
             _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
             _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFirelineIntensity(), (float)_spreadModel.GetMaxSpreadRate());
+            _rateOfSpreadIsSet = true;
         }
 
         /// <summary>
@@ -123,6 +123,7 @@ namespace PREACT.Wildfire
             //just in case we try to ignite a dead cell
             if (_dead)
             {
+                Engine.Message(_owner.Simulation, Engine.LogType.Log, $"Trying to ignite dead cell, fuel number {_cellData.fuel_model}.");
                 return;
             }
 

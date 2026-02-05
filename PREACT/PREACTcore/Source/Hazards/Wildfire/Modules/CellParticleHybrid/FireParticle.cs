@@ -12,16 +12,17 @@ namespace PREACT.Wildfire
         private bool _dead;
         private double _distanceLeftToTarget;
         private float _ignitionTime;
+        private float _spreadRate;
 
         public bool Dead { get => _dead; }
 
-        public FireParticle(FuelCell startCell, FuelCell targetCell, float ignitionTime, float residualTime, CellParticleHybrid sim, bool diagonal)
+        public FireParticle(FuelCell startCell, FuelCell targetCell, float ignitionTime, float residualTime, CellParticleHybrid wildfireSim, bool diagonal)
         {
             _ignitionTime = ignitionTime;
             _targetCell = targetCell;
             _localPosition = startCell.IgnitionPoint;
             _currentCell = startCell;
-            sim.AddActiveFireParticle(this);            
+            wildfireSim.AddActiveFireParticle(this);            
 
             Vector3d delta = _targetCell.IgnitionPoint - _localPosition;
             _spreadVector = delta.normalized;
@@ -30,7 +31,7 @@ namespace PREACT.Wildfire
             _spreadDirection = (float)Vector3d.Angle(Vector3d.up, _spreadVector) * Mathd.Sign(Vector3d.Dot(Vector3d.right, _spreadVector)); 
             _distanceLeftToTarget = delta.magnitude;
 
-            //these are the factors to compensate for the average distance being longer
+            //these are the factors to compensate for the average distance being longer with randomized ignition points
             float distanceCorrection = 1.088f;
             if (diagonal)
             {
@@ -53,7 +54,7 @@ namespace PREACT.Wildfire
             //since we might have overshot the ignition point in the ignited fuel cell, we have to take the overshot time and move the new particle to compensate
             if (residualTime > 0)
             {
-                Step(ignitionTime, residualTime, sim);
+                Step(ignitionTime, residualTime, wildfireSim);
             }
         }
 
@@ -71,14 +72,24 @@ namespace PREACT.Wildfire
                 return;
             }
                         
-            if (!_targetCell._dead)//the target should never be dead here as the particle will not be created then, but keep it as we might want to enable real-time changes from user
+            if (!_targetCell.Dead)//the target should never be dead here as the particle will not be created then, but keep it as we might want to enable real-time changes from user
             {
                 FuelCell cell = sim.GetCell(_localPosition);                
                 _currentCell = cell;
-                float spreadRate = _currentCell.GetSpreadRateInDirection(_spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?
-                if (spreadRate > 0)
+                if(!_currentCell.Dead)
                 {
-                    double delta = deltaTime * spreadRate;
+                    _spreadRate = _currentCell.GetSpreadRateInDirection(_spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?                    
+                }
+                else
+                {
+                    //this means that we are crossing a cell that is dead, do we die or continue at same spread rate as before?
+                    _dead = true;
+                    return;
+                }
+
+                if (_spreadRate > 0)
+                {
+                    double delta = deltaTime * _spreadRate;
                     _localPosition += delta * _spreadVector;
                     _distanceLeftToTarget -= delta;
 
@@ -86,7 +97,7 @@ namespace PREACT.Wildfire
                     if (_distanceLeftToTarget <= 0.0)
                     {
                         _dead = true;
-                        float residualTime = (float)-_distanceLeftToTarget / spreadRate;
+                        float residualTime = (float)-_distanceLeftToTarget / _spreadRate;
                         float timeOfArrival = currentTime + deltaTime - residualTime;
                         _targetCell.Ignite(timeOfArrival, residualTime);                        
                     }

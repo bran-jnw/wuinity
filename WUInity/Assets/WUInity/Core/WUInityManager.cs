@@ -791,11 +791,12 @@ namespace WUInity
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
             _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _markerPrefab);
+            _simulationDomainVisualizer.SpawnFireIgnitionMarkers(_input, _markerPrefab);
             UpdateMap();
             UpdateSimBorders();
         }
 
-        public void UpdateDestinations(System.Collections.Generic.List<PREACT.Evacuation.EvacuationDestination> destinations)
+        public void UpdateDestinations(List<PREACT.Evacuation.EvacuationDestination> destinations)
         {
             _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, destinations, _markerPrefab);
         }

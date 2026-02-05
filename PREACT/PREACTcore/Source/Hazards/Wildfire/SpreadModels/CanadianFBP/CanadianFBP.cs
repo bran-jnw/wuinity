@@ -89,8 +89,8 @@ namespace PREACT.Wildfire
     /// </summary>
     public static class CanadianFBP
     {
-        public enum FuelTypes { C1, C2, C3, C4, C5, C6, C7, D1, D2, M1, M2, M3, M4, S1, S2, S3, O1a, O1b }
-        public enum CoverTypes { Open, }
+        public enum FuelTypes { C1, C2, C3, C4, C5, C6, C7, D1, D2, M1, M2, M3, M4, S1, S2, S3, O1a, O1b, NonFuel }
+        public enum CoverTypes { Open, Canopy}
 
         private static readonly double slopelimit_isi = 0.01;
         private static readonly int numfuels = 18;      
@@ -101,12 +101,12 @@ namespace PREACT.Wildfire
         {
             _fuelCoeffs = new Dictionary<string, FuelCoefficients>(numfuels);
             CreateDefaultDatabase();
+            Engine.Message(null, Engine.LogType.Debug, "Default CFBP database created.");
         }
 
-        public static FuelCoefficients GetFuelCoefficients(string fuelType)
+        public static FuelCoefficients GetFuelCoefficients(string fuelType, out bool success)
         {
-            FuelCoefficients f = null;
-            _fuelCoeffs.TryGetValue(fuelType, out f);
+            success = _fuelCoeffs.TryGetValue(fuelType, out FuelCoefficients f);
             return f;
         }
 

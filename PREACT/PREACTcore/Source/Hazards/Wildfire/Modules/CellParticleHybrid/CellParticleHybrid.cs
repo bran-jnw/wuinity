@@ -66,6 +66,7 @@ namespace PREACT.Wildfire
                     _fuelCells[x, y] = new FuelCell(true, x, y, landscapeData, _fuelModels, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture, simulation.Input.WildfireModule.FireCellInput);
                 }
             }
+            Engine.Message(_simulation, Engine.LogType.Debug, $"Size of raster is {landscapeData.RasterCellResolutionX}.");
 
             _aliveParticles = new Queue<FireParticle>();            
 
@@ -76,14 +77,7 @@ namespace PREACT.Wildfire
                 _ignitionPoints = new List<IgnitionPoint>(ignitionPoints.Length);
                 for (int i = 0; i < ignitionPoints.Length; ++i)
                 {
-                    if (ignitionPoints[i].IgnitionTime <= 0)
-                    {
-                        IgniteAtLatLon(ignitionPoints[i].LatLon, 0f);
-                    }
-                    else
-                    {
-                        _ignitionPoints.Add(new IgnitionPoint(ignitionPoints[i]));
-                    }
+                    _ignitionPoints.Add(new IgnitionPoint(ignitionPoints[i]));
                 }
             }
             else
@@ -106,13 +100,18 @@ namespace PREACT.Wildfire
         private void IgniteAtLatLon(Vector2d latLon, float currentTime)
         {
             Vector2d pos = _simulation.GetSimulationPosition(latLon);
-            pos += _originOffset;
+            pos -= _originOffset;
             int xIndex = (int)(_landscapeData.GetCellCountX() * pos.x / _landscapeData.GetLandscapeSizeX());
             int yIndex = (int)(_landscapeData.GetCellCountY() * pos.y / _landscapeData.GetLandscapeSizeY());
 
             if(IsInside(xIndex, yIndex))
             {
                 _fuelCells[xIndex, yIndex].Ignite(currentTime, 0f);
+                Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at lat/lon [{latLon.x}/{latLon.y}] as requested by user.");
+            }
+            else
+            {
+                Engine.Message(_simulation, Engine.LogType.Log, $"Tried to ignite at lat/lon [{latLon.x}/{latLon.y}] but this is outside of the provided landscape.");
             }
         }
 

@@ -199,9 +199,11 @@ namespace PREACT.Wildfire
                 Header.SouthUtm = transform[3] + transform[5] * tif.RasterYSize; //negative cell size when north up
                 Header.XResol = transform[1];
                 Header.YResol = -transform[5];
+				RasterCellResolutionX = Mathd.Max(Header.XResol);
+				RasterCellResolutionY = Mathd.Max(Header.YResol);
 
-                //https://gdal.org/en/stable/drivers/raster/lcp.html
-                Header.CrownFuels = 20; //20 if no crown fuels, 21 if crown fuels exist(crown fuels = canopy height, canopy base height, canopy bulk density)
+				//https://gdal.org/en/stable/drivers/raster/lcp.html
+				Header.CrownFuels = 20; //20 if no crown fuels, 21 if crown fuels exist(crown fuels = canopy height, canopy base height, canopy bulk density)
                 switch (NumVals)
                 {
                     case 8:
@@ -292,6 +294,7 @@ namespace PREACT.Wildfire
 								continue;
 							}
 
+							//update min/max for header
 							//elevation
 							if(rasterIndex == 0)
 							{
@@ -575,53 +578,43 @@ namespace PREACT.Wildfire
 			return GetCellData((int)posit);
 		}
 
-		public int[] GetExisitingFuelModelNumbers()
+		public HashSet<int> GetExisitingFuelModelNumbers()
         {
-			int[] indexMap = new int[256];
+			HashSet<int> uniqueFuels = new HashSet<int>();
 			int cells = landscape.Length / (int)NumVals;
-            List<int> invalidFuelModelNumbers = new List<int>();
+            HashSet<int> invalidFuelModelNumbers = new HashSet<int>();
 			int invalidCount = 0;
             for (int i = 0; i < cells; i++)
             {
 				int fuelModelNumber = landscape[i * NumVals + 3]; //fuel number is offset by 3
-				if (fuelModelNumber > 0 && fuelModelNumber <= 256)
+				if (fuelModelNumber > 0 && fuelModelNumber <= short.MaxValue) //&& fuelModelNumber <= 256 this needed to increase for canadian data
                 {
-					indexMap[fuelModelNumber - 1] += 1;
+					uniqueFuels.Add(fuelModelNumber);
                 }
 				else
                 {
-                    if(!invalidFuelModelNumbers.Contains(fuelModelNumber))
-					{
-						invalidFuelModelNumbers.Add(fuelModelNumber);
-						++invalidCount;
-                    }
+					invalidFuelModelNumbers.Add(fuelModelNumber);
+					++invalidCount;
                 }
             }
 
 			if(invalidFuelModelNumbers.Count > 0)
             {
-				string error = "Landscape data contains " + invalidCount + " cells with fuel model numbers outside of the valid range 1-256, numbers are: ";
-				for (int i = 0; i < invalidFuelModelNumbers.Count; i++)
+				string error = "Landscape data contains " + invalidCount + " cells with fuel model numbers outside of the valid range, numbers are: ";
+				int index = 0;
+				foreach (int i in invalidFuelModelNumbers)
 				{
-					error += invalidFuelModelNumbers[i];
-					if(i < invalidFuelModelNumbers.Count - 1)
+					error += i;
+					if(index < invalidFuelModelNumbers.Count - 1)
 					{
 						error += ", ";
 					}
+					index++;
 				}
                 Engine.Message(null, Engine.LogType.Warning, error);
             }
 
-			List<int> presentFuelModelNumbers= new List<int>();
-			for (int i = 0; i < indexMap.Length; i++)
-			{
-				if(indexMap[i] > 0)
-                {
-					presentFuelModelNumbers.Add(i + 1);
-                }
-			}
-
-			return presentFuelModelNumbers.ToArray();
+			return uniqueFuels;
 		}
 
 		celldata CellData(double east, double north, ref celldata cell, ref crowndata cfuel, ref grounddata gfuel)

@@ -22,7 +22,6 @@ namespace PREACT.Wildfire
         public CanadianFBPLookupEntry GetLookupEntry(int fuelModelNumber, out bool success)
         {
             CanadianFBPLookupEntry entry;
-            entry.grid_value = -1;
             success = _database.TryGetValue(fuelModelNumber, out entry);
             return entry;
         }
@@ -70,6 +69,7 @@ namespace PREACT.Wildfire
                     int.TryParse(line[5], out entry.r);
                     int.TryParse(line[6], out entry.b);
                     _database.Add(entry.grid_value, entry);
+                    //Engine.Message(null, Engine.LogType.Debug, $"Canadian fuel lookup entry fuel_type is {entry.fuel_type}.");
                 }
             }
 

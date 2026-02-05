@@ -7,9 +7,8 @@
 
 using System.IO;
 using PREACT.Wildfire;
-using PREACT.Visualization;
-using PREACT.IO;
 using PREACT.Math;
+using System.Collections.Generic;
 
 namespace PREACT.IO
 {
@@ -113,12 +112,13 @@ namespace PREACT.IO
             if (success)
             {
                 _lcpData = lcpData;
-                int[] fuelNrs = _lcpData.GetExisitingFuelModelNumbers();
+                HashSet<int> fuelNrs = _lcpData.GetExisitingFuelModelNumbers();
                 string message = "Present fuel model numbers are ";
-                for (int i = 0; i < fuelNrs.Length; i++)
+                int index = 0;
+                foreach (int i in fuelNrs)
                 {
-                    message += fuelNrs[i].ToString();
-                    if (i < fuelNrs.Length - 1)
+                    message += i;
+                    if (index < fuelNrs.Count - 1)
                     {
                         message += ", ";
                     }
@@ -126,6 +126,8 @@ namespace PREACT.IO
                     {
                         message += ".";
                     }
+
+                    ++index;
                 }
 
                 Engine.Message(null, Engine.LogType.Log, message);

@@ -21,15 +21,19 @@ namespace PREACT.Wildfire
         private BehaveCore.Crown _crownBehave;
         private double _firelineIntensity;
 
-        private int _fuelModelNumber;
         private LandscapeCellData _cellData;
-        InitialFuelMoisture _moisture;
+        bool _hasFuelLoad = false;
 
         public SpreadModelBehave(BehaveCore.FuelModels fuelModel, LandscapeCellData cellData, InitialFuelMoisture moisture)
         {
             _crownBehave = new BehaveCore.Crown(fuelModel);
             _cellData = cellData;
-            _moisture = moisture;
+            _hasFuelLoad = !_crownBehave.isAllFuelLoadZero(_cellData.fuel_model);
+            
+            if(!_hasFuelLoad)
+            {
+                return;
+            }
 
             double crownRatio = 1.0; //This can be whatever as Behave calculates it internally each time anyway, so not sure why it is an input
             double moistureFoliar = 0;
@@ -37,7 +41,7 @@ namespace PREACT.Wildfire
                 moisture.OneHour, moisture.TenHour, moisture.HundredHour, moisture.LiveHerbaceous, moisture.LiveWoody, moistureFoliar, MoistureUnits,
                 0, WindSpeedUnits, WindHeightInputMode, 0, WindAndSpreadOrientationMode, 
                 _cellData.slope, SlopeUnits,
-                _cellData.aspect, _cellData.canopy_cover, FractionUnits, _cellData.crown_canopy_height, _cellData.crown_base, LengthUnits, crownRatio, FractionUnits, _cellData.crown_bulk_density, DensityUnits);
+                _cellData.aspect, _cellData.canopy_cover, FractionUnits, _cellData.crown_canopy_height, _cellData.crown_base, LengthUnits, crownRatio, FractionUnits, _cellData.crown_bulk_density, DensityUnits);            
         }
 
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager timeManager)
@@ -113,7 +117,7 @@ namespace PREACT.Wildfire
 
         public override bool HasFuelLoad()
         {
-            return !_crownBehave.isAllFuelLoadZero(_fuelModelNumber);
+            return _hasFuelLoad;
         }
     }
 }

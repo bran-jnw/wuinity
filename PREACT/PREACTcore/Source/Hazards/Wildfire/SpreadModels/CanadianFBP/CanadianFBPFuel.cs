@@ -8,7 +8,6 @@
 
         public CanadianFBPFuel(CanadianFBPLookupEntry lookupEntry)
         {
-
             if (lookupEntry.fuel_type.StartsWith("C-1")) FuelType = CanadianFBP.FuelTypes.C1;
             else if (lookupEntry.fuel_type.StartsWith("C-2")) FuelType = CanadianFBP.FuelTypes.C2;
             else if (lookupEntry.fuel_type.StartsWith("C-3")) FuelType = CanadianFBP.FuelTypes.C3;
@@ -31,8 +30,15 @@
             else if (lookupEntry.fuel_type.StartsWith("M-2")) FuelType = CanadianFBP.FuelTypes.M2;
             else if (lookupEntry.fuel_type.StartsWith("M-3")) FuelType = CanadianFBP.FuelTypes.M3;
             else if (lookupEntry.fuel_type.StartsWith("M-4")) FuelType = CanadianFBP.FuelTypes.M4;
+            else FuelType = CanadianFBP.FuelTypes.NonFuel;
 
-            Coefficients = new FuelCoefficients(CanadianFBP.GetFuelCoefficients(nameof(FuelType)));
+            Coefficients = new FuelCoefficients(CanadianFBP.GetFuelCoefficients(FuelType.ToString(), out bool success));
+
+            if(!success || FuelType == CanadianFBP.FuelTypes.NonFuel)
+            {
+                FuelType = CanadianFBP.FuelTypes.NonFuel;
+                return;
+            }
 
             //extra information that might be included
             int percent_conifer = Coefficients.PercentConifer;

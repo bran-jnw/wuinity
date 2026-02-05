@@ -266,6 +266,22 @@ namespace WUInity.Visualization
             }
         }
 
+        public void SpawnFireIgnitionMarkers(PREACTInput input, GameObject markerPrefab)
+        {
+            int index = 0;
+            foreach (PREACT.Wildfire.IgnitionPointInput points  in input.WildfireModule.Data.IgnitionPoints)
+            {
+                GameObject marker = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
+                Vector2d pos = input.Simulation.Data.GetSimulationPosition(points.LatLon);
+
+                float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);
+                marker.transform.localScale = new Vector3(scale, 100f, scale);
+                marker.transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
+                MeshRenderer mR = marker.GetComponentInChildren<MeshRenderer>();
+                mR.material.color = Color.white;
+            }
+        }
+
         private void ClearMarkers()
         {
             if (_goalMarkers != null)

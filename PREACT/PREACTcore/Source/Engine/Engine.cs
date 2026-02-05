@@ -504,7 +504,7 @@ namespace PREACT
             {
                 if(simulation.State == Simulation.SimulationState.Running)
                 {
-                    message = "[Simulation# " + simulation.SimulationIndex + ", " + (int)simulation.SimulationTime + "s] " + message;
+                    message = "[Simulation# " + simulation.SimulationIndex + ", " + simulation.Time.CurrentDateTime.ToString() + "s] " + message;
                 }
                 else
                 {
