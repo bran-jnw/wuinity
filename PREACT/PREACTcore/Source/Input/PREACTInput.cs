@@ -452,7 +452,7 @@ namespace PREACT.IO
             Engine.Message(null, Engine.LogType.InputError, "Could not interpret user input " + userInput + " for " + nameOfInput + ".");
         }
 
-        public static void CheckIfFileExist(string nameOfInput, string inputData, string rootFolder, out bool success)
+        public static void CheckIfFileExist(string nameOfInput, string inputData, string rootFolder, out bool success, bool critical = true)
         {
             success = true;
             string filePath = Path.Combine(rootFolder, inputData);
@@ -461,7 +461,7 @@ namespace PREACT.IO
             {
                 success = false;
                 nameOfInput += "(" + inputData + ")";
-                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                PREACTInput.InputNotFoundMessage(nameOfInput, critical);
             }
         }
 

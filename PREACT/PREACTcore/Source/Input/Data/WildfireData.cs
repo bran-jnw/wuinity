@@ -100,7 +100,8 @@ namespace PREACT.IO
                 {
                     filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile);
                     _constantLookupTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile), out success);
-                    issues += success ? 0 : 1;
+                    success = true; //we always get something
+                    //issues += success ? 0 : 1;
                 }
 
                 if (issues > 0)

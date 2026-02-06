@@ -200,16 +200,16 @@ namespace PREACT.IO
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     LookUpTableFile = userInput;
-                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-                    success = true;
+                    //PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success, false);                    
                 }
                 else
                 {
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
+                success = true;
             }
 
-                nameOfInput = nameof(SpreadMode);
+            nameOfInput = nameof(SpreadMode);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 switch (userInput)
