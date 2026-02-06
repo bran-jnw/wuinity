@@ -72,7 +72,8 @@ namespace WUInity
         public float RenderScale { get => _renderScale; }
 
         [Header("Prefabs")]
-        [SerializeField] private GameObject _markerPrefab;
+        [SerializeField] private GameObject _destinationMarkerPrefab;
+        [SerializeField] private GameObject _wildfireIgnitionMarkerPrefab;
 
         [Header("References")]              
         
@@ -790,15 +791,15 @@ namespace WUInity
             _godCamera.SetInput(_input);
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals
-            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _markerPrefab);
-            _simulationDomainVisualizer.SpawnFireIgnitionMarkers(_input, _markerPrefab);
+            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _destinationMarkerPrefab);
+            _simulationDomainVisualizer.SpawnWildfireIgnitionMarkers(_input, _wildfireIgnitionMarkerPrefab);
             UpdateMap();
             UpdateSimBorders();
         }
 
         public void UpdateDestinations(List<PREACT.Evacuation.EvacuationDestination> destinations)
         {
-            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, destinations, _markerPrefab);
+            _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, destinations, _destinationMarkerPrefab);
         }
 
         public void UpdateMap()

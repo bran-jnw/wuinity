@@ -493,7 +493,9 @@ MonoBehaviour:
   SuppressMessages: 0
   AutoLoadExample: 0
   _renderScale: 1
-  _markerPrefab: {fileID: 2598817330613097118, guid: 9a4214ef857ec764cafe974156c124ea,
+  _destinationMarkerPrefab: {fileID: 2598817330613097118, guid: 9a4214ef857ec764cafe974156c124ea,
+    type: 3}
+  _wildfireIgnitionMarkerPrefab: {fileID: 2598817330613097118, guid: cd022a396cd10c2489b806a497597af5,
     type: 3}
   _simBorder: {fileID: 5507650468005286544}
   _osmBorder: {fileID: 8912109063249177183}

@@ -34,6 +34,7 @@ namespace WUInity.Visualization
 
         //markers
         GameObject[] _goalMarkers;
+        GameObject[] _ignitionMarkers;
 
         public SimulationDomainVisualizerUnity(Transform parent)
         {
@@ -220,7 +221,7 @@ namespace WUInity.Visualization
 
         public void SpawnEvacuationGoalMarkers(PREACTInput input, GameObject markerPrefab)
         {
-            ClearMarkers();
+            ClearDestinationMarkers();
 
             if (input.Evacuation.EvacuationDestinationInputs.Count == 0)
             {
@@ -244,7 +245,7 @@ namespace WUInity.Visualization
 
         public void SpawnEvacuationGoalMarkers(PREACTInput input, System.Collections.Generic.List<EvacuationDestination> destinations, GameObject markerPrefab)
         {
-            ClearMarkers();
+            ClearDestinationMarkers();
 
             if (destinations.Count == 0)
             {
@@ -266,23 +267,29 @@ namespace WUInity.Visualization
             }
         }
 
-        public void SpawnFireIgnitionMarkers(PREACTInput input, GameObject markerPrefab)
+        public void SpawnWildfireIgnitionMarkers(PREACTInput input, GameObject markerPrefab)
         {
+            ClearIgnitionMarkers();
+
+            _ignitionMarkers = new GameObject[input.WildfireModule.Data.IgnitionPoints.Length];
+
             int index = 0;
             foreach (PREACT.Wildfire.IgnitionPointInput points  in input.WildfireModule.Data.IgnitionPoints)
             {
-                GameObject marker = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
+                _ignitionMarkers[index] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
                 Vector2d pos = input.Simulation.Data.GetSimulationPosition(points.LatLon);
 
                 float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);
-                marker.transform.localScale = new Vector3(scale, 100f, scale);
-                marker.transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
-                MeshRenderer mR = marker.GetComponentInChildren<MeshRenderer>();
+                _ignitionMarkers[index].transform.localScale = new Vector3(scale, 100f, scale);
+                _ignitionMarkers[index].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
+                MeshRenderer mR = _ignitionMarkers[index].GetComponentInChildren<MeshRenderer>();
                 mR.material.color = Color.white;
+
+                ++index;
             }
         }
 
-        private void ClearMarkers()
+        private void ClearDestinationMarkers()
         {
             if (_goalMarkers != null)
             {
@@ -291,6 +298,20 @@ namespace WUInity.Visualization
                     if (_goalMarkers[i] != null)
                     {
                         MonoBehaviour.Destroy(_goalMarkers[i]);
+                    }
+                }
+            }
+        }
+
+        private void ClearIgnitionMarkers()
+        {
+            if (_ignitionMarkers != null)
+            {
+                for (int i = 0; i < _ignitionMarkers.Length; i++)
+                {
+                    if (_ignitionMarkers[i] != null)
+                    {
+                        MonoBehaviour.Destroy(_ignitionMarkers[i]);
                     }
                 }
             }

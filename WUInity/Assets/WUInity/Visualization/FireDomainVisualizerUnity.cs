@@ -24,7 +24,7 @@ namespace WUInity.Visualization
 
         public FireDomainVisualizerUnity(Transform parent)
         {
-            _lcpDomainPlane = new GameObject("LCPDomain");
+            _lcpDomainPlane = new GameObject("WildfireDomain");
             _lcpDomainPlane.transform.parent = parent;
             _lcpDomainPlane.transform.position += Vector3.up;
             _lcpDomainPlane.isStatic = true;            
