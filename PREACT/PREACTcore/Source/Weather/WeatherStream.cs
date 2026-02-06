@@ -12,12 +12,12 @@ using PREACT.Math;
 
 namespace PREACT.Weather
 {
-    public struct HourlyWeatherData
+    public struct HourlyWeather
     {
         public float _temp, _rh, _precip, _windSpeed, _windDirection, _cloudCover, _directRadiation, _boundrayLayerHeight;
 
         //temperature_2m", "relative_humidity_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "cloud_cover", "direct_radiation", "boundary_layer_height" 
-        public HourlyWeatherData(float temp, float rh, float precip, float windSpeed, float windDirection, float cloudCover, float directRadiation, float boundrayLayerHeight)   
+        public HourlyWeather(float temp, float rh, float precip, float windSpeed, float windDirection, float cloudCover, float directRadiation, float boundrayLayerHeight)   
         {
             _temp = temp;
             _rh = rh;
@@ -29,7 +29,7 @@ namespace PREACT.Weather
             _boundrayLayerHeight = boundrayLayerHeight;
         }
 
-        public static void InterpolateData(HourlyWeatherData hour1, HourlyWeatherData hour2, float fraction, ref HourlyWeatherData interpolatedHour)
+        public static void InterpolateData(HourlyWeather hour1, HourlyWeather hour2, float fraction, ref HourlyWeather interpolatedHour)
         {
             interpolatedHour._temp = Interpolation.CosineInterpolate(hour1._temp, hour2._temp, fraction);
             interpolatedHour._rh = Interpolation.CosineInterpolate(hour1._rh, hour2._rh, fraction);
@@ -41,18 +41,18 @@ namespace PREACT.Weather
         }
     }
 
-    public class WeatherData
+    public class WeatherStream
     {
         private double _latitude, _longitude, _elevation;
-        private HourlyWeatherData[] _hourlyData;
+        private HourlyWeather[] _hourlyData;
         private DateTime _dateTimeFirstEntry;
         private DateTime _dateTimeLastEntry;
 
-        public HourlyWeatherData[] HourlyData { get => _hourlyData; }
+        public HourlyWeather[] HourlyData { get => _hourlyData; }
         public DateTime FirstEntry { get => _dateTimeFirstEntry; }
         public DateTime LastEntry { get => _dateTimeLastEntry; }
 
-        public WeatherData(double latitude, double longitude, double elevation, DateTime firstDateTime, DateTime lastDateTime, HourlyWeatherData[] hourlyData)
+        public WeatherStream(double latitude, double longitude, double elevation, DateTime firstDateTime, DateTime lastDateTime, HourlyWeather[] hourlyData)
         {
             _latitude = latitude;
             _longitude = longitude;
@@ -62,7 +62,7 @@ namespace PREACT.Weather
             _dateTimeLastEntry = lastDateTime;
         }
 
-        public void GetHourlyData(DateTime dateTime, out HourlyWeatherData current, out HourlyWeatherData next)
+        public void GetHourlyData(DateTime dateTime, out HourlyWeather current, out HourlyWeather next)
         {
             int index = (int)(dateTime - _dateTimeFirstEntry).TotalHours;
             current = _hourlyData[index];
@@ -76,11 +76,11 @@ namespace PREACT.Weather
             }
         }
 
-        public static WeatherData LoadFromFile(string filePath, out bool success)
+        public static WeatherStream LoadFromFile(string filePath, out bool success)
         {
             success = false;
-            WeatherData result = null;
-            List<HourlyWeatherData> weatherData = new List<HourlyWeatherData>();
+            WeatherStream result = null;
+            List<HourlyWeather> weatherData = new List<HourlyWeather>();
 
             bool fileExists = File.Exists(filePath);
             if (fileExists)
@@ -123,14 +123,14 @@ namespace PREACT.Weather
                         bool b7 = float.TryParse(data[7], out directRadiation);
                         bool b8 = float.TryParse(data[8], out boundrayLayerHeight);
 
-                        HourlyWeatherData wD = new HourlyWeatherData(temp, rh, precip, windSpeed, windDirection, cloudCover, directRadiation, boundrayLayerHeight);
+                        HourlyWeather wD = new HourlyWeather(temp, rh, precip, windSpeed, windDirection, cloudCover, directRadiation, boundrayLayerHeight);
                         weatherData.Add(wD);
                     }                    
                 }
 
                 if (weatherData.Count > 0)
                 {
-                    result = new WeatherData(latitude, longitude, elevation, first, last, weatherData.ToArray());
+                    result = new WeatherStream(latitude, longitude, elevation, first, last, weatherData.ToArray());
                     success = true;
                     Engine.Message(null, Engine.LogType.Log, " Weather input file " + filePath + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
                 }

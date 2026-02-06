@@ -20,7 +20,7 @@ namespace PREACT.Wildfire
     public class MainOutputs
     {
         public double hffmc, SurfaceFuelConsumption, CriticalSurfaceIntensity, RSO, FoliarMoistureContent, SurfaceFireIntensity, SurfaceRateOfSpread, ISI, be, SpreadFactor, SpreadAzimuth, WSV, ff;
-        public int JulianDateMin, JulianDate;
+        public int JulianDayMin, JulianDay;
         public char CoverType;
     }
 

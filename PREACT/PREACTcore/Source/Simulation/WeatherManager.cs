@@ -12,7 +12,7 @@ namespace PREACT
         private bool _fwiNeedsUpdate = true;
         private Wildfire.FFMCHourly _ffmcHourly;
         private DateTime _lastDateTime;
-        private WeatherData _weatherData;
+        private WeatherStream _weatherData;
 
         private float _weatherReferenceElevation;
 
@@ -26,7 +26,7 @@ namespace PREACT
         private float _currentWindDirection, _nextWindDirection, _interpolatedWindDirection;
         private float _currentCloudCover, _nextCloudCover, _interpolatedCloudCover;*/
 
-        private HourlyWeatherData _currentHourlyData, _nextHourlyData, _interpolatedHourlyData;
+        private HourlyWeather _currentHourlyData, _nextHourlyData, _interpolatedHourlyData;
 
 
         //"temperature_2m", "relative_humidity_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "cloud_cover", "direct_radiation", "boundary_layer_height" 
@@ -69,7 +69,7 @@ namespace PREACT
             {
                 //update all relevant data
                 float timeFraction = (currentDateTime.Minute * 60 + currentDateTime.Second) * _inverseSecondsPerHour;
-                HourlyWeatherData.InterpolateData(_currentHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
+                HourlyWeather.InterpolateData(_currentHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
             }
 
             if (newDay)
@@ -123,7 +123,7 @@ namespace PREACT
             bool fileExists = File.Exists(filePath);
             if (fileExists)
             {
-                WeatherData wD = WeatherData.LoadFromFile(filePath, out success);
+                WeatherStream wD = WeatherStream.LoadFromFile(filePath, out success);
                 Engine.Message(_simulation, Engine.LogType.Log, $"Weather data available from {wD.FirstEntry.ToString()} to {wD.LastEntry.ToString()}");
                 if (success)
                 {
@@ -141,7 +141,7 @@ namespace PREACT
                 filePath = Path.Combine(_simulation.Input.RootFolder, $"{_simulation.Input.Simulation.Name}_weather.csv");
                 if(File.Exists(filePath))
                 {
-                    WeatherData wD = WeatherData.LoadFromFile(filePath, out success);
+                    WeatherStream wD = WeatherStream.LoadFromFile(filePath, out success);
                     Engine.Message(_simulation, Engine.LogType.Log, $"Weather data available from {wD.FirstEntry.ToString()} to {wD.LastEntry.ToString()}");
                     if (success)
                     {
@@ -193,21 +193,31 @@ namespace PREACT
                             //header
                             file.WriteLine($"{nameof(hour.Time)},{nameof(hour.Temperature_2m)} [{weatherStream.HourlyUnits.Temperature_2m}],{nameof(hour.Relativehumidity_2m)} [{weatherStream.HourlyUnits.Relativehumidity_2m}],{nameof(hour.Precipitation)} [{weatherStream.HourlyUnits.Precipitation}]," +
                                 $"{nameof(hour.Windspeed_10m)} [{weatherStream.HourlyUnits.Windspeed_10m}],{nameof(hour.Winddirection_10m)} [{weatherStream.HourlyUnits.Winddirection_10m}],{nameof(hour.Cloudcover)} [{weatherStream.HourlyUnits.Cloudcover}]," +
-                                $"{nameof(hour.Direct_radiation)} [{weatherStream.HourlyUnits.Direct_radiation}],{nameof(hour.Boundary_layer_height)} [{weatherStream.HourlyUnits.Boundary_layer_height}]");
+                                $"{nameof(hour.Direct_radiation)} [{weatherStream.HourlyUnits.Direct_radiation}],{nameof(hour.Boundary_layer_height)} [{weatherStream.HourlyUnits.Boundary_layer_height}],FFMC hourly [-],FFMC [-],DMC [-],DC [-],ISI [-],BUI [-],FWI [-]");
 
-                            //save actual data to usable format
-                            HourlyWeatherData[] hourlyArray = new HourlyWeatherData[hour.Time.Length];
+                            //save actual data to usable format in memory
+                            HourlyWeather[] hourlyArray = new HourlyWeather[hour.Time.Length];
                             DateTime startDateTime, endDateTime;
                             DateTime.TryParse(hour.Time[0], out startDateTime);
                             DateTime.TryParse(hour.Time[hour.Time.Length - 1], out endDateTime);
-                            _weatherData = new WeatherData(weatherStream.Latitude, weatherStream.Longitude, weatherStream.Elevation, startDateTime, endDateTime, hourlyArray);
+                            _weatherData = new WeatherStream(weatherStream.Latitude, weatherStream.Longitude, weatherStream.Elevation, startDateTime, endDateTime, hourlyArray);
+
+                            Wildfire.FireWeatherIndex fwi = new Wildfire.FireWeatherIndex();
+                            Wildfire.FFMCHourly ffmcHourly = new Wildfire.FFMCHourly();
 
                             //loop through all data
                             for (int i = 0; i < hour.Time.Length; i++)
                             {
-                                file.WriteLine($"{hour.Time[i]},{hour.Temperature_2m[i]},{hour.Relativehumidity_2m[i]},{hour.Precipitation[i]},{hour.Windspeed_10m[i]},{hour.Winddirection_10m[i]},{hour.Cloudcover[i]},{hour.Direct_radiation[i]},{hour.Boundary_layer_height[i]}");
+                                DateTime.TryParse(hour.Time[i], out DateTime dateTime);
+                                if(dateTime != null && dateTime.Hour == 12)
+                                {
+                                    fwi.CalculateDay(dateTime, hour.Temperature_2m[i] ?? 0, hour.Relativehumidity_2m[i] ?? 0, hour.Windspeed_10m[i] ?? 0, hour.Precipitation[i] ?? 0);
+                                }
+                                ffmcHourly.Calculate(hour.Temperature_2m[i] ?? 0, hour.Relativehumidity_2m[i] ?? 0, hour.Windspeed_10m[i] ?? 0, hour.Precipitation[i] ?? 0);
 
-                                _weatherData.HourlyData[i] = new HourlyWeatherData(hour.Temperature_2m[i] ?? 0, hour.Relativehumidity_2m[i] ?? 0,hour.Precipitation[i] ?? 0, hour.Windspeed_10m[i] ?? 0, hour.Winddirection_10m[i] ?? 0, hour.Cloudcover[i] ?? 0, hour.Direct_radiation[i] ?? 0, hour.Boundary_layer_height[i] ?? 0);
+                                file.WriteLine($"{hour.Time[i]},{hour.Temperature_2m[i]},{hour.Relativehumidity_2m[i]},{hour.Precipitation[i]},{hour.Windspeed_10m[i]},{hour.Winddirection_10m[i]},{hour.Cloudcover[i]},{hour.Direct_radiation[i]},{hour.Boundary_layer_height[i]},{ffmcHourly.Value},{fwi.FFMC},{fwi.DMC},{fwi.DC},{fwi.ISI},{fwi.BUI},{fwi.FWI}");
+
+                                _weatherData.HourlyData[i] = new HourlyWeather(hour.Temperature_2m[i] ?? 0, hour.Relativehumidity_2m[i] ?? 0,hour.Precipitation[i] ?? 0, hour.Windspeed_10m[i] ?? 0, hour.Winddirection_10m[i] ?? 0, hour.Cloudcover[i] ?? 0, hour.Direct_radiation[i] ?? 0, hour.Boundary_layer_height[i] ?? 0);
                             }
                         }
                     }

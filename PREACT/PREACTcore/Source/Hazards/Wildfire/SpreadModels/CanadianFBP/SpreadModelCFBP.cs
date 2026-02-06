@@ -82,7 +82,7 @@ namespace PREACT.Wildfire
             _inputs.JulianDay = time.CurrentDateTime.DayOfYear;
 
             CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
-            _inputs.JulianDayMin = _outputs.JulianDateMin; //so that we do not have to calculate it every time
+            _inputs.JulianDayMin = _outputs.JulianDayMin; //so that we do not have to calculate it every time
         }
 
         public override double GetMaxSpreadRate()

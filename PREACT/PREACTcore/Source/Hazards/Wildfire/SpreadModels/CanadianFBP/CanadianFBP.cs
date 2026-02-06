@@ -594,22 +594,22 @@ namespace PREACT.Wildfire
         {
             double LATN;
             int ND;
-            output.JulianDate = input.JulianDay;
-            output.JulianDateMin = input.JulianDayMin;
+            output.JulianDay = input.JulianDay;
+            output.JulianDayMin = input.JulianDayMin;
             if (input.JulianDayMin <= 0)
             {
                 if (input.Elevation < 0)
                 {
                     LATN = 46.0 + 23.4 * Mathd.Exp(-0.0360 * (150 - input.Lon));
-                    output.JulianDateMin = (int)(0.5 + 151.0 * input.Lat / LATN);
+                    output.JulianDayMin = (int)(0.5 + 151.0 * input.Lat / LATN);
                 }
                 else
                 {
                     LATN = 43.0 + 33.7 * Mathd.Exp(-0.0351 * (150 - input.Lon));
-                    output.JulianDateMin = (int)(0.5 + 142.1 * input.Lat / LATN + (0.0172 * input.Elevation));
+                    output.JulianDayMin = (int)(0.5 + 142.1 * input.Lat / LATN + (0.0172 * input.Elevation));
                 }
             }
-            ND = Mathd.Abs(input.JulianDay - output.JulianDateMin);
+            ND = Mathd.Abs(input.JulianDay - output.JulianDayMin);
             if (ND >= 50)
             {
                 return (120.0);
@@ -938,7 +938,7 @@ namespace PREACT.Wildfire
             m.SurfaceFuelConsumption = 0.0;
             m.CriticalSurfaceIntensity = 0.0; m.RSO = 0.0; m.FoliarMoistureContent = 0; m.SurfaceFireIntensity = 0.0;
             m.SurfaceRateOfSpread = 0.0; m.ISI = 0.0; m.be = 0.0; m.SpreadFactor = 1.0; m.SpreadAzimuth = 0.0; m.WSV = 0.0;
-            m.ff = 0.0; m.JulianDate = 0; m.JulianDateMin = 0;
+            m.ff = 0.0; m.JulianDay = 0; m.JulianDayMin = 0;
             m.CoverType = ' ';
         }
 
