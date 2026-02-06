@@ -54,7 +54,7 @@ namespace PREACT.Wildfire
                     double spreadRate;
 
                     int.TryParse(line[0], out fuelNumber);
-                    double.TryParse(line[4], out spreadRate);
+                    double.TryParse(line[1], out spreadRate);
                     _database.Add(fuelNumber, spreadRate);
                     //Engine.Message(null, Engine.LogType.Debug, $"Canadian fuel lookup entry fuel_type is {entry.fuel_type}.");
                 }

@@ -96,8 +96,14 @@ namespace PREACT.IO
                     _canadianFBPLookupTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.FBPLookupTableFile), out success);
                     issues += success ? 0 : 1;
                 }
+                else if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.LookUpTable)
+                {
+                    filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile);
+                    _constantLookupTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile), out success);
+                    issues += success ? 0 : 1;
+                }
 
-                if(issues > 0)
+                if (issues > 0)
                 {
                     return;
                 }

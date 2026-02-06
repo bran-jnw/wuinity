@@ -124,10 +124,12 @@ IgnitionPointsFile=fireCell/example.ign
 UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
-SpreadRateModel=BehavePlus
+SpreadRateModel=LookUpTable #BehavePlus, CanadianFBP
 StartDC=482
 StartDMC=58
 StartFFMC=89
+StartHourlyFFMC=85
+LookUpTableFile=fire/constant_spreadrates.csv
 
 [AscImport]
 RootFolder=flammap
