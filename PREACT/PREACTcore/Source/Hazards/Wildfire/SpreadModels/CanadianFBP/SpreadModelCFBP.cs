@@ -67,12 +67,62 @@ namespace PREACT.Wildfire
             _inputs.GrassFuelLoad = 0.35; //kg/m2
         }
 
+        //for testing outside of PREACT       
+        public SpreadModelCFBP(CanadianFBPFuel fuel, int elevation, int percentSlope, int slopeAzimuth, double lat, double lon, int pattern = 0, int time = 0, int percentCuring = 80, double grassFuelLoad = 0.35)
+        {
+            _inputs = new CanadianFBPInputs();
+            _outputs = new MainOutputs();
+            _secondaryOutputs = new SecondaryOutputs();
+            _head = new FireData();
+            _flank = new FireData();
+            _back = new FireData();
+            _fuel = fuel;
+
+            //landscape
+            _inputs.Elevation = elevation;
+            _inputs.PercentSlope = percentSlope;
+            _inputs.SlopeAzimuth = slopeAzimuth;
+
+            _inputs.Lat = lat;
+            _inputs.Lon = lon;
+
+            _inputs.Pattern = pattern; //lin = 1, point = 1
+            _inputs.Time = 20;
+            _inputs.JulianDayMin = -1; //this means it is calculated/updated first calc             
+
+            _inputs.PercentCuring = 80;//TODO, read input
+            _inputs.GrassFuelLoad = 0.35; //kg/m2
+        }
+
+        public void CalculateSpreadRate(double windSpeed, int windDirection, double FFMC, double BUI, int julianDay)
+        {
+            _inputs.WindAzimuth = windDirection + 180;
+            if(_inputs.WindAzimuth > 360)
+            {
+                _inputs.WindAzimuth -= 360;
+            }
+            _inputs.WindSpeed = windSpeed * 3.6; //requires km/h, input is m/s
+
+            //moisture related
+            _inputs.FFMC = FFMC;
+            _inputs.BUI = BUI;
+
+            _inputs.JulianDay = julianDay;
+
+            CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
+            _inputs.JulianDayMin = _outputs.JulianDayMin; //so that we do not have to calculate it every time
+        }
+
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
         {
             //wind
             double windSpeed, windDirection;
             weather.GetWind(out windSpeed, out windDirection);            
-            _inputs.WindAzimuth = (int)windDirection;
+            _inputs.WindAzimuth = (int)windDirection + 180;
+            if (_inputs.WindAzimuth > 360)
+            {
+                _inputs.WindAzimuth -= 360;
+            }
             _inputs.WindSpeed = windSpeed * 3.6; //requires km/h, input is m/s
 
             //moisture related
@@ -85,9 +135,29 @@ namespace PREACT.Wildfire
             _inputs.JulianDayMin = _outputs.JulianDayMin; //so that we do not have to calculate it every time
         }
 
+        public double GetHeadISI()
+        {
+            return _outputs.ISI;
+        }
+
         public override double GetMaxSpreadRate()
         {
             return _head.RateOfSpread * _meterPerMinToMeterPerSecond;
+        }
+
+        public double GetFlankSpreadRate()
+        {
+            return _flank.RateOfSpread * _meterPerMinToMeterPerSecond;
+        }
+
+        public double GetBackSpreadRate()
+        {
+            return _back.RateOfSpread * _meterPerMinToMeterPerSecond;
+        }
+
+        public double GetLengthToBreadth()
+        {
+            return _secondaryOutputs.LengthToBreadth;
         }
 
         public override double GetDirectionOfMaxSpread()
@@ -96,20 +166,27 @@ namespace PREACT.Wildfire
         }
 
         public override double GetSpreadRateInDirection(double directionOfInterest)
-        {
-            double theta = Mathd.Abs(_outputs.SpreadAzimuth - directionOfInterest) * Mathd.Deg2Rad;
+        {      
+            double theta = Mathd.Abs(_outputs.SpreadAzimuth - directionOfInterest);
+            if (theta == 90.0)
+            {
+                theta += 0.001;
+            }
+            theta *= Mathd.Deg2Rad;
+
             double ROS = _head.RateOfSpread;
             double BROS = _back.RateOfSpread;
-            double FROS = _flank.RateOfSpread;            
+            double FROS = _flank.RateOfSpread;   
 
-            double c1 = Mathd.Cos(theta);
-            if (c1 == 0.0)
-            {
-                c1 = Mathd.Cos(theta + .001);
-            }
-            double s1 = Mathd.Sin(theta);
-            
-            double ROStheta = (((ROS - BROS) / (2 * c1) + (ROS + BROS) / (2 * c1)) * ((FROS * c1 * Mathd.Sqrt(FROS * FROS * c1 * c1 + (ROS * BROS) * s1 * s1) - ((ROS * ROS - BROS * BROS) / 4) * s1 * s1) / (FROS * FROS * c1 * c1 + ((ROS + BROS) / 2) * ((ROS + BROS) / 2) * s1 * s1)));
+            double cosTheta = Mathd.Cos(theta);
+            double sinTheta = Mathd.Sin(theta);
+
+            double p1 = (ROS - BROS) / (2 * cosTheta);
+            double p2 = (ROS + BROS) / (2 * cosTheta);
+            double nom1 = FROS * cosTheta * Mathd.Sqrt(FROS * FROS * cosTheta * cosTheta + (ROS * BROS) * sinTheta * sinTheta);
+            double nom2 = (ROS * ROS - BROS * BROS) * 0.25 * sinTheta * sinTheta;
+            double denom = FROS * FROS * cosTheta * cosTheta + ((ROS + BROS) * 0.5) * ((ROS + BROS) * 0.5) * sinTheta * sinTheta;
+            double ROStheta = p1 + p2 * ((nom1 - nom2) / denom); 
 
             return ROStheta * _meterPerMinToMeterPerSecond;
         }
@@ -121,7 +198,7 @@ namespace PREACT.Wildfire
 
         public override double GetFirelineIntensity()
         {
-            return 1000;// _head.FireIntensity * 1000;
+            return _outputs.SurfaceFireIntensity;
         }
     }
 }

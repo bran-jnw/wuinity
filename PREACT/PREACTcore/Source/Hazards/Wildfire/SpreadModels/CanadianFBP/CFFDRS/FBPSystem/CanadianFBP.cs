@@ -151,10 +151,15 @@ namespace PREACT.Wildfire
                 headfire.CrownFractionBurned = 0.0;
             }
             secondaryOuts.LengthToBreadth = LengthToBreadth(fuel.FuelType, mainOuts.WSV);
+
+            //backfire stuff
             backfire.ISI = backfire_isi(mainOuts);
             backfire.SurfaceRateOfSpread = backfire_ros(input, fuel, mainOuts, backfire.ISI);
-            flankfire.SurfaceRateOfSpread = flankfire_ros(headfire.SurfaceRateOfSpread, backfire.SurfaceRateOfSpread, secondaryOuts.LengthToBreadth);
+            backfire.RateOfSpread = backfire.SurfaceRateOfSpread;//bran-jnw
             backfire.FireIntensity = fire_behaviour(input, fuel, mainOuts, backfire);
+
+            //flank fire stuff
+            flankfire.SurfaceRateOfSpread = flankfire_ros(headfire.SurfaceRateOfSpread, backfire.SurfaceRateOfSpread, secondaryOuts.LengthToBreadth);
             flankfire.RateOfSpread = flankfire_ros(headfire.RateOfSpread, backfire.RateOfSpread, secondaryOuts.LengthToBreadth);
             flankfire.FireIntensity = flank_fire_behaviour(fuel, mainOuts, flankfire);
 
@@ -449,17 +454,17 @@ namespace PREACT.Wildfire
                 wse2 = 28.0 - Mathd.Log(1.0 - isf / (2.496 * output.ff)) / 0.0818;
                 wse = wse2;
             }
-            wrad = input.WindAzimuth / 180.0 * 3.1415926;
+            wrad = input.WindAzimuth * Mathd.Deg2Rad;
             wsx = input.WindSpeed * Mathd.Sin(wrad);
             wsy = input.WindSpeed * Mathd.Cos(wrad);
-            srad = input.SlopeAzimuth / 180.0 * 3.1415926;
+            srad = input.SlopeAzimuth  * Mathd.Deg2Rad;
             wsex = wse * Mathd.Sin(srad);
             wsey = wse * Mathd.Cos(srad);
             wsvx = wsx + wsex;
             wsvy = wsy + wsey;
             WSV = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);
             raz = Mathd.Acos(wsvy / WSV);
-            raz = raz / 3.1415926 * 180.0;
+            raz = raz * Mathd.Rad2Deg;
 
             if (wsvx < 0)
             {

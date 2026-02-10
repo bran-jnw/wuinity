@@ -83,8 +83,8 @@ namespace PREACT.Wildfire
                 else
                 {
                     //this means that we are crossing a cell that is dead, do we die or continue at same spread rate as before?
-                    _dead = true;
-                    return;
+                    //_dead = true;
+                    //return;
                 }
 
                 if (_spreadRate > 0)

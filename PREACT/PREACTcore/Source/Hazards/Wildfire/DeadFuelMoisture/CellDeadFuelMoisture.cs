@@ -12,10 +12,10 @@ namespace PREACT.Wildfire
     public class CellDeadFuelMoisture
     {
         double fuelMoisture_1, fuelMoisture_10, fuelMoisture_100, fuelMoisture_1000;
-        DeadFuelMoisture dfm1h;
-        DeadFuelMoisture dfm10h;
-        DeadFuelMoisture dfm100h;
-        DeadFuelMoisture dfm1000h;
+        DeadFuelMoistureCSharp dfm1h;
+        DeadFuelMoistureCSharp dfm10h;
+        DeadFuelMoistureCSharp dfm100h;
+        DeadFuelMoistureCSharp dfm1000h;
         bool use1000Hour = false;
         FireCell cell;
         double latitude, longitude;
@@ -49,14 +49,9 @@ namespace PREACT.Wildfire
             long cloudCover = 0;// (long)cell.GetMesh().GetCurrentWindData().cloudCover;
             double startSolarRad = SunRadiation.SimpleRadiation(latitude, longitude, startDate, startHour, cloudCover, (long)cell.GetElevation(), (long)cell.GetSlope(), (long)cell.GetAspect(), cell.GetCanopyCover());
 
-            dfm1h = DeadFuelMoisture.createDeadFuelMoisture1("stick_1hr");
-            dfm10h = DeadFuelMoisture.createDeadFuelMoisture10("stick_10hr");
-            dfm100h = DeadFuelMoisture.createDeadFuelMoisture100("stick_100hr");            
-
-            //needed? happens in creation
-            dfm1h.initializeStick();
-            dfm10h.initializeStick();
-            dfm100h.initializeStick();    
+            dfm1h = DeadFuelMoistureCSharp.createDeadFuelMoisture1("stick_1hr");
+            dfm10h = DeadFuelMoistureCSharp.createDeadFuelMoisture10("stick_10hr");
+            dfm100h = DeadFuelMoistureCSharp.createDeadFuelMoisture100("stick_100hr");       
 
             //initialize the stick environment
             dfm1h.initializeEnvironment(startYear, startMonth, startDay, startHour, startMinute, startSecond,
@@ -78,7 +73,7 @@ namespace PREACT.Wildfire
 
             if (use1000Hour)
             {
-                dfm1000h = DeadFuelMoisture.createDeadFuelMoisture1000("stick_1000hr");
+                dfm1000h = DeadFuelMoistureCSharp.createDeadFuelMoisture1000("stick_1000hr");
                 dfm1000h.initializeStick();
                 dfm1000h.initializeEnvironment(startYear, startMonth, startDay, startHour, startMinute, startSecond,
                     startAirTemp, startAirHumidity, startSolarRad, startCumRain, stickTemp,

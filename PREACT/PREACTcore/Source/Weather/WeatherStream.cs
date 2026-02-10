@@ -85,59 +85,79 @@ namespace PREACT.Weather
             bool fileExists = File.Exists(filePath);
             if (fileExists)
             {
-                string[] dataLines = File.ReadAllLines(filePath);
-
-                double latitude, longitude, elevation;
-                DateTime first = DateTime.MinValue;
-                DateTime last = DateTime.MaxValue;
-
-                string[] data = dataLines[0].Split(',');
-                double.TryParse(data[1], out latitude);
-                data = dataLines[1].Split(',');
-                double.TryParse(data[1], out longitude);
-                data = dataLines[2].Split(',');
-                double.TryParse(data[1], out elevation);
-
-                for (int j = 4; j < dataLines.Length; j++)
+                try
                 {
-                    data = dataLines[j].Split(',');
-                    if (data.Length >= 9)
+                    FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using (StreamReader sr = new StreamReader(fs))
                     {
-                        if(j == 4)
+                        double latitude, longitude, elevation;
+                        DateTime first = DateTime.MinValue;
+                        DateTime last = DateTime.MaxValue;
+
+                        string line = sr.ReadLine();
+                        string[] data = line.Split(',');
+                        double.TryParse(line, out latitude);
+
+                        line = sr.ReadLine();
+                        data = line.Split(',');
+                        double.TryParse(data[1], out longitude);
+
+                        line = sr.ReadLine();
+                        data = line.Split(',');
+                        double.TryParse(data[1], out elevation);
+
+                        line = sr.ReadLine(); //header line, skip                    
+                        line = sr.ReadLine();
+                        int j = 4; //we are now at line 4
+                        while (line != null)
                         {
-                            DateTime.TryParse(data[0], out first);
+                            data = line.Split(',');
+                            if (data.Length >= 9)
+                            {
+                                if (j == 4)
+                                {
+                                    DateTime.TryParse(data[0], out first);
+                                }
+                                else
+                                {
+                                    DateTime.TryParse(data[0], out last);
+                                }
+
+                                float temp, rh, precip, windSpeed, windDirection, cloudCover, directRadiation, boundrayLayerHeight;
+
+                                bool b1 = float.TryParse(data[1], out temp);
+                                bool b2 = float.TryParse(data[2], out rh);
+                                bool b3 = float.TryParse(data[3], out precip);
+                                bool b4 = float.TryParse(data[4], out windSpeed);
+                                bool b5 = float.TryParse(data[5], out windDirection);
+                                bool b6 = float.TryParse(data[6], out cloudCover);
+                                bool b7 = float.TryParse(data[7], out directRadiation);
+                                bool b8 = float.TryParse(data[8], out boundrayLayerHeight);
+
+                                HourlyWeather wD = new HourlyWeather(temp, rh, precip, windSpeed, windDirection, cloudCover, directRadiation, boundrayLayerHeight);
+                                weatherData.Add(wD);
+                            }
+
+                            j++;
+                            line = sr.ReadLine();
                         }
-                        else
+
+                        if (weatherData.Count > 0)
                         {
-                            DateTime.TryParse(data[0], out last);
-                        }                            
-
-                        float temp, rh, precip, windSpeed, windDirection, cloudCover, directRadiation, boundrayLayerHeight;
-
-                        bool b1 = float.TryParse(data[1], out temp);
-                        bool b2 = float.TryParse(data[2], out rh);
-                        bool b3 = float.TryParse(data[3], out precip);
-                        bool b4 = float.TryParse(data[4], out windSpeed);
-                        bool b5 = float.TryParse(data[5], out windDirection);
-                        bool b6 = float.TryParse(data[6], out cloudCover);
-                        bool b7 = float.TryParse(data[7], out directRadiation);
-                        bool b8 = float.TryParse(data[8], out boundrayLayerHeight);
-
-                        HourlyWeather wD = new HourlyWeather(temp, rh, precip, windSpeed, windDirection, cloudCover, directRadiation, boundrayLayerHeight);
-                        weatherData.Add(wD);
+                            result = new WeatherStream(latitude, longitude, elevation, first, last, weatherData.ToArray());
+                            success = true;
+                            Engine.Message(null, Engine.LogType.Log, " Weather input file " + filePath + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
+                        }
+                        else if (fileExists)
+                        {
+                            Engine.Message(null, Engine.LogType.Warning, "Weather input file " + filePath + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
+                        }
                     }                    
                 }
-
-                if (weatherData.Count > 0)
+                catch (Exception e)
                 {
-                    result = new WeatherStream(latitude, longitude, elevation, first, last, weatherData.ToArray());
-                    success = true;
-                    Engine.Message(null, Engine.LogType.Log, " Weather input file " + filePath + " was found, " + weatherData.Count + " valid data points were succesfully loaded.");
-                }
-                else if (fileExists)
-                {
-                    Engine.Message(null, Engine.LogType.Warning, "Weather input file " + filePath + " was found but did not contain any valid data, will not be able to do fire or smoke spread simulations.");
-                }
+                    Engine.Message(null, Engine.LogType.Exception, e.Message);
+                } 
             }
             else
             {

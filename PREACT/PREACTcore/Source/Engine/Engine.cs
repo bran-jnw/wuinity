@@ -487,7 +487,7 @@ namespace PREACT
         }
 
 
-        public enum LogType { Log, Warning, SimulationError, InputError, Event, Debug };
+        public enum LogType { Log, Warning, SimulationError, InputError, Event, Exception, Debug };
         private List<string> _consoleLog = new List<string>();
         /// <summary>
         /// Receives all the information from a WUINITY session, used by GUI.
@@ -524,6 +524,10 @@ namespace PREACT
             else if (logType == LogType.Event)
             {
                 message = "EVENT: " + message;
+            }
+            else if (logType == LogType.Exception)
+            {
+                message = "EXCEPTION: " + message;
             }
             else if(logType == LogType.Debug)
             {

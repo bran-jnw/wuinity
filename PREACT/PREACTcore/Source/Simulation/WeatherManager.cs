@@ -44,6 +44,15 @@ namespace PREACT
             _ffmcHourly = new Wildfire.FFMCHourly(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);                       
         }
 
+        Wildfire.DeadFuelMoistureEngine _deadFuelMoistureEngine;
+        public void DeadFuelMoistureRun(DateTime start, DateTime end)
+        {
+            if(_deadFuelMoistureEngine == null)
+            {
+                //_deadFuelMoistureEngine = new Wildfire.DeadFuelMoistureEngine()
+            }
+        }
+
         public void Step(float simulationTime, DateTime currentDateTime)
         {
             bool newMinute = _lastDateTime.Minute != currentDateTime.Minute;
@@ -127,7 +136,7 @@ namespace PREACT
                 Engine.Message(_simulation, Engine.LogType.Log, $"Weather data available from {wD.FirstEntry.ToString()} to {wD.LastEntry.ToString()}");
                 if (success)
                 {
-                    if(DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) < 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) > 0)
+                    if(DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) > 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) < 0)
                     {
                         haveCorrectWeather = true;
                         _weatherData = wD;
@@ -145,7 +154,7 @@ namespace PREACT
                     Engine.Message(_simulation, Engine.LogType.Log, $"Weather data available from {wD.FirstEntry.ToString()} to {wD.LastEntry.ToString()}");
                     if (success)
                     {
-                        if (timeManager.StartDateTime > wD.FirstEntry && timeManager.EndDateTime < wD.LastEntry)
+                        if (DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) > 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) < 0)
                         {
                             haveCorrectWeather = true;
                             _weatherData = wD;

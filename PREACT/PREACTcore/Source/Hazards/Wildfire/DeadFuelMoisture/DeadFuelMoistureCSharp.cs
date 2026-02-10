@@ -109,7 +109,7 @@ namespace PREACT.Wildfire
         under the direction of Systems for Environmental Management.
        \brief The SEM common source C++ namespace identifier.
      */
-    public class DeadFuelMoisture
+    public class DeadFuelMoistureCSharp
     {
         // Non-integral static data members must be initialized outside the class
         const double Aks = 2.0e-13; //Permeability of a water saturated stick (2.0e-13 cm2).
@@ -288,7 +288,7 @@ namespace PREACT.Wildfire
             \param[in] name Name or description of the dead fuel stick.
          */
 
-        public DeadFuelMoisture(double radius = 0.64, string name = "" )            
+        public DeadFuelMoistureCSharp(double radius = 0.64, string name = "" )            
         {
             m_semTime = new SemTime();
             initializeParameters(radius, name);
@@ -301,7 +301,7 @@ namespace PREACT.Wildfire
             \param[in] r Reference to the DeadFuelMoisture from which to copy.
         */
 
-        public DeadFuelMoisture(DeadFuelMoisture r )
+        public DeadFuelMoistureCSharp(DeadFuelMoistureCSharp r )
         {
             m_semTime   = r.m_semTime;
             m_density   = r.m_density;
@@ -446,7 +446,7 @@ namespace PREACT.Wildfire
             /*! \brief Virtual class destructor.
              */
 
-        ~DeadFuelMoisture()
+        ~DeadFuelMoistureCSharp()
         {
             return;
         }
@@ -484,9 +484,9 @@ namespace PREACT.Wildfire
             \return Pointer to the dynamically-allocated DeadFuelMoisture instance.
          */
 
-        static public DeadFuelMoisture createDeadFuelMoisture1(string name = "")
+        static public DeadFuelMoistureCSharp createDeadFuelMoisture1(string name = "")
         {
-            return (new DeadFuelMoisture(0.20, name));
+            return (new DeadFuelMoistureCSharp(0.20, name));
         }
 
         //------------------------------------------------------------------------------
@@ -499,9 +499,9 @@ namespace PREACT.Wildfire
             \return Pointer to the dynamically-allocated DeadFuelMoisture instance.
          */
 
-        static public DeadFuelMoisture createDeadFuelMoisture10(string name = "")
+        static public DeadFuelMoistureCSharp createDeadFuelMoisture10(string name = "")
         {
-            return (new DeadFuelMoisture(0.64, name));
+            return (new DeadFuelMoistureCSharp(0.64, name));
         }
 
         //------------------------------------------------------------------------------
@@ -514,9 +514,9 @@ namespace PREACT.Wildfire
             \return Pointer to the dynamically-allocated DeadFuelMoisture instance.
          */
 
-        static public DeadFuelMoisture createDeadFuelMoisture100(string name = "")
+        static public DeadFuelMoistureCSharp createDeadFuelMoisture100(string name = "")
         {
-            return (new DeadFuelMoisture(2.00, name));
+            return (new DeadFuelMoistureCSharp(2.00, name));
         }
 
         //------------------------------------------------------------------------------
@@ -529,9 +529,9 @@ namespace PREACT.Wildfire
             \return Pointer to the dynamically-allocated DeadFuelMoisture instance.
          */
 
-        static public DeadFuelMoisture createDeadFuelMoisture1000(string name = "")
+        static public DeadFuelMoistureCSharp createDeadFuelMoisture1000(string name = "")
         {
-            return (new DeadFuelMoisture(6.40, name));
+            return (new DeadFuelMoistureCSharp(6.40, name));
         }
 
         //------------------------------------------------------------------------------

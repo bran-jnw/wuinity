@@ -2,8 +2,8 @@
 Name=Dogrib
 LowerLeftLatLon=51.621113,-115.609849
 DomainSize=40000.0,30000.0
-DeltaTime=30.0
-StartDateTime=2001-09-29T17:00:00
+DeltaTime=1.0
+StartDateTime=2001-10-16T13:00:00
 EndDateTime=2001-10-17T00:00:00
 StopWhenEvacuated=false
 
