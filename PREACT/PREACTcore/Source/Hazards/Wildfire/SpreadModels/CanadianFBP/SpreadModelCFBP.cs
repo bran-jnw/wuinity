@@ -84,7 +84,7 @@ namespace PREACT.Wildfire
             _inputs.SlopeAzimuth = slopeAzimuth;
 
             _inputs.Lat = lat;
-            _inputs.Lon = lon;
+            _inputs.Lon = -lon; //they refer to west longitude
 
             _inputs.Pattern = pattern; //lin = 1, point = 1
             _inputs.Time = 20;

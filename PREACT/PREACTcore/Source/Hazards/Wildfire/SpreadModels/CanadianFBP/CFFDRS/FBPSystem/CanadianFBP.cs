@@ -155,8 +155,7 @@ namespace PREACT.Wildfire
             //backfire stuff
             backfire.ISI = backfire_isi(mainOuts);
             backfire.SurfaceRateOfSpread = backfire_ros(input, fuel, mainOuts, backfire.ISI);
-            backfire.RateOfSpread = backfire.SurfaceRateOfSpread;//bran-jnw
-            backfire.FireIntensity = fire_behaviour(input, fuel, mainOuts, backfire);
+            backfire.FireIntensity = fire_behaviour(input, fuel, mainOuts, backfire); //also sets .RateOfSpread
 
             //flank fire stuff
             flankfire.SurfaceRateOfSpread = flankfire_ros(headfire.SurfaceRateOfSpread, backfire.SurfaceRateOfSpread, secondaryOuts.LengthToBreadth);
