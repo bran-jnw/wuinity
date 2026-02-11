@@ -5,8 +5,6 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.IO;
 using PREACT.Math;
 
 namespace PREACT.Wildfire
@@ -14,111 +12,50 @@ namespace PREACT.Wildfire
     [System.Serializable]
     public struct IgnitionPoint
     {
-        public Vector2d LatLon;
-        public float IgnitionTime;
-
-        private int x;
-        private int y;
-
+        float _ignitionTime;
+        Vector2d _simulationPos;
+        Vector2d _latLon;
         private bool _hasBeenIgnited;
 
-        public int GetX()
-        {
-            return x;
-        }
-
-        public int GetY()
-        {
-            return y;
-        }
+        public Vector2d LatLon { get => _latLon; }
+        public float IgnitionTime { get => _ignitionTime; }    
 
         public bool HasBeenIgnited()
         {
             return _hasBeenIgnited;
         }
 
-        public void MarkAsIgnited()
+        public void Ignite()
         {
             _hasBeenIgnited = true;
         }
 
         /// <summary>
-        /// Only used for testing, creates ignition point directly on mesh
+        /// Called to create ignition point from input.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        public IgnitionPoint(int x, int y, float ignitionTime)
+        /// <param name="simulation"></param>
+        /// <param name="input"></param>
+        public IgnitionPoint(Simulation simulation, IgnitionPointInput input)
         {
-            this.x = x;
-            this.y = y;
-            this.IgnitionTime = ignitionTime;
-
-            LatLon = Vector2d.zero;
-
-            _hasBeenIgnited = false;
-        }
-
-        public IgnitionPoint(IgnitionPointInput input)
-        {
-            LatLon = input.LatLon;
-            x = -1;
-            y = -1;
-            IgnitionTime = input.IgnitionTime;
-
-            _hasBeenIgnited = false;
-        }
-
-        public IgnitionPoint(Vector2d latLong, float ignitionTime)
-        {
-            this.LatLon = latLong;
-            x = -1;
-            y = -1;
-            this.IgnitionTime = ignitionTime;
+            _latLon = input.LatLon;
+            _ignitionTime = input.IgnitionTime;
+            _simulationPos = simulation.GetSimulationPosition(_latLon);
 
             _hasBeenIgnited = false;
         }
 
         /// <summary>
-        /// Used when creating something dynamically during runtime.
+        /// Called when wanting to cerate igbition point while running simulation (real-time interaction).
         /// </summary>
-        /// <param name="latLong"></param>
-        /// <param name="mesh"></param>
-        public IgnitionPoint(Simulation simulation, Vector2d latLong, FireMesh mesh, float ignitionTime)
+        /// <param name="simulation"></param>
+        /// <param name="simulationPos"></param>
+        public IgnitionPoint(Simulation simulation, Vector2d simulationPos)
         {
-            this.LatLon = latLong;
-
-            Vector2d pos = simulation.GetSimulationPosition(latLong);
-
-            x = (int)(pos.x / mesh._cellSize.x);
-            y = (int)(pos.y / mesh._cellSize.y);
-
-            this.IgnitionTime = ignitionTime;
+            _latLon = simulation.Input.Simulation.Data.GetWGS84FromSimulationPosition(simulationPos);
+            _simulationPos = simulationPos;
+            _ignitionTime = simulation.Time.SimulationTime;
 
             _hasBeenIgnited = false;
-        }
-
-        /// <summary>
-        /// Called when starting fire since we only specify lat/long in input file
-        /// </summary>
-        /// <param name="mesh"></param>
-        public void CalculateMeshIndex(Simulation simulation, FireMesh mesh)
-        {
-            if (x < 0 && y < 0)
-            {
-                Vector2d pos = simulation.GetSimulationPosition(LatLon);
-
-                x = (int)(pos.x / mesh._cellSize.x);
-                y = (int)(pos.y / mesh._cellSize.y);
-            }
-        }
-
-        public bool IsInsideFire(Vector2int cells)
-        {
-            if (x >= 0 && x < cells.x && y >= 0 && y < cells.y)
-            {
-                return true;
-            }
-            return false;
         }
     }
 }

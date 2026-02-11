@@ -326,7 +326,7 @@ namespace PREACT.IO
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {                    
                 ReadingInputMessage(nameOfInput);
-                newInput.Evacuation.Parse(inputLines, lineindex, newInput.Events, newInput.Population, newInput.PedestrianModule, newInput.TrafficModule, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
+                newInput.Evacuation.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, newInput.Population, newInput.PedestrianModule, newInput.TrafficModule, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
             }
             else if(newInput.PedestrianModule.Enabled || newInput.TrafficModule.Enabled)
             {

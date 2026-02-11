@@ -77,7 +77,7 @@ namespace PREACT.Wildfire
                 _ignitionPoints = new List<IgnitionPoint>(ignitionPoints.Length);
                 for (int i = 0; i < ignitionPoints.Length; ++i)
                 {
-                    _ignitionPoints.Add(new IgnitionPoint(ignitionPoints[i]));
+                    _ignitionPoints.Add(new IgnitionPoint(_simulation, ignitionPoints[i]));
                 }
             }
             else

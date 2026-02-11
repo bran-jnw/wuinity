@@ -76,7 +76,7 @@ namespace PREACT.IO
 
                 //common 
                 filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.IgnitionPointsFile);
-                LoadIgnitionPoints(wildfireInput, filePath, false, out success);
+                LoadIgnitionPoints(wildfireInput, simulationInput, filePath, false, out success);
                 issues += success ? 0 : 1;
 
                 //spread model dependent
@@ -157,9 +157,9 @@ namespace PREACT.IO
             }
         }
 
-        public void LoadIgnitionPoints(WildfireModuleInput fireInput, string filePath, bool updateInput, out bool success)
+        public void LoadIgnitionPoints(WildfireModuleInput fireInput, SimulationInput simulationInput, string filePath, bool updateInput, out bool success)
         {
-            _ignitionPoints = IgnitionPointInput.LoadIgnitionPointsFile(filePath, out success);
+            _ignitionPoints = IgnitionPointInput.LoadIgnitionPointsFile(filePath, simulationInput, out success);
             if (success && updateInput)
             {
                 fireInput.FireCellInput.IgnitionPointsFile = Path.GetFileName(filePath);

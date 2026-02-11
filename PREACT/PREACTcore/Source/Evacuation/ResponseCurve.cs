@@ -6,21 +6,22 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.IO;
 using PREACT.IO;
+using System;
 
 namespace PREACT.Evacuation
 {
-    [System.Serializable]
+    public enum TimeInputs { Absolute, Relative }
+
     public struct ResponseDataPoint
     {
-        public float probability;
-        public float time;
+        public float Probability;
+        public float Time;
 
         public ResponseDataPoint(float time, float probability)
         {
-            this.time = time;
-            this.probability = probability;
+            Time = time;
+            Probability = probability;
         }
     }
 
@@ -28,23 +29,25 @@ namespace PREACT.Evacuation
     /// Response curve used for when people will start evacuating.
     /// Time relative to evacuation order being announced.
     /// </summary>
-    [System.Serializable]
     public struct ResponseCurve
     {
         public string Name;
+        public TimeInputs TimeInput;
         public ResponseDataPoint[] DataPoints;
 
 
         public ResponseCurve(ResponseDataPoint[] dataPoints, string name)
         {
-            this.Name = name;
-            this.DataPoints = dataPoints;
+            Name = name;
+            DataPoints = dataPoints;
+            TimeInput = TimeInputs.Relative;
         }
 
         public ResponseCurve(List<ResponseDataPoint> dataPoints, string name)
         {
             Name = name;
             DataPoints = dataPoints.ToArray();
+            TimeInput = TimeInputs.Relative;
         }
 
         public void SetDataPoints(List<ResponseDataPoint> dataPoints)
@@ -52,7 +55,7 @@ namespace PREACT.Evacuation
             DataPoints = dataPoints.ToArray();
         }
 
-        public static void Parse(Dictionary<string, ResponseCurve> newInputs, string[] inputLines, List<int> responseCurveLineIndices, out bool success)
+        public static void Parse(Dictionary<string, ResponseCurve> newInputs, string[] inputLines, List<int> responseCurveLineIndices, SimulationInput simulationInput, out bool success)
         {
             success = false;
             newInputs.Clear();
@@ -82,9 +85,37 @@ namespace PREACT.Evacuation
                     break;
                 }
 
+                //critical
+                nameOfInput = nameof(TimeInput);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    switch (userInput)
+                    {
+                        case nameof(TimeInputs.Absolute):
+                            newInput.TimeInput = TimeInputs.Absolute;
+                            break;
+                        case nameof(TimeInputs.Relative):
+                            newInput.TimeInput = TimeInputs.Relative;
+                            break;
+                        default:
+                            ++issues;
+                            PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                            break;
+                    }
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    break;
+                }
+
                 //this one is a bit special as each line does not have a name
-                int startIndex = responseCurveLineIndices[i] + 2; //skip header and name line
-                int endIndex = startIndex + inputToParse.Count - 1; //remove name line from count
+                int startIndex = responseCurveLineIndices[i] + 3; //skip header, name line and time relation
+                int endIndex = startIndex + inputToParse.Count - 2; //remove name and timeinput line from count
                 List<ResponseDataPoint> points = new List<ResponseDataPoint>(endIndex - startIndex);
                 for (int j = startIndex; j < endIndex; ++j)
                 {
@@ -94,8 +125,23 @@ namespace PREACT.Evacuation
                     {
                         ResponseDataPoint dataPoint = new ResponseDataPoint();
 
-                        issues += float.TryParse(data[0], out dataPoint.time) ? 0 : 1;
-                        issues += float.TryParse(data[1], out dataPoint.probability) ? 0 : 1;
+                        if(newInput.TimeInput == TimeInputs.Relative)
+                        {
+                            issues += float.TryParse(data[0], out dataPoint.Time) ? 0 : 1;
+                        }
+                        else
+                        {
+                            DateTime dateTime;
+                            if(DateTime.TryParse(data[0], out dateTime))
+                            {
+                                dataPoint.Time = (float)(dateTime - simulationInput.StartDateTime).TotalSeconds;
+                            }
+                            else
+                            {
+                                ++issues;
+                            }
+                        }                        
+                        issues += float.TryParse(data[1], out dataPoint.Probability) ? 0 : 1;
 
                         if (issues > 0)
                         {

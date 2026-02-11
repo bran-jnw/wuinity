@@ -8,25 +8,32 @@
 using System.Collections.Generic;
 using System.IO;
 using PREACT.Math;
+using System;
 
 namespace PREACT.Wildfire
 {
     [System.Serializable]                           
     public struct IgnitionPointInput
     {
-        public Vector2d LatLon;                    
-        public float IgnitionTime;           
+        public Vector2d LatLon;
+        public bool AbsoluteTime;
+        public float IgnitionTime;
+        public DateTime IgnitionDateTime;
 
-        public IgnitionPointInput(Vector2d latLong, float ignitionTime)    
+        public IgnitionPointInput(Vector2d latLong, bool absoluteTime, float ignitionTime, DateTime ignitionDateTime)    
         {
-            this.LatLon = latLong;
-            this.IgnitionTime = ignitionTime;
+            LatLon = latLong;
+            IgnitionTime = ignitionTime;
+            AbsoluteTime = absoluteTime;
+            IgnitionDateTime = ignitionDateTime;
         }
 
-        public IgnitionPointInput(double lat, double lon, float ignitionTime)
+        public IgnitionPointInput(double lat, double lon, bool absoluteTime, float ignitionTime, DateTime ignitionDateTime)
         {
-            this.LatLon = new Vector2d(lat, lon);
-            this.IgnitionTime = ignitionTime;
+            LatLon = new Vector2d(lat, lon);
+            IgnitionTime = ignitionTime;
+            AbsoluteTime = absoluteTime;
+            IgnitionDateTime = ignitionDateTime;
         }
 
         /// <summary>
@@ -35,7 +42,7 @@ namespace PREACT.Wildfire
         /// Sends message to the WUI_LOG to inform the user.
         /// </summary>
         /// <returns></returns>
-        public static IgnitionPointInput[] LoadIgnitionPointsFile(string path, out bool success)
+        public static IgnitionPointInput[] LoadIgnitionPointsFile(string path, IO.SimulationInput simulationInput, out bool success)
         {
             success = false;
             IgnitionPointInput[] result = null;
@@ -52,15 +59,31 @@ namespace PREACT.Wildfire
                     if (data.Length >= 3)
                     {
                         double lat, lon;
-                        float ignitionTime;
+                        float ignitionTime = 0;
+                        DateTime dateTime = DateTime.Now;
+                        bool absoluteTime = false;
 
                         bool b1 = double.TryParse(data[0], out lat);
                         bool b2 = double.TryParse(data[1], out lon);
-                        bool b3 = float.TryParse(data[2], out ignitionTime);
+                        bool b3 = bool.TryParse(data[2], out absoluteTime);
 
-                        if (b1 && b2 && b3)
+                        bool b4;
+                        if(absoluteTime)
                         {
-                            IgnitionPointInput iP = new IgnitionPointInput(lat, lon, ignitionTime);
+                            b4 = DateTime.TryParse(data[3], out dateTime);
+                            if(b4)
+                            {
+                                ignitionTime = (float)(dateTime - simulationInput.StartDateTime).TotalSeconds;
+                            }                           
+                        }
+                        else
+                        {
+                            b4 = float.TryParse(data[3], out ignitionTime);
+                        }                           
+
+                        if (b1 && b2 && b3 && b4)
+                        {
+                            IgnitionPointInput iP = new IgnitionPointInput(lat, lon, absoluteTime, ignitionTime, dateTime);
                             ignitionPoints.Add(iP);
                         }
                     }

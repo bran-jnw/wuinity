@@ -288,10 +288,10 @@ namespace PREACT.Evacuation
             r = Random.valueF;            
             for (int i = 1; i < pickedCurve.DataPoints.Length; i++) //skip first as that is always zero probability
             {
-                if (r <= pickedCurve.DataPoints[i].probability)
+                if (r <= pickedCurve.DataPoints[i].Probability)
                 {
                     //offset with evacuation order time
-                    responseTime = Random.Range(pickedCurve.DataPoints[i - 1].time, pickedCurve.DataPoints[i].time) + evacuationOrderStart;
+                    responseTime = Random.Range(pickedCurve.DataPoints[i - 1].Time, pickedCurve.DataPoints[i].Time) + evacuationOrderStart;
                     break;
                 }
             }

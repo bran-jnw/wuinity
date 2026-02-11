@@ -1,10 +1,10 @@
 [Simulation]
-Name=Development
-LowerLeftLatLon=39.409924,-105.104505
-DomainSize=10000.0,11000.0
+Name=Lytton
+LowerLeftLatLon=50.196615, -121.665957
+DomainSize=10000.0,10000.0
 DeltaTime=1.0
-StartDateTime=2001-06-05T11:00:00
-EndDateTime=2001-06-06T11:00:00
+StartDateTime=2021-06-16T12:00:00
+EndDateTime=2021-07-02T00:00:00
 StopWhenEvacuated=false
 
 [Map]
@@ -12,7 +12,8 @@ MapProvider=Mapbox
 ZoomLevel=13
 
 [Weather]
-WeatherFile=development_weather.csv
+WeatherFile=lytton_weather.csv
+DesiredLatLon=50.228701345102586, -121.54306201686576
 
 [Population]
 PopulationFile=population/big_population.csv
@@ -81,20 +82,18 @@ Color=1.0,1.0,0.0
 
 [ResponseCurve]
 Name=slow
-TimeInput=Absolute
-2001-06-05T11:00:00, 0.0
-2001-06-05T14:20:00, 0.0
-2001-06-05T14:10:00, 1.0
+0, 0
+12000, 0.0
+12500, 1.0
 
 [ResponseCurve]
 Name=fast
-TimeInput=Relative
 0, 0
 450, 0.8
 900, 1.0
 
 [PedestrianModule]
-Enabled=true
+Enabled=false
 Module=MacroHouseholdSim
 
 [MacroHouseholdSim]
@@ -103,7 +102,7 @@ WalkingSpeedModifier=1.0
 WalkingDistanceModifier=1.0
 
 [TrafficModule]
-Enabled=true
+Enabled=false
 Module=SUMO      
 VisibilityAffectsSpeed=false  
 
@@ -115,31 +114,21 @@ SmokeBeta=-0.02910
 
 [WildfireModule]
 Enabled=true
-Module=CellParticleHybrid #AscImport
-LcpFile=fire/rox_big_burning_city.lcp
+Module=CellParticleHybrid
+LcpFile=dogrib_landscape_UTM.tif
 GraphicalFireInputFile=fire/example.gfi
 
 [CellParticleHybrid]
-FuelModelsFile=fireCell/default.fuel
-InitialFuelMoistureFile=fireCell/default.fmc
-IgnitionPointsFile=fireCell/example.ign
+IgnitionPointsFile=ignitions.ign
 UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
-SpreadRateModel=BehavePlus #LookUpTable, CanadianFBP
+SpreadRateModel=CanadianFBP
+FBPLookupTableFile=fbp_lookup_table.csv
 StartDC=482
 StartDMC=58
 StartFFMC=89
-StartHourlyFFMC=85
-LookUpTableFile=fire/constant_spreadrates.csv
-
-[AscImport]
-RootFolder=flammap
-TimeOfArrivalFile=output/TOA.asc
-RateOfSpreadFile=output/ROS.asc
-SpreadDirectionFile=output/SD.asc
-FirelineIntensityFile=output/FI.asc
-WeatherStreamFile=weather_stream.wxs
+StartHourlyFFMC=94
 
 [TriggerBufferModule]
 Enabled=false
@@ -152,7 +141,7 @@ InitialFuelMoistureFile=fireCell/default.fmc
 OutputName=trigger_buffer.asc
 
 [SmokeModule]
-Enabled=true
+Enabled=false
 Module=AdvectDiffuse3D
 
 [GlobalSmoke]
