@@ -30,9 +30,9 @@ namespace PREACT.Runtime
         }     
         
         public void SetSimulatonData(Vector2d lowerLeftLatLon, Vector2d domainSize)
-        {            
-            _simulationInput.DomainSize = domainSize;
-            _simulationInput.Data.UpdateData(lowerLeftLatLon);
+        {
+            _simulationInput.LowerLeftLatLon = lowerLeftLatLon;
+            _simulationInput.DomainSize = domainSize;        
         }
     }
 }

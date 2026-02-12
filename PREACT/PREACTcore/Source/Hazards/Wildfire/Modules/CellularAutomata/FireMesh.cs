@@ -16,7 +16,7 @@ namespace PREACT.Wildfire
     {
         Vector2int _cellCount;                                
         public FireCellInput.SpreadModes spreadMode;                               
-        public IgnitionPointInput[] ignitionPoints;                
+        public List<IgnitionPointInput> ignitionPoints;                
         FireCell[] _fireCells;                                
         public Vector2d _cellSize;
         float cellArea;
@@ -73,7 +73,7 @@ namespace PREACT.Wildfire
             this.ignitionPoints = ignitionPoints;
         }*/
 
-        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherManager weather, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPointInput[] ignitionPoints) : base(simulation)        
+        public FireMesh(Simulation simulation, LandscapeData lcpData, WeatherManager weather, InitialFuelMoistureLibrary initialFuelMoisture, List<IgnitionPointInput> ignitionPoints) : base(simulation)        
         {
 
             this.lcpData = lcpData;
@@ -387,7 +387,7 @@ namespace PREACT.Wildfire
             }
             else
             {
-                for (int i = 0; i < ignitionPoints.Length; ++i)
+                for (int i = 0; i < ignitionPoints.Count; ++i)
                 {
                     /*if (!ignitionPoints[i].HasBeenIgnited() && ignitionPoints[i].IgnitionTime <= currentTime)
                     {
@@ -407,7 +407,7 @@ namespace PREACT.Wildfire
                     }*/
                 }
 
-                if (activatedIgnitions == ignitionPoints.Length)
+                if (activatedIgnitions == ignitionPoints.Count)
                 {
                     _ignitionDone = true;
                 }

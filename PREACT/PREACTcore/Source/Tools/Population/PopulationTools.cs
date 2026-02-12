@@ -54,9 +54,7 @@ namespace PREACT.Tools
                     populationMap.CreatePopulation(minHouseholdSize, maxHouseholdSize, simulationData, populationOutputFilePath, out success);
                 }
             }
-        }
-
-        
+        }        
 
         public static LocalGPWData CreateLocalGPWData(Vector2d lowerLeftLatLon, Vector2d domainSize, string globalGPWFolder, out bool success)
         {

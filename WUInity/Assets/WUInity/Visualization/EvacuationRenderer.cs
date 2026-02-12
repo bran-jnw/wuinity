@@ -44,7 +44,10 @@ namespace WUInity.Visualization
 
         private void CreateHouseholdsBuffer(int householdCount)
         {            
-            householdPositionsBuffer = new ComputeBuffer(householdCount, 4 * sizeof(float));
+            if(householdCount > 0)
+            {
+                householdPositionsBuffer = new ComputeBuffer(householdCount, 4 * sizeof(float));
+            }            
         }
 
         public void UpdateEvacuationRenderer(bool renderHouseholds, bool renderCars, PedestrianModule pedestrianModule, TrafficModule trafficModule)

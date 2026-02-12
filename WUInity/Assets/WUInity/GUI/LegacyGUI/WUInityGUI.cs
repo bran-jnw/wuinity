@@ -96,6 +96,7 @@ namespace WUInity.UI
         Engine _engine;
         private PREACT.IO.PREACTInput _input;
         private PREACT.Runtime.WorkingData _workingData;
+
         public void SetManager(WUInityManager wuinityManager, Engine engine, PREACT.Runtime.WorkingData workingData)
         {
             _wuinityManager = wuinityManager;
@@ -106,6 +107,7 @@ namespace WUInity.UI
         public void UpdateInput(PREACT.IO.PREACTInput input)
         {
             _input = input;
+            _workingData.SetSimulatonData(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
             SetDirty();
         }
 

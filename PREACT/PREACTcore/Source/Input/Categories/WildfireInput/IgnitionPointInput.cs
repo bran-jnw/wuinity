@@ -42,11 +42,10 @@ namespace PREACT.Wildfire
         /// Sends message to the WUI_LOG to inform the user.
         /// </summary>
         /// <returns></returns>
-        public static IgnitionPointInput[] LoadIgnitionPointsFile(string path, IO.SimulationInput simulationInput, out bool success)
+        public static void LoadIgnitionPointsFile(List<IgnitionPointInput> ignitionPoints, string path, IO.SimulationInput simulationInput, out bool success)
         {
             success = false;
-            IgnitionPointInput[] result = null;
-            List<IgnitionPointInput> ignitionPoints= new List<IgnitionPointInput>();
+            ignitionPoints.Clear();
             
             bool fileExists = File.Exists(path);
             if (fileExists)
@@ -96,7 +95,6 @@ namespace PREACT.Wildfire
 
             if (ignitionPoints.Count > 0)
             {
-                result = ignitionPoints.ToArray();
                 Engine.Message(null, Engine.LogType.Log, " Ignition points data file " + path + " was found, " + ignitionPoints.Count + " valid data points were succesfully loaded.");
                 success = true;
             }
@@ -104,8 +102,6 @@ namespace PREACT.Wildfire
             {
                 Engine.Message(null, Engine.LogType.Warning, "Ignition points data file " + path + " was found but did not contain any valid data, fire and smoke spread will have to rely on other ignition methods (painted map).");
             }
-
-            return result;
         }
     }
 }

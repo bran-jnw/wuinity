@@ -291,6 +291,7 @@ namespace WUInity.UI
             LocalGPWData data = PopulationTools.CreateLocalGPWData(_input.Simulation.LowerLeftLatLon, _input.Simulation.DomainSize, paths[0], out success);
             if (success)
             {
+                PopulationTools.SaveLocalGPWData(Path.Combine(_input.RootFolder, _input.Simulation.Name + ".gpw"), data);
                 _wuinityManager.SimulationDomainVisualizer.SetAndDisplayLocalGPW(data, _workingData);
             }
             
@@ -320,8 +321,8 @@ namespace WUInity.UI
         }        
         void CreateAndSavePopulationMap(string[] paths)
         {
-            string filePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".pop");
-            PopulationMap pMap = PopulationTools.CreateAndSavePopulationMap(_workingData.SimulationInput, paths[0], _populationMapCellSize, filePath, out success);
+            string popFilePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".pop");
+            PopulationMap pMap = PopulationTools.CreateAndSavePopulationMap(_workingData.SimulationInput, paths[0], _populationMapCellSize, popFilePath, out success);
             if (success)
             {
                 _workingData.PopulationMap = pMap;
@@ -375,12 +376,8 @@ namespace WUInity.UI
         {
             _firstFileInSequence = paths[0];
             FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(_input.RootFolder);
-            FileBrowser.ShowLoadDialog(CreateAndSaveRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify filename of new routerDb", "Set");
-        }
-        void CreateAndSaveRouterDb(string[] paths)
-        {
-            PopulationTools.CreateAndSaveRouterDb(_firstFileInSequence, paths[0]);
+            string routerDbFilePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".routerdb");
+            PopulationTools.CreateAndSaveRouterDb(_firstFileInSequence, routerDbFilePath);
         }
         /*void OpenLoadRouterDb()
         {
@@ -402,8 +399,8 @@ namespace WUInity.UI
         }
         void RoadAccessCorrectPopulationMap(string[] paths)
         {
-            _workingData.SimulationInput.Data.UpdateData(_latitude, _longitude, out success);
-            if(success)
+            //_workingData.SimulationInput.Data.UpdateData(_latitude, _longitude, out success);
+            if(true) //success
             {
                 PopulationTools.RoadAccessCorrectPopulationMap(_workingData.PopulationMap, _workingData.SimulationInput.Data, paths[0], out success);
             }            

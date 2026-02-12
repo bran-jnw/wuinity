@@ -25,6 +25,7 @@ namespace PREACT.Wildfire
     /// </summary>
     public class AscFireImport : WildfireModule
     {
+        private float _startTime;
         private float _maxTimeOfArrival = float.MinValue;
         private int ncols, nrows, _activeCells;
         private double _xllcorner, _yllcorner, _cellsize, _NODATA_VALUE;
@@ -38,10 +39,11 @@ namespace PREACT.Wildfire
 
         public AscFireImport(Simulation simulation) : base(simulation)
         {
-            string TOAFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.TimeOfArrivalFile);
-            string ROSFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.RateOfSpreadFile);
-            string FIFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.FirelineIntensityFile);
-            string SDFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RootFolder, _simulation.Input.WildfireModule.AscImportInput.SpreadDirectionFile);
+            _startTime = (float)_simulation.Time.GetSimulationTime(_simulation.Input.WildfireModule.AscImportInput.StartDateTime);
+            string TOAFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.TimeOfArrivalFile);
+            string ROSFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.RateOfSpreadFile);
+            string FIFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.FirelineIntensityFile);
+            string SDFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.WildfireModule.AscImportInput.SpreadDirectionFile);
             ReadOutput(TOAFile, ROSFile, FIFile, SDFile);
 
             Vector2d ascUTM = new Vector2d(_xllcorner, _yllcorner);
@@ -51,12 +53,19 @@ namespace PREACT.Wildfire
             _newlyIgnitedCells = new List<Vector2int>();
             _sootInjection = new float[ncols * nrows];
 
-            Engine.Message(null, Engine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
+            Engine.Message(_simulation, Engine.LogType.Log, "Wildfire ASCII data offset by (x/y) meters: " + _originOffset.x + ", " + _originOffset.y);
         }
 
+        bool _first = true;
         public override void Step(float currentTime, float deltaTime)
         {
             bool updateVisuals = (int)currentTime % 60 == 0 ? true : false;
+
+            if (_first && currentTime >= _startTime)
+            {
+                _first = false;
+                Engine.Message(_simulation, Engine.LogType.Log, "AscFire started.");
+            }
 
             if (updateVisuals)
             {
@@ -65,8 +74,8 @@ namespace PREACT.Wildfire
                 {
                     for (int x = 0; x < ncols; x++)
                     {
-                        if (!_data[x, y].isActive && _simulation.SimulationTime > _data[x, y].TimeOfAArrival)
-                        {
+                        if (!_data[x, y].isActive && _simulation.SimulationTime > _data[x, y].TimeOfAArrival + _startTime)
+                        {                            
                             _data[x, y].isActive = true;
                             _newlyIgnitedCells.Add(new Vector2int(x, y));
                             _firelineIntensityData[index] = _data[x, y].FirelineIntensity;

@@ -30,7 +30,7 @@ namespace PREACT.Wildfire
 
         public Simulation Simulation { get => _simulation; }
 
-        public CellParticleHybrid(Simulation simulation, LandscapeData landscapeData, bool[] wuiArea, FuelModelInput fuelModelInput, InitialFuelMoistureLibrary initialFuelMoisture, IgnitionPointInput[] ignitionPoints) : base(simulation)
+        public CellParticleHybrid(Simulation simulation, LandscapeData landscapeData, bool[] wuiArea, FuelModelInput fuelModelInput, InitialFuelMoistureLibrary initialFuelMoisture, List<IgnitionPointInput> ignitionPoints) : base(simulation)
         {
             _landscapeData = landscapeData;
             _originOffset = landscapeData.OriginOffset;
@@ -74,8 +74,8 @@ namespace PREACT.Wildfire
 
             if(!inverseSpreadDirection)
             {
-                _ignitionPoints = new List<IgnitionPoint>(ignitionPoints.Length);
-                for (int i = 0; i < ignitionPoints.Length; ++i)
+                _ignitionPoints = new List<IgnitionPoint>(ignitionPoints.Count);
+                for (int i = 0; i < ignitionPoints.Count; ++i)
                 {
                     _ignitionPoints.Add(new IgnitionPoint(_simulation, ignitionPoints[i]));
                 }

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<PAMDataset>
+<Metadata>
+<MDI key="Creator">FlamMap6 Desktop Application</MDI>
+</Metadata>
+  <PAMRasterBand band="1">
+    <Description>Elevation</Description>
+    <UnitType>Meters</UnitType>
+  </PAMRasterBand>
+  <PAMRasterBand band="2">
+    <Description>Slope</Description>
+    <UnitType>Degrees</UnitType>
+  </PAMRasterBand>
+  <PAMRasterBand band="3">
+    <Description>Aspect</Description>
+    <UnitType>Degrees</UnitType>
+  </PAMRasterBand>
+  <PAMRasterBand band="4">
+    <Description>Fuel Model</Description>
+    <UnitType>Class</UnitType>
+  </PAMRasterBand>
+  <PAMRasterBand band="5">
+    <Description>Canopy Cover</Description>
+    <UnitType>Percent</UnitType>
+  </PAMRasterBand>
+</PAMDataset>

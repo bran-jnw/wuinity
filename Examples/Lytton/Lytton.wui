@@ -3,7 +3,7 @@ Name=Lytton
 LowerLeftLatLon=50.196615, -121.665957
 DomainSize=10000.0,10000.0
 DeltaTime=1.0
-StartDateTime=2021-06-16T12:00:00
+StartDateTime=2021-06-29T12:00:00
 EndDateTime=2021-07-02T00:00:00
 StopWhenEvacuated=false
 
@@ -16,8 +16,8 @@ WeatherFile=lytton_weather.csv
 DesiredLatLon=50.228701345102586, -121.54306201686576
 
 [Population]
-PopulationFile=population/big_population.csv
-CullOutsideGroups=false
+PopulationFile=population.csv
+CullOutsideGroups=true
 
 [Demographics]
 Name=one_car
@@ -38,8 +38,8 @@ UseTriggerBufferEvacuation=false
 TriggerBufferFile=fire/trigger_buffer.asc
 
 [Destination]
-Name=route85
-LatLon=39.5071781907873,-105.02231033756013
+Name=Highway12
+LatLon=50.276342, -121.598340
 Type=Exit
 MaxFlow=-1.0
 MaxVehicles=-1
@@ -48,8 +48,8 @@ Blocked=false
 Color=1.0,1.0,1.0
 
 [Destination]
-Name=route121
-LatLon=39.503415, -105.092083
+Name=Highway1
+LatLon=50.250494, -121.552022
 Type=Exit
 MaxFlow=-1.0
 MaxVehicles=-1
@@ -58,42 +58,25 @@ Blocked=false
 Color=1.0,0.0,0.0
 
 [EvacuationGroup]
-Name=route85_group
+Name=lytton
 Default=true
-Demographics=two_cars
-DestinationChoice=EvacGroupCDF
-ShapeFile=groups/east.shp
-ResponseCurves=slow, fast
-ResponseCurvesCDF=0.9, 1.0
-Destinations=route85, route121
-DestinationsCDF=0.9, 1.0
-Color=1.0,1.0,0.0
-
-[EvacuationGroup]
-Name=route121_group
 Demographics=one_car
-DestinationChoice=EvacGroupCDF
-ShapeFile=groups/west.shp
-ResponseCurves=slow, fast 
-ResponseCurvesCDF=0.1, 1.0
-Destinations=route121, route85
-DestinationsCDF=0.9, 1.0
+DestinationChoice=EvacGroupCDF 
+ShapeFile=groups/lytton_all.shp
+ResponseCurves=made_up
+ResponseCurvesCDF=1.0
+Destinations=Highway1, Highway12
+DestinationsCDF=0.2, 1.0
 Color=1.0,1.0,0.0
 
 [ResponseCurve]
-Name=slow
-0, 0
-12000, 0.0
-12500, 1.0
-
-[ResponseCurve]
-Name=fast
-0, 0
-450, 0.8
-900, 1.0
+Name=made_up
+TimeInput=Absolute
+2021-06-30T18:00:00, 0.0
+2021-06-30T22:00:00, 1.0
 
 [PedestrianModule]
-Enabled=false
+Enabled=true
 Module=MacroHouseholdSim
 
 [MacroHouseholdSim]
@@ -102,33 +85,40 @@ WalkingSpeedModifier=1.0
 WalkingDistanceModifier=1.0
 
 [TrafficModule]
-Enabled=false
+Enabled=true
 Module=SUMO      
 VisibilityAffectsSpeed=false  
 
 [SUMO]
-ConfigurationFile=sumo/rox.sumocfg
-UTMoffset=-491253.49,-4359238.56
+ConfigurationFile=sumo/osm.sumocfg
+UTMoffset=-585470.77,-5559583.08
 SmokeAlpha=0.4967
 SmokeBeta=-0.02910
 
 [WildfireModule]
 Enabled=true
-Module=CellParticleHybrid
-LcpFile=dogrib_landscape_UTM.tif
+Module=CellParticleHybrid #AscImport
+LcpFile=wildfire/lytton_edited2.tif
 GraphicalFireInputFile=fire/example.gfi
 
 [CellParticleHybrid]
-IgnitionPointsFile=ignitions.ign
+IgnitionPointsFile=lytton.ign
 UseRandomIgnitionMap=false
 RandomIgnitionPoints=0
 UseInitialIgnitionMap=false
 SpreadRateModel=CanadianFBP
-FBPLookupTableFile=fbp_lookup_table.csv
+FBPLookupTableFile=wildfire/fbp_lookup_table.csv
 StartDC=482
 StartDMC=58
-StartFFMC=89
-StartHourlyFFMC=94
+StartFFMC=96
+StartHourlyFFMC=96
+
+[AscImport]
+StartDateTime=2021-06-30T16:30:00
+TimeOfArrivalFile=wildfire/TOA.asc
+RateOfSpreadFile=wildfire/ROS.asc
+SpreadDirectionFile=wildfire/SD.asc
+FirelineIntensityFile=wildfire/FI.asc
 
 [TriggerBufferModule]
 Enabled=false

@@ -61,7 +61,7 @@ namespace WUInity.Visualization
 
         private void CheckIfNeedNewSimulationDomainPlane(PopulationMap data)
         {
-            if (DomainVisualizerUnity.NeedNewPlane(_simulationDomainSize, data._size, _simulationDomainLatLon, data._lowerLeftLatLong))
+            if (DomainVisualizerUnity.NeedNewPlane(_simulationDomainSize, data._size, _simulationDomainLatLon, data._lowerLeftLatLong) || _simulationDomainMeshRenderer == null)
             {
                 _simulationDomainMeshRenderer = DomainVisualizerUnity.CreateDomainPlane(_simulationDomainPlane, _simulationDomainMeshRenderer, data._size, Vector2d.zero);
             }
@@ -229,10 +229,12 @@ namespace WUInity.Visualization
             }            
 
             _goalMarkers = new GameObject[input.Evacuation.EvacuationDestinationInputs.Count];
+
             int index = 0;
-            foreach(EvacuationDestinationInput eDI in input.Evacuation.EvacuationDestinationInputs.Values)
+            foreach (EvacuationDestinationInput eDI in input.Evacuation.EvacuationDestinationInputs.Values)
             {
                 _goalMarkers[index] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
+                _goalMarkers[index].name = $"Destination {eDI.Name}";
                 Vector2d pos = input.Simulation.Data.GetSimulationPosition(eDI.LatLon);
 
                 float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);
@@ -240,6 +242,8 @@ namespace WUInity.Visualization
                 _goalMarkers[index].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
                 MeshRenderer mR = _goalMarkers[index].GetComponentInChildren<MeshRenderer>();
                 mR.material.color = eDI.Color.UnityColor();
+
+                ++index;
             }
         }
 
@@ -257,6 +261,7 @@ namespace WUInity.Visualization
             foreach (EvacuationDestination eDI in destinations)
             {
                 _goalMarkers[index] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
+                _goalMarkers[index].name = $"Destination {eDI.Name}";
                 Vector2d pos = input.Simulation.Data.GetSimulationPosition(eDI.LatLon);
 
                 float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);
@@ -264,20 +269,28 @@ namespace WUInity.Visualization
                 _goalMarkers[index].transform.position = new Vector3((float)pos.x, 0f, (float)pos.y);
                 MeshRenderer mR = _goalMarkers[index].GetComponentInChildren<MeshRenderer>();
                 mR.material.color = eDI.Color.UnityColor();
+
+                ++index;
             }
+        }
+
+        private void InternalSpawnDestinationMarker()
+        {
+
         }
 
         public void SpawnWildfireIgnitionMarkers(PREACTInput input, GameObject markerPrefab)
         {
             ClearIgnitionMarkers();
 
-            _ignitionMarkers = new GameObject[input.WildfireModule.Data.IgnitionPoints.Length];
+            _ignitionMarkers = new GameObject[input.WildfireModule.Data.IgnitionPoints.Count];
 
             int index = 0;
-            foreach (PREACT.Wildfire.IgnitionPointInput points  in input.WildfireModule.Data.IgnitionPoints)
+            foreach (PREACT.Wildfire.IgnitionPointInput point in input.WildfireModule.Data.IgnitionPoints)
             {
                 _ignitionMarkers[index] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
-                Vector2d pos = input.Simulation.Data.GetSimulationPosition(points.LatLon);
+                _ignitionMarkers[index].name = $"Ignition [{point.LatLon.x}/{point.LatLon.x}]";
+                Vector2d pos = input.Simulation.Data.GetSimulationPosition(point.LatLon);
 
                 float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);
                 _ignitionMarkers[index].transform.localScale = new Vector3(scale, 100f, scale);

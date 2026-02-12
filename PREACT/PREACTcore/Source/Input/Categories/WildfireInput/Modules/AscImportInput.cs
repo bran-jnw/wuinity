@@ -6,7 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.IO;
+using System;
 
 namespace PREACT.IO
 {
@@ -14,12 +14,11 @@ namespace PREACT.IO
     [System.Serializable]
     public class AscImportInput
     {
-        public string RootFolder = string.Empty;
+        public DateTime StartDateTime;
         public string TimeOfArrivalFile = string.Empty;
         public string RateOfSpreadFile = string.Empty;
         public string SpreadDirectionFile = string.Empty;
         public string FirelineIntensityFile = string.Empty;
-        public string WeatherStreamFile = string.Empty;
 
         public AscImportInput()
         {
@@ -34,17 +33,21 @@ namespace PREACT.IO
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            //could be empty
-            nameOfInput = nameof(RootFolder);
+            //critical
+            nameOfInput = nameof(StartDateTime);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                newInput.RootFolder = userInput;
+                 success = DateTime.TryParse(userInput, out newInput.StartDateTime);
             }
             else
             {
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            rootFolder = Path.Combine(rootFolder, newInput.RootFolder);
+            if (!success)
+            {
+                return newInput;
+            }
 
             //critical
             nameOfInput = nameof(TimeOfArrivalFile);
@@ -103,18 +106,6 @@ namespace PREACT.IO
             {
                 newInput.FirelineIntensityFile = userInput;
                 PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder,out success);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-
-            //not critical
-            nameOfInput = nameof(WeatherStreamFile);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                newInput.WeatherStreamFile = userInput;
-                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
             }
             else
             {

@@ -16,7 +16,7 @@ namespace PREACT.IO
     {
         private LandscapeData _lcpData;
         private FuelModelInput _fuelModelsData;
-        private IgnitionPointInput[] _ignitionPoints;
+        private List<IgnitionPointInput> _ignitionPoints = new List<IgnitionPointInput>();
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
         private CanadianFBPLookupTable _canadianFBPLookupTable = new CanadianFBPLookupTable();
         private SpreadRateLookUpTable _constantLookupTable = new SpreadRateLookUpTable();
@@ -29,7 +29,7 @@ namespace PREACT.IO
                
         public LandscapeData LCPData { get => _lcpData; }        
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
-        public IgnitionPointInput[] IgnitionPoints { get => _ignitionPoints; }       
+        public List<IgnitionPointInput> IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }   
         public CanadianFBPLookupTable CanadianFBPLookupTable { get => _canadianFBPLookupTable; }
         public SpreadRateLookUpTable ConstantLookupTable { get => _constantLookupTable; }
@@ -159,7 +159,7 @@ namespace PREACT.IO
 
         public void LoadIgnitionPoints(WildfireModuleInput fireInput, SimulationInput simulationInput, string filePath, bool updateInput, out bool success)
         {
-            _ignitionPoints = IgnitionPointInput.LoadIgnitionPointsFile(filePath, simulationInput, out success);
+            IgnitionPointInput.LoadIgnitionPointsFile(_ignitionPoints, filePath, simulationInput, out success);
             if (success && updateInput)
             {
                 fireInput.FireCellInput.IgnitionPointsFile = Path.GetFileName(filePath);
