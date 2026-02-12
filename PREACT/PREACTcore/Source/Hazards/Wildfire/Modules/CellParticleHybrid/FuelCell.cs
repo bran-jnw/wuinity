@@ -12,13 +12,14 @@ namespace PREACT.Wildfire
         public LandscapeCellData _cellData;
         public float _maxROS;
         private double _cellSize;
-        public int _linearIndex;
+        private int _linearIndex;
         private CellParticleHybrid _owner;
         private bool _rateOfSpreadIsSet;
 
         SpreadModel _spreadModel;
 
         public Vector2int Index { get => _index; }
+        public int LinearIndex { get => _linearIndex; }
 
         public Vector3d IgnitionPoint;
         private float _timeOfArrival;
@@ -102,7 +103,7 @@ namespace PREACT.Wildfire
             }
 
             _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
-            _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFirelineIntensity(), (float)_spreadModel.GetMaxSpreadRate());
+            _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFireIntensity(), (float)_spreadModel.GetMaxSpreadRate(), (float)_spreadModel.GetDirectionOfMaxSpread());
             _rateOfSpreadIsSet = true;
         }
 

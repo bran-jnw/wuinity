@@ -32,7 +32,7 @@
         /// Returns the fire intensity [kW/m].
         /// </summary>
         /// <returns></returns>
-        public abstract double GetFirelineIntensity();
+        public abstract double GetFireIntensity();
         
         /// <summary>
         /// Returns if a fuel that can burn is present.

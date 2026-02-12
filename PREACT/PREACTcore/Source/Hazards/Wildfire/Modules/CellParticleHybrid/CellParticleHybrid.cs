@@ -20,8 +20,9 @@ namespace PREACT.Wildfire
         private Queue<FireParticle> _aliveParticles;
         private int _xDim, _yDim;
         private FuelCell[,] _fuelCells;
-        private float[] _fireLineIntensityData;
+        private float[] _maxFireIntensityData;
         private float[,] _maxRosData;
+        private float[,] _maxRosDirectionData;
         private float[] _timeOfArrivalData;
         private float[] _sootInjection;
         private List<Vector2int> _ignitedCellIndices;
@@ -40,7 +41,7 @@ namespace PREACT.Wildfire
             _xDim = _landscapeData.GetCellCountX();
             _yDim = _landscapeData.GetCellCountY();
 
-            _fireLineIntensityData = new float[_xDim * _yDim];
+            _maxFireIntensityData = new float[_xDim * _yDim];
             _maxRosData = new float[_xDim, _yDim];
             _timeOfArrivalData = new float[_xDim * _yDim];
 
@@ -152,10 +153,14 @@ namespace PREACT.Wildfire
             return hasNonWUINeighbors;
         }
 
-        public void UpdateCellData(Vector2int index, int linearIndex, float firelineIntensity, float rateOfSpread)
+        public void UpdateCellData(Vector2int index, int linearIndex, float firelineIntensity, float rateOfSpread, float rateOfSpreadDirection)
         {
-            _fireLineIntensityData[linearIndex] = firelineIntensity;
-            _maxRosData[index.x, index.y] = Mathf.Max(rateOfSpread, _maxRosData[index.x, index.y]);            
+            _maxFireIntensityData[linearIndex] = Mathf.Max(firelineIntensity, _maxFireIntensityData[linearIndex]);
+            if (_maxRosData[index.x, index.y] > Mathf.Max(rateOfSpread))
+            {
+                _maxRosData[index.x, index.y] = rateOfSpread;
+                _maxRosDirectionData[index.x, index.y] = rateOfSpreadDirection;
+            }        
         }
 
         public void SetTimeOfArrival(int linearIndex, float timeOfArrival)
@@ -272,7 +277,7 @@ namespace PREACT.Wildfire
 
         public override float[] GetFireLineIntensityData()
         {
-            return _fireLineIntensityData;
+            return _maxFireIntensityData;
         }
 
         public override float[] GetFuelModelNumberData()
@@ -408,7 +413,7 @@ namespace PREACT.Wildfire
             {
                 using (OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff"))
                 {
-                    OSGeo.GDAL.Dataset output = driver.Create(filePath, _xDim, _yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
+                    OSGeo.GDAL.Dataset output = driver.Create(filePath, _xDim, _yDim, 4, OSGeo.GDAL.DataType.GDT_Float32, null);
 
                     double leftX = _simulation.UTMOrigin.x + _originOffset.x;
                     double lowerLeftY = _simulation.UTMOrigin.y + _originOffset.y;
@@ -421,10 +426,10 @@ namespace PREACT.Wildfire
                     reference.SetUTM(_simulation.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                     output.SetSpatialRef(reference);
 
-                    //heat map
+                    //time of arrival
                     OSGeo.GDAL.Band band = output.GetRasterBand(1); //starts from 1, not zero                
                     band.SetNoDataValue(-9999f);
-                    band.SetDescription($"Time of arrival [hours] from ignition.");
+                    band.SetDescription($"Time of arrival [hours] from initial ignition.");
                     float[] row = new float[_xDim];
                     for (int y = 0; y < _yDim; ++y)
                     {
@@ -440,41 +445,43 @@ namespace PREACT.Wildfire
                     }
                     band.FlushCache();
 
-                    // average level of service
-                    /*band = output.GetRasterBand(2);
+                    // spread rate
+                    band = output.GetRasterBand(3);
                     band.SetNoDataValue(-9999f);
-                    band.SetDescription("Average level of service (ratio of actual speed and speed limit.)");
+                    band.SetDescription("Max rate of spread [m/s].");
                     for (int y = 0; y < _yDim; ++y)
                     {
-                        for (int x = 0; x < xDim; ++x)
+                        for (int x = 0; x < _xDim; ++x)
                         {
-                            row[x] = _accumulatedLevelOfService[x, y] / _carCount[x, y];
+                            row[x] = _maxRosData[x, y]; 
                             if (row[x] == 0f)
                             {
                                 row[x] = -9999f;
                             }
                         }
-                        band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                        band.WriteRaster(0, y, _xDim, 1, row, _xDim, 1, 0, 0);
                     }
                     band.FlushCache();
 
-                    // average waiting time
+                    // fire intensity
                     band = output.GetRasterBand(3);
                     band.SetNoDataValue(-9999f);
-                    band.SetDescription("Average waiting time [s].");
-                    for (int y = 0; y < yDim; ++y)
+                    band.SetDescription("Max rate of spread direction [degree azimuth, counter clock-wise from North].)");
+                    for (int y = 0; y < _yDim; ++y)
                     {
-                        for (int x = 0; x < xDim; ++x)
+                        for (int x = 0; x < _xDim; ++x)
                         {
-                            row[x] = _accumulatedWatingTime[x, y] / _carCount[x, y];
+                            row[x] = _maxFireIntensityData[_fuelCells[x, y].LinearIndex];
                             if (row[x] == 0f)
                             {
                                 row[x] = -9999f;
                             }
                         }
-                        band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                        band.WriteRaster(0, y, _xDim, 1, row, _xDim, 1, 0, 0);
                     }
-                    band.FlushCache();*/
+                    band.FlushCache();                    
+
+                    //close
                     output.FlushCache();
                     //reminder, output.Close() crashes violently, do not use or investigate further why...
                 }

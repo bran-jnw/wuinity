@@ -25,7 +25,7 @@ namespace PREACT.Wildfire
             return 0;
         }
 
-        public override double GetFirelineIntensity()
+        public override double GetFireIntensity()
         {
             return 1000;
         }

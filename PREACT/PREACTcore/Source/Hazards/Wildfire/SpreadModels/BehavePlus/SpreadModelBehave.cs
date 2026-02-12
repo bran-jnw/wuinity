@@ -110,7 +110,7 @@ namespace PREACT.Wildfire
             return rosDirection;
         }
 
-        public override double GetFirelineIntensity()
+        public override double GetFireIntensity()
         {
             return _firelineIntensity;
         }

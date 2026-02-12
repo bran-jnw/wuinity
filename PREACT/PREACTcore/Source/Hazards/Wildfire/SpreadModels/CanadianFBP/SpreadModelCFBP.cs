@@ -196,7 +196,7 @@ namespace PREACT.Wildfire
             return _hasFuelLoad;
         }
 
-        public override double GetFirelineIntensity()
+        public override double GetFireIntensity()
         {
             return _outputs.SurfaceFireIntensity;
         }
