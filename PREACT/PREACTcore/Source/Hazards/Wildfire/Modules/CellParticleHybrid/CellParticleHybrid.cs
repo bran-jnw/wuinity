@@ -7,6 +7,8 @@
 
 using System.Collections.Generic;
 using PREACT.Math;
+using System.IO;
+using System;
 
 namespace PREACT.Wildfire
 {
@@ -27,6 +29,7 @@ namespace PREACT.Wildfire
         private LandscapeData _landscapeData;
         private BehaveCore.FuelModels _fuelModels;
         private List<IgnitionPoint> _ignitionPoints;
+        private float _initialIgnition = -1;
 
         public Simulation Simulation { get => _simulation; }
 
@@ -319,7 +322,6 @@ namespace PREACT.Wildfire
             {
                 return;
             }
-
             _internalDeltaTime = deltaTime;
 
             //check ignitions
@@ -331,6 +333,11 @@ namespace PREACT.Wildfire
                     {
                         IgniteAtLatLon(_ignitionPoints[i].LatLon, currentTime);
                         _ignitionPoints.Remove(_ignitionPoints[i]);
+
+                        if(_initialIgnition < 0)
+                        {
+                            _initialIgnition = currentTime;
+                        }
                     }
                 }
             }
@@ -368,6 +375,8 @@ namespace PREACT.Wildfire
 
         public override void Stop()
         {
+            string filePath = Path.Combine(_simulation.Engine.OutputFolder, $"{_simulation.Input.Simulation.Name}_wildfire.tif");
+            SaveOutputMaps(filePath);
             /*float[,] triggerBuffer = new float[_xDim, _yDim];
 
             //collect time of arrival, make sure to update if any cells were ignited last time step
@@ -390,6 +399,91 @@ namespace PREACT.Wildfire
         {
             offset = _originOffset;
             size = new Vector2d(_landscapeData.GetLandscapeSizeX(), _landscapeData.GetLandscapeSizeY());
+        }
+
+        private void SaveOutputMaps(string filePath)
+        {
+            //usage map as geotiff
+            try
+            {
+                using (OSGeo.GDAL.Driver driver = OSGeo.GDAL.Gdal.GetDriverByName("GTiff"))
+                {
+                    OSGeo.GDAL.Dataset output = driver.Create(filePath, _xDim, _yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
+
+                    double leftX = _simulation.UTMOrigin.x + _originOffset.x;
+                    double lowerLeftY = _simulation.UTMOrigin.y + _originOffset.y;
+                    double[] geoTransform = new double[] { leftX, GetCellSizeX(), 0.0, lowerLeftY, 0.0, GetCellSizeY() };
+                    output.SetGeoTransform(geoTransform);
+
+                    OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
+                    reference.SetProjCS("UTM " + _simulation.UTMData.Zona + " (WGS84)");
+                    reference.SetWellKnownGeogCS("WGS84");
+                    reference.SetUTM(_simulation.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                    output.SetSpatialRef(reference);
+
+                    //heat map
+                    OSGeo.GDAL.Band band = output.GetRasterBand(1); //starts from 1, not zero                
+                    band.SetNoDataValue(-9999f);
+                    band.SetDescription($"Time of arrival [hours] from ignition.");
+                    float[] row = new float[_xDim];
+                    for (int y = 0; y < _yDim; ++y)
+                    {
+                        for (int x = 0; x < _xDim; ++x)
+                        {
+                            row[x] = (_fuelCells[x, y].TimeOfArrival - _initialIgnition) / 3600; //minutes
+                            if (row[x] == 0f)
+                            {
+                                row[x] = -9999f;
+                            }
+                        }
+                        band.WriteRaster(0, y, _xDim, 1, row, _xDim, 1, 0, 0);
+                    }
+                    band.FlushCache();
+
+                    // average level of service
+                    /*band = output.GetRasterBand(2);
+                    band.SetNoDataValue(-9999f);
+                    band.SetDescription("Average level of service (ratio of actual speed and speed limit.)");
+                    for (int y = 0; y < _yDim; ++y)
+                    {
+                        for (int x = 0; x < xDim; ++x)
+                        {
+                            row[x] = _accumulatedLevelOfService[x, y] / _carCount[x, y];
+                            if (row[x] == 0f)
+                            {
+                                row[x] = -9999f;
+                            }
+                        }
+                        band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                    }
+                    band.FlushCache();
+
+                    // average waiting time
+                    band = output.GetRasterBand(3);
+                    band.SetNoDataValue(-9999f);
+                    band.SetDescription("Average waiting time [s].");
+                    for (int y = 0; y < yDim; ++y)
+                    {
+                        for (int x = 0; x < xDim; ++x)
+                        {
+                            row[x] = _accumulatedWatingTime[x, y] / _carCount[x, y];
+                            if (row[x] == 0f)
+                            {
+                                row[x] = -9999f;
+                            }
+                        }
+                        band.WriteRaster(0, y, xDim, 1, row, xDim, 1, 0, 0);
+                    }
+                    band.FlushCache();*/
+                    output.FlushCache();
+                    //reminder, output.Close() crashes violently, do not use or investigate further why...
+                }
+
+            }
+            catch (Exception e)
+            {
+                Engine.Message(null, Engine.LogType.Warning, e.Message);
+            }
         }
     }    
 }

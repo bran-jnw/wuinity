@@ -4,7 +4,7 @@ LowerLeftLatLon=50.196615, -121.665957
 DomainSize=10000.0,10000.0
 DeltaTime=1.0
 StartDateTime=2021-06-29T12:00:00
-EndDateTime=2021-07-02T00:00:00
+EndDateTime=2021-07-05T00:00:00
 StopWhenEvacuated=false
 
 [Map]
