@@ -19,7 +19,7 @@ namespace PREACT
             _simulation = simulation;
         }
 
-        public abstract void Step(float currentTime, float deltaTime);
+        public abstract void Step(float simulationTime, float deltaTime);
         public abstract bool IsSimulationDone();
         public abstract void Stop();
         public Vector2d GetOriginOffset()

@@ -43,6 +43,7 @@ namespace PREACT.Wildfire
 
             _maxFireIntensityData = new float[_xDim * _yDim];
             _maxRosData = new float[_xDim, _yDim];
+            _maxRosDirectionData = new float[_xDim, _yDim];
             _timeOfArrivalData = new float[_xDim * _yDim];
 
             bool[,] wuiArea2D = GetWUIArea2D(wuiArea, _xDim, _yDim);
@@ -156,7 +157,7 @@ namespace PREACT.Wildfire
         public void UpdateCellData(Vector2int index, int linearIndex, float firelineIntensity, float rateOfSpread, float rateOfSpreadDirection)
         {
             _maxFireIntensityData[linearIndex] = Mathf.Max(firelineIntensity, _maxFireIntensityData[linearIndex]);
-            if (_maxRosData[index.x, index.y] > Mathf.Max(rateOfSpread))
+            if (rateOfSpread > _maxRosData[index.x, index.y])
             {
                 _maxRosData[index.x, index.y] = rateOfSpread;
                 _maxRosDirectionData[index.x, index.y] = rateOfSpreadDirection;
@@ -321,7 +322,7 @@ namespace PREACT.Wildfire
             _aliveParticles.Enqueue(particle);
         }
 
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(float simulationTime, float deltaTime)
         {
             if(_done)
             {
@@ -334,14 +335,14 @@ namespace PREACT.Wildfire
             {
                 for (int i = 0; i < _ignitionPoints.Count; ++i)
                 {
-                    if (_ignitionPoints[i].IgnitionTime <= currentTime)
+                    if (_ignitionPoints[i].IgnitionTime <= simulationTime)
                     {
-                        IgniteAtLatLon(_ignitionPoints[i].LatLon, currentTime);
+                        IgniteAtLatLon(_ignitionPoints[i].LatLon, simulationTime);
                         _ignitionPoints.Remove(_ignitionPoints[i]);
 
                         if(_initialIgnition < 0)
                         {
-                            _initialIgnition = currentTime;
+                            _initialIgnition = simulationTime;
                         }
                     }
                 }
@@ -352,7 +353,7 @@ namespace PREACT.Wildfire
             while (_aliveParticles.Count > 0)
             {
                 FireParticle f = _aliveParticles.Dequeue();
-                f.Step(currentTime, deltaTime, this);
+                f.Step(simulationTime, deltaTime, this);
                 if(!f.Dead)
                 {
                     stillAliveParticles.Enqueue(f);
@@ -363,7 +364,7 @@ namespace PREACT.Wildfire
             if (_aliveParticles.Count == 0 && _ignitionPoints.Count == 0)
             {
                 _done = true;
-                Engine.Message(null, Engine.LogType.Log, "No more active fire particles left, stopping fire spread simulation after " + (currentTime + deltaTime) + " seconds.");
+                Engine.Message(null, Engine.LogType.Log, "No more active fire particles left, stopping fire spread simulation after " + (simulationTime + deltaTime) + " seconds.");
             }
         }
 
@@ -380,7 +381,7 @@ namespace PREACT.Wildfire
 
         public override void Stop()
         {
-            string filePath = Path.Combine(_simulation.Engine.OutputFolder, $"{_simulation.Input.Simulation.Name}_wildfire.tif");
+            string filePath = Path.Combine(_simulation.Engine.OutputFolder, $"{_simulation.Input.Simulation.Name}_wildfire_{_simulation.SimulationIndex}.tif");
             SaveOutputMaps(filePath);
             /*float[,] triggerBuffer = new float[_xDim, _yDim];
 
@@ -435,8 +436,8 @@ namespace PREACT.Wildfire
                     {
                         for (int x = 0; x < _xDim; ++x)
                         {
-                            row[x] = (_fuelCells[x, y].TimeOfArrival - _initialIgnition) / 3600; //minutes
-                            if (row[x] == 0f)
+                            row[x] = (_fuelCells[x, y].TimeOfArrival - _initialIgnition) / 3600; //hours
+                            if (row[x] <= 0f)
                             {
                                 row[x] = -9999f;
                             }
@@ -446,7 +447,7 @@ namespace PREACT.Wildfire
                     band.FlushCache();
 
                     // spread rate
-                    band = output.GetRasterBand(3);
+                    band = output.GetRasterBand(2);
                     band.SetNoDataValue(-9999f);
                     band.SetDescription("Max rate of spread [m/s].");
                     for (int y = 0; y < _yDim; ++y)
@@ -454,7 +455,7 @@ namespace PREACT.Wildfire
                         for (int x = 0; x < _xDim; ++x)
                         {
                             row[x] = _maxRosData[x, y]; 
-                            if (row[x] == 0f)
+                            if (row[x] <= 0f)
                             {
                                 row[x] = -9999f;
                             }
@@ -463,7 +464,7 @@ namespace PREACT.Wildfire
                     }
                     band.FlushCache();
 
-                    // fire intensity
+                    // max spread rate direction
                     band = output.GetRasterBand(3);
                     band.SetNoDataValue(-9999f);
                     band.SetDescription("Max rate of spread direction [degree azimuth, counter clock-wise from North].)");
@@ -471,15 +472,33 @@ namespace PREACT.Wildfire
                     {
                         for (int x = 0; x < _xDim; ++x)
                         {
-                            row[x] = _maxFireIntensityData[_fuelCells[x, y].LinearIndex];
-                            if (row[x] == 0f)
+                            row[x] = _maxRosDirectionData[x, y];
+                            if (row[x] <= 0f)
                             {
                                 row[x] = -9999f;
                             }
                         }
                         band.WriteRaster(0, y, _xDim, 1, row, _xDim, 1, 0, 0);
                     }
-                    band.FlushCache();                    
+                    band.FlushCache();
+
+                    // fire intenisty
+                    band = output.GetRasterBand(4);
+                    band.SetNoDataValue(-9999f);
+                    band.SetDescription("Fire intenisty [kW/m].)");
+                    for (int y = 0; y < _yDim; ++y)
+                    {
+                        for (int x = 0; x < _xDim; ++x)
+                        {
+                            row[x] = _maxFireIntensityData[_fuelCells[x, y].LinearIndex];
+                            if (row[x] <= 0f)
+                            {
+                                row[x] = -9999f;
+                            }
+                        }
+                        band.WriteRaster(0, y, _xDim, 1, row, _xDim, 1, 0, 0);
+                    }
+                    band.FlushCache();
 
                     //close
                     output.FlushCache();
