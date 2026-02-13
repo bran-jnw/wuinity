@@ -59,5 +59,11 @@ namespace PREACT.IO
             LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmData.ZoneLetter);
             return new Vector2d(wgs84.Lat, wgs84.Lng);
         }
+
+        public Vector2d GetWGS84FromUTMPosition(Vector2d pos)
+        {
+            LatLngUTMConverter.LatLng wgs84 = LatLngUTMConverter.WGS84.convertUtmToLatLng(pos.x, pos.y, _utmData.ZoneNumber, _utmData.ZoneLetter);
+            return new Vector2d(wgs84.Lat, wgs84.Lng);
+        }
     }
 }

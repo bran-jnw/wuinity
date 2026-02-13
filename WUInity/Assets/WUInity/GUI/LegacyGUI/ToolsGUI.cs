@@ -32,7 +32,7 @@ namespace WUInity.UI
 
         void ToolsMenu()
         {
-            PopulationInput popIn = _input.Population;
+            //PopulationInput popIn = _input.Population;
             if (populationMenuDirty)
             {
                 populationMenuDirty = false;
@@ -215,7 +215,20 @@ namespace WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population tools");
             ++buttonIndex;
-            if(_workingData.HavePopulationMap && _workingData.PopulationMapCorrectedForRoadAccess)
+
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min/max household size");
+            ++buttonIndex;
+            _minHouseholdSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _minHouseholdSize);
+            _maxHouseholdSize = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _maxHouseholdSize);
+            ++buttonIndex;
+
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population from WorldPop"))
+            {
+                OpenCreatePopulationFromWorldPop();
+            }
+            ++buttonIndex;            
+
+            if (_workingData.HavePopulationMap && _workingData.PopulationMapCorrectedForRoadAccess)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min/max household size");
                 ++buttonIndex;
@@ -453,6 +466,49 @@ namespace WUInity.UI
         {
             PopulationTools.SavePopulationMask(_workingData.PopulationMap, paths[0]);
         }
-        
+
+        //create population from world pop raster 
+        private void OpenCreatePopulationFromWorldPop()
+        {
+            FileBrowser.SetFilters(false, geoTiffFilter);
+            string initialPath = Path.GetDirectoryName(_input.RootFolder);
+            FileBrowser.ShowLoadDialog(SaveGeoTiffLocation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select WorldPop GeoTiff", "Load");
+        }
+        string _worldPopFilePath;
+        string _routerDbFilePath;
+        private void SaveGeoTiffLocation(string[] paths)
+        {
+            _worldPopFilePath = paths[0];
+            OpenSelectRouterDb();
+        }
+        private void OpenSelectRouterDb()
+        {
+            FileBrowser.SetFilters(false, routerDbFilter);
+            string initialPath = Path.GetDirectoryName(_worldPopFilePath);
+            FileBrowser.ShowLoadDialog(SaveRouterDbFilePath, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select RouterDb", "Load");
+        }
+        private void SaveRouterDbFilePath(string[] paths)
+        {
+            _routerDbFilePath = paths[0];
+            OpenSavePopulation();
+        }
+        private void OpenSavePopulation()
+        {
+            FileBrowser.SetFilters(false, csvFilter);
+            string initialPath = Path.GetDirectoryName(_worldPopFilePath);
+            FileBrowser.ShowSaveDialog(CreatePopulationFromWorldPop, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify population file name", "Save");
+        }
+        private void CreatePopulationFromWorldPop(string[] paths) //string[] paths
+        {
+            if (_input == null)
+            {
+                _workingData.SimulationInput.Data.UpdateData(_latitude, _longitude, out success);
+                PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _workingData.SimulationInput.Data, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
+            }
+            else
+            {
+                PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _input.Simulation.Data, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
+            }
+        }
     }
 }

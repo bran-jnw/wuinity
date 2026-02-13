@@ -195,6 +195,25 @@ namespace PREACT.Tools
             }                     
         }
 
+        public static void CreatePopulationFromWorldPop(string minHouseholdSize, string maxHouseholdSize, SimulationData simulationData, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
+        {
+            success = false;
+
+            int min, max;
+            if (int.TryParse(minHouseholdSize, out min) && int.TryParse(maxHouseholdSize, out max) && min <= max)
+            {
+                Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
+                if(success)
+                {
+                    PopulationMap.CreatePopulation(worldPopFilePath, outputFilePath, simulationData, routerDb, min, max, out success);
+                }                
+            }
+            else
+            {
+                Engine.Message(null, Engine.LogType.Warning, "Could not parse min and/or max household size.");
+            }
+        }
+
         public static bool CreateAndSaveRouterDb(string osmInputFile, string outputFile)
         {
             return RoutingData.CreateAndSaveRouterDb(osmInputFile, outputFile);

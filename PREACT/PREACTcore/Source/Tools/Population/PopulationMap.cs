@@ -437,6 +437,100 @@ namespace PREACT.Population
             }
         }
 
+        public static void CreatePopulation(string worldPopFilePath, string outputFilePath, SimulationData simulationData, Itinero.RouterDb routerDb, int minHouseholdSize, int maxHouseholdSize, out bool success)
+        {
+            success = false;
+
+            int xDim, yDim;
+            double xSize, ySize, westUtm, eastUtm, southUtm, northUtm;
+            float[] populationNumbers;
+
+            string wkt;
+            OSGeo.OSR.SpatialReference srs;
+
+
+            using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(worldPopFilePath, OSGeo.GDAL.Access.GA_ReadOnly))
+            {
+                wkt = tif.GetProjection();
+                srs = new OSGeo.OSR.SpatialReference(wkt);
+
+                xDim = tif.RasterXSize;
+                yDim = tif.RasterYSize;            
+
+                //https://gdal.org/en/stable/tutorials/geotransforms_tut.html
+                //assume these contain UTM coordinates
+                double[] transform = new double[6];
+                tif.GetGeoTransform(transform);
+                westUtm = transform[0];
+                eastUtm = transform[0] + transform[1] * tif.RasterXSize;
+                northUtm = transform[3];
+                southUtm = transform[3] + transform[5] * tif.RasterYSize; //negative cell size when north up
+                xSize = transform[1];
+                ySize = -transform[5];
+
+                OSGeo.GDAL.Band band = tif.GetRasterBand(1);
+                populationNumbers = new float[xDim * yDim];
+                band.ReadRaster(0, 0, xDim, yDim, populationNumbers, xDim, yDim, 0, 0);
+            }
+
+            Itinero.Router router = new Itinero.Router(routerDb);
+
+            using (StreamWriter sW = new StreamWriter(outputFilePath))
+            {
+                sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");
+
+                int totalPeople = 0;
+                int totalPeopleOnGrid = 0;
+                for (int i = 0; i < populationNumbers.Length; i++)
+                {
+                    int rasterPopCount = (int)(populationNumbers[i] + 0.5f);
+                    if (rasterPopCount > 1)
+                    {
+                        totalPeople += rasterPopCount;
+
+                        int yIndex = i / xDim;
+                        int xIndex = i - yIndex * xDim;
+                        Vector2d rasterCenter = new Vector2d((xIndex + 0.5f) * xSize + westUtm, (yIndex + 0.5) * ySize + southUtm);
+                        Vector2d latLon = simulationData.GetWGS84FromUTMPosition(rasterCenter);
+
+                        Itinero.RouterPoint latLonOnNetwork = Traffic.RouteCreator.GetValidRouterPoint(router, latLon, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), (float)xSize);
+                        if (latLonOnNetwork != null)
+                        {
+                            totalPeopleOnGrid += rasterPopCount;
+
+                            int peopleWithoutHouseHold = rasterPopCount;
+                            List<int> householdCounts = new List<int>();
+                            while (peopleWithoutHouseHold > 0)
+                            {
+                                int peopleInThisHousehold = Random.Range(minHouseholdSize, maxHouseholdSize + 1);
+                                if (peopleInThisHousehold > peopleWithoutHouseHold)
+                                {
+                                    peopleInThisHousehold = peopleWithoutHouseHold;
+                                }
+                                householdCounts.Add(peopleInThisHousehold);
+                                peopleWithoutHouseHold -= peopleInThisHousehold;
+                            }
+
+                            for (int j = 0; j < householdCounts.Count; ++j)
+                            {
+                                Vector2d householdStartPos = rasterCenter;
+                                householdStartPos.x += xSize * Random.Range(-0.5f, 0.5f);
+                                householdStartPos.y += ySize * Random.Range(-0.5f, 0.5f);
+                                Vector2d householdStartLatLon = simulationData.GetWGS84FromUTMPosition(householdStartPos);
+
+                                sW.WriteLine(householdStartLatLon.x + "," + householdStartLatLon.y + "," + latLonOnNetwork.Latitude + "," + latLonOnNetwork.Longitude + "," + householdCounts[j]);
+                            }
+                        }                        
+                    }
+                }
+
+                Engine.Message(null, Engine.LogType.Log, $"Number of people found in raster: {totalPeople}. Number of people with access to road network: {totalPeopleOnGrid}.");
+
+                success = true;
+                Engine.Message(null, Engine.LogType.Log, "Generated and saved population to file " + outputFilePath);
+            }
+        }
+
         public void CreatePopulation(int minHouseholdSize, int maxHouseholdSize, SimulationData simulationData, string outputFilePath, out bool success)
         {
             success = false;

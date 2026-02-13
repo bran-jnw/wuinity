@@ -174,7 +174,7 @@ namespace PREACT.Wildfire
 
 		private void ReadGeoTIFF(string filePath)
 		{
-            OSGeo.GDAL.Gdal.AllRegister();
+            //OSGeo.GDAL.Gdal.AllRegister();
             using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(filePath, OSGeo.GDAL.Access.GA_ReadOnly))
             {
                 Header.numeast = tif.RasterXSize;

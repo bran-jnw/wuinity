@@ -13,7 +13,7 @@ namespace WUInity.UI
 
         string[] routerDbFilter = new string[] { ".routerdb" };
         string[] routeCollectionFilter = new string[] { ".rc" };
-        string[] osmFilter = new string[] { ".pbf", ".osm" };
+        string[] osmFilter = new string[] { ".pbf", ".osm", ".xml" };
         string[] maskFilter = new string[] { ".pmk" };
         string[] csvFilter = new string[] { ".csv" };
 

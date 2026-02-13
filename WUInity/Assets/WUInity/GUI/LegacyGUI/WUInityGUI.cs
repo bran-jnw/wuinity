@@ -68,6 +68,7 @@ namespace WUInity.UI
 
         string[] wuiFilter = new string[] { ".wui" };
         string[] lcpFilter = new string[] { ".lcp", ".tif", ".tiff" };
+        string[] geoTiffFilter = new string[] { ".tif", ".tiff" };
         string[] fuelModelsFilter = new string[] { ".fuel" };
         
         string[] populationMapFilter = new string[] { ".pop" };

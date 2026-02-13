@@ -16,7 +16,7 @@ WeatherFile=lytton_weather.csv
 DesiredLatLon=50.228701345102586, -121.54306201686576
 
 [Population]
-PopulationFile=population.csv
+PopulationFile=population/worldpop_population_clipped.csv
 CullOutsideGroups=true
 
 [Demographics]
@@ -49,7 +49,7 @@ Color=1.0,1.0,1.0
 
 [Destination]
 Name=Highway1
-LatLon=50.250494, -121.552022
+LatLon=50.255091, -121.448254
 Type=Exit
 MaxFlow=-1.0
 MaxVehicles=-1
@@ -72,8 +72,8 @@ Color=1.0,1.0,0.0
 [ResponseCurve]
 Name=made_up
 TimeInput=Absolute
-2021-06-30T18:00:00, 0.0
-2021-06-30T22:00:00, 1.0
+2021-06-30T17:30:00, 0.0
+2021-06-30T20:00:00, 1.0
 
 [PedestrianModule]
 Enabled=true
