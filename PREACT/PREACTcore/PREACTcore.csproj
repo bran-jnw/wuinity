@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Source\Hazards\Dispersion\Modules\GaussianReleaseGPU - Copy\**" />
+    <EmbeddedResource Remove="Source\Hazards\Dispersion\Modules\GaussianReleaseGPU - Copy\**" />
+    <None Remove="Source\Hazards\Dispersion\Modules\GaussianReleaseGPU - Copy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Source\Evacuation\Traffic\Modules\SUMO\Build_notes.txt" />
     <Content Include="Source\Evacuation\Traffic\Modules\SUMO\version_info.txt" />
   </ItemGroup>
@@ -73,6 +79,10 @@
     <None Update="ThirdParty\Open-Meteo-DotNet\OpenMeteo.dll">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Source\Hazards\Dispersion\Modules\GaussianReleaseGPU\" />
   </ItemGroup>
 
 </Project>
