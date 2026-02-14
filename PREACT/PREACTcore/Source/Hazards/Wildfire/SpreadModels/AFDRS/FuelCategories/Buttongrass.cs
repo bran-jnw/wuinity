@@ -5,25 +5,32 @@ namespace PREACT.Wildfire.AFDRS
     public class Buttongrass
     {
         float _fmc;
-        float _rateOfSpread;
+        float _ros;
         float _fuelLoad;
         float _intensity;
         float _flameHeight;
 
+        int _productivity;
+
         private const float _b = 17.625f;
         private const float _c = 243.04f;
 
-        public void Calculate(float temp, float rh, float tsr, float rain, float windSpeed, float tsf, int productivity)
+        public Buttongrass(int productivity)
+        {
+            _productivity = productivity;
+        }
+
+        public void Calculate(float temp, float rh, float tsr, float rain, float windSpeed, float tsf)
         {
             //https://en.wikipedia.org/wiki/Dew_point
             float gamma = Mathf.Log(rh * 0.01f) + _b * temp / (_c + temp); 
             float dew_pt = _c * gamma / (_b - gamma);
 
             _fmc = FMC_buttongrass(temp, rh, dew_pt, tsr, rain);
-            _rateOfSpread = ROS_buttongrass(windSpeed, _fmc, tsf, productivity);
-            _fuelLoad = fuel_load_buttongrass(tsf, productivity);
-            _intensity = Intensity_buttongrass(_rateOfSpread, _fuelLoad);
-            _flameHeight = Flame_height_buttongrass(_intensity);
+            _ros = ROSButtongrass(windSpeed, _fmc, tsf, _productivity);
+            _fuelLoad = FuelLoadButtongrass(tsf, _productivity);
+            _intensity = IntensityButtongrass(_ros, _fuelLoad);
+            _flameHeight = FlameHeightButtongrass(_intensity);
         }
 
         ///   returns the grass fuel moisture content (%) based on McArthur (1966)
@@ -45,20 +52,20 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="tsf"></param>
         /// <param name="productivity"></param>
         /// <returns></returns>
-        private float fuel_load_buttongrass(float tsf, int productivity)
+        private float FuelLoadButtongrass(float tsf, int productivity)
         {
-            float result;
+            float FuelLoadButtongrass;
 
             if(productivity == 1)
             {
-                result = 11.73f * (1f - Mathf.Exp(-0.106f * tsf));
+                FuelLoadButtongrass = 11.73f * (1f - Mathf.Exp(-0.106f * tsf));
             }
             else
             {
-                result = 44.61f * (1f - Mathf.Exp(-0.041f * tsf));
+                FuelLoadButtongrass = 44.61f * (1f - Mathf.Exp(-0.041f * tsf));
             }
 
-            return result;
+            return FuelLoadButtongrass;
         }
 
         /// <summary>
@@ -70,7 +77,7 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="U_10"></param>
         /// <param name="mc"></param>
         /// <param name="productivity"></param>
-        private float spread_prob_buttongrass(float U_10, float mc, int productivity)
+        private float SpreadProbButtongrass(float U_10, float mc, int productivity)
         {
             float U_2 = U_10 / 1.2f;
             return 1f / (1f + Mathf.Exp(-(-1f + 0.68f * U_2 - 0.07f * mc - 0.0037f * U_2 * mc + 2.1f * productivity)));
@@ -87,18 +94,18 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="tsf"></param>
         /// <param name="productivity"></param>
         /// <returns></returns>
-        private  float ROS_buttongrass(float U_10, float mc, float tsf, int productivity)
+        private  float ROSButtongrass(float U_10, float mc, float tsf, int productivity)
         {
-            float spread_prob = spread_prob_buttongrass(U_10, mc, productivity);
+            float spread_prob = SpreadProbButtongrass(U_10, mc, productivity);
             float U_2 = U_10 / 1.2f;
 
-            float ros = 0.678f * Mathf.Pow(U_2, 1.312f) * Mathf.Exp(-0.0243f * mc) * (1 - Mathf.Exp(-0.116f * tsf)) * 60f;
+            float ROSButtongrass = 0.678f * Mathf.Pow(U_2, 1.312f) * Mathf.Exp(-0.0243f * mc) * (1 - Mathf.Exp(-0.116f * tsf)) * 60f;
             if (spread_prob <= 0.5)
             {
-                ros = 0f;
+                ROSButtongrass = 0f;
             }
 
-            return ros;
+            return ROSButtongrass;
         }
 
         /// <summary>
@@ -107,7 +114,7 @@ namespace PREACT.Wildfire.AFDRS
         /// </summary>
         /// <param name="intensity"></param>
         /// <returns></returns>
-        private float Flame_height_buttongrass(float intensity)
+        private float FlameHeightButtongrass(float intensity)
         {
             return 0.148f * Mathf.Pow(intensity, 0.403f);
         }
@@ -122,7 +129,7 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="fuel_load"></param>
         /// <param name="Single"></param>
         /// <returns></returns>
-        private float Intensity_buttongrass(float ROS, float fuel_load)
+        private float IntensityButtongrass(float ROS, float fuel_load)
         {
             ROS = ROS / 3600; // to m/s
             fuel_load = fuel_load / 10f; // to kg/m^2
