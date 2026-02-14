@@ -7,7 +7,7 @@
 
 using UnityEngine;
 using PREACT.Wildfire;
-using PREACT.Smoke;
+using PREACT.Dispersion;
 using PREACT.IO;
 using PREACT.Visualization;
 using PREACT.Math;

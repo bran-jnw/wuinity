@@ -7,7 +7,7 @@
 
 using PREACT.Math;
 
-namespace PREACT.Smoke
+namespace PREACT.Dispersion
 {
     /// <summary>
     /// Based on https://www.sciencedirect.com/topics/engineering/box-model

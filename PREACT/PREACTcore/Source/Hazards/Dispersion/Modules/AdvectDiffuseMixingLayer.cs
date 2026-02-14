@@ -13,7 +13,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using PREACT.Math;
 
-namespace PREACT.Smoke
+namespace PREACT.Dispersion
 {
     public class AdvectDiffuseMixingLayer : SmokeModule, IDisposable
     {

@@ -485,7 +485,7 @@ namespace PREACT.Wildfire
                     // fire intenisty
                     band = output.GetRasterBand(4);
                     band.SetNoDataValue(-9999f);
-                    band.SetDescription("Fire intenisty [kW/m].)");
+                    band.SetDescription("Fire intensity [kW/m].)");
                     for (int y = 0; y < _yDim; ++y)
                     {
                         for (int x = 0; x < _xDim; ++x)

@@ -12,9 +12,9 @@ namespace PREACT.IO
 {
     public class SmokeData
     {
-        private Smoke.ExtinctionRamp _extinctionRamp;
+        private Dispersion.ExtinctionRamp _extinctionRamp;
 
-        public Smoke.ExtinctionRamp ExtinctionRamp { get => _extinctionRamp; }
+        public Dispersion.ExtinctionRamp ExtinctionRamp { get => _extinctionRamp; }
 
         public void LoadAll(SmokeInput smokeInput, string rootFolder, out bool success)
         {
@@ -33,7 +33,7 @@ namespace PREACT.IO
 
         public void LoadExtinctionRamp(string filePath, out bool success)
         {
-            _extinctionRamp = Smoke.ExtinctionRamp.LoadExtinctionRampFile(filePath, out success);
+            _extinctionRamp = Dispersion.ExtinctionRamp.LoadExtinctionRampFile(filePath, out success);
         }
     }
 

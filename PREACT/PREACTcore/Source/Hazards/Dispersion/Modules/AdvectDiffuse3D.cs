@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using PREACT.Math;
 using ILGPU.Algorithms.Random;
 
-namespace PREACT.Smoke
+namespace PREACT.Dispersion
 {
     public class AdvectDiffuse3D : SmokeModule, IDisposable
     {

@@ -361,12 +361,12 @@ namespace WUInity
             if (Input.GetKey(KeyCode.KeypadPlus))
             {
                 print("Going up.");
-                ((PREACT.Smoke.AdvectDiffuse3D)_engine.Simulation.SmokeModule).IncreaseOutputHeight();
+                ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.SmokeModule).IncreaseOutputHeight();
             }
             else if (Input.GetKey(KeyCode.KeypadMinus))
             {
                 print("Going down.");
-                ((PREACT.Smoke.AdvectDiffuse3D)_engine.Simulation.SmokeModule).DecreaseOutputHeight();
+                ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.SmokeModule).DecreaseOutputHeight();
             }
 
             //always update visuals, even when paused

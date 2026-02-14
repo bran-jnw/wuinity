@@ -11,7 +11,7 @@ using PREACT.Evacuation;
 using PREACT.Pedestrian;
 using PREACT.Traffic;
 using PREACT.Wildfire;
-using PREACT.Smoke;
+using PREACT.Dispersion;
 using PREACT.IO;
 using System.Threading;
 using System.Diagnostics;

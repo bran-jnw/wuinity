@@ -12,7 +12,7 @@ using System;
 using System.Runtime.InteropServices;
 using PREACT.Math;
 
-namespace PREACT.Smoke
+namespace PREACT.Dispersion
 {
     public class LagrangianSmokeSim : SmokeModule
     {
