@@ -12,20 +12,23 @@ namespace PREACT.Wildfire.AFDRS
 
         int _productivity;
 
-        private const double _b = 17.625f;
-        private const double _c = 243.04f;
-
         public Buttongrass(int productivity)
         {
             _productivity = productivity;
         }
 
-        public void Calculate(double temp, double rh, double tsr, double rain, double windSpeed, double tsf)
+        ///temp: air temperature(C)
+        ///   rh: relative humidity (%)
+        ///   tsr: time since rain (h)
+        ///   rain: rainfall (mm)  
+        ///   U_10: 10 m wind speed(km/h)
+        /// tsf: time since fire(y))
+        public void Calculate(double temp, double rh, double tsr, double rain, double U_10, double tsf)
         {
             double dew_pt = AFDRS.dewpoint(temp, rh);
 
             _fmc = FMC_buttongrass(temp, rh, dew_pt, tsr, rain);
-            _ros = ROSButtongrass(windSpeed, _fmc, tsf, _productivity);
+            _ros = ROSButtongrass(U_10, _fmc, tsf, _productivity);
             _fuelLoad = FuelLoadButtongrass(tsf, _productivity);
             _intensity = IntensityButtongrass(_ros, _fuelLoad);
             _flameHeight = FlameHeightButtongrass(_intensity);

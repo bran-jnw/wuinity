@@ -7,9 +7,9 @@ namespace PREACT.Wildfire.AFDRS
     {
         /*public struct Coefficients
         {
-            float r_l0, r_lw, r_h0, r_hw;
+            double r_l0, r_lw, r_h0, r_hw;
 
-            public Coefficients(float r_l0, float r_lw, float r_h0, float r_hw)
+            public Coefficients(double r_l0, double r_lw, double r_h0, double r_hw)
             {
                 this.r_l0 = r_l0;
                 this.r_lw = r_lw;
@@ -27,11 +27,11 @@ namespace PREACT.Wildfire.AFDRS
         public enum States { Natural, Grazed, EatenOut }
 
 
-        float _fmc, _ros, _intensity, _flameHeight;
-        float _fuel_load, _curing;
+        double _fmc, _ros, _intensity, _flameHeight;
+        double _fuel_load, _curing;
         States _state;
 
-        public Grassland(FuelSubTypes fuelSubType, float fuel_load, float curing)
+        public Grassland(FuelSubTypes fuelSubType, double fuel_load, double curing)
         {
             if (fuelSubType == FuelSubTypes.ChenopodShrubland || fuelSubType == FuelSubTypes.LowWetland)
             {
@@ -50,7 +50,7 @@ namespace PREACT.Wildfire.AFDRS
             _curing = curing;
         }
 
-        public void Calculate(float temp, float rh, float U_10)
+        public void Calculate(double temp, double rh, double U_10)
         {
             _fmc = FMC_grass(temp, rh);    
             _ros = ROS_grass(U_10, _fmc, _curing, _state);// fuelSubType);
@@ -63,45 +63,45 @@ namespace PREACT.Wildfire.AFDRS
         /// args:
         ///   temp: air temperature (C)
         ///   rh: relative humidity (%)
-        public static float FMC_grass(float temp, float rh)
+        public static double FMC_grass(double temp, double rh)
         {
-            float FMC_grass;
+            double FMC_grass;
 
-            FMC_grass = 9.58f - 0.205f * temp + 0.138f * rh;
-            return Mathf.Max(FMC_grass, 5f);
+            FMC_grass = 9.58 - 0.205 * temp + 0.138 * rh;
+            return Mathd.Max(FMC_grass, 5);
         }
 
         /// returns the curing coefficient based on Cruz et al. (2015)
         ///   curing: degree of grass curing (%)
-        public static float curing_coeff_grass(float curing)
+        public static double curing_coeff_grass(double curing)
         {
-            return 1.036f / (1f + 103.989f * Mathf.Exp(-0.0996f * (curing - 20f)));
+            return 1.036 / (1 + 103.989 * Mathd.Exp(-0.0996 * (curing - 20)));
         }
 
         /// returns the grass moisture coefficient
         ///   U_10: 10 m wind speed (km/h)
         ///   mc: fuel moisture content (%)
-        public static float moist_coeff_grass(float U_10, float mc)
+        public static double moist_coeff_grass(double U_10, double mc)
         {
-            float moist_coeff_grass;
+            double moist_coeff_grass;
 
             if (mc < 12)
             {
-                moist_coeff_grass = Mathf.Exp(-0.108f * mc);
+                moist_coeff_grass = Mathd.Exp(-0.108 * mc);
             }
             else
             {
-                if (U_10 <= 10f)
+                if (U_10 <= 10)
                 {
-                    moist_coeff_grass = 0.684f - 0.0342f * mc;
+                    moist_coeff_grass = 0.684 - 0.0342 * mc;
                 }
                 else
                 {
-                    moist_coeff_grass = 0.547f - 0.0228f * mc;
+                    moist_coeff_grass = 0.547 - 0.0228 * mc;
                 }
             }
 
-            moist_coeff_grass = Mathf.Max(moist_coeff_grass, 0.001f);
+            moist_coeff_grass = Mathd.Max(moist_coeff_grass, 0.001);
 
             return moist_coeff_grass;
         }
@@ -113,54 +113,54 @@ namespace PREACT.Wildfire.AFDRS
         ///   mc: fuel moisture content (%)
         ///   curing: degree of grass curing (%)
         ///   state: grass state (natural, grazed, eaten-out)
-        public static float ROS_grass(float U_10, float mc, float curing, States state)//, FuelSubTypes fuelSubType)
+        public static double ROS_grass(double U_10, double mc, double curing, States state)//, FuelSubTypes fuelSubType)
         {
-            float curing_coeff = curing_coeff_grass(curing);
-            float moist_coeff = moist_coeff_grass(U_10, mc);
-            float waf = 1f;
+            double curing_coeff = curing_coeff_grass(curing);
+            double moist_coeff = moist_coeff_grass(U_10, mc);
+            double waf = 1;
 
             /*if (fuelSubType == FuelSubTypes.GambaGrass)
             {
                 waf = 1f; //TODO: what value should it be?
             }*/
 
-            float ROS_grass;
+            double ROS_grass;
 
             if (state == States.Natural)
             {
                 if (U_10 < 5)
                 {
-                    ROS_grass = 0.054f + 0.269f * U_10;
+                    ROS_grass = 0.054 + 0.269 * U_10;
                 }
                 else
                 {
-                    ROS_grass = 1.4f + 0.838f * Mathf.Pow(U_10 - 5, 0.844f);
+                    ROS_grass = 1.4 + 0.838 * Mathd.Pow(U_10 - 5, 0.844);
                 }
             }
             else if (state == States.Grazed)
             {
                 if (U_10 < 5)
                 {
-                    ROS_grass = 0.054f + 0.209f * U_10;
+                    ROS_grass = 0.054 + 0.209 * U_10;
                 }
                 else
                 {
-                    ROS_grass = 1.1f + 0.715f * Mathf.Pow(U_10 - 5, 0.844f);
+                    ROS_grass = 1.1 + 0.715 * Mathd.Pow(U_10 - 5, 0.844);
                 }
             }
             else //eaten-out
             {
                 if (U_10 < 5)
                 {
-                    ROS_grass = 0.054f + 0.209f * U_10;
+                    ROS_grass = 0.054 + 0.209 * U_10;
                 }
                 else
                 {
-                    ROS_grass = 0.55f + 0.357f * Mathf.Pow(U_10 - 5f, 0.844f);
+                    ROS_grass = 0.55 + 0.357 * Mathd.Pow(U_10 - 5, 0.844);
                 }
             }
 
-            ROS_grass = ROS_grass * 1000f * moist_coeff * curing_coeff * waf;
+            ROS_grass = ROS_grass * 1000 * moist_coeff * curing_coeff * waf;
 
             return ROS_grass;
         }
@@ -170,20 +170,20 @@ namespace PREACT.Wildfire.AFDRS
         /// args
         ///   ROS: forward rate of spread (m/h)
         ///   state: grass state (natural, grazed, eaten-out)
-        public static float Flame_height_grass(float ROS, States state)
+        public static double Flame_height_grass(double ROS, States state)
         {
             //adjust units from km/h to m/s
             ROS = ROS / 3600;
 
-            float Flame_height_grass = 0f;
+            double Flame_height_grass = 0;
 
             if (state == States.Natural)
             {
-                Flame_height_grass = 2.66f * Mathf.Pow(ROS, 0.295f);
+                Flame_height_grass = 2.66 * Mathd.Pow(ROS, 0.295);
             }
             else//eaten-out or grazed
             {
-                Flame_height_grass = 1.12f * Mathf.Pow(ROS, 0.295f);
+                Flame_height_grass = 1.12 * Mathd.Pow(ROS, 0.295);
             }
 
             return Flame_height_grass;
@@ -193,16 +193,16 @@ namespace PREACT.Wildfire.AFDRS
         /// for grass fuel loads are limited to range 1 to 6 t/ha
         ///   ROS: forward rate of spread (km/h)
         ///   fuel_load: fine fuel load (t/ha)
-        public static float Intensity_grass(float ROS, float fuel_load)//, FuelSubTypes fuelSubType)
+        public static double Intensity_grass(double ROS, double fuel_load)//, FuelSubTypes fuelSubType)
         {
-            float Intensity_grass;
+            double Intensity_grass;
 
             //TODO:check
             /*if (fuelSubType != FuelSubTypes.GambaGrass)
             {
                 //limit fuel load to range 1 - 6
-                fuel_load = Mathf.Max(1f, fuel_load);
-                fuel_load = Mathf.Min(6f, fuel_load);                
+                fuel_load = Mathd.Max(1f, fuel_load);
+                fuel_load = Mathd.Min(6f, fuel_load);                
             }*/
             Intensity_grass = intensity(ROS, fuel_load);
 
@@ -212,31 +212,31 @@ namespace PREACT.Wildfire.AFDRS
         /// returns the fireline intensity (kW/m) based on Byram 1959
         ///   ROS: forward rate of spread (km/h)
         ///   fuel_load: fine fuel load (t/ha)
-        public static float intensity(float ROS, float fuel_load)
+        public static double intensity(double ROS, double fuel_load)
         {
             // convert units
             ROS = ROS / 3600; // m/s
             fuel_load = fuel_load / 10; //kg/m^2
 
-            return 18600f * ROS * fuel_load;
+            return 18600 * ROS * fuel_load;
         }
 
         /// returns the grass fuel load (t/ha)
         ///
         /// args
         ///   state: the grass fuel state - eaten-out, grazed or natural
-        public static float state_to_load_grass(States state)
+        public static double state_to_load_grass(States state)
         {
             //TODO: verify
-            float load = 2.0f; //eaten out
+            double load = 2.0; //eaten out
 
             if (state == States.Natural)
             {
-                load = 5.0f;
+                load = 5.0;
             }
             else if (state == States.Grazed)
             {
-                load = 3.5f;
+                load = 3.5;
             }
 
             return load;
@@ -247,12 +247,12 @@ namespace PREACT.Wildfire.AFDRS
         ///
         /// args
         ///   load: the grass fuel load (t/ha)
-        public static States load_to_state_grass(float load)
+        public static States load_to_state_grass(double load)
         {
             States state = States.EatenOut;
 
             //TODO: verify
-            if (load >= 6f)
+            if (load >= 6)
             {
                 state = States.Natural;
             }

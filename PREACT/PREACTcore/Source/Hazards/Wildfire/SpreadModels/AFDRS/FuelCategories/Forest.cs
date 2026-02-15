@@ -2,27 +2,27 @@
 using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
-{
-    public enum SubModels { Dry, Wet}
-
+{   
     public class Forest
     {
+        public enum FuelSubTypes { Dry, Wet }
+
         float _fmc;
         float _ros;
         float _fuelLoad;
         float _intensity;
         float _flameHeight;
 
-        SubModels _submodel;
+        FuelSubTypes _subtype;
 
-        public Forest(SubModels submodel)
+        public Forest(FuelSubTypes submodel)
         {
-            _submodel = submodel;
+            _subtype = submodel;
         }
 
         public void Calculate(float temp, float rh, float U_10, DateTime dateTime)
         {
-            _fmc = FMC_forest(temp, rh, dateTime, _submodel);
+            _fmc = FMC_forest(temp, rh, dateTime, _subtype);
             //_ros = ROS_forest(U_10)
             //_fuelLoad = fuel_availability_forest()
             //_intensity = Intensity_forest()
@@ -39,7 +39,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   fl_e: elevated fuel load (t/ha)
         ///   fl_o: overstorey (canopy) fuel load (t/ha)
         ///   h_o: overstorey (canopy) height (m)
-        private float Intensity_forest(float ROS, float DF, float flame_h, float fl_s, float fl_ns, float fl_e, float fl_o, float h_o, float waf = 3f, float DI = 100f, SubModels submodel = SubModels.Dry)
+        private float Intensity_forest(float ROS, float DF, float flame_h, float fl_s, float fl_ns, float fl_e, float fl_o, float h_o, float waf = 3f, float DI = 100f, FuelSubTypes submodel = FuelSubTypes.Dry)
         {
             float fuel_avail;
             float fuel_load;
@@ -102,7 +102,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   DI: drought indes - KBDI except SDI in Tas
         ///   WAF: wind adjustment factor
         ///   submodel: dry or wet
-        private float ROS_forest(float U_10, float fhs_s, float fhs_ns, float h_ns, float fmc, float DF, float waf, float DI = 100f, SubModels submodel = SubModels.Dry)
+        private float ROS_forest(float U_10, float fhs_s, float fhs_ns, float h_ns, float fmc, float DF, float waf, float DI = 100f, FuelSubTypes submodel = FuelSubTypes.Dry)
         {
             float wind_threshold = 5;
             float fuel_avail;
@@ -137,7 +137,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   rh: relative humidity (%)
         ///   date_: (underscore due to VBA Date objects)
         ///   time:
-        private float FMC_forest(float temp, float rh, DateTime dateTime, SubModels submodel)
+        private float FMC_forest(float temp, float rh, DateTime dateTime, FuelSubTypes submodel)
         {
             const int start_peak_month = 10; //October
             const int end_peak_month = 3; //March
@@ -149,7 +149,7 @@ namespace PREACT.Wildfire.AFDRS
             float FMC_forest;
             if((dateTime.Month >= start_peak_month || dateTime.Month <= end_peak_month) 
                 && (dateTime.Hour >= start_afternoon && dateTime.Hour <= end_afternoon)
-                && submodel == SubModels.Dry)
+                && submodel == FuelSubTypes.Dry)
             {
                 FMC_forest = 2.76f + 0.124f * rh - 0.0187f * temp;
             }                
@@ -211,11 +211,11 @@ namespace PREACT.Wildfire.AFDRS
         ///   DI: drought indes - KBDI except SDI in Tas
         ///   WAF: wind adjustment factor
         ///   submodel: dry or wet
-        float fuel_availability_forest(float DF, float DI = 100f, float waf = 3f, SubModels submodel = SubModels.Dry)
+        float fuel_availability_forest(float DF, float DI = 100f, float waf = 3f, FuelSubTypes submodel = FuelSubTypes.Dry)
         {
             float fuel_availability_forest = 0f;
 
-            if (submodel == SubModels.Dry)
+            if (submodel == FuelSubTypes.Dry)
             {
                 fuel_availability_forest = DF * 0.1f;
             }                

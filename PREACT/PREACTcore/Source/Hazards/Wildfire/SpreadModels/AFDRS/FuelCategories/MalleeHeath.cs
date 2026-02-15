@@ -17,12 +17,17 @@ namespace PREACT.Wildfire.AFDRS
             _fuelLoadCrown = fuelLoadCrown;
         }
 
-        public void Calculate(float air_temperature, float relative_humidity, DateTime dateTime, float precipitation, float time_since_rain, float windSpeed)
+        ///   air_temperature: air temperature (C)
+        ///   relative_humidity: relative humidity (%)
+        ///   dateTime: 24 hour time format
+        ///   precipitation: precipitation in the last 48 hours (mm)
+        ///   time_since_rain: time since rain or dewfall stopped (h)
+        public void Calculate(float air_temperature, float relative_humidity, DateTime dateTime, float precipitation, float time_since_rain, float U_10)
         {
             _fmc = FMC_mallee(air_temperature, relative_humidity, dateTime, precipitation, time_since_rain);
-            float spreadProbability = spread_prob_mallee(windSpeed, _fmc, _overstoreyCover);
-            float crownProbability = crown_prob_mallee(windSpeed, _fmc);
-            _ros = ROS_mallee(windSpeed, _fmc, _overstoreyCover, _overstoreyHeight, spreadProbability, crownProbability);
+            float spreadProbability = spread_prob_mallee(U_10, _fmc, _overstoreyCover);
+            float crownProbability = crown_prob_mallee(U_10, _fmc);
+            _ros = ROS_mallee(U_10, _fmc, _overstoreyCover, _overstoreyHeight, spreadProbability, crownProbability);
             float fuel_load = fuel_load_mallee(_fuelLoadSurface, _fuelLoadCrown, crownProbability);
             _intensity = intensity(_ros, fuel_load);
             _flameHeight = flame_height_mallee(_intensity);
