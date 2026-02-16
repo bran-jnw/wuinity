@@ -14,6 +14,8 @@ namespace PREACT.Wildfire.AFDRS
 
         private static double _meterPerMinToMeterPerSecond = 1.0 / 60.0;
 
+        double _forwardSpreadRate, _directionOfMaxSpread, _eccentricity;
+
         public SpreadModelAFDRS(LandscapeCellData cellData, CanadianFBPLookupTable lookupTable, SpatialManager spatialManager)
         {
             if (cellData.fuel_model < 1)
@@ -67,52 +69,6 @@ namespace PREACT.Wildfire.AFDRS
             _inputs.GrassFuelLoad = 0.35; //kg/m2
         }
 
-        //for testing outside of PREACT       
-        public SpreadModelAFDRS(CanadianFBPFuel fuel, int elevation, int percentSlope, int slopeAzimuth, double lat, double lon, int pattern = 0, int time = 0, int percentCuring = 80, double grassFuelLoad = 0.35)
-        {
-            _inputs = new CanadianFBPInputs();
-            _outputs = new MainOutputs();
-            _secondaryOutputs = new SecondaryOutputs();
-            _head = new FireData();
-            _flank = new FireData();
-            _back = new FireData();
-            _fuel = fuel;
-
-            //landscape
-            _inputs.Elevation = elevation;
-            _inputs.PercentSlope = percentSlope;
-            _inputs.SlopeAzimuth = slopeAzimuth;
-
-            _inputs.Lat = lat;
-            _inputs.Lon = -lon; //they refer to west longitude
-
-            _inputs.Pattern = pattern; //lin = 1, point = 1
-            _inputs.Time = 20;
-            _inputs.JulianDayMin = -1; //this means it is calculated/updated first calc             
-
-            _inputs.PercentCuring = 80;//TODO, read input
-            _inputs.GrassFuelLoad = 0.35; //kg/m2
-        }
-
-        public void CalculateSpreadRate(double windSpeed, int windDirection, double FFMC, double BUI, int julianDay)
-        {
-            _inputs.WindAzimuth = windDirection + 180;
-            if (_inputs.WindAzimuth > 360)
-            {
-                _inputs.WindAzimuth -= 360;
-            }
-            _inputs.WindSpeed = windSpeed * 3.6; //requires km/h, input is m/s
-
-            //moisture related
-            _inputs.FFMC = FFMC;
-            _inputs.BUI = BUI;
-
-            _inputs.JulianDay = julianDay;
-
-            CanadianFBP.Calculate(_inputs, _fuel, _outputs, _secondaryOutputs, _head, _flank, _back);
-            _inputs.JulianDayMin = _outputs.JulianDayMin; //so that we do not have to calculate it every time
-        }
-
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
         {
             //wind
@@ -135,29 +91,9 @@ namespace PREACT.Wildfire.AFDRS
             _inputs.JulianDayMin = _outputs.JulianDayMin; //so that we do not have to calculate it every time
         }
 
-        public double GetHeadISI()
-        {
-            return _outputs.ISI;
-        }
-
         public override double GetMaxSpreadRate()
         {
             return _head.RateOfSpread * _meterPerMinToMeterPerSecond;
-        }
-
-        public double GetFlankSpreadRate()
-        {
-            return _flank.RateOfSpread * _meterPerMinToMeterPerSecond;
-        }
-
-        public double GetBackSpreadRate()
-        {
-            return _back.RateOfSpread * _meterPerMinToMeterPerSecond;
-        }
-
-        public double GetLengthToBreadth()
-        {
-            return _secondaryOutputs.LengthToBreadth;
         }
 
         public override double GetDirectionOfMaxSpread()
@@ -167,28 +103,28 @@ namespace PREACT.Wildfire.AFDRS
 
         public override double GetSpreadRateInDirection(double directionOfInterest)
         {
-            double theta = Mathd.Abs(_outputs.SpreadAzimuth - directionOfInterest);
-            if (theta == 90.0)
+            double rosDirection = _forwardSpreadRate;
+            if (_forwardSpreadRate != 0.0) // if forward spread rate is not zero
             {
-                theta += 0.001;
+                // Calculate the fire spread rate in this azimuth
+                // if it deviates more than a tenth degree from the maximum azimuth
+
+                // Calculate beta: the angle between the direction of max spread and the direction of interest
+                double beta = Mathd.Abs(_directionOfMaxSpread - directionOfInterest);
+
+                // Calculate the fire spread rate in this azimuth
+                // if it deviates more than a tenth degree from the maximum azimuth
+                if (beta > 180.0)
+                {
+                    beta = (360.0 - beta);
+                }
+                if (Mathd.Abs(beta) > 0.1)
+                {
+                    double radians = beta * Mathd.Deg2Rad;
+                    rosDirection = _forwardSpreadRate * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
+                }
             }
-            theta *= Mathd.Deg2Rad;
-
-            double ROS = _head.RateOfSpread;
-            double BROS = _back.RateOfSpread;
-            double FROS = _flank.RateOfSpread;
-
-            double cosTheta = Mathd.Cos(theta);
-            double sinTheta = Mathd.Sin(theta);
-
-            double p1 = (ROS - BROS) / (2 * cosTheta);
-            double p2 = (ROS + BROS) / (2 * cosTheta);
-            double nom1 = FROS * cosTheta * Mathd.Sqrt(FROS * FROS * cosTheta * cosTheta + (ROS * BROS) * sinTheta * sinTheta);
-            double nom2 = (ROS * ROS - BROS * BROS) * 0.25 * sinTheta * sinTheta;
-            double denom = FROS * FROS * cosTheta * cosTheta + ((ROS + BROS) * 0.5) * ((ROS + BROS) * 0.5) * sinTheta * sinTheta;
-            double ROStheta = p1 + p2 * ((nom1 - nom2) / denom);
-
-            return ROStheta * _meterPerMinToMeterPerSecond;
+            return rosDirection;
         }
 
         public override bool HasFuelLoad()
@@ -199,6 +135,6 @@ namespace PREACT.Wildfire.AFDRS
         public override double GetFireIntensity()
         {
             return _outputs.SurfaceFireIntensity;
-        }
+        }        
     }
 }
