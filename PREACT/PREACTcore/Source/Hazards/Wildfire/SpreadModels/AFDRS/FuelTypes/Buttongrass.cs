@@ -2,36 +2,68 @@
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public class Buttongrass
+    public static class Buttongrass
     {
-        double _fmc;
-        double _ros;
-        double _fuelLoad;
-        double _intensity;
-        double _flameHeight;
-
-        int _productivity;
-
-        public Buttongrass(int productivity)
-        {
-            _productivity = productivity;
-        }
-
         ///temp: air temperature(C)
         ///   rh: relative humidity (%)
         ///   tsr: time since rain (h)
         ///   rain: rainfall (mm)  
         ///   U_10: 10 m wind speed(km/h)
         /// tsf: time since fire(y))
-        public void Calculate(double temp, double rh, double tsr, double rain, double U_10, double tsf)
+        public static AFDRSOutput Calculate(double temp, double rh, double tsr, double rain, double U_10, double tsf, int productivity, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
             double dew_pt = AFDRS.dewpoint(temp, rh);
+            double fmc = FMC_buttongrass(temp, rh, dew_pt, tsr, rain);
 
-            _fmc = FMC_buttongrass(temp, rh, dew_pt, tsr, rain);
-            _ros = ROSButtongrass(U_10, _fmc, tsf, _productivity);
-            _fuelLoad = FuelLoadButtongrass(tsf, _productivity);
-            _intensity = IntensityButtongrass(_ros, _fuelLoad);
-            _flameHeight = FlameHeightButtongrass(_intensity);
+            double noWindNoSlopeROS = ROSButtongrass(0, fmc, tsf, productivity);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double windROS = ROSButtongrass(U_10, fmc, tsf, productivity);
+
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
+            double fuelLoad = FuelLoadButtongrass(tsf, productivity);
+            double intensity = IntensityButtongrass(ros, fuelLoad);
+            double flameHeight = FlameHeightButtongrass(intensity);
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+        }
+
+        //This migh tbe useful at some point, this is use dif doign the Canadian approach to spread direction taking into account wind and slope
+        private static double SlopeWindEquivalent(double slopeROS, double mc, double tsf)
+        {
+            double U_2 = Mathd.Pow(slopeROS / (0.678 * Mathd.Exp(-0.0243 * mc) * (1 - Mathd.Exp(-0.116 * tsf)) * 60), 1 / 1.312);
+
+            double U_10 = U_2 * 1.2;
+
+            return U_10;
+        }
+
+        private static void CalculateEffectiveWind(double windSpeed, double windAzimuth, double slopeWindSpeed, double slopeAzimuth, out double effectiveWindSpeed, out double effectiveWindAzimuth)
+        {
+            //wind vector
+            double wrad = windAzimuth * Mathd.Deg2Rad;
+            double wsx = windSpeed * Mathd.Sin(wrad);
+            double wsy = windSpeed * Mathd.Cos(wrad);
+
+            //slope vector
+            double srad = slopeAzimuth * Mathd.Deg2Rad;
+            double wsex = slopeWindSpeed * Mathd.Sin(srad);
+            double wsey = slopeWindSpeed * Mathd.Cos(srad);
+
+            //combined vector
+            double wsvx = wsx + wsex;
+            double wsvy = wsy + wsey;
+            double WSV = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);
+            effectiveWindSpeed = WSV;
+
+            double raz = Mathd.Acos(wsvy / WSV);
+            raz = raz * Mathd.Rad2Deg;
+
+            if (wsvx < 0)
+            {
+                raz = 360 - raz;
+            }
+            effectiveWindAzimuth = raz;
         }
 
         ///   returns the grass fuel moisture content (%) based on McArthur (1966)
@@ -40,7 +72,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   tsr: time since rain (h)
         ///   rain: rainfall (mm)       
         ///   dew_pt: dewpoint temperature (c)
-        private double FMC_buttongrass(double temp, double rh, double dew_pt, double tsr, double rain)
+        private static double FMC_buttongrass(double temp, double rh, double dew_pt, double tsr, double rain)
         {
             return (67.128 * (1 - Mathd.Exp(-3.132 * rain)) * Mathd.Exp(-0.0858 * tsr)) + (Mathd.Exp(1.66 + 0.0214 * rh - 0.0292 * dew_pt));
         }
@@ -53,17 +85,17 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="tsf"></param>
         /// <param name="productivity"></param>
         /// <returns></returns>
-        private double FuelLoadButtongrass(double tsf, int productivity)
+        private static double FuelLoadButtongrass(double tsf, int productivity)
         {
             double FuelLoadButtongrass;
 
             if(productivity == 1)
             {
-                FuelLoadButtongrass = 11.73f * (1f - Mathd.Exp(-0.106 * tsf));
+                FuelLoadButtongrass = 11.73 * (1 - Mathd.Exp(-0.106 * tsf));
             }
             else
             {
-                FuelLoadButtongrass = 44.61f * (1f - Mathd.Exp(-0.041 * tsf));
+                FuelLoadButtongrass = 44.61 * (1 - Mathd.Exp(-0.041 * tsf));
             }
 
             return FuelLoadButtongrass;
@@ -78,10 +110,10 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="U_10"></param>
         /// <param name="mc"></param>
         /// <param name="productivity"></param>
-        private double SpreadProbButtongrass(double U_10, double mc, int productivity)
+        private static double SpreadProbButtongrass(double U_10, double mc, int productivity)
         {
-            double U_2 = U_10 / 1.2f;
-            return 1f / (1f + Mathd.Exp(-(-1 + 0.68 * U_2 - 0.07 * mc - 0.0037 * U_2 * mc + 2.1 * productivity)));
+            double U_2 = U_10 / 1.2;
+            return 1 / (1 + Mathd.Exp(-(-1 + 0.68 * U_2 - 0.07 * mc - 0.0037 * U_2 * mc + 2.1 * productivity)));
         }
 
         /// <summary>
@@ -95,16 +127,20 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="tsf"></param>
         /// <param name="productivity"></param>
         /// <returns></returns>
-        private  double ROSButtongrass(double U_10, double mc, double tsf, int productivity)
+        private static double ROSButtongrass(double U_10, double mc, double tsf, int productivity)
         {
-            double spread_prob = SpreadProbButtongrass(U_10, mc, productivity);
-            double U_2 = U_10 / 1.2f;
+            double ROSButtongrass;
 
-            double ROSButtongrass = 0.678f * Mathd.Pow(U_2, 1.312f) * Mathd.Exp(-0.0243f * mc) * (1 - Mathd.Exp(-0.116f * tsf)) * 60f;
+            double spread_prob = SpreadProbButtongrass(U_10, mc, productivity);
             if (spread_prob <= 0.5)
             {
                 ROSButtongrass = 0f;
             }
+            else
+            {
+                double U_2 = U_10 / 1.2;
+                ROSButtongrass = 0.678 * Mathd.Pow(U_2, 1.312) * Mathd.Exp(-0.0243 * mc) * (1 - Mathd.Exp(-0.116 * tsf)) * 60;
+            }   
 
             return ROSButtongrass;
         }
@@ -115,9 +151,9 @@ namespace PREACT.Wildfire.AFDRS
         /// </summary>
         /// <param name="intensity"></param>
         /// <returns></returns>
-        private double FlameHeightButtongrass(double intensity)
+        private static double FlameHeightButtongrass(double intensity)
         {
-            return 0.148f * Mathd.Pow(intensity, 0.403f);
+            return 0.148 * Mathd.Pow(intensity, 0.403);
         }
 
         /// <summary>
@@ -130,10 +166,10 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="fuel_load"></param>
         /// <param name="Single"></param>
         /// <returns></returns>
-        private double IntensityButtongrass(double ROS, double fuel_load)
+        private static double IntensityButtongrass(double ROS, double fuel_load)
         {
             ROS = ROS / 3600; // to m/s
-            fuel_load = fuel_load / 10f; // to kg/m^2
+            fuel_load = fuel_load / 10; // to kg/m^2
             return 19900 * ROS * fuel_load;
         }  
     }

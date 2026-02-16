@@ -3,16 +3,9 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public class Shrubland
+    public static class Shrubland
     {
         public enum States {Heath, Wet_heath }// no diff in the models at this stage
-
-        double _fmc, _ros, _intensity, _flameHeight; //output
-
-        public Shrubland()
-        {
-            
-        }
 
         /// <summary>
         /// temp: air temperature(C)
@@ -32,13 +25,21 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="waf"></param>
         /// <param name="fuel_load"></param>
 
-        public void Calculate(double temp, double rh, double rain, double hours, double U_10, double h_el, double waf, double fuel_load)
+        public static AFDRSOutput Calculate(double temp, double rh, double rain, double hours, double U_10, double h_el, double waf, double fuel_load, , double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Heath)
         {
-            _fmc = FMC_heath(temp, rh, rain, hours);
-            double SI = SI_heath(U_10, h_el, _fmc, waf);
-            _ros = ROS_heath(U_10, h_el, _fmc, SI, waf);           
-            _intensity = intensity_heath(_ros, fuel_load);
-            _flameHeight = Flame_height_heath(_intensity);
+            double fmc = FMC_heath(temp, rh, rain, hours);
+            double SI = SI_heath(U_10, h_el, fmc, waf);
+
+            double noWindNoSlopeROS = ROS_heath(0, h_el, fmc, SI, waf);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double windROS = ROS_heath(U_10, h_el, fmc, SI, waf);
+
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction); 
+            double intensity = intensity_heath(ros, fuel_load);
+            double flameHeight = Flame_height_heath(intensity);
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
         /// returns fuel moisture content (%). Based on:

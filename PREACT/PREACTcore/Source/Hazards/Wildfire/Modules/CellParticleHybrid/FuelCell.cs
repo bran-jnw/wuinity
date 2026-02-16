@@ -94,17 +94,23 @@ namespace PREACT.Wildfire
             }
         }
 
+        float lastUpdate; 
         public void UpdateRateOfSpread(float currentTime)
         {
-            if (_dead)
+            /*if (_dead)
             {
                 Engine.Message(_owner.Simulation, Engine.LogType.Log, $"Trying to update dead cell, fuel number {_cellData.fuel_model}.");
                 return;
-            }
+            }*/
 
-            _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
-            _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFireIntensity(), (float)_spreadModel.GetMaxSpreadRate(), (float)_spreadModel.GetDirectionOfMaxSpread());
-            _rateOfSpreadIsSet = true;
+            //only update every 60 seconds, wetaher does not change that often
+            if(currentTime - lastUpdate > 60f || !_rateOfSpreadIsSet)
+            {
+                lastUpdate = currentTime;
+                _spreadModel.CalculateSpreadRate(_owner.Simulation.Weather, _owner.Simulation.Time);
+                _owner.UpdateCellData(_index, _linearIndex, (float)_spreadModel.GetFireIntensity(), (float)_spreadModel.GetMaxSpreadRate(), (float)_spreadModel.GetDirectionOfMaxSpread());
+                _rateOfSpreadIsSet = true;
+            }            
         }
 
         /// <summary>

@@ -4,39 +4,33 @@ using System.Text;
 
 namespace PREACT.Wildfire.AFDRS
 {   
-    public class GrassyWoodland
+    public static class GrassyWoodland
     {
         public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural }
 
-        double _fmc, _ros, _intensity, _flameHeight;
-        Grassland.States _state;
-        double _curing, _fuel_load;
-        FuelSubTypes _subtype;
-
-        public GrassyWoodland(FuelSubTypes fuelSubType, double curing, double fuel_load)
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double mc, double waf, double percentSlope, double windAzimuth, double slopeAzimuth, FuelSubTypes fuelSubType, double curing, double fuel_load, Grassland.States state)
         {
-            if(fuelSubType == FuelSubTypes.AcaciaWoodland)
-            {
-                _state = Grassland.States.EatenOut;
-            }
-            else if(fuelSubType == FuelSubTypes.Rural)
-            {
-                _state = Grassland.States.Grazed;
-            }
-            //TODO: Gamba is mentioned in original
-            /*Case "Gamba"
-            Range("state_woodland").Value = "natural"*/
+            double fmc = FMC_woodland(temp, rh);
 
-            _curing = curing;
-            _fuel_load = fuel_load;
-        }
+            if (fuelSubType == FuelSubTypes.AcaciaWoodland)
+            {
+                state = Grassland.States.EatenOut;
+            }
+            else if (fuelSubType == FuelSubTypes.Rural)
+            {
+                state = Grassland.States.Grazed;
+            }
 
-        public void Calculate(double temp, double rh, double U_10, double mc, double waf)
-        {
-            _fmc = FMC_woodland(temp, rh);
-            _ros = ROS_woodland(U_10, _fmc, _curing, _state, waf);
-            _intensity = Intensity_woodland(_fmc, _fuel_load);
-            _flameHeight = Flame_height_woodland(_ros, _state);
+            double noWindNoSlopeROS = ROS_woodland(0, fmc, curing, state, waf);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double windROS = ROS_woodland(U_10, fmc, curing, state, waf);
+
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
+            double intensity = Intensity_woodland(fmc, fuel_load);
+            double flameHeight = Flame_height_woodland(ros, state);
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
         /// returns the forward ROS (m/h) ignoring slope
@@ -54,7 +48,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   subtype: woodland, acacia_woodland, woody_forticulture, rural, urban
         ///   state: grass state (natural, eaten out, grazed)
         ///   WAF: wind adjustment factor
-        private double ROS_woodland(double U_10, double mc, double curing, Grassland.States state, double waf)
+        private static double ROS_woodland(double U_10, double mc, double curing, Grassland.States state, double waf)
         {
             return Grassland.ROS_grass(U_10, mc, curing, state) * waf;
         }
@@ -63,7 +57,7 @@ namespace PREACT.Wildfire.AFDRS
         /// uses grass fuel moisture content based on McArthur (1966)
         ///   temp: air temperature (C)
         ///   rh: relative humidity (%)
-        private double FMC_woodland(double temp, double rh)
+        private static double FMC_woodland(double temp, double rh)
         {
             return Grassland.FMC_grass(temp, rh);
         }
@@ -72,7 +66,7 @@ namespace PREACT.Wildfire.AFDRS
         /// uses the grass model
         ///   ROS: forward rate of spread (m/h)
         ///   state: grass state (natural, eaten out, grazed)
-        private double Flame_height_woodland(double ROS, Grassland.States state)
+        private static double Flame_height_woodland(double ROS, Grassland.States state)
         {
             return Grassland.Flame_height_grass(ROS, state);
         }
@@ -82,7 +76,7 @@ namespace PREACT.Wildfire.AFDRS
         /// args
         ///   ROS: forward rate of spread (km/h)
         ///   fuel_load: fine fuel load (t/ha)
-        private double Intensity_woodland(double ROS, double fuel_load)
+        private static double Intensity_woodland(double ROS, double fuel_load)
         {
             return Grassland.Intensity_grass(ROS, fuel_load);
         }

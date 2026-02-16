@@ -3,34 +3,30 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public class MalleeHeath
+    public static class MalleeHeath
     {
-        float _overstoreyCover, _overstoreyHeight, _fuelLoadSurface,_fuelLoadCrown;
-        float _fmc, _ros, _intensity, _flameHeight;
-
-
-        public MalleeHeath(float overstoreyCover, float overstoreyHeight, float fuelLoadSurface, float fuelLoadCrown)
-        {  
-            _overstoreyCover = overstoreyCover;
-            _overstoreyHeight = overstoreyHeight;
-            _fuelLoadSurface = fuelLoadSurface;
-            _fuelLoadCrown = fuelLoadCrown;
-        }
-
         ///   air_temperature: air temperature (C)
         ///   relative_humidity: relative humidity (%)
         ///   dateTime: 24 hour time format
         ///   precipitation: precipitation in the last 48 hours (mm)
         ///   time_since_rain: time since rain or dewfall stopped (h)
-        public void Calculate(float air_temperature, float relative_humidity, DateTime dateTime, float precipitation, float time_since_rain, float U_10)
+        public static AFDRSOutput Calculate(double air_temperature, double relative_humidity, DateTime dateTime, double precipitation, double time_since_rain, double U_10, double percentSlope, double windAzimuth, double slopeAzimuth, double overstoreyCover, double overstoreyHeight, double fuelLoadSurface, double fuelLoadCrown)
         {
-            _fmc = FMC_mallee(air_temperature, relative_humidity, dateTime, precipitation, time_since_rain);
-            float spreadProbability = spread_prob_mallee(U_10, _fmc, _overstoreyCover);
-            float crownProbability = crown_prob_mallee(U_10, _fmc);
-            _ros = ROS_mallee(U_10, _fmc, _overstoreyCover, _overstoreyHeight, spreadProbability, crownProbability);
-            float fuel_load = fuel_load_mallee(_fuelLoadSurface, _fuelLoadCrown, crownProbability);
-            _intensity = intensity(_ros, fuel_load);
-            _flameHeight = flame_height_mallee(_intensity);
+            double fmc = FMC_mallee(air_temperature, relative_humidity, dateTime, precipitation, time_since_rain);
+            double spreadProbability = spread_prob_mallee(U_10, fmc, overstoreyCover);
+            double crownProbability = crown_prob_mallee(U_10, fmc);
+
+            double noWindNoSlopeROS = ROS_mallee(0, fmc, overstoreyCover, overstoreyHeight, spreadProbability, crownProbability);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double windROS = ROS_mallee(U_10, fmc, overstoreyCover, overstoreyHeight, spreadProbability, crownProbability);
+
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
+            double fuel_load = fuel_load_mallee(fuelLoadSurface, fuelLoadCrown, crownProbability);
+            double intensity = IntensityMaleeHeath(ros, fuel_load);
+            double flameHeight = flame_height_mallee(intensity);
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
         /// return fuel moisture content (%). Based on:
@@ -49,7 +45,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   time: 24 hour time format
         ///   precipitation: precipitation in the last 48 hours (mm)
         ///   time_since_rain: time since rain or dewfall stopped (h)
-        private static float FMC_mallee(float air_temperature, float relative_humidity, DateTime dateTime, float precipitation, float time_since_rain)
+        private static double FMC_mallee(double air_temperature, double relative_humidity, DateTime dateTime, double precipitation, double time_since_rain)
         {
             const int start_peak_month = 10; //October
             const int end_peak_month = 3; //March
@@ -69,9 +65,9 @@ namespace PREACT.Wildfire.AFDRS
                 delta = 0;
             }
 
-            float FMC_mallee = 4.74f + 0.108f * relative_humidity - 0.1f * (air_temperature - 25f) - delta * (1.68f + (0.028f * relative_humidity));
+            double FMC_mallee = 4.74 + 0.108 * relative_humidity - 0.1 * (air_temperature - 25) - delta * (1.68 + (0.028 * relative_humidity));
 
-            return FMC_mallee + 67.128f * (1f - Mathf.Exp(-3.132f * precipitation)) * Mathf.Exp(-0.0858f * time_since_rain);
+            return FMC_mallee + 67.128 * (1 - Mathd.Exp(-3.132 * precipitation)) * Mathd.Exp(-0.0858 * time_since_rain);
         }
 
         /// return the likelihood of spread sustainability (go/no-go) [value between 0 and 1].
@@ -82,9 +78,9 @@ namespace PREACT.Wildfire.AFDRS
         ///   wind_speed: 10 m wind speed(km/h)
         ///   fuel_moisture: dead fuel moisture content (%)
         ///   overstorey_cover: (%)
-        private static float spread_prob_mallee(float wind_speed, float fuel_moisture, float overstorey_cover)
+        private static double spread_prob_mallee(double wind_speed, double fuel_moisture, double overstorey_cover)
         {
-            return (1f / (1f + Mathf.Exp(-(14.624f + 0.2066f * wind_speed - 1.8719f * fuel_moisture - 0.030442f * overstorey_cover))));
+            return (1f / (1 + Mathd.Exp(-(14.624 + 0.2066 * wind_speed - 1.8719 * fuel_moisture - 0.030442 * overstorey_cover))));
         }
 
         /// type of fire, i.e. surface fire, crown fire, or an ensemble of the two, based on
@@ -95,9 +91,9 @@ namespace PREACT.Wildfire.AFDRS
         /// args
         ///   wind_speed: 10 m wind speed(km/h)
         ///   fuel_moisture: dead fuel moisture content (%)
-        private static float crown_prob_mallee(float wind_speed, float fuel_moisture)
+        private static double crown_prob_mallee(double wind_speed, double fuel_moisture)
         {
-            return 1f / (1f + Mathf.Exp(-(-11.138f + 1.4054f * wind_speed - 3.4217f * fuel_moisture)));
+            return 1f / (1 + Mathd.Exp(-(-11.138 + 1.4054 * wind_speed - 3.4217 * fuel_moisture)));
         }
 
         /// return rate of spread (m/h) [Range = 0 - 8000].
@@ -109,14 +105,14 @@ namespace PREACT.Wildfire.AFDRS
         ///   fuel_moisture: dead fuel moisture content (%)
         ///   overstorey_cover: (%)
         ///   overstorey_height: (m)
-        private static float ROS_mallee(float wind_speed, float fuel_moisture, float overstorey_cover, float overstorey_height, float spread_probability, float crown_probability)
+        private static double ROS_mallee(double wind_speed, double fuel_moisture, double overstorey_cover, double overstorey_height, double spread_probability, double crown_probability)
         {
-            float ros_surface = 3.337f * wind_speed * Mathf.Exp(-0.1284f * fuel_moisture) * Mathf.Pow(overstorey_height, -0.7073f) * 60f;
-            float ros_crown = 9.5751f * wind_speed * Mathf.Exp(-0.1795f * fuel_moisture) * Mathf.Pow((overstorey_cover / 100f), 0.3589f) * 60f;
+            double ros_surface = 3.337 * wind_speed * Mathd.Exp(-0.1284 * fuel_moisture) * Mathd.Pow(overstorey_height, -0.7073) * 60;
+            double ros_crown = 9.5751 * wind_speed * Mathd.Exp(-0.1795 * fuel_moisture) * Mathd.Pow((overstorey_cover / 100), 0.3589) * 60;
 
-            float ROS_mallee;
+            double ROS_mallee;
 
-            if (spread_probability < 0.5f)
+            if (spread_probability < 0.5)
             {
                 ROS_mallee = 0;
             }
@@ -147,11 +143,11 @@ namespace PREACT.Wildfire.AFDRS
         ///   fuel_load_surface: surface fuel load (t/ha)
         ///   fuel_load_canopy: canopy fuel load (t/ha)
         ///   crown_probability: crown probability %
-        private static float fuel_load_mallee(float fuel_load_surface, float fuel_load_canopy, float crown_probability)
+        private static double fuel_load_mallee(double fuel_load_surface, double fuel_load_canopy, double crown_probability)
         {
-            float fuel_load_mallee;
+            double fuel_load_mallee;
 
-            if (crown_probability <= 0.01f)
+            if (crown_probability <= 0.01)
             {
                 fuel_load_mallee = fuel_load_surface;
             }
@@ -170,18 +166,18 @@ namespace PREACT.Wildfire.AFDRS
         /// returns the fireline intensity (kW/m) based on Byram 1959
         ///   ROS: forward rate of spread (km/h)
         ///   fuel_load: fine fuel load (t/ha)
-        public static float intensity(float ROS, float fuel_load)
+        public static double IntensityMaleeHeath(double ROS, double fuel_load)
         {
             // convert units
             ROS = ROS / 3600; // m/s
             fuel_load = fuel_load / 10; //kg/m^2
 
-            return 18600f * ROS * fuel_load;
+            return 18600 * ROS * fuel_load;
         }
 
-        private static float flame_height_mallee(float intensity)
+        private static double flame_height_mallee(double intensity)
         {
-            return Mathf.Exp(-4.142f) * Mathf.Pow(intensity, 0.633f);
+            return Mathd.Exp(-4.142f) * Mathd.Pow(intensity, 0.633f);
         }
         
         static readonly int[] fbi_b = { 0, 6, 12, 24, 50, 100 }; //use same fbi bounds, fbi high anchor and intensity high anchor for all classes
@@ -190,18 +186,18 @@ namespace PREACT.Wildfire.AFDRS
         ///   fuel_moisture: dead fuel moisture content (%)
         ///   overstorey_cover: (%)
         ///   intensity: fire line intensity (kW/m)
-        private static int FBI_mallee(float wind_speed, float fuel_moisture, float overstorey_cover, float intensity)
+        private static int FBI_mallee(double wind_speed, double fuel_moisture, double overstorey_cover, double intensity)
         {
-            float intensity_ha; //arbitrary high anchor for intensity
-            float param_la, param_ua, fbi_la, fbi_ua; //upper and lower anchors for parameter and fbi
+            double intensity_ha; //arbitrary high anchor for intensity
+            double param_la, param_ua, fbi_la, fbi_ua; //upper and lower anchors for parameter and fbi
             
             int fbi_ha = 200; //arbitrary high anchor for fbi
             int param_ha = 90000;
-            float param;
+            double param;
 
 
-            float spread_probability = spread_prob_mallee(wind_speed, fuel_moisture, overstorey_cover);
-            float crown_probability = crown_prob_mallee(wind_speed, fuel_moisture);
+            double spread_probability = spread_prob_mallee(wind_speed, fuel_moisture, overstorey_cover);
+            double crown_probability = crown_prob_mallee(wind_speed, fuel_moisture);
 
             if(spread_probability < 0.5f) //category 1
             {
@@ -256,7 +252,7 @@ namespace PREACT.Wildfire.AFDRS
                 }                   
             }
 
-            float FBI_mallee = fbi_la + (fbi_ua - fbi_la) * (param - param_la) / (param_ua - param_la);
+            double FBI_mallee = fbi_la + (fbi_ua - fbi_la) * (param - param_la) / (param_ua - param_la);
 
             return (int)FBI_mallee; //FBI needs to be truncated for National consistency
         }

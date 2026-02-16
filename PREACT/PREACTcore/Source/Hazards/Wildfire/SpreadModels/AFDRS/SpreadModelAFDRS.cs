@@ -135,6 +135,54 @@ namespace PREACT.Wildfire.AFDRS
         public override double GetFireIntensity()
         {
             return _outputs.SurfaceFireIntensity;
-        }        
+        }
+
+        //Van Wagner 1977, taken from Canadian FBP system
+        public static double SlopeFactor(double percentSlope)
+        {
+            return Mathd.Min(10, Mathd.Exp(3.533 * Mathd.Pow(percentSlope * 0.01, 1.2)));
+        }
+
+        //Adapted from Behave
+        public static void CalculateDirectionOfMaxSpread(double windAzimuth, double slopeAzimuth, double noWindNoSlopeROS, double windROS, double slopeROS, out double forwardROS, out double spreadDirection)
+        {
+            //Calculate directional components (direction is clockwise from upslope)
+            double correctedWindDirection = windAzimuth + 180; //back to wind direction from wind azimuth
+            if (correctedWindDirection >= 360)
+            {
+                correctedWindDirection -= 360;
+            }
+            correctedWindDirection -= slopeAzimuth; //wind direction relative to aspect
+
+            double windDirRadians = correctedWindDirection * Mathd.Deg2Rad;
+
+            // Calculate coordinate components
+            double x = slopeROS + (windROS * Mathd.Cos(windDirRadians));
+            double y = windROS * Mathd.Sin(windDirRadians);
+            double rateVector = Mathd.Sqrt((x * x) + (y * y));
+
+            // Apply wind and slope rate to spread rate
+            forwardROS = noWindNoSlopeROS + rateVector;
+
+            // Calculate azimuth
+            double azimuth = Mathd.Atan2(y, x);
+            // Recalculate azimuth to degrees
+            azimuth *= Mathd.Rad2Deg;
+            // If angle is negative, add 360 degrees
+            if (azimuth < 0)
+            {
+                azimuth += 360.0;
+            }
+
+            // Convert azimuth to be relative to North
+            double dirMaxSpreadRelativeToNorth = azimuth;
+            dirMaxSpreadRelativeToNorth += slopeAzimuth + 180.0; // spread direction is now relative to north
+            while (dirMaxSpreadRelativeToNorth >= 360.0)
+            {
+                dirMaxSpreadRelativeToNorth -= 360.0;
+            }
+
+            spreadDirection = dirMaxSpreadRelativeToNorth;
+        }
     }
 }

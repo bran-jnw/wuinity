@@ -3,7 +3,7 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public class Spinifex
+    public static class Spinifex
     {
         public enum FuelSubTypes { Spinifex, SpinifexWoodland };
 
@@ -11,14 +11,6 @@ namespace PREACT.Wildfire.AFDRS
         private const double KGSQM_TO_TPH = 10f;
         private const double SECONDS_PER_HOUR = 3600f; // s
         private const double MAX_COVER = 75f; // %
-
-        double _fmc, _ros, _intensity, _flameHeight; //output
-        FuelSubTypes _subtype;
-
-        public Spinifex(FuelSubTypes subtype) 
-        {
-            _subtype = subtype;
-        }
 
         /// <summary>
         /// AWAP_uf: monthly top level soil moisture(unitless 0-1)from http://www.sciro.au/awap
@@ -30,12 +22,20 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="time_since_fire"></param>
         /// <param name="relative_humidity"></param>
         /// <param name="air_temperature"></param>        
-        public void Calculate(double AWAP_uf, int time_since_fire, double relative_humidity, double air_temperature, double wind_speed_10m, double wrf)
+        public static AFDRSOutput Calculate(double AWAP_uf, int time_since_fire, double relative_humidity, double air_temperature, double wind_speed_10m, double wrf, FuelSubTypes subtype, , double percentSlope, double windAzimuth, double slopeAzimuth)
         {
-            _fmc = FMC_spinifex(AWAP_uf, time_since_fire, relative_humidity, air_temperature, _subtype);
-            _ros = ROS_spinifex(wind_speed_10m, time_since_fire, _fmc, wrf, _subtype);
-            _intensity = intensity_spinifex(_ros, time_since_fire, _subtype);
-            _flameHeight = flame_height_spinifex(_ros, time_since_fire, _subtype);
+            double fmc = FMC_spinifex(AWAP_uf, time_since_fire, relative_humidity, air_temperature, subtype);
+
+            double noWindNoSlopeROS = ROS_spinifex(0, time_since_fire, fmc, wrf, subtype);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double windROS = ROS_spinifex(wind_speed_10m, time_since_fire, fmc, wrf, subtype);
+
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
+            double intensity = intensity_spinifex(ros, time_since_fire, subtype);
+            double flameHeight = flame_height_spinifex(ros, time_since_fire, subtype);
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
 

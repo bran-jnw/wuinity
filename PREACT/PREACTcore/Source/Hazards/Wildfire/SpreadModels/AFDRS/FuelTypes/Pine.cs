@@ -2,7 +2,7 @@
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public class Pine
+    public static class Pine
     {
         private const double HEAT_CONTENT = 18600; //KJ/kg
         private const double KGSQM_TO_TPH = 10; //kg/m2 to t/ha
@@ -10,13 +10,6 @@ namespace PREACT.Wildfire.AFDRS
         private const double KGM2_PER_LBFT2 = 4.88243; //kg/m2 per lb/ft2
         private const double KJKG_PER_BTULB = 2.326; //kg/kJ per Btu/lb
         private const double MSEC_PER_FTMIN = 0.00508; //m/s per ft/min
-
-        double _fmc, _ros, _intensity, _flameHeight; //output
-
-        public Pine()
-        {
-
-        }
 
         /// <summary>
         /// 
@@ -26,13 +19,21 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="U_10"></param>
         /// <param name="DF">Drought factor</param>
         /// <param name="KBDI">Keetch Byram drought index KBDI</param>
-        public void Calculate(double temp, double rh, double U_10, double DF, double KBDI)
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double DF, double KBDI, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
-            _fmc = FMC_pine(temp, rh);
-            double[] fhp = fb_pine_ensemble(U_10, _fmc, DF, KBDI); //TODO:correct call?
-            _ros = fhp[0];
-            _intensity = fhp[1];
-            _flameHeight = fhp[2];
+            double fmc = FMC_pine(temp, rh);
+
+            double noWindNoSlopeROS = fb_pine_ensemble(0, fmc, DF, KBDI)[0]; //TODO:correct method call?
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double[] ensemble = fb_pine_ensemble(U_10, fmc, DF, KBDI);
+            double windROS = ensemble[0]; //TODO:correct method call?
+
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
+            double intensity = ensemble[1]; //TODO: re-calc with new ROS
+            double flameHeight = ensemble[2]; //TODO: re-calc with new ROS
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
         /// returns the grass fuel moisture content (%) based on McArthur (1966)
@@ -116,7 +117,7 @@ namespace PREACT.Wildfire.AFDRS
             double moisture_fraction = mc / 100;
 
             //adjust units
-            double fuel_load_SI = (fl_s / KGSQM_TO_TPH) * FA_pine(DF, KBDI, (wrf));
+            double fuel_load_SI = (fl_s / KGSQM_TO_TPH) * FA_pine(DF, KBDI, wrf);
             double fuel_load_IMP = fuel_load_SI / KGM2_PER_LBFT2; // convert to imperial kg/m2 per lb/ft2
 
             //foliar moisture content
@@ -284,7 +285,6 @@ namespace PREACT.Wildfire.AFDRS
             double[] fire_behaviour_array = { ROS, Intensity_total, flame_height };
 
             return fire_behaviour_array;
-            //fb_pine_ensemble = result_array
         }
     }
 }

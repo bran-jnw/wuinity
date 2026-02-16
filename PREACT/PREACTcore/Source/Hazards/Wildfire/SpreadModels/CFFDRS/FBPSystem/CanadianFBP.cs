@@ -392,7 +392,7 @@ namespace PREACT.Wildfire
         static double slope_effect(CanadianFBPInputs input, CanadianFBPFuel fuel, MainOutputs output, double isi)
         /* ISI is ISZ really */
         {
-            double isf, rsf, wse, percentSlope, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, WSV, raz, check, wse2, wse1;
+            double isf, rsf, wse, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, WSV, raz, check, wse2, wse1;
             double mu = 0.0;
 
             if (input.PercentSlope > 70.0)
@@ -470,6 +470,7 @@ namespace PREACT.Wildfire
                 raz = 360 - raz;
             }
             output.SpreadAzimuth = raz;
+
             return WSV;
         }
 

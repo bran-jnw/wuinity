@@ -54,7 +54,7 @@ namespace PREACT.Wildfire
             _inputs.Elevation = (int)(0.5 + cellData.elevation);
             int percentSlope = (int)(0.5 + Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100);
             _inputs.PercentSlope = percentSlope;
-            _inputs.SlopeAzimuth = (int)(0.5 + cellData.aspect);
+            _inputs.SlopeAzimuth = (int)(0.5 + cellData.aspect); 
 
             _inputs.Lat = spatialManager.SimulationCenterLatLon.x;
             _inputs.Lon = spatialManager.SimulationCenterLatLon.y;

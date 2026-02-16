@@ -3,7 +3,7 @@
 namespace PREACT.Wildfire.AFDRS
 {
     public static class AFDRS
-    {
+    {      
         ///returns the vapour pressure deficit in hPa, calculated using Tetens (1930)
         ///args
         ///  temp: air temperature (C)

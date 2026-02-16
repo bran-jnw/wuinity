@@ -3,7 +3,7 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public class Grassland
+    public static class Grassland
     {
         /*public struct Coefficients
         {
@@ -26,36 +26,33 @@ namespace PREACT.Wildfire.AFDRS
 
         public enum States { Natural, Grazed, EatenOut }
 
-
-        double _fmc, _ros, _intensity, _flameHeight;
-        double _fuel_load, _curing;
-        States _state;
-
-        public Grassland(FuelSubTypes fuelSubType, double fuel_load, double curing)
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double percentSlope, double windAzimuth, double slopeAzimuth, FuelSubTypes fuelSubType, double fuel_load, double curing, States state)
         {
+            double fmc = FMC_grass(temp, rh);
+
             if (fuelSubType == FuelSubTypes.ChenopodShrubland || fuelSubType == FuelSubTypes.LowWetland)
             {
-                _state = States.EatenOut;
+                state = States.EatenOut;
             }
             else if (fuelSubType == FuelSubTypes.GambaGrass)
             {
-                _state = States.Natural;
+                state = States.Natural;
             }
             else
             {
-                _state = load_to_state_grass(fuel_load);
+                state = load_to_state_grass(fuel_load);
             }
 
-            _fuel_load = fuel_load;
-            _curing = curing;
-        }
+            double noWindNoSlopeROS = ROS_grass(0, fmc, curing, state);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double windROS = ROS_grass(U_10, fmc, curing, state); // fuelSubType);
 
-        public void Calculate(double temp, double rh, double U_10)
-        {
-            _fmc = FMC_grass(temp, rh);    
-            _ros = ROS_grass(U_10, _fmc, _curing, _state);// fuelSubType);
-            _intensity = Intensity_grass(_ros, _fuel_load);// fuelSubType);
-            _flameHeight = Flame_height_grass(_ros, _state);
+            //calculate final values
+            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
+            double intensity = Intensity_grass(ros, fuel_load);// fuelSubType);
+            double flameHeight = Flame_height_grass(ros, state);
+
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
         /// returns the grass fuel moisture content (%) based on McArthur (1966)
