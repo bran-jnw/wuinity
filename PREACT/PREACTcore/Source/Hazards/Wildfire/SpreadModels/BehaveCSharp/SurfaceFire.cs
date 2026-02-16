@@ -140,9 +140,7 @@ namespace PREACT.Wildfire.Behave
 
         public double calculateNoWindNoSlopeSpreadRate(double reactionIntensity, double propagatingFlux, double heatSink)
         {
-            noWindNoSlopeSpreadRate_ = (heatSink < 1.0e-07)
-                ? (0.0)
-                : (reactionIntensity * propagatingFlux / heatSink);
+            noWindNoSlopeSpreadRate_ = (heatSink < 1.0e-07) ? (0.0) : (reactionIntensity * propagatingFlux / heatSink);
             return noWindNoSlopeSpreadRate_;
         }
 
@@ -176,9 +174,7 @@ namespace PREACT.Wildfire.Behave
         void calculateFlameLength()
         {
             // Byram 1959, Albini 1976
-            flameLength_ = ((firelineIntensity_ < 1.0e-07)
-                ? (0.0)
-                : (0.45 * pow(firelineIntensity_, 0.46)));
+            flameLength_ = ((firelineIntensity_ < 1.0e-07) ? (0.0) : (0.45 * pow(firelineIntensity_, 0.46)));
         }
 
         public double calculateForwardSpreadRate(int fuelModelNumber, bool hasDirectionOfInterest = false, double directionOfInterest = -1.0)
@@ -321,13 +317,11 @@ namespace PREACT.Wildfire.Behave
             // Recalculate azimuth in degrees
             azimuth *= 180.0 / M_PI;
 
-            // If angle is negative, add 360 degrees
             if (azimuth < -1.0e-20)
             {
                 azimuth += 360.0;
             }
 
-            // Undocumented hack from BehavePlus code
             if (fabs(azimuth) < 0.5)
             {
                 azimuth = 0.0;

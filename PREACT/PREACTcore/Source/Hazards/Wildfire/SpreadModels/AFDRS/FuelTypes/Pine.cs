@@ -223,23 +223,23 @@ namespace PREACT.Wildfire.AFDRS
         }
 
 
-        /*private static double ROS_pine(double U_10, double mc, double DF, double KBDI)
+        private static double ROS_pine(double U_10, double mc, double DF, double KBDI)
         {
-            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, fuel_models_default); //TODO:check added deault
+            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_models_default); //TODO:check added default
             return FB_pine[0];
         }
 
-        private static double Intensity_pine(U_10, mc, DF, KBDI) As Single
-            Dim FB_pine() As Single
-            FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI)
-            Intensity_pine = FB_pine(1)
-        End Function
+        private static double Intensity_pine(double U_10, double mc, double DF, double KBDI)
+        {
+            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_models_default);
+            return FB_pine[1];
+        }            
 
-        private static double FH_pine(U_10, mc, DF, KBDI) As Single
-            Dim FB_pine() As Single
-            FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI)
-            FH_pine = FB_pine(2)
-        }*/
+        private static double FH_pine(double U_10, double mc, double DF, double KBDI)
+        {
+            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_models_default);
+            return FB_pine[2];
+        }
 
         // fuel array elements: proportion, fl_s, fl_o, bh_o, bd_o
         static readonly double[] fuelArray1 = { 0.151, 4, 11.5, 0.7, 0.17 };

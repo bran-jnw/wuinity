@@ -41,7 +41,7 @@ namespace PREACT.Wildfire
             if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.BehavePlus)
             {
                 InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
-                _spreadModel = new SpreadModelBehavePlus(fuelModels, _cellData, moisture);
+                _spreadModel = new SpreadModelBehave(fuelModels, _cellData, moisture);
             }
             else if(input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.CanadianFBP)
             {

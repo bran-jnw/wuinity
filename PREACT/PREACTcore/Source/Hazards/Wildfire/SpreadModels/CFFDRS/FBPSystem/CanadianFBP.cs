@@ -453,12 +453,15 @@ namespace PREACT.Wildfire
                 wse2 = 28.0 - Mathd.Log(1.0 - isf / (2.496 * output.ff)) / 0.0818;
                 wse = wse2;
             }
+            //wind
             wrad = input.WindAzimuth * Mathd.Deg2Rad;
             wsx = input.WindSpeed * Mathd.Sin(wrad);
             wsy = input.WindSpeed * Mathd.Cos(wrad);
+            //slope
             srad = input.SlopeAzimuth  * Mathd.Deg2Rad;
             wsex = wse * Mathd.Sin(srad);
             wsey = wse * Mathd.Cos(srad);
+            //combine
             wsvx = wsx + wsex;
             wsvy = wsy + wsey;
             WSV = Mathd.Sqrt(wsvx * wsvx + wsvy * wsvy);

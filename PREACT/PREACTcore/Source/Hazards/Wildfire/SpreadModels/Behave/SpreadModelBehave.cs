@@ -3,7 +3,7 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire
 {
-    public class SpreadModelBehavePlus : SpreadModel
+    public class SpreadModelBehave : SpreadModel
     {
         public static readonly BehaveCore.TwoFuelModelsMethod.TwoFuelModelsMethodEnum TwoFuelModelsMethod = BehaveCore.TwoFuelModelsMethod.TwoFuelModelsMethodEnum.NoMethod;
         public static readonly BehaveCore.FractionUnits.FractionUnitsEnum MoistureUnits = BehaveCore.FractionUnits.FractionUnitsEnum.Percent;
@@ -24,7 +24,7 @@ namespace PREACT.Wildfire
         private LandscapeCellData _cellData;
         bool _hasFuelLoad = false;
 
-        public SpreadModelBehavePlus(BehaveCore.FuelModels fuelModel, LandscapeCellData cellData, InitialFuelMoisture moisture)
+        public SpreadModelBehave(BehaveCore.FuelModels fuelModel, LandscapeCellData cellData, InitialFuelMoisture moisture)
         {
             _crownBehave = new BehaveCore.Crown(fuelModel);
             _cellData = cellData;

@@ -23,7 +23,7 @@ namespace PREACT.Wildfire.AFDRS
                 return;
             }
 
-            _percentSlope = 0.5 + Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100;
+            _percentSlope = Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100;
             _slopeAzimuth = (int)(0.5 + cellData.aspect);
         }
 
@@ -59,9 +59,6 @@ namespace PREACT.Wildfire.AFDRS
             double rosDirection = _output.ROS;
             if (rosDirection != 0.0) // if forward spread rate is not zero
             {
-                // Calculate the fire spread rate in this azimuth
-                // if it deviates more than a tenth degree from the maximum azimuth
-
                 // Calculate beta: the angle between the direction of max spread and the direction of interest
                 double beta = Mathd.Abs(_output.Direction - directionOfInterest);
 
@@ -112,7 +109,7 @@ namespace PREACT.Wildfire.AFDRS
             // Calculate coordinate components
             double x = slopeROS + (windROS * Mathd.Cos(windDirRadians));
             double y = windROS * Mathd.Sin(windDirRadians);
-            double rateVector = Mathd.Sqrt((x * x) + (y * y));
+            double rateVector = Mathd.Sqrt((x * x) + (y * y)); //this is equivalent to WSV
 
             // Apply wind and slope rate to spread rate
             forwardROS = noWindNoSlopeROS + rateVector;

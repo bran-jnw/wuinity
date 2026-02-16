@@ -28,7 +28,7 @@ namespace PREACT.Wildfire.AFDRS
             return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
         }
 
-        //This migh tbe useful at some point, this is use dif doign the Canadian approach to spread direction taking into account wind and slope
+        //This might tbe useful at some point, this is used if doing the Canadian approach to spread direction taking into account wind and slope
         private static double SlopeWindEquivalent(double slopeROS, double mc, double tsf)
         {
             double U_2 = Mathd.Pow(slopeROS / (0.678 * Mathd.Exp(-0.0243 * mc) * (1 - Mathd.Exp(-0.116 * tsf)) * 60), 1 / 1.312);
