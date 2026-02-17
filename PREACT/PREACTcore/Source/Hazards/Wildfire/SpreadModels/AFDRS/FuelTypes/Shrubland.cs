@@ -25,7 +25,7 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="waf"></param>
         /// <param name="fuel_load"></param>
 
-        public static AFDRSOutput Calculate(double temp, double rh, double rain, double hours, double U_10, double h_el, double waf, double fuel_load, , double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Heath)
+        public static AFDRSOutput Calculate(double temp, double rh, double rain, double hours, double U_10, double h_el, double waf, double fuel_load, double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Heath)
         {
             double fmc = FMC_heath(temp, rh, rain, hours);
             double SI = SI_heath(U_10, h_el, fmc, waf);

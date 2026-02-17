@@ -9,6 +9,7 @@ namespace PREACT.Wildfire.AFDRS
         private AFDRSOutput _output;
         private bool _hasFuelLoad;
 
+        private static double _kmPerHourToMeterPerSecond = 1.0 / 3.6;
         private static double _meterPerHourToMeterPerSecond = 1.0 / 3600.0;
 
         double _eccentricity;
@@ -133,6 +134,105 @@ namespace PREACT.Wildfire.AFDRS
             }
 
             spreadDirection = dirMaxSpreadRelativeToNorth;
+        }
+
+        public static double CalculateEccentricity(double fireLengthToWidthRatio)
+        {
+            double eccentricity = 0.0;
+            double x = (fireLengthToWidthRatio * fireLengthToWidthRatio) - 1.0;
+            if (x > 0.0)
+            {
+                eccentricity = Mathd.Sqrt(x) / fireLengthToWidthRatio;
+            }
+
+            return eccentricity;
+        }
+
+        /// <summary>
+        /// Listed for Spinifex, grassland, buttongrass, heathland (https://research.csiro.au/spark/resources/model-library/)
+        /// </summary>
+        /// <param name="U_10">wind speed, km/h</param>
+        /// <returns></returns>
+        public static double GrasslandLengthToWidth(double U_10)
+        {
+            double LBR = 1.0;
+            if (U_10 < 5)
+            {
+                LBR = 1.0;
+            }
+            else
+            {
+                LBR = 1.1 * Mathd.Pow(U_10, 0.464);
+            }
+
+            return LBR;
+        }
+
+        /// <summary>
+        /// Listed for Eucalypt (dry/wet), Mallee heath (https://research.csiro.au/spark/resources/model-library/)
+        /// </summary>
+        /// <param name="U_10">wind speed, km/h</param>
+        /// <returns></returns>
+        public static double EucalyptLengthToWidth(double U_10)
+        {
+            double LBR = 1.0;
+            if (U_10 < 5)
+            {
+                LBR = 1.0;
+            }
+            else if (U_10 < 25)
+            {
+                LBR = 0.9286 * Mathd.Exp(0.0505 * U_10);
+            }
+            else
+            {
+                LBR = 0.1143 * U_10 + 0.4143;
+            }
+
+            return LBR;
+        }
+
+        public static double CalculateSurfaceFireLengthToWidthRatio(double U_10)
+        {
+            double lengthToWidthRatio;
+
+            //km/h to m/s
+            U_10 *= _kmPerHourToMeterPerSecond;
+
+            if (U_10 > 1.0e-07)
+            {
+                //coefficients from Farsite manual as they are in m/s
+                lengthToWidthRatio = .936 * Mathd.Exp(0.2566 * U_10) + 0.461 * Mathd.Exp(-0.1548 * U_10) - .397;
+                // maximum eccentricity
+                if (lengthToWidthRatio > 8.0)
+                {
+                    lengthToWidthRatio = 8.0;
+                }
+            }
+            else
+            {
+                lengthToWidthRatio = 1.0;
+            }
+
+            return lengthToWidthRatio;
+        }
+
+        public static double CalculateCrownFireLengthToWidthRatio(double U_10)
+        {
+            double lengthToWidthRatio;
+            //Calculates the crown fire length-to-width ratio given the 20-ft wind speed (in mph)
+            // (Rothermel 1991, Equation 10, p16)            
+            if (U_10 > 1.0e-07)
+            {
+                U_10 *= 0.621371192;
+                lengthToWidthRatio = 1.0 + 0.125 * U_10;
+            }
+            else
+            {
+                lengthToWidthRatio = 1.0;
+            }
+
+            return lengthToWidthRatio;
         }
     }
 }
