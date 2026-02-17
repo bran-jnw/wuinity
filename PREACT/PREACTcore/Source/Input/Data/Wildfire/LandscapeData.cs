@@ -214,9 +214,7 @@ namespace PREACT.Wildfire
                         Header.CrownFuels = 21;
 						Header.GroundFuels = 21;
                         break;
-                }
-				//assume always present
-                
+                }                
 
 				//TODO: fix, probably used to determine UTM zone and when doing pre-runs for fuel moisture content
                 //Header.latitude = reader.ReadInt32();
@@ -257,12 +255,13 @@ namespace PREACT.Wildfire
                 Header.hiduff = 0;
                 Header.lowoody = 0;
                 Header.hiwoody = 0;
-				                
+
+                //https://gdal.org/en/stable/drivers/raster/lcp.html
                 Header.GridUnits = 0; //linear unit: 0 = meters, 1 = feet, 2 = kilometers
                 //SI defaults
-                Header.EUnits = 1;
-                Header.SUnits = 1;
-                Header.AUnits = 1;
+                Header.EUnits = 0; //meters
+                Header.SUnits = 0; //degrees
+                Header.AUnits = 2;
                 Header.FOptions = 0;
                 Header.CUnits = 1;
                 Header.HUnits = 1;
@@ -270,18 +269,6 @@ namespace PREACT.Wildfire
                 Header.PUnits = 1;
                 Header.DUnits = 1;
                 Header.WOptions = 0; //coarse woody options(1 if coarse woody band is present)
-
-				//assume we have no category counts
-                Header.numelev = 1;
-                Header.numslope = 1;
-                Header.numaspect = 1;
-                Header.numfuel = 1;
-                Header.numcover = 1;
-                Header.numheight = 1;
-                Header.numbase = 1;
-                Header.numdensity = 1;
-                Header.numduff = 1;
-                Header.numwoody = 1;
 
 				//dummy stuff
 				char[] filePaths = new char[256];// "Not set...".PadRight(256).ToCharArray();
@@ -356,7 +343,7 @@ namespace PREACT.Wildfire
                                 Header.hicover = Mathf.Max(landscape[index], Header.hicover);
                             }
 
-                            //caonpy height
+                            //canopy height
                             if (rasterIndex == 5)
                             {
                                 Header.loheight = Mathf.Min(landscape[index], Header.loheight);
@@ -380,7 +367,23 @@ namespace PREACT.Wildfire
                     }
                 }
 
-				CantAllocLCP = false;
+                //category counts
+                Header.numelev = (Header.hielev - Header.loelev) / 200;
+				for(int i = 0; i < Header.numelev; ++i)
+				{
+					Header.elevs[i] = Header.loelev + i * 200;
+                }
+                Header.numslope = 100;
+                Header.numaspect = 100;
+                Header.numfuel = 100;
+                Header.numcover = 100;
+                Header.numheight = 100;
+                Header.numbase = 100;
+                Header.numdensity = 100;
+                Header.numduff = 100;
+                Header.numwoody = 100;
+
+                CantAllocLCP = false;
             }
         }
 
