@@ -22,7 +22,7 @@ namespace PREACT.Wildfire.AFDRS
         /// <param name="time_since_fire"></param>
         /// <param name="relative_humidity"></param>
         /// <param name="air_temperature"></param>        
-        public static AFDRSOutput Calculate(double AWAP_uf, int time_since_fire, double relative_humidity, double air_temperature, double wind_speed_10m, double wrf, FuelSubTypes subtype, , double percentSlope, double windAzimuth, double slopeAzimuth)
+        public static AFDRSOutput Calculate(double AWAP_uf, int time_since_fire, double relative_humidity, double air_temperature, double wind_speed_10m, double wrf, FuelSubTypes subtype, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
             double fmc = FMC_spinifex(AWAP_uf, time_since_fire, relative_humidity, air_temperature, subtype);
 

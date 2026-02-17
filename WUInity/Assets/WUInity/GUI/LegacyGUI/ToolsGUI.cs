@@ -290,7 +290,16 @@ namespace WUInity.UI
                     //_engine.Simulation.DisplayTriggerBuffer();
                     PREACT.Engine.Message(null, PREACT.Engine.LogType.Debug, "Not yet implemented.");
                 }
-            }   
+            }
+
+            //Landscape tools
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Landscape tools");
+            ++buttonIndex;
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Tiff->LCP"))
+            {
+                OpenSelectGeoTiff();
+            }
         }        
 
         //GPW
@@ -509,6 +518,30 @@ namespace WUInity.UI
             {
                 PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _input.Simulation.Data, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
             }
+        }
+
+        //convert geotiff to lcp
+        private void OpenSelectGeoTiff()
+        {
+            FileBrowser.SetFilters(false, geoTiffFilter);
+            FileBrowser.ShowLoadDialog(SaveGeoTiffFilePath, CancelSaveLoad, FileBrowser.PickMode.Files, false, null, null, "Select Landscape GeoTiff", "Load");
+        }
+        string _geoTiffFilePath;
+        private void SaveGeoTiffFilePath(string[] paths)
+        {
+            _geoTiffFilePath = paths[0];
+            OpenSaveLCP();
+        }
+        private void OpenSaveLCP()
+        {
+            FileBrowser.SetFilters(false, lcpFilter);
+            string initialPath = Path.GetDirectoryName(_geoTiffFilePath);
+            FileBrowser.ShowSaveDialog(SaveLCPFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Specify LCP file name", "Save");
+        }
+        private void SaveLCPFile(string[] paths)
+        {
+            PREACT.Wildfire.LandscapeData landscape = new PREACT.Wildfire.LandscapeData(_geoTiffFilePath, Vector2d.zero);
+            landscape.SaveLCP(paths[0]);
         }
     }
 }

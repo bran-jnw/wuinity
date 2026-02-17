@@ -202,6 +202,7 @@ namespace PREACT.Wildfire
 
 				//https://gdal.org/en/stable/drivers/raster/lcp.html
 				Header.CrownFuels = 20; //20 if no crown fuels, 21 if crown fuels exist(crown fuels = canopy height, canopy base height, canopy bulk density)
+                Header.GroundFuels = 20; //20 if no ground fuels, 21 if ground fuels exist (ground fuels = duff loading, coarse woody)
                 switch (NumVals)
                 {
                     case 8:
@@ -211,19 +212,20 @@ namespace PREACT.Wildfire
                     case 10:
                         // 5 basic, crown fuels, and duff and woody
                         Header.CrownFuels = 21;
+						Header.GroundFuels = 21;
                         break;
                 }
 				//assume always present
-                Header.GroundFuels = 21; //20 if no ground fuels, 21 if ground fuels exist (ground fuels = duff loading, coarse woody)
+                
 
 				//TODO: fix, probably used to determine UTM zone and when doing pre-runs for fuel moisture content
                 //Header.latitude = reader.ReadInt32();
 
                 //offset to preserve coordinate precision (legacy from 16-bit OS days), ignore
-                /*Header.loeast = reader.ReadDouble();
-                Header.hieast = reader.ReadDouble();
-                Header.lonorth = reader.ReadDouble();
-                Header.hinorth = reader.ReadDouble();*/
+                Header.loeast = 0;
+                Header.hieast = 0;
+                Header.lonorth = 0;
+                Header.hinorth = 0;
 
 				//gets updated in loop when reading data
                 Header.loelev = int.MaxValue;
@@ -251,11 +253,10 @@ namespace PREACT.Wildfire
                 Header.hidensity = int.MinValue;
 
 				//does not seem to be included in GeoTIFF from Landfire, ignore for now
-                /*Header.loduff = reader.ReadInt32();
-                Header.hiduff = reader.ReadInt32();
-
-                Header.lowoody = reader.ReadInt32();
-                Header.hiwoody = reader.ReadInt32();*/
+                Header.loduff = 0;
+                Header.hiduff = 0;
+                Header.lowoody = 0;
+                Header.hiwoody = 0;
 				                
                 Header.GridUnits = 0; //linear unit: 0 = meters, 1 = feet, 2 = kilometers
                 //SI defaults
@@ -270,9 +271,21 @@ namespace PREACT.Wildfire
                 Header.DUnits = 1;
                 Header.WOptions = 0; //coarse woody options(1 if coarse woody band is present)
 
-                //dummy stuff
-				char[] filePaths = new char[256];
-                char[] description = new char[512];
+				//assume we have no category counts
+                Header.numelev = 1;
+                Header.numslope = 1;
+                Header.numaspect = 1;
+                Header.numfuel = 1;
+                Header.numcover = 1;
+                Header.numheight = 1;
+                Header.numbase = 1;
+                Header.numdensity = 1;
+                Header.numduff = 1;
+                Header.numwoody = 1;
+
+				//dummy stuff
+				char[] filePaths = new char[256];// "Not set...".PadRight(256).ToCharArray();
+				char[] description = new char[512];// "This data was read from a GeoTiff.".PadRight(512).ToCharArray();
                 Header.ElevFile = filePaths;
                 Header.SlopeFile = filePaths;
                 Header.AspectFile = filePaths;
@@ -307,9 +320,9 @@ namespace PREACT.Wildfire
 								continue;
 							}
 
-							//update min/max for header
-							//elevation
-							if(rasterIndex == 0)
+                            //update min/max for header
+                            //elevation
+                            if (rasterIndex == 0)
 							{
 								Header.loelev = Mathf.Min(landscape[index], Header.loelev);
                                 Header.hielev = Mathf.Max(landscape[index], Header.hielev);
