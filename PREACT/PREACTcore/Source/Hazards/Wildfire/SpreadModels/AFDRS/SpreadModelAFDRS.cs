@@ -1,16 +1,19 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
     public class SpreadModelAFDRS : SpreadModel
     {
+        public enum FuelModels { ButtonGrass, Forest, Grassland, GrassyWoodland, MalleeHeath, Pine, Shrubland, Spinifex }
+
+        private FuelModels _fuelModel;
 
         private AFDRSOutput _output;
         private bool _hasFuelLoad;
 
-        private static double _kmPerHourToMeterPerSecond = 1.0 / 3.6;
-        private static double _meterPerHourToMeterPerSecond = 1.0 / 3600.0;
+        private static readonly double _kmPerHourToMeterPerSecond = 1.0 / 3.6;
+        private static readonly double _meterPerHourToMeterPerSecond = 1.0 / 3600.0;
 
         double _eccentricity;
 
@@ -22,6 +25,11 @@ namespace PREACT.Wildfire.AFDRS
             {
                 _hasFuelLoad = false;
                 return;
+            }
+
+            if(cellData.fuel_model <= 230)
+            {
+                _fuelModel = FuelModels.Forest;
             }
 
             _percentSlope = Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100;

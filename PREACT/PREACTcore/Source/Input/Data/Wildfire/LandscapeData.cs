@@ -48,11 +48,9 @@ namespace PREACT.Wildfire
 		public short w;				// coarse woody model
 	}
 
-
 	public class LandscapeData
 	{
 		// header for landscape file
-		[System.Serializable]
 		private class LCpHeader
 		{
 			public int CrownFuels;         // 20 if no crown fuels, 21 if crown fuels exist
@@ -174,7 +172,7 @@ namespace PREACT.Wildfire
 
 		private void ReadGeoTIFF(string filePath)
 		{
-            //OSGeo.GDAL.Gdal.AllRegister();
+            //OSGeo.GDAL.Gdal.AllRegister(); //should be done by engine
             using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(filePath, OSGeo.GDAL.Access.GA_ReadOnly))
             {
                 Header.numeast = tif.RasterXSize;
@@ -271,6 +269,21 @@ namespace PREACT.Wildfire
                 Header.PUnits = 1;
                 Header.DUnits = 1;
                 Header.WOptions = 0; //coarse woody options(1 if coarse woody band is present)
+
+                //dummy stuff
+				char[] filePaths = new char[256];
+                char[] description = new char[512];
+                Header.ElevFile = filePaths;
+                Header.SlopeFile = filePaths;
+                Header.AspectFile = filePaths;
+                Header.FuelFile = filePaths;
+                Header.CoverFile = filePaths;
+                Header.HeightFile = filePaths;
+                Header.BaseFile = filePaths;
+                Header.DensityFile = filePaths;
+                Header.DuffFile = filePaths;
+                Header.WoodyFile = filePaths;
+                Header.Description = description;
 
                 //from: https://landfire.gov/fuel/landscape
                 //Eight bands are included in a landscape file: elevation, slope, aspect, fire behavior fuel model, tree canopy cover, canopy height, canopy base height, and canopy bulk density.
@@ -714,15 +727,15 @@ namespace PREACT.Wildfire
 			return true;
 		}
 
-		void ReadData(string path)
+		void ReadData(string filePath)
 		{
-			if(!DoesLCPExist(path))
+			if(!DoesLCPExist(filePath))
             {
 				CantAllocLCP = true;
 				return;
 			}			
 
-			using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+			using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
 			{
 				Header.CrownFuels = reader.ReadInt32();
 				Header.GroundFuels = reader.ReadInt32();
@@ -918,7 +931,7 @@ namespace PREACT.Wildfire
 				{
 					double NumAlloc;
 
-					using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+					using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
 					{
 						//fseek(landfile, headsize, SEEK_SET);
 						//if((landscape=(short *) calloc(Header.numnorth*Header.numeast, NumVals*sizeof(short)))!=NULL)
@@ -974,11 +987,11 @@ namespace PREACT.Wildfire
 
             if (CantAllocLCP)
             {
-                Engine.Message(null, Engine.LogType.Log, " LCP found in " + path + " but could not properly read it.");
+                Engine.Message(null, Engine.LogType.Log, " LCP found in " + filePath + " but could not properly read it.");
             }
             else
             {
-                Engine.Message(null, Engine.LogType.Log, " LCP found in " + path + ", read succesfully.");
+                Engine.Message(null, Engine.LogType.Log, " LCP found in " + filePath + ", read succesfully.");
             }
         }
 
@@ -999,7 +1012,7 @@ namespace PREACT.Wildfire
 			return Header.GroundFuels - 20;
 		}
 
-		/*double ConvertEastingOffsetToUtm(double input)
+        /*double ConvertEastingOffsetToUtm(double input)
 		{
 			return input;
 			double MetersToKm = 1.0;
@@ -1054,5 +1067,132 @@ namespace PREACT.Wildfire
 
 			return input * KmToMeters - ipart * 1000.0;
 		}*/
-	}
+
+        public void SaveLCP(string filePath)
+        {
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite)))
+            {
+				writer.Write(Header.CrownFuels);
+				writer.Write(Header.GroundFuels);
+                writer.Write(Header.latitude);
+                writer.Write(Header.loeast);
+                writer.Write(Header.hieast);
+                writer.Write(Header.lonorth);
+                writer.Write(Header.hinorth);
+                writer.Write(Header.loelev);
+                writer.Write(Header.hielev);
+                writer.Write(Header.numelev);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.elevs[i]);
+                }
+                writer.Write(Header.loslope);
+                writer.Write(Header.hislope);
+                writer.Write(Header.numslope);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.slopes[i]);
+                }
+                writer.Write(Header.loaspect);
+                writer.Write(Header.hiaspect);
+                writer.Write(Header.numaspect);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.aspects[i]);
+                }
+                writer.Write(Header.lofuel);
+                writer.Write(Header.hifuel);
+                writer.Write(Header.numfuel);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.fuels[i]);
+                }
+                writer.Write(Header.locover);
+                writer.Write(Header.hicover);
+                writer.Write(Header.numcover);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.covers[i]);
+                }
+                writer.Write(Header.loheight);
+                writer.Write(Header.hiheight);
+                writer.Write(Header.numheight);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.heights[i]);
+                }
+                writer.Write(Header.lobase);
+                writer.Write(Header.hibase);
+                writer.Write(Header.numbase);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.bases[i]);
+                }
+                writer.Write(Header.lodensity);
+                writer.Write(Header.hidensity);
+                writer.Write(Header.numdensity);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.densities[i]);
+                }
+                writer.Write(Header.loduff);
+                writer.Write(Header.hiduff);
+                writer.Write(Header.numduff);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.duffs[i]);
+                }
+                writer.Write(Header.lowoody);
+                writer.Write(Header.hiwoody);
+                writer.Write(Header.numwoody);
+                for (int i = 0; i < 100; i++)
+                {
+                    writer.Write(Header.woodies[i]);
+                }
+                writer.Write(Header.numeast);
+                writer.Write(Header.numnorth);
+                writer.Write(Header.EastUtm);
+                writer.Write(Header.WestUtm);
+                writer.Write(Header.NorthUtm);
+                writer.Write(Header.SouthUtm);
+                writer.Write(Header.GridUnits);
+                writer.Write(Header.XResol);
+                writer.Write(Header.YResol);
+                writer.Write(Header.EUnits);
+                writer.Write(Header.SUnits);
+                writer.Write(Header.AUnits);
+                writer.Write(Header.FOptions);
+                writer.Write(Header.CUnits);
+                writer.Write(Header.HUnits);
+                writer.Write(Header.BUnits);
+                writer.Write(Header.PUnits);
+                writer.Write(Header.DUnits);
+                writer.Write(Header.WOptions);
+				//arrays of chars
+                writer.Write(Header.ElevFile);
+                writer.Write(Header.SlopeFile);
+                writer.Write(Header.AspectFile);
+                writer.Write(Header.FuelFile);
+                writer.Write(Header.CoverFile);
+                writer.Write(Header.HeightFile);
+                writer.Write(Header.BaseFile);
+                writer.Write(Header.DensityFile);
+                writer.Write(Header.DuffFile);
+                writer.Write(Header.WoodyFile);
+                writer.Write(Header.Description);
+
+				//write actual data
+                for (int i = 0; i < Header.numnorth; i++)
+                {
+                    for (int j = 0; j < Header.numeast; j++)
+                    {
+                        for (int k = 0; k < NumVals; k++)
+                        {
+                            writer.Write(landscape[i * Header.numeast * NumVals + j * NumVals + k] );
+                        }
+                    }
+                }
+            }          
+        }
+    }
 }
