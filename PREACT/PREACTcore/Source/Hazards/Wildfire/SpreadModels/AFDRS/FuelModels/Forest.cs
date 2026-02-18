@@ -3,8 +3,13 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {   
-    public static class Forest
+    public class Forest : AFDRSFuelModel
     {
+        public override AFDRSOutput Calculate(AFDRSInput input)
+        {            
+            return new AFDRSOutput();//Calculate(input.Temp, input.RH, input.U_10, input.DateTime, input.WindAzimuth, input.SlopeAzimuth, input.PercentSlope, )
+        }
+
         public enum FuelSubModel { Dry, Wet }
 
         ///   temp: air temperature(C)
@@ -21,44 +26,38 @@ namespace PREACT.Wildfire.AFDRS
         ///   fl_e: elevated fuel load (t/ha)
         ///   fl_o: overstorey (canopy) fuel load (t/ha)
         ///   h_o: overstorey (canopy) height (m)  
-        /// 
-        ///   DI: drought indes - KBDI except SDI in Tas        
+        ///   DI: drought index - KBDI except SDI in Tas        
         public static AFDRSOutput Calculate(double temp, double rh, double U_10, DateTime dateTime, double windAzimuth, double slopeAzimuth, double percentSlope, double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double DI = 100, FuelSubModel submodel = FuelSubModel.Dry, double waf = 3)
         {
             double fmc = FMC_forest(temp, rh, dateTime, submodel);
+            double fuel_availability = fuel_availability_forest(DF, DI, waf, submodel);
 
-            double noWindNoSlopeROS = ROS_forest(0, fhs_s, fhs_ns, h_ns, fmc, DF, waf, DI, submodel);
+            double noWindNoSlopeROS = ROS_forest(0, fhs_s, fhs_ns, h_ns, fmc, waf, fuel_availability);
             double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
-            double windROS = ROS_forest(U_10, fhs_s, fhs_ns, h_ns, fmc, DF, waf, DI, submodel);
+            double windROS = ROS_forest(U_10, fhs_s, fhs_ns, h_ns, fmc, waf, fuel_availability);
 
             //calculate final values
             SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
             //double fuelLoad = fuel_availability_forest(DF, DI, waf, submodel);
             double flameHeight = Flame_height_forest(ros, h_el);
-            double intensity = Intensity_forest(ros, DF, flameHeight, fl_s, fl_ns, fl_e, fl_o, h_o, waf, DI, submodel);
+            double intensity = Intensity_forest(ros, flameHeight, fl_s, fl_ns, fl_e, fl_o, h_o, fuel_availability);
+            double lengthToWidth = SpreadModelAFDRS.ForestLengthToWidth(U_10);
 
-            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
         }
 
         /// return the intensity based on fuel load and ROS
         /// note AFDRS caps surface fuel load at 10 t/ha (1 kg/m)
         ///   ROS: forward rate of spread (km/h)
-        ///   DF: drought (fuel availability) factor (1-10)
         ///   flame_h: flame height (m)
         ///   fl_s: surface fuel load (t/ha)
         ///   fl_ns: near surface fuel load (t/ha)
         ///   fl_e: elevated fuel load (t/ha)
         ///   fl_o: overstorey (canopy) fuel load (t/ha)
         ///   h_o: overstorey (canopy) height (m)
-        private static double Intensity_forest(double ROS, double DF, double flame_h, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double waf, double DI, FuelSubModel submodel)
-        {
-            double fuel_avail;
-            double fuel_load;
-            double flame_h_elev = 1f; //m
-            double flame_h_crown_frac = 0.66f; //dimensionless
-
+        private static double Intensity_forest(double ROS, double flame_h, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double fuel_avail)
+        {     
             //modify fuel parameters with fuel availability
-            fuel_avail = fuel_availability_forest(DF, DI, waf, submodel);
             fl_s = fl_s * fuel_avail;
             fl_ns = fl_ns * fuel_avail;
             fl_e = fl_e * fuel_avail;
@@ -68,9 +67,12 @@ namespace PREACT.Wildfire.AFDRS
             fl_s = Mathd.Min(10f, fl_s);
 
             //accumulate fuel load based on flame height
-            fuel_load = fl_s + fl_ns;
+            double fuel_load = fl_s + fl_ns;
 
-            if(flame_h > flame_h_elev)
+            double flame_h_elev = 1f; //m
+            const double flame_h_crown_frac = 0.66f; //dimensionless
+
+            if (flame_h > flame_h_elev)
             {
                 fuel_load = fuel_load + fl_e;
             }
@@ -110,18 +112,16 @@ namespace PREACT.Wildfire.AFDRS
         ///   h_ns: near surface fuel height (cm)
         ///   fmc: fuel moisture content (%)
         ///   DF: Drought factor
+        ///   waf : wind adjustment factor
         ///   DI: drought indes - KBDI except SDI in Tas
-        ///   WAF: wind adjustment factor
         ///   submodel: dry or wet
-        private static double ROS_forest(double U_10, double fhs_s, double fhs_ns, double h_ns, double fmc, double DF, double waf, double DI, FuelSubModel submodel)
+        private static double ROS_forest(double U_10, double fhs_s, double fhs_ns, double h_ns, double fmc, double waf, double fuel_avail)
         {
-            double wind_threshold = 5;
-            double fuel_avail;
+            const double wind_threshold = 5;
             h_ns = Mathd.Min(h_ns, 20);
             double mf = Mf_forest(fmc); //moisture function
 
             //modify fuel parameters with fuel availability
-            fuel_avail = fuel_availability_forest(DF, DI, waf, submodel);
             fhs_s = fhs_s * fuel_avail;
             fhs_ns = fhs_ns * fuel_avail;
 
@@ -177,7 +177,7 @@ namespace PREACT.Wildfire.AFDRS
         }
 
         /// returns the forest fuel moisture factor
-        ///   fmc: fine fule moisture content (%)
+        ///   fmc: fine fuel moisture content (%)
         private static double Mf_forest(double fmc)
         {
             double Mf_forest;
@@ -219,7 +219,7 @@ namespace PREACT.Wildfire.AFDRS
 
         /// returns the fuel availability - proportion of fuel available to be burnt
         ///   DF: Drought factor
-        ///   DI: drought indes - KBDI except SDI in Tas
+        ///   DI: drought index - KBDI except SDI in Tas
         ///   WAF: wind adjustment factor
         ///   submodel: dry or wet
         static double fuel_availability_forest(double DF, double DI = 100f, double waf = 3f, FuelSubModel submodel = FuelSubModel.Dry)
@@ -241,96 +241,5 @@ namespace PREACT.Wildfire.AFDRS
 
             return fuel_availability_forest;
         }
-
-        /*Public Sub update_from_LUT_Forest(bool loads_only = false)
-        {
-            double FTno;
-            double time_since_fire;
-            double load_max;
-            double fuel_load_k;
-
-            FTno = Application.WorksheetFunction.VLookup(Range("ClassForest").Value, Range("ForestLUT"), 2, False)
-
-
-            if (FTno = 9999)
-            {
-                Exit Sub
-            }
-
-                    Dim lut As String
-            lut = "AFDRS Fuel LUT"
-            Dim table As String
-            table = "AFDRS_LUT"
-            Dim fuel_sub_type As String
-            fuel_sub_type = "Fuel_FDR"
-
-
-            if (Range("State").Value = "NSWv402")
-                    {
-                        lut = "NSW_Fuel_v402_LUT"
-                table = "NSW_fuel_LUT"
-                fuel_sub_type = "AFDRS fuel type"
-            }
-
-
-                    time_since_fire = Range("tsf").Value
-
-            // surface fuel
-            fuel_load_max = LookupValueInTable(FTno, "FTno_State", "FL_s", lut, table)
-            fuel_load_k = LookupValueInTable(FTno, "FTno_State", "Fk_s", lut, table)
-            Range("fl_s_forest").Value = fuel_amount(fuel_load_max, time_since_fire, fuel_load_k)
-            fhs_max = LookupValueInTable(FTno, "FTno_State", "FHS_s", lut, table)
-            Range("fhs_s").Value = fuel_amount(fhs_max, time_since_fire, fuel_load_k)
-
-
-            // near surface fuel
-            fuel_load_max = LookupValueInTable(FTno, "FTno_State", "FL_ns", lut, table)
-            fuel_load_k = LookupValueInTable(FTno, "FTno_State", "Fk_ns", lut, table)
-            Range("fl_ns_forest").Value = fuel_amount(fuel_load_max, time_since_fire, fuel_load_k)
-            fhs_max = LookupValueInTable(FTno, "FTno_State", "FHS_ns", lut, table)
-            Range("fhs_ns").Value = fuel_amount(fhs_max, time_since_fire, fuel_load_k)
-
-            // elevated fuel
-            fuel_load_max = LookupValueInTable(FTno, "FTno_State", "FL_el", lut, table)
-            fuel_load_k = LookupValueInTable(FTno, "FTno_State", "Fk_el", lut, table)
-            Range("fl_e_forest").Value = fuel_amount(fuel_load_max, time_since_fire, fuel_load_k)
-
-            // bark fuel load
-            fuel_load_max = LookupValueInTable(FTno, "FTno_State", "FL_b", lut, table)
-            fuel_load_k = LookupValueInTable(FTno, "FTno_State", "Fk_b", lut, table)
-            Range("fl_b_forest").Value = fuel_amount(fuel_load_max, time_since_fire, fuel_load_k)
-
-            // canopy fuel load
-            fuel_load_max = LookupValueInTable(FTno, "FTno_State", "FL_o", lut, table)
-            fuel_load_k = LookupValueInTable(FTno, "FTno_State", "Fk_o", lut, table)
-            Range("fl_o_forest").Value = fuel_amount(fuel_load_max, time_since_fire, fuel_load_k)
-
-
-            if (!loads_only)
-            {         
-                // near surface fuel height
-                Range("h_ns_forest").Value = LookupValueInTable(FTno, "FTno_State", "H_ns", lut, table)
-
-                // near surface fuel height
-                Range("h_e_forest").Value = LookupValueInTable(FTno, "FTno_State", "H_el", lut, table)
-
-                // near surface fuel height
-                Range("h_o_forest").Value = LookupValueInTable(FTno, "FTno_State", "H_o", lut, table)
-
-                //WRF
-                Range("waf_forest").Value = LookupValueInTable(FTno, "FTno_State", "WRF_For", lut, table)
-
-                // submodel
-                if (LookupValueInTable(FTno, "FTno_State", fuel_sub_type, lut, table) = "Wet_forest")
-                {
-                    Range("submodel_forest").Value = "wet";
-                }                    
-                else
-                {
-                    Range("submodel_forest").Value = "dry";
-                }
-
-            }
-        }*/    
     }
 }

@@ -5,11 +5,12 @@ namespace PREACT.Wildfire.AFDRS
 {
     public class SpreadModelAFDRS : SpreadModel
     {
-        public enum FuelModels { ButtonGrass, Forest, Grassland, GrassyWoodland, MalleeHeath, Pine, Shrubland, Spinifex }
+        public enum FuelModels { Forest, Grassland, Savannah, Spinifex, Heathland, MalleeHeath, Buttongrass, Pine };
 
         private FuelModels _fuelModel;
-
+        private AFDRSInput _input;
         private AFDRSOutput _output;
+        
         private bool _hasFuelLoad;
 
         private static readonly double _kmPerHourToMeterPerSecond = 1.0 / 3.6;
@@ -18,6 +19,8 @@ namespace PREACT.Wildfire.AFDRS
         double _eccentricity;
 
         double _slopeAzimuth, _percentSlope;
+
+        AFDRSFuelModel _fuelModelCode;
 
         public SpreadModelAFDRS(LandscapeCellData cellData, SpatialManager spatialManager)
         {
@@ -30,6 +33,9 @@ namespace PREACT.Wildfire.AFDRS
             if(cellData.fuel_model <= 230)
             {
                 _fuelModel = FuelModels.Forest;
+                _fuelModelCode = new Forest();
+                //set all the input needed
+                //_input.SetForestInput();
             }
 
             _percentSlope = Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100;
@@ -39,18 +45,20 @@ namespace PREACT.Wildfire.AFDRS
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
         {
             //wind
-            double windSpeed, windDirection;
-            weather.GetWind(out windSpeed, out windDirection);
-            windDirection += 180;
-            if (windDirection > 360)
+            double windSpeed, windAzimuth;
+            weather.GetWind(out windSpeed, out windAzimuth);
+            windAzimuth += 180;
+            if (windAzimuth > 360)
             {
-                windDirection -= 360;
+                windAzimuth -= 360;
             }
             windSpeed *= 3.6; //requires km/h, input is m/s
 
-            //moisture related
+            //update transient data
+            _input.UpdateTransientData(time.CurrentDateTime, weather.GetTemperature(), weather.GetRelativeHumidity(), windSpeed, windAzimuth, 0, 0);
 
             //calculate
+            _output = _fuelModelCode.Calculate(_input);
         }
 
         public override double GetMaxSpreadRate()
@@ -181,7 +189,7 @@ namespace PREACT.Wildfire.AFDRS
         /// </summary>
         /// <param name="U_10">wind speed, km/h</param>
         /// <returns></returns>
-        public static double EucalyptLengthToWidth(double U_10)
+        public static double ForestLengthToWidth(double U_10)
         {
             double LBR = 1.0;
             if (U_10 < 5)

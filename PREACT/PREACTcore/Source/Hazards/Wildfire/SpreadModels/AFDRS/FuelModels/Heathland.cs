@@ -3,11 +3,15 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public static class Shrubland
+    public class Heathland : AFDRSFuelModel
     {
-        public enum States {Heath, Wet_heath }// no diff in the models at this stage
+        public enum States { Dry, Wet }// no diff in the models at this stage
 
-        /// <summary>
+        public override AFDRSOutput Calculate(AFDRSInput input)
+        {
+            return Calculate(input.Temp, input.RH, input.RainLast48Hours, input.TimeSinceRain, input.U_10, input.ElevatedFuelHeight, input.WindAdjustmentFactor, input.SurfaceFuelLoad, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth, input.HeathlandState);
+        }
+
         /// temp: air temperature(C)
         /// rh: relative humidity (%)
         /// rain: precipitation in the last 48 hours (mm)
@@ -15,19 +19,9 @@ namespace PREACT.Wildfire.AFDRS
         /// U_10: 10 m wind speed (km/h)
         /// h_el: elevated fuel height (m)
         /// waf: wind adjustment factor
-        /// </summary>
-        /// <param name="temp"></param>
-        /// <param name="rh"></param>
-        /// <param name="rain"></param>
-        /// <param name="hours"></param>
-        /// <param name="U_10"></param>
-        /// <param name="h_el"></param>
-        /// <param name="waf"></param>
-        /// <param name="fuel_load"></param>
-
-        public static AFDRSOutput Calculate(double temp, double rh, double rain, double hours, double U_10, double h_el, double waf, double fuel_load, double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Heath)
+        public static AFDRSOutput Calculate(double temp, double rh, double rain, int hoursSinceRain, double U_10, double h_el, double waf, double fuel_load, double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Dry)
         {
-            double fmc = FMC_heath(temp, rh, rain, hours);
+            double fmc = FMC_heath(temp, rh, rain, hoursSinceRain);
             double SI = SI_heath(U_10, h_el, fmc, waf);
 
             double noWindNoSlopeROS = ROS_heath(0, h_el, fmc, SI, waf);
@@ -38,8 +32,9 @@ namespace PREACT.Wildfire.AFDRS
             SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction); 
             double intensity = intensity_heath(ros, fuel_load);
             double flameHeight = Flame_height_heath(intensity);
+            double lengthToWidth = SpreadModelAFDRS.GrasslandLengthToWidth(U_10);
 
-            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
         }
 
         /// returns fuel moisture content (%). Based on:
@@ -107,8 +102,6 @@ namespace PREACT.Wildfire.AFDRS
         /// returns forward rate of spread (m/h) [range: 0-6000 m/h]
         /// Anderson, W. R., et al. (2015). "A generic, empirical-based model for predicting rate of fire
         /// spread in shrublands." International Journal of Wildland Fire 24(4): 443-460.
-        ///
-        /// args
         ///   U_10: 10 m wind speed (km/h)
         ///   h_el: elevated fuel height (m)
         ///   mc: fuel moisture content (%)
@@ -129,8 +122,6 @@ namespace PREACT.Wildfire.AFDRS
         }
 
         /// returns the fire line intensity (kW/m)
-        ///
-        /// args
         ///   ROS: forward rate of spread (m/h)
         ///   fl_max: maximum fuel load (t/ha)
         ///   tsf: time since fire (y)
@@ -146,8 +137,6 @@ namespace PREACT.Wildfire.AFDRS
         /// Here we use the flame height calculation for mallee-heath shrublands (Cruz, M. G., et al. (2013).
         /// "Fire behaviour modelling in semi-arid mallee-heath shrublands of southern Australia.
         /// Environmental Modelling & Software 40: 21-34).
-        ///
-        /// args
         ///   intensity: fire line intensity (kW/m)
         private static double Flame_height_heath(double intensity)
         {

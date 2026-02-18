@@ -11,16 +11,16 @@ namespace PREACT.Wildfire.AFDRS
         public double Direction;
         public double Intensity;
         public double FlameHeight;
-        public double Eccentricity;
+        public double LengthToWidth;
 
-        public AFDRSOutput(double fms, double ros, double direction, double intensity, double flameHeight) //, double eccentricity
+        public AFDRSOutput(double fms, double ros, double direction, double intensity, double flameHeight, double lengthToWidth) 
         {
             FMC = fms;
             ROS = ros;
             Direction = direction;
             Intensity = intensity;
             FlameHeight = flameHeight;
-            Eccentricity = 1.0;// eccentricity;
+            LengthToWidth = lengthToWidth;
         }
     }
 }

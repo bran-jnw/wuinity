@@ -3,8 +3,15 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public static class Grassland
+    public class Grassland : AFDRSFuelModel
     {
+        public enum FuelSubTypes { Grass, Pasture, ChenopodShrubland, LowWetland, GambaGrass }
+
+        public override AFDRSOutput Calculate(AFDRSInput input)
+        {
+            return Calculate(input.Temp, input.RH, input.U_10, input.SurfaceFuelLoad, input.Curing, input.GrasslandSubType, input.GrasslandState, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+        }
+
         /*public struct Coefficients
         {
             double r_l0, r_lw, r_h0, r_hw;
@@ -21,15 +28,20 @@ namespace PREACT.Wildfire.AFDRS
             public static readonly Coefficients Grazed = new Coefficients(0.054f, 0.209f, 1.1f, 0.715f);
             public static readonly Coefficients EatenOut = new Coefficients(0.027f, 0.1045f, 0.55f, 0.357f);
         }*/
-
-        public enum FuelSubTypes { Grass, Pasture, ChenopodShrubland, LowWetland, GambaGrass }
-
+        
         public enum States { Natural, Grazed, EatenOut }
 
-        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double percentSlope, double windAzimuth, double slopeAzimuth, FuelSubTypes fuelSubType, double fuel_load, double curing, States state)
+        ///   temp: air temperature (C)
+        ///   rh: relative humidity (%)
+        ///   U_10: 10 m wind speed (km/h)
+        ///   fuel_load: fine fuel load (t/ha)
+        ///   curing: degree of grass curing (%)
+        ///   state: grass state (natural, grazed, eaten-out)
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double fuel_load, double curing, FuelSubTypes fuelSubType, States state, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
-            double fmc = FMC_grass(temp, rh);
+            double fmc = FMC_grassland(temp, rh);
 
+            //enfirce a few parameters if needed
             if (fuelSubType == FuelSubTypes.ChenopodShrubland || fuelSubType == FuelSubTypes.LowWetland)
             {
                 state = States.EatenOut;
@@ -38,21 +50,22 @@ namespace PREACT.Wildfire.AFDRS
             {
                 state = States.Natural;
             }
-            else
+            /*else
             {
                 state = load_to_state_grass(fuel_load);
-            }
+            }*/
 
-            double noWindNoSlopeROS = ROS_grass(0, fmc, curing, state);
+            double noWindNoSlopeROS = ROS_grassland(0, fmc, curing, state, fuelSubType);
             double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
-            double windROS = ROS_grass(U_10, fmc, curing, state); // fuelSubType);
+            double windROS = ROS_grassland(U_10, fmc, curing, state, fuelSubType);
 
             //calculate final values
             SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
-            double intensity = Intensity_grass(ros, fuel_load);// fuelSubType);
-            double flameHeight = Flame_height_grass(ros, state);
+            double intensity = Intensity_grassland(ros, fuel_load);// fuelSubType);
+            double flameHeight = Flame_height_grassland(ros, state);
+            double lengthToWidth = SpreadModelAFDRS.GrasslandLengthToWidth(U_10);
 
-            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
         }
 
         /// returns the grass fuel moisture content (%) based on McArthur (1966)
@@ -60,7 +73,7 @@ namespace PREACT.Wildfire.AFDRS
         /// args:
         ///   temp: air temperature (C)
         ///   rh: relative humidity (%)
-        public static double FMC_grass(double temp, double rh)
+        public static double FMC_grassland(double temp, double rh)
         {
             double FMC_grass;
 
@@ -70,7 +83,7 @@ namespace PREACT.Wildfire.AFDRS
 
         /// returns the curing coefficient based on Cruz et al. (2015)
         ///   curing: degree of grass curing (%)
-        public static double curing_coeff_grass(double curing)
+        public static double curing_coeff_grassland(double curing)
         {
             return 1.036 / (1 + 103.989 * Mathd.Exp(-0.0996 * (curing - 20)));
         }
@@ -78,7 +91,7 @@ namespace PREACT.Wildfire.AFDRS
         /// returns the grass moisture coefficient
         ///   U_10: 10 m wind speed (km/h)
         ///   mc: fuel moisture content (%)
-        public static double moist_coeff_grass(double U_10, double mc)
+        public static double moist_coeff_grassland(double U_10, double mc)
         {
             double moist_coeff_grass;
 
@@ -110,10 +123,10 @@ namespace PREACT.Wildfire.AFDRS
         ///   mc: fuel moisture content (%)
         ///   curing: degree of grass curing (%)
         ///   state: grass state (natural, grazed, eaten-out)
-        public static double ROS_grass(double U_10, double mc, double curing, States state)//, FuelSubTypes fuelSubType)
+        public static double ROS_grassland(double U_10, double mc, double curing, States state, FuelSubTypes fuelSubType)
         {
-            double curing_coeff = curing_coeff_grass(curing);
-            double moist_coeff = moist_coeff_grass(U_10, mc);
+            double curing_coeff = curing_coeff_grassland(curing);
+            double moist_coeff = moist_coeff_grassland(U_10, mc);
             double waf = 1;
 
             /*if (fuelSubType == FuelSubTypes.GambaGrass)
@@ -167,7 +180,7 @@ namespace PREACT.Wildfire.AFDRS
         /// args
         ///   ROS: forward rate of spread (m/h)
         ///   state: grass state (natural, grazed, eaten-out)
-        public static double Flame_height_grass(double ROS, States state)
+        public static double Flame_height_grassland(double ROS, States state)
         {
             //adjust units from km/h to m/s
             ROS = ROS / 3600;
@@ -190,7 +203,7 @@ namespace PREACT.Wildfire.AFDRS
         /// for grass fuel loads are limited to range 1 to 6 t/ha
         ///   ROS: forward rate of spread (km/h)
         ///   fuel_load: fine fuel load (t/ha)
-        public static double Intensity_grass(double ROS, double fuel_load)//, FuelSubTypes fuelSubType)
+        public static double Intensity_grassland(double ROS, double fuel_load)//, FuelSubTypes fuelSubType)
         {
             double Intensity_grass;
 
@@ -222,7 +235,7 @@ namespace PREACT.Wildfire.AFDRS
         ///
         /// args
         ///   state: the grass fuel state - eaten-out, grazed or natural
-        public static double state_to_load_grass(States state)
+        public static double state_to_load_grassland(States state)
         {
             //TODO: verify
             double load = 2.0; //eaten out
@@ -244,7 +257,7 @@ namespace PREACT.Wildfire.AFDRS
         ///
         /// args
         ///   load: the grass fuel load (t/ha)
-        public static States load_to_state_grass(double load)
+        public static States load_to_state_grassland(double load)
         {
             States state = States.EatenOut;
 

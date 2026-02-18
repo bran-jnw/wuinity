@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PREACT.Wildfire.AFDRS
 {   
-    public static class GrassyWoodland
+    public static class Savannah
     {
         public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural }
 
@@ -12,7 +12,7 @@ namespace PREACT.Wildfire.AFDRS
         {
             double fmc = FMC_woodland(temp, rh);
 
-            if (fuelSubType == FuelSubTypes.AcaciaWoodland)
+            if (fuelSubType == FuelSubTypes.AcaciaWoodland || fuelSubType == FuelSubTypes.WoodyHorticulture)
             {
                 state = Grassland.States.EatenOut;
             }
@@ -50,7 +50,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   WAF: wind adjustment factor
         private static double ROS_woodland(double U_10, double mc, double curing, Grassland.States state, double waf)
         {
-            return Grassland.ROS_grass(U_10, mc, curing, state) * waf;
+            return Grassland.ROS_grassland(U_10, mc, curing, state, Grassland.FuelSubTypes.Grass) * waf;
         }
 
         /// returns the woodland fuel moisture content (%)
@@ -59,7 +59,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   rh: relative humidity (%)
         private static double FMC_woodland(double temp, double rh)
         {
-            return Grassland.FMC_grass(temp, rh);
+            return Grassland.FMC_grassland(temp, rh);
         }
 
         /// returns the flame height (m) based on M. Plucinski, pers. comm.
@@ -68,7 +68,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   state: grass state (natural, eaten out, grazed)
         private static double Flame_height_woodland(double ROS, Grassland.States state)
         {
-            return Grassland.Flame_height_grass(ROS, state);
+            return Grassland.Flame_height_grassland(ROS, state);
         }
 
         /// returns the fireline intensity (kW/m) based on Byram 1959
@@ -78,7 +78,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   fuel_load: fine fuel load (t/ha)
         private static double Intensity_woodland(double ROS, double fuel_load)
         {
-            return Grassland.Intensity_grass(ROS, fuel_load);
+            return Grassland.Intensity_grassland(ROS, fuel_load);
         }
     }
 }

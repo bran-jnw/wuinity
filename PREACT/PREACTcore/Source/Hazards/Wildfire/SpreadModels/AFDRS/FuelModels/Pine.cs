@@ -2,7 +2,7 @@
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public static class Pine
+    public class Pine : AFDRSFuelModel
     {
         private const double HEAT_CONTENT = 18600; //KJ/kg
         private const double KGSQM_TO_TPH = 10; //kg/m2 to t/ha
@@ -11,14 +11,17 @@ namespace PREACT.Wildfire.AFDRS
         private const double KJKG_PER_BTULB = 2.326; //kg/kJ per Btu/lb
         private const double MSEC_PER_FTMIN = 0.00508; //m/s per ft/min
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="temp"></param>
-        /// <param name="rh"></param>
-        /// <param name="U_10"></param>
-        /// <param name="DF">Drought factor</param>
-        /// <param name="KBDI">Keetch Byram drought index KBDI</param>
+        public override AFDRSOutput Calculate(AFDRSInput input)
+        {
+            return Calculate(input.Temp, input.RH, input.U_10, input.DF, input.KBDI, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+        }
+
+        ///   temp: air temperature (C)
+        ///   rh: relative humidity (%)
+        ///   U_10: 10 m wind speed (km/h)
+        ///   DF: drought factor
+        ///   KBDI: Keetch Byram drought index KBDI
+
         public static AFDRSOutput Calculate(double temp, double rh, double U_10, double DF, double KBDI, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
             double fmc = FMC_pine(temp, rh);
@@ -30,10 +33,11 @@ namespace PREACT.Wildfire.AFDRS
 
             //calculate final values
             SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
-            double intensity = ensemble[1]; //TODO: re-calc with new ROS
-            double flameHeight = ensemble[2]; //TODO: re-calc with new ROS
+            double intensity = ensemble[1]; //TODO: re-calc with new ROS?
+            double flameHeight = ensemble[2]; //TODO: re-calc with new ROS?
+            double lengthToWidth = SpreadModelAFDRS.ForestLengthToWidth(U_10);
 
-            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
         }
 
         /// returns the grass fuel moisture content (%) based on McArthur (1966)
@@ -262,7 +266,7 @@ namespace PREACT.Wildfire.AFDRS
             double wrf = 5;
             double ROS = Grassland.ROS_grass(U_10, (mc), 100, Grassland.States.EatenOut);
             double Intensity_total = intensity(ROS, 1.5) * grass_proportion;
-            double flame_height = Grassland.Flame_height_grass((ROS), Grassland.States.EatenOut) * grass_proportion;
+            double flame_height = Grassland.Flame_height_grassland((ROS), Grassland.States.EatenOut) * grass_proportion;
             ROS = ROS * grass_proportion;
 
             foreach (double[] fuel_model in fuel_arrays)
