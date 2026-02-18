@@ -13,7 +13,7 @@ namespace PREACT.Wildfire.AFDRS
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
-            return Calculate(input.Temp, input.RH, input.U_10, input.DF, input.KBDI, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+            return Calculate(input.Temp, input.RH, input.U_10, input.DroughtFactor, input.KBDI, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
         }
 
         ///   temp: air temperature (C)

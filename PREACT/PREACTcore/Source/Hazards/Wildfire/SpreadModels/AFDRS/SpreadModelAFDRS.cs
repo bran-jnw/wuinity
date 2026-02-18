@@ -18,8 +18,6 @@ namespace PREACT.Wildfire.AFDRS
 
         double _eccentricity;
 
-        double _slopeAzimuth, _percentSlope;
-
         AFDRSFuelModel _fuelModelCode;
 
         public SpreadModelAFDRS(LandscapeCellData cellData, SpatialManager spatialManager)
@@ -30,16 +28,16 @@ namespace PREACT.Wildfire.AFDRS
                 return;
             }
 
-            if(cellData.fuel_model <= 230)
+            double percentSlope = Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100;
+            double slopeAzimuth = cellData.aspect;
+
+            if (cellData.fuel_model <= 230)
             {
                 _fuelModel = FuelModels.Forest;
                 _fuelModelCode = new Forest();
                 //set all the input needed
                 //_input.SetForestInput();
-            }
-
-            _percentSlope = Mathd.Tan(Mathd.Deg2Rad * cellData.slope) * 100;
-            _slopeAzimuth = (int)(0.5 + cellData.aspect);
+            }            
         }
 
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
@@ -59,11 +57,13 @@ namespace PREACT.Wildfire.AFDRS
 
             //calculate
             _output = _fuelModelCode.Calculate(_input);
+            _output.ROS *= _meterPerHourToMeterPerSecond;
+            _eccentricity = CalculateEccentricity(_output.LengthToWidth);
         }
 
         public override double GetMaxSpreadRate()
         {
-            return _output.ROS * _meterPerHourToMeterPerSecond;
+            return _output.ROS;
         }
 
         public override double GetDirectionOfMaxSpread()
@@ -91,6 +91,7 @@ namespace PREACT.Wildfire.AFDRS
                     rosDirection = rosDirection * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
                 }
             }
+
             return rosDirection;
         }
 

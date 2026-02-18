@@ -1,9 +1,6 @@
-﻿using System;
-using static System.Math;
-using System.Collections.Generic;
-using System.Text;
+﻿using static System.Math;
 
-namespace PREACT.Wildfire.AFDRS
+namespace PREACT.Weather
 {
     //https://wikifire.wsl.ch/tiki-index908f.html?page=Keetch-Byram+drought+index
     public class DailyKBDI
@@ -14,14 +11,14 @@ namespace PREACT.Wildfire.AFDRS
 
         double _cumulativeRain;
         double _oldKBDI, _KBDI;
-        double _meanAnnualPrcp;
+        double _meanAnnualPrcpCoeff;
 
         public double KBDI { get => _KBDI; }
 
         public DailyKBDI(double startKBDI, double meanAnnualPrcp)
         {
             _oldKBDI = startKBDI;
-            _meanAnnualPrcp = meanAnnualPrcp;
+            _meanAnnualPrcpCoeff = 1.0 / (1.0 + 10.88 * Exp(-0.001736 * meanAnnualPrcp);
         }
 
         /*public void CalculateDailyKBDI_Imperial(double tempF, double cumulativePRCP_hundredthInch, ref double KBDI)
@@ -42,9 +39,9 @@ namespace PREACT.Wildfire.AFDRS
             }
 
             double P_net = Max(0, dailyPrcp - Max(0, P_lim_metric - _cumulativeRain));
-            double Q_SI = (_oldKBDI - P_net);
+            double Q_SI = _oldKBDI - P_net;
             _oldKBDI = _KBDI;
-            _KBDI = Q_SI + 0.001 * (203.2 - Q_SI) * (0.968 * Exp(0.875 * tempC + 1.5552) - 8.30) / (1.0 + 10.88 * Exp(-0.001736 * _meanAnnualPrcp));
+            _KBDI = Q_SI + 0.001 * (203.2 - Q_SI) * (0.968 * Exp(0.875 * tempC + 1.5552) - 8.30) * _meanAnnualPrcpCoeff;
 
         }
     }

@@ -9,7 +9,7 @@ namespace PREACT.Wildfire.AFDRS
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
-            return Calculate(input.Temp, input.RH, input.U_10, input.SurfaceFuelLoad, input.Curing, input.GrasslandSubType, input.GrasslandState, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+            return Calculate(input.Temp, input.RH, input.U_10, input.FuelLoadSurface, input.Curing, input.GrasslandSubType, input.GrasslandState, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
         }
 
         /*public struct Coefficients

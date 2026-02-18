@@ -6,7 +6,7 @@ namespace PREACT.Wildfire.AFDRS
     {
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
-            return Calculate(input.Temp, input.RH, input.TimeSinceRain, input.RainLast48Hours, input.U_10, input.TimeSinceFire, input.Productivity, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+            return Calculate(input.Temp, input.RH, input.HoursSinceRain, input.RainLast48Hours, input.U_10, input.YearsSinceFire, input.Productivity, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
         }
 
         ///temp: air temperature(C)

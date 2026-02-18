@@ -5,14 +5,14 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire
 {
-    public  class FFMCHourly
+    public  class HourlyFFMC
     {
         private const double FFMC_COEFFICIENT = 250.0 * 59.5 / 101.0; //used in conversion between FFMC and moisture content
         private double _ffmc0, _ffmc;
 
         public double Value {  get =>  _ffmc; }
 
-        public FFMCHourly(double initialFFMC = 85.0) 
+        public HourlyFFMC(double initialFFMC = 85.0) 
         {
             _ffmc0 = initialFFMC;
         }

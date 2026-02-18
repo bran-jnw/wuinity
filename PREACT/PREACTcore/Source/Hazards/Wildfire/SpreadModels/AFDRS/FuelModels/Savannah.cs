@@ -4,11 +4,25 @@ using System.Text;
 
 namespace PREACT.Wildfire.AFDRS
 {   
-    public static class Savannah
+    public class Savannah : AFDRSFuelModel
     {
         public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural }
 
-        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double mc, double waf, double percentSlope, double windAzimuth, double slopeAzimuth, FuelSubTypes fuelSubType, double curing, double fuel_load, Grassland.States state)
+        public override AFDRSOutput Calculate(AFDRSInput input)
+        {
+            return Calculate(input.Temp, input.RH, input.U_10, input.WindAdjustmentFactor, input.SavannahSubType, input.Curing, input.FuelLoadSurface, input.GrasslandState, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+        }
+
+        ///   temp: air temperature (C)
+        ///   rh: relative humidity (%)
+        ///   U_10: 10 m wind speed (km/h)
+        ///   WAF: wind adjustment factor
+        ///   subtype: woodland, acacia_woodland, woody_forticulture, rural, urban
+        ///   curing: degree of grass curing (%)
+        ///   fuel_load: fine fuel load (t/ha)
+        ///   state: grass state (natural, eaten out, grazed)
+
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double waf, FuelSubTypes fuelSubType, double curing, double fuel_load, Grassland.States state, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
             double fmc = FMC_woodland(temp, rh);
 
@@ -29,8 +43,9 @@ namespace PREACT.Wildfire.AFDRS
             SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
             double intensity = Intensity_woodland(fmc, fuel_load);
             double flameHeight = Flame_height_woodland(ros, state);
+            double lengthToWidth = SpreadModelAFDRS.GrasslandLengthToWidth(U_10);
 
-            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
         }
 
         /// returns the forward ROS (m/h) ignoring slope

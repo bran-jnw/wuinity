@@ -8,7 +8,7 @@ namespace PREACT.Wildfire.AFDRS
         public enum FuelSubTypes { MalleeHeath, MalleeChenopod }
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
-            return Calculate(input.Temp, input.RH, input.DateTime, input.RainLast48Hours, input.TimeSinceRain, input.U_10, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth, input.MalleHeathOverstoreyCover, input.MalleHeathOverstoreyHeight, input.SurfaceFuelLoad, input.NearSurfaceFuelLoad, input.FuelLoadCrown, input.MalleeHeathSubType);
+            return Calculate(input.Temp, input.RH, input.DateTime, input.RainLast48Hours, input.HoursSinceRain, input.U_10, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth, input.MalleHeathOverstoreyCover, input.MalleHeathOverstoreyHeight, input.FuelLoadSurface, input.FuelLoadNearSurface, input.FuelLoadCrown, input.MalleeHeathSubType);
         }
 
         ///   air_temperature: air temperature (C)

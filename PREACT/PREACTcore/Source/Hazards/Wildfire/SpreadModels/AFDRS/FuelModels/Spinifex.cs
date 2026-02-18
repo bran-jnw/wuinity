@@ -3,7 +3,7 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire.AFDRS
 {
-    public static class Spinifex
+    public class Spinifex : AFDRSFuelModel
     {
         public enum FuelSubTypes { Spinifex, SpinifexWoodland };
 
@@ -12,30 +12,35 @@ namespace PREACT.Wildfire.AFDRS
         private const double SECONDS_PER_HOUR = 3600f; // s
         private const double MAX_COVER = 75f; // %
 
-        /// <summary>
+        public override AFDRSOutput Calculate(AFDRSInput input)
+        {
+            return Calculate(input.AWAP, input.YearsSinceFire, input.RH, input.Temp, input.U_10, input.WindAdjustmentFactor, input.SpinifexSubType, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+        }
+
         /// AWAP_uf: monthly top level soil moisture(unitless 0-1)from http://www.sciro.au/awap
         /// time_since_fire: (y)
         ///  relative_humidity: (%)
-        ///  air _temperature: (°C)
-        /// </summary>
-        /// <param name="AWAP_uf"></param>
-        /// <param name="time_since_fire"></param>
-        /// <param name="relative_humidity"></param>
-        /// <param name="air_temperature"></param>        
-        public static AFDRSOutput Calculate(double AWAP_uf, int time_since_fire, double relative_humidity, double air_temperature, double wind_speed_10m, double wrf, FuelSubTypes subtype, double percentSlope, double windAzimuth, double slopeAzimuth)
+        ///  air _temperature: (°C)       
+        ///  wind_speed_10m: mean 10 m wind speed (km/h)
+        ///  fuel_moisture: combined dead & live fuel moisture(%)
+        ///  wrf: wind reduction factor
+        ///  subtype: spinifex or spinifex woodland
+        public static AFDRSOutput Calculate(double AWAP_uf, int time_since_fire, double relative_humidity, double air_temperature, double wind_speed_10m, double wrf, FuelSubTypes fuelSubType, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
-            double fmc = FMC_spinifex(AWAP_uf, time_since_fire, relative_humidity, air_temperature, subtype);
+            double fmc = FMC_spinifex(AWAP_uf, time_since_fire, relative_humidity, air_temperature, fuelSubType);            
 
-            double noWindNoSlopeROS = ROS_spinifex(0, time_since_fire, fmc, wrf, subtype);
+            double noWindNoSlopeROS = ROS_spinifex(0, time_since_fire, fmc, wrf, fuelSubType);
             double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
-            double windROS = ROS_spinifex(wind_speed_10m, time_since_fire, fmc, wrf, subtype);
+            double windROS = ROS_spinifex(wind_speed_10m, time_since_fire, fmc, wrf, fuelSubType);
 
             //calculate final values
             SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
-            double intensity = intensity_spinifex(ros, time_since_fire, subtype);
-            double flameHeight = flame_height_spinifex(ros, time_since_fire, subtype);
+            double fuel_load = fuel_load_spinifex(time_since_fire, fuelSubType);
+            double intensity = intensity_spinifex(ros, fuel_load);
+            double flameHeight = flame_height_spinifex(ros, fuel_load);
+            double lengthToWidth = SpreadModelAFDRS.GrasslandLengthToWidth(wind_speed_10m);
 
-            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight);
+            return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
         }
 
 
@@ -51,10 +56,10 @@ namespace PREACT.Wildfire.AFDRS
 
             if(subtype == FuelSubTypes.SpinifexWoodland)
             {
-                fuel_cover_spinifex = (fuel_cover_spinifex - 0.13992188 + 0.12047025 * Mathd.Log(time_since_fire));
+                fuel_cover_spinifex = fuel_cover_spinifex - 0.13992188 + 0.12047025 * Mathd.Log(time_since_fire);
             }
 
-            return (1 / (1 + Mathd.Exp(-fuel_cover_spinifex))) * 100;
+            return 100 * (1.0 / (1.0 + Mathd.Exp(-fuel_cover_spinifex)));
         }
 
         ///return the fuel moisture content (%)
@@ -100,7 +105,7 @@ namespace PREACT.Wildfire.AFDRS
 
             if (subtype == FuelSubTypes.SpinifexWoodland)
             {
-                fuel_load_spinifex = (fuel_load_spinifex + 0.4253039 - 0.1723223 * Mathd.Log(time_since_fire));
+                fuel_load_spinifex = fuel_load_spinifex + 0.4253039 - 0.1723223 * Mathd.Log(time_since_fire);
             }
 
             return Mathd.Exp(fuel_load_spinifex);
@@ -137,9 +142,10 @@ namespace PREACT.Wildfire.AFDRS
         ///predicting fire behaviour in spinifex grasslands of arid Australia [IJWF].
         ///args
         ///  wind_speed_10m: mean 10 m wind speed (km/h)
+        /// time_since_fire: (y)
         ///  fuel_moisture: combined dead & live fuel moisture(%)
-        ///  fuel_cover: total fuel cover (%)
-        ///  wrf:
+        ///  wrf: wind reduction factor
+        ///  subtype: subtype of fuel
         private static double ROS_spinifex(double wind_speed_10m, int time_since_fire, double fuel_moisture, double wrf, FuelSubTypes subtype)
         {
             double wind_speed_2m = wind_speed_10m * wrf;
@@ -162,9 +168,9 @@ namespace PREACT.Wildfire.AFDRS
         ///  rate_of_spread: steady-state forward rate of spread (m/h)
         ///  time_since_fire: (y)
         ///  subtype: FuelSubTypes.Spinifex or FuelSubTypes.SpinifexWoodland
-        private static double intensity_spinifex(double rate_of_spread, int time_since_fire, FuelSubTypes subtype)
+        private static double intensity_spinifex(double rate_of_spread, double fuel_load)
         {
-            double fuel_load = fuel_load_spinifex(time_since_fire, subtype); /// KGSQM_TO_TPH this conversion happens in intensity calc
+             /// KGSQM_TO_TPH this conversion happens in intensity calc
             return intensity(rate_of_spread, fuel_load);
         }
 
@@ -188,9 +194,8 @@ namespace PREACT.Wildfire.AFDRS
         ///  rate_of_spread: steady-state forward rate of spread (m/h)
         ///  time_since_fire: (y)
         ///  subtype: FuelSubTypes.Spinifex or FuelSubTypes.SpinifexWoodland
-        private static double flame_height_spinifex(double rate_of_spread, int time_since_fire, FuelSubTypes subtype)
+        private static double flame_height_spinifex(double rate_of_spread, double fuel_load)
         {
-            double fuel_load = fuel_load_spinifex(time_since_fire, subtype);
             return 0.097 * Mathd.Pow(rate_of_spread, 0.424) + 0.102 * fuel_load;
         }
     }

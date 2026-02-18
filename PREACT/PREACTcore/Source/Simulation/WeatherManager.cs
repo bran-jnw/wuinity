@@ -10,7 +10,7 @@ namespace PREACT
         private Simulation _simulation;
         private Wildfire.FireWeatherIndex _fwi;
         private bool _fwiNeedsUpdate = true;
-        private Wildfire.FFMCHourly _ffmcHourly;
+        private Wildfire.HourlyFFMC _ffmcHourly;
         private DateTime _lastDateTime;
         private WeatherStream _weatherData;
 
@@ -18,7 +18,7 @@ namespace PREACT
         int _hoursSinceRain;
         double _totalRainToday, _totalRainYesterday, _totalRain2DaysAgo, _totalRainSimulation;
         double _maxTemperatureToday, _maxTemperatureYesterday;
-        Wildfire.AFDRS.DailyKBDI _DailyKBDI;
+        DailyKBDI _DailyKBDI;
 
         private float _weatherReferenceElevation;
 
@@ -49,8 +49,8 @@ namespace PREACT
         {
             _simulation = simulation;
             _fwi = new Wildfire.FireWeatherIndex(simulation.Input.WildfireModule.FireCellInput.StartFFMC, simulation.Input.WildfireModule.FireCellInput.StartDMC, simulation.Input.WildfireModule.FireCellInput.StartDC);
-            _ffmcHourly = new Wildfire.FFMCHourly(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);
-            _DailyKBDI = new Wildfire.AFDRS.DailyKBDI(100, 1500); //TODO: user input
+            _ffmcHourly = new Wildfire.HourlyFFMC(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);
+            _DailyKBDI = new DailyKBDI(100, 1500); //TODO: user input
         }
 
         Wildfire.DeadFuelMoistureEngine _deadFuelMoistureEngine;
@@ -106,7 +106,6 @@ namespace PREACT
                 float timeFraction = (currentDateTime.Minute * 60 + currentDateTime.Second) * _inverseSecondsPerHour;
                 HourlyWeather.InterpolateData(_currentHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
             }
-
 
             if (newMinute)
             {
@@ -238,7 +237,7 @@ namespace PREACT
                             _weatherData = new WeatherStream(weatherStream.Latitude, weatherStream.Longitude, weatherStream.Elevation, startDateTime, endDateTime, hourlyArray);
 
                             Wildfire.FireWeatherIndex fwi = new Wildfire.FireWeatherIndex();
-                            Wildfire.FFMCHourly ffmcHourly = new Wildfire.FFMCHourly();
+                            Wildfire.HourlyFFMC ffmcHourly = new Wildfire.HourlyFFMC();
 
                             //loop through all data
                             for (int i = 0; i < hour.Time.Length; i++)
