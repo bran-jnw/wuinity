@@ -154,17 +154,17 @@ namespace PREACT.Wildfire.AFDRS
             double windRad = windAzimuth * Mathd.Deg2Rad;
             Vector2d upSlopeVector = new Vector2d(Mathd.Sin(slopeRad), Mathd.Cos(slopeRad));
             Vector2d windVector = new Vector2d(Mathd.Sin(windRad), Mathd.Cos(windRad));
-            double dot = Vector2d.Dot(upSlopeVector, windVector);
+            double alignment = Vector2d.Dot(upSlopeVector, windVector);
             double degreeSlope = Mathd.Atan(percentSlope * 0.01) * Mathd.Rad2Deg;
-            double alignedPercentSlope = degreeSlope * dot;
+            double alignedDegreeSlope = degreeSlope * alignment;
 
             // Capping slopes at 20 degrees for largest speed increases or decreases in this example
-            alignedPercentSlope = Mathd.Clamp(alignedPercentSlope, -20, 20);
+            alignedDegreeSlope = Mathd.Clamp(alignedDegreeSlope, -20, 20);
             // Using McArthur's rule of thumb to double the speed of the fire for every 10 degrees up-slope.
-            double slopeFactor = Mathd.Pow(2.0, 0.1 * Mathd.Abs(alignedPercentSlope));
+            double slopeFactor = Mathd.Pow(2.0, 0.1 * Mathd.Abs(alignedDegreeSlope));
 
             // The CSIRO Kataburn model is implemented here for negative slopes (fire spreading down hill)
-            if (alignedPercentSlope < 0)
+            if (alignedDegreeSlope < 0)
             {
                 slopeFactor = slopeFactor / (2 * slopeFactor - 1.0);
             }                
