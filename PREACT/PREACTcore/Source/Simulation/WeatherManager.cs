@@ -14,6 +14,12 @@ namespace PREACT
         private DateTime _lastDateTime;
         private WeatherStream _weatherData;
 
+        //values that are needed for something else
+        int _hoursSinceRain;
+        double _totalRainToday, _totalRainYesterday, _totalRain2DaysAgo, _totalRainSimulation;
+        double _maxTemperatureToday, _maxTemperatureYesterday;
+        Wildfire.AFDRS.DailyKBDI _DailyKBDI;
+
         private float _weatherReferenceElevation;
 
         private const float _inverseSecondsPerHour = 1.0f / 3600.0f;
@@ -35,13 +41,16 @@ namespace PREACT
 
         public Wildfire.FireWeatherIndex FWI { get => _fwi; }
         public double FFMCHourly { get => _ffmcHourly.Value; }
+        public int HoursSinceRain { get => _hoursSinceRain; }
+        public double KBDI { get => _DailyKBDI.KBDI; }
 
 
         public WeatherManager(Simulation simulation)
         {
             _simulation = simulation;
             _fwi = new Wildfire.FireWeatherIndex(simulation.Input.WildfireModule.FireCellInput.StartFFMC, simulation.Input.WildfireModule.FireCellInput.StartDMC, simulation.Input.WildfireModule.FireCellInput.StartDC);
-            _ffmcHourly = new Wildfire.FFMCHourly(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);                       
+            _ffmcHourly = new Wildfire.FFMCHourly(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);
+            _DailyKBDI = new Wildfire.AFDRS.DailyKBDI(100, 1500); //TODO: user input
         }
 
         Wildfire.DeadFuelMoistureEngine _deadFuelMoistureEngine;
@@ -59,20 +68,37 @@ namespace PREACT
             bool newHour = _lastDateTime.Hour != currentDateTime.Hour;
             bool newDay = _lastDateTime.DayOfYear != currentDateTime.DayOfYear;
 
-
-            if (newMinute)
+            if (newDay)
             {
+                _fwiNeedsUpdate = true;
 
+                _maxTemperatureYesterday = _maxTemperatureToday;
+                _maxTemperatureToday = -300.0;
+
+                _totalRain2DaysAgo = _totalRainYesterday;
+                _totalRainYesterday = _totalRainToday;
+                _totalRainToday = 0;
+
+                _DailyKBDI.CalculateDailyKBDI_Metric(_maxTemperatureYesterday, _totalRainYesterday);
             }
 
             if (newHour)
             {
                 //read new values from weather input stream
                 _weatherData.GetHourlyData(currentDateTime, out _currentHourlyData, out _nextHourlyData);
-                _interpolatedHourlyData = _currentHourlyData;
+                _interpolatedHourlyData = _currentHourlyData;                
 
                 //now update hourly values
-                _ffmcHourly.Calculate(_currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed * 3.6, _currentHourlyData._precip);
+                _ffmcHourly.Calculate(_currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed * 3.6, _currentHourlyData._precip);                          
+                
+                if(_currentHourlyData._temp > _maxTemperatureToday)
+                {
+                    _maxTemperatureToday = _currentHourlyData._temp;
+                }
+
+                _hoursSinceRain = _currentHourlyData._precip > 0 ? 0 : _hoursSinceRain + 1;
+                _totalRainToday += _currentHourlyData._precip;
+                _totalRainSimulation += _currentHourlyData._precip;
             }
             else
             {
@@ -81,9 +107,10 @@ namespace PREACT
                 HourlyWeather.InterpolateData(_currentHourlyData, _nextHourlyData, timeFraction, ref _interpolatedHourlyData);
             }
 
-            if (newDay)
+
+            if (newMinute)
             {
-                _fwiNeedsUpdate = true;
+
             }
 
             if (_fwiNeedsUpdate && currentDateTime.Hour == 12)
@@ -91,7 +118,6 @@ namespace PREACT
                 _fwiNeedsUpdate = false;
                 _fwi.CalculateDay(currentDateTime, _currentHourlyData._temp, _currentHourlyData._rh, _currentHourlyData._windSpeed * 3.6, _currentHourlyData._precip);
             }
-
 
             //lastly just update DateTime
             _lastDateTime = currentDateTime;

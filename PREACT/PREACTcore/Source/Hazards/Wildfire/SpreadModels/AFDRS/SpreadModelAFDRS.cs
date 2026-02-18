@@ -55,7 +55,7 @@ namespace PREACT.Wildfire.AFDRS
             windSpeed *= 3.6; //requires km/h, input is m/s
 
             //update transient data
-            _input.UpdateTransientData(time.CurrentDateTime, weather.GetTemperature(), weather.GetRelativeHumidity(), windSpeed, windAzimuth, 0, 0);
+            _input.UpdateTransientData(time.CurrentDateTime, weather.GetTemperature(), weather.GetRelativeHumidity(), windSpeed, windAzimuth, 0, weather.HoursSinceRain, 0, weather.KBDI);
 
             //calculate
             _output = _fuelModelCode.Calculate(_input);
