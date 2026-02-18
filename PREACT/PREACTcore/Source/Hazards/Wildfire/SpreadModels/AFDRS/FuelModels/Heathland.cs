@@ -25,7 +25,7 @@ namespace PREACT.Wildfire.AFDRS
             double SI = SI_heath(U_10, h_el, fmc, waf);
 
             double noWindNoSlopeROS = ROS_heath(0, h_el, fmc, SI, waf);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROS_heath(U_10, h_el, fmc, SI, waf);
 
             //calculate final values

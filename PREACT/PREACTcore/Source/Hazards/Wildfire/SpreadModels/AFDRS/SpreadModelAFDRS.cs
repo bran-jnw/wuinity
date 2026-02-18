@@ -38,6 +38,41 @@ namespace PREACT.Wildfire.AFDRS
                 //set all the input needed
                 //_input.SetForestInput();
             }            
+            else if(true)
+            {
+                _fuelModel = FuelModels.Grassland;
+                _fuelModelCode = new Grassland();
+            }
+            else if (true)
+            {
+                _fuelModel = FuelModels.Savannah;
+                _fuelModelCode = new Savannah();
+            }
+            else if (true)
+            {
+                _fuelModel = FuelModels.Spinifex;
+                _fuelModelCode = new Spinifex();
+            }
+            else if (true)
+            {
+                _fuelModel = FuelModels.Heathland;
+                _fuelModelCode = new Heathland();
+            }
+            else if (true)
+            {
+                _fuelModel = FuelModels.MalleeHeath;
+                _fuelModelCode = new MalleeHeath();
+            }
+            else if (true)
+            {
+                _fuelModel = FuelModels.Buttongrass;
+                _fuelModelCode = new Buttongrass();
+            }
+            else if (true)
+            {
+                _fuelModel = FuelModels.Pine;
+                _fuelModelCode = new Pine();
+            }
         }
 
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
@@ -45,7 +80,7 @@ namespace PREACT.Wildfire.AFDRS
             //wind
             double windSpeed, windAzimuth;
             weather.GetWind(out windSpeed, out windAzimuth);
-            windAzimuth += 180;
+            windAzimuth += 180; //azimuth is direction wind travels, direction is where it travels from
             if (windAzimuth > 360)
             {
                 windAzimuth -= 360;
@@ -106,9 +141,35 @@ namespace PREACT.Wildfire.AFDRS
         }
 
         //Van Wagner 1977, taken from Canadian FBP system
-        public static double SlopeFactor(double percentSlope)
+        public static double SlopeFactorFBP(double percentSlope)
         {
             return Mathd.Min(10, Mathd.Exp(3.533 * Mathd.Pow(percentSlope * 0.01, 1.2)));
+        }
+
+        //idea from https://research.csiro.au/spark/resources/model-library/slope-effects/
+        public static double SlopeFactorCSIRO(double percentSlope, double slopeAzimuth, double windAzimuth)
+        {
+            slopeAzimuth -= 180.0; //upslope
+            double slopeRad = slopeAzimuth * Mathd.Deg2Rad;
+            double windRad = windAzimuth * Mathd.Deg2Rad;
+            Vector2d upSlopeVector = new Vector2d(Mathd.Sin(slopeRad), Mathd.Cos(slopeRad));
+            Vector2d windVector = new Vector2d(Mathd.Sin(windRad), Mathd.Cos(windRad));
+            double dot = Vector2d.Dot(upSlopeVector, windVector);
+            double degreeSlope = Mathd.Atan(percentSlope * 0.01) * Mathd.Rad2Deg;
+            double alignedPercentSlope = degreeSlope * dot;
+
+            // Capping slopes at 20 degrees for largest speed increases or decreases in this example
+            alignedPercentSlope = Mathd.Clamp(alignedPercentSlope, -20, 20);
+            // Using McArthur's rule of thumb to double the speed of the fire for every 10 degrees up-slope.
+            double slopeFactor = Mathd.Pow(2.0, 0.1 * Mathd.Abs(alignedPercentSlope));
+
+            // The CSIRO Kataburn model is implemented here for negative slopes (fire spreading down hill)
+            if (alignedPercentSlope < 0)
+            {
+                slopeFactor = slopeFactor / (2 * slopeFactor - 1.0);
+            }                
+
+            return slopeFactor;
         }
 
         //Adapted from Behave
@@ -209,7 +270,7 @@ namespace PREACT.Wildfire.AFDRS
             return LBR;
         }
 
-        public static double CalculateSurfaceFireLengthToWidthRatio(double U_10)
+        /*public static double CalculateSurfaceFireLengthToWidthRatio(double U_10)
         {
             double lengthToWidthRatio;
 
@@ -250,6 +311,7 @@ namespace PREACT.Wildfire.AFDRS
             }
 
             return lengthToWidthRatio;
-        }
+        }*/
     }
 }
+        

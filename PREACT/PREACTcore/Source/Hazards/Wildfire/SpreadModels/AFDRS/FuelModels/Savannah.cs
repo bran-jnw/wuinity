@@ -36,7 +36,7 @@ namespace PREACT.Wildfire.AFDRS
             }
 
             double noWindNoSlopeROS = ROS_woodland(0, fmc, curing, state, waf);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROS_woodland(U_10, fmc, curing, state, waf);
 
             //calculate final values

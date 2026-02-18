@@ -27,7 +27,7 @@ namespace PREACT.Wildfire.AFDRS
             double fmc = FMC_pine(temp, rh);
 
             double noWindNoSlopeROS = fb_pine_ensemble(0, fmc, DF, KBDI)[0]; //TODO:correct method call?
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double[] ensemble = fb_pine_ensemble(U_10, fmc, DF, KBDI);
             double windROS = ensemble[0]; //TODO:correct method call?
 

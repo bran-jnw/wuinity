@@ -30,7 +30,7 @@ namespace PREACT.Wildfire.AFDRS
             double fmc = FMC_spinifex(AWAP_uf, time_since_fire, relative_humidity, air_temperature, fuelSubType);            
 
             double noWindNoSlopeROS = ROS_spinifex(0, time_since_fire, fmc, wrf, fuelSubType);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROS_spinifex(wind_speed_10m, time_since_fire, fmc, wrf, fuelSubType);
 
             //calculate final values

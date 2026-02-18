@@ -27,7 +27,7 @@ namespace PREACT.Wildfire.AFDRS
             double crownProbability = crown_prob_mallee(U_10, fmc);
 
             double noWindNoSlopeROS = ROS_mallee(0, fmc, overstoreyCover, overstoreyHeight, spreadProbability, crownProbability);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROS_mallee(U_10, fmc, overstoreyCover, overstoreyHeight, spreadProbability, crownProbability);
 
             //calculate final values

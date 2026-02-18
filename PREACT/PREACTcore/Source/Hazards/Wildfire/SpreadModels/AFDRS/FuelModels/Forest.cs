@@ -33,7 +33,7 @@ namespace PREACT.Wildfire.AFDRS
             double fuel_availability = fuel_availability_forest(DF, DI, waf, submodel);
 
             double noWindNoSlopeROS = ROS_forest(0, fhs_s, fhs_ns, h_ns, fmc, waf, fuel_availability);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROS_forest(U_10, fhs_s, fhs_ns, h_ns, fmc, waf, fuel_availability);
 
             //calculate final values

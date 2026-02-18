@@ -102,7 +102,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   fl_o: overstorey (canopy) fuel load (t/ha)
         ///   h_o: overstorey (canopy) height (m)  
         ///   DI: drought index - KBDI except SDI in Tas        
-        public void SetForestInput(double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double slopeAzimuth, double percentSlope, double DI = 100, Forest.FuelSubModel submodel = Forest.FuelSubModel.Dry, double waf = 3)
+        public void SetForestInput(double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double slopeAzimuth, double percentSlope, double DI = 100, Forest.FuelSubModel subModel = Forest.FuelSubModel.Dry, double waf = 3)
         {
             PercentSlope = percentSlope;
             SlopeAzimuth = slopeAzimuth;

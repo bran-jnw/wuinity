@@ -21,7 +21,7 @@ namespace PREACT.Wildfire.AFDRS
             double fmc = FMC_buttongrass(temp, rh, dew_pt, tsr, rain);
 
             double noWindNoSlopeROS = ROSButtongrass(0, fmc, tsf, productivity);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROSButtongrass(U_10, fmc, tsf, productivity);
 
             //calculate final values
@@ -119,7 +119,7 @@ namespace PREACT.Wildfire.AFDRS
         private static double SpreadProbButtongrass(double U_10, double mc, int productivity)
         {
             double U_2 = U_10 / 1.2;
-            return 1 / (1 + Mathd.Exp(-(-1 + 0.68 * U_2 - 0.07 * mc - 0.0037 * U_2 * mc + 2.1 * productivity)));
+            return 1.0 / (1.0 + Mathd.Exp(-(-1 + 0.68 * U_2 - 0.07 * mc - 0.0037 * U_2 * mc + 2.1 * productivity)));
         }
 
         /// <summary>

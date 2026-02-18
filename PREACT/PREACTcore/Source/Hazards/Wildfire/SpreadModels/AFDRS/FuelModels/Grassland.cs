@@ -56,7 +56,7 @@ namespace PREACT.Wildfire.AFDRS
             }*/
 
             double noWindNoSlopeROS = ROS_grassland(0, fmc, curing, state, fuelSubType);
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactor(percentSlope);
+            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
             double windROS = ROS_grassland(U_10, fmc, curing, state, fuelSubType);
 
             //calculate final values
