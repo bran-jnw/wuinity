@@ -5,7 +5,7 @@ namespace PREACT.Wildfire.AFDRS
 {
     public class Grassland : AFDRSFuelModel
     {
-        public enum FuelSubTypes { Grass, Pasture, ChenopodShrubland, LowWetland, GambaGrass }
+        public enum FuelSubTypes { Grass, Pasture, ChenopodShrubland, LowWetland, GambaGrass, Crop }
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace PREACT.Wildfire.AFDRS
 {   
-    public class Savannah : AFDRSFuelModel
+    public class Savanna : AFDRSFuelModel
     {
-        public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural }
+        public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural, Urban }
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
@@ -26,7 +26,7 @@ namespace PREACT.Wildfire.AFDRS
         {
             double fmc = FMC_woodland(temp, rh);
 
-            if (fuelSubType == FuelSubTypes.AcaciaWoodland || fuelSubType == FuelSubTypes.WoodyHorticulture)
+            if (fuelSubType == FuelSubTypes.AcaciaWoodland || fuelSubType == FuelSubTypes.WoodyHorticulture || fuelSubType == FuelSubTypes.Urban)
             {
                 state = Grassland.States.EatenOut;
             }

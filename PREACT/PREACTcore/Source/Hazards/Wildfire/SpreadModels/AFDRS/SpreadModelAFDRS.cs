@@ -46,7 +46,7 @@ namespace PREACT.Wildfire.AFDRS
             else if (true)
             {
                 _fuelModel = FuelModels.Savannah;
-                _fuelModelCode = new Savannah();
+                _fuelModelCode = new Savanna();
             }
             else if (true)
             {

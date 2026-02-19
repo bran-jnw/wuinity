@@ -56,7 +56,7 @@ namespace PREACT.Wildfire.AFDRS
         //Pine has none
 
         //Savannah
-        public Savannah.FuelSubTypes SavannahSubType;
+        public Savanna.FuelSubTypes SavannahSubType;
 
         //Spinifex
         public Spinifex.FuelSubTypes SpinifexSubType;
@@ -164,7 +164,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   curing: degree of grass curing (%)
         ///   fuel_load: fine fuel load (t/ha)
         ///   state: grass state (natural, eaten out, grazed)
-        public void SetSavannahInput(double waf, Savannah.FuelSubTypes fuelSubType, double curing, double fuel_load, Grassland.States state, double percentSlope, double slopeAzimuth)
+        public void SetSavannahInput(double waf, Savanna.FuelSubTypes fuelSubType, double curing, double fuel_load, Grassland.States state, double percentSlope, double slopeAzimuth)
         {
             WindAdjustmentFactor = waf;
             SavannahSubType = fuelSubType;
