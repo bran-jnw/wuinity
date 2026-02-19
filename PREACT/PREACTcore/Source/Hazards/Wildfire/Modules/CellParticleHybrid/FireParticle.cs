@@ -32,12 +32,12 @@ namespace PREACT.Wildfire
             _distanceLeftToTarget = delta.magnitude;
 
             //these are the factors to compensate for the average distance being longer with randomized ignition points
-            float distanceCorrection = 1.088f;
-            if (diagonal)
+            //average distance between cells sharing one side is 1.088f;
+            //average distance between cells with touching corners is 1.042f
+            if (!diagonal)
             {
-                distanceCorrection = 1.042f;
+                _distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
             }
-            _distanceLeftToTarget /= distanceCorrection;
 
             if (CellParticleHybrid.inverseSpreadDirection)
             {

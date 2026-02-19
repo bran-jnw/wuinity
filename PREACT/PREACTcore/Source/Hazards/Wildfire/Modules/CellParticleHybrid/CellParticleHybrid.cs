@@ -73,7 +73,7 @@ namespace PREACT.Wildfire
             }
             Engine.Message(_simulation, Engine.LogType.Debug, $"Size of raster is {landscapeData.RasterCellResolutionX}.");
 
-            _aliveParticles = new Queue<FireParticle>();            
+            _aliveParticles = new Queue<FireParticle>(_xDim * _yDim * 8 / 10); //just a guess, 10 percent active at max           
 
             _done = false;      
 
