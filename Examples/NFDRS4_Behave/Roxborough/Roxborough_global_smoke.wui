@@ -141,16 +141,13 @@ SmokeBeta=-0.02910
 [WildfireModule]
 Enabled=true
 Module=AscImport
-LcpFile=fire/rox_big_burning_city.lcp
 GraphicalFireInputFile=fire/example.gfi
 
 [AscImport]
-RootFolder=flammap
-TimeOfArrivalFile=output/TOA.asc
-RateOfSpreadFile=output/ROS.asc
-SpreadDirectionFile=output/SD.asc
-FirelineIntensityFile=output/FI.asc
-WeatherStreamFile=weather_stream.wxs
+TimeOfArrivalFile=flammap/output/TOA.asc
+RateOfSpreadFile=flammap/output/ROS.asc
+SpreadDirectionFile=flammap/output/SD.asc
+FirelineIntensityFile=flammap/output/FI.asc
 
 [TriggerBufferModule]
 Enabled=false

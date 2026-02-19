@@ -59,7 +59,7 @@ namespace PREACT.IO
                 return;
             }
 
-            string filePath = Path.Combine(rootFolder, wildfireInput.LcpFile);
+            string filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.LandscapeFile);
             LoadLCPFile(wildfireInput, filePath, simulationInput.Data.UTMOrigin, false, out success);
             if(!success)
             {
@@ -144,7 +144,7 @@ namespace PREACT.IO
 
             if (success && updateInput)
             {
-                fireInput.LcpFile = Path.GetFileName(filePath);
+                fireInput.FireCellInput.LandscapeFile = Path.GetFileName(filePath);
             }
         }
 

@@ -32,10 +32,16 @@ namespace PREACT.IO
         public double StartDC = 15.0;
         public double StartHourlyFFMC = 85.0;
 
-        //behave
+        //australian
+        public string AFDRSLookupTableFile = string.Empty;
+        public double StartKBDI = 100.0;
+        public double MeanAnnualPrcp = 1000.0;
+
+        //simple
         public string LookUpTableFile = string.Empty;
 
         //common
+        public string LandscapeFile = string.Empty;
         public string IgnitionPointsFile = string.Empty;
         public bool UseRandomIgnitionMap = false;
         public int RandomIgnitionPoints = 0;
@@ -51,6 +57,23 @@ namespace PREACT.IO
             success = false;
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
+
+            //critical
+            nameOfInput = nameof(LandscapeFile);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                LandscapeFile = userInput;
+                PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                success = false;
+            }
+            if (!success)
+            {
+                return;
+            }
 
             //critical
             nameOfInput = nameof(SpreadRateModel);

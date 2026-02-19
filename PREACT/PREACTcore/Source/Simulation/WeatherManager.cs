@@ -50,7 +50,7 @@ namespace PREACT
             _simulation = simulation;
             _fwi = new Wildfire.FireWeatherIndex(simulation.Input.WildfireModule.FireCellInput.StartFFMC, simulation.Input.WildfireModule.FireCellInput.StartDMC, simulation.Input.WildfireModule.FireCellInput.StartDC);
             _ffmcHourly = new Wildfire.HourlyFFMC(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);
-            _DailyKBDI = new DailyKBDI(100, 1500); //TODO: user input
+            _DailyKBDI = new DailyKBDI(simulation.Input.WildfireModule.FireCellInput.StartKBDI, 1500); //TODO: user input
         }
 
         Wildfire.DeadFuelMoistureEngine _deadFuelMoistureEngine;

@@ -23,8 +23,7 @@ namespace PREACT.IO
         public WildfireData Data { get => _data; }
         public AscImportInput AscImportInput { get => _ascImportInput; }
         public FireCellInput FireCellInput { get => _fireCellInput; }
-        public WildfireModules Module = WildfireModules.None;
-        public string LcpFile = string.Empty;
+        public WildfireModules Module = WildfireModules.None;        
         public string GraphicalFireInputFile = string.Empty;
 
 
@@ -100,27 +99,7 @@ namespace PREACT.IO
                 success = false;
                 PREACTInput.CriticalDependency(nameof(weatherInput.WeatherFile));
                 return;
-            }*/
-
-            //might not always need lcp file
-            if (Module != WildfireModules.None && Module != WildfireModules.AscImport)
-            {
-                nameOfInput = nameof(LcpFile);
-                if (inputToParse.TryGetValue(nameOfInput, out userInput))
-                {
-                    LcpFile = userInput;
-                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success);
-                }
-                else
-                {
-                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
-                    success = false;
-                }
-                if(!success)
-                {
-                    return;
-                }
-            }            
+            }*/         
 
             //might be critical if using e.g. random ignition
             nameOfInput = nameof(GraphicalFireInputFile);
