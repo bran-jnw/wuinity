@@ -5,7 +5,7 @@ namespace PREACT.Wildfire.AFDRS
 {
     public class Heathland : AFDRSFuelModel
     {
-        public enum States { Dry, Wet }// no diff in the models at this stage
+        public enum States { Heath, WetHeathland }// no diff in the models at this stage
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
@@ -19,7 +19,7 @@ namespace PREACT.Wildfire.AFDRS
         /// U_10: 10 m wind speed (km/h)
         /// h_el: elevated fuel height (m)
         /// waf: wind adjustment factor
-        public static AFDRSOutput Calculate(double temp, double rh, double rain, int hoursSinceRain, double U_10, double h_el, double waf, double fuel_load, double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Dry)
+        public static AFDRSOutput Calculate(double temp, double rh, double rain, int hoursSinceRain, double U_10, double h_el, double waf, double fuel_load, double percentSlope, double windAzimuth, double slopeAzimuth, States state = States.Heath)
         {
             double fmc = FMC_heath(temp, rh, rain, hoursSinceRain);
             double SI = SI_heath(U_10, h_el, fmc, waf);

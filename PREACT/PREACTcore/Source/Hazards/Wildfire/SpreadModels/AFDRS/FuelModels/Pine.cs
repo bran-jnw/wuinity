@@ -4,6 +4,8 @@ namespace PREACT.Wildfire.AFDRS
 {
     public class Pine : AFDRSFuelModel
     {
+        public enum FuelSubTypes { PineEnsamble, PineStage };
+
         private const double HEAT_CONTENT = 18600; //KJ/kg
         private const double KGSQM_TO_TPH = 10; //kg/m2 to t/ha
         private const double SECONDS_PER_HOUR = 3600; //s
@@ -13,7 +15,7 @@ namespace PREACT.Wildfire.AFDRS
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
-            return Calculate(input.Temp, input.RH, input.U_10, input.DroughtFactor, input.KBDI, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
+            return Calculate(input.Temp, input.RH, input.U_10, input.DroughtFactor, input.KBDI, input.PineSubType, input.PercentSlope, input.WindAzimuth, input.SlopeAzimuth);
         }
 
         ///   temp: air temperature (C)
@@ -22,19 +24,37 @@ namespace PREACT.Wildfire.AFDRS
         ///   DF: drought factor
         ///   KBDI: Keetch Byram drought index KBDI
 
-        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double DF, double KBDI, double percentSlope, double windAzimuth, double slopeAzimuth)
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, double DF, double KBDI, FuelSubTypes fuelSubType, double percentSlope, double windAzimuth, double slopeAzimuth)
         {
             double fmc = FMC_pine(temp, rh);
 
-            double noWindNoSlopeROS = fb_pine_ensemble(0, fmc, DF, KBDI)[0]; //TODO:correct method call?
-            double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
-            double[] ensemble = fb_pine_ensemble(U_10, fmc, DF, KBDI);
-            double windROS = ensemble[0]; //TODO:correct method call?
+            double ros, direction, intensity, flameHeight;
+            if(fuelSubType == FuelSubTypes.PineEnsamble)
+            {
+                double noWindNoSlopeROS = fb_pine_ensemble(0, fmc, DF, KBDI)[0];
+                double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
+                double[] ensemble = fb_pine_ensemble(U_10, fmc, DF, KBDI);
+                double windROS = ensemble[0];
 
-            //calculate final values
-            SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out double ros, out double direction);
-            double intensity = ensemble[1]; //TODO: re-calc with new ROS?
-            double flameHeight = ensemble[2]; //TODO: re-calc with new ROS?
+                //calculate final values
+                SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out ros, out direction);
+                intensity = ensemble[1]; //TODO: re-calc with new ROS?
+                flameHeight = ensemble[2]; //TODO: re-calc with new ROS?                
+            }
+            else
+            {
+                //TODO: use user input instead of default
+                double noWindNoSlopeROS = fire_behaviour_pine(0, fmc, DF, KBDI, _fuel_model_parameters_default)[0];
+                double slopeROS = noWindNoSlopeROS * SpreadModelAFDRS.SlopeFactorFBP(percentSlope);
+                double[] result = fire_behaviour_pine(U_10, fmc, DF, KBDI, _fuel_model_parameters_default);
+                double windROS = result[0];
+
+                //calculate final values
+                SpreadModelAFDRS.CalculateDirectionOfMaxSpread(windAzimuth, slopeAzimuth, noWindNoSlopeROS, windROS, slopeROS, out ros, out direction);
+                intensity = result[1]; //TODO: re-calc with new ROS?
+                flameHeight = result[2]; //TODO: re-calc with new ROS? 
+            }
+
             double lengthToWidth = SpreadModelAFDRS.ForestLengthToWidth(U_10);
 
             return new AFDRSOutput(fmc, ros, direction, intensity, flameHeight, lengthToWidth);
@@ -76,7 +96,7 @@ namespace PREACT.Wildfire.AFDRS
             return U_stand_height * Mathd.Exp(-0.48);
         }
 
-        static readonly double[] _fuel_models_default = { 5, 10.5, 11, 5, 0.1 };
+        static readonly double[] _fuel_model_parameters_default = { 5, 10.5, 11, 5, 0.1 };
         /// returns array of the the forward rate of spread m/h, intensity kW/m and flame height m for pine based on Cruz model
         ///
         /// args
@@ -96,7 +116,7 @@ namespace PREACT.Wildfire.AFDRS
             //fuel_models array is empty or imcomplete, use defaults
             if (fuel_models.Length < 5)
             {
-                fuel_models = _fuel_models_default;
+                fuel_models = _fuel_model_parameters_default;
             }
 
             double wrf = fuel_models[0];
@@ -229,29 +249,29 @@ namespace PREACT.Wildfire.AFDRS
 
         private static double ROS_pine(double U_10, double mc, double DF, double KBDI)
         {
-            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_models_default); //TODO:check added default
+            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_model_parameters_default); //TODO:check added default
             return FB_pine[0];
         }
 
         private static double Intensity_pine(double U_10, double mc, double DF, double KBDI)
         {
-            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_models_default);
+            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_model_parameters_default);
             return FB_pine[1];
         }            
 
         private static double FH_pine(double U_10, double mc, double DF, double KBDI)
         {
-            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_models_default);
+            double[] FB_pine = fire_behaviour_pine(U_10, mc, DF, KBDI, _fuel_model_parameters_default);
             return FB_pine[2];
         }
 
         // fuel array elements: proportion, fl_s, fl_o, bh_o, bd_o
-        static readonly double[] fuelArray1 = { 0.151, 4, 11.5, 0.7, 0.17 };
-        static readonly double[] fuelArray2 = { 0.151, 5, 12, 1.5, 0.18 };
-        static readonly double[] fuelArray3 = { 0.121, 8.5, 12, 2.5, 0.18 };
-        static readonly double[] fuelArray4 = { 0.091, 10, 8, 6, 0.12 };
-        static readonly double[] fuelArray5 = { 0.394, 7, 10, 14, 0.15 };
-        static readonly double[][] fuel_arrays = { fuelArray1, fuelArray2, fuelArray3, fuelArray4, fuelArray5 };
+        static readonly double[] prad02 = { 0.151, 4, 11.5, 0.7, 0.17 };
+        static readonly double[] prad03 = { 0.151, 5, 12, 1.5, 0.18 };
+        static readonly double[] prad04_unthinned = { 0.121, 8.5, 12, 2.5, 0.18 };
+        static readonly double[] prad04_thinned = { 0.091, 10, 8, 6, 0.12 };
+        static readonly double[] prad05 = { 0.394, 7, 10, 14, 0.15 };
+        static readonly double[][] fuel_arrays = { prad02, prad03, prad04_unthinned, prad04_thinned, prad05 };
         /// returns array of the the forward rate of spread (m/h), intensity (kW/m) and flame height (m) for pine using an mixed stand ensemble
         ///
         /// args
@@ -261,10 +281,10 @@ namespace PREACT.Wildfire.AFDRS
         ///   KBDI: Keetch Byram drought index KBDI
         private static double[] fb_pine_ensemble(double U_10, double mc, double DF, double KBDI)
         {
-            //initialise
+            //initialise with PRAD01
             double grass_proportion = 0.091;
             double wrf = 5;
-            double ROS = Grassland.ROS_grass(U_10, (mc), 100, Grassland.States.EatenOut);
+            double ROS = Grassland.ROS_grassland(U_10, (mc), 100, Grassland.States.EatenOut, Grassland.FuelSubTypes.Grass);
             double Intensity_total = intensity(ROS, 1.5) * grass_proportion;
             double flame_height = Grassland.Flame_height_grassland((ROS), Grassland.States.EatenOut) * grass_proportion;
             ROS = ROS * grass_proportion;

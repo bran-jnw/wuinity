@@ -18,7 +18,7 @@ namespace PREACT.Weather
         public DailyKBDI(double startKBDI, double meanAnnualPrcp)
         {
             _oldKBDI = startKBDI;
-            _meanAnnualPrcpCoeff = 1.0 / (1.0 + 10.88 * Exp(-0.001736 * meanAnnualPrcp);
+            _meanAnnualPrcpCoeff = 1.0 / (1.0 + 10.88 * Exp(-0.001736 * meanAnnualPrcp));
         }
 
         /*public void CalculateDailyKBDI_Imperial(double tempF, double cumulativePRCP_hundredthInch, ref double KBDI)

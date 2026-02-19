@@ -5,7 +5,8 @@ namespace PREACT.Wildfire.AFDRS
 {
     public class Grassland : AFDRSFuelModel
     {
-        public enum FuelSubTypes { Grass, Pasture, ChenopodShrubland, LowWetland, GambaGrass, Crop }
+        public enum FuelSubTypes { Grass, Pasture, ChenopodShrubland, LowWetland, GambaGrass } //, Crop 
+        public enum States { Natural, Grazed, EatenOut }
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {
@@ -27,9 +28,7 @@ namespace PREACT.Wildfire.AFDRS
             public static readonly Coefficients Natural = new Coefficients(0.54f, 0.269f, 1.4f, 0.838f);
             public static readonly Coefficients Grazed = new Coefficients(0.054f, 0.209f, 1.1f, 0.715f);
             public static readonly Coefficients EatenOut = new Coefficients(0.027f, 0.1045f, 0.55f, 0.357f);
-        }*/
-        
-        public enum States { Natural, Grazed, EatenOut }
+        }*/               
 
         ///   temp: air temperature (C)
         ///   rh: relative humidity (%)

@@ -6,7 +6,7 @@ namespace PREACT.Wildfire.AFDRS
 {   
     public class Savanna : AFDRSFuelModel
     {
-        public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural, Urban }
+        public enum FuelSubTypes { WoodyGrassland, AcaciaWoodland, WoodyHorticulture, Rural, Urban };
 
         public override AFDRSOutput Calculate(AFDRSInput input)
         {

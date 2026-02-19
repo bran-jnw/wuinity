@@ -10,7 +10,7 @@ namespace PREACT.Wildfire.AFDRS
             return new AFDRSOutput();//Calculate(input.Temp, input.RH, input.U_10, input.DateTime, input.WindAzimuth, input.SlopeAzimuth, input.PercentSlope, )
         }
 
-        public enum FuelSubModel { Dry, Wet }
+        public enum FuelSubModel { DryForest, WetForest };
 
         ///   temp: air temperature(C)
         ///   rh: relative humidity (%)
@@ -27,7 +27,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   fl_o: overstorey (canopy) fuel load (t/ha)
         ///   h_o: overstorey (canopy) height (m)  
         ///   DI: drought index - KBDI except SDI in Tas        
-        public static AFDRSOutput Calculate(double temp, double rh, double U_10, DateTime dateTime, double windAzimuth, double slopeAzimuth, double percentSlope, double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double DI = 100, FuelSubModel submodel = FuelSubModel.Dry, double waf = 3)
+        public static AFDRSOutput Calculate(double temp, double rh, double U_10, DateTime dateTime, double windAzimuth, double slopeAzimuth, double percentSlope, double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double DI = 100, FuelSubModel submodel = FuelSubModel.DryForest, double waf = 3)
         {
             double fmc = FMC_forest(temp, rh, dateTime, submodel);
             double fuel_availability = fuel_availability_forest(DF, DI, waf, submodel);
@@ -160,7 +160,7 @@ namespace PREACT.Wildfire.AFDRS
             double FMC_forest;
             if((dateTime.Month >= start_peak_month || dateTime.Month <= end_peak_month) 
                 && (dateTime.Hour >= start_afternoon && dateTime.Hour <= end_afternoon)
-                && submodel == FuelSubModel.Dry)
+                && submodel == FuelSubModel.DryForest)
             {
                 FMC_forest = 2.76f + 0.124f * rh - 0.0187f * temp;
             }                
@@ -222,11 +222,11 @@ namespace PREACT.Wildfire.AFDRS
         ///   DI: drought index - KBDI except SDI in Tas
         ///   WAF: wind adjustment factor
         ///   submodel: dry or wet
-        static double fuel_availability_forest(double DF, double DI = 100f, double waf = 3f, FuelSubModel submodel = FuelSubModel.Dry)
+        static double fuel_availability_forest(double DF, double DI = 100f, double waf = 3f, FuelSubModel submodel = FuelSubModel.DryForest)
         {
             double fuel_availability_forest = 0f;
 
-            if (submodel == FuelSubModel.Dry)
+            if (submodel == FuelSubModel.DryForest)
             {
                 fuel_availability_forest = DF * 0.1f;
             }                

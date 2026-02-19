@@ -53,7 +53,8 @@ namespace PREACT.Wildfire.AFDRS
         public double MalleHeathOverstoreyCover;
         public double MalleHeathOverstoreyHeight;
 
-        //Pine has none
+        //Pine
+        public Pine.FuelSubTypes PineSubType;
 
         //Savannah
         public Savanna.FuelSubTypes SavannahSubType;
@@ -102,7 +103,7 @@ namespace PREACT.Wildfire.AFDRS
         ///   fl_o: overstorey (canopy) fuel load (t/ha)
         ///   h_o: overstorey (canopy) height (m)  
         ///   DI: drought index - KBDI except SDI in Tas        
-        public void SetForestInput(double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double slopeAzimuth, double percentSlope, double DI = 100, Forest.FuelSubModel subModel = Forest.FuelSubModel.Dry, double waf = 3)
+        public void SetForestInput(double fhs_s, double fhs_ns, double h_ns, double DF, double h_el, double fl_s, double fl_ns, double fl_e, double fl_o, double h_o, double slopeAzimuth, double percentSlope, double DI = 100, Forest.FuelSubModel subModel = Forest.FuelSubModel.DryForest, double waf = 3)
         {
             PercentSlope = percentSlope;
             SlopeAzimuth = slopeAzimuth;
@@ -125,7 +126,7 @@ namespace PREACT.Wildfire.AFDRS
 
         /// h_el: elevated fuel height (m)
         /// waf: wind adjustment factor
-        public void SetHeathlandInput(double h_el, double waf, double fuel_load, double percentSlope, double slopeAzimuth, Heathland.States state = Heathland.States.Dry)
+        public void SetHeathlandInput(double h_el, double waf, double fuel_load, double percentSlope, double slopeAzimuth, Heathland.States state = Heathland.States.Heath)
         {
             ElevatedFuelHeight = h_el;
             WindAdjustmentFactor = waf;
@@ -140,9 +141,9 @@ namespace PREACT.Wildfire.AFDRS
         ///   overstorey_height: (m)
         ///   fuel_load_surface: surface fuel load (t/ha)
         ///   fuel_load_canopy: canopy fuel load (t/ha)
-        public void SetMalleeHeathInput(MalleeHeath.FuelSubTypes subType, double overstoreyCover, double overstoreyHeight, double fuelLoadSurface, double fuelLoadNearSurface, double fuelLoadCrown, double percentSlope, double slopeAzimuth)
+        public void SetMalleeHeathInput(MalleeHeath.FuelSubTypes fuelSubType, double overstoreyCover, double overstoreyHeight, double fuelLoadSurface, double fuelLoadNearSurface, double fuelLoadCrown, double percentSlope, double slopeAzimuth)
         {       
-            MalleeHeathSubType = subType;
+            MalleeHeathSubType = fuelSubType;
             MalleHeathOverstoreyCover = overstoreyCover;
             MalleHeathOverstoreyHeight = overstoreyHeight;
             FuelLoadSurface = fuelLoadSurface;
@@ -153,8 +154,9 @@ namespace PREACT.Wildfire.AFDRS
             SlopeAzimuth = slopeAzimuth;
         }
 
-        public void SetPineInput(double percentSlope, double slopeAzimuth)
+        public void SetPineInput(Pine.FuelSubTypes fuelSubType, double percentSlope, double slopeAzimuth)
         {
+            PineSubType = fuelSubType;
             PercentSlope = percentSlope;
             SlopeAzimuth = slopeAzimuth;
         }
