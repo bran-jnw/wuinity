@@ -420,7 +420,7 @@ namespace PREACT.IO
             Engine.Message(null, Engine.LogType.Log, nameOfInput + " input is being read...");
         }
 
-        public static void InputNotFoundMessage(string nameOfInput, bool critical = false)
+        public static void InputNotFoundMessage(string nameOfInput, bool critical = false, string defaultValue = "VALUE")
         {
             if(critical)
             {
@@ -428,7 +428,7 @@ namespace PREACT.IO
             }
             else
             {
-                Engine.Message(null, Engine.LogType.Warning, nameOfInput + " was not found, default value has been used.");
+                Engine.Message(null, Engine.LogType.Warning, $"{nameOfInput} was not found, default value {defaultValue} has been used.");
             }                
         }
 

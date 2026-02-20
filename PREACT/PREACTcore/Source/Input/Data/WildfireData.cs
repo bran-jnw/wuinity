@@ -80,7 +80,7 @@ namespace PREACT.IO
                 issues += success ? 0 : 1;
 
                 //spread model dependent
-                if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.BehavePlus)
+                if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.Behave)
                 {
                     filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.FuelModelsFile);
                     LoadFuelModelsInput(wildfireInput, filePath, false, out success);

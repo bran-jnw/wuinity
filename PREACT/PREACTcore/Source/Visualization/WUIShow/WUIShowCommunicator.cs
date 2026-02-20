@@ -104,11 +104,11 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.Simulation.Input.WildfireModule.Data.LCPData.GetLandscapeSizeX();
+                double xSize = _engine.Simulation.WildfireModule.GetCellCountX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.Simulation.Input.WildfireModule.Data.LCPData.GetLandscapeSizeY();
+                double ySize = _engine.Simulation.WildfireModule.GetCellCountY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);

@@ -13,11 +13,13 @@ namespace PREACT.IO
     [System.Serializable]
     public class FireCellInput
     {
-        public enum SpreadRateModels { BehavePlus, CanadianFBP, LookUpTable }
+        public enum CentroidModes { Center, Random, RandomCross, RandomCircle }
+        public enum SpreadRateModels { Behave, CanadianFBP, LookUpTable }
         public enum IgnitionTypes { Point, Polygon, Random }
         public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
-        public SpreadRateModels SpreadRateModel = SpreadRateModels.BehavePlus;
+
+        public SpreadRateModels SpreadRateModel = SpreadRateModels.Behave;
 
         public SpreadModes SpreadMode = SpreadModes.SixteenDirections;
 
@@ -41,6 +43,8 @@ namespace PREACT.IO
         public string LookUpTableFile = string.Empty;
 
         //common
+        public CentroidModes CentroidMode = CentroidModes.RandomCross;
+        public double RandomAmount = 1.0;
         public string LandscapeFile = string.Empty;
         public string IgnitionPointsFile = string.Empty;
         public bool UseRandomIgnitionMap = false;
@@ -75,6 +79,54 @@ namespace PREACT.IO
                 return;
             }
 
+            //not critical
+            nameOfInput = nameof(CentroidMode);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = true;
+                switch (userInput)
+                {
+                    case nameof(CentroidModes.Center):
+                        CentroidMode = CentroidModes.Center;
+                        break;
+                    case nameof(CentroidModes.Random):
+                        CentroidMode = CentroidModes.Random;
+                        break;
+                    case nameof(CentroidModes.RandomCross):
+                        CentroidMode = CentroidModes.RandomCross;
+                        break;
+                    case nameof(CentroidModes.RandomCircle):
+                        CentroidMode = CentroidModes.RandomCircle;
+                        break;
+                    default:
+                        success = false;
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                        break;
+                }
+            }
+            else
+            {
+                success = false;
+                PREACTInput.InputNotFoundMessage(nameOfInput, false, CentroidMode.ToString());
+            }
+            success = true;
+
+            //not critical, uses defaults
+            nameOfInput = nameof(RandomAmount);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = double.TryParse(userInput, out RandomAmount);
+                if (!success)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput, false, RandomAmount.ToString());
+            }
+            success = true;
+
             //critical
             nameOfInput = nameof(SpreadRateModel);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
@@ -82,8 +134,8 @@ namespace PREACT.IO
                 success = true;
                 switch (userInput)
                 {
-                    case nameof(SpreadRateModels.BehavePlus):
-                        SpreadRateModel = SpreadRateModels.BehavePlus;
+                    case nameof(SpreadRateModels.Behave):
+                        SpreadRateModel = SpreadRateModels.Behave;
                         break;
                     case nameof(SpreadRateModels.CanadianFBP):
                         SpreadRateModel = SpreadRateModels.CanadianFBP;
@@ -100,14 +152,14 @@ namespace PREACT.IO
             else
             {
                 success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
             if(!success)
             {
                 return;
             }
 
-            if (SpreadRateModel == SpreadRateModels.BehavePlus)
+            if (SpreadRateModel == SpreadRateModels.Behave)
             {
                 //not critical, uses defaults
                 nameOfInput = nameof(FuelModelsFile);

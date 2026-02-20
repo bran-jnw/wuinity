@@ -289,7 +289,7 @@ namespace WUInity.Visualization
             foreach (PREACT.Wildfire.IgnitionPointInput point in input.WildfireModule.Data.IgnitionPoints)
             {
                 _ignitionMarkers[index] = MonoBehaviour.Instantiate<GameObject>(markerPrefab);
-                _ignitionMarkers[index].name = $"Ignition [{point.LatLon.x}/{point.LatLon.x}]";
+                _ignitionMarkers[index].name = $"Ignition [{point.LatLon.x}, {point.LatLon.y}]";
                 Vector2d pos = input.Simulation.Data.GetSimulationPosition(point.LatLon);
 
                 float scale = 0.02f * (float)Mathd.Max(input.Simulation.DomainSize.x, input.Simulation.DomainSize.y);

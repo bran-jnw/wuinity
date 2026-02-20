@@ -27,8 +27,10 @@ namespace PREACT.Wildfire
             }
             _directionOfMaxSpread = windAzimuth;
 
-            double windFactor = Mathd.Min(10, 0.05 * windSpeed);
+            double windFactor = Mathd.Min(10, 0.01 * windSpeed);
             _forwardSpreadRate = _noWindNoSlopeSpreadRate * (1.0 + windFactor);
+            double lToW = LengthToWidth(windSpeed * 3.6);
+            _eccentricity = CalculateEccentricity(lToW);
         }
 
         public override double GetDirectionOfMaxSpread()
@@ -48,6 +50,8 @@ namespace PREACT.Wildfire
 
         public override double GetSpreadRateInDirection(double directionOfInterest)
         {
+            return GetSpreadRateInDirectionModified(directionOfInterest);
+
             double rosDirection = _forwardSpreadRate;
             if (_forwardSpreadRate != 0.0) // if forward spread rate is not zero
             {
@@ -70,6 +74,59 @@ namespace PREACT.Wildfire
                 }
             }
             return rosDirection;
+        }
+
+        private double GetSpreadRateInDirectionModified(double directionOfInterest)
+        {
+            double rosDirection = _forwardSpreadRate;
+            if (_forwardSpreadRate != 0.0) // if forward spread rate is not zero
+            {
+                // Calculate the fire spread rate in this azimuth
+                // if it deviates more than a tenth degree from the maximum azimuth
+
+                // Calculate beta: the angle between the direction of max spread and the direction of interest
+                double beta = Mathd.Abs(_directionOfMaxSpread - directionOfInterest);
+
+                // Calculate the fire spread rate in this azimuth
+                // if it deviates more than a tenth degree from the maximum azimuth
+                if (beta > 180.0)
+                {
+                    beta = (360.0 - beta);
+                }
+                if (Mathd.Abs(beta) > 30)
+                {
+                    double radians = beta * Mathd.Deg2Rad;// 180 * (beta - 30) / 150 * Mathd.Deg2Rad //rescale to 0-180 range. It works best when just having a hard limit...
+                    rosDirection = _forwardSpreadRate * (1.0 - _eccentricity) / (1.0 - _eccentricity * Mathd.Cos(radians));
+                }
+            }
+            return rosDirection;
+        }
+
+        private static double LengthToWidth(double U_10)
+        {
+            double LBR = 1.0;
+            if (U_10 < 5)
+            {
+                LBR = 1.0;
+            }
+            else
+            {
+                LBR = 1.1 * Mathd.Pow(U_10, 0.464);
+            }
+
+            return Mathd.Min(8.0, LBR);
+        }
+
+        private static double CalculateEccentricity(double fireLengthToWidthRatio)
+        {
+            double eccentricity = 0.0;
+            double x = (fireLengthToWidthRatio * fireLengthToWidthRatio) - 1.0;
+            if (x > 0.0)
+            {
+                eccentricity = Mathd.Sqrt(x) / fireLengthToWidthRatio;
+            }
+
+            return eccentricity;
         }
 
         public override bool HasFuelLoad()

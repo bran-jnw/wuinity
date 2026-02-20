@@ -30,7 +30,7 @@ namespace PREACT.Wildfire
 
         public float TimeOfArrival { get => _timeOfArrival; }
 
-        public FuelCell(bool randomCenter, int xIndex, int yIndex, LandscapeData landscape, BehaveCore.FuelModels fuelModels, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures, IO.FireCellInput input)
+        public FuelCell(IO.FireCellInput.CentroidModes centroidMode, int xIndex, int yIndex, LandscapeData landscape, BehaveCore.FuelModels fuelModels, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures, IO.FireCellInput input)
         {
             _owner = owner;
             _index = new Vector2int(xIndex, yIndex);
@@ -38,7 +38,7 @@ namespace PREACT.Wildfire
             _cellData = landscape.GetCellData(_index.x, _index.y);
             _cellSize = landscape.RasterCellResolutionX;                
 
-            if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.BehavePlus)
+            if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.Behave)
             {
                 InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
                 _spreadModel = new SpreadModelBehave(fuelModels, _cellData, moisture);
@@ -52,21 +52,45 @@ namespace PREACT.Wildfire
                 _spreadModel = new SpreadModelLookUpTable(_cellData, _owner.Simulation.Input.WildfireModule.Data.ConstantLookupTable);
             }
 
-
-            if (randomCenter)
+            double xPos, yPos, zPos;
+            double randomAmount = _owner.Simulation.Input.WildfireModule.FireCellInput.RandomAmount;
+            double randomStart = (1.0 - randomAmount) * 0.5;
+            if (centroidMode == IO.FireCellInput.CentroidModes.Random)
             {
-                double xPos = (Random.valueD + xIndex) * _cellSize;
-                double yPos = (Random.valueD + yIndex) * _cellSize;
-                double zPos = landscape.GetElevationLocalPos(xPos, yPos);
-                IgnitionPoint = new Vector3d(xPos, yPos, zPos);
+                xPos = (randomStart + Random.valueD * randomAmount + xIndex) * _cellSize;
+                yPos = (randomStart + Random.valueD * randomAmount + yIndex) * _cellSize;
             }
-            else
+            else if (centroidMode == IO.FireCellInput.CentroidModes.RandomCross)
             {
-                double xPos = (xIndex + 0.5) * _cellSize;
-                double yPos = (yIndex + 0.5) * _cellSize;
-                double zPos = _cellData.elevation;
-                IgnitionPoint = new Vector3d(xPos, yPos, zPos);
+                bool xAxis = Random.valueD < 0.5;
+                if (xAxis)
+                {
+                    xPos = (randomStart + Random.valueD * randomAmount + xIndex) * _cellSize;
+                    yPos = (yIndex + 0.5) * _cellSize;
+                }
+                else
+                {
+                    xPos = (xIndex + 0.5) * _cellSize;
+                    yPos = (randomStart + Random.valueD * randomAmount + yIndex) * _cellSize;
+                }
             }
+            else if (centroidMode == IO.FireCellInput.CentroidModes.RandomCircle)
+            {
+                double theta = Random.valueD * 2.0 * Mathd.PI;
+                double r = Mathd.Sqrt(Random.valueD);
+                double xRand = r * Mathd.Cos(theta) * randomAmount;
+                double yRand = r * Mathd.Sin(theta) * randomAmount;
+                xPos = (0.5 + xRand + xIndex) * _cellSize;
+                yPos = (0.5 + yRand + yIndex) * _cellSize;
+            }
+            else //centroidMode == IO.FireCellInput.CentroidModes.Center)
+            {
+                xPos = (xIndex + 0.5) * _cellSize;
+                yPos = (yIndex + 0.5) * _cellSize;
+                //zPos = _cellData.elevation;
+            }
+            zPos = landscape.GetElevationLocalPos(xPos, yPos);
+            IgnitionPoint = new Vector3d(xPos, yPos, zPos);
 
             _dead = true;
             if (!wuiArea[_index.x, _index.y] && _spreadModel.HasFuelLoad())

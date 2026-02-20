@@ -161,11 +161,15 @@ namespace PREACT
                 Engine.Message(_simulation, Engine.LogType.Log, $"Weather data available from {wD.FirstEntry.ToString()} to {wD.LastEntry.ToString()}");
                 if (success)
                 {
-                    if(DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) > 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) < 0)
+                    if(DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) >= 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) <= 0)
                     {
                         haveCorrectWeather = true;
                         _weatherData = wD;
                     }
+                }
+                else
+                {
+                    Engine.Message(_simulation, Engine.LogType.Log, $"Supplied weather data is outside of needed range.");
                 }
             }     
 
@@ -179,10 +183,14 @@ namespace PREACT
                     Engine.Message(_simulation, Engine.LogType.Log, $"Weather data available from {wD.FirstEntry.ToString()} to {wD.LastEntry.ToString()}");
                     if (success)
                     {
-                        if (DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) > 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) < 0)
+                        if (DateTime.Compare(timeManager.StartDateTime, wD.FirstEntry) >= 0 && DateTime.Compare(timeManager.EndDateTime, wD.LastEntry) <= 0)
                         {
                             haveCorrectWeather = true;
                             _weatherData = wD;
+                        }
+                        else
+                        {
+                            Engine.Message(_simulation, Engine.LogType.Log, $"Supplied weather data is outside of needed range.");
                         }
                     }
                 }                
@@ -190,6 +198,7 @@ namespace PREACT
 
             if (!haveCorrectWeather)
             {
+                Engine.Message(_simulation, Engine.LogType.Log, $"Weather data file was either not found or did not contain needed time range, downloading weather.");
                 DownloadWeather();
             }                             
         }

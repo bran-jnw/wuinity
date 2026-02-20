@@ -68,7 +68,7 @@ namespace PREACT.Wildfire
             {
                 for (int x = 0; x < _xDim; ++x)
                 {
-                    _fuelCells[x, y] = new FuelCell(true, x, y, landscapeData, _fuelModels, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture, simulation.Input.WildfireModule.FireCellInput);
+                    _fuelCells[x, y] = new FuelCell(simulation.Input.WildfireModule.FireCellInput.CentroidMode, x, y, landscapeData, _fuelModels, wuiArea2D, _xDim, _yDim, this, initialFuelMoisture, simulation.Input.WildfireModule.FireCellInput);
                 }
             }
             Engine.Message(_simulation, Engine.LogType.Debug, $"Size of raster is {landscapeData.RasterCellResolutionX}.");

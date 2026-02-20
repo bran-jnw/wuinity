@@ -28,7 +28,12 @@ namespace PREACT.Wildfire
             _spreadVector = delta.normalized;
             //TODO: correct or should be "flat" (projected onto plane) angle?, and see if better way to determine sign
             //maybe use? https://stackoverflow.com/questions/14066933/direct-way-of-computing-the-clockwise-angle-between-two-vectors
-            _spreadDirection = (float)Vector3d.Angle(Vector3d.up, _spreadVector) * Mathd.Sign(Vector3d.Dot(Vector3d.right, _spreadVector)); 
+            Vector2d flatSpreadVector = new Vector2d(_spreadVector.x, _spreadVector.y);
+            _spreadDirection = Vector2d.Angle(Vector2d.up, flatSpreadVector) * Mathd.Sign(Vector2d.Dot(Vector2d.right, flatSpreadVector));
+            if(_spreadDirection < 0)
+            {
+                _spreadDirection += 360.0;
+            }
             _distanceLeftToTarget = delta.magnitude;
 
             //these are the factors to compensate for the average distance being longer with randomized ignition points
@@ -36,7 +41,7 @@ namespace PREACT.Wildfire
             //average distance between cells with touching corners is 1.042f
             if (!diagonal)
             {
-                _distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
+                //_distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
             }
 
             if (CellParticleHybrid.inverseSpreadDirection)
