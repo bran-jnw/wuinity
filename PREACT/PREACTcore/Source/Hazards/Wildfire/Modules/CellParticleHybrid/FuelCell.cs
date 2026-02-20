@@ -153,6 +153,16 @@ namespace PREACT.Wildfire
             return (float)_spreadModel.GetSpreadRateInDirection(spreadDirection);
         }
 
+        public float GetDirectionOfMaxSpread(float currentTime)
+        {
+            if (!_rateOfSpreadIsSet)
+            {
+                UpdateRateOfSpread(currentTime);
+            }
+
+            return (float)_spreadModel.GetDirectionOfMaxSpread();
+        }
+
         public void Ignite(float timeOfArrival, float residualTime)
         {
             //just in case we try to ignite a dead cell

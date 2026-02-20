@@ -83,7 +83,16 @@ namespace PREACT.Wildfire
                 _currentCell = cell;
                 if(!_currentCell.Dead)
                 {
-                    _spreadRate = _currentCell.GetSpreadRateInDirection(_spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?                    
+                    double spreadDirection = _spreadDirection;
+                    double headDirection = _currentCell.GetDirectionOfMaxSpread(currentTime);
+                    double theta = Mathd.Abs(headDirection - _spreadDirection);
+                    //modifier for cellular particle hybrid
+                    if (theta <= 33)
+                    {
+                        _spreadDirection = headDirection;
+                    }
+
+                    _spreadRate = _currentCell.GetSpreadRateInDirection(spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?                    
                 }
                 else
                 {

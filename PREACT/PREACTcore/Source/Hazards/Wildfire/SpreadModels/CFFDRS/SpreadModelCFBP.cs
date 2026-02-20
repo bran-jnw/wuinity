@@ -168,10 +168,12 @@ namespace PREACT.Wildfire
         public override double GetSpreadRateInDirection(double directionOfInterest)
         {      
             double theta = Mathd.Abs(_outputs.SpreadAzimuth - directionOfInterest);
+
             if (theta == 90.0)
             {
                 theta += 0.001;
             }
+
             theta *= Mathd.Deg2Rad;
 
             double ROS = _head.RateOfSpread;
