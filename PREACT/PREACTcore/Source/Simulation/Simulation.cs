@@ -162,7 +162,6 @@ namespace PREACT
                 return;
             }
 
-
             if (_stopRun)
             {
                 _state = SimulationState.Error;
@@ -208,6 +207,119 @@ namespace PREACT
             //{
             _haveResults = true;
             //}
+        }
+
+        bool _runRealtime = false;
+        private void Step()
+        {
+            long startTime = _simulationStopWatch.ElapsedMilliseconds;
+            UpdateEvents();
+            //this state represents the positions at the start of the time step
+            if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _trafficModule != null)
+            {
+                _engine.WUIShow.SendData(_timeManager.SimulationTime);
+            }
+
+            //step all modules forward in time
+            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepFireModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task smokeTask = System.Threading.Tasks.Task.Run(StepSmokeModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule, _stopThreadsToken.Token);
+
+            System.Threading.Tasks.Task.WaitAll(fireTask, smokeTask, pedestrianTask, trafficTask);
+
+            //handle any fire effects on road network
+            if (_wildfireModule != null)
+            {
+                if (_trafficModule != null)
+                {
+                    _trafficModule.HandleIgnitedFireCells(_wildfireModule.GetIgnitedFireCells());
+                }
+                _wildfireModule.ConsumeIgnitedFireCells();
+            }
+
+            //handle/inject cars that arrived this timestep
+            if (_trafficModule != null)
+            {
+                _pathfindingStopwatch.Start();
+                _trafficModule.HandleNewCars();
+                _pathfindingStopwatch.Stop();
+            }
+
+            //increase time
+            float deltaTime = _input.Simulation.DeltaTime;
+            //if only fire running we can take longer steps potentially
+            if (_wildfireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
+            {
+                deltaTime = (float)_wildfireModule.GetInternalDeltaTime();
+            }
+
+            //see if we are done or not
+            _timeManager.Step(deltaTime);
+            _weatherManager.Step(_timeManager.SimulationTime, _timeManager.CurrentDateTime);
+            CheckCompletion();
+
+            if (_input.WildfireModule.Enabled)
+            {
+                //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
+                _evacuationManager.CheckEvacuationGoalStatus();
+                //can get set when evac goals are all gone
+                if (_stopRun)
+                {
+                    return;
+                }
+            }
+
+            UpdateTiming(startTime, deltaTime);
+        }
+
+        private void UpdateTiming(long startTime, float deltaTime)
+        {
+            //just some stuff for controlling execution mode and timing performance
+            long timeSpent = _simulationStopWatch.ElapsedMilliseconds - startTime;
+            if (_runRealtime)
+            {
+                int sleepTime = (int)deltaTime * 1000 - (int)timeSpent;
+                if (sleepTime > 0)
+                {
+                    Thread.Sleep(sleepTime);
+                }
+            }
+            _stepExecutionTime = 0.01f * timeSpent + 0.99f * _stepExecutionTime;
+        }
+
+        private void CheckCompletion()
+        {
+            if (_stopRun)
+            {
+                return;
+            }
+
+            bool endTimeReached = _timeManager.SimulationEndTime - SimulationTime < 0.001f ? true : false;
+
+            if (endTimeReached)
+            {
+                Stop("Simulation has reached specified end time.", false);
+            }
+
+            if (!_stopRun && _input.Simulation.StopWhenEvacuated)
+            {
+                bool pedestrianDone = true;
+                if (_input.PedestrianModule.Enabled)
+                {
+                    pedestrianDone = _pedestrianModule.IsSimulationDone();
+                }
+                bool trafficDone = true;
+                if (_input.TrafficModule.Enabled)
+                {
+                    trafficDone = _trafficModule.IsSimulationDone();
+                }
+
+                if (pedestrianDone && trafficDone)
+                {
+                    Stop("Both pedestrian and traffic simulations are completed, stopping as per user settings.", false);
+                }
+            }
         }
 
         private void PostRun()
@@ -433,120 +545,7 @@ namespace PREACT
             {
                 Engine.Message(this, Engine.LogType.Log, "Trigger buffer module was enabled.");
             }
-        }
-
-        bool _runRealtime = false;
-        private void Step()
-        {  
-            long startTime = _simulationStopWatch.ElapsedMilliseconds;
-            UpdateEvents();
-            //this state represents the positions at the start of the time step
-            if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _trafficModule != null)
-            {
-                _engine.WUIShow.SendData(_timeManager.SimulationTime);
-            }
-
-            //step all modules forward in time
-            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepFireModule, _stopThreadsToken.Token);
-            System.Threading.Tasks.Task smokeTask =  System.Threading.Tasks.Task.Run(StepSmokeModule, _stopThreadsToken.Token);
-            System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule, _stopThreadsToken.Token);
-            System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule, _stopThreadsToken.Token);
-
-            System.Threading.Tasks.Task.WaitAll(fireTask, smokeTask,pedestrianTask, trafficTask);
-
-            //handle any fire effects on road network
-            if (_wildfireModule != null)
-            {
-                if(_trafficModule != null)
-                {
-                    _trafficModule.HandleIgnitedFireCells(_wildfireModule.GetIgnitedFireCells());
-                }     
-                _wildfireModule.ConsumeIgnitedFireCells();
-            }
-
-            //handle/inject cars that arrived this timestep
-            if (_trafficModule != null)
-            {
-                _pathfindingStopwatch.Start();
-                _trafficModule.HandleNewCars();
-                _pathfindingStopwatch.Stop();
-            }                
-
-            //increase time
-            float deltaTime = _input.Simulation.DeltaTime;
-            //if only fire running we can take longer steps potentially
-            if (_wildfireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
-            {
-                deltaTime = (float)_wildfireModule.GetInternalDeltaTime();
-            }
-
-            //see if we are done or not
-            _timeManager.Step(deltaTime);
-            _weatherManager.Step(_timeManager.SimulationTime, _timeManager.CurrentDateTime);
-            CheckCompletion();            
-
-            if (_input.WildfireModule.Enabled)
-            {
-                //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
-                _evacuationManager.CheckEvacuationGoalStatus();
-                //can get set when evac goals are all gone
-                if (_stopRun)
-                {
-                    return;
-                }
-            }            
-
-            UpdateTiming(startTime, deltaTime);
-        }
-
-        private void UpdateTiming(long startTime, float deltaTime)
-        {
-            //just some stuff for controlling execution mode and timing performance
-            long timeSpent = _simulationStopWatch.ElapsedMilliseconds - startTime;
-            if (_runRealtime)
-            {
-                int sleepTime = (int)deltaTime * 1000 - (int)timeSpent;
-                if (sleepTime > 0)
-                {
-                    Thread.Sleep(sleepTime);
-                }
-            }
-            _stepExecutionTime = 0.01f * timeSpent + 0.99f * _stepExecutionTime;
-        }
-
-        private void CheckCompletion()
-        {
-            if (_stopRun)
-            {
-                return;
-            }
-
-            bool endTimeReached = _timeManager.SimulationEndTime - SimulationTime < 0.001f ? true : false;
-
-            if(endTimeReached)
-            {
-                Stop("Simulation has reached specified end time.", false);
-            }
-
-            if (!_stopRun && _input.Simulation.StopWhenEvacuated)
-            {
-                bool pedestrianDone = true;
-                if (_input.PedestrianModule.Enabled)
-                {
-                    pedestrianDone = _pedestrianModule.IsSimulationDone();
-                }
-                bool trafficDone = true;
-                if (_input.TrafficModule.Enabled)
-                {
-                    trafficDone = _trafficModule.IsSimulationDone();
-                }
-
-                if (pedestrianDone && trafficDone)
-                {
-                    Stop("Both pedestrian and traffic simulations are completed, stopping as per user settings.", false);
-                }
-            }
-        }
+        }        
 
         public void SetPause(bool pause)
         {

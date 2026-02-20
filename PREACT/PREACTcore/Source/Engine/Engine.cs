@@ -155,6 +155,7 @@ namespace PREACT
                 int simulationIndex = i + engineTask.SimulationIndexOffset;
                 _mainSimulation = new Simulation(this, _input, simulationIndex);
                 _simulations[0] = _mainSimulation; 
+                SetMainSimulation(simulationIndex);
                 //only run wui show in serial mode
                 _mainSimulation.Run(true);
 
