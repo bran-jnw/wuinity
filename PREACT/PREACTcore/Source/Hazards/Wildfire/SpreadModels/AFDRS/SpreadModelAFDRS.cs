@@ -98,7 +98,7 @@ namespace PREACT.Wildfire.AFDRS
 
         public override double GetMaxSpreadRate()
         {
-            return _output.ROS;
+            return _output.ROS * _kmPerHourToMeterPerSecond;
         }
 
         public override double GetDirectionOfMaxSpread()

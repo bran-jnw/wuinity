@@ -23,7 +23,7 @@ namespace PREACT.IO
         public float DeltaTime = 1.0f;
         public DateTime StartDateTime = DateTime.MinValue;
         public DateTime EndDateTime = DateTime.MaxValue;
-        public bool StopWhenEvacuated = true;
+        public bool StopWhenEvacuated = false;
 
         public SimulationInput()
         {
@@ -127,7 +127,7 @@ namespace PREACT.IO
             else
             {
                 success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
             if(!success)
             {
@@ -146,7 +146,7 @@ namespace PREACT.IO
             else
             {
                 success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
+                PREACTInput.InputNotFoundMessage(nameOfInput, true);
             }
             if (!success)
             {

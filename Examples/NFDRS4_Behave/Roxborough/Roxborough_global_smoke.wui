@@ -3,12 +3,16 @@ Name=Roxborough_global_smoke
 LowerLeftLatLon=39.409924,-105.104505
 DomainSize=10000.0,11000.0
 DeltaTime=1.0
-MaxSimTime=36000.0
+StartDateTime=2001-06-05T11:00:00
+EndDateTime=2001-06-06T11:00:00
 StopWhenEvacuated=true
 
 [Map]
 MapProvider=Mapbox
 ZoomLevel=13
+
+[Weather]
+WeatherFile=roxborough_weather.csv
 
 [Population]
 PopulationFile=population/big_population.csv
@@ -68,6 +72,7 @@ Color=0.0,0.0,1.0
 
 [ResponseCurve]
 Name=observed_average
+TimeInput=Relative
 0, 0
 300, 0.037
 1080, 0.67
@@ -77,6 +82,7 @@ Name=observed_average
 
 [ResponseCurve]
 Name=reported_average
+TimeInput=Relative
 0, 0
 900, 0.79
 1800, 0.91
@@ -134,7 +140,6 @@ VisibilityAffectsSpeed=false
 [SUMO]
 ConfigurationFile=sumo/rox.sumocfg
 UTMoffset=-491253.49,-4359238.56
-DestinationChoice=EvacGroupWeighted
 SmokeAlpha=0.4967
 SmokeBeta=-0.02910
 
@@ -144,6 +149,7 @@ Module=AscImport
 GraphicalFireInputFile=fire/example.gfi
 
 [AscImport]
+StartDateTime=2001-06-05T11:00:00
 TimeOfArrivalFile=flammap/output/TOA.asc
 RateOfSpreadFile=flammap/output/ROS.asc
 SpreadDirectionFile=flammap/output/SD.asc
