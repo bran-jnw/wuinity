@@ -42,6 +42,7 @@ namespace PREACT.Wildfire
             if (!diagonal)
             {
                 //_distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
+                _distanceLeftToTarget *= 0.9792654911267634; //this is the same thing but with random factor 0.5
             }
 
             if (CellParticleHybrid.inverseSpreadDirection)
