@@ -101,10 +101,15 @@ namespace PREACT
         /// <summary>
         /// Starts and runs the simulation until completed or halted.
         /// </summary>
-        public void Run()
+        public void Run(bool startWUIshow = false)
         {
             _state = SimulationState.Initializing;
             PreRun();
+
+            if(startWUIshow)
+            {
+                _engine.StartWUIShow();
+            }
 
             //actual time step loop
             _state = SimulationState.Running;
