@@ -22,7 +22,7 @@ namespace PREACT.Visualization
         private int numberOfBlockedCars = 0;
         private double origoLongitude;
         private double origoLatitude;
-        private Vector2d offset;
+        private Vector2d _offset;
         private int maxNumberOfCars;
         bool _readingData;
 
@@ -42,7 +42,7 @@ namespace PREACT.Visualization
             this.origoLongitude = origoLongitude;
             this.origoLatitude = origoLatitude;
 
-            this.offset = _engine.Simulation.TrafficModule.GetOriginOffset();
+            _offset = _engine.Simulation.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentVehiclePositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
@@ -307,7 +307,7 @@ namespace PREACT.Visualization
                         {
                             addBytes(BitConverter.GetBytes(vehicle.VehicleId));
                             //sending geodata, wgs84
-                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(vehicle.SimulationPos.x - offset.x, vehicle.SimulationPos.y - offset.y, false);
+                            LIBSUMO.TraCIPosition wgs84 = LIBSUMO.Simulation.convertGeo(vehicle.SimulationPos.x - _offset.x, vehicle.SimulationPos.y - _offset.y, false);
                             //Make the lon/lat coordinates relative to conserve precision during cast to float
                             //SUMO defines lon as x and lat as y
                             double longitude = wgs84.x - origoLongitude;

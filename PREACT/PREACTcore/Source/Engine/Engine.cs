@@ -154,6 +154,20 @@ namespace PREACT
             {
                 int simulationIndex = i + engineTask.SimulationIndexOffset;
                 _mainSimulation = new Simulation(this, _input, simulationIndex);
+
+                //only run WUI-show on serial runs
+                if (_input.WUIShow.SendDataToWUIShow && _input.TrafficModule.Enabled)
+                {
+                    if (_wuiShow == null)
+                    {
+                        _wuiShow = new Visualization.WUIShowCommunicator(this, _input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
+                    }
+                    else
+                    {
+                        _wuiShow.Initiate(this, _input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
+                    }
+                }
+
                 _simulations[0] = _mainSimulation;
                 _mainSimulation.Run();
                 if(_mainSimulation.TrafficModule != null)
@@ -295,8 +309,7 @@ namespace PREACT
                 Parallel.For(startIndex, endIndex, index =>
                 {
                     try
-                    {
-                        
+                    {                        
                         _simulations[index].Run();
                     }
                     catch (Exception e)
@@ -330,19 +343,7 @@ namespace PREACT
             else
             {
                 trafficArrivalDataCollection = new List<List<float>>();
-            }                     
-
-            if (_input.WUIShow.SendDataToWUIShow && _input.TrafficModule.Enabled)
-            {
-                if(_wuiShow == null)
-                {
-                    _wuiShow = new Visualization.WUIShowCommunicator(this, _input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
-                }
-                else
-                {
-                    _wuiShow.Initiate(this, _input.WUIShow.WuiShowServerIP, _input.WUIShow.WuiShowServerPort, 0, _input.Simulation.LowerLeftLatLon.y, _input.Simulation.LowerLeftLatLon.x);
-                }
-            }
+            }      
         }   
         
         public void SetMainSimulation(int simulationIndex)
