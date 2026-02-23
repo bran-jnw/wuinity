@@ -3,18 +3,23 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire
 {
-    public class SpreadModelLookUpTable : SpreadModel
+    public class SpreadModelLookupROS : SpreadModel
     {
-        double _noWindNoSlopeSpreadRate;
+        private static readonly double _kmPerHourToMeterPerSecond = 1.0 / 3.6;
+
+        LookupROSEntry _fuel;
         double _directionOfMaxSpread;
         bool _hasFuelLoad;
         double _eccentricity;
         double _forwardSpreadRate;
 
-        public SpreadModelLookUpTable(LandscapeCellData cellData, SpreadRateLookUpTable lookUpTable)
+        public SpreadModelLookupROS(LandscapeCellData cellData, LookupROSTable lookUpTable)
         {
-            _noWindNoSlopeSpreadRate = lookUpTable.GetSpreadRate(cellData.fuel_model);
-            _hasFuelLoad = _noWindNoSlopeSpreadRate > 0;
+            _fuel = lookUpTable.GetSpreadRate(cellData.fuel_model, out bool success);
+            if(success && _fuel.NoWindNoSlopeROS > 0.0)
+            {
+                _hasFuelLoad = true;
+            }
         }
 
         public override void CalculateSpreadRate(WeatherManager weather, TimeManager time)
@@ -27,9 +32,18 @@ namespace PREACT.Wildfire
             }
             _directionOfMaxSpread = windAzimuth;
 
-            double windFactor = Mathd.Min(10, 0.01 * windSpeed);
-            _forwardSpreadRate = _noWindNoSlopeSpreadRate * (1.0 + windFactor);
-            double lToW = LengthToWidth(windSpeed * 3.6);
+            if(_fuel.WindCoefficient >= 0) //linear
+            {
+                double phiWind = windSpeed * _fuel.WindCoefficient;
+                _forwardSpreadRate = _fuel.NoWindNoSlopeROS * (1.0 + phiWind);
+            }
+            else//exponential
+            {
+                double windMultiplier = Mathd.Exp(windSpeed * _fuel.WindCoefficient);
+                _forwardSpreadRate = _fuel.NoWindNoSlopeROS * windMultiplier;
+            }
+            
+            double lToW = LengthToWidth(windSpeed);
             _eccentricity = CalculateEccentricity(lToW);
         }
 
@@ -45,7 +59,7 @@ namespace PREACT.Wildfire
 
         public override double GetMaxSpreadRate()
         {
-            return _noWindNoSlopeSpreadRate;
+            return _forwardSpreadRate;
         }
 
         public override double GetSpreadRateInDirection(double directionOfInterest)
@@ -74,8 +88,26 @@ namespace PREACT.Wildfire
             return rosDirection;
         }
 
+        //Alexander (1985), m/s
         private static double LengthToWidth(double U_10)
         {
+            double LBR = 1 + 0.0189433521 * Mathd.Pow(U_10, 2.154); //coeff = 0.00120 (original) * 3.6 ^2.154 to get m/s input
+
+            return Mathd.Min(6.5, LBR);
+        }
+
+        //m/s
+        private static double LengthToWidthFarsite(double effectiveWindSpeed)
+        {
+            double LBR = 0.936 * Mathd.Exp(0.2566 *  effectiveWindSpeed) + 0.461 * Mathd.Exp(-0.1548 * effectiveWindSpeed) - 0.397;
+
+            return Mathd.Min(8.0, LBR);
+        }
+
+        //m/s
+        private static double LengthToWidthGrass(double U_10)
+        {
+            U_10 *= 3.6;
             double LBR = 1.0;
             if (U_10 < 5)
             {

@@ -49,7 +49,7 @@ namespace PREACT.Wildfire
             }
             else
             {
-                _spreadModel = new SpreadModelLookUpTable(_cellData, _owner.Simulation.Input.WildfireModule.Data.ConstantLookupTable);
+                _spreadModel = new SpreadModelLookupROS(_cellData, _owner.Simulation.Input.WildfireModule.Data.LookupROSTable);
             }
 
             double xPos, yPos, zPos;

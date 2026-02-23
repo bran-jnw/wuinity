@@ -14,7 +14,7 @@ namespace PREACT.IO
     public class FireCellInput
     {
         public enum CentroidModes { Center, Random, RandomCross, RandomCircle }
-        public enum SpreadRateModels { Behave, CanadianFBP, LookUpTable }
+        public enum SpreadRateModels { Behave, CanadianFBP, LookupROS }
         public enum IgnitionTypes { Point, Polygon, Random }
         public enum SpreadModes { FourDirections, EightDirections, SixteenDirections }
 
@@ -43,8 +43,8 @@ namespace PREACT.IO
         public string LookUpTableFile = string.Empty;
 
         //common
-        public CentroidModes CentroidMode = CentroidModes.RandomCross;
-        public double RandomAmount = 1.0;
+        public CentroidModes CentroidMode = CentroidModes.Random;
+        public double RandomAmount = 0.5;
         public string LandscapeFile = string.Empty;
         public string IgnitionPointsFile = string.Empty;
         public bool UseRandomIgnitionMap = false;
@@ -140,8 +140,8 @@ namespace PREACT.IO
                     case nameof(SpreadRateModels.CanadianFBP):
                         SpreadRateModel = SpreadRateModels.CanadianFBP;
                         break;
-                    case nameof(SpreadRateModels.LookUpTable):
-                        SpreadRateModel = SpreadRateModels.LookUpTable;
+                    case nameof(SpreadRateModels.LookupROS):
+                        SpreadRateModel = SpreadRateModels.LookupROS;
                         break;
                     default:
                         success = false;
@@ -268,7 +268,7 @@ namespace PREACT.IO
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
             }
-            else if (SpreadRateModel == SpreadRateModels.LookUpTable)
+            else if (SpreadRateModel == SpreadRateModels.LookupROS)
             {
                 //not critical, we just use a default table
                 nameOfInput = nameof(LookUpTableFile);

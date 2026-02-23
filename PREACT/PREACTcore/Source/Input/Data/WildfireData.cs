@@ -19,7 +19,7 @@ namespace PREACT.IO
         private List<IgnitionPointInput> _ignitionPoints = new List<IgnitionPointInput>();
         private InitialFuelMoistureLibrary _initialFuelMoistureData;
         private CanadianFBPLookupTable _canadianFBPLookupTable = new CanadianFBPLookupTable();
-        private SpreadRateLookUpTable _constantLookupTable = new SpreadRateLookUpTable();
+        private LookupROSTable _lookupROSTable = new LookupROSTable();
 
         public bool[] WuiArea;
         public bool[] RandomIgnition;
@@ -32,7 +32,7 @@ namespace PREACT.IO
         public List<IgnitionPointInput> IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }   
         public CanadianFBPLookupTable CanadianFBPLookupTable { get => _canadianFBPLookupTable; }
-        public SpreadRateLookUpTable ConstantLookupTable { get => _constantLookupTable; }
+        public LookupROSTable LookupROSTable { get => _lookupROSTable; }
 
         public WildfireData()
         {
@@ -96,12 +96,11 @@ namespace PREACT.IO
                     _canadianFBPLookupTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.FBPLookupTableFile), out success);
                     issues += success ? 0 : 1;
                 }
-                else if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.LookUpTable)
+                else if (wildfireInput.FireCellInput.SpreadRateModel == FireCellInput.SpreadRateModels.LookupROS)
                 {
                     filePath = Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile);
-                    _constantLookupTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile), out success);
-                    success = true; //we always get something
-                    //issues += success ? 0 : 1;
+                    _lookupROSTable.Parse(Path.Combine(rootFolder, wildfireInput.FireCellInput.LookUpTableFile), out success);
+                    issues += success ? 0 : 1;
                 }
 
                 if (issues > 0)
