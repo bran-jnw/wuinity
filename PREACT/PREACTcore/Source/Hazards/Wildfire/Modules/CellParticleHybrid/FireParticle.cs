@@ -90,8 +90,12 @@ namespace PREACT.Wildfire
                     //modifier for cellular particle hybrid
                     if (theta <= 33)
                     {
-                        _spreadDirection = headDirection;
+                        spreadDirection = headDirection;
                     }
+                    /*else
+                    {
+                        spreadDirection = headDirection + 180 * (theta - 10) / 170 ; //this is not a good idea as it overestimates the lateral spread
+                    }*/
 
                     _spreadRate = _currentCell.GetSpreadRateInDirection(spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?                    
                 }
