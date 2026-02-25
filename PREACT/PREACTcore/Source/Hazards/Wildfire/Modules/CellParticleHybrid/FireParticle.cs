@@ -41,8 +41,8 @@ namespace PREACT.Wildfire
             //average distance between cells with touching corners is 1.042f
             if (!diagonal)
             {
-                //_distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
-                _distanceLeftToTarget *= 0.9792654911267634; //this is the same thing but with random factor 0.5
+                _distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
+                //_distanceLeftToTarget *= 0.9792654911267634; //this is the same thing but with random factor 0.5
             }
 
             if (CellParticleHybrid.inverseSpreadDirection)
@@ -88,14 +88,14 @@ namespace PREACT.Wildfire
                     double headDirection = _currentCell.GetDirectionOfMaxSpread(currentTime);
                     double theta = Mathd.Abs(headDirection - _spreadDirection);
                     //modifier for cellular particle hybrid
-                    if (theta <= 33)
+                    if (theta < 22.5)
                     {
                         spreadDirection = headDirection;
                     }
-                    /*else
+                    else if(theta <45)
                     {
-                        spreadDirection = headDirection + 180 * (theta - 10) / 170 ; //this is not a good idea as it overestimates the lateral spread
-                    }*/
+                        spreadDirection = headDirection + 45 * (theta - 22.5) / (45-22.5); //this is not a good idea as it overestimates the lateral spread
+                    }
 
                     _spreadRate = _currentCell.GetSpreadRateInDirection(spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?                    
                 }

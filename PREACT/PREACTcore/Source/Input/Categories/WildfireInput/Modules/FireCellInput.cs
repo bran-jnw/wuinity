@@ -45,6 +45,7 @@ namespace PREACT.IO
         //common
         public CentroidModes CentroidMode = CentroidModes.Random;
         public double RandomAmount = 0.5;
+        public double ThetaLimit = 5.0;
         public string LandscapeFile = string.Empty;
         public string IgnitionPointsFile = string.Empty;
         public bool UseRandomIgnitionMap = false;
@@ -116,6 +117,22 @@ namespace PREACT.IO
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
                 success = double.TryParse(userInput, out RandomAmount);
+                if (!success)
+                {
+                    PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                }
+            }
+            else
+            {
+                PREACTInput.InputNotFoundMessage(nameOfInput, false, RandomAmount.ToString());
+            }
+            success = true;
+
+            //not critical, uses defaults
+            nameOfInput = nameof(ThetaLimit);
+            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            {
+                success = double.TryParse(userInput, out ThetaLimit);
                 if (!success)
                 {
                     PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
