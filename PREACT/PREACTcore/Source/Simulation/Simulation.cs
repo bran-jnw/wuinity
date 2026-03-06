@@ -393,12 +393,12 @@ namespace PREACT
                 }
                 else if(_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.FireCell)
                 {
-                    _wildfireModule = new FireMesh(this, _input.WildfireModule.Data.LCPData, _weatherManager, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
+                    _wildfireModule = new FireMesh(this, _input.WildfireModule.Data.LandscapeData, _weatherManager, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
                 }
                 else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
                 {
-                    _wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LCPData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
+                    _wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
                 }
                 else
@@ -520,7 +520,7 @@ namespace PREACT
                     {
                         if (_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
                         {
-                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LCPData, _timeManager.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
+                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LandscapeData, _timeManager.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
                         }
                         else
                         {

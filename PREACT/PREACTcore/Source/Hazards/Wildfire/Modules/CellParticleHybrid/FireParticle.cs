@@ -13,6 +13,7 @@ namespace PREACT.Wildfire
         private double _distanceLeftToTarget;
         private float _ignitionTime;
         private float _spreadRate;
+        private bool _diagonal;
 
         public bool Dead { get => _dead; }
 
@@ -22,6 +23,7 @@ namespace PREACT.Wildfire
             _targetCell = targetCell;
             _localPosition = startCell.IgnitionPoint;
             _currentCell = startCell;
+            _diagonal = diagonal;
             wildfireSim.AddActiveFireParticle(this);            
 
             Vector3d delta = _targetCell.IgnitionPoint - _localPosition;
@@ -39,9 +41,10 @@ namespace PREACT.Wildfire
             //these are the factors to compensate for the average distance being longer with randomized ignition points
             //average distance between cells sharing one side is 1.088f;
             //average distance between cells with touching corners is 1.042f
-            if (!diagonal)
+            
+            if (!_diagonal)
             {
-                _distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
+                //_distanceLeftToTarget *= 0.9575533928173384; ; //ratio between  1.0419... / 1.088...  = 0.9575111441172938 done with 1 000 000 000 MonteCarlo samples per ratio
                 //_distanceLeftToTarget *= 0.9792654911267634; //this is the same thing but with random factor 0.5
             }
 
@@ -87,14 +90,22 @@ namespace PREACT.Wildfire
                     double spreadDirection = _spreadDirection;
                     double headDirection = _currentCell.GetDirectionOfMaxSpread(currentTime);
                     double theta = Mathd.Abs(headDirection - _spreadDirection);
-                    //modifier for cellular particle hybrid
-                    if (theta < 22.5)
+                    double thetaLimit = 0.0;
+                    double lToB = _currentCell.GetLengthToBreadth();
+                    if(lToB > 1.0)
                     {
-                        spreadDirection = headDirection;
-                    }
-                    else if(theta <45)
-                    {
-                        spreadDirection = headDirection + 45 * (theta - 22.5) / (45-22.5); //this is not a good idea as it overestimates the lateral spread
+                        double c = Mathd.Sqrt(lToB * lToB - 1.0);
+                        thetaLimit = 40.0;// Mathd.Min(45.0, Mathd.Rad2Deg * Mathd.Atan(1.0 / c));
+
+                        //modifier for cellular particle hybrid
+                        if (theta <= thetaLimit)
+                        {
+                            //spreadDirection = headDirection;
+                        }
+                        else if (theta < 45.0)
+                        {
+                            //spreadDirection = headDirection + 45.0 * (theta - thetaLimit) / (45.0 - thetaLimit); //this is not a good idea as it overestimates the lateral spread
+                        }
                     }
 
                     _spreadRate = _currentCell.GetSpreadRateInDirection(spreadDirection, currentTime);//TODO: cache the spread rate and only update if in new cell?                    

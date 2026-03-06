@@ -259,7 +259,7 @@ namespace PREACT.Tools
                     float top = (float)(lowerLeftLatLon.x + size.y + borderSize.y);
 
                     OsmStreamSource source;                    
-                    if (osmFile.EndsWith("pbf"))
+                    if (osmFile.ToLower().EndsWith("pbf"))
                     {
                         source = new PBFOsmStreamSource(stream);
                     }

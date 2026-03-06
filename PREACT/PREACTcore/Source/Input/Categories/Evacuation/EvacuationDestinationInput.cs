@@ -8,7 +8,7 @@ namespace PREACT.IO
     {
         public string Name;
         public Vector2d LatLon;        
-        public EvacGoalType Type;
+        public DestinationTypes Type;
         public float MaxFlow; //cars per hour
         public int MaxVehicles;
         public int MaxPeople;
@@ -16,7 +16,7 @@ namespace PREACT.IO
         public PREACTColor Color;
         
 
-        public EvacuationDestinationInput(string name, Vector2d latLon, EvacGoalType type, PREACTColor color, float maxFlow, int maxCars, int maxPeople, bool blocked)
+        public EvacuationDestinationInput(string name, Vector2d latLon, DestinationTypes type, PREACTColor color, float maxFlow, int maxCars, int maxPeople, bool blocked)
         {
             Name = name;
             LatLon = latLon;
@@ -86,11 +86,11 @@ namespace PREACT.IO
                 {
                     switch (userInput)
                     {
-                        case nameof(EvacGoalType.Exit):
-                            newInput.Type = EvacGoalType.Exit;
+                        case nameof(DestinationTypes.Exit):
+                            newInput.Type = DestinationTypes.Exit;
                             break;
-                        case nameof(EvacGoalType.Refugee):
-                            newInput.Type = EvacGoalType.Refugee;
+                        case nameof(DestinationTypes.Refugee):
+                            newInput.Type = DestinationTypes.Refugee;
                             break;
                         default:
                             ++issues;

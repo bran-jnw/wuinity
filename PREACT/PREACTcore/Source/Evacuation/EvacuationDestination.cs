@@ -20,7 +20,7 @@ namespace PREACT.Evacuation
         private PREACTColor _color;
         private float _maxFlow = -1f; //cars per hour
         private string _name = string.Empty;
-        private EvacGoalType _goalType = EvacGoalType.Exit;
+        private DestinationTypes _goalType = DestinationTypes.Exit;
         private int _maxCars = -1;
         private int _maxPeople = -1;
         private bool _blocked = false; 
@@ -42,7 +42,7 @@ namespace PREACT.Evacuation
         public bool Blocked { get => _blocked; }
         public float MaxFlow { get => _maxFlow; }
         public string Name { get => _name; }
-        public EvacGoalType GoalType { get => _goalType; }
+        public DestinationTypes GoalType { get => _goalType; }
         public int MaxCars { get => _maxCars; }
         public int MaxPeople { get => _maxPeople; }
         public uint CurrentPeople { get => _currentPeople; }
@@ -123,7 +123,7 @@ namespace PREACT.Evacuation
 
         void UpdateCapacity()
         {
-            if (_goalType == EvacGoalType.Refugee)
+            if (_goalType == DestinationTypes.Refugee)
             {
                 //track cars and respond
                 if (_maxCars > 0 && _vehicles.Count >= _maxCars && !_blocked)

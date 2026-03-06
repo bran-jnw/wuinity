@@ -233,11 +233,11 @@ namespace WUInity
             {
                 Vector2int cellCount;
                 //get correct size, fire mesh or evac mesh
-                if(_manager.PREACTInput.WildfireModule.Data.LCPData != null)
+                if(_manager.PREACTInput.WildfireModule.Data.LandscapeData != null)
                 {
-                    fireDataCellCount = _manager.PREACTInput.WildfireModule.Data.LCPData.GetCellCount();
+                    fireDataCellCount = _manager.PREACTInput.WildfireModule.Data.LandscapeData.GetCellCount();
                     cellCount = fireDataCellCount;
-                    fireDataRealSize = _manager.PREACTInput.WildfireModule.Data.LCPData.GetSize();
+                    fireDataRealSize = _manager.PREACTInput.WildfireModule.Data.LandscapeData.GetSize();
                 }
                 else
                 {

@@ -155,11 +155,6 @@ namespace PREACT.Wildfire
             return _back.RateOfSpread * _meterPerMinToMeterPerSecond;
         }
 
-        public double GetLengthToBreadth()
-        {
-            return _secondaryOutputs.LengthToBreadth;
-        }
-
         public override double GetDirectionOfMaxSpread()
         {
             return _outputs.SpreadAzimuth;
@@ -201,6 +196,11 @@ namespace PREACT.Wildfire
         public override double GetFireIntensity()
         {
             return _outputs.SurfaceFireIntensity;
+        }
+
+        public override double GetLengthToBreadth()
+        {
+            return _secondaryOutputs.LengthToBreadth;
         }
     }
 }

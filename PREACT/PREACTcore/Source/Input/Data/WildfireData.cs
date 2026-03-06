@@ -27,7 +27,7 @@ namespace PREACT.IO
         public bool[] ManualTriggerBuffer;
 
                
-        public LandscapeData LCPData { get => _lcpData; }        
+        public LandscapeData LandscapeData { get => _lcpData; }        
         public FuelModelInput FuelModelsData { get => _fuelModelsData; }        
         public List<IgnitionPointInput> IgnitionPoints { get => _ignitionPoints; }       
         public InitialFuelMoistureLibrary InitialFuelMoistureData { get => _initialFuelMoistureData; }   

@@ -787,7 +787,7 @@ namespace WUInity
         public void UpdateInput(PREACTInput input)
         {
             _input = input;
-            _painter.SetLCPData(_input.WildfireModule.Data.LCPData);            
+            _painter.SetLCPData(_input.WildfireModule.Data.LandscapeData);            
             _godCamera.SetInput(_input);
             _wuiGUI.UpdateInput(_input);            
             //this needs map and evac goals

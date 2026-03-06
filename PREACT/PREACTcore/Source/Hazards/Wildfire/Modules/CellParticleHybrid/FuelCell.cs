@@ -52,7 +52,11 @@ namespace PREACT.Wildfire
                 _spreadModel = new SpreadModelLookupROS(_cellData, _owner.Simulation.Input.WildfireModule.Data.LookupROSTable);
             }
 
-            double xPos, yPos, zPos;
+            //default center
+            double xPos = (xIndex + 0.5) * _cellSize;
+            double yPos = (yIndex + 0.5) * _cellSize;
+            double zPos = _cellData.elevation;      
+
             double randomAmount = _owner.Simulation.Input.WildfireModule.FireCellInput.RandomAmount;
             double randomStart = (1.0 - randomAmount) * 0.5;
             if (centroidMode == IO.FireCellInput.CentroidModes.Random)
@@ -83,13 +87,12 @@ namespace PREACT.Wildfire
                 xPos = (0.5 + xRand + xIndex) * _cellSize;
                 yPos = (0.5 + yRand + yIndex) * _cellSize;
             }
-            else //centroidMode == IO.FireCellInput.CentroidModes.Center)
+
+            if(centroidMode != IO.FireCellInput.CentroidModes.Center)
             {
-                xPos = (xIndex + 0.5) * _cellSize;
-                yPos = (yIndex + 0.5) * _cellSize;
-                //zPos = _cellData.elevation;
+                zPos = landscape.GetElevationLocalPos(xPos, yPos);
             }
-            zPos = landscape.GetElevationLocalPos(xPos, yPos);
+                
             IgnitionPoint = new Vector3d(xPos, yPos, zPos);
 
             _dead = true;
@@ -161,6 +164,11 @@ namespace PREACT.Wildfire
             }
 
             return (float)_spreadModel.GetDirectionOfMaxSpread();
+        }
+
+        public double GetLengthToBreadth()
+        {
+            return _spreadModel.GetLengthToBreadth();
         }
 
         public void Ignite(float timeOfArrival, float residualTime)

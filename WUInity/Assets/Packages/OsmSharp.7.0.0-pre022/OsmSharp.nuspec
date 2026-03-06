@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>OsmSharp</id>
+    <version>7.0.0-pre022</version>
+    <title>OsmSharp</title>
+    <authors>OsmSharp Contributors</authors>
+    <licenseUrl>https://raw.githubusercontent.com/OsmSharp/core/develop/LICENSE.md</licenseUrl>
+    <projectUrl>https://www.osmsharp.com/</projectUrl>
+    <iconUrl>https://www.osmsharp.com/logos/osmsharp_logo64.png</iconUrl>
+    <description>An OpenStreetMap (OSM) library for .NET.</description>
+    <copyright>Itinero BV</copyright>
+    <tags>openstreetmap, osm</tags>
+    <repository url="https://github.com/osmsharp/core" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="System.Text.Json" version="6.0.7" exclude="Build,Analyzers" />
+        <dependency id="protobuf-net" version="3.1.25" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

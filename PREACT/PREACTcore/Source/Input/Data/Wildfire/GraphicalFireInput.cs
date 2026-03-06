@@ -17,8 +17,8 @@ namespace PREACT
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
-                    int xCount = fireData.LCPData.GetCellCountX();
-                    int yCount = fireData.LCPData.GetCellCountY();
+                    int xCount = fireData.LandscapeData.GetCellCountX();
+                    int yCount = fireData.LandscapeData.GetCellCountY();
                     bw.Write(xCount);
                     bw.Write(yCount);
                     bw.Write(GetBytes(fireData.WuiArea));

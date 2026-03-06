@@ -14,7 +14,7 @@ namespace PREACT.IO
     [System.Serializable]
     public class SUMOInput
     {
-        public enum SmokeSpeedReductionModels { Exponential, Smokanza};
+        public enum SmokeSpeedReductionModels { Exponential, Smokanzo};
 
         public string ConfigurationFile = string.Empty;
         public Vector2d UTMoffset;

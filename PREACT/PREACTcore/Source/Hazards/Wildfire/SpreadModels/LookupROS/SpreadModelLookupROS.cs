@@ -12,6 +12,7 @@ namespace PREACT.Wildfire
         bool _hasFuelLoad;
         double _eccentricity;
         double _forwardSpreadRate;
+        double _lengthToWidth;
 
         public SpreadModelLookupROS(LandscapeCellData cellData, LookupROSTable lookUpTable)
         {
@@ -42,9 +43,9 @@ namespace PREACT.Wildfire
                 double windMultiplier = Mathd.Exp(windSpeed * _fuel.WindCoefficient);
                 _forwardSpreadRate = _fuel.NoWindNoSlopeROS * windMultiplier;
             }
-            
-            double lToW = LengthToWidth(windSpeed);
-            _eccentricity = CalculateEccentricity(lToW);
+
+            _lengthToWidth = LengthToWidth(windSpeed);
+            _eccentricity = CalculateEccentricity(_lengthToWidth);
         }
 
         public override double GetDirectionOfMaxSpread()
@@ -136,6 +137,11 @@ namespace PREACT.Wildfire
         public override bool HasFuelLoad()
         {
             return _hasFuelLoad;
+        }
+        
+        public override double GetLengthToBreadth()
+        {
+            return _lengthToWidth;
         }
     }
 }

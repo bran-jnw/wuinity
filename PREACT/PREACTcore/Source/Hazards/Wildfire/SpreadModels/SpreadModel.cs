@@ -39,5 +39,11 @@
         /// </summary>
         /// <returns></returns>
         public abstract bool HasFuelLoad();
+
+        /// <summary>
+        /// Returns if a fuel that can burn is present.
+        /// </summary>
+        /// <returns></returns>
+        public abstract double GetLengthToBreadth();
     }
 }

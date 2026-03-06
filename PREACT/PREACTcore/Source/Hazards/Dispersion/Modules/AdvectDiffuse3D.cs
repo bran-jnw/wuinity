@@ -147,7 +147,7 @@ namespace PREACT.Dispersion
             _globalData.yDim = _fireCellsY / _globalData.fireSmokeCellRatio + _fireCellsY % _globalData.fireSmokeCellRatio;
             _globalData.xyDim = _globalData.xDim * _globalData.yDim;
             //determine height of domain
-            Vector2d elevationMinMax = _simulation.Input.WildfireModule.Data.LCPData.GetElevationMinMax();
+            Vector2d elevationMinMax = _simulation.Input.WildfireModule.Data.LandscapeData.GetElevationMinMax();
             float domainHeight = _simulation.Input.SmokeModule.AdvectDiffuseInput.MixingLayerHeight + (float)elevationMinMax.y - (float)elevationMinMax.x;
             _globalData.zDim = (int)(0.5f + domainHeight * _globalData.inverseCellSizeZ);
 
@@ -175,7 +175,7 @@ namespace PREACT.Dispersion
             uint[] heightMap = new uint[_2DbufferSize];
             if (_globalData.fireSmokeCellRatio != 1)
             {
-                Wildfire.LandscapeData l = _simulation.Input.WildfireModule.Data.LCPData;
+                Wildfire.LandscapeData l = _simulation.Input.WildfireModule.Data.LandscapeData;
                 for (int y = 0; y < _globalData.yDim; ++y)
                 {
                     for (int x = 0; x < _globalData.xDim; ++x)
@@ -188,7 +188,7 @@ namespace PREACT.Dispersion
             }
             else
             {
-                float[] elevation = _simulation.Input.WildfireModule.Data.LCPData.Get1DElevation();
+                float[] elevation = _simulation.Input.WildfireModule.Data.LandscapeData.Get1DElevation();
                 for (int i = 0; i < _2DbufferSize; ++i)
                 {
                     heightMap[i] = (uint)(0.5f + elevation[i] * _globalData.inverseCellSizeZ);

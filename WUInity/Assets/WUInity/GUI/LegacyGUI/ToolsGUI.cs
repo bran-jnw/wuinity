@@ -300,6 +300,25 @@ namespace WUInity.UI
             {
                 OpenSelectGeoTiff();
             }
+
+            //OSM
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM tools");
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
+            ++buttonIndex;
+            _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
+            _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Domain size x/y");
+            ++buttonIndex;
+            _domainSizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeX);
+            _domainSizeY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeY);
+            ++buttonIndex;
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Download OSM"))
+            {
+                OpenDownloadOSM();
+            }
         }        
 
         //GPW
@@ -542,6 +561,26 @@ namespace WUInity.UI
         {
             PREACT.Wildfire.LandscapeData landscape = new PREACT.Wildfire.LandscapeData(_geoTiffFilePath, Vector2d.zero);
             landscape.SaveLCP(paths[0]);
+        }
+
+        //OSM
+        private void OpenDownloadOSM()
+        {
+            FileBrowser.SetFilters(false, ".osm.xml");
+            FileBrowser.ShowSaveDialog(DownloadOSM, CancelSaveLoad, FileBrowser.PickMode.Files, false, null, null, "Specify OSM file name", "Save");
+        }
+        private async void DownloadOSM(string[] paths)
+        {
+            double.TryParse(_latitude, out double lat);
+            double.TryParse(_longitude, out double lon);
+            Vector2d latLon = new Vector2d(lat, lon);
+            double.TryParse(_domainSizeX, out double xSize);
+            double.TryParse(_domainSizeY, out double ySize);
+            Vector2d domainSize = new Vector2d(xSize, ySize);
+            _workingData.SetSimulatonData(latLon, domainSize);
+            latLon = _workingData.SimulationInput.Data.GetWGS84FromSimulationPosition(new Vector2d(-1000.0, -1000.0));
+            Vector2d upperLatLon = _workingData.SimulationInput.Data.GetWGS84FromSimulationPosition(new Vector2d(domainSize.x + 1000.0, domainSize.y + 1000.0));
+            await OSMTools.DownloadOMSData(latLon, upperLatLon, paths[0]);
         }
     }
 }

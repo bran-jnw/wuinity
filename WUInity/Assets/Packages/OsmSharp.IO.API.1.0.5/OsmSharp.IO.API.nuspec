@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>OsmSharp.IO.API</id>
+    <version>1.0.5</version>
+    <authors>Alex Hennings &amp; Harel Mazor</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/OsmSharp/io-api</projectUrl>
+    <description>This is a simple C# client to allow using the OSM API over REST.</description>
+    <copyright>Copyright 2025 Alex Hennings &amp; Harel Mazor</copyright>
+    <tags>osm openstreetmap client</tags>
+    <repository type="git" url="https://github.com/OsmSharp/io-api" commit="796c370ae8cb95308a46da6628f970f99c010363" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="2.0.2" exclude="Build,Analyzers" />
+        <dependency id="OsmSharp" version="7.0.0-pre022" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

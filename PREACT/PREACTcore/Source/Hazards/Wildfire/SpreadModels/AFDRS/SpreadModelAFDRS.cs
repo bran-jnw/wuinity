@@ -270,6 +270,11 @@ namespace PREACT.Wildfire.AFDRS
             return LBR;
         }
 
+        public override double GetLengthToBreadth()
+        {
+            return _output.LengthToWidth;
+        }
+
         /*public static double CalculateSurfaceFireLengthToWidthRatio(double U_10)
         {
             double lengthToWidthRatio;

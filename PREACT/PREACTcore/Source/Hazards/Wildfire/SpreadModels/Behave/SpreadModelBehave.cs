@@ -20,6 +20,7 @@ namespace PREACT.Wildfire
         private double _eccentricity;
         private BehaveCore.Crown _crownBehave;
         private double _firelineIntensity;
+        private double _lengthToBreadth;
 
         private LandscapeCellData _cellData;
         bool _hasFuelLoad = false;
@@ -63,8 +64,9 @@ namespace PREACT.Wildfire
             _crownBehave.setMoistureFoliar(moistureFoliar, MoistureUnits);*/
 
             _crownBehave.doCrownRunRothermel();
-            _forwardSpreadRate = _crownBehave.getFinalSpreadRate(BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond);
+            _forwardSpreadRate = _crownBehave.getFinalSpreadRate(BehaveCore.SpeedUnits.SpeedUnitsEnum.MetersPerSecond);            
             _eccentricity = _crownBehave.getFireEccentricity();
+            _lengthToBreadth = 1.0 / Mathd.Sqrt(1.0 - _eccentricity * _eccentricity);
             _directionOfMaxSpread = _crownBehave.getDirectionOfMaxSpread();
             _firelineIntensity = _crownBehave.getFinalFirelineIntesity(BehaveCore.FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter);
         }
@@ -118,6 +120,11 @@ namespace PREACT.Wildfire
         public override bool HasFuelLoad()
         {
             return _hasFuelLoad;
+        }
+
+        public override double GetLengthToBreadth()
+        {
+            return _lengthToBreadth;
         }
     }
 }

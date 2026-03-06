@@ -24,7 +24,7 @@ namespace WUInity.UI
             int buttonIndex = 0;
 
             string lcpExistsStatus = "LCP file NOT found"; 
-            if(_input.WildfireModule.Data.LCPData != null)
+            if(_input.WildfireModule.Data.LandscapeData != null)
             {
                 lcpExistsStatus = "LCP file found";
             }
@@ -37,13 +37,13 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if(_input.WildfireModule.Data.LCPData != null)
+            if(_input.WildfireModule.Data.LandscapeData != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "LCP DATA");
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _input.WildfireModule.Data.LCPData.GetCellCountX() + ", " + _input.WildfireModule.Data.LCPData.GetCellCountY());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cells (x, y): " + _input.WildfireModule.Data.LandscapeData.GetCellCountX() + ", " + _input.WildfireModule.Data.LandscapeData.GetCellCountY());
                 ++buttonIndex;
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_input.WildfireModule.Data.LCPData.RasterCellResolutionX) + ", " + Mathf.RoundToInt((float)_input.WildfireModule.Data.LCPData.RasterCellResolutionY));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size (x, y): " + UnityEngine.Mathf.RoundToInt((float)_input.WildfireModule.Data.LandscapeData.RasterCellResolutionX) + ", " + Mathf.RoundToInt((float)_input.WildfireModule.Data.LandscapeData.RasterCellResolutionY));
                 ++buttonIndex;
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle LCP display"))
@@ -61,19 +61,19 @@ namespace WUInity.UI
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Elevation"))
                 {
                     _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Elevation);
-                    lcpCurrentInfo = "Elevation range: " + _input.WildfireModule.Data.LCPData.GetElevationMin() + "-" + _input.WildfireModule.Data.LCPData.GetElevationMax() + " [m]";
+                    lcpCurrentInfo = "Elevation range: " + _input.WildfireModule.Data.LandscapeData.GetElevationMin() + "-" + _input.WildfireModule.Data.LandscapeData.GetElevationMax() + " [m]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Slope"))
                 {
                     _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Slope);
-                    lcpCurrentInfo = "Slope range: " + _input.WildfireModule.Data.LCPData.GetSlopeMin() + "-" + _input.WildfireModule.Data.LCPData.GetSlopeMax() + " [-]";
+                    lcpCurrentInfo = "Slope range: " + _input.WildfireModule.Data.LandscapeData.GetSlopeMin() + "-" + _input.WildfireModule.Data.LandscapeData.GetSlopeMax() + " [-]";
                 }
                 ++buttonIndex;
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Aspect"))
                 {
                     _wuinityManager.FireDomainVisualizer.SetLCPViewMode(FireDomainVisualizer.LcpViewMode.Aspect);
-                    lcpCurrentInfo = "Aspect range: " + _input.WildfireModule.Data.LCPData.GetAspectMin() + "-" + _input.WildfireModule.Data.LCPData.GetAspectMax() + " [°]";
+                    lcpCurrentInfo = "Aspect range: " + _input.WildfireModule.Data.LandscapeData.GetAspectMin() + "-" + _input.WildfireModule.Data.LandscapeData.GetAspectMax() + " [°]";
                 }
                 ++buttonIndex;
 
@@ -172,7 +172,7 @@ namespace WUInity.UI
         void LoadLCP(string[] paths)
         {
             _input.WildfireModule.Data.LoadLCPFile(_input.WildfireModule, paths[0], _input.Simulation.Data.UTMOrigin, true, out success);
-            _wuinityManager.FireDomainVisualizer.SetAndDisplayLCP(_input.WildfireModule.Data.LCPData);
+            _wuinityManager.FireDomainVisualizer.SetAndDisplayLCP(_input.WildfireModule.Data.LandscapeData);
         }
 
         void OpenLoadFuelsModelFile()

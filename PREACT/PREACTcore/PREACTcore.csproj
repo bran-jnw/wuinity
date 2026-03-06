@@ -23,8 +23,8 @@
     <PackageReference Include="ILGPU.Algorithms" Version="1.5.3" />
     <PackageReference Include="Itinero" Version="1.5.1" />
     <PackageReference Include="Itinero.IO.Osm" Version="1.5.1" />
-    <PackageReference Include="openmeteo_sdk" Version="1.25.0" />
-    <PackageReference Include="System.Text.Json" Version="10.0.2" />
+    <PackageReference Include="OsmSharp.IO.API" Version="1.0.5" />
+    <PackageReference Include="System.Text.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +65,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ThirdParty\GDAL\x64\gdal_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\libgdalconst_wrap.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\libgdal_wrap.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\libogr_wrap.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ThirdParty\GDAL\x64\libosr_wrap.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ThirdParty\GDAL\x64\ogr_wrap.dll">
