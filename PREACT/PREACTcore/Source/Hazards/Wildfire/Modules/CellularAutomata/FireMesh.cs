@@ -523,9 +523,9 @@ namespace PREACT.Wildfire
             return maxROSAzimuth;
         }
 
-        public override float GetInternalDeltaTime()
+        public override double GetInternalDeltaTime()
         {
-            return (float)dt;
+            return dt;
         }
 
         public override int GetCellCountX()

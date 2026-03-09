@@ -13,7 +13,7 @@ namespace PREACT.IO
     [System.Serializable]
     public class WildfireModuleInput
     {
-        public enum WildfireModules { None, AscImport, FireCell, CellParticleHybrid, FarsiteDLL, PrometheusCOM }
+        public enum WildfireModules { None, AscImport, FireCell, CellParticleHybrid, NarrowLevelSet }
 
         private WildfireData _data;
         private AscImportInput _ascImportInput;
@@ -76,6 +76,9 @@ namespace PREACT.IO
                         break;
                     case nameof(WildfireModules.CellParticleHybrid):
                         Module = WildfireModules.CellParticleHybrid;
+                        break;
+                    case nameof(WildfireModules.NarrowLevelSet):
+                        Module = WildfireModules.NarrowLevelSet;
                         break;
                     default:
                         success = false;
@@ -153,6 +156,22 @@ namespace PREACT.IO
             else if (Module == WildfireModules.CellParticleHybrid)
             {
                 nameOfInput = nameof(WildfireModules.CellParticleHybrid);
+                PREACTInput.ReadingInputMessage(nameOfInput);
+                int lineindex;
+                if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
+                {
+                    _fireCellInput.Parse(inputLines, lineindex, this, rootFolder, out success);
+                }
+                else
+                {
+                    //critical
+                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                    return;
+                }
+            }
+            else if (Module == WildfireModules.NarrowLevelSet)
+            {
+                nameOfInput = nameof(WildfireModules.NarrowLevelSet);
                 PREACTInput.ReadingInputMessage(nameOfInput);
                 int lineindex;
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))

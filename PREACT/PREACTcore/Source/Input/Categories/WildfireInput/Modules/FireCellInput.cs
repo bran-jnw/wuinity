@@ -287,18 +287,22 @@ namespace PREACT.IO
             }
             else if (SpreadRateModel == SpreadRateModels.LookupROS)
             {
-                //not critical, we just use a default table
+                //critical
                 nameOfInput = nameof(LookUpTableFile);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     LookUpTableFile = userInput;
-                    //PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success, false);                    
+                    PREACTInput.CheckIfFileExist(nameOfInput, userInput, rootFolder, out success, false);                    
                 }
                 else
                 {
+                    success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
-                success = true;
+                if (!success)
+                {
+                    return;
+                }
             }
 
             nameOfInput = nameof(SpreadMode);
@@ -334,6 +338,7 @@ namespace PREACT.IO
             }
             else
             {
+                success = false;
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
             if (!success)

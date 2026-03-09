@@ -241,7 +241,7 @@ namespace PREACT.Wildfire
             return borderCells;
         }
 
-        public override float GetInternalDeltaTime()
+        public override double GetInternalDeltaTime()
         {
             return _internalDeltaTime;
         }

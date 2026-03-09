@@ -304,7 +304,7 @@ namespace PREACT.Wildfire
             return result;
         }
 
-        public override float GetInternalDeltaTime()
+        public override double GetInternalDeltaTime()
         {
             return _simulation.Input.Simulation.DeltaTime;
         }

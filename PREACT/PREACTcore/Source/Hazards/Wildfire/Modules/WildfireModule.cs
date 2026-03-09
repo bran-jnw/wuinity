@@ -22,7 +22,7 @@ namespace PREACT.Wildfire
         /// The fire module might be able to take longer time steps compared to other modules, so this information is needed if only doing fire simulation.
         /// </summary>
         /// <returns></returns>
-        public abstract float GetInternalDeltaTime();
+        public abstract double GetInternalDeltaTime();
 
         /// <summary>
         /// Get the maximum rate of spread (any direction, so azimuth is also needed to back calculate eliipse)

@@ -221,7 +221,7 @@ namespace PREACT
             }
 
             //step all modules forward in time
-            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepFireModule, _stopThreadsToken.Token);
+            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepWildfireModule, _stopThreadsToken.Token);
             System.Threading.Tasks.Task smokeTask = System.Threading.Tasks.Task.Run(StepSmokeModule, _stopThreadsToken.Token);
             System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule, _stopThreadsToken.Token);
             System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule, _stopThreadsToken.Token);
@@ -401,9 +401,14 @@ namespace PREACT
                     _wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
                     Engine.Message(this, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
                 }
+                else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.NarrowLevelSet)
+                {
+                    _wildfireModule = new NarrowLevelSet(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.IgnitionPoints, _weatherManager, _timeManager);
+                    Engine.Message(this, Engine.LogType.Log, "Fire module NarrowLevelSet initiated.");
+                }
                 else
                 {
-                    Engine.Message(this, Engine.LogType.SimulationError, "Could not initiate fire mdoule, aborting.");
+                    Engine.Message(this, Engine.LogType.SimulationError, "Could not initiate fire module, aborting.");
                 }
             }  
             else
@@ -582,8 +587,8 @@ namespace PREACT
         }
 
         bool fireUpdated = false;
-        float nextFireUpdate;
-        private void StepFireModule()
+        double nextFireUpdate;
+        private void StepWildfireModule()
         {
             //update fire mesh if needed
             fireUpdated = false;
@@ -596,8 +601,6 @@ namespace PREACT
                     _wildfireModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
                     _fireStopwatch.Stop();
                     nextFireUpdate += _wildfireModule.GetInternalDeltaTime();
-                    // Route analysis: consider calling RoutingData::ModifyRouterDB at this point if the fire interferes with the road network
-                    // Note: we need to preprocess each cell which has a road on it
                 }
             }
         }

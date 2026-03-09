@@ -8,28 +8,35 @@ namespace PREACT.Wildfire
     public class NarrowLevelSet : WildfireModule
     {
         int _stepCount;
-        NarrowBand _band;
-        NarrowBandLevelSetSolver _solver;
-        FastMarchingReinitializer _fmm;
+        NarrowBandLevelSetSolver _solver;        
 
-        public int xDim { get; }
-        public int yDim { get; }
-        public double Dx { get; }
-        public double Dy { get; }
+        private List<IgnitionPoint> _ignitionPoints;
+        private double _initialIgnition = -1;
+        private WeatherManager _weather;
+        private TimeManager _time;
 
-        // Level set field
-        public double[,] Phi { get; }
+        private float[] _maxFireIntensityData;
+        private float[,] _maxRosData;
+        private float[,] _maxRosDirectionData;
+        private float[] _timeOfArrivalData;
+        private float[] _sootInjection;
+        Vector2d _landscapeSize;
+        double _internalDeltaTime;
+        private List<Vector2int> _ignitedCellIndices;                 
         public SpreadModel[,] Spread { get; }
      
 
-        public NarrowLevelSet(Simulation simulation, LandscapeData landscape) : base(simulation)
+        public NarrowLevelSet(Simulation simulation, LandscapeData landscape, List<IgnitionPointInput> ignitionPoints, WeatherManager weather, TimeManager time) : base(simulation)
         {
-            xDim = simulation.Input.WildfireModule.Data.LandscapeData.GetCellCountX();
-            yDim = simulation.Input.WildfireModule.Data.LandscapeData.GetCellCountY();
-            Dx = simulation.Input.WildfireModule.Data.LandscapeData.RasterCellResolutionX;
-            Dy = simulation.Input.WildfireModule.Data.LandscapeData.RasterCellResolutionY;
+            _weather = weather;
+            _time = time;
+            _originOffset = landscape.OriginOffset;
+            _landscapeSize = new Vector2d(landscape.GetLandscapeSizeX(), landscape.GetLandscapeSizeY());
+            int xDim = simulation.Input.WildfireModule.Data.LandscapeData.GetCellCountX();
+            int yDim = simulation.Input.WildfireModule.Data.LandscapeData.GetCellCountY();
+            double Dx = simulation.Input.WildfireModule.Data.LandscapeData.RasterCellResolutionX;
+            double Dy = simulation.Input.WildfireModule.Data.LandscapeData.RasterCellResolutionY;            
 
-            Phi = new double[xDim, yDim];
             Spread = new SpreadModel[xDim, yDim];
             for (int y = 0; y < yDim; y++) 
             {
@@ -48,69 +55,137 @@ namespace PREACT.Wildfire
 
                     }
                 }
+            }           
+           
+            _solver = new NarrowBandLevelSetSolver(xDim, yDim, Dx, Dy, 16, 0.5);            
+
+            _maxFireIntensityData = new float[xDim * yDim];
+            _maxRosData = new float[xDim, yDim];
+            _maxRosDirectionData = new float[xDim, yDim];
+            _timeOfArrivalData = new float[xDim * yDim];
+            _ignitedCellIndices = new List<Vector2int>(256);
+
+
+            _ignitionPoints = new List<IgnitionPoint>(ignitionPoints.Count);
+            for (int i = 0; i < ignitionPoints.Count; ++i)
+            {
+                _ignitionPoints.Add(new IgnitionPoint(_simulation, ignitionPoints[i]));
             }
-            
 
-            _band = new NarrowBand(xDim, yDim, 8);
-            _solver = new NarrowBandLevelSetSolver(_band, 0.5);
-            _fmm = new FastMarchingReinitializer(Dx, Dy);
-        }
-
-        public override void Step(float simulationTime, float deltaTime)
-        {
-            _solver.Step(this, deltaTime);
-
-            // Periodic reinitialization (PDE or FMM)
-            if (_stepCount % 20 == 0)
+            for (int i = 0; i < _ignitionPoints.Count; ++i)
             {
-                _fmm.Reinitialize(this);
-            }            
-            _stepCount++;
-        }
-
-        private void SetCircularIgnition(double x0, double y0, double radius)
-        {
-
-            for (int i = 0; i < xDim; i++)
-            {
-                double x = (i + 0.5) * Dx;
-                for (int j = 0; j < yDim; j++)
+                if (_ignitionPoints[i].IgnitionTime <= 0.0)
                 {
-                    double y = (j + 0.5) * Dy;
-                    double dist = Mathd.Sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
-                    Phi[i, j] = dist - radius; // negative inside
+                    IgniteAtLatLon(_ignitionPoints[i].LatLon, 0.0);
+                    _ignitionPoints.Remove(_ignitionPoints[i]);
+
+                    if (_initialIgnition < 0)
+                    {
+                        _initialIgnition = 0.0;
+                    }
                 }
             }
         }
 
+        public override void Step(float simulationTime, float deltaTime)
+        {
+            /*for (int i = 0; i < _ignitionPoints.Count; ++i)
+            {
+                if (_ignitionPoints[i].IgnitionTime <= simulationTime)
+                {
+                    IgniteAtLatLon(_ignitionPoints[i].LatLon, simulationTime);
+                    _ignitionPoints.Remove(_ignitionPoints[i]);
+
+                    if (_initialIgnition < 0)
+                    {
+                        _initialIgnition = simulationTime;
+                    }
+                }
+            }*/
+
+            _solver.Step(this, deltaTime, _weather, _time, out _internalDeltaTime);
+
+            // Periodic reinitialization 
+            if (_stepCount % 20 == 0)
+            {
+                _solver.Reinitialize();
+            }            
+            _stepCount++;
+        }
+
+        public void UpdateCellData(int xIndex, int yIndex, float firelineIntensity, float rateOfSpread, float rateOfSpreadDirection)
+        {
+            int linIndex = xIndex + yIndex * _solver.xDim;
+            _maxFireIntensityData[linIndex] = Mathf.Max(firelineIntensity, _maxFireIntensityData[linIndex]);
+            if (rateOfSpread > _maxRosData[xIndex, yIndex])
+            {
+                _maxRosData[xIndex, yIndex] = rateOfSpread;
+                _maxRosDirectionData[xIndex, yIndex] = rateOfSpreadDirection;
+            }
+        }
+
+        public void SetTimeOfArrival(int xIndex, int yIndex, float timeOfArrival)
+        {
+            _timeOfArrivalData[xIndex + yIndex * _solver.xDim] = timeOfArrival;
+            _ignitedCellIndices.Add(new Vector2int(xIndex, yIndex));
+        }
+
+        private void IgniteAtLatLon(Vector2d latLon, double currentTime)
+        {
+            Vector2d pos = _simulation.GetSimulationPosition(latLon);
+            pos -= _originOffset;
+            int xIndex = (int)(_solver.xDim * pos.x / _landscapeSize.x);
+            int yIndex = (int)(_solver.yDim * pos.y / _landscapeSize.y);
+
+            if (IsInside(xIndex, yIndex))
+            {
+                _solver.SetInitialIgnition(pos.x, pos.y, 0.5 * _solver.Dx);
+                Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at lat/lon [{latLon.x}/{latLon.y}] as requested by user.");
+            }
+            else
+            {
+                Engine.Message(_simulation, Engine.LogType.Log, $"Tried to ignite at lat/lon [{latLon.x}/{latLon.y}] but this is outside of the provided landscape.");
+            }
+        }        
+
+        public bool IsInside(double xPos, double yPos)
+        {
+            if (xPos < 0 || xPos > _landscapeSize.x || yPos < 0 || yPos > _landscapeSize.y)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public override void ConsumeIgnitedFireCells()
         {
-            throw new NotImplementedException();
+            _ignitedCellIndices.Clear();
         }
 
         public override int GetActiveCellCount()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public override int GetCellCountX()
         {
-            throw new NotImplementedException();
+            return _solver.xDim;
         }
 
         public override int GetCellCountY()
         {
-            throw new NotImplementedException();
+            return _solver.yDim;
         }
 
         public override float GetCellSizeX()
         {
-            throw new NotImplementedException();
+            return (float)_solver.Dx;
         }
 
         public override float GetCellSizeY()
         {
-            throw new NotImplementedException();
+            return (float)_solver.Dy;
         }
 
         public override FireCellState GetFireCellState(Vector2d latLong)
@@ -120,7 +195,7 @@ namespace PREACT.Wildfire
 
         public override float[] GetFireLineIntensityData()
         {
-            throw new NotImplementedException();
+            return _maxFireIntensityData;
         }
 
         public override float[] GetFuelModelNumberData()
@@ -133,9 +208,9 @@ namespace PREACT.Wildfire
             throw new NotImplementedException();
         }
 
-        public override float GetInternalDeltaTime()
+        public override double GetInternalDeltaTime()
         {
-            throw new NotImplementedException();
+            return _internalDeltaTime;
         }
 
         public override float[,] GetMaxROS()
@@ -150,7 +225,8 @@ namespace PREACT.Wildfire
 
         public override void GetOffsetAndSize(out Vector2d offset, out Vector2d size)
         {
-            throw new NotImplementedException();
+            offset = _originOffset;
+            size = _landscapeSize;
         }
 
         public override float[] GetSootProduction()
@@ -160,12 +236,12 @@ namespace PREACT.Wildfire
 
         public override bool IsSimulationDone()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public override void Stop()
         {
-            throw new NotImplementedException();
+            //nothing to do
         }
     }
 }

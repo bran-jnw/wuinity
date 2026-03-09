@@ -49,7 +49,7 @@ namespace PREACT.IO
                 success = true;
                 return;
             }
-            Engine.Message(null, Engine.LogType.Log, "Loading Fire data...");
+            Engine.Message(null, Engine.LogType.Log, "Loading wildfire data...");
 
             //we need LCP for all fires except straight import of results
             if (wildfireInput.Module == WildfireModuleInput.WildfireModules.AscImport) 
@@ -70,7 +70,7 @@ namespace PREACT.IO
             filePath = Path.Combine(rootFolder, wildfireInput.GraphicalFireInputFile);
             LoadGraphicalFireInput(wildfireInput, filePath, _lcpData, false, out success);
 
-            if (wildfireInput.Module == WildfireModuleInput.WildfireModules.FireCell || wildfireInput.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
+            if (wildfireInput.Module == WildfireModuleInput.WildfireModules.FireCell || wildfireInput.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid || wildfireInput.Module == WildfireModuleInput.WildfireModules.NarrowLevelSet)
             {
                 int issues = 0;
 

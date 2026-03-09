@@ -16,7 +16,7 @@ WeatherFile=verification_weather.csv
 
 [WildfireModule]
 Enabled=true
-Module=CellParticleHybrid
+Module=NarrowLevelSet
 
 [CellParticleHybrid]
 LandscapeFile=flat_1001x1001.tif
@@ -25,7 +25,12 @@ RandomAmount=0.5
 ThetaLimit=5.0
 IgnitionPointsFile=center.ign
 SpreadRateModel=LookupROS #Behave, LookupROS
-
 FuelModelsFile=default.fuel
 InitialFuelMoistureFile=default.fmc
+LookUpTableFile=constant_spreadrates.csv
+
+[NarrowLevelSet]
+LandscapeFile=flat_1001x1001.tif
+IgnitionPointsFile=center.ign
+SpreadRateModel=LookupROS #Behave, LookupROS
 LookUpTableFile=constant_spreadrates.csv
