@@ -17,6 +17,7 @@ namespace PREACT.Evacuation
     {
         //properties
         private Vector2d _latLon;
+        private Vector2d _simulationPos;
         private PREACTColor _color;
         private float _maxFlow = -1f; //cars per hour
         private string _name = string.Empty;
@@ -29,15 +30,16 @@ namespace PREACT.Evacuation
         Simulation _simulation;    
         private uint _currentPeople;
         private List<TrafficModuleVehicle> _vehicles = new List<TrafficModuleVehicle>();
-        private float _currentVehicleFlow = 0f;
-        private float _firstArrivalTime;
-        private float _currentTimeStep;
+        private double _currentVehicleFlow = 0f;
+        private double _firstArrivalTime;
+        private double  _currentTimeStep;
         private int _timeStepCars;
         //data for WUI-SHOW etc
-        private float _totalTravelTime;
-        private float _averageTravelTime;
+        private double _totalTravelTime;
+        private double _averageTravelTime;
 
         public Vector2d LatLon { get => _latLon; }
+        public Vector2d SimulationPos { get => _simulationPos; }
         public PREACTColor Color { get => _color; }
         public bool Blocked { get => _blocked; }
         public float MaxFlow { get => _maxFlow; }
@@ -47,17 +49,18 @@ namespace PREACT.Evacuation
         public int MaxPeople { get => _maxPeople; }
         public uint CurrentPeople { get => _currentPeople; }
         public List<TrafficModuleVehicle> Vehicles { get => _vehicles; }
-        public float CurrentVehicleFlow { get => _currentVehicleFlow; }
-        public float FirstArrivalTime { get => _firstArrivalTime; }
-        public float CurrentTimeStep { get => CurrentTimeStep; }
+        public double CurrentVehicleFlow { get => _currentVehicleFlow; }
+        public double FirstArrivalTime { get => _firstArrivalTime; }
+        public double CurrentTimeStep { get => CurrentTimeStep; }
         public int TimeStepCars { get => TimeStepCars; }
-        public float TotalTravelTime { get => _totalTravelTime; }
-        public float AverageTravelTime { get => _averageTravelTime; }
+        public double TotalTravelTime { get => _totalTravelTime; }
+        public double AverageTravelTime { get => _averageTravelTime; }
         
         public EvacuationDestination(Simulation simulation, Vector2d latLon, string name)
         {
             _simulation = simulation;
             _latLon = latLon;
+            _simulationPos = _simulation.Spatial.GetSimulationPosition(latLon);
             _name = name;
             _color = PREACTColor.Random();
         }
@@ -66,6 +69,7 @@ namespace PREACT.Evacuation
         {
             _simulation = simulation;
             _latLon = input.LatLon;
+            _simulationPos = _simulation.Spatial.GetSimulationPosition(_latLon);
             _color = input.Color;
             _maxFlow = input.MaxFlow;
             _name = input.Name;
@@ -99,7 +103,7 @@ namespace PREACT.Evacuation
         /// <param name="currentTime"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public bool CarArrives(TrafficModuleVehicle arrivingVehicle, float currentTime, float deltaTime)
+        public bool CarArrives(TrafficModuleVehicle arrivingVehicle, double currentTime, double deltaTime)
         {
             UpdateFlow(currentTime, deltaTime);            
 
@@ -151,7 +155,7 @@ namespace PREACT.Evacuation
             }
         }
 
-        private void UpdateFlow(float timeStamp, float deltaTime)
+        private void UpdateFlow(double timeStamp, double deltaTime)
         {
             //new timestamp?
             if (_currentTimeStep != timeStamp)
@@ -168,7 +172,7 @@ namespace PREACT.Evacuation
             }
             else
             {
-                float timestepFlow = _timeStepCars / deltaTime;
+                double timestepFlow = _timeStepCars / deltaTime;
                 if (timeStamp == _firstArrivalTime)
                 {
                     _currentVehicleFlow = timestepFlow;
@@ -177,7 +181,7 @@ namespace PREACT.Evacuation
                 {
                     _currentVehicleFlow = _vehicles.Count / (timeStamp - _firstArrivalTime);
                 }
-                _currentVehicleFlow = Mathf.Max(timestepFlow, _currentVehicleFlow) * 3600f;
+                _currentVehicleFlow = Mathd.Max(timestepFlow, _currentVehicleFlow) * 3600f;
             }
         }
     }

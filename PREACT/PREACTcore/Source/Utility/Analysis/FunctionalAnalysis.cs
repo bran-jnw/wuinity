@@ -14,7 +14,7 @@ namespace PREACT.Utility.Analysis
     {
         public enum DimensionScalingMode { Max, Min, Average };
 
-        public static float[] CalculateAverageCurve(List<List<float>> curves, DimensionScalingMode scalingMode)
+        public static double[] CalculateAverageCurve(List<List<double>> curves, DimensionScalingMode scalingMode)
         {      
             if(curves.Count == 1)
             {
@@ -44,17 +44,17 @@ namespace PREACT.Utility.Analysis
             }
 
             //correct dimensionality
-            float[][] newCurves = new float[curves.Count][];
+            double[][] newCurves = new double[curves.Count][];
             for (int i = 0; i < curves.Count; i++)
             {
                 newCurves[i] = ScaleDimension(curves[i], desiredDimensions);
             }
 
             //finally calculate average
-            float[] result = new float[desiredDimensions];
+            double[] result = new double[desiredDimensions];
             for (int i = 0; i < desiredDimensions; i++)
             {
-                float average = 0;
+                double average = 0;
                 for (int j = 0; j < curves.Count; j++)
                 {
                     average += newCurves[j][i]; 
@@ -66,7 +66,7 @@ namespace PREACT.Utility.Analysis
             return result;
         }
 
-        public static float[] ScaleDimension(List<float> data, int desiredDimension)
+        public static double[] ScaleDimension(List<double> data, int desiredDimension)
         {
             if(data.Count == desiredDimension)
             {
@@ -75,7 +75,7 @@ namespace PREACT.Utility.Analysis
             //how big are the jumps in the data set
             float sampleStep = (float)data.Count / desiredDimension;
             //save first and last value as they are known
-            float[] result = new float[desiredDimension];
+            double[] result = new double[desiredDimension];
             result[0] = data[0];
             result[desiredDimension - 1] = data[data.Count - 1];
             //interpolate the rest of the values

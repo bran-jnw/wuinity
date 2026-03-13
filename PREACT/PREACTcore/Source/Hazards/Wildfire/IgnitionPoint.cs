@@ -18,6 +18,7 @@ namespace PREACT.Wildfire
         private bool _hasBeenIgnited;
 
         public Vector2d LatLon { get => _latLon; }
+        public Vector2d SimulationPos { get => _simulationPos; }
         public float IgnitionTime { get => _ignitionTime; }    
 
         public bool HasBeenIgnited()
@@ -39,13 +40,13 @@ namespace PREACT.Wildfire
         {
             _latLon = input.LatLon;
             _ignitionTime = input.IgnitionTime;
-            _simulationPos = simulation.GetSimulationPosition(_latLon);
+            _simulationPos = simulation.Spatial.GetSimulationPosition(_latLon);
 
             _hasBeenIgnited = false;
         }
 
         /// <summary>
-        /// Called when wanting to cerate igbition point while running simulation (real-time interaction).
+        /// Called when wanting to create igbition point while running simulation (real-time interaction).
         /// </summary>
         /// <param name="simulation"></param>
         /// <param name="simulationPos"></param>

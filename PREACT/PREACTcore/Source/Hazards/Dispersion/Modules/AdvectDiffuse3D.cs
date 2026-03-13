@@ -76,7 +76,7 @@ namespace PREACT.Dispersion
 
         public AdvectDiffuse3D(Simulation simulation) : base(simulation)
         {
-            _originOffset = _simulation.Spatial.GetFireModuleOffset();
+            _originOffset = _simulation.Spatial.GetWildfireModuleOffset();
             try
             {
                 Initialize();
@@ -244,7 +244,7 @@ namespace PREACT.Dispersion
         }
 
         bool _lockOutput = false;
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
             //update wind
             double windSpeed, windDirection;
@@ -261,7 +261,7 @@ namespace PREACT.Dispersion
             _globalData.Kz = KzClasses[stability];
 
             int subSteps = 5;
-            _globalData.dt = deltaTime / subSteps;
+            _globalData.dt = (float)deltaTime / subSteps;
 
             //inject soot
             _cpuInjection.CopyFromCPU(_simulation.WildfireModule.GetSootProduction());

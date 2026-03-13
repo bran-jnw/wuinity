@@ -398,7 +398,8 @@ namespace PREACT
                 }
                 else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
                 {
-                    _wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
+                    //_wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
+                    _wildfireModule = new SimpleFireCA(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.IgnitionPoints, _weatherManager, _timeManager);
                     Engine.Message(this, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
                 }
                 else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.NarrowLevelSet)
@@ -720,22 +721,12 @@ namespace PREACT
             string outputFilePath = Path.Combine(_engine.OutputFolder, _input.Simulation.Name + "_" + _simulationIndex + "_arrivalData.csv");
             using (StreamWriter outputFile = new StreamWriter(outputFilePath))
             {
-                List<float> data = _trafficModule.GetArrivalData();
-                foreach (float value in data)
+                List<double> data = _trafficModule.GetArrivalData();
+                foreach (double value in data)
                 {
                     outputFile.WriteLine(value.ToString());
                 }                
             }
-        }
-
-        public Vector2d GetSimulationPosition(Vector2d latLon)
-        {
-            return _input.Simulation.Data.GetSimulationPosition(latLon);
-        }
-
-        public Vector2d GetWGS84FromSimulationPosition(Vector2d pos)
-        {
-            return _input.Simulation.Data.GetWGS84FromSimulationPosition(pos);
-        }     
+        }   
     }    
 }

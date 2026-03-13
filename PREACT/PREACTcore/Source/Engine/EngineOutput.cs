@@ -18,7 +18,7 @@ namespace PREACT
             _engine = engine;
         }
 
-        public void SaveAverageCurve(float[] data)
+        public void SaveAverageCurve(double[] data)
         {
             string[] output = new string[data.Length + 2];
             output[0] = "Time [s],ArrivalIndex [-]";

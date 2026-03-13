@@ -61,7 +61,7 @@ namespace PREACT.Traffic
             for (int i = 0; i < points; i++)
             {
                 Itinero.LocalGeo.Coordinate coordinate = routeData.route.Shape[i + startSI];
-                Vector2d simulationPos = simulation.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
+                Vector2d simulationPos = simulation.Spatial.GetSimulationPosition(new Vector2d(coordinate.Latitude, coordinate.Longitude));
                 if (i > 0)
                 {
                     distance += Vector2.Distance(new Vector2((float)simulationPos.x, (float)simulationPos.y), new Vector2(segmentCoordinates[i - 1].Y, segmentCoordinates[i - 1].Z));

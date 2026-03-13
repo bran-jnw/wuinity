@@ -32,8 +32,8 @@ namespace PREACT.IO
             _simulation = simulation;
         }
 
-        List<float> _emptyArrivalData = new List<float>();
-        public List<float> GetTrafficArrivalData()
+        List<double> _emptyArrivalData = new List<double>();
+        public List<double> GetTrafficArrivalData()
         {
             if (_simulation.TrafficModule != null)
             {

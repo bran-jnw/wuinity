@@ -21,9 +21,9 @@ namespace PREACT.Dispersion
         }
 
 
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
-            _extinctionCoefficientOutput[0] = _extinctionCoefficientRamp.GetOpticalDensity(currentTime);
+            _extinctionCoefficientOutput[0] = _extinctionCoefficientRamp.GetOpticalDensity((float)currentTime);
         }      
 
         public override bool IsSimulationDone()

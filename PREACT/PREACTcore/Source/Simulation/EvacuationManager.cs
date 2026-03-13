@@ -61,8 +61,8 @@ namespace PREACT.Evacuation
             {
                 if (!eD.Blocked)
                 {
-                    FireCellState cellState = _simulation.WildfireModule.GetFireCellState(eD.LatLon);
-                    if (cellState == FireCellState.Burning)
+                    FireCellState cellState = _simulation.WildfireModule.GetFireCellState(eD.SimulationPos);
+                    if (cellState == FireCellState.Ignited)
                     {
                         Engine.Message(_simulation, Engine.LogType.Log, " Destination blocked by fire: " + eD.Name);
                         BlockDestination(eD);

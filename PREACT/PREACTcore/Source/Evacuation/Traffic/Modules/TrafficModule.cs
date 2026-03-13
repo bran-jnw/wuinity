@@ -14,27 +14,27 @@ namespace PREACT.Traffic
 {
     public abstract class TrafficModule : SimulationModule
     {
-        protected List<float> _arrivalData;
+        protected List<double> _arrivalData;
         protected List<InjectedCar> _carsToInject;
         protected Dictionary<uint, TrafficModuleVehicle> _activeVehicles;
 
         protected struct InjectedCar
         {
-            public Vector2d startLatLong;
-            public EvacuationDestination evacuationGoal;
+            public Vector2d startLatLon;
+            public EvacuationDestination evacuationDestination;
             public uint numberOfPeopleInCar;
 
-            public InjectedCar(Vector2d startLatLong, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
+            public InjectedCar(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
             {
-                this.startLatLong = startLatLong;
-                this.evacuationGoal = evacuationGoal;
+                this.startLatLon = startLatLon;
+                this.evacuationDestination = evacuationGoal;
                 this.numberOfPeopleInCar = numberOfPeopleInCar;
             }
         }
 
         public TrafficModule(Simulation simulation) : base(simulation)
         {
-            _arrivalData = new List<float>();
+            _arrivalData = new List<double>();
             _carsToInject = new List<InjectedCar>();
             _activeVehicles = new Dictionary<uint, TrafficModuleVehicle>();
         }
@@ -42,13 +42,13 @@ namespace PREACT.Traffic
         /// <summary>
         /// Inject new car into the simulation and puts it in a waiting list (as this happens during a simulation step). Must be "consumed" later with PostUpdate().
         /// </summary>
-        /// <param name="startLatLong"></param>
+        /// <param name="startLatLon"></param>
         /// <param name="evacuationGoal"></param>
         /// <param name="routeData"></param>
         /// <param name="numberOfPeopleInCar"></param>
-        public void InsertNewCar(Vector2d startLatLong, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
+        public void InsertNewCar(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
         {
-            _carsToInject.Add(new InjectedCar(startLatLong, evacuationGoal, numberOfPeopleInCar));
+            _carsToInject.Add(new InjectedCar(startLatLon, evacuationGoal, numberOfPeopleInCar));
         }
 
         public abstract void HandleNewCars();
@@ -69,7 +69,7 @@ namespace PREACT.Traffic
             ++carCount;
             return carCount;
         }
-        public List<float> GetArrivalData()
+        public List<double> GetArrivalData()
         {
             return _arrivalData;
         }

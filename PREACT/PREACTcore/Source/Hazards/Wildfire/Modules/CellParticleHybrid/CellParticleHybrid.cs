@@ -30,7 +30,7 @@ namespace PREACT.Wildfire
         private LandscapeData _landscapeData;
         private BehaveCore.FuelModels _fuelModels;
         private List<IgnitionPoint> _ignitionPoints;
-        private float _initialIgnition = -1;
+        private double _initialIgnition = -1;
 
         public Simulation Simulation { get => _simulation; }
 
@@ -102,16 +102,16 @@ namespace PREACT.Wildfire
             }                   
         }
 
-        private void IgniteAtLatLon(Vector2d latLon, float currentTime)
+        private void IgniteAtLatLon(Vector2d latLon, double currentTime)
         {
-            Vector2d pos = _simulation.GetSimulationPosition(latLon);
+            Vector2d pos = _simulation.Spatial.GetSimulationPosition(latLon);
             pos -= _originOffset;
             int xIndex = (int)(_landscapeData.GetCellCountX() * pos.x / _landscapeData.GetLandscapeSizeX());
             int yIndex = (int)(_landscapeData.GetCellCountY() * pos.y / _landscapeData.GetLandscapeSizeY());
 
             if(IsInside(xIndex, yIndex))
             {
-                _fuelCells[xIndex, yIndex].Ignite(currentTime, 0f);
+                _fuelCells[xIndex, yIndex].Ignite((float)currentTime, 0f);
                 Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at lat/lon [{latLon.x}/{latLon.y}] as requested by user.");
             }
             else
@@ -322,7 +322,7 @@ namespace PREACT.Wildfire
             _aliveParticles.Enqueue(particle);
         }
 
-        public override void Step(float simulationTime, float deltaTime)
+        public override void Step(double simulationTime, double deltaTime)
         {
             if(_done)
             {
@@ -353,7 +353,7 @@ namespace PREACT.Wildfire
             while (_aliveParticles.Count > 0)
             {
                 FireParticle f = _aliveParticles.Dequeue();
-                f.Step(simulationTime, deltaTime, this);
+                f.Step((float)simulationTime, (float)deltaTime, this);
                 if(!f.Dead)
                 {
                     stillAliveParticles.Enqueue(f);
@@ -436,7 +436,7 @@ namespace PREACT.Wildfire
                     {
                         for (int x = 0; x < _xDim; ++x)
                         {
-                            row[x] = (_fuelCells[x, y].TimeOfArrival - _initialIgnition) / 3600; //hours
+                            row[x] = (_fuelCells[x, y].TimeOfArrival - (float)_initialIgnition) / 3600; //hours
                             if (row[x] <= 0f)
                             {
                                 row[x] = -9999f;
@@ -510,6 +510,11 @@ namespace PREACT.Wildfire
             {
                 Engine.Message(null, Engine.LogType.Warning, e.Message);
             }
+        }
+
+        public override Vector2int SimulationPosToCellIndex(Vector2d simulationPos, out bool inside)
+        {
+            throw new NotImplementedException();
         }
     }    
 }

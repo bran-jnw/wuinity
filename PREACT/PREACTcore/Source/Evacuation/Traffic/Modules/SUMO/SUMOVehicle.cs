@@ -81,7 +81,7 @@ namespace PREACT.Traffic
             return active;
         }
 
-        public override void Arrive(float deltaTime, float currentTime)
+        public override void Arrive(double deltaTime, double currentTime)
         {
             active = false;
             if(_destination != null)

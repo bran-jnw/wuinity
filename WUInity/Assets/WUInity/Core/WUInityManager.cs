@@ -697,15 +697,15 @@ namespace WUInity
         Texture2D _trafficUsageMap;
         private void CreateTrafficUsageMapTexture()
         {
-            float[,] data = ((SUMOModule)_engine.Simulation.TrafficModule).GetUsageMap();
-            float maxData = ((SUMOModule)_engine.Simulation.TrafficModule).GetMaxUsage();
+            double[,] data = ((SUMOModule)_engine.Simulation.TrafficModule).GetUsageMap();
+            double maxData = ((SUMOModule)_engine.Simulation.TrafficModule).GetMaxUsage();
             _trafficUsageMap = new Texture2D(data.GetLength(0), data.GetLength(1));
             _trafficUsageMap.filterMode = FilterMode.Point;
             for (uint y = 0; y < data.GetLength(1); ++y)
             {
                 for (uint x = 0; x < data.GetLength(0); ++x)
                 {
-                    float ratio = (float)data[x, y] / maxData;
+                    float ratio = (float)(data[x, y] / maxData);
                     Color color = Color.HSVToRGB(0.67f - 0.67f * ratio, 1.0f, 1.0f);
                     color.a = 1f;
                     if (data[x, y] == 0)

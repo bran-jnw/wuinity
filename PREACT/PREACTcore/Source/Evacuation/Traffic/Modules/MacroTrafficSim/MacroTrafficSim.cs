@@ -162,7 +162,7 @@ namespace PREACT.Traffic
             return false;
         }
 
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
             //first resolve traffic events
             for (int i = 0; i < trafficEvents.Count; ++i)
@@ -217,7 +217,7 @@ namespace PREACT.Traffic
                     }
                     
                     //check if we are going on to a new stretch of road (new traffic density) after this time step
-                    if(vehicle.WillChangeRoad(deltaTime, speed))
+                    if(vehicle.WillChangeRoad((float)deltaTime, speed))
                     {
                         int newHash = vehicle.GetNextHashCode();
                         RoadSegment nextSegment;
@@ -226,7 +226,7 @@ namespace PREACT.Traffic
                         {
                             if(nextSegment.CanAddCar())
                             {
-                                vehicle.MoveCar(currentTime, deltaTime, speed);
+                                vehicle.MoveCar((float)currentTime, (float)deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
                                 nextSegment.AddCar(vehicle);
                             }
@@ -241,7 +241,7 @@ namespace PREACT.Traffic
                         {
                             if (nextSegment.CanAddCar())
                             {
-                                vehicle.MoveCar(currentTime, deltaTime, speed);
+                                vehicle.MoveCar((float)currentTime, (float)deltaTime, speed);
                                 //we also need to add it to the next segment as otherwise we might overlad this next road
                                 nextSegment.AddCar(vehicle);
                             }
@@ -253,7 +253,7 @@ namespace PREACT.Traffic
                         }
                         else
                         {
-                            vehicle.MoveCar(currentTime, deltaTime, speed);
+                            vehicle.MoveCar((float)currentTime, (float)deltaTime, speed);
                             //now we need to add to our temporary road segment dictionary since otherwise we might overfill any new segment
                             int hash = vehicle.roadSegmentHash;
                             nextSegment = new RoadSegment(vehicle, _simulation);
@@ -262,7 +262,7 @@ namespace PREACT.Traffic
                     }
                     else
                     {
-                        vehicle.MoveCar(currentTime, deltaTime, speed);
+                        vehicle.MoveCar((float)currentTime, (float)deltaTime, speed);
                     }                    
 
                     //flag cars that have arrived
@@ -336,7 +336,7 @@ namespace PREACT.Traffic
                 carsInSystem.Remove(vehiclesToRemove[i]);
 
                 //save output data for funtional analysis
-                _arrivalData.Add(currentTime + deltaTime);                            
+                _arrivalData.Add((float)(currentTime + deltaTime));                            
             }
 
             if(evacGoalsDirty)

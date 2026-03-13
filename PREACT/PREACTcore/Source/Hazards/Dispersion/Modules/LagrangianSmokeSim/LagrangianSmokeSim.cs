@@ -112,9 +112,9 @@ namespace PREACT.Dispersion
             return u_star_squared * theta_zero * GRAVITY_INVERSE * VON_KARMAN_INVERSE * L_inverse;
         }
 
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
-            particleProcessingKernel(particleCount, c, hostParticleSystem.deviceParticleSystem, deltaTime);
+            particleProcessingKernel(particleCount, c, hostParticleSystem.deviceParticleSystem, (float)deltaTime);
             device.Synchronize();
         }
 

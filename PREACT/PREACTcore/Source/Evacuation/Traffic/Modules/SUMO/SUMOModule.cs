@@ -25,8 +25,8 @@ namespace PREACT.Traffic
         private int totalVehiclesInjected, totalSumoVehiclesInjected;
         private List<string> output;
 
-        float _maxUsage;
-        private float[,] _usageMap;
+        double _maxUsage;
+        private double[,] _usageMap;
         private uint[,] _carCount;
         private float[,] _accumulatedLevelOfService;
         private float[,] _accumulatedWatingTime;
@@ -41,6 +41,13 @@ namespace PREACT.Traffic
                 string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.TrafficModule.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", "0.0", "-e", _simulation.Time.SimulationEndTime.ToString() }));
+
+                //check if destinations are valid, if not abort
+                ValidateDestinations(simulation.Evacuation.Destinations, out bool allValid);
+                if(!allValid)
+                {
+                    return;
+                }
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
                 Vector2d sumoUTM = new Vector2d(-_simulation.Input.TrafficModule.SumoInput.UTMoffset.x, -_simulation.Input.TrafficModule.SumoInput.UTMoffset.y);
@@ -62,7 +69,7 @@ namespace PREACT.Traffic
                 int yDim = Mathd.CeilToInt(_simulation.Input.Simulation.DomainSize.y / _simulation.Input.TrafficModule.SumoInput.OutputRasterSize);
 
                 _maxUsage = 0f;
-                _usageMap = new float[xDim, yDim];
+                _usageMap = new double[xDim, yDim];
                 _carCount = new uint[xDim, yDim];
                 _accumulatedLevelOfService = new float[xDim, yDim];
                 _accumulatedWatingTime = new float[xDim, yDim];
@@ -78,8 +85,27 @@ namespace PREACT.Traffic
             {
                 success = false;
                 Engine.Message(_simulation, Engine.LogType.SimulationError, "Could not start SUMO, aborting. " + e.Message + ". " + e.InnerException);
+            }            
+        }
+
+        private void ValidateDestinations(List<EvacuationDestination> destinations, out bool allValid)
+        {
+            allValid = true;
+
+            foreach (EvacuationDestination eD in destinations)
+            {
+                try
+                {
+                    //IMPORTANT!!! Longitude then latitude in SUMO
+                    LIBSUMO.TraCIRoadPosition road = LIBSUMO.Simulation.convertRoad(eD.LatLon.y, eD.LatLon.x, true);
+                }
+                catch (Exception e)
+                {
+                    allValid = false;
+                    Engine.Message(_simulation, Engine.LogType.SimulationError, $"Destination {eD.Name} returns error from SUMO: {e.Message}");
+                }
+                
             }
-            
         }
 
         //might crash SUMO when running a new instance of SUMOModule while the old one is garbage collected
@@ -94,7 +120,7 @@ namespace PREACT.Traffic
             return 1f - _simulation.Input.TrafficModule.SumoInput.SmokeAlpha * Mathf.Exp(_simulation.Input.TrafficModule.SumoInput.SmokeBeta / extCoeff);
         }
 
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
             if(_checkSmoke)
             {
@@ -180,7 +206,7 @@ namespace PREACT.Traffic
             output.Add(dataLine);
         }
 
-        private void UpdateOutputMaps(SUMOVehicle vehicle, float deltaTime)
+        private void UpdateOutputMaps(SUMOVehicle vehicle, double deltaTime)
         {
             Vector2d pos = vehicle.SimulationPos;
 
@@ -202,12 +228,12 @@ namespace PREACT.Traffic
             }
         }
 
-        public float[,] GetUsageMap()
+        public double[,] GetUsageMap()
         {
             return _usageMap;
         }
 
-        public float GetMaxUsage()
+        public double GetMaxUsage()
         {
             return _maxUsage;
         }
@@ -216,10 +242,10 @@ namespace PREACT.Traffic
         {
             foreach (InjectedCar injectedCar in _carsToInject)
             {
-                EvacuationDestination evacuationGoal = injectedCar.evacuationGoal;
+                EvacuationDestination evacuationGoal = injectedCar.evacuationDestination;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
-                Vector2d startLatLon = injectedCar.startLatLong;                
-                Vector2d goalLatLon = evacuationGoal.LatLon;
+                Vector2d startLatLon = injectedCar.startLatLon;                
+                Vector2d destinationLatLon = evacuationGoal.LatLon;
 
                 //TODO: create input for this...
                 string vehicleType = "evacuation_car";
@@ -227,17 +253,17 @@ namespace PREACT.Traffic
                 try
                 {
                     //IMPORTANT!!! Longitude then latitude in SUMO
-                    LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLon.y, startLatLon.x, true);
-                    LIBSUMO.TraCIRoadPosition goalRoad = LIBSUMO.Simulation.convertRoad(goalLatLon.y, goalLatLon.x, true);
+                    LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLon.y, startLatLon.x, true); //lon/lat
+                    LIBSUMO.TraCIRoadPosition destinationRoad = LIBSUMO.Simulation.convertRoad(destinationLatLon.y, destinationLatLon.x, true); //lon/lat
                     LIBSUMO.TraCIStage route;
                     //TODO:do we find route based on empty network/pure speed limits or do we take into account current state of network
                     if(true)
                     {
-                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, goalRoad.edgeID);
+                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, destinationRoad.edgeID);
                     }
                     else
                     {
-                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, goalRoad.edgeID, "", -1, 1);
+                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, destinationRoad.edgeID, "", -1, 1);
                     }
 
                     bool foundRoute = false;
@@ -251,20 +277,20 @@ namespace PREACT.Traffic
                     {
                         int randomStart = Math.Random.Range(0, _validStartPositions.Count);   
                         //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
-                        route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, goalRoad.edgeID);    
+                        route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, destinationRoad.edgeID);    
                         if(route.edges.Count > 0)
                         {
                             foundRoute = true;
-                            Engine.Message(null, Engine.LogType.Warning, "No route could be found for the injected car, so it was teleported to a valid location. Affected lat/lon: " + startLatLon.x + ", " + startLatLon.y);
+                            Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                         }
                         else
                         {
-                            Engine.Message(null, Engine.LogType.Warning, "No route could be found for the injected car, tried teleporting but no valid route could be found.");
+                            Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                         }
                     }
                     else
                     {
-                        Engine.Message(null, Engine.LogType.Warning, "Car could not be injected as no valid route was found or cached.");
+                        Engine.Message(null, Engine.LogType.Warning, $"Car could not be injected as no valid route was found or cached. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                     }
 
                     if(foundRoute)
@@ -360,7 +386,7 @@ namespace PREACT.Traffic
                     OSGeo.GDAL.Band band = output.GetRasterBand(1); //starts from 1, not zero                
                     band.SetNoDataValue(-9999f);
                     band.SetDescription("Heat map [s], accumulated time spent on a roads overlaying with the raster.");
-                    float[] row = new float[xDim];
+                    double[] row = new double[xDim];
                     for (int y = 0; y < yDim; ++y)
                     {
                         for (int x = 0; x < xDim; ++x)
@@ -431,7 +457,7 @@ namespace PREACT.Traffic
         {
             if(!_simulation.Input.WildfireModule.Enabled)
             {
-                Engine.Message(null, Engine.LogType.Log, "No fire module requested, won't sort SUMO network edges in fire cells.");
+                Engine.Message(null, Engine.LogType.Log, "No wildfire module requested, won't sort SUMO network edges in fire cells.");
                 return;
             }
 
@@ -444,28 +470,28 @@ namespace PREACT.Traffic
                 for (int i = 0; i < junctions.Count; i++)
                 {
                     LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
-                    //TODO: include fire module offset here, as now we assume 0,0 is aligned with fire module origin
-                    int cellIndexX = (int)((nodePos.x + _originOffset.x) / _simulation.WildfireModule.GetCellSizeX());
-                    int cellIndexY = (int)((nodePos.y + _originOffset.y) / _simulation.WildfireModule.GetCellSizeY());
+                    Vector2d simulationPos = new Vector2d(nodePos.x + _originOffset.x, nodePos.y + _originOffset.y);
+                    Vector2int wildfireIndex = _simulation.Spatial.GetWildfireCellIndex(simulationPos, out bool inside);
 
-                    if (cellIndexX > 0 && cellIndexX < _simulation.WildfireModule.GetCellCountX() - 1 &&
-                        cellIndexY > 0 && cellIndexY < _simulation.WildfireModule.GetCellCountY() - 1)
+                    if(!inside)
                     {
-                        LIBSUMO.StringVector incomingEdges = LIBSUMO.Junction.getIncomingEdges(junctions[i]);
-                        for (int j = 0; j < incomingEdges.Count; j++)
-                        {
-                            //internal edges starts with ":", skip these
-                            if (!incomingEdges[j].StartsWith(":"))
-                            {
-                                if (fireCellEdges[cellIndexX, cellIndexY] == null)
-                                {
-                                    fireCellEdges[cellIndexX, cellIndexY] = new List<string>();
-                                    ++fireCellsWithJunctions;
-                                }
+                        continue;
+                    }
 
-                                fireCellEdges[cellIndexX, cellIndexY].Add(incomingEdges[j]);
-                            }                            
-                        }
+                    LIBSUMO.StringVector incomingEdges = LIBSUMO.Junction.getIncomingEdges(junctions[i]);
+                    for (int j = 0; j < incomingEdges.Count; j++)
+                    {
+                        //internal edges starts with ":", skip these
+                        if (!incomingEdges[j].StartsWith(":"))
+                        {
+                            if (fireCellEdges[wildfireIndex.x, wildfireIndex.y] == null)
+                            {
+                                fireCellEdges[wildfireIndex.x, wildfireIndex.y] = new List<string>();
+                                ++fireCellsWithJunctions;
+                            }
+
+                            fireCellEdges[wildfireIndex.x, wildfireIndex.y].Add(incomingEdges[j]);
+                        }                            
                     }
                 }
 

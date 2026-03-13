@@ -156,7 +156,7 @@ namespace PREACT.Wildfire
             
             if (cellState == FireCellState.CanBurn)
             {
-                cellState = FireCellState.Burning;
+                cellState = FireCellState.Ignited;
 
                 //initialize spread rate if not done before
                 if (maxSpreadRate < 0.0)
@@ -310,7 +310,7 @@ namespace PREACT.Wildfire
 
         public void Burn()
         {
-            if(cellState != FireCellState.Burning)
+            if(cellState != FireCellState.Ignited)
             {
                 return;
             }
@@ -358,7 +358,7 @@ namespace PREACT.Wildfire
 
         public void CheckFireSpread()
         {
-            if(cellState != FireCellState.Burning)
+            if(cellState != FireCellState.Ignited)
             {
                 return;
             }
@@ -404,7 +404,7 @@ namespace PREACT.Wildfire
 
         public void CheckIfDead()
         {
-            if (cellState != FireCellState.Burning || doneSpreading)
+            if (cellState != FireCellState.Ignited || doneSpreading)
             {
                 return;
             }

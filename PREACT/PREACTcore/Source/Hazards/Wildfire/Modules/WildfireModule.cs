@@ -12,7 +12,7 @@ namespace PREACT.Wildfire
 {
     public abstract class WildfireModule : SimulationModule
     {
-        protected float _internalDeltaTime;
+        protected double _internalDeltaTime;
         public WildfireModule(Simulation simulation) : base(simulation)
         {
 
@@ -47,11 +47,13 @@ namespace PREACT.Wildfire
         public abstract void GetOffsetAndSize(out Vector2d offset, out Vector2d size);
 
         /// <summary>
-        /// Returns state of cell on mesh based on lat/long. Returns dead if outside of mesh.
+        /// Returns state of cell on mesh based on simulation position. Returns dead if outside of mesh.
         /// </summary>
-        /// <param name="latLong"></param>
+        /// <param name="simulationPos"></param>
         /// <returns></returns>
-        public abstract FireCellState GetFireCellState(Vector2d latLong);
+        public abstract FireCellState GetFireCellState(Vector2d simulationPos);
+
+        public abstract Vector2int SimulationPosToCellIndex(Vector2d simulationPos, out bool inside);
     }
 }
 

@@ -42,7 +42,7 @@ namespace PREACT.Traffic
             _destination = newDestination;
         }
 
-        public abstract void Arrive(float deltaTime, float currentTime);
+        public abstract void Arrive(double deltaTime, double currentTime);
     }
 }
 

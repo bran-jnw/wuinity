@@ -49,7 +49,7 @@ Color=1.0,1.0,1.0
 
 [Destination]
 Name=Highway1
-LatLon=50.255091, -121.448254
+LatLon=50.254070, -121.517087
 Type=Exit
 MaxFlow=-1.0
 MaxVehicles=-1
@@ -91,7 +91,7 @@ VisibilityAffectsSpeed=false
 
 [SUMO]
 ConfigurationFile=sumo/osm.sumocfg
-UTMoffset=-585470.77,-5559583.08
+UTMoffset=-591146.13,-5556903.75
 SmokeAlpha=0.4967
 SmokeBeta=-0.02910
 

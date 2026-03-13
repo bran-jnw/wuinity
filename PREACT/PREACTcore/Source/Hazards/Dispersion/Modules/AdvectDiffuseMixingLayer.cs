@@ -122,7 +122,7 @@ namespace PREACT.Dispersion
         }
 
         bool _lockOutput = false;
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
             //if fire has been updated we need to update the injection buffer
             bool fireHasUpdated = true;

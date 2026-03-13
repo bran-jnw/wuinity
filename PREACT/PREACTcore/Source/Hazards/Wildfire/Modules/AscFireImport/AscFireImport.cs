@@ -30,6 +30,7 @@ namespace PREACT.Wildfire
         private int ncols, nrows, _activeCells;
         private double _xllcorner, _yllcorner, _cellsize, _NODATA_VALUE;
         private FireRasterData[,] _data;
+        private Vector2d _landscapeSize;
 
         //TODO: clean this up, this is duplicate data but is needed for shaders, come up with some way of better data storage
         float[] _firelineIntensityData;
@@ -48,6 +49,7 @@ namespace PREACT.Wildfire
 
             Vector2d ascUTM = new Vector2d(_xllcorner, _yllcorner);
             _originOffset = ascUTM - _simulation.Input.Simulation.Data.UTMOrigin;
+            _landscapeSize = new Vector2d(ncols * _cellsize, nrows * _cellsize);
 
             _firelineIntensityData = new float[ncols * nrows];
             _newlyIgnitedCells = new List<Vector2int>();
@@ -57,7 +59,7 @@ namespace PREACT.Wildfire
         }
 
         bool _first = true;
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {
             bool updateVisuals = (int)currentTime % 60 == 0 ? true : false;
 
@@ -275,15 +277,15 @@ namespace PREACT.Wildfire
         /// </summary>
         /// <param name="latLon"></param>
         /// <returns></returns>
-        public override FireCellState GetFireCellState(Vector2d latLon)
+        public override FireCellState GetFireCellState(Vector2d simulationPos)
         {
-            Vector2d pos = _simulation.GetSimulationPosition(latLon);
+            Vector2d pos = simulationPos;
             pos += _originOffset;
 
             int x = (int)(pos.x / _cellsize);
             int y = (int)(pos.y / _cellsize);
 
-            FireCellState result = FireCellState.Burning;
+            FireCellState result = FireCellState.Ignited;
 
             if (!IsInside(x, y) || _simulation.SimulationTime < _data[x, y].TimeOfAArrival)
             {
@@ -295,8 +297,8 @@ namespace PREACT.Wildfire
 
         private bool IsInside(int x, int y)
         {
-            bool result = false;
-            if(x >= 0 && x < ncols && y >= 0 && y < nrows)
+            bool result = true;
+            if(x < 0 || x >= ncols || y < 0 || y >= nrows)
             {
                 result = true;
             }
@@ -337,7 +339,18 @@ namespace PREACT.Wildfire
         public override void Stop()
         {
             //throw new System.NotImplementedException();
-        }        
+        }
+
+        public override Vector2int SimulationPosToCellIndex(Vector2d simulationPos, out bool inside)
+        {
+            Vector2d LocalPos = simulationPos;
+            LocalPos -= _originOffset;
+            int xIndex = (int)(ncols * LocalPos.x / _landscapeSize.x);
+            int yIndex = (int)(nrows * LocalPos.y / _landscapeSize.y);
+            inside = IsInside(xIndex, yIndex);
+
+            return new Vector2int(xIndex, yIndex);
+        }
     }
 }
 

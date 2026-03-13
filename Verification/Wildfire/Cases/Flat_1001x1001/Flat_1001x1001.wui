@@ -4,7 +4,7 @@ LowerLeftLatLon=55.60980,13.29195
 DomainSize=30030.0,30030.0
 DeltaTime=1.0
 StartDateTime=2025-01-01T00:00:00
-EndDateTime=2025-01-01T01:53:00 #04:10:15
+EndDateTime=2025-01-01T04:10:15 #04:10:15
 StopWhenEvacuated=false
 
 [Map]
@@ -16,7 +16,7 @@ WeatherFile=verification_weather.csv
 
 [WildfireModule]
 Enabled=true
-Module=NarrowLevelSet
+Module=CellParticleHybrid #NarrowLevelSet
 
 [CellParticleHybrid]
 LandscapeFile=flat_1001x1001.tif

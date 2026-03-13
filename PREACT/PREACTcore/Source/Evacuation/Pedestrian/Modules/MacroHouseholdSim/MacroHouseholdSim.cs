@@ -62,7 +62,7 @@ namespace PREACT.Pedestrian
         /// </summary>
         /// <param name="deltaTime"></param>
         /// <param name="currentTime"></param>
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {            
             if (!evacuationDone)
             {                
@@ -230,7 +230,7 @@ namespace PREACT.Pedestrian
             int culledOutsideGroups = 0;
             for (int i = 0; i < householdData.Length; ++i)
             {
-                Vector2d pos = _simulation.GetSimulationPosition(householdData[i].originLatLon);
+                Vector2d pos = _simulation.Spatial.GetSimulationPosition(householdData[i].originLatLon);
 
                 //check that we are inside
                 if(pos.x >= 0.0 && pos.x <= _simulation.Input.Simulation.DomainSize.x && pos.y >= 0.0 && pos.y <= _simulation.Input.Simulation.DomainSize.y)

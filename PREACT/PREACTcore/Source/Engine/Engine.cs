@@ -233,7 +233,7 @@ namespace PREACT
                     else
                     {
                         bool success;
-                        List<float> dataFromDisk = ParseArrivalData(outputFilePaths[j - 1], out success);
+                        List<double> dataFromDisk = ParseArrivalData(outputFilePaths[j - 1], out success);
                         if (success)
                         {
                             CollectSimulationStatistics(dataFromDisk, startIndex + j, engineTask);
@@ -250,9 +250,9 @@ namespace PREACT
             PostSimulations();
         }
 
-        private List<float> ParseArrivalData(string filePath, out bool success)
+        private List<double> ParseArrivalData(string filePath, out bool success)
         {
-            List<float> result = new List<float>(); 
+            List<double> result = new List<double>(); 
             success = false;
 
             if(File.Exists(filePath))
@@ -262,8 +262,8 @@ namespace PREACT
                 //skip last line, empty
                 for(int i = 0; i < data.Length - 1; ++i)
                 {
-                    float value;
-                    if(float.TryParse(data[i], out value))
+                    double value;
+                    if(double.TryParse(data[i], out value))
                     {
                         result.Add(value);
                     }
@@ -331,7 +331,7 @@ namespace PREACT
             }
             else
             {
-                trafficArrivalDataCollection = new List<List<float>>();
+                trafficArrivalDataCollection = new List<List<double>>();
             }      
         }  
         
@@ -370,7 +370,7 @@ namespace PREACT
             int actualRuns = trafficArrivalDataCollection.Count;
             if (actualRuns > 0)
             {
-                float[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
+                double[] averageCurve = FunctionalAnalysis.CalculateAverageCurve(trafficArrivalDataCollection, FunctionalAnalysis.DimensionScalingMode.Average);
                 _engineOutput.SaveAverageCurve(averageCurve);
                 //plot results
                 double[] xData = new double[averageCurve.Length];
@@ -400,14 +400,14 @@ namespace PREACT
             SimulationOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
         }
 
-        float cumulativeTotalEvacTime = 0.0f;
+        double cumulativeTotalEvacTime = 0.0f;
         int convergedInSequence = 0;
-        List<List<float>> trafficArrivalDataCollection;
+        List<List<double>> trafficArrivalDataCollection;
         /// <summary>
         /// Each simulation calls this function when it is done to see if evacuation time has vonverged and simulations should be stopped.
         /// </summary>
         /// <param name="simulation"></param>
-        private void CollectSimulationStatistics(List<float> arrivalData, int simulationIndex, EngineTask engineTask)
+        private void CollectSimulationStatistics(List<double> arrivalData, int simulationIndex, EngineTask engineTask)
         {
             if(arrivalData.Count < 1)
             {
@@ -415,18 +415,18 @@ namespace PREACT
             }
 
             trafficArrivalDataCollection.Add(arrivalData);
-            float RSET = arrivalData[arrivalData.Count - 1];
+            double RSET = arrivalData[arrivalData.Count - 1];
 
             int resultCount = trafficArrivalDataCollection.Count;
             //need at least 2 simulations to have valid average
             if (resultCount > 1)
             {
                 Message(null, LogType.Log, "Evaluating convergence criteria...");
-                float pastAverage = cumulativeTotalEvacTime / (resultCount - 1);
+                double pastAverage = cumulativeTotalEvacTime / (resultCount - 1);
                 
                 cumulativeTotalEvacTime += RSET;
-                float currentAverage = cumulativeTotalEvacTime / resultCount;
-                float convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
+                double currentAverage = cumulativeTotalEvacTime / resultCount;
+                double convergenceCriteria = (currentAverage - pastAverage) / currentAverage;
                 //if convergence met we can stop
                 if (convergenceCriteria < engineTask.ConvergenceMaxDifference)
                 {

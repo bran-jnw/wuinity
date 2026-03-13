@@ -7,5 +7,5 @@
 
 namespace PREACT.Wildfire
 {
-    public enum FireCellState { Dead, CanBurn, Burning}    
+    public enum FireCellState { Dead, CanBurn, Ignited}    
 }

@@ -62,9 +62,9 @@ namespace PREACT.Pedestrian
             }
 
             reachedCar = false;
-            Vector2d temp = simulation.GetSimulationPosition(householdData.originLatLon);
+            Vector2d temp = simulation.Spatial.GetSimulationPosition(householdData.originLatLon);
             homePosition = new Vector2((float)temp.x, (float)temp.y);           
-            temp = simulation.GetSimulationPosition(householdData.roadAccessLatLon);
+            temp = simulation.Spatial.GetSimulationPosition(householdData.roadAccessLatLon);
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(homePosition, carPosition) * houseInput.WalkingDistanceModifier;
 
@@ -87,7 +87,7 @@ namespace PREACT.Pedestrian
             return _houseHoldData.roadAccessLatLon;
         }
 
-        public Vector4 GetPositionAndState(float time)
+        public Vector4 GetPositionAndState(double time)
         {
             //states are used in shader to apply color
             float state = 0.375f;
@@ -104,9 +104,9 @@ namespace PREACT.Pedestrian
                 state = 0.625f;
             }
 
-            float ratio = (time - ResponseTime) / (evacuationTime - ResponseTime);
-            ratio = Mathf.Clamp01(ratio);
-            Vector2 position = Vector2.Lerp(homePosition, carPosition, ratio);
+            double ratio = (time - ResponseTime) / (evacuationTime - ResponseTime);
+            ratio = Mathd.Clamp01(ratio);
+            Vector2 position = Vector2.Lerp(homePosition, carPosition, (float)ratio);
             return new Vector4(position.X, position.Y, peopleInHousehold, state);
         }
     }

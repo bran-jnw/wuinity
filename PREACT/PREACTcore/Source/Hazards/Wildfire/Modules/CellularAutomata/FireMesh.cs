@@ -241,7 +241,7 @@ namespace PREACT.Wildfire
 
         bool _initialized = false;
         List<Vector2int> _ignitedCells = new List<Vector2int>();
-        public override void Step(float currentTime, float deltaTime)
+        public override void Step(double currentTime, double deltaTime)
         {            
             UpdateIgnitionPoints((float)timeSinceStart);
 
@@ -318,7 +318,7 @@ namespace PREACT.Wildfire
                 if(_simulation.Input.SmokeModule.Enabled)
                 {
                     sootProduction[i] = 0.0f;
-                    if (_fireCells[i].cellState == FireCellState.Burning)
+                    if (_fireCells[i].cellState == FireCellState.Ignited)
                     {
                         //[kg/s], intensity is kW/m2, assume 8000 btu/lb is 18608 kJ/kg HOC, soot yield 0.015 for wood found for FDS
                         sootProduction[i] = Mathf.Max(0.0f, 0.015f * (float)_fireCells[i].GetTimestepBurntMass() * dtInversed);
@@ -448,9 +448,9 @@ namespace PREACT.Wildfire
             return sootProduction;
         }
 
-        public override FireCellState GetFireCellState(Vector2d latLong)     
+        public override FireCellState GetFireCellState(Vector2d simulationPos)     
         {
-            Vector2d pos = _simulation.GetSimulationPosition(latLong);
+            Vector2d pos = simulationPos;
 
             int x = (int)(pos.x / _cellSize.x);
             int y = (int)(pos.y / _cellSize.x);
@@ -567,6 +567,11 @@ namespace PREACT.Wildfire
         {
             offset = _originOffset;
             size = new Vector2d(lcpData.GetLandscapeSizeX(), lcpData.GetLandscapeSizeY());
+        }
+
+        public override Vector2int SimulationPosToCellIndex(Vector2d simulationPos, out bool inside)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
