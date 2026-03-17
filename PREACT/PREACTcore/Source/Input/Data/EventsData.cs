@@ -8,7 +8,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class EventsData
     {

@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     [System.Serializable]
     public class FireCellInput

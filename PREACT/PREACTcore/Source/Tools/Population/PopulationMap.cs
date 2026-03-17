@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using PREACT.IO;
+using PREACT.Input;
 using PREACT.Math;
 
 namespace PREACT.Population

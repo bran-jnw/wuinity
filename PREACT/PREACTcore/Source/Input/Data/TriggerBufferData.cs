@@ -1,8 +1,8 @@
-using PREACT.IO;
+using PREACT.Input;
 using PREACT.Wildfire;
 using System.IO;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class TriggerBufferData
     {

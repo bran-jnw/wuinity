@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace PREACT.Wildfire
 {
-    public class SimpleFireCA : WildfireModule
+    public class SimpleWildfireCA : WildfireModule
     {
         public static readonly Vector2int[] NeighborIndices = new Vector2int[] { Vector2int.up, new Vector2int(1, 1), Vector2int.right, new Vector2int(1, -1), Vector2int.down, new Vector2int(-1, -1), Vector2int.left, new Vector2int(-1, 1) };
         public static readonly double[] SpreadDirectionsForward = new double[] { 0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0 };
@@ -34,7 +34,7 @@ namespace PREACT.Wildfire
         int _nx, _ny;
         double _dx, _dy;
 
-        public SimpleFireCA(Simulation simulation, LandscapeData landscape, List<IgnitionPointInput> ignitionPoints, WeatherManager weather, TimeManager time) : base(simulation)
+        public SimpleWildfireCA(Simulation simulation, LandscapeData landscape, List<IgnitionPointInput> ignitionPoints, WeatherManager weather, TimeManager time) : base(simulation)
         {
             _weather = weather;
             _time = time;

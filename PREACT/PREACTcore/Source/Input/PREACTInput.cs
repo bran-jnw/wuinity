@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using PREACT.Evacuation;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     [System.Serializable]
     public class PREACTInput

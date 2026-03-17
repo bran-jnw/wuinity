@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.IO;
 using PREACT.Evacuation;
-using PREACT.IO;
+using PREACT.Input;
 
 namespace PREACT
 {

@@ -10,7 +10,7 @@ using PREACT.Wildfire;
 using PREACT.Math;
 using System.Collections.Generic;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class WildfireData
     {
@@ -70,7 +70,7 @@ namespace PREACT.IO
             filePath = Path.Combine(rootFolder, wildfireInput.GraphicalFireInputFile);
             LoadGraphicalFireInput(wildfireInput, filePath, _lcpData, false, out success);
 
-            if (wildfireInput.Module == WildfireModuleInput.WildfireModules.FireCell || wildfireInput.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid || wildfireInput.Module == WildfireModuleInput.WildfireModules.NarrowLevelSet)
+            if (wildfireInput.Module == WildfireModuleInput.WildfireModules.SimpleWildfireCA || wildfireInput.Module == WildfireModuleInput.WildfireModules.ElmClone)
             {
                 int issues = 0;
 

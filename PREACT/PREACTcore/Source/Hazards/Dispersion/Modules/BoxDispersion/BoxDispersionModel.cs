@@ -14,7 +14,7 @@ namespace PREACT.Dispersion
     /// </summary>
     public class BoxDispersionModel
     {
-        int cellCountX, cellCountY;
+        /*int cellCountX, cellCountY;
         float cellSizeX, cellSizeY;
         float cellArea, cellVolume, invertedCellVolume, cellHeight;
         Wildfire.FireMesh fireMesh;
@@ -158,7 +158,7 @@ namespace PREACT.Dispersion
                     }
                 }
             }
-        }
+        }*/
     }
 }
 

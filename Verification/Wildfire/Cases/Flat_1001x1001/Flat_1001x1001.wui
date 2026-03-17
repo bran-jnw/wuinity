@@ -16,9 +16,9 @@ WeatherFile=verification_weather.csv
 
 [WildfireModule]
 Enabled=true
-Module=CellParticleHybrid #NarrowLevelSet
+Module=ElmClone #ElmClone, SimpleWildfireCA
 
-[CellParticleHybrid]
+[SimpleWildfireCA]
 LandscapeFile=flat_1001x1001.tif
 CentroidMode=Center #Center, Random, RandomCross, RandomCircle
 RandomAmount=0.5
@@ -29,7 +29,7 @@ FuelModelsFile=default.fuel
 InitialFuelMoistureFile=default.fmc
 LookUpTableFile=constant_spreadrates.csv
 
-[NarrowLevelSet]
+[ElmClone]
 LandscapeFile=flat_1001x1001.tif
 IgnitionPointsFile=center.ign
 SpreadRateModel=LookupROS #Behave, LookupROS

@@ -7,7 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using PREACT.IO;
+using PREACT.Input;
 using PREACT.Evacuation;
 using PREACT.Math;
 

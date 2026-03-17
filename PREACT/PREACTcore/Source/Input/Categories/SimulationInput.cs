@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System;
 using PREACT.Math;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class SimulationInput
     {

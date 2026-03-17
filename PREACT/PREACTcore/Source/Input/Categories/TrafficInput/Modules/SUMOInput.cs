@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using PREACT.Math;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {  
     [System.Serializable]
     public class SUMOInput

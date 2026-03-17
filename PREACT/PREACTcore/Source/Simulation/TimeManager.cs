@@ -22,7 +22,7 @@ namespace PREACT
         //public string StartDateISO8601 { get => _startDateISO8601; }
         //public string EndDateISO8601 { get => _endDateISO8601; }
 
-        public TimeManager(IO.PREACTInput input, Simulation simulation)
+        public TimeManager(Input.PREACTInput input, Simulation simulation)
         {
             _simulationTime = 0;
             _startDateTime = input.Simulation.StartDateTime;

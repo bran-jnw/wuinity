@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using PREACT.Traffic;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     [System.Serializable] 
     public class MacroTrafficSimInput

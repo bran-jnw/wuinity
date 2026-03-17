@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     [System.Serializable]
     public class WUIShowInput

@@ -30,7 +30,7 @@ namespace PREACT.Wildfire
 
         public float TimeOfArrival { get => _timeOfArrival; }
 
-        public FuelCell(IO.FireCellInput.CentroidModes centroidMode, int xIndex, int yIndex, LandscapeData landscape, BehaveCore.FuelModels fuelModels, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures, IO.FireCellInput input)
+        public FuelCell(Input.FireCellInput.CentroidModes centroidMode, int xIndex, int yIndex, LandscapeData landscape, BehaveCore.FuelModels fuelModels, bool[,] wuiArea, int xDim, int yDim, CellParticleHybrid owner, InitialFuelMoistureLibrary initialFuelMoistures, Input.FireCellInput input)
         {
             _owner = owner;
             _index = new Vector2int(xIndex, yIndex);
@@ -38,12 +38,12 @@ namespace PREACT.Wildfire
             _cellData = landscape.GetCellData(_index.x, _index.y);
             _cellSize = landscape.RasterCellResolutionX;                
 
-            if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.Behave)
+            if (input.SpreadRateModel == Input.FireCellInput.SpreadRateModels.Behave)
             {
                 InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
                 _spreadModel = new SpreadModelBehave(fuelModels, _cellData, moisture);
             }
-            else if(input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.CanadianFBP)
+            else if(input.SpreadRateModel == Input.FireCellInput.SpreadRateModels.CanadianFBP)
             {
                 _spreadModel = new SpreadModelCFBP(_cellData, owner.Simulation.Input.WildfireModule.Data.CanadianFBPLookupTable, _owner.Simulation.Spatial);
             }
@@ -59,12 +59,12 @@ namespace PREACT.Wildfire
 
             double randomAmount = _owner.Simulation.Input.WildfireModule.FireCellInput.RandomAmount;
             double randomStart = (1.0 - randomAmount) * 0.5;
-            if (centroidMode == IO.FireCellInput.CentroidModes.Random)
+            if (centroidMode == Input.FireCellInput.CentroidModes.Random)
             {
                 xPos = (randomStart + Random.valueD * randomAmount + xIndex) * _cellSize;
                 yPos = (randomStart + Random.valueD * randomAmount + yIndex) * _cellSize;
             }
-            else if (centroidMode == IO.FireCellInput.CentroidModes.RandomCross)
+            else if (centroidMode == Input.FireCellInput.CentroidModes.RandomCross)
             {
                 bool xAxis = Random.valueD < 0.5;
                 if (xAxis)
@@ -78,7 +78,7 @@ namespace PREACT.Wildfire
                     yPos = (randomStart + Random.valueD * randomAmount + yIndex) * _cellSize;
                 }
             }
-            else if (centroidMode == IO.FireCellInput.CentroidModes.RandomCircle)
+            else if (centroidMode == Input.FireCellInput.CentroidModes.RandomCircle)
             {
                 double theta = Random.valueD * 2.0 * Mathd.PI;
                 double r = Mathd.Sqrt(Random.valueD);
@@ -88,7 +88,7 @@ namespace PREACT.Wildfire
                 yPos = (0.5 + yRand + yIndex) * _cellSize;
             }
 
-            if(centroidMode != IO.FireCellInput.CentroidModes.Center)
+            if(centroidMode != Input.FireCellInput.CentroidModes.Center)
             {
                 zPos = landscape.GetElevationLocalPos(xPos, yPos);
             }

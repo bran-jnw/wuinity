@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using PREACT.Math;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class WeatherInput
     {

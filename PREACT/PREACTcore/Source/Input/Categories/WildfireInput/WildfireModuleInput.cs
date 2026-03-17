@@ -6,14 +6,13 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using PREACT.IO;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     [System.Serializable]
     public class WildfireModuleInput
     {
-        public enum WildfireModules { None, AscImport, FireCell, CellParticleHybrid, NarrowLevelSet }
+        public enum WildfireModules { None, AscImport, SimpleWildfireCA, ElmClone }
 
         private WildfireData _data;
         private AscImportInput _ascImportInput;
@@ -71,14 +70,11 @@ namespace PREACT.IO
                     case nameof(WildfireModules.AscImport):
                         Module = WildfireModules.AscImport;
                         break;
-                    case nameof(WildfireModules.FireCell):
-                        Module = WildfireModules.FireCell;
+                    case nameof(WildfireModules.SimpleWildfireCA):
+                        Module = WildfireModules.SimpleWildfireCA;
                         break;
-                    case nameof(WildfireModules.CellParticleHybrid):
-                        Module = WildfireModules.CellParticleHybrid;
-                        break;
-                    case nameof(WildfireModules.NarrowLevelSet):
-                        Module = WildfireModules.NarrowLevelSet;
+                    case nameof(WildfireModules.ElmClone):
+                        Module = WildfireModules.ElmClone;
                         break;
                     default:
                         success = false;
@@ -137,9 +133,9 @@ namespace PREACT.IO
                     return;
                 }
             }
-            else if (Module == WildfireModules.FireCell)
+            else if (Module == WildfireModules.SimpleWildfireCA)
             {
-                nameOfInput = nameof(WildfireModules.FireCell);
+                nameOfInput = nameof(WildfireModules.SimpleWildfireCA);
                 PREACTInput.ReadingInputMessage(nameOfInput);
                 int lineindex;
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
@@ -153,25 +149,9 @@ namespace PREACT.IO
                     return;
                 }
             }
-            else if (Module == WildfireModules.CellParticleHybrid)
+            else if (Module == WildfireModules.ElmClone)
             {
-                nameOfInput = nameof(WildfireModules.CellParticleHybrid);
-                PREACTInput.ReadingInputMessage(nameOfInput);
-                int lineindex;
-                if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
-                {
-                    _fireCellInput.Parse(inputLines, lineindex, this, rootFolder, out success);
-                }
-                else
-                {
-                    //critical
-                    PREACTInput.InputNotFoundMessage(nameOfInput);
-                    return;
-                }
-            }
-            else if (Module == WildfireModules.NarrowLevelSet)
-            {
-                nameOfInput = nameof(WildfireModules.NarrowLevelSet);
+                nameOfInput = nameof(WildfireModules.ElmClone);
                 PREACTInput.ReadingInputMessage(nameOfInput);
                 int lineindex;
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))

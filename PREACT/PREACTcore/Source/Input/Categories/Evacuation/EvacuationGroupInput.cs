@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using PREACT.Math;
-using PREACT.IO;
+using PREACT.Input;
 
 namespace PREACT.Evacuation
 {

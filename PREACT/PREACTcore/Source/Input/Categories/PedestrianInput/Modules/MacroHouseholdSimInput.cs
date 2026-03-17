@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class MacroHouseholdSimInput
     {

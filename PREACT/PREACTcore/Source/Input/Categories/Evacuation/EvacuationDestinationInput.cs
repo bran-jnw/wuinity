@@ -2,7 +2,7 @@ using PREACT.Math;
 using System.Collections.Generic;
 using System.IO;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public struct EvacuationDestinationInput
     {

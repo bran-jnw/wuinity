@@ -3,6 +3,25 @@ using PREACT.Math;
 
 namespace PREACT.Wildfire
 {
+    public struct WildfireSpreadrateInput
+    {
+        public int FuelModel;
+        public double WindSpeed, WindDirection;
+        public double Elevation, Slope, Aspect;
+    }
+
+    public struct WildfireSpreadrateOutput
+    {
+        public double ForwardROS;
+        public double BackROS;
+        public double FlankROS;
+        public double SpreadDirection;
+        public double FireIntensity;
+
+        public double Eccentricity;        
+        public double LengthToBreadth;
+    }
+
     public class SpreadModelLookupROS : SpreadModel
     {
         private static readonly double _kmPerHourToMeterPerSecond = 1.0 / 3.6;

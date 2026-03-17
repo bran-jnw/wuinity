@@ -8,7 +8,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PREACT.IO
+namespace PREACT.Output
 {
     [System.Serializable]
     public class SimulationOutput

@@ -8,10 +8,10 @@
 using System.Collections.Generic;
 using System.IO;
 using PREACT.Population;
-using PREACT.IO;
+using PREACT.Input;
 using PREACT.Math;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public class PopulationData
     {    

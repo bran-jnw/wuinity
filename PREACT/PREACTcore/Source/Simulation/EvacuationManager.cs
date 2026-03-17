@@ -1,6 +1,6 @@
 ﻿using PREACT.Math;
 using System.Collections.Generic;
-using PREACT.IO;
+using PREACT.Input;
 using PREACT.Pedestrian;
 using PREACT.Wildfire;
 

@@ -11,7 +11,7 @@ using Itinero.IO.Osm;
 using Itinero.Osm.Vehicles;
 using OsmSharp.Streams;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
     public static class RoutingData
     {

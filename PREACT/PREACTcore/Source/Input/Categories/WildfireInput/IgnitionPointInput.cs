@@ -42,7 +42,7 @@ namespace PREACT.Wildfire
         /// Sends message to the WUI_LOG to inform the user.
         /// </summary>
         /// <returns></returns>
-        public static void LoadIgnitionPointsFile(List<IgnitionPointInput> ignitionPoints, string path, IO.SimulationInput simulationInput, out bool success)
+        public static void LoadIgnitionPointsFile(List<IgnitionPointInput> ignitionPoints, string path, Input.SimulationInput simulationInput, out bool success)
         {
             success = false;
             ignitionPoints.Clear();

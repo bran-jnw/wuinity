@@ -25,7 +25,7 @@ namespace WUInity
         Vector3 startMousePos;
         PREACT.Math.Vector2d _mapSize;
         bool refreshClipPlanes = false;
-        private PREACT.IO.PREACTInput _input;
+        private PREACT.Input.PREACTInput _input;
         Engine _engine;
         WUInityManager _manager;
 
@@ -49,7 +49,7 @@ namespace WUInity
             _engine = _manager.Engine;
         }
 
-        public void SetInput(PREACT.IO.PREACTInput input)
+        public void SetInput(PREACT.Input.PREACTInput input)
         {
             _input = input;
             SetCameraStartPosition(_input.Simulation.DomainSize);

@@ -8,11 +8,11 @@ namespace PREACT.Runtime
     /// </summary>
     public class WorkingData
     {
-        private IO.SimulationInput _simulationInput;
+        private Input.SimulationInput _simulationInput;
         public LocalGPWData LocalGPWData;
         public PopulationMap PopulationMap;
         public Itinero.RouterDb RouterDb;
-        public IO.SimulationInput SimulationInput { get => _simulationInput; }
+        public Input.SimulationInput SimulationInput { get => _simulationInput; }
 
         public bool HaveSimulationInput { get => SimulationInput != null; }
         public bool HaveLocalGPW { get => LocalGPWData != null; }
@@ -25,7 +25,7 @@ namespace PREACT.Runtime
         /// </summary>
         public WorkingData()
         {
-            _simulationInput = new IO.SimulationInput();
+            _simulationInput = new Input.SimulationInput();
             //_populationMap = new PopulationMap();
         }     
         

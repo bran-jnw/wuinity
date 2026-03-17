@@ -1,7 +1,7 @@
 using UnityEngine;
 using SimpleFileBrowser;
 using System.IO;
-using PREACT.IO;
+using PREACT.Input;
 using PREACT.Tools;
 using PREACT.Population;
 using PREACT.Math;
@@ -281,7 +281,7 @@ namespace WUInity.UI
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Trigger buffer tools");
             ++buttonIndex;
-            if(_input.TriggerBufferModule.kPERILInput != null)
+            if(_input != null && _input.TriggerBufferModule.kPERILInput != null)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Run k-PERIL"))
                 {
@@ -410,7 +410,7 @@ namespace WUInity.UI
         void OpenCreateAndSaveRouterDb()
         {
             FileBrowser.SetFilters(false, osmFilter);
-            string initialPath = Path.GetDirectoryName(_input.RootFolder);
+            string initialPath = _input == null ? null : Path.GetDirectoryName(_input.RootFolder);
             FileBrowser.ShowLoadDialog(OpenSelectNewRouterDbFile, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select OSM file to build routerDb from", "Set");
         }
         void OpenSelectNewRouterDbFile(string[] paths)

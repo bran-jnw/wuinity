@@ -115,10 +115,10 @@ SmokeBeta=-0.02910
 
 [WildfireModule]
 Enabled=true
-Module=CellParticleHybrid #AscImport
+Module=SimpleWildfireCA #AscImport
 GraphicalFireInputFile=fire/example.gfi
 
-[CellParticleHybrid]
+[SimpleWildfireCA]
 LandscapeFile=fire/rox_big_burning_city.lcp
 FuelModelsFile=fireCell/default.fuel
 InitialFuelMoistureFile=fireCell/default.fmc

@@ -12,11 +12,12 @@ using PREACT.Pedestrian;
 using PREACT.Traffic;
 using PREACT.Wildfire;
 using PREACT.Dispersion;
-using PREACT.IO;
+using PREACT.Input;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using PREACT.Math;
+using PREACT.Output;
 
 namespace PREACT
 {
@@ -391,20 +392,15 @@ namespace PREACT
                     _wildfireModule = new AscFireImport(this);
                     Engine.Message(this, Engine.LogType.Log, "Fire module AscImport initiated.");
                 }
-                else if(_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.FireCell)
-                {
-                    _wildfireModule = new FireMesh(this, _input.WildfireModule.Data.LandscapeData, _weatherManager, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
-                    Engine.Message(this, Engine.LogType.Log, "Fire module FireCell initiated.");
-                }
-                else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.CellParticleHybrid)
+                else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.SimpleWildfireCA)
                 {
                     //_wildfireModule = new CellParticleHybrid(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.WuiArea, _input.WildfireModule.Data.FuelModelsData, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.IgnitionPoints);
-                    _wildfireModule = new SimpleFireCA(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.IgnitionPoints, _weatherManager, _timeManager);
+                    _wildfireModule = new SimpleWildfireCA(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.IgnitionPoints, _weatherManager, _timeManager);
                     Engine.Message(this, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
                 }
-                else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.NarrowLevelSet)
+                else if (_input.WildfireModule.Module == WildfireModuleInput.WildfireModules.ElmClone)
                 {
-                    _wildfireModule = new NarrowLevelSet(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.IgnitionPoints, _weatherManager, _timeManager);
+                    _wildfireModule = new ElmClone(this, _input.WildfireModule.Data.LandscapeData, _input.WildfireModule.Data.IgnitionPoints, _weatherManager, _timeManager);
                     Engine.Message(this, Engine.LogType.Log, "Fire module NarrowLevelSet initiated.");
                 }
                 else

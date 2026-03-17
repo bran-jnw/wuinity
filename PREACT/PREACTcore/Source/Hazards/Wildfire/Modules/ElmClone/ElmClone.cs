@@ -5,9 +5,9 @@ using System.Text;
 
 namespace PREACT.Wildfire
 {    
-    public class NarrowLevelSet : WildfireModule
+    public class ElmClone : WildfireModule
     {
-        NarrowBandLevelSetSolver _solver;        
+        ElmCloneSolver _solver;        
 
         private List<IgnitionPoint> _ignitionPoints;
         private double _initialIgnition = -1;
@@ -25,7 +25,7 @@ namespace PREACT.Wildfire
         public SpreadModel[,] Spread { get; }
      
 
-        public NarrowLevelSet(Simulation simulation, LandscapeData landscape, List<IgnitionPointInput> ignitionPoints, WeatherManager weather, TimeManager time) : base(simulation)
+        public ElmClone(Simulation simulation, LandscapeData landscape, List<IgnitionPointInput> ignitionPoints, WeatherManager weather, TimeManager time) : base(simulation)
         {
             _weather = weather;
             _time = time;
@@ -41,22 +41,22 @@ namespace PREACT.Wildfire
             {
                 for (int x = 0; x < xDim; x++)
                 {
-                    if(simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == IO.FireCellInput.SpreadRateModels.LookupROS)
+                    if(simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == Input.FireCellInput.SpreadRateModels.LookupROS)
                     {
                         Spread[x, y] = new SpreadModelLookupROS(landscape.GetCellData(x, y), simulation.Input.WildfireModule.Data.LookupROSTable);
                     }
-                    else if (simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == IO.FireCellInput.SpreadRateModels.Behave)
+                    else if (simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == Input.FireCellInput.SpreadRateModels.Behave)
                     {
 
                     }
-                    else if (simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == IO.FireCellInput.SpreadRateModels.CanadianFBP)
+                    else if (simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == Input.FireCellInput.SpreadRateModels.CanadianFBP)
                     {
 
                     }
                 }
             }           
            
-            _solver = new NarrowBandLevelSetSolver(xDim, yDim, Dx, Dy, 16, 0.5);            
+            _solver = new ElmCloneSolver(this, xDim, yDim, Dx, Dy, 16, 0.5);            
 
             _maxFireIntensityData = new float[xDim * yDim];
             _maxRosData = new float[xDim, yDim];
@@ -102,12 +102,12 @@ namespace PREACT.Wildfire
                 }
             }*/
 
-            _solver.Step(this, deltaTime, _weather, _time, out _internalDeltaTime);            
+            _solver.Step(deltaTime, _weather, _time, out _internalDeltaTime);            
         }
 
         public void UpdateCellData(int xIndex, int yIndex, float firelineIntensity, float rateOfSpread, float rateOfSpreadDirection)
         {
-            int linIndex = xIndex + yIndex * _solver.nx;
+            int linIndex = xIndex + yIndex * _solver.Nx;
             _maxFireIntensityData[linIndex] = Mathf.Max(firelineIntensity, _maxFireIntensityData[linIndex]);
             if (rateOfSpread > _maxRosData[xIndex, yIndex])
             {
@@ -118,7 +118,7 @@ namespace PREACT.Wildfire
 
         public void SetTimeOfArrival(int xIndex, int yIndex, float timeOfArrival)
         {
-            _timeOfArrivalData[xIndex + yIndex * _solver.nx] = timeOfArrival;
+            _timeOfArrivalData[xIndex + yIndex * _solver.Nx] = timeOfArrival;
             _ignitedCellIndices.Add(new Vector2int(xIndex, yIndex));
         }
 
@@ -126,13 +126,13 @@ namespace PREACT.Wildfire
         {
             Vector2d pos = _simulation.Spatial.GetSimulationPosition(latLon);
             pos -= _originOffset;
-            int xIndex = (int)(_solver.nx * pos.x / _landscapeSize.x);
-            int yIndex = (int)(_solver.ny * pos.y / _landscapeSize.y);
+            int xIndex = (int)(_solver.Nx * pos.x / _landscapeSize.x);
+            int yIndex = (int)(_solver.Ny * pos.y / _landscapeSize.y);
 
             if (IsInside(xIndex, yIndex))
             {
-                _solver.SetIgnition(pos.x, pos.y);
-                Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at lat/lon [{latLon.x}/{latLon.y}] as requested by user.");
+                _solver.Ignite(xIndex, yIndex, true);
+                Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at lat/lon {latLon.x}/{latLon.y} (x/y: {pos.x}, {pos.y}) as requested by user.");
             }
             else
             {
@@ -162,12 +162,12 @@ namespace PREACT.Wildfire
 
         public override int GetCellCountX()
         {
-            return _solver.nx;
+            return _solver.Nx;
         }
 
         public override int GetCellCountY()
         {
-            return _solver.ny;
+            return _solver.Ny;
         }
 
         public override float GetCellSizeX()

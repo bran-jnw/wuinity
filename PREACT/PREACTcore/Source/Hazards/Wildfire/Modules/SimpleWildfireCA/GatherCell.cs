@@ -3,11 +3,12 @@
 namespace PREACT.Wildfire
 {
     public enum States { Dead, CanBurn, Active, Ignited }
+
     public class GatherCell
     {
         GatherCell[] _neighbors = new GatherCell[8];
         double[] _distanceLeft = new double[8];
-        public SimpleFireCA _owner;
+        public SimpleWildfireCA _owner;
         Vector2int _index;
         int _linearIndex;
         LandscapeCellData _cellData;
@@ -24,7 +25,7 @@ namespace PREACT.Wildfire
         public Vector2int Index { get => _index; }
 
 
-        public GatherCell(int x, int y, LandscapeCellData cellData, SimpleFireCA owner, IO.FireCellInput input) 
+        public GatherCell(int x, int y, LandscapeCellData cellData, SimpleWildfireCA owner, Input.FireCellInput input) 
         {
             _owner = owner;
             _index = new Vector2int(x, y);
@@ -36,7 +37,7 @@ namespace PREACT.Wildfire
                 InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
                 _spreadModel = new SpreadModelBehave(fuelModels, _cellData, moisture);
             }
-            else*/ if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.CanadianFBP)
+            else*/ if (input.SpreadRateModel == Input.FireCellInput.SpreadRateModels.CanadianFBP)
             {
                 _spreadModel = new SpreadModelCFBP(_cellData, owner.Simulation.Input.WildfireModule.Data.CanadianFBPLookupTable, _owner.Simulation.Spatial);
             }
@@ -67,7 +68,7 @@ namespace PREACT.Wildfire
 
             for (int i = 0; i < 8; ++i)
             {
-                Vector2int neighborIndex = _index + SimpleFireCA.NeighborIndices[i];
+                Vector2int neighborIndex = _index + SimpleWildfireCA.NeighborIndices[i];
                 //check if inside
                 if(neighborIndex.x > 0 && neighborIndex.x < nx - 1 && neighborIndex.y > 0 && neighborIndex.y < ny - 1)
                 {
@@ -79,12 +80,12 @@ namespace PREACT.Wildfire
                     }
                     else
                     {
-                        _neighbors[i] = SimpleFireCA.DeadCell;
+                        _neighbors[i] = SimpleWildfireCA.DeadCell;
                     }
                 }
                 else
                 {
-                    _neighbors[i] = SimpleFireCA.DeadCell;
+                    _neighbors[i] = SimpleWildfireCA.DeadCell;
                 }
             }
         }
@@ -138,7 +139,7 @@ namespace PREACT.Wildfire
             {
                 if (_neighbors[i].State == States.Ignited) //needed as all neighbors might not be ignited
                 {                    
-                    double spreadRate = GetSpreadRateInDirection(i, SimpleFireCA.SpreadDirectionsTowards[i], simulationTime);
+                    double spreadRate = GetSpreadRateInDirection(i, SimpleWildfireCA.SpreadDirectionsTowards[i], simulationTime);
                     _distanceLeft[i] -= spreadRate * deltaTime;
                     if (_distanceLeft[i] <= 0.0)
                     {

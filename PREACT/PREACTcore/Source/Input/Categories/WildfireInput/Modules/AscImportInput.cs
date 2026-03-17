@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace PREACT.IO
+namespace PREACT.Input
 {
 
     [System.Serializable]

@@ -11,7 +11,7 @@ namespace PREACT.Wildfire
 {
     public class CellDeadFuelMoisture
     {
-        double fuelMoisture_1, fuelMoisture_10, fuelMoisture_100, fuelMoisture_1000;
+        /*double fuelMoisture_1, fuelMoisture_10, fuelMoisture_100, fuelMoisture_1000;
         DeadFuelMoistureCSharp dfm1h;
         DeadFuelMoistureCSharp dfm10h;
         DeadFuelMoistureCSharp dfm100h;
@@ -26,10 +26,10 @@ namespace PREACT.Wildfire
             this.longitude = longitude;
             this.use1000Hour = use1000Hour;
 
-            /*int startYear = 2000;
+            int startYear = 2000;
             int startMonth = 1;
             int startDay = 1;
-            int startHour = 0;*/
+            int startHour = 0;
             int startMinute = 0;
             int startSecond = 0;
             double startAirTemp = 20.0;
@@ -142,7 +142,7 @@ namespace PREACT.Wildfire
             }
 
             return fuelMoisture_1000;
-        }
+        }*/
     }
 }
 
