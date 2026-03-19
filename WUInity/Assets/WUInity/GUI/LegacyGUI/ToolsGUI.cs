@@ -39,75 +39,7 @@ namespace WUInity.UI
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
-            int buttonColumnStart = 140;
-
-            /*string localPopStatus = "Population data NOT loaded";
-            if (WUI_engine.POPULATION.IsPopulationLoaded())
-            {
-                localPopStatus = "Population data loaded";
-            }
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), localPopStatus);
-            ++buttonIndex;*/
-
-            if (_input == null)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
-                ++buttonIndex;
-                _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
-                _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
-                ++buttonIndex;
-
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Domain size x/y");
-                ++buttonIndex;
-                _domainSizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeX);
-                _domainSizeY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeY);
-                ++buttonIndex;
-
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
-                ++buttonIndex;
-                _xBorder = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _xBorder);
-                _yBorder = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _yBorder);
-                ++buttonIndex;
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply"))
-                {
-                    Vector2d latLon, domainSize;
-                    if(ParseVector2d(_latitude, _longitude, out latLon) && ParseVector2d(_domainSizeX, _domainSizeY, out domainSize))
-                    {
-                        _workingData.SetSimulatonData(latLon, domainSize);
-                    }                    
-                }
-                ++buttonIndex;
-            }
-
-            //GPW stuff
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "GPW tools");
-            ++buttonIndex;            
-
-            if (_workingData.HaveLocalGPW)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _workingData.LocalGPWData.TotalPopulation);
-                ++buttonIndex;
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide GPW data"))
-                {                    
-                    _wuinityManager.SimulationDomainVisualizer.ToggleGPWVisibility();
-                    if(_wuinityManager.SimulationDomainVisualizer.IsGPWPlaneVisible())
-                    {
-                        _wuinityManager.SetSampleMode(DataSampleMode.LocalGPW);
-                    }
-                }
-                ++buttonIndex;
-            }
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create local GPW data"))
-            {
-                OpenCreateAndSaveLocalGPW();
-            }
-            ++buttonIndex;
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load local GPW data"))
-            {
-                OpenLoadLocalGPW();
-            }
-            ++buttonIndex;
+            int buttonColumnStart = 140;         
 
             //Router Db stuff
             ++buttonIndex;
@@ -117,99 +49,7 @@ namespace WUInity.UI
             {
                 OpenCreateAndSaveRouterDb();
             }
-            ++buttonIndex;
-            /*if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load routerDb"))
-            {
-                OpenLoadRouterDb();
-            }
-            ++buttonIndex;  */       
-
-            //Population map stuff
-            ++buttonIndex;
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population map tools");
-            ++buttonIndex;
-            if (_workingData.HavePopulationMap)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Population:" + _workingData.PopulationMap.TotalPopulation);
-                ++buttonIndex;
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Show/hide population map"))
-                {
-                    _wuinityManager.SetSampleMode(DataSampleMode.PopulationMap);
-                    _wuinityManager.SimulationDomainVisualizer.ToggleVisibility();
-
-                }
-                ++buttonIndex;
-            }
-            if(!_creatingPopulationMap)
-            {
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population map"))
-                {
-                    _creatingPopulationMap = true;
-                }
-                ++buttonIndex;
-            }
-            else
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cell size [m]:");
-                ++buttonIndex;
-                _populationMapCellSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight),_populationMapCellSize);
-                ++buttonIndex;
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Select local GPW file"))
-                {
-                    OpenCreateAndSavePopulationMap();
-                    _creatingPopulationMap = false;
-                }
-                ++buttonIndex;
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
-                {
-                    _creatingPopulationMap = false;
-                }
-                ++buttonIndex;
-                ++buttonIndex;
-            }
-            
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Load population map"))
-            {
-                OpenLoadPopulationMap();
-            }
-            ++buttonIndex;
-            if (_workingData.HavePopulationMap)
-            {               
-                //re-scaling
-                if (!_reScaling)
-                {
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Re-scale total population"))
-                    {
-                        _reScaling = true;
-                    }
-                    ++buttonIndex;
-                }
-                else
-                {
-                    GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Desired population:");
-                    ++buttonIndex;
-                    _desiredPopulation = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _desiredPopulation);
-                    ++buttonIndex;
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Apply re-scale"))
-                    {
-                        ScalePopulation();
-                        _reScaling = false;
-                    }                    
-                    ++buttonIndex;
-                    if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cancel"))
-                    {
-                        _reScaling = false;
-                    }
-                    ++buttonIndex;
-                    ++buttonIndex;
-                }
-                //correct for road access
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Correct for network access"))
-                {
-                    OpenRoadAccessCorrectPopulationMap();
-                }
-                ++buttonIndex;                
-            }          
+            ++buttonIndex;  
 
             //Population stuff
             ++buttonIndex;
@@ -226,34 +66,34 @@ namespace WUInity.UI
             {
                 OpenCreatePopulationFromWorldPop();
             }
-            ++buttonIndex;            
-
-            if (_workingData.HavePopulationMap && _workingData.PopulationMapCorrectedForRoadAccess)
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min/max household size");
-                ++buttonIndex;
-                _minHouseholdSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _minHouseholdSize);
-                _maxHouseholdSize = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _maxHouseholdSize);
-                ++buttonIndex;                               
-
-                if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create population"))
-                {
-                    OpenCreatePopulation();
-                }
-                ++buttonIndex;
-
-            }
-            else
-            {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "[Need data]");
-                ++buttonIndex;
-            }
+            ++buttonIndex;   
 
             //OSM stuff
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM tools");
             ++buttonIndex;
-            if(!_filteringOSM)
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
+            ++buttonIndex;
+            _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
+            _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Domain size x/y");
+            ++buttonIndex;
+            _domainSizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeX);
+            _domainSizeY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeY);
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Border x/y");
+            ++buttonIndex;
+            _xBorder = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _xBorder);
+            _yBorder = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _yBorder);
+            ++buttonIndex;
+            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Download OSM"))
+            {
+                OpenDownloadOSM();
+            }
+            ++buttonIndex;
+
+            if (!_filteringOSM)
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Filter OSM data"))
                 {
@@ -299,25 +139,6 @@ namespace WUInity.UI
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Tiff->LCP"))
             {
                 OpenSelectGeoTiff();
-            }
-
-            //OSM
-            ++buttonIndex;
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "OSM tools");
-            ++buttonIndex;
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
-            ++buttonIndex;
-            _latitude = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _latitude);
-            _longitude = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _longitude);
-            ++buttonIndex;
-            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Domain size x/y");
-            ++buttonIndex;
-            _domainSizeX = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeX);
-            _domainSizeY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeY);
-            ++buttonIndex;
-            if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Download OSM"))
-            {
-                OpenDownloadOSM();
             }
         }        
 
@@ -420,16 +241,6 @@ namespace WUInity.UI
             string routerDbFilePath = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]) + ".routerdb");
             PopulationTools.CreateAndSaveRouterDb(_firstFileInSequence, routerDbFilePath);
         }
-        /*void OpenLoadRouterDb()
-        {
-            FileBrowser.SetFilters(false, routerDbFilter);
-            string initialPath = Path.GetDirectoryName(WUI_input.RootFolder);
-            FileBrowser.ShowLoadDialog(LoadRouterDb, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select local GPW data", "Set");
-        }
-        void LoadRouterDb(string[] paths)
-        {
-            LoadRouterDb(paths[0]);
-        }*/
 
         //filter population map
         void OpenRoadAccessCorrectPopulationMap()
@@ -499,7 +310,11 @@ namespace WUInity.UI
         private void OpenCreatePopulationFromWorldPop()
         {
             FileBrowser.SetFilters(false, geoTiffFilter);
-            string initialPath = Path.GetDirectoryName(_input.RootFolder);
+            string initialPath = null;
+            if (_input != null)
+            {
+                initialPath = Path.GetDirectoryName(_input.RootFolder);
+            }
             FileBrowser.ShowLoadDialog(SaveGeoTiffLocation, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Select WorldPop GeoTiff", "Load");
         }
         string _worldPopFilePath;
@@ -528,15 +343,7 @@ namespace WUInity.UI
         }
         private void CreatePopulationFromWorldPop(string[] paths) //string[] paths
         {
-            if (_input == null)
-            {
-                _workingData.SimulationInput.Data.UpdateData(_latitude, _longitude, out success);
-                PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _workingData.SimulationInput.Data, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
-            }
-            else
-            {
-                PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _input.Simulation.Data, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
-            }
+            PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
         }
 
         //convert geotiff to lcp

@@ -101,9 +101,9 @@ namespace PREACT.Wildfire
         private void ExpandTagged(int x, int y)
         {
             int xMin = Mathd.Max(2, x - _bandThickness);
-            int xMax = Mathd.Min(Nx - 2, x + _bandThickness);
+            int xMax = Mathd.Min(Nx - 2, x + _bandThickness + 1);
             int yMin = Mathd.Max(2, y - _bandThickness);
-            int yMax = Mathd.Min(Ny - 2, y + _bandThickness);
+            int yMax = Mathd.Min(Ny - 2, y + _bandThickness + 1);
 
 
             for (int i = xMin; i < xMax; i++)
@@ -133,11 +133,15 @@ namespace PREACT.Wildfire
             {
                 int x = index.X;
                 int y = index.Y;
+                int xMin = Mathd.Max(2, x - _bandThickness);
+                int xMax = Mathd.Min(Nx - 2, x + _bandThickness + 1);
+                int yMin = Mathd.Max(2, y - _bandThickness);
+                int yMax = Mathd.Min(Ny - 2, y + _bandThickness + 1);
 
                 bool untagBecauseBurned = true;
-                for(int i = x - _bandThickness; i <= x + _bandThickness; ++i)
+                for(int i = xMin - _bandThickness; i < xMax + _bandThickness; ++i)
                 {
-                    if (_phi[i, y] > 0)
+                    if (_phi[i, y] >= 0)
                     {
                         untagBecauseBurned = false;
                         break;
@@ -146,9 +150,9 @@ namespace PREACT.Wildfire
 
                 if(untagBecauseBurned)
                 {
-                    for (int j = y - _bandThickness; j <= y + _bandThickness; ++j)
+                    for (int j = yMin; j < yMax; ++j)
                     {
-                        if (_phi[x, j] > 0)
+                        if (_phi[x, j] >= 0)
                         {
                             untagBecauseBurned = false;
                             break;

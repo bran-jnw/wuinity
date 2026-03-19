@@ -195,7 +195,7 @@ namespace PREACT.Tools
             }                     
         }
 
-        public static void CreatePopulationFromWorldPop(string minHouseholdSize, string maxHouseholdSize, SimulationData simulationData, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
+        public static void CreatePopulationFromWorldPop(string minHouseholdSize, string maxHouseholdSize, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
         {
             success = false;
 
@@ -205,7 +205,7 @@ namespace PREACT.Tools
                 Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
                 if(success)
                 {
-                    PopulationMap.CreatePopulation(worldPopFilePath, outputFilePath, simulationData, routerDb, min, max, out success);
+                    PopulationMap.CreatePopulation(worldPopFilePath, outputFilePath, routerDb, min, max, out success);
                 }                
             }
             else

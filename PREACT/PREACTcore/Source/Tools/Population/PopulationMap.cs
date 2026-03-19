@@ -437,7 +437,7 @@ namespace PREACT.Population
             }
         }
 
-        public static void CreatePopulation(string worldPopFilePath, string outputFilePath, SimulationData simulationData, Itinero.RouterDb routerDb, int minHouseholdSize, int maxHouseholdSize, out bool success)
+        public static void CreatePopulation(string worldPopFilePath, string outputFilePath, Itinero.RouterDb routerDb, int minHouseholdSize, int maxHouseholdSize, out bool success)
         {
             success = false;
 
@@ -446,13 +446,12 @@ namespace PREACT.Population
             float[] populationNumbers;
 
             string wkt;
-            OSGeo.OSR.SpatialReference srs;
-
+            OSGeo.OSR.SpatialReference utm;            
 
             using (OSGeo.GDAL.Dataset tif = OSGeo.GDAL.Gdal.Open(worldPopFilePath, OSGeo.GDAL.Access.GA_ReadOnly))
             {
                 wkt = tif.GetProjection();
-                srs = new OSGeo.OSR.SpatialReference(wkt);
+                utm = new OSGeo.OSR.SpatialReference(wkt);
 
                 xDim = tif.RasterXSize;
                 yDim = tif.RasterYSize;            
@@ -473,6 +472,11 @@ namespace PREACT.Population
                 band.ReadRaster(0, 0, xDim, yDim, populationNumbers, xDim, yDim, 0, 0);
             }
 
+            OSGeo.OSR.SpatialReference wgs84 = new OSGeo.OSR.SpatialReference("");
+            wgs84.SetWellKnownGeogCS("WGS84");
+            OSGeo.OSR.CoordinateTransformation utmToWGS84 = new OSGeo.OSR.CoordinateTransformation(utm, wgs84);
+            double[] inout = new double[2];
+
             Itinero.Router router = new Itinero.Router(routerDb);
 
             using (StreamWriter sW = new StreamWriter(outputFilePath))
@@ -491,7 +495,10 @@ namespace PREACT.Population
                         int yIndex = i / xDim;
                         int xIndex = i - yIndex * xDim;
                         Vector2d rasterCenter = new Vector2d((xIndex + 0.5f) * xSize + westUtm, (yIndex + 0.5) * ySize + southUtm);
-                        Vector2d latLon = simulationData.GetWGS84FromUTMPosition(rasterCenter);
+                        inout[0] = rasterCenter.x;
+                        inout[1] = rasterCenter.y;
+                        utmToWGS84.TransformPoint(inout);
+                        Vector2d latLon =  new Vector2d(inout[0], inout[1]);
 
                         Itinero.RouterPoint latLonOnNetwork = Traffic.RouteCreator.GetValidRouterPoint(router, latLon, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), (float)xSize);
                         if (latLonOnNetwork != null)
@@ -516,9 +523,11 @@ namespace PREACT.Population
                                 Vector2d householdStartPos = rasterCenter;
                                 householdStartPos.x += xSize * Random.Range(-0.5f, 0.5f);
                                 householdStartPos.y += ySize * Random.Range(-0.5f, 0.5f);
-                                Vector2d householdStartLatLon = simulationData.GetWGS84FromUTMPosition(householdStartPos);
+                                inout[0] = householdStartPos.x;
+                                inout[1] = householdStartPos.y;
+                                utmToWGS84.TransformPoint(inout);
 
-                                sW.WriteLine(householdStartLatLon.x + "," + householdStartLatLon.y + "," + latLonOnNetwork.Latitude + "," + latLonOnNetwork.Longitude + "," + householdCounts[j]);
+                                sW.WriteLine(inout[0] + "," + inout[1] + "," + latLonOnNetwork.Latitude + "," + latLonOnNetwork.Longitude + "," + householdCounts[j]);
                             }
                         }                        
                     }
