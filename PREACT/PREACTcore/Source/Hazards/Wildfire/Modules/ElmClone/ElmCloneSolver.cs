@@ -5,6 +5,9 @@ namespace PREACT.Wildfire
 {
     public class ElmCloneSolver
     {
+        private const double EPSILON = 1.0e-30;
+        private const double BIG = 3e4;
+
         private struct CellIndex
         {
             public int X;
@@ -18,9 +21,8 @@ namespace PREACT.Wildfire
         }
 
         private double[,] _phi; // narrow-band, normalized [-1,1]
-        double[,] _phiStar;
-        double[,] rhs1;
-        double[,] rhs2;
+        double[,] _phi_star;
+        double[,] rhs;
         private Vector2d[,] _ROS;
         private Vector2d[,] _ROS_star;
         private readonly int _bandThickness;
@@ -29,6 +31,7 @@ namespace PREACT.Wildfire
         private Dictionary<int, CellIndex> _tagged;
         private Dictionary<int, CellIndex> _everTagged;
         private List<CellIndex> _cellsToIgnite;
+        private List<int> _cellsToRemove;
 
         private int _activeCells;
         public int ActiveCells { get => _activeCells; }
@@ -63,11 +66,11 @@ namespace PREACT.Wildfire
             _tagged = new Dictionary<int, CellIndex>(Nx * Ny / 10);
             _everTagged = new Dictionary<int, CellIndex>(Nx * Ny / 5);
             _cellsToIgnite = new List<CellIndex>(Nx * Ny / 20);
+            _cellsToRemove = new List<int>(Nx * Ny / 20);
 
             _phi = new double[xDim, yDim];
-            _phiStar = new double[xDim, yDim];
-            rhs1 = new double[xDim, yDim];
-            rhs2 = new double[xDim, yDim];
+            _phi_star = new double[xDim, yDim];
+            rhs = new double[xDim, yDim];
             _ROS = new Vector2d[xDim, yDim];
             _ROS_star = new Vector2d[xDim, yDim];
 
@@ -78,7 +81,8 @@ namespace PREACT.Wildfire
             {
                 for (int j = 0; j < Ny; j++)
                 {
-                    _phi[i, i] = 1;
+                    _phi[i, j] = 1.0;
+                    _phi_star[i, j] = 1.0;
                 }
             }
         }
@@ -87,13 +91,14 @@ namespace PREACT.Wildfire
         {
             if(newIgnition)
             {
-                _phi[ignIndexX, ignIndexY] = -1f; // ignition
+                _phi[ignIndexX, ignIndexY] = -1.0; // ignition
+                _phi_star[ignIndexX, ignIndexY] = -1.0;
             }            
             _ignited[ignIndexX, ignIndexY] = true;
-            AddTagged(ignIndexX, ignIndexY);
+            ExpandTagged(ignIndexX, ignIndexY);
         }
 
-        private void AddTagged(int x, int y)
+        private void ExpandTagged(int x, int y)
         {
             int xMin = Mathd.Max(2, x - _bandThickness);
             int xMax = Mathd.Min(Nx - 2, x + _bandThickness);
@@ -115,10 +120,53 @@ namespace PREACT.Wildfire
             }                
         }
 
-        private void RemoveTagged(int x, int y)
+        int _untagCounter = 0;
+        private void UpdateTagged()
         {
-            int index = x + y * Nx;
-            _tagged.Remove(index);
+            _untagCounter += 1;            
+            if(_untagCounter % 5 != 0 || _tagged.Count < 100)
+            {
+                return;
+            }
+
+            foreach (CellIndex index in _tagged.Values)
+            {
+                int x = index.X;
+                int y = index.Y;
+
+                bool untagBecauseBurned = true;
+                for(int i = x - _bandThickness; i <= x + _bandThickness; ++i)
+                {
+                    if (_phi[i, y] > 0)
+                    {
+                        untagBecauseBurned = false;
+                        break;
+                    }
+                }
+
+                if(untagBecauseBurned)
+                {
+                    for (int j = y - _bandThickness; j <= y + _bandThickness; ++j)
+                    {
+                        if (_phi[x, j] > 0)
+                        {
+                            untagBecauseBurned = false;
+                            break;
+                        }
+                    }
+                }
+
+                if(untagBecauseBurned)
+                {
+                    _cellsToRemove.Add(x + y * Nx);
+                }                
+            }
+
+            foreach(int index in _cellsToRemove)
+            {
+                _tagged.Remove(index);
+            }
+            _cellsToRemove.Clear();
         }
 
         private void CalculateROS(out double maxROS, double[,] phi, Vector2d[,] resultROS, WeatherManager weather, TimeManager time)
@@ -149,15 +197,9 @@ namespace PREACT.Wildfire
         }
         private (double normalX, double normalY) ComputeNormal(double[,] phi, int i, int j, double dx, double dy)
         {
-            //von Neumann zero gradient at edges
-            int xNeg = i > 0 ? i - 1 : i;
-            int xPos = i < (Nx - 1) ? i + 1 : i;
-            int yNeg = j > 0 ? j - 1 : j;
-            int yPos = j < (Ny - 1) ? j + 1 : j;
-
-            double dphidx = (phi[xPos, j] - phi[xNeg, j]) * _2dx_inversed;
-            double dphidy = (phi[i, yPos] - phi[i, yNeg]) * _2dy_inversed;
-            double inverseMagnitude = 1.0 / (Mathd.Sqrt(dphidx * dphidx + dphidy * dphidy) + 1e-9); //avoid zero division
+            double dphidx = Mathd.Clamp((phi[i + 1, j] - phi[i - 1, j]) * _2dx_inversed, -BIG, BIG);
+            double dphidy = Mathd.Clamp((phi[i, j + 1] - phi[i, j - 1]) * _2dy_inversed, -BIG, BIG);
+            double inverseMagnitude = 1.0 / (Mathd.Max(Mathd.Sqrt(dphidx * dphidx + dphidy * dphidy), EPSILON)); //avoid zero division
 
             return (dphidx * inverseMagnitude, dphidy * inverseMagnitude);
         }
@@ -165,40 +207,32 @@ namespace PREACT.Wildfire
 
         public void Step(double deltaTime, WeatherManager weather, TimeManager time, out double internalDeltaTime)
         {
-            CalculateROS(out double maxROS, _phi, _ROS, weather, time);            
-
+            //step 1
+            CalculateROS(out double maxROS, _phi, _ROS, weather, time);  
             if (maxROS <= 0.0)
             {
                 internalDeltaTime = deltaTime;
                 return;
             }
-
             double dtCFL = _cfl * Mathd.Min(dx, dy) / maxROS;
             internalDeltaTime = Mathd.Min(deltaTime, dtCFL);
-
-            // Gradient full step
-            ComputeRhs(_phi, rhs1, _ROS);
-
-            //intermediate
+            ComputeRhs(_phi, rhs, _ROS);
             foreach (CellIndex index in _tagged.Values)
             {
                 int i = index.X;
                 int j = index.Y;
-                _phiStar[i, j] = _phi[i, j] - internalDeltaTime * rhs1[i, j];
+                _phi_star[i, j] = Mathd.Clamp(_phi[i, j] - internalDeltaTime * rhs[i, j], -100.0, 100.0);
             }
 
-            // Gradient of intermediate step
-            CalculateROS(out maxROS, _phiStar, _ROS_star, weather, time);
-            ComputeRhs(_phiStar, rhs2, _ROS_star);
-
-            //final
-            _activeCells = 0;
-            _cellsToIgnite.Clear();
+            //Step 2
+            CalculateROS(out maxROS, _phi_star, _ROS_star, weather, time);
+            ComputeRhs(_phi_star, rhs, _ROS_star);
+            _activeCells = 0;            
             foreach (CellIndex index in _tagged.Values)
             {
                 int i = index.X;
                 int j = index.Y;
-                _phi[i, j] = 0.5 * (_phi[i, j] + (_phiStar[i, j] - internalDeltaTime * rhs2[i, j]));
+                _phi[i, j] = 0.5 * (_phi[i, j] + (_phi_star[i, j] - internalDeltaTime * rhs[i, j]));
 
                 if(_phi[i, j] <= 0 && !_ignited[i, j])
                 {
@@ -212,6 +246,9 @@ namespace PREACT.Wildfire
             {
                 Ignite(c.X, c.Y, false);
             }
+            _cellsToIgnite.Clear();
+
+            UpdateTagged();
         }        
 
         /// <summary>
@@ -225,91 +262,102 @@ namespace PREACT.Wildfire
                 int j = index.Y;
                 Vector2d cellROS = ros[i, j];
 
-                //von Neumann zero gradient at edges
-                int xNeg = i > 0 ? i - 1 : i;
-                int xPos = i < (Nx - 1) ? i + 1 : i;
-                int yNeg = j > 0 ? j - 1 : j;
-                int yPos = j < (Ny - 1) ? j + 1 : j;
+                double PHIEAST = 1.0, PHIWEST = 1.0, PHINORTH = 1.0, PHISOUTH = 1.0, DELTAUP, DELTALOC;
 
-                int xNeg2 = i > 1 ? i - 2 : xNeg;
-                int xPos2 = i < (Nx - 2) ? i + 2 : xPos;
-                int yNeg2 = j > 1 ? j - 2 : yNeg;
-                int yPos2 = j < (Ny - 2) ? j + 2 : yPos;
+                //Apply flux limiter
+                if(cellROS.x > 0.0)
+                {
+                    //east
+                    DELTAUP = _phi[i, j] - _phi[i - 1, j];
+                    DELTALOC = _phi[i + 1, j] - _phi[i, j];
+                    if (Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        PHIEAST = _phi[i, j] + HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
 
-                //local 
-                double dphi_loc_west = phi[i - 1, j] - phi[i, j];
-                double dphi_loc_east = phi[i + 1, j] - phi[i, j];
-                double dphi_loc_south = phi[i, j - 1] - phi[i, j];
-                double dphi_loc_north = phi[i, j + 1] - phi[i, j];
-
-                double phi_west = phi[i, j], phi_east = phi[i, j];
-                if (cellROS.x > 0f)
-                {                    
-                    double dphi_up_west = (phi[xNeg2, j] - phi[xNeg, j]);
-                    double r_west = dphi_up_west / dphi_loc_west;
-                    double B_r = Superbee(r_west);
-                    phi_west = phi[xNeg, j] - 0.5 * B_r * dphi_loc_west;
-
-                    double dphi_up_east = (phi[i, j] - phi[xNeg, j]);
-                    double r_east = dphi_up_east / dphi_loc_east;
-                    B_r = Superbee(r_east);
-                    phi_east = phi[i, j] + 0.5 * B_r * dphi_loc_east;           
-                }                    
+                    //west
+                    DELTALOC = -DELTAUP;
+                    if(Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        DELTAUP = _phi[i - 2, j] - _phi[i - 1, j];
+                        PHIWEST = _phi[i - 1, j] - HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
+                }
                 else
                 {
-                    double dphi_up_west = (phi[i, j] - phi[xPos, j]);
-                    double r_west = dphi_up_west / dphi_loc_west;
-                    double B_r = Superbee(r_west);
-                    phi_west = phi[i, j] + 0.5 * B_r * dphi_loc_west;
+                    //east
+                    DELTALOC = _phi[i + 1, j] - _phi[i, j];
+                    if(Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        DELTAUP = _phi[i + 2, j] - _phi[i + 1, j];
+                        PHIEAST = _phi[i + 1, j] - HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
 
-                    double dphi_up_east = (phi[xPos2, j] - phi[xPos, j]);
-                    double r_east = dphi_up_east / dphi_loc_east;
-                    B_r = Superbee(r_east);
-                    phi_east = phi[xPos, j] - 0.5 * B_r * dphi_loc_east;
+                    //west
+                    DELTAUP = -DELTALOC;
+                    DELTALOC = _phi[i - 1, j] - _phi[i, j];
+                    if(Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        PHIWEST = _phi[i, j] + HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
                 }
 
-                double phi_south = phi[i, j], phi_north = phi[i, j];
-                if (cellROS.y > 0f)
+                double DPHIDX_LIMITED = (PHIEAST - PHIWEST) * _dx_inversed;
+                DPHIDX_LIMITED = Mathd.Clamp(DPHIDX_LIMITED, -1000.0, 1000.0);
+
+                if (cellROS.y > 0.0)
                 {
-                    double dphi_up_south = (phi[i, yNeg2] - phi[i, yNeg]);
-                    double r_south = dphi_up_south / dphi_loc_south;
-                    double B_r = Superbee(r_south);
-                    phi_south = phi[i, yNeg] - 0.5 * B_r * dphi_loc_south;
+                    // PHINORTH
+                    DELTAUP = _phi[i, j] - _phi[i, j - 1];
+                    DELTALOC = _phi[i, j + 1] - _phi[i, j];
+                    if (Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        PHINORTH = _phi[i, j] + HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
 
-                    double dphi_up_north = (phi[i, j] - phi[i, yNeg]);
-                    double r_north = dphi_up_north / dphi_loc_north;
-                    B_r = Superbee(r_north);
-                    phi_north = phi[i, j] + 0.5 * B_r * dphi_loc_north;
-                }                    
-                else
+                    // PHISOUTH
+                    DELTALOC = -DELTAUP;
+                    if (Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        DELTAUP = _phi[i, j - 2] - _phi[i, j - 1];
+                        PHISOUTH = _phi[i, j - 1] - HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
+                }
+                else //UY.LT. 0
                 {
-                    double dphi_up_south = (phi[i, j] - phi[i, yPos]);
-                    double r_south = dphi_up_south / dphi_loc_south;
-                    double B_r = Superbee(r_south);
-                    phi_south = phi[i, j] + 0.5 * B_r * dphi_loc_south;
+                    // PHINORTH
+                    DELTALOC = _phi[i, j + 1] - _phi[i, j];
+                    if (Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        DELTAUP = _phi[i, j + 2] - _phi[i, j + 1];
+                        PHINORTH = _phi[i, j + 1] - HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
 
-                    double dphi_up_north = (phi[i, yPos2] - phi[i, yPos]);
-                    double r_north = dphi_up_north / dphi_loc_north;
-                    B_r = Superbee(r_north);
-                    phi_north = phi[i, yPos] - 0.5 * B_r * dphi_loc_north;
-                }                    
+                    // PHISOUTH
+                    DELTAUP = -DELTALOC;
+                    DELTALOC = _phi[i, j - 1] - _phi[i, j];
+                    if (Mathd.Abs(DELTALOC) > EPSILON)
+                    {
+                        PHISOUTH = _phi[i, j] + HalfSuperbee(DELTAUP / DELTALOC) * DELTALOC;
+                    }
+                }
 
-                double dphidx = (phi_east - phi_west) * _dx_inversed;
-                double dphidy = (phi_north - phi_south) * _dy_inversed;
+                double DPHIDY_LIMITED = (PHINORTH - PHISOUTH) * _dx_inversed;
+                DPHIDY_LIMITED = Mathd.Clamp(DPHIDY_LIMITED, -1000.0, 1000.0);
 
-                rhs[i, j] = (cellROS.x * dphidx + cellROS.y * dphidy);
+                rhs[i, j] = (cellROS.x * DPHIDX_LIMITED + cellROS.y * DPHIDY_LIMITED);
             }
         }
 
-        private static double Superbee(double r)
+        private static double HalfSuperbee(double r)
         {
             if (r <= 0.0)
             {
                 return 0.0;
             }
 
-            double a = Mathd.Min(2.0 * r, 1.0);
-            double b = Mathd.Min(r, 2.0);
+            double a = Mathd.Min(0.5 * r, 1.0);
+            double b = Mathd.Min(r, 0.5);
 
             return Mathd.Max(0.0, Mathd.Max(a, b));
         }
