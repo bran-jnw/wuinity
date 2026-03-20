@@ -131,7 +131,7 @@ namespace PREACT.Wildfire
 
             if (IsInside(xIndex, yIndex))
             {
-                _solver.Ignite(xIndex, yIndex, true);
+                _solver.Burn(xIndex, yIndex, true);
                 Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at lat/lon {latLon.x}/{latLon.y} (x/y: {pos.x}, {pos.y}) as requested by user.");
             }
             else

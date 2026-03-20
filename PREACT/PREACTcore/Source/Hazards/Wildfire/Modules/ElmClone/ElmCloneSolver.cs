@@ -26,11 +26,11 @@ namespace PREACT.Wildfire
         private Vector2d[,] _ROS;
         private Vector2d[,] _ROS_star;
         private readonly int _bandThickness;
-        private readonly bool[,] _ignited;
+        private readonly bool[,] _burned;
 
         private Dictionary<int, CellIndex> _tagged;
         private Dictionary<int, CellIndex> _everTagged;
-        private List<CellIndex> _cellsToIgnite;
+        private List<CellIndex> _cellsToBurn;
         private List<int> _cellsToRemove;
 
         private int _activeCells;
@@ -65,7 +65,7 @@ namespace PREACT.Wildfire
 
             _tagged = new Dictionary<int, CellIndex>(Nx * Ny / 10);
             _everTagged = new Dictionary<int, CellIndex>(Nx * Ny / 5);
-            _cellsToIgnite = new List<CellIndex>(Nx * Ny / 20);
+            _cellsToBurn = new List<CellIndex>(Nx * Ny / 20);
             _cellsToRemove = new List<int>(Nx * Ny / 20);
 
             _phi = new double[xDim, yDim];
@@ -74,7 +74,7 @@ namespace PREACT.Wildfire
             _ROS = new Vector2d[xDim, yDim];
             _ROS_star = new Vector2d[xDim, yDim];
 
-            _ignited = new bool[xDim, yDim];
+            _burned = new bool[xDim, yDim];
 
             //initialize
             for (int i = 0; i < Nx; i++)
@@ -87,14 +87,14 @@ namespace PREACT.Wildfire
             }
         }
 
-        public void Ignite(int ignIndexX, int ignIndexY, bool newIgnition)
+        public void Burn(int ignIndexX, int ignIndexY, bool newIgnition)
         {
             if(newIgnition)
             {
                 _phi[ignIndexX, ignIndexY] = -1.0; // ignition
                 _phi_star[ignIndexX, ignIndexY] = -1.0;
             }            
-            _ignited[ignIndexX, ignIndexY] = true;
+            _burned[ignIndexX, ignIndexY] = true;
             ExpandTagged(ignIndexX, ignIndexY);
         }
 
@@ -110,6 +110,11 @@ namespace PREACT.Wildfire
             {
                 for (int j = yMin; j < yMax; j++)
                 {
+                    if (_burned[i, j])
+                    {
+                        continue;
+                    }
+
                     int index = i + j * Nx;
                     CellIndex c = new CellIndex(i, j);
                     if (_everTagged.TryAdd(index, c)) //has never been tagged
@@ -182,6 +187,11 @@ namespace PREACT.Wildfire
                 int i = index.X;
                 int j = index.Y;
 
+                if (_burned[i, j])
+                {
+                    continue;
+                }
+
                 (double nxn, double nyn) = ComputeNormal(phi, i, j, dx, dy);
                 Vector2d spreadVector = new Vector2d(nxn, nyn);
                 double spreadDirection = Vector2d.Angle(Vector2d.up, spreadVector) * Mathd.Sign(Vector2d.Dot(Vector2d.right, spreadVector)); //relative to north
@@ -238,19 +248,19 @@ namespace PREACT.Wildfire
                 int j = index.Y;
                 _phi[i, j] = 0.5 * (_phi[i, j] + (_phi_star[i, j] - internalDeltaTime * rhs[i, j]));
 
-                if(_phi[i, j] <= 0 && !_ignited[i, j])
+                if(_phi[i, j] <= 0 && !_burned[i, j])
                 {
-                    _cellsToIgnite.Add(index);
+                    _cellsToBurn.Add(index);
                     _owner.UpdateCellData(i, j, (float)_owner.Spread[i, j].GetFireIntensity(), (float)_owner.Spread[i, j].GetMaxSpreadRate(), (float)_owner.Spread[i, j].GetDirectionOfMaxSpread());
                     _owner.SetTimeOfArrival(i, j, (float)(time.SimulationTime + internalDeltaTime));                    
                 }
             }
 
-            foreach(CellIndex c in _cellsToIgnite)
+            foreach(CellIndex c in _cellsToBurn)
             {
-                Ignite(c.X, c.Y, false);
+                Burn(c.X, c.Y, false);
             }
-            _cellsToIgnite.Clear();
+            _cellsToBurn.Clear();
 
             UpdateTagged();
         }        

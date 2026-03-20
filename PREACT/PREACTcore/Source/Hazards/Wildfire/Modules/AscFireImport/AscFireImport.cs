@@ -300,7 +300,7 @@ namespace PREACT.Wildfire
             bool result = true;
             if(x < 0 || x >= ncols || y < 0 || y >= nrows)
             {
-                result = true;
+                result = false;
             }
 
             return result;
