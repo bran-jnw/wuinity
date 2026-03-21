@@ -47,12 +47,12 @@ namespace WUInity.Visualization
             if(householdCount > 0)
             {
                 householdPositionsBuffer = new ComputeBuffer(householdCount, 4 * sizeof(float));
-            }            
+            }
         }
 
         public void UpdateEvacuationRenderer(bool renderHouseholds, bool renderCars, PedestrianModule pedestrianModule, TrafficModule trafficModule)
         {
-            if (renderHouseholds)
+            if (renderHouseholds && householdPositionsBuffer != null)
             {
                 System.Numerics.Vector4[] newPositions = ((MacroHouseholdSim)pedestrianModule).GetHouseholdPositions();
                 householdPositionsBuffer.SetData(newPositions);
