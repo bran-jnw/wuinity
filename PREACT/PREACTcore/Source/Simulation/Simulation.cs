@@ -40,15 +40,16 @@ namespace PREACT
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
         private WildfireModule _wildfireModule;
-        private SmokeModule _smokeModule;
+        private SmokeModule _dispersionModule;
         private TriggerBufferModule _triggerBufferModule;
+        private Drones.DroneModule _droneModule;
+
+        private List<SimulationModule> _simulationModules;
+        private System.Threading.Tasks.Task[] _simulationModuleTasks;
 
         private Stopwatch _simulationStopWatch = new Stopwatch();
-        private Stopwatch _trafficStopwatch = new Stopwatch();
-        private Stopwatch _pedestrianStopwatch = new Stopwatch();
-        private Stopwatch _fireStopwatch = new Stopwatch();
-        private Stopwatch _smokeStopwatch = new Stopwatch();
         private Stopwatch _pathfindingStopwatch = new Stopwatch();
+        private Stopwatch[] _moduleStopwatches;
 
         //Data
         private int _simulationIndex;
@@ -70,7 +71,7 @@ namespace PREACT
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
         public WildfireModule WildfireModule { get => _wildfireModule; }
-        public SmokeModule SmokeModule { get => _smokeModule; }
+        public SmokeModule SmokeModule { get => _dispersionModule; }
         public TriggerBufferModule TriggerBufferModule { get => _triggerBufferModule; }
         public PREACTInput Input { get => _input; }
         public SimulationOutput Output { get => _output; }
@@ -97,6 +98,8 @@ namespace PREACT
             _evacuationManager = new EvacuationManager(this);
             _hazardManager = new HazardManager(this);
             _output = new SimulationOutput(this);
+
+            _simulationModules = new List<SimulationModule>();
         }
 
         /// <summary>
@@ -147,10 +150,6 @@ namespace PREACT
         private void PreRun()
         {            
             _simulationStopWatch.Restart();
-            _trafficStopwatch.Reset();
-            _pedestrianStopwatch.Reset();
-            _fireStopwatch.Reset();
-            _smokeStopwatch.Reset();
             _stopRun = false;
             _stoppedDueToError = false;
 
@@ -198,10 +197,18 @@ namespace PREACT
                 }
             }
 
+            //stuff for running threads and timing
+            _simulationModuleTasks = new System.Threading.Tasks.Task[_simulationModules.Count];
+            _moduleStopwatches = new Stopwatch[_simulationModules.Count];
+            for (int i = 0; i < _simulationModules.Count; ++i)
+            {
+                _moduleStopwatches[i] = new Stopwatch();              
+            }
+
             //do actual simulation steps
             _stopRun = false;
             _state = SimulationState.Running;
-            nextFireUpdate = 0f; //fire start is always 0 seconds
+            //nextFireUpdate = 0f; //fire start is always 0 seconds
 
             //only update visuals if doing single run
             //if (!WUI_engine.RUNTIME_DATA.Simulation.MultipleSimulations)
@@ -214,6 +221,7 @@ namespace PREACT
         private void Step()
         {
             long startTime = _simulationStopWatch.ElapsedMilliseconds;
+
             UpdateEvents();
             //this state represents the positions at the start of the time step
             if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _trafficModule != null)
@@ -222,30 +230,19 @@ namespace PREACT
             }
 
             //step all modules forward in time
-            System.Threading.Tasks.Task fireTask = System.Threading.Tasks.Task.Run(StepWildfireModule, _stopThreadsToken.Token);
-            System.Threading.Tasks.Task smokeTask = System.Threading.Tasks.Task.Run(StepSmokeModule, _stopThreadsToken.Token);
-            System.Threading.Tasks.Task pedestrianTask = System.Threading.Tasks.Task.Run(StepPedestrianModule, _stopThreadsToken.Token);
-            System.Threading.Tasks.Task trafficTask = System.Threading.Tasks.Task.Run(StepTrafficModule, _stopThreadsToken.Token);
-
-            System.Threading.Tasks.Task.WaitAll(fireTask, smokeTask, pedestrianTask, trafficTask);
-
-            //handle any fire effects on road network
-            if (_wildfireModule != null)
+            for(int i = 0; i < _simulationModules.Count; ++i)
             {
-                if (_trafficModule != null)
-                {
-                    _trafficModule.HandleIgnitedFireCells(_wildfireModule.GetIgnitedFireCells());
-                }
-                _wildfireModule.ConsumeIgnitedFireCells();
+                Stopwatch stopwatch = _moduleStopwatches[i];
+                SimulationModule module = _simulationModules[i];
+                _simulationModuleTasks[i] = System.Threading.Tasks.Task.Run(() => StepModule(stopwatch, module, _timeManager.SimulationTime, _input.Simulation.DeltaTime), _stopThreadsToken.Token);                  
             }
+            System.Threading.Tasks.Task.WaitAll(_simulationModuleTasks);
 
-            //handle/inject cars that arrived this timestep
-            if (_trafficModule != null)
-            {
-                _pathfindingStopwatch.Start();
-                _trafficModule.HandleNewCars();
-                _pathfindingStopwatch.Stop();
-            }
+            //handle all damage/impact on road network
+            AffectRoadNetwork();
+
+            //inject vehicles from all sources
+            HandleNewVehicles();            
 
             //increase time
             float deltaTime = _input.Simulation.DeltaTime;
@@ -272,6 +269,30 @@ namespace PREACT
             }
 
             UpdateTiming(startTime, deltaTime);
+        }
+
+        private void AffectRoadNetwork()
+        {
+            //handle any fire effects on road network
+            if (_wildfireModule != null)
+            {
+                if (_trafficModule != null)
+                {
+                    _trafficModule.HandleIgnitedFireCells(_wildfireModule.GetIgnitedFireCells());
+                }
+                _wildfireModule.ConsumeIgnitedFireCells();
+            }
+        }
+
+        private void HandleNewVehicles()
+        {
+            //handle/inject cars that arrived this timestep
+            if (_trafficModule != null)
+            {
+                _pathfindingStopwatch.Start();
+                _trafficModule.HandleNewCars();
+                _pathfindingStopwatch.Stop();
+            }
         }
 
         private void UpdateTiming(long startTime, float deltaTime)
@@ -341,10 +362,10 @@ namespace PREACT
 
             _simulationStopWatch.Stop();
             Engine.Message(this, Engine.LogType.Log, "Total time spent [s]:" + _simulationStopWatch.ElapsedMilliseconds * 0.001);
-            Engine.Message(this, Engine.LogType.Log, "Total time spent in pedestrian module [s]:" + _pedestrianStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pedestrianStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Engine.Message(this, Engine.LogType.Log, "Total time spent in traffic module [s]:" + _trafficStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _trafficStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Engine.Message(this, Engine.LogType.Log, "Total time spent in fire module [s]:" + _fireStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _fireStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
-            Engine.Message(this, Engine.LogType.Log, "Total time spent in smoke module [s]:" + _smokeStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _smokeStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            for(int i = 0; i < _moduleStopwatches.Length; ++i)
+            {
+                Engine.Message(this, Engine.LogType.Log, $"Total time spent in {_simulationModules[i].GetType().Name} [s]:" + _moduleStopwatches[i].ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _moduleStopwatches[i].ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
+            }            
             Engine.Message(this, Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / _simulationStopWatch.ElapsedMilliseconds)));
             _state = SimulationState.Finished;
             Engine.Message(this, Engine.LogType.Log, " Simulation done.");
@@ -361,11 +382,19 @@ namespace PREACT
             {
                 return;
             }
+            if(_wildfireModule != null)
+            {
+                _simulationModules.Add(_wildfireModule);
+            }
             
             CreateDispersionModule();
             if (_stopRun)
             {
                 return;
+            }
+            if (_dispersionModule != null)
+            {
+                _simulationModules.Add(_dispersionModule);
             }
 
             CreatePedestrianModule();
@@ -373,11 +402,29 @@ namespace PREACT
             {
                 return;
             }
+            if (_pedestrianModule != null)
+            {
+                _simulationModules.Add(_pedestrianModule);
+            }
 
             CreateTrafficModule();
             if (_stopRun)
             {
                 return;
+            }
+            if (_trafficModule != null)
+            {
+                _simulationModules.Add(_trafficModule);
+            }
+
+            CreateDroneModule();
+            if (_stopRun)
+            {
+                return;
+            }
+            if (_droneModule != null)
+            {
+                _simulationModules.Add(_droneModule);
             }
 
             Engine.Message(this, Engine.LogType.Log, "All requested sub-modules initiated successfully.");
@@ -416,13 +463,13 @@ namespace PREACT
 
         private void CreateDispersionModule()
         {
-            //can only run together
+            //can only run together for now
             if (_input.SmokeModule.Enabled)
             {
                 //this module does not need the fire
                 if (_input.SmokeModule.Module == SmokeInput.SmokeModules.GlobalSmoke)
                 {
-                    _smokeModule = new GlobalSmoke(this, _input.SmokeModule.Data.ExtinctionRamp);
+                    _dispersionModule = new GlobalSmoke(this, _input.SmokeModule.Data.ExtinctionRamp);
                     return;
                 }                
 
@@ -434,11 +481,11 @@ namespace PREACT
                 {                       
                     if(_input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                     {
-                        _smokeModule = new AdvectDiffuseMixingLayer(this);
+                        _dispersionModule = new AdvectDiffuseMixingLayer(this);
                     }
                     else if (_input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuse3D)
                     {
-                        _smokeModule = new AdvectDiffuse3D(this);                         
+                        _dispersionModule = new AdvectDiffuse3D(this);                         
                         Engine.Message(this, Engine.LogType.Log, "Smoke module AdvectDiffuse3D initiated.");
                     }
                     else if (_input.SmokeModule.Module == SmokeInput.SmokeModules.BoxModel)
@@ -547,7 +594,12 @@ namespace PREACT
             {
                 Engine.Message(this, Engine.LogType.Log, "Trigger buffer module was enabled.");
             }
-        }        
+        }    
+        
+        private void CreateDroneModule()
+        {
+            //Panos
+        }
 
         public void SetPause(bool pause)
         {
@@ -583,93 +635,23 @@ namespace PREACT
             }
         }
 
-        bool fireUpdated = false;
-        double nextFireUpdate;
-        private void StepWildfireModule()
+        private static void StepModule(Stopwatch timer, SimulationModule module, double currentTime, double deltaTime)
         {
-            //update fire mesh if needed
-            fireUpdated = false;
-            if (_input.WildfireModule.Enabled)
-            {
-                if (SimulationTime >= nextFireUpdate && SimulationTime >= 0.0f)
-                {
-                    fireUpdated = true;
-                    _fireStopwatch.Start();
-                    _wildfireModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
-                    _fireStopwatch.Stop();
-                    nextFireUpdate += _wildfireModule.GetInternalDeltaTime();
-                }
-            }
+            timer.Start();
+            module.Step(currentTime, deltaTime);
+            timer.Stop();
         }
-
-        private void StepSmokeModule()
-        {
-            //sync with fire
-            if (_input.SmokeModule.Enabled && SimulationTime >= 0.0f)
-            {
-                _smokeStopwatch.Start();
-                if (_input.SmokeModule.Module == SmokeInput.SmokeModules.BoxModel)
-                {
-                    //smokeBoxDispersionModel.Update(input.deltaTime, fireMesh.currentWindData.direction, fireMesh.currentWindData.speed);
-                }
-                else
-                {
-                    _smokeModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
-                }
-                _smokeStopwatch.Stop();
-            }
-        }
-
-        private void StepPedestrianModule()
-        {
-            //advance pedestrian
-            if (_input.PedestrianModule.Enabled)
-            {
-                _pedestrianStopwatch.Start();
-                _pedestrianModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
-                _pedestrianStopwatch.Stop();
-            }
-        }
-
-        private void StepTrafficModule()
-        {
-            //advance traffic
-            if (_input.TrafficModule.Enabled)
-            {
-                _trafficStopwatch.Start();
-                _trafficModule.Step(_timeManager.SimulationTime, _input.Simulation.DeltaTime);
-                _trafficStopwatch.Stop();
-            }
-        }
-
 
         CancellationTokenSource _stopThreadsToken = new CancellationTokenSource();
         private void StopModules()
         {
             //_stopThreadsToken.Cancel();
 
-            if (_pedestrianModule != null)
+            foreach(SimulationModule sim in _simulationModules)
             {
-                _pedestrianModule.Stop();
+                sim.Stop();
             }
-
-            if (_trafficModule != null)
-            {
-                _trafficModule.Stop();
-            }
-
-            if (_wildfireModule != null)
-            {
-                _wildfireModule.Stop();
-            }
-
-            if (_smokeModule != null)
-            {
-                _smokeModule.Stop();
-            }
-        }
-
-        
+        }        
 
         bool _stoppedDueToError = false;
         public bool StoppedDueToError { get => _stoppedDueToError; }
