@@ -23,7 +23,7 @@ namespace PREACT.Input
         public AscImportInput AscImportInput { get => _ascImportInput; }
         public FireCellInput FireCellInput { get => _fireCellInput; }
         public WildfireModules Module = WildfireModules.None;        
-        public string GraphicalFireInputFile = string.Empty;
+        //public string GraphicalFireInputFile = string.Empty;
 
 
         public WildfireModuleInput() 
@@ -101,7 +101,7 @@ namespace PREACT.Input
             }*/         
 
             //might be critical if using e.g. random ignition
-            nameOfInput = nameof(GraphicalFireInputFile);
+            /*nameOfInput = nameof(GraphicalFireInputFile);
             if (inputToParse.TryGetValue(nameof(GraphicalFireInputFile), out userInput))
             {
                 GraphicalFireInputFile = userInput;
@@ -114,7 +114,7 @@ namespace PREACT.Input
             else
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
+            }*/
 
             //now check modules that have been selected
             if (Module == WildfireModules.AscImport)

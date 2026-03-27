@@ -46,7 +46,7 @@ namespace PREACT.Input
             WUIShow = new WUIShowInput();
         }
 
-        public static void SaveToDisk(PREACTInput input, string filePath)
+        public static void SaveToDisk(PREACTInput input, string saveFilePath)
         {
             //TODO: fix new format save
             //string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
@@ -54,7 +54,7 @@ namespace PREACT.Input
             //EvacuationGroup.SaveEvacGroupIndices();
             //GraphicalFireInput.SaveGraphicalFireInput();
 
-            Engine.Message(null, Engine.LogType.Log, " Input file " + filePath + " saved.");       
+            Engine.Message(null, Engine.LogType.Log, " Input file " + saveFilePath + " saved.");       
         }
 
         public static PREACTInput LoadFromDisk(string filePath, out bool success)

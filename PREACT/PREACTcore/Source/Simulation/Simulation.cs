@@ -37,12 +37,12 @@ namespace PREACT
         private PREACTInput _input;
         private SimulationOutput _output;        
 
+        //these are modules that have interdependency or gives information to others
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
         private WildfireModule _wildfireModule;
         private SmokeModule _dispersionModule;
         private TriggerBufferModule _triggerBufferModule;
-        private Drones.DroneModule _droneModule;
 
         private List<SimulationModule> _simulationModules;
         private System.Threading.Tasks.Task[] _simulationModuleTasks;
@@ -382,50 +382,32 @@ namespace PREACT
             {
                 return;
             }
-            if(_wildfireModule != null)
-            {
-                _simulationModules.Add(_wildfireModule);
-            }
+            
             
             CreateDispersionModule();
             if (_stopRun)
             {
                 return;
-            }
-            if (_dispersionModule != null)
-            {
-                _simulationModules.Add(_dispersionModule);
-            }
+            }            
 
             CreatePedestrianModule();
             if (_stopRun)
             {
                 return;
-            }
-            if (_pedestrianModule != null)
-            {
-                _simulationModules.Add(_pedestrianModule);
-            }
+            }            
 
             CreateTrafficModule();
             if (_stopRun)
             {
                 return;
-            }
-            if (_trafficModule != null)
-            {
-                _simulationModules.Add(_trafficModule);
-            }
+            }            
 
+            //this does not have a class field as it will not be called by others for information
             CreateDroneModule();
             if (_stopRun)
             {
                 return;
-            }
-            if (_droneModule != null)
-            {
-                _simulationModules.Add(_droneModule);
-            }
+            }            
 
             Engine.Message(this, Engine.LogType.Log, "All requested sub-modules initiated successfully.");
         }
@@ -458,6 +440,12 @@ namespace PREACT
             else
             {
                 Engine.Message(this, Engine.LogType.Log, "No fire module was enabled.");
+            }
+
+            //register module
+            if (_wildfireModule != null)
+            {
+                _simulationModules.Add(_wildfireModule);
             }
         }
 
@@ -498,6 +486,11 @@ namespace PREACT
             {
                 Engine.Message(this, Engine.LogType.Log, "No smoke module was enabled.");
             }
+
+            if (_dispersionModule != null)
+            {
+                _simulationModules.Add(_dispersionModule);
+            }
         }
 
         private void CreatePedestrianModule()
@@ -522,6 +515,11 @@ namespace PREACT
             else
             {
                 Engine.Message(this, Engine.LogType.Log, "No pedestrian module was enabled.");
+            }
+
+            if (_pedestrianModule != null)
+            {
+                _simulationModules.Add(_pedestrianModule);
             }
         }
 
@@ -551,6 +549,11 @@ namespace PREACT
             else
             {
                 Engine.Message(this, Engine.LogType.Log, "No traffic module was enabled.");
+            }
+
+            if (_trafficModule != null)
+            {
+                _simulationModules.Add(_trafficModule);
             }
         }
 
@@ -599,6 +602,10 @@ namespace PREACT
         private void CreateDroneModule()
         {
             //Panos
+            /*if (droneModule != null)
+            {
+                simulationModules.Add(_droneModule);
+            }*/
         }
 
         public void SetPause(bool pause)
