@@ -152,7 +152,7 @@ InitialFuelMoistureFile=fireCell/default.fmc
 OutputName=trigger_buffer.asc
 
 [SmokeModule]
-Enabled=true
+Enabled=false
 Module=AdvectDiffuse3D
 
 [GlobalSmoke]

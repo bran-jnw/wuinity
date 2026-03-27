@@ -97,7 +97,7 @@ namespace WUInity.UI
         void BuildRouterDbFromOSM(string[] paths)
         {
             string outputFile = Path.Combine(Path.GetDirectoryName(paths[0]), Path.GetFileNameWithoutExtension(paths[0]), ".routerDb");
-            PopulationTools.CreateAndSaveRouterDb(paths[0], outputFile);
+            PopulationTools.CreateAndSaveRouterDb(paths[0], outputFile, out bool success);
         }
     }
 }

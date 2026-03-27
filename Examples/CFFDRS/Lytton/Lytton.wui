@@ -97,10 +97,10 @@ SmokeBeta=-0.02910
 
 [WildfireModule]
 Enabled=true
-Module=CellParticleHybrid #AscImport
+Module=SimpleWildfireCA #AscImport
 GraphicalFireInputFile=fire/example.gfi
 
-[CellParticleHybrid]
+[SimpleWildfireCA]
 LandscapeFile=wildfire/lytton_edited2.tif
 IgnitionPointsFile=lytton.ign
 UseRandomIgnitionMap=false

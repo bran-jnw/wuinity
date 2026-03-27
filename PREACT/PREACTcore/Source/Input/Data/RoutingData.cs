@@ -80,9 +80,9 @@ namespace PREACT.Input
             return routerDb;
         }
 
-        public static bool CreateAndSaveRouterDb(string osmInputFilePath, string outputFilePath)
+        public static void CreateAndSaveRouterDb(string osmInputFilePath, string outputFilePath, out bool success)
         {
-            bool success = false;
+            success = false;
 
             if (File.Exists(osmInputFilePath))
             {                
@@ -103,8 +103,6 @@ namespace PREACT.Input
             {
                 Engine.Message(null, Engine.LogType.Warning, "OSM file could not be found.");
             }
-
-            return success;
         }
     }
 }

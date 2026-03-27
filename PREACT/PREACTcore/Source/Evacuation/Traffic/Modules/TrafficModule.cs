@@ -77,13 +77,29 @@ namespace PREACT.Traffic
 
         public abstract bool IsNetworkReachable(Vector2d startLatLong);
 
-        public List<TrafficModuleVehicle> GetVehiclesInBoundingBox(Vector2d lowerLeftPos, Vector2d upperRightPos)
+        public List<TrafficModuleVehicle> GetVehiclesInBoundingBox(Vector2d lowerLeftSimulationPos, Vector2d upperRightSimulationPos)
         {
             List<TrafficModuleVehicle> vehicles = new List<TrafficModuleVehicle>();
 
             foreach (TrafficModuleVehicle vehicle in _activeVehicles.Values)
             {
-                if(vehicle.SimulationPos.x >= lowerLeftPos.x && vehicle.SimulationPos.x <= upperRightPos.x && vehicle.SimulationPos.y >= lowerLeftPos.y && vehicle.SimulationPos.y <= upperRightPos.y)
+                if(vehicle.SimulationPos.x >= lowerLeftSimulationPos.x && vehicle.SimulationPos.x <= upperRightSimulationPos.x && vehicle.SimulationPos.y >= lowerLeftSimulationPos.y && vehicle.SimulationPos.y <= upperRightSimulationPos.y)
+                {
+                    vehicles.Add(vehicle);
+                }
+            }
+
+            return vehicles;
+        }
+
+        public List<TrafficModuleVehicle> GetVehiclesRadius(List<TrafficModuleVehicle> vehicles, Vector2d center, double radius)
+        {
+            vehicles.Clear();
+            double radiusSqrd = radius * radius;
+            foreach (TrafficModuleVehicle vehicle in _activeVehicles.Values)
+            {
+                double distanceSqrd = Vector2d.SqrMagnitude(center - vehicle.SimulationPos);
+                if (distanceSqrd <= radiusSqrd)
                 {
                     vehicles.Add(vehicle);
                 }

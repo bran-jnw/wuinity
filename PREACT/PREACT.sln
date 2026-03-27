@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.2.11415.280 d18.0
+VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PREACTexecute", "PREACTexecute\PREACTexecute.csproj", "{8A9382FF-050E-456A-A450-1D8049D06820}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PREACTcore", "PREACTcore\PREACTcore.csproj", "{E8B7BDBB-69FE-4ACD-B781-873193F5DBFA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "..\WUInity\Assembly-CSharp.csproj", "{0D9FD70E-31C7-D9AE-6407-BBC11E6C95D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureTester", "FeatureTester\FeatureTester.csproj", "{EAA61374-5C2D-4D56-BC04-D162C5029840}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +56,18 @@ Global
 		{0D9FD70E-31C7-D9AE-6407-BBC11E6C95D3}.Release|x64.Build.0 = Release|Any CPU
 		{0D9FD70E-31C7-D9AE-6407-BBC11E6C95D3}.Release|x86.ActiveCfg = Release|Any CPU
 		{0D9FD70E-31C7-D9AE-6407-BBC11E6C95D3}.Release|x86.Build.0 = Release|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Debug|x64.Build.0 = Debug|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Debug|x86.Build.0 = Debug|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Release|x64.ActiveCfg = Release|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Release|x64.Build.0 = Release|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Release|x86.ActiveCfg = Release|Any CPU
+		{EAA61374-5C2D-4D56-BC04-D162C5029840}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

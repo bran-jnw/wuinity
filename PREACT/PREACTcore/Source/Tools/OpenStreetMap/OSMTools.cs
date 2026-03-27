@@ -1,21 +1,17 @@
 ﻿using PREACT.Math;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
 using System;
 using System.Collections.Generic;
-
 using OsmSharp;
-using OsmSharp.IO.API;
 using OsmSharp.Streams;
 using PREACT.Spatial;
-
 
 namespace PREACT.Tools
 {
     public class OSMTools
     {
-        public static async Task DownloadOMSData(Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, string saveFilePath, int tries = 0)
+        public static async Task DownloadOMSData(Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, string saveFilePath, int tries = 20)
         {
             try
             {
@@ -28,7 +24,6 @@ namespace PREACT.Tools
                     target.RegisterSource(data);
                     target.Pull();
                 }
-
                 Engine.Message(null, Engine.LogType.Log, "OSM data saved to " + saveFilePath);
             }
             catch (Exception e)
