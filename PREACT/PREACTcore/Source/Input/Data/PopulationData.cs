@@ -29,7 +29,7 @@ namespace PREACT.Input
             }
         }
 
-        private HouseholdData[] _householdData;
+        private HouseholdData[] _householdData = System.Array.Empty<HouseholdData>();
         private int _totalPopulation;
 
         public HouseholdData[] Households { get => _householdData; }        

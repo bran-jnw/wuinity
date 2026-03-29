@@ -17,68 +17,60 @@ namespace PREACT
     [System.Serializable]
     public class Simulation
     {
-        public enum SimulationState { Initializing, Running, Finished, Error };
+        public enum SimulationState { Initializing, Running, Completed, Error };
 
         //References
-        private SimulationState _state;
         private Engine _engine;
+        private SimulationState _state;
+        private Stopwatch _simulationStopwatch = new Stopwatch();
+        private PREACTInput _input;
+        private SimulationOutput _output;        
         private TimeManager _time;
         private WeatherManager _weather;
         private SpatialManager _spatial;
         private EvacuationManager _evacuation;
-        private HazardManager _hazards;
-        private PREACTInput _input;
-        private SimulationOutput _output;                      
+        private HazardManager _hazards;                             
 
-        private List<SimulationModule> _simulationModules;
+        private List<SimulationModule> _simulationModules = new List<SimulationModule>();
         private System.Threading.Tasks.Task[] _simulationModuleTasks;
-
-        private Stopwatch _simulationStopwatch = new Stopwatch();
-        private Stopwatch[] _moduleStopwatches;
+        private Stopwatch[] _moduleStopwatches;        
 
         //Data
         private int _simulationIndex;
-        private bool _visualize;
         private bool _isPaused = false;
         private bool _stopRun;
         private bool _haveResults = false;
-        private float _stepExecutionTime;
-        
+        private float _stepExecutionTime;        
 
         //References
         public Engine Engine { get => _engine; }
         public SimulationState State { get => _state; }
+        public PREACTInput Input { get => _input; }
+        public SimulationOutput Output { get => _output; }
         public TimeManager Time { get => _time; }
         public WeatherManager Weather { get => _weather; }
         public SpatialManager Spatial { get => _spatial; }
         public EvacuationManager Evacuation { get => _evacuation; }
-        public HazardManager Hazards { get => _hazards; }        
-        public PREACTInput Input { get => _input; }
-        public SimulationOutput Output { get => _output; }
+        public HazardManager Hazards { get => _hazards; }                
 
         //Data
         public int SimulationIndex { get => _simulationIndex; }
-        public bool Visualize { get => _visualize; }
         public bool IsPaused { get => _isPaused; }        
         public bool HaveResults { get => _haveResults; }         
-        public float SimulationTime { get => _time.SimulationTime; }  
         public float StepExecutionTime { get => _stepExecutionTime; }                
 
 
         public Simulation(Engine engine, PREACTInput input, int simulationIndex)
         {
             _engine = engine;
-            _input = input;
             _simulationIndex = simulationIndex;
+            _input = input;
+            _output = new SimulationOutput(this);            
             _time = new TimeManager(_input, this);
             _spatial = new SpatialManager(this);
-            _weather = new WeatherManager(this);
-            _output = new SimulationOutput(this);
-
-            _evacuation = new EvacuationManager(this);
-            _hazards = new HazardManager(this);          
-
-            _simulationModules = new List<SimulationModule>();
+            _weather = new WeatherManager(this, _time);
+            _hazards = new HazardManager(this);
+            _evacuation = new EvacuationManager(this);            
         }
 
         /// <summary>
@@ -87,12 +79,7 @@ namespace PREACT
         public void Run(bool startWUIshow = false)
         {
             _state = SimulationState.Initializing;
-            PreRun();
-
-            if (startWUIshow)
-            {
-                _engine.StartWUIShow();
-            }
+            PreRun(startWUIshow);            
 
             //actual time step loop
             _state = SimulationState.Running;
@@ -110,7 +97,7 @@ namespace PREACT
             }
                         
             PostRun();
-            _state = SimulationState.Finished;
+            _state = SimulationState.Completed;
         }
 
         bool _talkToWUIShow = false;
@@ -127,15 +114,18 @@ namespace PREACT
         /// <summary>
         /// Sets up all modules and timing of simulation.
         /// </summary>
-        private void PreRun()
-        {            
+        private void PreRun(bool startWUIShow)
+        {
+            if (startWUIShow)
+            {
+                _engine.StartWUIShow();
+            }
+
             _simulationStopwatch.Restart();
             _stopRun = false;
             _stoppedDueToError = false;
 
-            Engine.Message(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait.");
-
-            _weather.Initialize(_time);   
+            Engine.Message(this, Engine.LogType.Log, "Simulation  " + _simulationIndex + " started, please wait."); 
 
             CreateSimulationModules();
             //when creating modules we might have found an issue
@@ -166,12 +156,16 @@ namespace PREACT
         {
             long startTime = _simulationStopwatch.ElapsedMilliseconds;
 
-            UpdateEvents();
+            //update weather for current time step
+            _weather.Update(_time.CurrentDateTime);
+
             //this state represents the positions at the start of the time step
             if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _evacuation.TrafficModule != null)
             {
                 _engine.WUIShow.SendData(_time.SimulationTime);
             }
+
+            UpdateEvents();            
 
             //step all modules forward in time
             for(int i = 0; i < _simulationModules.Count; ++i)
@@ -182,56 +176,21 @@ namespace PREACT
             }
             System.Threading.Tasks.Task.WaitAll(_simulationModuleTasks);
 
-            _evacuation.PostStep();       
-
-            //increase time
+            //advance time
             float deltaTime = _input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
-            if (_hazards.WildfireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
+            /*if (_hazards.WildfireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
             {
                 deltaTime = (float)_hazards.WildfireModule.GetInternalDeltaTime();
-            }
-
-            //see if we are done or not
+            }*/
             _time.Step(deltaTime);
-            _weather.Step(_time.SimulationTime, _time.CurrentDateTime);
+
+            //deal with what has happen during time step
+            _evacuation.UpdateConsequences();
+
+            //see if we are done or not   
             CheckCompletion();
-
-            if (_input.WildfireModule.Enabled)
-            {
-                //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
-                _evacuation.CheckEvacuationGoalStatus();
-                //can get set when evac goals are all gone
-                if (_stopRun)
-                {
-                    return;
-                }
-            }
-
-            UpdateTiming(startTime, deltaTime);
-        }
-
-        private void UpdateTiming(long startTime, float deltaTime)
-        {
-            //just some stuff for controlling execution mode and timing performance
-            long timeSpent = _simulationStopwatch.ElapsedMilliseconds - startTime;
-            if (_runRealtime)
-            {
-                int sleepTime = (int)deltaTime * 1000 - (int)timeSpent;
-                if (sleepTime > 0)
-                {
-                    Thread.Sleep(sleepTime);
-                }
-            }
-
-            if(timeSpent > 100)
-            {
-                _stepExecutionTime = timeSpent;
-            }
-            else
-            {
-                _stepExecutionTime = 0.01f * timeSpent + 0.99f * _stepExecutionTime;
-            }                
+            UpdatePerformanceTimer(startTime, deltaTime);
         }
 
         private void CheckCompletion()
@@ -241,7 +200,7 @@ namespace PREACT
                 return;
             }
 
-            bool endTimeReached = _time.SimulationEndTime - SimulationTime < 0.001f ? true : false;
+            bool endTimeReached = _time.SimulationEndTime - _time.SimulationTime < 0.001f ? true : false;
 
             if (endTimeReached)
             {
@@ -268,18 +227,37 @@ namespace PREACT
             }
         }
 
-        private void PostRun()
+        private void UpdatePerformanceTimer(long startTime, float deltaTime)
         {
-            StopModules();
-            _output.AddEvacTime(SimulationTime);           
-
-            if (!_stoppedDueToError)
+            //just some stuff for controlling execution mode and timing performance
+            long timeSpent = _simulationStopwatch.ElapsedMilliseconds - startTime;
+            if (_runRealtime)
             {
-                _output.SaveOutput();
+                int sleepTime = (int)deltaTime * 1000 - (int)timeSpent;
+                if (sleepTime > 0)
+                {
+                    Thread.Sleep(sleepTime);
+                }
             }
 
+            if(timeSpent > 100) //for when one can actually see time taken
+            {
+                _stepExecutionTime = timeSpent;
+            }
+            else
+            {
+                _stepExecutionTime = 0.01f * timeSpent + 0.99f * _stepExecutionTime;
+            }                
+        }
+
+        private void PostRun()
+        {
+            StopModules();                     
+
             if (!_stoppedDueToError)
             {
+                _output.AddEvacTime(_time.SimulationTime);
+                _output.SaveOutput();
                 _haveResults = true;
                 _evacuation.CreateAndRunTriggerBufferModule(this, _input, _weather, _time);
             }
@@ -292,8 +270,9 @@ namespace PREACT
             }
             Engine.Message(this, Engine.LogType.Log, "Total time spent on road closures [s]:" + _evacuation.RoadClosureStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _evacuation.RoadClosureStopwatch.ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
             Engine.Message(this, Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _evacuation.PathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _evacuation.PathfindingStopwatch.ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
-            _state = SimulationState.Finished;
+            _state = SimulationState.Completed;
             Engine.Message(this, Engine.LogType.Log, " Simulation done.");
+
             //force garbage collection                
             System.GC.Collect();
         }
@@ -345,11 +324,12 @@ namespace PREACT
             _isPaused = !_isPaused;
         }
 
-        public void ToogleRealtime()
+        public void ToggleRealtime()
         {
             _runRealtime = !_runRealtime;
         }
 
+        //TODO: move
         private void UpdateEvents()
         {
             if (_input.TrafficModule.Enabled)
@@ -360,7 +340,7 @@ namespace PREACT
                     for (int i = 0; i < _input.Events.Data.BlockDestinationEvents.Count; i++)
                     {
                         BlockDestinationEvent bGE = _input.Events.Data.BlockDestinationEvents[i];
-                        if (SimulationTime >= bGE.StartTime && !bGE.Triggered)
+                        if (_time.SimulationTime >= bGE.StartTime && !bGE.Triggered)
                         {
                             bGE.ApplyEffects();
                         }

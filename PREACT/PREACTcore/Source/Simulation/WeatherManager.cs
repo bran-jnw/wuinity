@@ -45,12 +45,39 @@ namespace PREACT
         public double KBDI { get => _DailyKBDI.KBDI; }
 
 
-        public WeatherManager(Simulation simulation)
+        public WeatherManager(Simulation simulation, TimeManager time)
         {
             _simulation = simulation;
+
+            //todo: move fire specific stuff to where it is actually used?
             _fwi = new Wildfire.FireWeatherIndex(simulation.Input.WildfireModule.FireCellInput.StartFFMC, simulation.Input.WildfireModule.FireCellInput.StartDMC, simulation.Input.WildfireModule.FireCellInput.StartDC);
             _ffmcHourly = new Wildfire.HourlyFFMC(simulation.Input.WildfireModule.FireCellInput.StartHourlyFFMC);
             _DailyKBDI = new DailyKBDI(simulation.Input.WildfireModule.FireCellInput.StartKBDI, 1500); //TODO: user input
+
+            LoadOrDownloadWeather(time);
+            Update(time.StartDateTime, true);
+        }
+
+        private void Initialize(TimeManager timeManager)
+        {
+            //calculate FWI up until point of simulation start
+            /*if(_weatherData.FirstEntry.Month == 1 && _weatherData.FirstEntry.Day == 1 && _weatherData.FirstEntry.Hour == 0)
+            {
+                _fwi.Reset();
+                int days = (_simulation.Time.StartDateTime - _weatherData.FirstEntry).Days;
+                if(_simulation.Time.StartDateTime.Hour < 12)
+                {
+                    days--; 
+                }
+
+                DateTime start = _weatherData.FirstEntry.AddHours(12); 
+                for (int i = 0; i < days; ++i)
+                {
+                    HourlyWeatherData noonData = _weatherData.HourlyData[12 + 24 * i];
+                    _fwi.CalculateDay(start, noonData._temp, noonData._rh, noonData._windSpeed, noonData._precip);
+                    start.AddHours(24);
+                }
+            }*/
         }
 
         Wildfire.DeadFuelMoistureEngine _deadFuelMoistureEngine;
@@ -62,11 +89,17 @@ namespace PREACT
             }
         }
 
-        public void Step(float simulationTime, DateTime currentDateTime)
+        public void Update(DateTime currentDateTime, bool forceUpdate = false)
         {
             bool newMinute = _lastDateTime.Minute != currentDateTime.Minute;
             bool newHour = _lastDateTime.Hour != currentDateTime.Hour;
             bool newDay = _lastDateTime.DayOfYear != currentDateTime.DayOfYear;
+            if(forceUpdate)
+            {
+                newMinute = true;
+                newHour = true;
+                newDay = true;
+            }
 
             if (newDay)
             {
@@ -122,34 +155,7 @@ namespace PREACT
             _lastDateTime = currentDateTime;
         }
 
-        public void Initialize(TimeManager timeManager)
-        {
-            InitializeWeather(timeManager);
-
-            _weatherData.GetHourlyData(_simulation.Time.StartDateTime, out _currentHourlyData, out _nextHourlyData);
-            _interpolatedHourlyData = _currentHourlyData;
-
-            //calculate FWI up until point of simulation start
-            /*if(_weatherData.FirstEntry.Month == 1 && _weatherData.FirstEntry.Day == 1 && _weatherData.FirstEntry.Hour == 0)
-            {
-                _fwi.Reset();
-                int days = (_simulation.Time.StartDateTime - _weatherData.FirstEntry).Days;
-                if(_simulation.Time.StartDateTime.Hour < 12)
-                {
-                    days--; 
-                }
-
-                DateTime start = _weatherData.FirstEntry.AddHours(12); 
-                for (int i = 0; i < days; ++i)
-                {
-                    HourlyWeatherData noonData = _weatherData.HourlyData[12 + 24 * i];
-                    _fwi.CalculateDay(start, noonData._temp, noonData._rh, noonData._windSpeed, noonData._precip);
-                    start.AddHours(24);
-                }
-            }*/
-        }
-
-        private void InitializeWeather(TimeManager timeManager)
+        private void LoadOrDownloadWeather(TimeManager timeManager)
         {
             string filePath = Path.Combine(_simulation.Input.RootFolder, _simulation.Input.Weather.WeatherFile);
             bool success = false;
@@ -173,7 +179,7 @@ namespace PREACT
                 }
             }     
 
-            //check for default named file that would be saved by the donwloader
+            //check for default named file that would be saved by the downloader
             if(!fileExists)
             {
                 filePath = Path.Combine(_simulation.Input.RootFolder, $"{_simulation.Input.Simulation.Name}_weather.csv");

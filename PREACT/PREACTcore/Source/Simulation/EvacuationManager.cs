@@ -22,7 +22,7 @@ namespace PREACT.Evacuation
 
 
         PREACTInput _input;
-        EvacuationGroup _defaultEvacutionGroup;        
+        EvacuationGroup _defaultEvacuationGroup;        
         Dictionary<string, EvacuationDestination> _evacuationDestinationsDict;
         List<EvacuationDestination> _evacuationDestinations;
         List<EvacuationDestination> _availableEvacuationDestinations;
@@ -52,13 +52,16 @@ namespace PREACT.Evacuation
             BuildAvailableEvacuationDestinations();
         }
 
-        public void PostStep()
+        public void UpdateConsequences()
         {
             //handle all damage/impact on road network
             AffectRoadNetwork();
 
             //inject vehicles from all sources
             HandleNewVehicles();
+            
+            //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
+            UpdateDestinationsWildfireStatus();
         }
 
         private void AffectRoadNetwork()
@@ -242,8 +245,13 @@ namespace PREACT.Evacuation
             return result;
         }
 
-        public void CheckEvacuationGoalStatus()
+        public void UpdateDestinationsWildfireStatus()
         {
+            if (!_input.WildfireModule.Enabled)
+            {
+                return;
+            }
+
             foreach (EvacuationDestination eD in _evacuationDestinations)
             {
                 if (!eD.Blocked)
@@ -391,7 +399,7 @@ namespace PREACT.Evacuation
             {
                 if (_evacuationGroups[i].Default)
                 {
-                    _defaultEvacutionGroup = _evacuationGroups[i];
+                    _defaultEvacuationGroup = _evacuationGroups[i];
                     break;
                 }
             }
@@ -441,7 +449,7 @@ namespace PREACT.Evacuation
 
         public EvacuationGroup GetEvacuationGroup(Vector2d latLon, out bool insideGroup)
         {
-            EvacuationGroup pickedGroup = _defaultEvacutionGroup;
+            EvacuationGroup pickedGroup = _defaultEvacuationGroup;
             insideGroup = false;
 
             for (int i = 0; i < _evacuationGroups.Length; ++i)

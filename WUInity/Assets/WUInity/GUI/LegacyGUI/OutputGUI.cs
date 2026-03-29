@@ -185,7 +185,7 @@ namespace WUInity.UI
                 LegendGUI();                
             }
 
-            if (_engine.Simulation.State == Simulation.SimulationState.Finished)  
+            if (_engine.Simulation.State == Simulation.SimulationState.Completed)  
             {
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Display usage map"))
                 {
