@@ -33,9 +33,6 @@ namespace PREACT.Evacuation
         public TrafficModule TrafficModule { get => _trafficModule; }
         public TriggerBufferModule TriggerBufferModule { get => _triggerBufferModule; }
 
-        public Stopwatch PathfindingStopwatch { get => _pathfindingStopwatch; }
-        public Stopwatch RoadClosureStopwatch { get => _roadClosureStopwatch; }
-
         //Data, move?
         public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
         public DemographicsInput DefaultDemographics { get => _defaultDemographics; }
@@ -486,6 +483,12 @@ namespace PREACT.Evacuation
             }
 
             return result;
+        }
+
+        public void PostRun(Stopwatch simStopwatch)
+        {
+            Engine.Message(_simulation, Engine.LogType.Log, "Total time spent on road closures [s]:" + _roadClosureStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _roadClosureStopwatch.ElapsedMilliseconds / simStopwatch.ElapsedMilliseconds)));
+            Engine.Message(_simulation, Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _pathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _pathfindingStopwatch.ElapsedMilliseconds / simStopwatch.ElapsedMilliseconds)));
         }
     }
 }

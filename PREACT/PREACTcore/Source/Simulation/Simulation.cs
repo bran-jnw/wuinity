@@ -32,8 +32,9 @@ namespace PREACT
         private HazardManager _hazards;                             
 
         private List<SimulationModule> _simulationModules = new List<SimulationModule>();
-        private System.Threading.Tasks.Task[] _simulationModuleTasks;
-        private Stopwatch[] _moduleStopwatches;        
+        private Stopwatch[] _moduleStopwatches;
+
+        private JobSystem _moduleJobSystem;
 
         //Data
         private int _simulationIndex;
@@ -70,7 +71,7 @@ namespace PREACT
             _spatial = new SpatialManager(this);
             _weather = new WeatherManager(this, _time);
             _hazards = new HazardManager(this);
-            _evacuation = new EvacuationManager(this);            
+            _evacuation = new EvacuationManager(this);              
         }
 
         /// <summary>
@@ -165,24 +166,27 @@ namespace PREACT
                 _engine.WUIShow.SendData(_time.SimulationTime);
             }
 
-            UpdateEvents();            
+            UpdateEvents();
 
-            //step all modules forward in time
-            for(int i = 0; i < _simulationModules.Count; ++i)
-            {
-                Stopwatch stopwatch = _moduleStopwatches[i];
-                SimulationModule module = _simulationModules[i];
-                _simulationModuleTasks[i] = System.Threading.Tasks.Task.Run(() => StepModule(stopwatch, module, _time.SimulationTime, _input.Simulation.DeltaTime), _stopThreadsToken.Token);                  
-            }
-            System.Threading.Tasks.Task.WaitAll(_simulationModuleTasks);
-
-            //advance time
+            //step all modules forward in time            
             float deltaTime = _input.Simulation.DeltaTime;
             //if only fire running we can take longer steps potentially
             /*if (_hazards.WildfireModule != null && _input.WildfireModule.Enabled && !_input.PedestrianModule.Enabled && !_input.TrafficModule.Enabled && !_input.SmokeModule.Enabled)
             {
                 deltaTime = (float)_hazards.WildfireModule.GetInternalDeltaTime();
             }*/
+            for (int i = 0; i < _simulationModules.Count; ++i)
+            {
+                SimulationModule module = _simulationModules[i];
+                if (!module.IsSimulationDone())
+                {
+                    Stopwatch stopwatch = _moduleStopwatches[i];                    
+                    _moduleJobSystem.Schedule(() => StepModule(stopwatch, module, _time.SimulationTime, deltaTime));
+                }                
+            }
+            _moduleJobSystem.ExecuteJobs();
+
+            //advance time            
             _time.Step(deltaTime);
 
             //deal with what has happen during time step
@@ -268,8 +272,8 @@ namespace PREACT
             {
                 Engine.Message(this, Engine.LogType.Log, $"Total time spent in {_simulationModules[i].GetType().Name} [s]:" + _moduleStopwatches[i].ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _moduleStopwatches[i].ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
             }
-            Engine.Message(this, Engine.LogType.Log, "Total time spent on road closures [s]:" + _evacuation.RoadClosureStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _evacuation.RoadClosureStopwatch.ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
-            Engine.Message(this, Engine.LogType.Log, "Total time spent on initial traffic route pathfinding [s]:" + _evacuation.PathfindingStopwatch.ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _evacuation.PathfindingStopwatch.ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
+            _evacuation.PostRun(_simulationStopwatch);
+
             _state = SimulationState.Completed;
             Engine.Message(this, Engine.LogType.Log, " Simulation done.");
 
@@ -304,12 +308,12 @@ namespace PREACT
             }
 
             //stuff for running threads and timing
-            _simulationModuleTasks = new System.Threading.Tasks.Task[_simulationModules.Count];
             _moduleStopwatches = new Stopwatch[_simulationModules.Count];
             for (int i = 0; i < _simulationModules.Count; ++i)
             {
                 _moduleStopwatches[i] = new Stopwatch();
             }
+            _moduleJobSystem = new JobSystem(System.Math.Min(System.Environment.ProcessorCount, _simulationModules.Count));
 
             Engine.Message(this, Engine.LogType.Log, "All requested sub-modules initiated successfully.");
         }          
@@ -356,15 +360,14 @@ namespace PREACT
             timer.Stop();
         }
 
-        CancellationTokenSource _stopThreadsToken = new CancellationTokenSource();
         private void StopModules()
         {
-            //_stopThreadsToken.Cancel();
-
             foreach(SimulationModule sim in _simulationModules)
             {
                 sim.Stop();
             }
+
+            _moduleJobSystem.Dispose();
         }        
 
         bool _stoppedDueToError = false;
