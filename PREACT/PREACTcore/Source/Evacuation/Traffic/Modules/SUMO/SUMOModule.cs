@@ -51,7 +51,7 @@ namespace PREACT.Traffic
 
                 //need to use UTM projection in SUMO and WUInity to overlay data
                 Vector2d sumoUTM = new Vector2d(-_simulation.Input.TrafficModule.SumoInput.UTMoffset.x, -_simulation.Input.TrafficModule.SumoInput.UTMoffset.y);
-                _originOffset = sumoUTM - _simulation.UTMOrigin;
+                _originOffset = sumoUTM - _simulation.Spatial.UTMOrigin;
 
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
@@ -371,15 +371,15 @@ namespace PREACT.Traffic
                 {
                     OSGeo.GDAL.Dataset output = driver.Create(filePath, xDim, yDim, 3, OSGeo.GDAL.DataType.GDT_Float32, null);
 
-                    double leftX = _simulation.UTMOrigin.x;
-                    double lowerLeftY = _simulation.UTMOrigin.y;
+                    double leftX = _simulation.Spatial.UTMOrigin.x;
+                    double lowerLeftY = _simulation.Spatial.UTMOrigin.y;
                     double[] geoTransform = new double[] { leftX, _simulation.Input.TrafficModule.SumoInput.OutputRasterSize, 0.0, lowerLeftY, 0.0, _simulation.Input.TrafficModule.SumoInput.OutputRasterSize };
                     output.SetGeoTransform(geoTransform);
 
                     OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
-                    reference.SetProjCS("UTM " + _simulation.UTMData.Zona + " (WGS84)");
+                    reference.SetProjCS("UTM " + _simulation.Spatial.UTMData.Zona + " (WGS84)");
                     reference.SetWellKnownGeogCS("WGS84");
-                    reference.SetUTM(_simulation.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                    reference.SetUTM(_simulation.Spatial.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                     output.SetSpatialRef(reference);
 
                     //heat map

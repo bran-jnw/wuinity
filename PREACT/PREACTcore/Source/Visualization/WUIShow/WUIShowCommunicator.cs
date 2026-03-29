@@ -114,7 +114,7 @@ namespace PREACT.Visualization
                 offset += sizeof(double);
 
                 //origin WGS84
-                Vector2d lcpOriginUTM = _engine.Simulation.UTMOrigin + _engine.Simulation.Input.WildfireModule.Data.LandscapeData.OriginOffset;
+                Vector2d lcpOriginUTM = _engine.Simulation.Spatial.UTMOrigin + _engine.Simulation.Input.WildfireModule.Data.LandscapeData.OriginOffset;
                 var utmZone = Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_engine.Simulation.Input.Simulation.LowerLeftLatLon.x, _engine.Simulation.Input.Simulation.LowerLeftLatLon.y);
                 var lcpOriginWgs84 = Utility.LatLngUTMConverter.WGS84.convertUtmToLatLng(lcpOriginUTM.y, lcpOriginUTM.x, utmZone.ZoneNumber, utmZone.ZoneLetter);
                 double lat = lcpOriginWgs84.Lat;

@@ -416,15 +416,15 @@ namespace PREACT.Wildfire
                 {
                     OSGeo.GDAL.Dataset output = driver.Create(filePath, _xDim, _yDim, 4, OSGeo.GDAL.DataType.GDT_Float32, null);
 
-                    double leftX = _simulation.UTMOrigin.x + _originOffset.x;
-                    double lowerLeftY = _simulation.UTMOrigin.y + _originOffset.y;
+                    double leftX = _simulation.Spatial.UTMOrigin.x + _originOffset.x;
+                    double lowerLeftY = _simulation.Spatial.UTMOrigin.y + _originOffset.y;
                     double[] geoTransform = new double[] { leftX, GetCellSizeX(), 0.0, lowerLeftY, 0.0, GetCellSizeY() };
                     output.SetGeoTransform(geoTransform);
 
                     OSGeo.OSR.SpatialReference reference = new OSGeo.OSR.SpatialReference("");
-                    reference.SetProjCS("UTM " + _simulation.UTMData.Zona + " (WGS84)");
+                    reference.SetProjCS("UTM " + _simulation.Spatial.UTMData.Zona + " (WGS84)");
                     reference.SetWellKnownGeogCS("WGS84");
-                    reference.SetUTM(_simulation.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
+                    reference.SetUTM(_simulation.Spatial.UTMData.ZoneNumber, _simulation.Input.Simulation.LowerLeftLatLon.x > 0 ? 1 : 0); ;
                     output.SetSpatialRef(reference);
 
                     //time of arrival

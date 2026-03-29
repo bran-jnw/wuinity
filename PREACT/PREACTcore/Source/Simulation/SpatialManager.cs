@@ -1,4 +1,5 @@
 ﻿using PREACT.Math;
+using PREACT.Utility;
 
 namespace PREACT
 {
@@ -14,6 +15,8 @@ namespace PREACT
         private Vector2d _simulationCenterLatLon;
 
         public Vector2d SimulationCenterLatLon { get => _simulationCenterLatLon; }
+        public Vector2d UTMOrigin { get => _simulation.Input.Simulation.Data.UTMOrigin; }
+        public LatLngUTMConverter.UTMResult UTMData { get => _simulation.Input.Simulation.Data.UTMData; }
 
         public SpatialManager(Simulation simulation)
         {

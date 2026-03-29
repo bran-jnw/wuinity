@@ -4,7 +4,7 @@ using PREACT.Input;
 using PREACT.Pedestrian;
 using PREACT.Wildfire;
 using PREACT.Traffic;
-using PREACT.Pedestrian;
+using System.Diagnostics;
 using System.IO;
 
 namespace PREACT.Evacuation
@@ -15,6 +15,11 @@ namespace PREACT.Evacuation
         private TrafficModule _trafficModule;
         private PedestrianModule _pedestrianModule;
         private TriggerBufferModule _triggerBufferModule;
+
+
+        private Stopwatch _pathfindingStopwatch = new Stopwatch();
+        private Stopwatch _roadClosureStopwatch = new Stopwatch();
+
 
         PREACTInput _input;
         EvacuationGroup _defaultEvacutionGroup;        
@@ -27,6 +32,11 @@ namespace PREACT.Evacuation
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
         public TriggerBufferModule TriggerBufferModule { get => _triggerBufferModule; }
+
+        public Stopwatch PathfindingStopwatch { get => _pathfindingStopwatch; }
+        public Stopwatch RoadClosureStopwatch { get => _roadClosureStopwatch; }
+
+        //Data, move?
         public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
         public DemographicsInput DefaultDemographics { get => _defaultDemographics; }
 
@@ -41,6 +51,42 @@ namespace PREACT.Evacuation
             BuildEvacuationDestinationList(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
         }
+
+        public void PostStep()
+        {
+            //handle all damage/impact on road network
+            AffectRoadNetwork();
+
+            //inject vehicles from all sources
+            HandleNewVehicles();
+        }
+
+        private void AffectRoadNetwork()
+        {
+            //handle any fire effects on road network
+            if (_simulation.Hazards.WildfireModule != null)
+            {
+                if (_trafficModule != null)
+                {
+                    _roadClosureStopwatch.Start();
+                    _trafficModule.HandleIgnitedFireCells(_simulation.Hazards.WildfireModule.GetIgnitedFireCells());
+                    _roadClosureStopwatch.Stop();
+                }
+                _simulation.Hazards.WildfireModule.ConsumeIgnitedFireCells();
+            }
+        }
+
+        private void HandleNewVehicles()
+        {
+            //handle/inject cars that arrived this timestep
+            if (_trafficModule != null)
+            {
+                _pathfindingStopwatch.Start();
+                _trafficModule.HandleNewCars();
+                _pathfindingStopwatch.Stop();
+            }
+        }
+
 
         public List<SimulationModule> CreateModules(WeatherManager weather, TimeManager time, out bool success)
         {
