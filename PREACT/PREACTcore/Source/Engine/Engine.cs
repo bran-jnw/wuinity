@@ -160,7 +160,7 @@ namespace PREACT
                 //only run wui show in serial mode
                 _mainSimulation.Run(true);
 
-                if (_mainSimulation.TrafficModule != null)
+                if (_mainSimulation.Evacuation.TrafficModule != null)
                 {
                     CollectSimulationStatistics(_mainSimulation.Output.GetTrafficArrivalData(), simulationIndex,engineTask);
                 }                

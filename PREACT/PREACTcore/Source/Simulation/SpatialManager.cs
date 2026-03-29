@@ -39,9 +39,9 @@ namespace PREACT
         public Vector2d GetWildfireModuleOffset()
         {
             Vector2d result = Vector2d.zero;
-            if(_simulation.WildfireModule != null)
+            if(_simulation.Hazards.WildfireModule != null)
             {
-                result = _simulation.WildfireModule.GetOriginOffset();
+                result = _simulation.Hazards.WildfireModule.GetOriginOffset();
             }
 
             return result;
@@ -51,9 +51,9 @@ namespace PREACT
         {
             inside = false;
 
-            if (_simulation.WildfireModule != null)
+            if (_simulation.Hazards.WildfireModule != null)
             {
-                return _simulation.WildfireModule.SimulationPosToCellIndex(simulationPos, out inside);
+                return _simulation.Hazards.WildfireModule.SimulationPosToCellIndex(simulationPos, out inside);
             }
 
             return Vector2int.zero;

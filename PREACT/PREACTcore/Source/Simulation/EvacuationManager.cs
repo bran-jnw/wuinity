@@ -3,21 +3,30 @@ using System.Collections.Generic;
 using PREACT.Input;
 using PREACT.Pedestrian;
 using PREACT.Wildfire;
+using PREACT.Traffic;
+using PREACT.Pedestrian;
+using System.IO;
 
 namespace PREACT.Evacuation
 {
     public class EvacuationManager
     {
         Simulation _simulation;
+        private TrafficModule _trafficModule;
+        private PedestrianModule _pedestrianModule;
+        private TriggerBufferModule _triggerBufferModule;
+
         PREACTInput _input;
         EvacuationGroup _defaultEvacutionGroup;        
         Dictionary<string, EvacuationDestination> _evacuationDestinationsDict;
         List<EvacuationDestination> _evacuationDestinations;
         List<EvacuationDestination> _availableEvacuationDestinations;
         EvacuationGroup[] _evacuationGroups;
-
         DemographicsInput _defaultDemographics;
 
+        public PedestrianModule PedestrianModule { get => _pedestrianModule; }
+        public TrafficModule TrafficModule { get => _trafficModule; }
+        public TriggerBufferModule TriggerBufferModule { get => _triggerBufferModule; }
         public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
         public DemographicsInput DefaultDemographics { get => _defaultDemographics; }
 
@@ -31,6 +40,138 @@ namespace PREACT.Evacuation
             SetDefaulEvacuationtGroup(); //just sets default group fallback
             BuildEvacuationDestinationList(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
+        }
+
+        public List<SimulationModule> CreateModules(WeatherManager weather, TimeManager time, out bool success)
+        {
+            List<SimulationModule> createdModules = new List<SimulationModule>();
+
+            CreatePedestrianModule(_simulation, _input, weather, time, out success);
+            if(success && _pedestrianModule != null)
+            {
+                createdModules.Add(_pedestrianModule);
+            }
+            else
+            {
+                return createdModules;
+            }
+
+            CreateTrafficModule(_simulation, _input, weather, time, out success);
+            if (success && _trafficModule != null)
+            {
+                createdModules.Add(_trafficModule);
+            }
+            else
+            {
+                return createdModules;
+            }
+
+            CreateDroneModule();
+
+            return createdModules;
+        }
+
+        private void CreatePedestrianModule(Simulation simulation, PREACTInput input, WeatherManager weather, TimeManager time, out bool success)
+        {
+            success = false;
+            if (_input.PedestrianModule.Enabled)
+            {
+                if (_input.PedestrianModule.Module == PedestrianModuleInput.PedestrianModules.JupedSimSUMO)
+                {
+                    //placeholder for JupedSim
+                }
+                else if (_input.PedestrianModule.Module == PedestrianModuleInput.PedestrianModules.MacroHouseholdSim)
+                {
+                    _pedestrianModule = new MacroHouseholdSim(simulation);                    
+                    Engine.Message(simulation, Engine.LogType.Log, "Pedestrian module MacroPedestrianSim initiated.");
+                }
+            }
+            else
+            {
+                Engine.Message(simulation, Engine.LogType.Log, "No pedestrian module was enabled.");
+            }
+        }
+
+        private void CreateTrafficModule(Simulation simulation, PREACTInput input, WeatherManager weather, TimeManager time, out bool success)
+        {
+            success = false;
+
+            if (_input.TrafficModule.Enabled)
+            {
+                if (_input.TrafficModule.Module == TrafficModuleInput.TrafficModules.SUMO)
+                {
+                    _trafficModule = new SUMOModule(simulation, out success);
+                    if (success)
+                    {
+                        Engine.Message(simulation, Engine.LogType.Log, "Traffic module SUMO initiated.");
+                    }
+                }
+                else
+                {
+                    _trafficModule = new MacroTrafficSim(simulation);
+                    Engine.Message(simulation, Engine.LogType.Log, "Traffic module MacroTrafficSim initiated.");
+                }
+            }
+            else
+            {
+                success = true;
+                Engine.Message(simulation, Engine.LogType.Log, "No traffic module was enabled.");
+            }
+        }
+
+        private void CreateDroneModule()
+        {
+            //Panos
+        }
+
+        public void CreateAndRunTriggerBufferModule(Simulation simulation, PREACTInput input, WeatherManager weather, TimeManager time)
+        {
+            if (_input.TriggerBufferModule.Enabled)
+            {
+                if (_input.TriggerBufferModule.Module == TriggerBufferModuleInput.TriggerBufferModules.kPERIL)
+                {
+                    if (!_input.WildfireModule.Enabled && !_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
+                    {
+                        Engine.Message(simulation, Engine.LogType.Warning, "Can't run kPERIL without fire module (user set not to use BEHAVE).");
+                        return;
+                    }
+                    else
+                    {
+                        if (_input.TriggerBufferModule.kPERILInput.CalculateROSFromBehave)
+                        {
+                            _triggerBufferModule = new kPERIL(_input.WildfireModule.Data.LandscapeData, time.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, _input.WildfireModule.Data.InitialFuelMoistureData, _input.WildfireModule.Data.FuelModelsData);
+                        }
+                        else
+                        {
+                            _triggerBufferModule = new kPERIL(time.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, simulation.Hazards.WildfireModule.GetMaxROS(), simulation.Hazards.WildfireModule.GetMaxROSAzimuth());
+                        }
+                        _triggerBufferModule.Run();
+                        string outputFilePath = Path.Combine(simulation.Engine.OutputFolder, simulation.SimulationIndex + "_" + _input.TriggerBufferModule.kPERILInput.OutputName);
+                        kPERIL.SaveToFile(_triggerBufferModule.TriggerBufferOutput, simulation.Hazards.WildfireModule.GetCellSizeX(), outputFilePath);
+                    }
+                }
+                else
+                {
+
+                }
+
+                if (_triggerBufferModule != null)
+                {
+                    simulation.Output.AddTriggerBufferOutput(_triggerBufferModule.TriggerBufferOutput, simulation.SimulationIndex);
+                }
+            }
+            else
+            {
+                Engine.Message(simulation, Engine.LogType.Log, "Trigger buffer module was enabled.");
+            }
+        }
+
+        public void InsertNewCar(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
+        {
+            if (_trafficModule != null)
+            {
+                _trafficModule.InsertNewCar(startLatLon, evacuationGoal, numberOfPeopleInCar);
+            }
         }
 
         int _runtimeDestinationCount = 0;
@@ -61,7 +202,7 @@ namespace PREACT.Evacuation
             {
                 if (!eD.Blocked)
                 {
-                    FireCellState cellState = _simulation.WildfireModule.GetFireCellState(eD.SimulationPos);
+                    FireCellState cellState = _simulation.Hazards.WildfireModule.GetFireCellState(eD.SimulationPos);
                     if (cellState == FireCellState.Ignited)
                     {
                         Engine.Message(_simulation, Engine.LogType.Log, " Destination blocked by fire: " + eD.Name);
@@ -121,7 +262,7 @@ namespace PREACT.Evacuation
             //TODO
 
             //update cars already in traffic
-            _simulation.TrafficModule.UpdateEvacuationGoals();
+            _trafficModule.UpdateEvacuationGoals();
         }
 
         private void BuildEvacuationDestinationList()

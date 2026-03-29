@@ -382,11 +382,6 @@ namespace PREACT.Input
             {
                 PREACTInput.InputNotFoundMessage(nameOfInput);
             }
-            if (UseInitialIgnitionMap && fireInput.GraphicalFireInputFile != string.Empty)
-            {
-                success = false;
-                return;
-            }
 
             success = true;
         }

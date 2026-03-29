@@ -7,10 +7,11 @@
 
 using System.IO;
 using System.Collections.Generic;
+using PREACT.Input;
+using PREACT.Pedestrian;
 
 namespace PREACT.Output
 {
-    [System.Serializable]
     public class SimulationOutput
     {
         private Simulation _simulation;
@@ -32,12 +33,45 @@ namespace PREACT.Output
             _simulation = simulation;
         }
 
+        public void SaveOutput()
+        {
+            if (_simulation.Input.TrafficModule.Enabled)
+            {
+                Engine.Message(_simulation, Engine.LogType.Log, " Total cars in simulation: " + _simulation.Evacuation.TrafficModule.GetTotalCarsSimulated());
+                _simulation.Evacuation.TrafficModule.SaveToFile(_simulation.SimulationIndex);
+                SaveArrivalData();
+            }
+            if (_simulation.Input.PedestrianModule.Enabled)
+            {
+                if (_simulation.Input.PedestrianModule.Module == PedestrianModuleInput.PedestrianModules.MacroHouseholdSim)
+                {
+                    MacroHouseholdSim mHS = (MacroHouseholdSim)_simulation.Evacuation.PedestrianModule;
+                    string file = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Name + "_pedestrian_output_" + _simulation.SimulationIndex + ".csv");
+                    mHS.SaveToFile(file);
+                }
+            }
+
+        }
+
+        private void SaveArrivalData()
+        {
+            string outputFilePath = Path.Combine(_simulation.Engine.OutputFolder, _simulation.Input.Simulation.Name + "_" + _simulation.SimulationIndex + "_arrivalData.csv");
+            using (StreamWriter outputFile = new StreamWriter(outputFilePath))
+            {
+                List<double> data = _simulation.Evacuation.TrafficModule.GetArrivalData();
+                foreach (double value in data)
+                {
+                    outputFile.WriteLine(value.ToString());
+                }
+            }
+        }
+
         List<double> _emptyArrivalData = new List<double>();
         public List<double> GetTrafficArrivalData()
         {
-            if (_simulation.TrafficModule != null)
+            if (_simulation.Evacuation.TrafficModule != null)
             {
-                return _simulation.TrafficModule.GetArrivalData();
+                return _simulation.Evacuation.TrafficModule.GetArrivalData();
             }
             else
             {

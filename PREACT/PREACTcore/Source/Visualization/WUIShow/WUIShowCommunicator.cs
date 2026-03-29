@@ -42,7 +42,7 @@ namespace PREACT.Visualization
             this.origoLongitude = origoLongitude;
             this.origoLatitude = origoLatitude;
 
-            _offset = _engine.Simulation.TrafficModule.GetOriginOffset();
+            _offset = _engine.Simulation.Evacuation.TrafficModule.GetOriginOffset();
             this.maxNumberOfCars = maxNumberOfCars;
             previouslySentVehiclePositions = new Dictionary<uint, Vector2d>();
             _newVehiclesNotSent = new Queue<Traffic.TrafficModuleVehicle>();
@@ -87,7 +87,7 @@ namespace PREACT.Visualization
         private byte[] GetFinalFireTimeOfArrival()
         {
             byte[] result = null;
-            Wildfire.FireRasterData[,] data = ((Wildfire.AscFireImport)_engine.Simulation.WildfireModule).GetCompleteFireData();
+            Wildfire.FireRasterData[,] data = ((Wildfire.AscFireImport)_engine.Simulation.Hazards.WildfireModule).GetCompleteFireData();
 
             if (data != null)
             {
@@ -104,11 +104,11 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.Simulation.WildfireModule.GetCellCountX();
+                double xSize = _engine.Simulation.Hazards.WildfireModule.GetCellCountX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.Simulation.WildfireModule.GetCellCountY();
+                double ySize = _engine.Simulation.Hazards.WildfireModule.GetCellCountY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
@@ -259,7 +259,7 @@ namespace PREACT.Visualization
             }
 
             //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
-            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = _engine.Simulation.TrafficModule.GetActiveVehicles();
+            Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = _engine.Simulation.Evacuation.TrafficModule.GetActiveVehicles();
 
             //we only have dummy data
             if(activeVehicles.Count == 0)

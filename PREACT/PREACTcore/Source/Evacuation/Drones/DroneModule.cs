@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PREACT.Drones
+namespace PREACT.Evacuation
 {
     public abstract class DroneModule : SimulationModule
     {

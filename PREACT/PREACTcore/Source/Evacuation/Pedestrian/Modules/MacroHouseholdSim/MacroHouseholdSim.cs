@@ -42,6 +42,7 @@ namespace PREACT.Pedestrian
 
         public MacroHouseholdSim(Simulation simulation) : base(simulation)
         {
+            PopulateSimulation(simulation.Input.Population.Data.Households);
             output = new List<string>();
             output.Add("Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total cars activated,Avg. walking dist.");
         }
@@ -198,12 +199,12 @@ namespace PREACT.Pedestrian
 
                     for (int i = 0; i < household.cars; i++)
                     {
-                        _simulation.InsertNewCar(vehicleLatLon, evacDest, (uint)peopleInCar[i]);
+                        _simulation.Evacuation.InsertNewCar(vehicleLatLon, evacDest, (uint)peopleInCar[i]);
                     }
                 }
                 else
                 {
-                    _simulation.InsertNewCar(vehicleLatLon, evacDest, (uint)household.peopleInHousehold);
+                    _simulation.Evacuation.InsertNewCar(vehicleLatLon, evacDest, (uint)household.peopleInHousehold);
                 }
             }
             

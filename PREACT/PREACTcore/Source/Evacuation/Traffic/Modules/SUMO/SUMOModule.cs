@@ -465,7 +465,7 @@ namespace PREACT.Traffic
             {
                 int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[_simulation.WildfireModule.GetCellCountX(), _simulation.WildfireModule.GetCellCountY()];
+                fireCellEdges = new List<string>[_simulation.Hazards.WildfireModule.GetCellCountX(), _simulation.Hazards.WildfireModule.GetCellCountY()];
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
