@@ -145,8 +145,8 @@ namespace PREACT.Wildfire
 		public short[] landscape;
 		static readonly int headsize = 7316; //header size taken from farsite source code
 
-		Vector2d _originOffset; //offset from common origin (map lower left)
-		public Vector2d OriginOffset { get => _originOffset; }
+		Vector2d _origin; //offset from common origin (map lower left)
+		public Vector2d OriginOffset { get => _origin; }
 		Vector2int _originCellOffset; //cells offset from common origin
         //public Vector2int OriginCellOffset { get => originCellOffset; }
 
@@ -167,7 +167,7 @@ namespace PREACT.Wildfire
 			{
                 ReadLCP(filePath);
             }
-			CalculateOriginOffset(simulationUtmOrigin);
+			CalculateOrigin(simulationUtmOrigin);
 		}
 
 		private void ReadGeoTIFF(string filePath)
@@ -1011,11 +1011,11 @@ namespace PREACT.Wildfire
             }
         }
 
-		private void CalculateOriginOffset(Vector2d utmOrigin)
+		private void CalculateOrigin(Vector2d utmOriginReference)
 		{
             Vector2d lcpUTM = new Vector2d(Header.WestUtm, Header.SouthUtm);
-            _originOffset = lcpUTM - utmOrigin;
-            _originCellOffset = new Vector2int(-(int)(_originOffset.x / GetCellResolutionX()), -(int)(_originOffset.y / GetCellResolutionY()));            
+            _origin = lcpUTM - utmOriginReference;
+            _originCellOffset = new Vector2int(-(int)(_origin.x / GetCellResolutionX()), -(int)(_origin.y / GetCellResolutionY()));            
         }
 
 		long HaveCrownFuels()

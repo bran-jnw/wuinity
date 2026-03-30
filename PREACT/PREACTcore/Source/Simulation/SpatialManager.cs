@@ -39,12 +39,12 @@ namespace PREACT
         /// Returns the origin offset in meters (UTM coordinate offset compared to origin).
         /// </summary>
         /// <returns></returns>
-        public Vector2d GetWildfireModuleOffset()
+        public Vector2d GetWildfireModuleOrigin()
         {
             Vector2d result = Vector2d.zero;
-            if(_simulation.Hazards.WildfireModule != null)
+            if(_simulation.Hazards.Wildfire != null)
             {
-                result = _simulation.Hazards.WildfireModule.GetOriginOffset();
+                result = _simulation.Hazards.Wildfire.GetOriginOffset();
             }
 
             return result;
@@ -54,9 +54,9 @@ namespace PREACT
         {
             inside = false;
 
-            if (_simulation.Hazards.WildfireModule != null)
+            if (_simulation.Hazards.Wildfire != null)
             {
-                return _simulation.Hazards.WildfireModule.SimulationPosToCellIndex(simulationPos, out inside);
+                return _simulation.Hazards.Wildfire.SimulationPosToCellIndex(simulationPos, out inside);
             }
 
             return Vector2int.zero;

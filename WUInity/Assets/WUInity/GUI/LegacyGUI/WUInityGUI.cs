@@ -265,7 +265,8 @@ namespace WUInity.UI
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
 
-            for (int i = _messagesBuffer.Length - 1; i >= 0; i--)
+            int maxMessageIndex = _messagesBuffer.Length - 1;
+            for (int i = _messagesBuffer.Length - 1; i >= maxMessageIndex; i--)
             {
                 GUILayout.Label(_messagesBuffer[i]);
             }

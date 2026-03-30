@@ -36,6 +36,7 @@ namespace PREACT
         private JobSystem _moduleJobSystem;
         private Stopwatch _simulationStopwatch = new Stopwatch();
         private Stopwatch _threadsStopwatch = new Stopwatch();
+        private Stopwatch _weatherStopwatch = new Stopwatch();
 
         //Data
         private int _simulationIndex;
@@ -159,7 +160,9 @@ namespace PREACT
             long startTime = _simulationStopwatch.ElapsedMilliseconds;
 
             //update weather for current time step
+            _weatherStopwatch.Start();
             _weather.Update(_time.CurrentDateTime);
+            _weatherStopwatch.Stop();
 
             //this state represents the positions at the start of the time step
             if (_talkToWUIShow && _input.WUIShow.SendDataToWUIShow && _evacuation.TrafficModule != null)
@@ -271,6 +274,7 @@ namespace PREACT
 
             _simulationStopwatch.Stop();
             Engine.Message(this, Engine.LogType.Log, "Total time spent [s]:" + _simulationStopwatch.ElapsedMilliseconds * 0.001);
+            Engine.Message(this, Engine.LogType.Log, "Total time spent in weather manager [s]:" + _weatherStopwatch.ElapsedMilliseconds * 0.001);
             Engine.Message(this, Engine.LogType.Log, "Total time spent in module threads [s]:" + _threadsStopwatch.ElapsedMilliseconds * 0.001);
             if (_moduleStopwatches != null)
             {

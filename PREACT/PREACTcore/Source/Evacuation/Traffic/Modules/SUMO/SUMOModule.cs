@@ -457,7 +457,8 @@ namespace PREACT.Traffic
             //throw new System.NotImplementedException();
         }
 
-        List<string>[,] fireCellEdges;
+        //List<string>[,] fireCellEdges;
+        Dictionary<CellIndex, List<SumoEdge>> _cellsWithEdges;
         private void SortEdgesInFireCells()
         {
             if(!_simulation.Input.WildfireModule.Enabled)
@@ -468,9 +469,19 @@ namespace PREACT.Traffic
 
             try
             {
-                int fireCellsWithJunctions = 0;
+                Vector2d wildfireOrigin = _simulation.Hazards.Wildfire.GetOriginOffset();
+                double minX = wildfireOrigin.x - _originOffset.x; // now in sumo space
+                double minY = wildfireOrigin.y - _originOffset.y;
+                double cellW = _simulation.Hazards.Wildfire.GetCellSizeX();
+                double cellH = _simulation.Hazards.Wildfire.GetCellSizeY();
+
+                _cellsWithEdges = EdgeCellIntersection.SortEdgesIntoCells(_sumoConfig.Network.Edges, minX, minY, cellW, cellH, _simulation.Hazards.Wildfire.GetCellCountX(), _simulation.Hazards.Wildfire.GetCellCountX());
+                Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + _cellsWithEdges.Count);
+
+
+                /*int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[_simulation.Hazards.WildfireModule.GetCellCountX(), _simulation.Hazards.WildfireModule.GetCellCountY()];                
+                fireCellEdges = new List<string>[_simulation.Hazards.Wildfire.GetCellCountX(), _simulation.Hazards.Wildfire.GetCellCountY()];                
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
@@ -500,13 +511,15 @@ namespace PREACT.Traffic
                     }
                 }
 
-                Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);
+                Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);*/
             }
             catch (Exception e) 
             {
                 Engine.Message(null, Engine.LogType.SimulationError, e.Message);
             }            
         }
+
+        
 
         public override void HandleIgnitedFireCells(List<Vector2int> cellIndices)
         {
@@ -516,12 +529,48 @@ namespace PREACT.Traffic
             }
         }
 
+        HashSet<SUMOVehicle> _carsToUpdate = new HashSet<SUMOVehicle>(100);
         private void FireCellIgnited(int x, int y)
         {
-            //since we only want unique cars
-            HashSet<SUMOVehicle> carsToUpdate = new HashSet<SUMOVehicle>();
+            _carsToUpdate.Clear();
+            CellIndex ci = new CellIndex(x, y);
 
-            //make fire affect edges (based on junction)
+            if (_cellsWithEdges.TryGetValue(ci, out List<SumoEdge> edges))
+            {
+                foreach(SumoEdge edge in edges)
+                {
+                    //https://sumo.dlr.de/docs/Simulation/Routing.html
+                    //after testing this seems to be the best option
+                    LIBSUMO.Edge.adaptTraveltime(edge.Id, double.MaxValue);
+
+                    //collect cars in system that has the edge in their route
+                    foreach (SUMOVehicle car in _sumoVehicles.Values)
+                    {
+                        LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
+                        if (route.Contains(edge.Id))
+                        {
+                            _carsToUpdate.Add(car);
+                        }
+                    }
+                }
+            }
+
+            if (_carsToUpdate.Count == 0)
+            {
+                Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+            }
+            else
+            {
+                Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
+            }
+
+            //then do update for affected cars
+            foreach (SUMOVehicle car in _carsToUpdate)
+            {
+                LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
+            }
+
+            /*//make fire affect edges (based on junction)
             if (fireCellEdges[x, y] != null)
             {                
                 for (int i = 0; i < fireCellEdges[x, y].Count; i++)
@@ -541,7 +590,7 @@ namespace PREACT.Traffic
                     }
                 }
 
-                if(carsToUpdate.Count == 0)
+                if(_carsToUpdate.Count == 0)
                 {
                     Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
                 }
@@ -551,12 +600,12 @@ namespace PREACT.Traffic
                 }
 
                 //then do update for affected cars
-                foreach (SUMOVehicle car in carsToUpdate)
+                foreach (SUMOVehicle car in _carsToUpdate)
                 {
                     LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
                 }
-            }              
-        }
+            }*/
+        }    
 
         public override bool IsNetworkReachable(Vector2d pointLatLon)
         {

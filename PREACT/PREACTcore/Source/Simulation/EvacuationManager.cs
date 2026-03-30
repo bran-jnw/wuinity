@@ -64,15 +64,15 @@ namespace PREACT.Evacuation
         private void AffectRoadNetwork()
         {
             //handle any fire effects on road network
-            if (_simulation.Hazards.WildfireModule != null)
+            if (_simulation.Hazards.Wildfire != null)
             {
                 if (_trafficModule != null)
                 {
                     _roadClosureStopwatch.Start();
-                    _trafficModule.HandleIgnitedFireCells(_simulation.Hazards.WildfireModule.GetIgnitedFireCells());
+                    _trafficModule.HandleIgnitedFireCells(_simulation.Hazards.Wildfire.GetIgnitedFireCells());
                     _roadClosureStopwatch.Stop();
                 }
-                _simulation.Hazards.WildfireModule.ConsumeIgnitedFireCells();
+                _simulation.Hazards.Wildfire.ConsumeIgnitedFireCells();
             }
         }
 
@@ -205,11 +205,11 @@ namespace PREACT.Evacuation
                         }
                         else
                         {
-                            _triggerBufferModule = new kPERIL(time.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, simulation.Hazards.WildfireModule.GetMaxROS(), simulation.Hazards.WildfireModule.GetMaxROSAzimuth());
+                            _triggerBufferModule = new kPERIL(time.SimulationTime, _input.WildfireModule.Data.WuiArea, _input.TriggerBufferModule.kPERILInput.MidflameWindspeed, 0f, simulation.Hazards.Wildfire.GetMaxROS(), simulation.Hazards.Wildfire.GetMaxROSAzimuth());
                         }
                         _triggerBufferModule.Run();
                         string outputFilePath = Path.Combine(simulation.Engine.OutputFolder, simulation.SimulationIndex + "_" + _input.TriggerBufferModule.kPERILInput.OutputName);
-                        kPERIL.SaveToFile(_triggerBufferModule.TriggerBufferOutput, simulation.Hazards.WildfireModule.GetCellSizeX(), outputFilePath);
+                        kPERIL.SaveToFile(_triggerBufferModule.TriggerBufferOutput, simulation.Hazards.Wildfire.GetCellSizeX(), outputFilePath);
                     }
                 }
                 else
@@ -269,7 +269,7 @@ namespace PREACT.Evacuation
             {
                 if (!eD.Blocked)
                 {
-                    FireCellState cellState = _simulation.Hazards.WildfireModule.GetFireCellState(eD.SimulationPos);
+                    FireCellState cellState = _simulation.Hazards.Wildfire.GetFireCellState(eD.SimulationPos);
                     if (cellState == FireCellState.Ignited)
                     {
                         Engine.Message(_simulation, Engine.LogType.Log, " Destination blocked by fire: " + eD.Name);

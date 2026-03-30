@@ -85,8 +85,8 @@ namespace WUInity.Visualization
 
         private void CreateFireBuffer(Simulation simulation)
         {
-            _fireCellCountX = simulation.Hazards.WildfireModule.GetCellCountX();
-            _fireCellCountY = simulation.Hazards.WildfireModule.GetCellCountY();
+            _fireCellCountX = simulation.Hazards.Wildfire.GetCellCountX();
+            _fireCellCountY = simulation.Hazards.Wildfire.GetCellCountY();
             _fireBuffer = new ComputeBuffer(_fireCellCountX * _fireCellCountY, sizeof(float));
             _fireMaterial.SetInteger("_CellsX", _fireCellCountX);
             _fireMaterial.SetInteger("_CellsY", _fireCellCountY);
@@ -98,8 +98,8 @@ namespace WUInity.Visualization
         {
             if (simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None)
             {
-                _smokeCellCountX = simulation.Hazards.SmokeModule.GetCellsX();
-                _smokeCellCountY = simulation.Hazards.SmokeModule.GetCellsY();
+                _smokeCellCountX = simulation.Hazards.Smoke.GetCellsX();
+                _smokeCellCountY = simulation.Hazards.Smoke.GetCellsY();
                 sootBuffer = new ComputeBuffer(_smokeCellCountX * _smokeCellCountY, sizeof(float));
                 sootMaterial.SetInteger("_CellsX", _smokeCellCountX);
                 sootMaterial.SetInteger("_CellsY", _smokeCellCountY);
@@ -178,11 +178,11 @@ namespace WUInity.Visualization
                 float[] fireData = null;
                 if (_fireDisplayMode == FireDisplayMode.FirelineIntensity)
                 {
-                    fireData = simulation.Hazards.WildfireModule.GetFireLineIntensityData();
+                    fireData = simulation.Hazards.Wildfire.GetFireLineIntensityData();
                 }
                 else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
                 {
-                    fireData = simulation.Hazards.WildfireModule.GetFuelModelNumberData();
+                    fireData = simulation.Hazards.Wildfire.GetFuelModelNumberData();
                 }
                 
                 if (fireData != null)
@@ -196,7 +196,7 @@ namespace WUInity.Visualization
             {
                 if(simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None)
                 {
-                    float[] newSoot = simulation.Hazards.SmokeModule.GetSootDensity();
+                    float[] newSoot = simulation.Hazards.Smoke.GetSootDensity();
                     if(newSoot != null)
                     {
                         sootBuffer.SetData(newSoot);
@@ -229,7 +229,7 @@ namespace WUInity.Visualization
             Vector3 offset;
             Vector2 maxUV = Vector2.one;
 
-            simulation.Hazards.WildfireModule.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
+            simulation.Hazards.Wildfire.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
             width = (float)size.x;
             height = (float)size.y;             
             offset = new Vector3((float)offsetFire.x, 0f, (float)offsetFire.y);
@@ -321,7 +321,7 @@ namespace WUInity.Visualization
                 sootBuffer = null;
             }
 
-            if(!creationCall && simulation != null && simulation.Hazards.SmokeModule != null)
+            if(!creationCall && simulation != null && simulation.Hazards.Smoke != null)
             {
                 if (simulation.Input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                 {

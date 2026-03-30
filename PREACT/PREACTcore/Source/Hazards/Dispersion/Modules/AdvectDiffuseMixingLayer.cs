@@ -70,10 +70,10 @@ namespace PREACT.Dispersion
 
             //set up all buffers and data containers
             _globalData = new GlobalData();
-            _globalData.cellsX = _simulation.Hazards.WildfireModule.GetCellCountX();
-            _globalData.cellsY = _simulation.Hazards.WildfireModule.GetCellCountY();
-            _globalData.cellSizeX = _simulation.Hazards.WildfireModule.GetCellSizeX();
-            _globalData.cellSizeY = _simulation.Hazards.WildfireModule.GetCellSizeY();
+            _globalData.cellsX = _simulation.Hazards.Wildfire.GetCellCountX();
+            _globalData.cellsY = _simulation.Hazards.Wildfire.GetCellCountY();
+            _globalData.cellSizeX = _simulation.Hazards.Wildfire.GetCellSizeX();
+            _globalData.cellSizeY = _simulation.Hazards.Wildfire.GetCellSizeY();
             _globalData.cellSizeXSq = _globalData.cellSizeX * _globalData.cellSizeX;
             _globalData.cellSizeYSq = _globalData.cellSizeY * _globalData.cellSizeY;
             _globalData.inverseCellSizeXSq = 1f / _globalData.cellSizeXSq;
@@ -128,7 +128,7 @@ namespace PREACT.Dispersion
             bool fireHasUpdated = true;
             if (fireHasUpdated)
             {
-                _injection.CopyFromCPU(_simulation.Hazards.WildfireModule.GetSootProduction());
+                _injection.CopyFromCPU(_simulation.Hazards.Wildfire.GetSootProduction());
             }
 
             //update wind

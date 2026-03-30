@@ -87,7 +87,7 @@ namespace PREACT.Visualization
         private byte[] GetFinalFireTimeOfArrival()
         {
             byte[] result = null;
-            Wildfire.FireRasterData[,] data = ((Wildfire.AscFireImport)_engine.Simulation.Hazards.WildfireModule).GetCompleteFireData();
+            Wildfire.FireRasterData[,] data = ((Wildfire.AscFireImport)_engine.Simulation.Hazards.Wildfire).GetCompleteFireData();
 
             if (data != null)
             {
@@ -104,11 +104,11 @@ namespace PREACT.Visualization
                 offset += sizeof(int);
 
                 //physical size
-                double xSize = _engine.Simulation.Hazards.WildfireModule.GetCellCountX();
+                double xSize = _engine.Simulation.Hazards.Wildfire.GetCellCountX();
                 bytes = BitConverter.GetBytes(xSize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);
-                double ySize = _engine.Simulation.Hazards.WildfireModule.GetCellCountY();
+                double ySize = _engine.Simulation.Hazards.Wildfire.GetCellCountY();
                 bytes = BitConverter.GetBytes(ySize);
                 Buffer.BlockCopy(bytes, 0, result, offset, bytes.Length);
                 offset += sizeof(double);

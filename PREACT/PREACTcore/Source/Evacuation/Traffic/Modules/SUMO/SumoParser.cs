@@ -102,7 +102,7 @@ namespace PREACT.Traffic
                 return;
             }
 
-            //do edges now
+            //do edges
             XmlNodeList edgeNodes = root.SelectNodes("//edge");
             foreach (XmlNode edgeNode in edgeNodes)
             {

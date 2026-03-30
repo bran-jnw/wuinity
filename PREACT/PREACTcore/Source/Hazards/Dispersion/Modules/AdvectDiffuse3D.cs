@@ -76,7 +76,7 @@ namespace PREACT.Dispersion
 
         public AdvectDiffuse3D(Simulation simulation) : base(simulation)
         {
-            _originOffset = _simulation.Spatial.GetWildfireModuleOffset();
+            _originOffset = _simulation.Spatial.GetWildfireModuleOrigin();
             try
             {
                 Initialize();
@@ -120,8 +120,8 @@ namespace PREACT.Dispersion
             float zCellSize = 20f;
 
             //cell size stuff
-            _globalData.cellSizeX = _simulation.Hazards.WildfireModule.GetCellSizeX() * _globalData.fireSmokeCellRatio;
-            _globalData.cellSizeY = _simulation.Hazards.WildfireModule.GetCellSizeY() * _globalData.fireSmokeCellRatio;
+            _globalData.cellSizeX = _simulation.Hazards.Wildfire.GetCellSizeX() * _globalData.fireSmokeCellRatio;
+            _globalData.cellSizeY = _simulation.Hazards.Wildfire.GetCellSizeY() * _globalData.fireSmokeCellRatio;
             _globalData.cellSizeZ = zCellSize;
             Engine.Message(_simulation, Engine.LogType.Debug, "Cell sizes: " + _globalData.cellSizeX + ", " + _globalData.cellSizeY + ", " + _globalData.cellSizeZ);
 
@@ -141,8 +141,8 @@ namespace PREACT.Dispersion
             _globalData.invertedCellVolume = 1f / _globalData.cellVolume;
 
             //cell count stuff
-            _fireCellsX = _simulation.Hazards.WildfireModule.GetCellCountX();
-            _fireCellsY = _simulation.Hazards.WildfireModule.GetCellCountY();
+            _fireCellsX = _simulation.Hazards.Wildfire.GetCellCountX();
+            _fireCellsY = _simulation.Hazards.Wildfire.GetCellCountY();
             _globalData.xDim = _fireCellsX / _globalData.fireSmokeCellRatio + _fireCellsX % _globalData.fireSmokeCellRatio;
             _globalData.yDim = _fireCellsY / _globalData.fireSmokeCellRatio + _fireCellsY % _globalData.fireSmokeCellRatio;
             _globalData.xyDim = _globalData.xDim * _globalData.yDim;
@@ -264,7 +264,7 @@ namespace PREACT.Dispersion
             _globalData.dt = (float)deltaTime / subSteps;
 
             //inject soot
-            _cpuInjection.CopyFromCPU(_simulation.Hazards.WildfireModule.GetSootProduction());
+            _cpuInjection.CopyFromCPU(_simulation.Hazards.Wildfire.GetSootProduction());
             _injectionKernel(_fireCellsX * _fireCellsY, _cpuInjection.View, _groundIndex.View, _speciesDensity[READ].View, _globalData, _fireCellsX, _fireCellsY);
             _accelerator.Synchronize();
 

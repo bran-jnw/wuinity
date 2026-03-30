@@ -17,7 +17,6 @@ namespace PREACT.Input
         public enum SmokeSpeedReductionModels { Exponential, Smokanzo};
 
         public string ConfigurationFile = string.Empty;
-        //public Vector2d UTMoffset;
         public double OutputRasterSize = 25.0;        
         public float SmokeAlpha = 0f;
         public float SmokeBeta = 0f;
@@ -50,19 +49,6 @@ namespace PREACT.Input
             {
                 return newInput;
             }
-
-            /*nameOfInput = nameof(UTMoffset);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
-            {
-                string[] data = userInput.Split(',');
-                double.TryParse(data[0], out newInput.UTMoffset.x);
-                double.TryParse(data[1], out newInput.UTMoffset.y);
-            }
-            else
-            {
-                ++issues;
-                PREACTInput.InputNotFoundMessage(nameOfInput, true);
-            }*/
 
             nameOfInput = nameof(OutputRasterSize);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))

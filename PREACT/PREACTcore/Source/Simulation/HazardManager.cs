@@ -13,12 +13,12 @@ namespace PREACT
     /// </summary>
     public class HazardManager
     {
-        private WildfireModule _wildfireModule;
-        private SmokeModule _smokeModule;
+        private WildfireModule _wildfire;
+        private SmokeModule _smoke;
         private Simulation _simulation;
 
-        public WildfireModule WildfireModule { get => _wildfireModule; }
-        public SmokeModule SmokeModule { get => _smokeModule; }
+        public WildfireModule Wildfire { get => _wildfire; }
+        public SmokeModule Smoke { get => _smoke; }
 
         public HazardManager(Simulation simulation)
         {
@@ -30,9 +30,9 @@ namespace PREACT
             List<SimulationModule> createdModules = new List<SimulationModule>();
 
             CreateWildfireModule(_simulation, _simulation.Input, weather, time, out success);
-            if(success && _wildfireModule != null)
+            if(success && _wildfire != null)
             {
-                createdModules.Add(_wildfireModule);
+                createdModules.Add(_wildfire);
             }
             else
             {
@@ -40,9 +40,9 @@ namespace PREACT
             }
             
             CreateSmokeModule(_simulation, _simulation.Input, weather, time, out success);
-            if (success && _smokeModule != null)
+            if (success && _smoke != null)
             {
-                createdModules.Add(_smokeModule);
+                createdModules.Add(_smoke);
             }
             else
             {
@@ -60,18 +60,18 @@ namespace PREACT
             {
                 if (input.WildfireModule.Module == WildfireModuleInput.WildfireModules.AscImport)
                 {
-                    _wildfireModule = new AscFireImport(simulation);
+                    _wildfire = new AscFireImport(simulation);
                     Engine.Message(simulation, Engine.LogType.Log, $"Wildfire module {nameof(AscFireImport)} initiated.");
                 }
                 else if (input.WildfireModule.Module == WildfireModuleInput.WildfireModules.SimpleWildfireCA)
                 {
                     //_wildfireModule = new CellParticleHybrid(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.WuiArea, input.WildfireModule.Data.FuelModelsData, input.WildfireModule.Data.InitialFuelMoistureData, input.WildfireModule.Data.IgnitionPoints);
-                    _wildfireModule = new SimpleWildfireCA(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.IgnitionPoints, weather, time);
+                    _wildfire = new SimpleWildfireCA(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.IgnitionPoints, weather, time);
                     Engine.Message(simulation, Engine.LogType.Log, $"Wildfire module {nameof(SimpleWildfireCA)} initiated.");
                 }
                 else if (input.WildfireModule.Module == WildfireModuleInput.WildfireModules.ElmClone)
                 {
-                    _wildfireModule = new ElmClone(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.IgnitionPoints, weather, time);
+                    _wildfire = new ElmClone(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.IgnitionPoints, weather, time);
                     Engine.Message(simulation, Engine.LogType.Log, $"Wildfire module {nameof(ElmClone)} initiated.");
                 }
                 else
@@ -86,7 +86,7 @@ namespace PREACT
                 Engine.Message(simulation, Engine.LogType.Log, "No fire module was enabled.");
             }
 
-            if(_wildfireModule != null)
+            if(_wildfire != null)
             {
                 success = true;
             }
@@ -102,7 +102,7 @@ namespace PREACT
                 //simulation module does not need the fire
                 if (input.SmokeModule.Module == SmokeInput.SmokeModules.GlobalSmoke)
                 {
-                    _smokeModule = new GlobalSmoke(simulation, input.SmokeModule.Data.ExtinctionRamp);
+                    _smoke = new GlobalSmoke(simulation, input.SmokeModule.Data.ExtinctionRamp);
                 }
                 else if (!input.WildfireModule.Enabled)
                 {
@@ -112,11 +112,11 @@ namespace PREACT
                 {
                     if (input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                     {
-                        _smokeModule = new AdvectDiffuseMixingLayer(simulation);
+                        _smoke = new AdvectDiffuseMixingLayer(simulation);
                     }
                     else if (input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuse3D)
                     {
-                        _smokeModule = new AdvectDiffuse3D(simulation);
+                        _smoke = new AdvectDiffuse3D(simulation);
                         Engine.Message(simulation, Engine.LogType.Log, "Smoke module AdvectDiffuse3D initiated.");
                     }
                     else if (input.SmokeModule.Module == SmokeInput.SmokeModules.BoxModel)
@@ -131,7 +131,7 @@ namespace PREACT
                 Engine.Message(simulation, Engine.LogType.Log, "No smoke module was enabled.");
             }
 
-            if (_smokeModule != null)
+            if (_smoke != null)
             {
                 success = true;
             }
@@ -144,9 +144,9 @@ namespace PREACT
         public float GetExtinctionCoefficientAtPos(Vector2d pos)
         {
             float result = 0f;
-            if(_smokeModule != null)
+            if(_smoke != null)
             {
-                result = _smokeModule.GetSootDensityAtPos(pos) * 8700f; //TODO: user specified mass specific extinction coefficient
+                result = _smoke.GetSootDensityAtPos(pos) * 8700f; //TODO: user specified mass specific extinction coefficient
             }
 
             return result;
