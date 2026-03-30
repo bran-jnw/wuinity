@@ -32,25 +32,30 @@ namespace PREACT.Traffic
         private float[,] _accumulatedWatingTime;
         private bool _checkSmoke = false;
 
+        private SumoConfig _sumoConfig;
+
         public SUMOModule(Simulation simulation, out bool success) : base(simulation)
         {
             success = true;
             try
             {
                 _sumoVehicles = new Dictionary<string, SUMOVehicle>();
-                string inputFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.TrafficModule.SumoInput.ConfigurationFile);
+                string configFile = Path.Combine(_simulation.Engine.WorkingFolder, _simulation.Input.TrafficModule.SumoInput.ConfigurationFile);
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
-                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", inputFile, "-b", "0.0", "-e", _simulation.Time.SimulationEndTime.ToString() }));
+                LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", configFile, "-b", "0.0", "-e", _simulation.Time.SimulationEndTime.ToString() }));
 
                 //check if destinations are valid, if not abort
                 ValidateDestinations(simulation.Evacuation.Destinations, out bool allValid);
                 if(!allValid)
                 {
+                    success = false;
                     return;
                 }
 
+                _sumoConfig = new SumoConfig(configFile, _simulation.Input.WildfireModule.Enabled);
+
                 //need to use UTM projection in SUMO and WUInity to overlay data
-                Vector2d sumoUTM = new Vector2d(-_simulation.Input.TrafficModule.SumoInput.UTMoffset.x, -_simulation.Input.TrafficModule.SumoInput.UTMoffset.y);
+                Vector2d sumoUTM = -_sumoConfig.Network.UTMOffset;// new Vector2d(-_simulation.Input.TrafficModule.SumoInput.UTMoffset.x, -_simulation.Input.TrafficModule.SumoInput.UTMoffset.y);
                 _originOffset = sumoUTM - _simulation.Spatial.UTMOrigin;
 
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
@@ -465,7 +470,7 @@ namespace PREACT.Traffic
             {
                 int fireCellsWithJunctions = 0;
                 LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[_simulation.Hazards.WildfireModule.GetCellCountX(), _simulation.Hazards.WildfireModule.GetCellCountY()];
+                fireCellEdges = new List<string>[_simulation.Hazards.WildfireModule.GetCellCountX(), _simulation.Hazards.WildfireModule.GetCellCountY()];                
 
                 for (int i = 0; i < junctions.Count; i++)
                 {
