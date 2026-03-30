@@ -21,8 +21,7 @@ namespace PREACT
 
         //References
         private Engine _engine;
-        private SimulationState _state;
-        private Stopwatch _simulationStopwatch = new Stopwatch();
+        private SimulationState _state;        
         private PREACTInput _input;
         private SimulationOutput _output;        
         private TimeManager _time;
@@ -35,6 +34,8 @@ namespace PREACT
         private Stopwatch[] _moduleStopwatches;
 
         private JobSystem _moduleJobSystem;
+        private Stopwatch _simulationStopwatch = new Stopwatch();
+        private Stopwatch _threadsStopwatch = new Stopwatch();
 
         //Data
         private int _simulationIndex;
@@ -175,6 +176,7 @@ namespace PREACT
             {
                 deltaTime = (float)_hazards.WildfireModule.GetInternalDeltaTime();
             }*/
+            _threadsStopwatch.Start();
             for (int i = 0; i < _simulationModules.Count; ++i)
             {
                 SimulationModule module = _simulationModules[i];
@@ -185,6 +187,7 @@ namespace PREACT
                 }                
             }
             _moduleJobSystem.ExecuteJobs();
+            _threadsStopwatch.Stop();
 
             //advance time            
             _time.Step(deltaTime);
@@ -268,7 +271,8 @@ namespace PREACT
 
             _simulationStopwatch.Stop();
             Engine.Message(this, Engine.LogType.Log, "Total time spent [s]:" + _simulationStopwatch.ElapsedMilliseconds * 0.001);
-            if(_moduleStopwatches != null)
+            Engine.Message(this, Engine.LogType.Log, "Total time spent in module threads [s]:" + _threadsStopwatch.ElapsedMilliseconds * 0.001);
+            if (_moduleStopwatches != null)
             {
                 for (int i = 0; i < _moduleStopwatches.Length; ++i)
                 {
