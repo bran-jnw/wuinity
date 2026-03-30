@@ -297,7 +297,7 @@ namespace PREACT.Traffic
                     {
                         uint carID = GetNewCarID();
                         string sumoID = carID.ToString();
-                        string routeID = "wuiroute_" + carID;
+                        string routeID = "preact_route_" + carID;
                         LIBSUMO.Route.add(routeID, route.edges);
                         LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
                         LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
@@ -309,7 +309,7 @@ namespace PREACT.Traffic
                 }
                 catch (Exception e)
                 {
-                    Engine.Message(null, Engine.LogType.Warning, "SUMO: " + e.Message);
+                    Engine.Message(null, Engine.LogType.Warning, "Issue injecting vehicle into SUMO: " + e.Message);
                 }              
             } 
             

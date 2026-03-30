@@ -190,8 +190,8 @@ namespace WUInity.UI
         void FinishGraphicalFireInputEdit()
         {
             _wuinityManager.StopPainter();
-            string filePath = Path.Combine(_engine.WorkingFolder, _input.WildfireModule.GraphicalFireInputFile);
-            GraphicalFireInput.SaveGraphicalFireInput(filePath, _input.WildfireModule.Data);
+            /*string filePath = Path.Combine(_engine.WorkingFolder, _input.WildfireModule.GraphicalFireInputFile);
+            GraphicalFireInput.SaveGraphicalFireInput(filePath, _input.WildfireModule.Data);*/
         }
 
         void ResetFireGUI()

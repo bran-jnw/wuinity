@@ -61,22 +61,22 @@ namespace PREACT
                 if (input.WildfireModule.Module == WildfireModuleInput.WildfireModules.AscImport)
                 {
                     _wildfireModule = new AscFireImport(simulation);
-                    Engine.Message(simulation, Engine.LogType.Log, "Fire module AscImport initiated.");
+                    Engine.Message(simulation, Engine.LogType.Log, $"Wildfire module {nameof(AscFireImport)} initiated.");
                 }
                 else if (input.WildfireModule.Module == WildfireModuleInput.WildfireModules.SimpleWildfireCA)
                 {
                     //_wildfireModule = new CellParticleHybrid(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.WuiArea, input.WildfireModule.Data.FuelModelsData, input.WildfireModule.Data.InitialFuelMoistureData, input.WildfireModule.Data.IgnitionPoints);
                     _wildfireModule = new SimpleWildfireCA(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.IgnitionPoints, weather, time);
-                    Engine.Message(simulation, Engine.LogType.Log, "Fire module CellParticleHybrid initiated.");
+                    Engine.Message(simulation, Engine.LogType.Log, $"Wildfire module {nameof(SimpleWildfireCA)} initiated.");
                 }
                 else if (input.WildfireModule.Module == WildfireModuleInput.WildfireModules.ElmClone)
                 {
                     _wildfireModule = new ElmClone(simulation, input.WildfireModule.Data.LandscapeData, input.WildfireModule.Data.IgnitionPoints, weather, time);
-                    Engine.Message(simulation, Engine.LogType.Log, "Fire module NarrowLevelSet initiated.");
+                    Engine.Message(simulation, Engine.LogType.Log, $"Wildfire module {nameof(ElmClone)} initiated.");
                 }
                 else
                 {
-                    Engine.Message(simulation, Engine.LogType.SimulationError, "Could not initiate fire module, aborting.");
+                    Engine.Message(simulation, Engine.LogType.SimulationError, "Could not initiate wildfire module, aborting.");
                 }
             }
             else
@@ -84,6 +84,11 @@ namespace PREACT
 
                 success = true;
                 Engine.Message(simulation, Engine.LogType.Log, "No fire module was enabled.");
+            }
+
+            if(_wildfireModule != null)
+            {
+                success = true;
             }
         }
 
@@ -98,13 +103,10 @@ namespace PREACT
                 if (input.SmokeModule.Module == SmokeInput.SmokeModules.GlobalSmoke)
                 {
                     _smokeModule = new GlobalSmoke(simulation, input.SmokeModule.Data.ExtinctionRamp);
-                    success = true;
-                    return;
                 }
-
-                if (!input.WildfireModule.Enabled)
+                else if (!input.WildfireModule.Enabled)
                 {
-                    Engine.Message(simulation, Engine.LogType.SimulationError, "Smoke module that needs fire as source was enabled but no fire module was enabled, aborting.");
+                    Engine.Message(simulation, Engine.LogType.SimulationError, "Smoke module that needs wildfire as source was enabled but no wildfire module was enabled, aborting.");
                 }
                 else
                 {
@@ -127,6 +129,11 @@ namespace PREACT
             {
                 success = true;
                 Engine.Message(simulation, Engine.LogType.Log, "No smoke module was enabled.");
+            }
+
+            if (_smokeModule != null)
+            {
+                success = true;
             }
         }
 

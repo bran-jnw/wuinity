@@ -122,6 +122,7 @@ namespace WUInity.UI
         bool _simulationRunning = false;
         public void SimulationStarted()
         {
+            _messages.Clear();
             _simulationRunning = true;
         }
 

@@ -26,6 +26,9 @@ namespace PREACT.Wildfire
         double _internalDeltaTime;
         private List<Vector2int> _ignitedCellIndices;
 
+        //Behave stuff
+        BehaveCore.FuelModels _fuelModels = null;
+
         public Simulation Simulation { get => _simulation; }
 
 
@@ -54,6 +57,13 @@ namespace PREACT.Wildfire
 
             _activeCells = new HashSet<GatherCell>(_nx * _ny / 10);
             _cellsToIgnite = new ConcurrentBag<GatherCell>();
+            
+            InitialFuelMoistureLibrary initialFuelMoistures = null;
+            if (_simulation.Input.WildfireModule.FireCellInput.SpreadRateModel == Input.FireCellInput.SpreadRateModels.Behave)
+            {
+                _fuelModels = new BehaveCore.FuelModels();
+                initialFuelMoistures = _simulation.Input.WildfireModule.Data.InitialFuelMoistureData;
+            }
 
             //create
             _cells = new GatherCell[_nx][];
@@ -62,7 +72,7 @@ namespace PREACT.Wildfire
                 _cells[i] = new GatherCell[_ny];
                 for (int j = 0; j < _ny; ++j)
                 {
-                    _cells[i][j] = new GatherCell(i, j, landscape.GetCellData(i, j), this, _simulation.Input.WildfireModule.FireCellInput);
+                    _cells[i][j] = new GatherCell(i, j, landscape.GetCellData(i, j), this, _simulation.Input.WildfireModule.FireCellInput, initialFuelMoistures, _fuelModels);
                 }
             }
 

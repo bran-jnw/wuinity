@@ -22,7 +22,7 @@ namespace WUInity.UI
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            int dummy = (int)_engine.Simulation.SimulationTime;
+            int dummy = (int)_engine.Simulation.Time.SimulationTime;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Simulation time: " + dummy + " s");
             ++buttonIndex;
 
@@ -33,14 +33,14 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total population: " + dummy);
             ++buttonIndex;
 
-            if(_engine.Simulation.PedestrianModule != null)
+            if(_engine.Simulation.Evacuation.PedestrianModule != null)
             {
-                dummy = _engine.Simulation.PedestrianModule.GetPeopleStaying();
+                dummy = _engine.Simulation.Evacuation.PedestrianModule.GetPeopleStaying();
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
                 ++buttonIndex;
 
                 //toatl cars
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + _engine.Simulation.PedestrianModule.GetTotalCars());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalCars());
                 ++buttonIndex;
             }         
 
@@ -82,21 +82,21 @@ namespace WUInity.UI
             }
             ++buttonIndex;
 
-            if (_input.PedestrianModule.Enabled && _engine.Simulation.PedestrianModule != null)
+            if (_input.PedestrianModule.Enabled && _engine.Simulation.Evacuation.PedestrianModule != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.PedestrianModule.GetPeopleLeft() + " / " + _engine.Simulation.PedestrianModule.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.Evacuation.PedestrianModule.GetPeopleLeft() + " / " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalPopulation());
                 ++buttonIndex;
 
                 //cars reached by pedestrians
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + _engine.Simulation.PedestrianModule.GetCarsReached());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + _engine.Simulation.Evacuation.PedestrianModule.GetCarsReached());
                 ++buttonIndex;
             }
 
             //cars still left
-            if (_input.TrafficModule.Enabled && _engine.Simulation.TrafficModule != null)
+            if (_input.TrafficModule.Enabled && _engine.Simulation.Evacuation.TrafficModule != null)
             {
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + _engine.Simulation.TrafficModule.GetNumberOfCarsInSystem() + " / " + _engine.Simulation.TrafficModule.GetTotalCarsSimulated());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + _engine.Simulation.Evacuation.TrafficModule.GetNumberOfCarsInSystem() + " / " + _engine.Simulation.Evacuation.TrafficModule.GetTotalCarsSimulated());
                 ++buttonIndex;
             }
 
@@ -108,7 +108,7 @@ namespace WUInity.UI
                     GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), name + ": " + _engine.Simulation.Evacuation.Destinations[i].CurrentPeople + " (" + _engine.Simulation.Evacuation.Destinations[i].Vehicles.Count + ")");
                     ++buttonIndex;
                 }
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.PedestrianModule.GetPeopleStaying()));
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total evacuated: " + _engine.Simulation.Evacuation.GetTotalEvacuated() + " / " + (_engine.Simulation.Evacuation.PedestrianModule.GetTotalPopulation() - _engine.Simulation.Evacuation.PedestrianModule.GetPeopleStaying()));
                 ++buttonIndex;
             }            
 
@@ -119,7 +119,7 @@ namespace WUInity.UI
                 ++buttonIndex;
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Wind direction: " + _engine.Simulation.FireModule.GetCurrentWindData().direction + " degrees");
                 ++buttonIndex;*/
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + _engine.Simulation.WildfireModule.GetActiveCellCount());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Active cells (FireMesh): " + _engine.Simulation.Hazards.WildfireModule.GetActiveCellCount());
                 ++buttonIndex;
 
                 //fire visual mode
@@ -175,7 +175,7 @@ namespace WUInity.UI
 
                 if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Toggle realtime"))
                 {
-                    _engine.Simulation.ToogleRealtime();
+                    _engine.Simulation.ToggleRealtime();
                 }
                 ++buttonIndex;
 

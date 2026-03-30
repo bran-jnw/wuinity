@@ -60,7 +60,7 @@ namespace WUInity.Visualization
                 Graphics.DrawMeshInstancedProcedural(householdMesh, 0, householdsMaterial, bounds, householdPositionsBuffer.count, null, UnityEngine.Rendering.ShadowCastingMode.Off, false, 0, null, UnityEngine.Rendering.LightProbeUsage.Off, null);
             }
 
-            if (renderCars)
+            if (renderCars && trafficModule != null)
             {
                 Dictionary<uint, TrafficModuleVehicle> currentVehicles = trafficModule.GetActiveVehicles();
                 if(currentVehicles.Count > 0)

@@ -541,26 +541,38 @@ public class Simulation : global::System.IDisposable {
     return ret;
   }
 
+  public static TraCIStage findRoute(string fromEdge, string toEdge, string vType, double depart, int routingMode, double departPos, double arrivalPos) {
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_0(fromEdge, toEdge, vType, depart, routingMode, departPos, arrivalPos), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
+  public static TraCIStage findRoute(string fromEdge, string toEdge, string vType, double depart, int routingMode, double departPos) {
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_1(fromEdge, toEdge, vType, depart, routingMode, departPos), true);
+    if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
+    return ret;
+  }
+
   public static TraCIStage findRoute(string fromEdge, string toEdge, string vType, double depart, int routingMode) {
-    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_0(fromEdge, toEdge, vType, depart, routingMode), true);
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_2(fromEdge, toEdge, vType, depart, routingMode), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static TraCIStage findRoute(string fromEdge, string toEdge, string vType, double depart) {
-    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_1(fromEdge, toEdge, vType, depart), true);
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_3(fromEdge, toEdge, vType, depart), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static TraCIStage findRoute(string fromEdge, string toEdge, string vType) {
-    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_2(fromEdge, toEdge, vType), true);
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_4(fromEdge, toEdge, vType), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
   public static TraCIStage findRoute(string fromEdge, string toEdge) {
-    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_3(fromEdge, toEdge), true);
+    TraCIStage ret = new TraCIStage(libsumoPINVOKE.Simulation_findRoute__SWIG_5(fromEdge, toEdge), true);
     if (libsumoPINVOKE.SWIGPendingException.Pending) throw libsumoPINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }

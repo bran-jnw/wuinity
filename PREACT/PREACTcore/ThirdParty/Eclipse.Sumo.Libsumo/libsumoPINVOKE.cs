@@ -4876,16 +4876,22 @@ class libsumoPINVOKE {
   public static extern double Simulation_getDistanceRoad__SWIG_1(string jarg1, double jarg2, string jarg3, double jarg4);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findRoute__SWIG_0___")]
-  public static extern global::System.IntPtr Simulation_findRoute__SWIG_0(string jarg1, string jarg2, string jarg3, double jarg4, int jarg5);
+  public static extern global::System.IntPtr Simulation_findRoute__SWIG_0(string jarg1, string jarg2, string jarg3, double jarg4, int jarg5, double jarg6, double jarg7);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findRoute__SWIG_1___")]
-  public static extern global::System.IntPtr Simulation_findRoute__SWIG_1(string jarg1, string jarg2, string jarg3, double jarg4);
+  public static extern global::System.IntPtr Simulation_findRoute__SWIG_1(string jarg1, string jarg2, string jarg3, double jarg4, int jarg5, double jarg6);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findRoute__SWIG_2___")]
-  public static extern global::System.IntPtr Simulation_findRoute__SWIG_2(string jarg1, string jarg2, string jarg3);
+  public static extern global::System.IntPtr Simulation_findRoute__SWIG_2(string jarg1, string jarg2, string jarg3, double jarg4, int jarg5);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findRoute__SWIG_3___")]
-  public static extern global::System.IntPtr Simulation_findRoute__SWIG_3(string jarg1, string jarg2);
+  public static extern global::System.IntPtr Simulation_findRoute__SWIG_3(string jarg1, string jarg2, string jarg3, double jarg4);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findRoute__SWIG_4___")]
+  public static extern global::System.IntPtr Simulation_findRoute__SWIG_4(string jarg1, string jarg2, string jarg3);
+
+  [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findRoute__SWIG_5___")]
+  public static extern global::System.IntPtr Simulation_findRoute__SWIG_5(string jarg1, string jarg2);
 
   [global::System.Runtime.InteropServices.DllImport("libsumocs", EntryPoint="CSharp_EclipsefSumofLibsumo_Simulation_findIntermodalRoute__SWIG_0___")]
   public static extern global::System.IntPtr Simulation_findIntermodalRoute__SWIG_0(string jarg1, string jarg2, string jarg3, double jarg4, int jarg5, double jarg6, double jarg7, double jarg8, double jarg9, double jarg10, string jarg11, string jarg12, string jarg13);

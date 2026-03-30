@@ -120,6 +120,7 @@ namespace PREACT.Evacuation
         private void CreatePedestrianModule(Simulation simulation, PREACTInput input, WeatherManager weather, TimeManager time, out bool success)
         {
             success = false;
+
             if (_input.PedestrianModule.Enabled)
             {
                 if (_input.PedestrianModule.Module == PedestrianModuleInput.PedestrianModules.JupedSimSUMO)
@@ -134,7 +135,13 @@ namespace PREACT.Evacuation
             }
             else
             {
+                success = true;
                 Engine.Message(simulation, Engine.LogType.Log, "No pedestrian module was enabled.");
+            }
+
+            if(_pedestrianModule != null)
+            {
+                success = true;
             }
         }
 
@@ -151,6 +158,10 @@ namespace PREACT.Evacuation
                     {
                         Engine.Message(simulation, Engine.LogType.Log, "Traffic module SUMO initiated.");
                     }
+                    else
+                    {
+                        _trafficModule = null;
+                    }
                 }
                 else
                 {
@@ -162,6 +173,11 @@ namespace PREACT.Evacuation
             {
                 success = true;
                 Engine.Message(simulation, Engine.LogType.Log, "No traffic module was enabled.");
+            }
+
+            if (_trafficModule != null)
+            {
+                success = true;
             }
         }
 
@@ -305,7 +321,7 @@ namespace PREACT.Evacuation
             }
             if (allBlocked)
             {
-                _simulation.Stop("No evacuation goals available, stopping simulation.", false);
+                _simulation.Stop("All destinations are unavailable, stopping simulation.", false);
                 return;
             }
 
@@ -313,7 +329,10 @@ namespace PREACT.Evacuation
             //TODO
 
             //update cars already in traffic
-            _trafficModule.UpdateEvacuationGoals();
+            if(_trafficModule != null)
+            {
+                _trafficModule.UpdateEvacuationGoals();
+            }            
         }
 
         private void BuildEvacuationDestinationList()

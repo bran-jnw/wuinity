@@ -268,10 +268,13 @@ namespace PREACT
 
             _simulationStopwatch.Stop();
             Engine.Message(this, Engine.LogType.Log, "Total time spent [s]:" + _simulationStopwatch.ElapsedMilliseconds * 0.001);
-            for(int i = 0; i < _moduleStopwatches.Length; ++i)
+            if(_moduleStopwatches != null)
             {
-                Engine.Message(this, Engine.LogType.Log, $"Total time spent in {_simulationModules[i].GetType().Name} [s]:" + _moduleStopwatches[i].ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _moduleStopwatches[i].ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
-            }
+                for (int i = 0; i < _moduleStopwatches.Length; ++i)
+                {
+                    Engine.Message(this, Engine.LogType.Log, $"Total time spent in {_simulationModules[i].GetType().Name} [s]:" + _moduleStopwatches[i].ElapsedMilliseconds * 0.001 + string.Format(" [{0}%]", (int)(100.0 * _moduleStopwatches[i].ElapsedMilliseconds / _simulationStopwatch.ElapsedMilliseconds)));
+                }
+            }            
             _evacuation.PostRun(_simulationStopwatch);
 
             _state = SimulationState.Completed;
@@ -289,10 +292,12 @@ namespace PREACT
             if (success)
             {
                 _simulationModules.AddRange(createdModules);
+                Engine.Message(this, Engine.LogType.Log, "All requested hazard modules initiated successfully.");
             }
             else
             {
                 _stopRun = true;
+                Engine.Message(this, Engine.LogType.Log, "Failed to create all requested hazard modules, aborting.");
                 return;
             }
 
@@ -300,10 +305,12 @@ namespace PREACT
             if (success)
             {
                 _simulationModules.AddRange(createdModules);
+                Engine.Message(this, Engine.LogType.Log, "All requested evacuation modules initiated successfully.");
             }
             else
             {
                 _stopRun = true;
+                Engine.Message(this, Engine.LogType.Log, "Failed to create all requested evacuation modules, aborting.");
                 return;
             }
 
@@ -367,7 +374,10 @@ namespace PREACT
                 sim.Stop();
             }
 
-            _moduleJobSystem.Dispose();
+            if(_moduleJobSystem != null)
+            {
+                _moduleJobSystem.Dispose();
+            }            
         }        
 
         bool _stoppedDueToError = false;

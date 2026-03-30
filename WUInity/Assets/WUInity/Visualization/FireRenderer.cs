@@ -19,7 +19,7 @@ namespace WUInity.Visualization
     {
         [SerializeField] private Material _fireMaterial;
         [SerializeField] private Material sootMaterial;
-        int _fireCellCountX, _fireCellCountY, sootCellCountX, sootCellCountY;
+        int _fireCellCountX, _fireCellCountY, _smokeCellCountX, _smokeCellCountY;
 
         ComputeBuffer _fireBuffer, sootBuffer;
         MeshRenderer fireMeshRenderer, sootMeshRenderer;
@@ -84,35 +84,32 @@ namespace WUInity.Visualization
         }
 
         private void CreateFireBuffer(Simulation simulation)
-        {            
-            _fireCellCountX = simulation.WildfireModule.GetCellCountX();
-            _fireCellCountY = simulation.WildfireModule.GetCellCountY();
+        {
+            _fireCellCountX = simulation.Hazards.WildfireModule.GetCellCountX();
+            _fireCellCountY = simulation.Hazards.WildfireModule.GetCellCountY();
             _fireBuffer = new ComputeBuffer(_fireCellCountX * _fireCellCountY, sizeof(float));
             _fireMaterial.SetInteger("_CellsX", _fireCellCountX);
             _fireMaterial.SetInteger("_CellsY", _fireCellCountY);
             SetFireDisplayMode(FireDisplayMode.FirelineIntensity);
-            if (fireMeshRenderer == null)
-            {
-                fireMeshRenderer = CreateDataPlane(_fireMaterial, "FireSpread", true, simulation);
-            }
-
-            SetFireOffsetAndScale();
+            fireMeshRenderer = CreateDataPlane(_fireMaterial, "FireSpread", true, simulation);
         }
 
         private void CreateSootBuffer(Simulation simulation)
         {
-            if(simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None )
+            if (simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None)
             {
-                sootCellCountX = simulation.SmokeModule.GetCellsX();
-                sootCellCountY = simulation.SmokeModule.GetCellsY();
-                sootBuffer = new ComputeBuffer(sootCellCountX * sootCellCountY, sizeof(float));
-                sootMaterial.SetInteger("_CellsX", sootCellCountX);
-                sootMaterial.SetInteger("_CellsY", sootCellCountY);
+                _smokeCellCountX = simulation.Hazards.SmokeModule.GetCellsX();
+                _smokeCellCountY = simulation.Hazards.SmokeModule.GetCellsY();
+                sootBuffer = new ComputeBuffer(_smokeCellCountX * _smokeCellCountY, sizeof(float));
+                sootMaterial.SetInteger("_CellsX", _smokeCellCountX);
+                sootMaterial.SetInteger("_CellsY", _smokeCellCountY);
                 sootMaterial.SetFloat("_LowerCutOff", 0.0f);
                 sootMaterial.SetFloat("_MinValue", lowerExtCoeff); //500 meters with C = 3
                 sootMaterial.SetFloat("_MaxValue", upperExtCoeff); //5 meters with C = 3
 
-                if(simulation.Input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
+                sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true, simulation);
+
+                if (simulation.Input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                 {
                     // arrives in soot density, * 8700.0 (kg/m2, mass specific ext. coeff.) for extinction coefficient
                     sootMaterial.SetFloat("_DataMultiplier", 8700f); 
@@ -121,17 +118,11 @@ namespace WUInity.Visualization
                 {
                     sootMaterial.SetFloat("_DataMultiplier", 1f); // getting extinction coefficient directly
                 }
-                
-                if (sootMeshRenderer == null)
-                {
-                    sootMeshRenderer = CreateDataPlane(sootMaterial, "SootSpread", true, simulation);
-                }
             }
             else
             {
                 Engine.Message(null, Engine.LogType.Warning, "Unsupported smoke module, fire/smoke renderer failed to initialize.");
             }
-                      
         }       
         
         public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival}
@@ -187,11 +178,11 @@ namespace WUInity.Visualization
                 float[] fireData = null;
                 if (_fireDisplayMode == FireDisplayMode.FirelineIntensity)
                 {
-                    fireData = simulation.WildfireModule.GetFireLineIntensityData();
+                    fireData = simulation.Hazards.WildfireModule.GetFireLineIntensityData();
                 }
                 else if(_fireDisplayMode == FireDisplayMode.FuelModelNumber)
                 {
-                    fireData = simulation.WildfireModule.GetFuelModelNumberData();
+                    fireData = simulation.Hazards.WildfireModule.GetFuelModelNumberData();
                 }
                 
                 if (fireData != null)
@@ -205,7 +196,7 @@ namespace WUInity.Visualization
             {
                 if(simulation.Input.SmokeModule.Module != SmokeInput.SmokeModules.None)
                 {
-                    float[] newSoot = simulation.SmokeModule.GetSootDensity();
+                    float[] newSoot = simulation.Hazards.SmokeModule.GetSootDensity();
                     if(newSoot != null)
                     {
                         sootBuffer.SetData(newSoot);
@@ -222,7 +213,7 @@ namespace WUInity.Visualization
         MeshRenderer CreateDataPlane(Material material, string name, bool setActive, Simulation simulation)
         {
             GameObject gO = new GameObject(name);
-            gO.transform.parent = this.transform;
+            gO.transform.parent = transform;
             gO.isStatic = true;
             // You can change that line to provide another MeshFilter
             MeshFilter filter = gO.AddComponent<MeshFilter>();
@@ -238,7 +229,7 @@ namespace WUInity.Visualization
             Vector3 offset;
             Vector2 maxUV = Vector2.one;
 
-            simulation.WildfireModule.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
+            simulation.Hazards.WildfireModule.GetOffsetAndSize(out Vector2d offsetFire, out Vector2d size);
             width = (float)size.x;
             height = (float)size.y;             
             offset = new Vector3((float)offsetFire.x, 0f, (float)offsetFire.y);
@@ -250,11 +241,6 @@ namespace WUInity.Visualization
             gO.transform.position += Vector3.up;
             gO.SetActive(setActive);
             return mR;
-        }
-
-        private void SetFireOffsetAndScale()
-        {
-            
         }
 
         void CreateRandomFuelModelLegend()
@@ -335,7 +321,7 @@ namespace WUInity.Visualization
                 sootBuffer = null;
             }
 
-            if(!creationCall && simulation != null && simulation.SmokeModule != null)
+            if(!creationCall && simulation != null && simulation.Hazards.SmokeModule != null)
             {
                 if (simulation.Input.SmokeModule.Module == SmokeInput.SmokeModules.AdvectDiffuseMixingLayer)
                 {

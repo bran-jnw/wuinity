@@ -25,19 +25,19 @@ namespace PREACT.Wildfire
         public Vector2int Index { get => _index; }
 
 
-        public GatherCell(int x, int y, LandscapeCellData cellData, SimpleWildfireCA owner, Input.FireCellInput input) 
+        public GatherCell(int x, int y, LandscapeCellData cellData, SimpleWildfireCA owner, Input.FireCellInput input, InitialFuelMoistureLibrary initialFuelMoistures, BehaveCore.FuelModels fuelModels) 
         {
             _owner = owner;
             _index = new Vector2int(x, y);
             _linearIndex = x + y * owner.GetCellCountX();
             _cellData = cellData;
 
-            /*if (input.SpreadRateModel == IO.FireCellInput.SpreadRateModels.Behave)
+            if (input.SpreadRateModel == Input.FireCellInput.SpreadRateModels.Behave)
             {
                 InitialFuelMoisture moisture = initialFuelMoistures.GetInitialFuelMoisture(_cellData.fuel_model);
                 _spreadModel = new SpreadModelBehave(fuelModels, _cellData, moisture);
             }
-            else*/ if (input.SpreadRateModel == Input.FireCellInput.SpreadRateModels.CanadianFBP)
+            else if (input.SpreadRateModel == Input.FireCellInput.SpreadRateModels.CanadianFBP)
             {
                 _spreadModel = new SpreadModelCFBP(_cellData, owner.Simulation.Input.WildfireModule.Data.CanadianFBPLookupTable, _owner.Simulation.Spatial);
             }

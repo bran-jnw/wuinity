@@ -361,12 +361,12 @@ namespace WUInity
             if (Input.GetKey(KeyCode.KeypadPlus))
             {
                 print("Going up.");
-                ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.SmokeModule).IncreaseOutputHeight();
+                ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.Hazards.SmokeModule).IncreaseOutputHeight();
             }
             else if (Input.GetKey(KeyCode.KeypadMinus))
             {
                 print("Going down.");
-                ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.SmokeModule).DecreaseOutputHeight();
+                ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.Hazards.SmokeModule).DecreaseOutputHeight();
             }
 
             //always update visuals, even when paused
@@ -378,7 +378,7 @@ namespace WUInity
                     {
                         CreateVisualizers();
                     }
-                    EvacuationRenderer.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic, _engine.Simulation.PedestrianModule, _engine.Simulation.TrafficModule);
+                    EvacuationRenderer.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic, _engine.Simulation.Evacuation.PedestrianModule, _engine.Simulation.Evacuation.TrafficModule);
                     FireRenderer.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion, _engine.Simulation);
                 }
             }            
@@ -395,12 +395,12 @@ namespace WUInity
             PREACT.Math.Vector2d upperRight = new PREACT.Math.Vector2d(Mathf.Max(boundingBoxPoint1.x, boundingBoxPoint2.x), Mathf.Max(boundingBoxPoint1.z, boundingBoxPoint2.z));
             PREACT.Math.Vector2d simulationPos = new PREACT.Math.Vector2d(manualDestination.x, manualDestination.z);
 
-            List<TrafficModuleVehicle> vehicles = _engine.Simulation.TrafficModule.GetVehiclesInBoundingBox(lowerLeft, upperRight);
+            List<TrafficModuleVehicle> vehicles = _engine.Simulation.Evacuation.TrafficModule.GetVehiclesInBoundingBox(lowerLeft, upperRight);
             if(vehicles.Count > 0)
             {
                 PREACT.Math.Vector2d wgs84 = _engine.Simulation.Input.Simulation.Data.GetWGS84FromSimulationPosition(simulationPos);
                 PREACT.Evacuation.EvacuationDestination eD = _engine.Simulation.Evacuation.AddRuntimeDestination(wgs84);
-                _engine.Simulation.TrafficModule.SetManualDestination(vehicles, simulationPos, eD);
+                _engine.Simulation.Evacuation.TrafficModule.SetManualDestination(vehicles, simulationPos, eD);
             }           
         }
 
@@ -416,7 +416,7 @@ namespace WUInity
         {
             //this needs to be done AFTER simulation has started since we need some data from the sim
             //fix everything for evac rendering
-            EvacuationRenderer.CreateBuffers(_input.PedestrianModule.Enabled, _input.TrafficModule.Enabled, _input.Simulation.DomainSize, _engine.Simulation.PedestrianModule);            
+            EvacuationRenderer.CreateBuffers(_input.PedestrianModule.Enabled, _input.TrafficModule.Enabled, _input.Simulation.DomainSize, _engine.Simulation.Evacuation.PedestrianModule);            
 
             _renderHouseholds = _input.PedestrianModule.Enabled;
             _renderTraffic = _input.TrafficModule.Enabled;
@@ -697,8 +697,8 @@ namespace WUInity
         Texture2D _trafficUsageMap;
         private void CreateTrafficUsageMapTexture()
         {
-            double[,] data = ((SUMOModule)_engine.Simulation.TrafficModule).GetUsageMap();
-            double maxData = ((SUMOModule)_engine.Simulation.TrafficModule).GetMaxUsage();
+            double[,] data = ((SUMOModule)_engine.Simulation.Evacuation.TrafficModule).GetUsageMap();
+            double maxData = ((SUMOModule)_engine.Simulation.Evacuation.TrafficModule).GetMaxUsage();
             _trafficUsageMap = new Texture2D(data.GetLength(0), data.GetLength(1));
             _trafficUsageMap.filterMode = FilterMode.Point;
             for (uint y = 0; y < data.GetLength(1); ++y)
