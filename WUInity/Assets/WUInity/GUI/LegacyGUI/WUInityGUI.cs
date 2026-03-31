@@ -112,11 +112,14 @@ namespace WUInity.UI
             SetDirty();
         }
 
-        string[] _messagesBuffer;
-        List<string> _messages = new List<string>();
+        LinkedList<string> _messages = new LinkedList<string>();
         public void NewMessage(string message)
         {
-            _messages.Add(message);
+            _messages.AddFirst(message);
+            if(_messages.Count > 50)
+            {
+                _messages.RemoveLast();
+            }
         }
 
         bool _simulationRunning = false;
@@ -129,15 +132,6 @@ namespace WUInity.UI
         public void SimulationsFinished()
         {
             _simulationRunning = false;
-        }
-
-        private void Update()
-        {
-
-            if(_messagesBuffer == null || _messages.Count != _messagesBuffer.Length)
-            {
-                _messagesBuffer = _messages.ToArray();           
-            }
         }
 
         void OnGUI()
@@ -265,10 +259,11 @@ namespace WUInity.UI
             GUI.BeginGroup(new Rect(0, Screen.height - consoleHeight, Screen.width, consoleHeight), "");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(Screen.width), GUILayout.Height(consoleHeight));
 
-            int maxMessageIndex = _messagesBuffer.Length - 1;
-            for (int i = _messagesBuffer.Length - 1; i >= maxMessageIndex; i--)
+            LinkedListNode<string> node = _messages.First;
+            while(node != null)
             {
-                GUILayout.Label(_messagesBuffer[i]);
+                GUILayout.Label(node.Value);
+                node = node.Next;
             }
             
             GUILayout.EndScrollView();
