@@ -14,162 +14,134 @@ namespace PREACT.Traffic
             Y = y;
         }
     }
-
-    public struct Rect
-    {
-        public double MinX, MinY;
-        public double MaxX, MaxY;
-
-        public Rect(double minX, double minY, double maxX, double maxY)
-        {
-            MinX = minX;
-            MinY = minY;
-            MaxX = maxX;
-            MaxY = maxY;
-        }
-
-        public bool Contains(double x, double y)
-        {
-            return (x >= MinX && x <= MaxX && y >= MinY && y <= MaxY);
-        }
-    }
     
     public static class EdgeCellIntersection
     {
-        public static bool SegmentsIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+        //https://github.com/cgyurgyik/fast-voxel-traversal-algorithm/blob/master/overview/FastVoxelTraversalOverview.md
+        public static int TraverseCells(double x0, double y0, double x1, double y1, double cellW, double cellH, double minX, double minY, int[] outXs, int[] outYs)
         {
-            double d = (x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3);
-            if (Abs(d) < 1e-12)
+            int ix = (int)Floor((x0 - minX) / cellW);
+            int iy = (int)Floor((y0 - minY) / cellH);
+
+            int ixEnd = (int)Floor((x1 - minX) / cellW);
+            int iyEnd = (int)Floor((y1 - minY) / cellH);
+
+            double dx = x1 - x0;
+            double dy = y1 - y0;
+
+            int stepX = dx > 0.0 ? 1 : -1;
+            int stepY = dy > 0.0 ? 1 : -1;
+
+            double tMaxX;
+            double tMaxY;
+            double tDeltaX;
+            double tDeltaY;
+
+            if (dx != 0.0)
             {
-                return false; // parallel
+                double nextBoundaryX = minX + (ix + (stepX > 0 ? 1 : 0)) * cellW;
+                tMaxX = (nextBoundaryX - x0) / dx;
+                tDeltaX = cellW / Abs(dx);
+            }
+            else
+            {
+                tMaxX = double.PositiveInfinity;
+                tDeltaX = double.PositiveInfinity;
             }
 
-            double u = ((x3 - x1) * (y4 - y3) - (y3 - y1) * (x4 - x3)) / d;
-            double v = ((x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)) / d;
-
-            return (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0);
-        }
-
-        public static bool LineIntersectsRect(double x1, double y1, double x2, double y2, Rect r)
-        {
-            // Quick reject
-            if ((x1 < r.MinX && x2 < r.MinX) ||
-                (x1 > r.MaxX && x2 > r.MaxX) ||
-                (y1 < r.MinY && y2 < r.MinY) ||
-                (y1 > r.MaxY && y2 > r.MaxY))
+            if (dy != 0.0)
             {
-                return false;
+                double nextBoundaryY = minY + (iy + (stepY > 0 ? 1 : 0)) * cellH;
+                tMaxY = (nextBoundaryY - y0) / dy;
+                tDeltaY = cellH / Abs(dy);
+            }
+            else
+            {
+                tMaxY = double.PositiveInfinity;
+                tDeltaY = double.PositiveInfinity;
             }
 
-            // If any endpoint is inside rectangle
-            if (r.Contains(x1, y1) || r.Contains(x2, y2))
+            int count = 0;
+            outXs[count] = ix;
+            outYs[count] = iy;
+            count++;
+
+            while (ix != ixEnd || iy != iyEnd)
             {
-                return true;
-            }
-
-            // Check against each edge of the rectangle
-            if (SegmentsIntersect(x1, y1, x2, y2, r.MinX, r.MinY, r.MaxX, r.MinY)) return true;
-            if (SegmentsIntersect(x1, y1, x2, y2, r.MaxX, r.MinY, r.MaxX, r.MaxY)) return true;
-            if (SegmentsIntersect(x1, y1, x2, y2, r.MaxX, r.MaxY, r.MinX, r.MaxY)) return true;
-            if (SegmentsIntersect(x1, y1, x2, y2, r.MinX, r.MaxY, r.MinX, r.MinY)) return true;
-
-            return false;
-        }
-
-        public static Dictionary<CellIndex, List<SumoEdge>> SortEdgesIntoCells(Dictionary<string, SumoEdge> edges, double minXPos, double minYPos, double cellW, double cellH, int xDim, int yDim)
-        {
-            Dictionary<CellIndex, List<SumoEdge>> grid = new Dictionary<CellIndex, List<SumoEdge>>();
-
-            foreach (KeyValuePair<string, SumoEdge> pair in edges)
-            {
-                SumoEdge edge = pair.Value;
-
-                if (edge.Shape.Count < 2)
+                if (tMaxX < tMaxY)
                 {
-                    continue; // cannot compute geometry
+                    ix += stepX;
+                    tMaxX += tDeltaX;
+                }
+                else
+                {
+                    iy += stepY;
+                    tMaxY += tDeltaY;
                 }
 
-                // Compute bounding box for the edge shape
-                double xs = edge.Shape[0].x;
-                double ys = edge.Shape[0].y;
-                double xe = xs;
-                double ye = ys;
+                outXs[count] = ix;
+                outYs[count] = iy;
+                count++;
+            }
 
-                int i = 1;
-                while (i < edge.Shape.Count)
+            return count;
+        }
+
+        public static Dictionary<CellIndex, HashSet<SumoEdge>> SortEdgesIntoCells(Dictionary<string, SumoEdge> edges, double minXPos, double minYPos, double cellW, double cellH, int xDim, int yDim)
+        {
+            Dictionary<CellIndex, HashSet<SumoEdge>> grid = new Dictionary<CellIndex, HashSet<SumoEdge>>();
+
+            int maxCells = 4096;
+            int[] xs = new int[maxCells];
+            int[] ys = new int[maxCells];
+
+            double maxXPos = minXPos + xDim * cellW;
+            double maxYPos = minYPos + yDim * cellH;
+
+            foreach (KeyValuePair<string, SumoEdge> kv in edges)
+            {
+                SumoEdge edge = kv.Value;
+
+                int i = 0;
+                while (i < edge.Shape.Count - 1)
                 {
-                    double x = edge.Shape[i].x;
-                    double y = edge.Shape[i].y;
+                    double x0 = edge.Shape[i].x;
+                    double y0 = edge.Shape[i].y;
+                    double x1 = edge.Shape[i + 1].x;
+                    double y1 = edge.Shape[i + 1].y;
 
-                    if (x < xs) xs = x;
-                    if (x > xe) xe = x;
-                    if (y < ys) ys = y;
-                    if (y > ye) ye = y;
+
+                    // segment bounding box
+                    double sMinX = x0 < x1 ? x0 : x1;
+                    double sMaxX = x0 > x1 ? x0 : x1;
+                    double sMinY = y0 < y1 ? y0 : y1;
+                    double sMaxY = y0 > y1 ? y0 : y1;
+
+                    if (sMaxX < minXPos || sMinX > maxXPos || sMaxY < minYPos || sMinY > maxYPos)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    int visited = TraverseCells(x0, y0, x1, y1, cellW, cellH, minXPos, minYPos, xs, ys);
+
+                    int c = 0;
+                    while (c < visited)
+                    {
+                        CellIndex ci = new CellIndex(xs[c], ys[c]);
+
+                        HashSet<SumoEdge> set;
+                        if (!grid.TryGetValue(ci, out set))
+                        {
+                            set = new HashSet<SumoEdge>();
+                            grid[ci] = set;
+                        }
+
+                        set.Add(edge);
+                        c++;
+                    }
 
                     i++;
-                }
-
-                int cellX0 = (int)Floor((xs - minXPos) / cellW);
-                int cellY0 = (int)Floor((ys - minYPos) / cellH);
-                int cellX1 = (int)Floor((xe - minXPos) / cellW);
-                int cellY1 = (int)Floor((ye - minYPos) / cellH);
-
-                //check if some part is inside, else loop
-                int outside = 0;
-                if(cellX0 < 0 || cellX0 > xDim - 1) ++outside;
-                if(cellX1 < 0 || cellX1 > xDim - 1) ++outside;
-                if(cellY0 < 0 || cellY0 > yDim - 1) ++outside;
-                if(cellY1 < 0 || cellY1 > yDim - 1) ++outside;
-                if(outside == 4)
-                {
-                    continue;
-                }
-
-                int cx = cellX0;
-                while (cx <= cellX1)
-                {
-                    int cy = cellY0;
-                    while (cy <= cellY1)
-                    {
-                        Rect rect = new Rect(
-                            minXPos + cx * cellW,
-                            minYPos + cy * cellH,
-                            minXPos + (cx + 1) * cellW,
-                            minYPos + (cy + 1) * cellH
-                        );
-
-                        bool touches = false;
-
-                        int s = 0;
-                        while (s < edge.Shape.Count - 1)
-                        {
-                            double x1 = edge.Shape[s].x;
-                            double y1 = edge.Shape[s].y;
-                            double x2 = edge.Shape[s + 1].x;
-                            double y2 = edge.Shape[s + 1].y;
-
-                            if (LineIntersectsRect(x1, y1, x2, y2, rect))
-                            {
-                                touches = true;
-                                break;
-                            }
-                            s++;
-                        }
-
-                        if (touches)
-                        {
-                            CellIndex idx = new CellIndex(cx, cy);
-
-                            if (!grid.ContainsKey(idx))
-                            {
-                                grid[idx] = new List<SumoEdge>();
-                            }
-                            grid[idx].Add(edge);
-                        }
-
-                        cy++;
-                    }
-                    cx++;
                 }
             }
 

@@ -458,7 +458,7 @@ namespace PREACT.Traffic
         }
 
         //List<string>[,] fireCellEdges;
-        Dictionary<CellIndex, List<SumoEdge>> _cellsWithEdges;
+        Dictionary<CellIndex, HashSet<SumoEdge>> _cellsWithEdges;
         private void SortEdgesInFireCells()
         {
             if(!_simulation.Input.WildfireModule.Enabled)
@@ -477,41 +477,6 @@ namespace PREACT.Traffic
 
                 _cellsWithEdges = EdgeCellIntersection.SortEdgesIntoCells(_sumoConfig.Network.Edges, minX, minY, cellW, cellH, _simulation.Hazards.Wildfire.GetCellCountX(), _simulation.Hazards.Wildfire.GetCellCountX());
                 Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + _cellsWithEdges.Count);
-
-
-                /*int fireCellsWithJunctions = 0;
-                LIBSUMO.StringVector junctions = LIBSUMO.Junction.getIDList();
-                fireCellEdges = new List<string>[_simulation.Hazards.Wildfire.GetCellCountX(), _simulation.Hazards.Wildfire.GetCellCountY()];                
-
-                for (int i = 0; i < junctions.Count; i++)
-                {
-                    LIBSUMO.TraCIPosition nodePos = LIBSUMO.Junction.getPosition(junctions[i]);
-                    Vector2d simulationPos = new Vector2d(nodePos.x + _originOffset.x, nodePos.y + _originOffset.y);
-                    Vector2int wildfireIndex = _simulation.Spatial.GetWildfireCellIndex(simulationPos, out bool inside);
-
-                    if(!inside)
-                    {
-                        continue;
-                    }
-
-                    LIBSUMO.StringVector incomingEdges = LIBSUMO.Junction.getIncomingEdges(junctions[i]);
-                    for (int j = 0; j < incomingEdges.Count; j++)
-                    {
-                        //internal edges starts with ":", skip these
-                        if (!incomingEdges[j].StartsWith(":"))
-                        {
-                            if (fireCellEdges[wildfireIndex.x, wildfireIndex.y] == null)
-                            {
-                                fireCellEdges[wildfireIndex.x, wildfireIndex.y] = new List<string>();
-                                ++fireCellsWithJunctions;
-                            }
-
-                            fireCellEdges[wildfireIndex.x, wildfireIndex.y].Add(incomingEdges[j]);
-                        }                            
-                    }
-                }
-
-                Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + fireCellsWithJunctions);*/
             }
             catch (Exception e) 
             {
@@ -535,7 +500,7 @@ namespace PREACT.Traffic
             _carsToUpdate.Clear();
             CellIndex ci = new CellIndex(x, y);
 
-            if (_cellsWithEdges.TryGetValue(ci, out List<SumoEdge> edges))
+            if (_cellsWithEdges.TryGetValue(ci, out HashSet<SumoEdge> edges))
             {
                 foreach(SumoEdge edge in edges)
                 {
