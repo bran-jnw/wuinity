@@ -18,7 +18,7 @@ namespace PREACT.Tools
     public static class PopulationTools
     {
 
-        public static async Task CreateBaseScenario(string path, string scenarioId, int minHouseholdSize, int maxHouseholdSize, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon)
+        public static async Task CreateBaseScenario(string path, string scenarioId, int minHouseholdSize, int maxHouseholdSize, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, int year)
         {
             string osmFilePath = Path.Combine(path, scenarioId + "_osm.xml");
             await OSMTools.DownloadOMSData(lowerLeftLatLon, upperRightLatLon, osmFilePath);
@@ -41,7 +41,7 @@ namespace PREACT.Tools
                 if (success)
                 {
                     WorldPopDownloader worldPop = new WorldPopDownloader();
-                    string worldPopFilePath = await worldPop.DownloadRegionUTM(2020, lowerLeftLatLon, upperRightLatLon, path);
+                    string worldPopFilePath = await worldPop.DownloadRegionUTM(year, lowerLeftLatLon, upperRightLatLon, path);
 
                     if(worldPopFilePath != null)
                     {

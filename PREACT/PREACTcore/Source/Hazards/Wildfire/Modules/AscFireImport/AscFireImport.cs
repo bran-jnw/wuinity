@@ -31,6 +31,7 @@ namespace PREACT.Wildfire
         private double _xllcorner, _yllcorner, _cellsize, _NODATA_VALUE;
         private FireRasterData[,] _data;
         private Vector2d _landscapeSize;
+        private bool _ignited = false;
 
         //TODO: clean this up, this is duplicate data but is needed for shaders, come up with some way of better data storage
         float[] _firelineIntensityData;
@@ -77,7 +78,8 @@ namespace PREACT.Wildfire
                     for (int x = 0; x < ncols; x++)
                     {
                         if (!_data[x, y].isActive && _simulation.Time.SimulationTime > _data[x, y].TimeOfAArrival + _startTime)
-                        {                            
+                        {
+                            _ignited = true;
                             _data[x, y].isActive = true;
                             _newlyIgnitedCells.Add(new Vector2int(x, y));
                             _firelineIntensityData[index] = _data[x, y].FirelineIntensity;
@@ -350,6 +352,11 @@ namespace PREACT.Wildfire
             inside = IsInside(xIndex, yIndex);
 
             return new Vector2int(xIndex, yIndex);
+        }
+
+        public override bool Ignited()
+        {
+            return _ignited;
         }
     }
 }

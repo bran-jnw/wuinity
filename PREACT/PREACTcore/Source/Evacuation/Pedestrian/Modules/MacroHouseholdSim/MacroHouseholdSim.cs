@@ -298,5 +298,21 @@ namespace PREACT.Pedestrian
         {
             //there is nothing to stop;
         }
+
+        public override void ReactToWildfire(double simulationTime)
+        {
+            for (int i = 0; i < _macroHouseholds.Count; ++i)
+            {
+                MacroHousehold household = _macroHouseholds[i];
+                if (!household.isMoving)
+                {
+                    float distance = _simulation.Hazards.DistanceToWildfire(_macroHouseholds[i].HomePosition);
+                    if (distance <= 500.0)
+                    {
+                        household.StartEvacuation(simulationTime);
+                    }
+                }                
+            }            
+        }
     }
 }

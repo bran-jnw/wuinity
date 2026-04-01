@@ -43,6 +43,7 @@ namespace PREACT.Wildfire
         public abstract int GetActiveCellCount();
         public abstract List<Vector2int> GetIgnitedFireCells();
         public abstract void ConsumeIgnitedFireCells();
+        public abstract bool Ignited();
 
         public abstract void GetOffsetAndSize(out Vector2d offset, out Vector2d size);
 

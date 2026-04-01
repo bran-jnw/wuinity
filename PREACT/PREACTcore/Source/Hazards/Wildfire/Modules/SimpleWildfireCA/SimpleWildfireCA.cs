@@ -174,12 +174,12 @@ namespace PREACT.Wildfire
 
         public override float[,] GetMaxROS()
         {
-            throw new NotImplementedException();
+            return _maxRosData;
         }
 
         public override float[,] GetMaxROSAzimuth()
         {
-            throw new NotImplementedException();
+            return _maxRosDirectionData;
         }
 
         public override void GetOffsetAndSize(out Vector2d offset, out Vector2d size)
@@ -305,6 +305,11 @@ namespace PREACT.Wildfire
         public override void Stop()
         {
             //save output
+        }
+
+        public override bool Ignited()
+        {
+            return _initialIgnition > 0 ? true : false;
         }
     }
 }

@@ -17,12 +17,58 @@ namespace PREACT
         private SmokeModule _smoke;
         private Simulation _simulation;
 
+        //data products
+        float[,] _wildfireFrontDistance;
+
         public WildfireModule Wildfire { get => _wildfire; }
         public SmokeModule Smoke { get => _smoke; }
 
         public HazardManager(Simulation simulation)
         {
             _simulation = simulation;
+        }
+
+        public void PostStep(float simulationTime)
+        {
+            CalculateWildfireDistanceTransform(simulationTime);
+        }
+                
+        private void CalculateWildfireDistanceTransform(float simulationTime)
+        {
+            if(!_wildfire.Ignited() ||  (int)simulationTime % 300 != 0)
+            {
+                return;
+            }
+
+            float[,] front = _wildfire.GetMaxROS();
+            if(_wildfireFrontDistance == null)
+            {
+                int xDim = front.GetLength(0);
+                int yDim = front.GetLength(1);
+                _wildfireFrontDistance = new float[xDim, yDim]; 
+                for(int j = 0; j < yDim; ++j)
+                {
+                    for (int i = 0; i < xDim; ++i)
+                    {
+                        _wildfireFrontDistance[i, j] = float.MaxValue;
+                    }
+                }
+                
+            }
+            Utility.Analysis.EuclideanDistanceTransform.ComputeEDT(front, _wildfireFrontDistance, _wildfire.GetCellSizeX(), _wildfire.GetCellSizeY(), 0f); 
+        }
+
+        public float DistanceToWildfire(Vector2d simulationPos)
+        {
+            float distance = float.MaxValue;
+
+            Vector2int cellIndex = _simulation.Spatial.GetWildfireCellIndex(simulationPos, out bool inside);
+            if(inside)
+            {
+                distance = _wildfireFrontDistance[cellIndex.x, cellIndex.y];
+            }
+
+            return distance;
         }
 
         public List<SimulationModule> CreateModules(WeatherManager weather, TimeManager time, out bool success)

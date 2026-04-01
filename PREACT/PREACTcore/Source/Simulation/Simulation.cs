@@ -196,7 +196,8 @@ namespace PREACT
             _time.Step(deltaTime);
 
             //deal with what has happen during time step
-            _evacuation.UpdateConsequences();
+            _hazards.PostStep(_time.SimulationTime);
+            _evacuation.PostStep();
 
             //see if we are done or not   
             CheckCompletion();

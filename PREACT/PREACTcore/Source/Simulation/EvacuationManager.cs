@@ -49,16 +49,22 @@ namespace PREACT.Evacuation
             BuildAvailableEvacuationDestinations();
         }
 
-        public void UpdateConsequences()
+        public void PostStep()
         {
+            //check for distance to wildfire front, affect evacuees
+            if(_simulation.Hazards.Wildfire != null)
+            {
+                _pedestrianModule.ReactToWildfire(_simulation.Time.SimulationTime);
+            }            
+
             //handle all damage/impact on road network
             AffectRoadNetwork();
 
-            //inject vehicles from all sources
-            HandleNewVehicles();
-            
             //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
             UpdateDestinationsWildfireStatus();
+
+            //inject vehicles from all sources
+            HandleNewVehicles();
         }
 
         private void AffectRoadNetwork()

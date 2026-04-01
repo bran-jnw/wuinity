@@ -240,5 +240,10 @@ namespace PREACT.Wildfire
         {
             throw new NotImplementedException();
         }
+
+        public override bool Ignited()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

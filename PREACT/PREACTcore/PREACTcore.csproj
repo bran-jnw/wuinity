@@ -24,7 +24,7 @@
     <PackageReference Include="Itinero" Version="1.5.1" />
     <PackageReference Include="Itinero.IO.Osm" Version="1.5.1" />
     <PackageReference Include="OsmSharp.IO.API" Version="1.0.5" />
-    <PackageReference Include="System.Text.Json" Version="10.0.3" />
+    <PackageReference Include="System.Text.Json" Version="10.0.5" />
   </ItemGroup>
 
   <ItemGroup>
