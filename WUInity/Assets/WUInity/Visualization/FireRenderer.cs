@@ -125,7 +125,7 @@ namespace WUInity.Visualization
             }
         }       
         
-        public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival}
+        public enum FireDisplayMode { FirelineIntensity, FuelModelNumber, TimeOfArrival, DistanceToFront }
         FireDisplayMode _fireDisplayMode = FireDisplayMode.FirelineIntensity;
 
         public void SetFireDisplayMode(FireDisplayMode mode)
@@ -167,6 +167,13 @@ namespace WUInity.Visualization
                 _fireMaterial.SetFloat("_LowerCutOff", 0.01f);
                 _fireMaterial.SetFloat("_MinValue", lowerFirelineIntensityValue);
                 _fireMaterial.SetFloat("_MaxValue", upperFirelineIntensityValue);
+                _fireMaterial.SetFloat("_DataMultiplier", 1.0f);
+            }
+            else if (_fireDisplayMode == FireDisplayMode.DistanceToFront)
+            {
+                _fireMaterial.SetFloat("_LowerCutOff", 0.0f);
+                _fireMaterial.SetFloat("_MinValue", 0.0f);
+                _fireMaterial.SetFloat("_MaxValue", 500.0f);
                 _fireMaterial.SetFloat("_DataMultiplier", 1.0f);
             }
         }

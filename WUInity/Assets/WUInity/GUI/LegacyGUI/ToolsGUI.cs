@@ -12,7 +12,7 @@ namespace WUInity.UI
     {
         private bool populationMenuDirty = true;
         private bool _reScaling = false, _filteringOSM = false, _creatingPopulationMap = false;
-        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _minHouseholdSize, _maxHouseholdSize, _latitude, _longitude, _domainSizeX, _domainSizeY, _scenarioId;
+        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _minHouseholdSize, _maxHouseholdSize, _latitude, _longitude, _domainSizeX, _domainSizeY, _scenarioId, _yearOfInterest;
         bool success;
 
         bool ParseVector2d(string x, string y, out Vector2d v)
@@ -45,6 +45,10 @@ namespace WUInity.UI
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Scenario Id");
             ++buttonIndex;
             _scenarioId = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _scenarioId);
+            ++buttonIndex;
+            GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Year of interest");
+            ++buttonIndex;
+            _yearOfInterest = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), _yearOfInterest);
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Lower left lat/lon");
             ++buttonIndex;
@@ -291,7 +295,9 @@ namespace WUInity.UI
             int.TryParse(_minHouseholdSize, out int min);
             int.TryParse(_maxHouseholdSize, out int max);
 
-            await PopulationTools.CreateBaseScenario(paths[0], _scenarioId, min, max, lowerLatLon, upperLatLon);
+            int.TryParse(_yearOfInterest, out int year);
+
+            await PopulationTools.CreateBaseScenario(paths[0], _scenarioId, min, max, lowerLatLon, upperLatLon, year);
         }
     }
 }
