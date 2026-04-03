@@ -14,12 +14,12 @@ using PREACT;
 using WUInity.UI;
 using PREACT.Population;
 using WUInity.Visualization;
+using Assets.WUInity.GUI.DearIMGUI;
 
 namespace WUInity
 {
     public enum DataSampleMode { None, LocalGPW, PopulationMap, Relocated, TrafficDens, Paint, Farsite }
 
-    [RequireComponent(typeof(WUInityGUI))]
     [RequireComponent(typeof(EvacuationRenderer))]
     [RequireComponent(typeof(FireRenderer))]
     public class WUInityManager : MonoBehaviour, IExternalManager                     
@@ -79,13 +79,10 @@ namespace WUInity
         
         [SerializeField] private LineRenderer _simBorder;
         [SerializeField] private LineRenderer _osmBorder;
-        [SerializeField] public  ComputeShader AdvectDiffuseCompute;
-        [SerializeField] public Texture2D NoiseTex;
-        [SerializeField] public Texture2D WindTex;
                 
         public DataSampleMode dataSampleMode = DataSampleMode.None;
 
-        private WUInityGUI _wuiGUI;
+        private PreactGUI _wuiGUI;
         PREACTInput _input;
         public PREACTInput PREACTInput { get => _input; }
 
@@ -129,11 +126,7 @@ namespace WUInity
             _osmBorder.gameObject.SetActive(false);
 
             //gui            
-            _wuiGUI = GetComponent<WUInityGUI>();
-            if (_wuiGUI == null)
-            {
-                gameObject.AddComponent<WUInityGUI>();
-            }
+            _wuiGUI = FindAnyObjectByType<PreactGUI>();
                         
             _engine = new Engine(this);
             _workingData = new PREACT.Runtime.WorkingData();
