@@ -39,7 +39,7 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
 
             if (ImGui.Button("Start run"))
             {
-                ScenarioEditorGUI.Close();
+                ScenarioEditorWindow.Close();
                 PreactGUI.WUInity.RunSimulation(_engineTask);
             }
         }        

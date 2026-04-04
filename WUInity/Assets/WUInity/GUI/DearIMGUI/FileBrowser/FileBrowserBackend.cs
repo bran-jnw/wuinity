@@ -3,7 +3,7 @@ using SimpleFileBrowser;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
-    public static class FileBrowserGUI
+    public static class FileBrowserBackend
     {
         //filters
         static string[] wuiFilter = new string[] { ".wui" };
@@ -32,7 +32,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         {
             FileBrowser.SetFilters(false, wuiFilter);
             string initialPath = PreactGUI.Engine.WorkingFolder;
-            FileBrowser.ShowSaveDialog(ScenarioEditorGUI.SaveNewInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
+            FileBrowser.ShowSaveDialog(ScenarioEditorWindow.SaveNewInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
         }
        
 

@@ -12,7 +12,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             var colors = style.Colors;
 
             // ----- Layout -----
-            style.WindowPadding = new Vector2(10f, 10f);
+            style.WindowPadding = new Vector2(6f, 6f);
             style.FramePadding = new Vector2(4f, 3f);
             style.ItemSpacing = new Vector2(6f, 6f);
             style.ItemInnerSpacing = new Vector2(4f, 4f);

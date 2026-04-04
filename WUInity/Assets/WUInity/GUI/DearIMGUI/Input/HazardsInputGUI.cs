@@ -1,8 +1,6 @@
 ﻿using ImGuiNET;
-using PREACT;
 using System;
 using PREACT.Input;
-using PREACT.Dispersion;
 
 namespace Assets.WUInity.GUI.DearIMGUI.Input
 {
@@ -24,6 +22,7 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
         public static void Draw(PREACTInput input)
         {
             ImGui.SeparatorText("Wildfire spread");
+            wildfireModuleIndex = (int)input.WildfireModule.Module;
             ImGui.Combo(nameof(input.WildfireModule), ref wildfireModuleIndex, WildfireModulesStrings, WildfireModulesStrings.Length);
             input.WildfireModule.Module = (WildfireModuleInput.WildfireModules)wildfireModuleIndex;
             if(input.WildfireModule.Module != WildfireModuleInput.WildfireModules.None)
@@ -32,6 +31,7 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
             }
 
             ImGui.SeparatorText("Wildfire smoke");
+            smokeModulIndex = (int)input.SmokeModule.Module;
             ImGui.Combo(nameof(input.SmokeModule), ref smokeModulIndex, SmokeModulesStrings, SmokeModulesStrings.Length);
             input.SmokeModule.Module = (SmokeInput.SmokeModules)smokeModulIndex;
             if(input.SmokeModule.Module != SmokeInput.SmokeModules.None)

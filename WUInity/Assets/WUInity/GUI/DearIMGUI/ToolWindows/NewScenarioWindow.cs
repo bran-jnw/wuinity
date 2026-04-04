@@ -26,7 +26,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 return;
             }
 
-            ImGui.Begin("New scenario", ref _open, ImGuiWindowFlags.MenuBar);
+            ImGui.Begin("New scenario", ref _open, PreactGUI.NoDockingNoCollapse);
 
             ImGui.InputText("Scenario name", ref scenarioId, 128);
             ImGui.InputFloat2("Lower left lat/lon", ref _latLon);
@@ -47,7 +47,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             input.Simulation.LowerLeftLatLon = new Vector2d(_latLon.x, _latLon.y);
             input.Simulation.DomainSize = new Vector2d(_domainSize.x, _domainSize.y);
 
-            ScenarioEditorGUI.SetInput(input);
+            ScenarioEditorWindow.SetInput(input);
             _open = false;
         }
 

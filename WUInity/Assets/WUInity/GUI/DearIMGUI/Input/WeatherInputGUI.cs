@@ -9,7 +9,7 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
     {
         public static void Draw(PREACT.Input.WeatherInput input)
         {
-            ImGui.InputText("Weather file", ref input.WeatherFile, 256);
+            ImGui.InputText(nameof(input.WeatherFile), ref input.WeatherFile, 256);
         }
     }
 }

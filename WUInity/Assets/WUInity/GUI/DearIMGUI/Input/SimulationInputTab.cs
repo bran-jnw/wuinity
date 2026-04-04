@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {    
-    public static class SimulationInputGUI
+    public static class SimulationInputTab
     {
         public static Vector2 _latLon, _domainSize;
 

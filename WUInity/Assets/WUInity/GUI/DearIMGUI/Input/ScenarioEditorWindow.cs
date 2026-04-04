@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
-    public  static class ScenarioEditorGUI
+    public  static class ScenarioEditorWindow
     {
         private static bool _isOpen;
         private static PREACT.Input.PREACTInput _input;
@@ -36,7 +36,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 return;
             }
 
-            ImGui.Begin("Scenario editor", ref _isOpen, ImGuiWindowFlags.MenuBar);
+            ImGui.Begin("Scenario editor", ref _isOpen, PreactGUI.NoDockingNoCollapse);
 
             if (ImGui.BeginTabBar(""))
             {
@@ -48,7 +48,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
                 if (ImGui.BeginTabItem("Simulation"))
                 {
-                    SimulationInputGUI.Draw(_input.Simulation);
+                    SimulationInputTab.Draw(_input.Simulation);
                     ImGui.EndTabItem();
                 }
 
@@ -60,8 +60,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
                 if (ImGui.BeginTabItem("Population"))
                 {
-
-
+                    PopulationInputTab.Draw(_input.Population);
                     ImGui.EndTabItem();
                 }
 
