@@ -62,7 +62,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Themes"))
+                if (ImGui.BeginMenu("Theme"))
                 {
                     if (ImGui.MenuItem("Dark theme")) { Themes.ApplyAdobeSpectrum(true); }
                     if (ImGui.MenuItem("Light Theme")) { Themes.ApplyAdobeSpectrum(false); }

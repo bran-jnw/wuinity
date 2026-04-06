@@ -8,7 +8,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
 {
     public static class ConsoleWindow
     {
-        private static bool _open;
+        private static bool _open = true;
 
         public static void Open()
         {

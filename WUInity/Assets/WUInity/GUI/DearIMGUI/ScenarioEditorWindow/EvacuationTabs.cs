@@ -70,6 +70,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             if (ImGui.BeginTabItem("Population"))
             {
+                if (ImGui.Button("Select population file")) { }
                 ImGui.InputText(nameof(input.Population.PopulationFile), ref input.Population.PopulationFile, 256);
                 ImGui.Checkbox(nameof(input.Population.CullOutsideGroups), ref input.Population.CullOutsideGroups);
 

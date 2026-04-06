@@ -12,7 +12,7 @@ namespace PREACT.Input
 {
     public class GlobalSmokeInput
     {
-        public string ExtinctionFile;
+        public string ExtinctionFile = string.Empty;
 
         public GlobalSmokeInput()
         {
