@@ -31,6 +31,13 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }
 
             ImGui.InputFloat(nameof(input.DeltaTime), ref input.DeltaTime);
+
+            CustomTypes.InputDateTimePopup(nameof(input.StartDateTime), ref input.StartDateTime);
+            CustomTypes.InputDateTimePopup(nameof(input.EndDateTime), ref input.EndDateTime);
+
+            ImGui.Checkbox(nameof(input.StopWhenEvacuated), ref input.StopWhenEvacuated);
+
+            //ImGui.SeparatorText(nameof(input.EndDateTime));
         }
 
         private static void DrawVector2d(string name, ref PREACT.Math.Vector2d value)

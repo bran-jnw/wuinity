@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using PREACT.Input;
 using PREACT.Math;
-using PREACT.Input;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace PREACT.Evacuation
 {
@@ -10,6 +11,7 @@ namespace PREACT.Evacuation
     public class EvacuationGroupInput
     {
         public string Name = string.Empty;
+        public DateTime EvacuationOrderDateTime;
         public PREACTColor Color = PREACTColor.white;
         public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupCDF;
         public List<string> Destinations = new List<string>(16);
@@ -26,7 +28,7 @@ namespace PREACT.Evacuation
         }
 
         public static void Parse(Dictionary<string, EvacuationGroupInput> newInputs, string[] inputLines, List<int> evacGroupLineIndices, 
-            Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, PopulationInput population, string rootFolder, out bool success)
+            Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, SimulationInput simulation, PopulationInput population, string rootFolder, out bool success)
         {            
             success = false;
             newInputs.Clear();
@@ -55,6 +57,28 @@ namespace PREACT.Evacuation
                 {
                     break;
                 }
+
+                //not critical, use starts
+                nameOfInput = nameof(EvacuationOrderDateTime);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    success = DateTime.TryParse(userInput, out newInput.EvacuationOrderDateTime);
+                    if (!success)
+                    {
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    success = false;
+                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
+                }
+                if (!success)
+                {
+                    newInput.EvacuationOrderDateTime = simulation.StartDateTime;
+                    success = true;
+                }
+                
 
                 //critical
                 nameOfInput = nameof(DestinationChoice);

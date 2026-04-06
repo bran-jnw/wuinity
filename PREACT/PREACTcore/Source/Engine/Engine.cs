@@ -455,11 +455,11 @@ namespace PREACT
             }
         }
 
-        public void SetInput(PREACTInput input)
+        public void SetInput(PREACTInput input, string filePath)
         {
             _dataStatus.HaveInput = true;
             _input = input;
-            _workingFile = null;
+            _workingFile = filePath;
             _dataStatus.Reset();
             _dataStatus.HaveInput = true;
             UpdateExternalManager(_input);

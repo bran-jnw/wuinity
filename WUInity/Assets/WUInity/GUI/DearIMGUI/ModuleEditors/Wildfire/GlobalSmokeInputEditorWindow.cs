@@ -25,7 +25,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if (ImGui.Button("Select global smoke file")) { }
             if (ImGui.Button("Create global smoke file")) { }
             ImGui.InputText(nameof(_input.ExtinctionFile), ref _input.ExtinctionFile, 256);
-            if (ImGui.Button("OK")) { _isOpen = false; }
+
+            ImGui.Separator();
+            if (ImGui.Button("Apply")) { _isOpen = false; }
 
             ImGui.End();
             if (!_isOpen)

@@ -21,8 +21,8 @@ namespace PREACT.Input
         public Vector2d LowerLeftLatLon { get => _lowerLeftLatLon; set { _lowerLeftLatLon = value; _data.UpdateData(LowerLeftLatLon); } }
         public Vector2d DomainSize;
         public float DeltaTime = 1.0f;
-        public DateTime StartDateTime = DateTime.MinValue;
-        public DateTime EndDateTime = DateTime.MaxValue;
+        public DateTime StartDateTime = DateTime.Now;
+        public DateTime EndDateTime = DateTime.Now;
         public bool StopWhenEvacuated = false;
 
         public SimulationInput()

@@ -42,7 +42,6 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
             {
                 if (ImGui.Button("Module settings###2")) 
                 {
-                    PREACT.Engine.Message(null, PREACT.Engine.LogType.Debug, "CLICK");
                     if (input.SmokeModule.Module == SmokeInput.SmokeModules.GlobalSmoke) { GlobalSmokeInputEditorWindow.Open(input.SmokeModule.GlobalSmokeInput);}
                 }
             }

@@ -9,8 +9,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if (ImGui.BeginMainMenuBar())
             {
                 if (ImGui.BeginMenu("File"))
-                {
-                    if (ImGui.MenuItem("New scenario")) { NewScenarioWindow.Open(); }
+                {                    
                     if (ImGui.MenuItem("Load scenario")) { FileBrowserBackend.OpenLoadInput(); }
                     if (ImGui.MenuItem("Save", ScenarioEditorWindow.HasInput)) { ScenarioEditorWindow.SaveInput(); }
                     if (ImGui.MenuItem("Save as", ScenarioEditorWindow.HasInput)) { FileBrowserBackend.OpenSaveInput(); }
@@ -26,6 +25,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
                         edit = true;
                     }
 
+                    if (ImGui.MenuItem("New scenario", edit)) { NewScenarioWindow.Open(); }
+
+                    ImGui.SeparatorText("Loaded scenario");
                     if (ImGui.MenuItem("Run/edit", edit)) { ScenarioEditorWindow.Open(); }
 
                     bool output = false;

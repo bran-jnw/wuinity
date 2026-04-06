@@ -13,6 +13,7 @@ namespace PREACT.Evacuation
     public class EvacuationGroup
     {
         private string _name;
+        private System.DateTime _evacuationOrderDateTime;
         private DestinationChoices _destinationChoice;
         private PREACTColor _color;
         private bool _default;
@@ -27,6 +28,7 @@ namespace PREACT.Evacuation
         private Vector2d _boundingBoxMax;
 
         public string Name { get => _name; }
+        public System.DateTime EvacuationOrderDateTime { get => _evacuationOrderDateTime; }
         public PREACTColor Color { get => _color; }
         public bool Default { get => _default; }
         public List<EvacuationDestination> Destinations { get => _destinations; }
@@ -37,6 +39,7 @@ namespace PREACT.Evacuation
         public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, DemographicsInput> allDemographics, Simulation simulation)
         {
             _name = groupInput.Name;
+            _evacuationOrderDateTime = groupInput.EvacuationOrderDateTime;
             _destinationChoice = groupInput.DestinationChoice;
             _color = groupInput.Color;
             _default = groupInput.Default;

@@ -1,8 +1,13 @@
 ﻿using ImGuiNET;
+using PREACT.Input;
 using PREACT.Math;
 using PREACT.Tools;
+using SimpleFileBrowser;
 using System;
+using System.IO;
+using UnityEditor.Rendering;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
@@ -10,9 +15,11 @@ namespace Assets.WUInity.GUI.DearIMGUI
     {
         private static bool _isOpen;
 
-        public static string scenarioId = string.Empty;
-        public static Vector2 _latLon, _domainSize;
-        public static int _year = DateTime.Today.Year;
+        private static Vector2 _latLon, _domainSize;
+        private static PREACTInput _input;
+        private static bool _folderSet;
+        private static bool _havePopulation, _haveSumo, _haveWildfireLandscape, _haveWeather;
+        private static bool _wantPedestrian, _wantTraffic, _wantWildfire, _wantSmoke;
 
         public static void Open()
         {
@@ -21,6 +28,8 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 PreactGUI.DrawWindow(Draw);
             }
             _isOpen = true;
+            _latLon = Vector2.zero;
+            _domainSize = Vector2.zero;
         }
 
         public static void Draw()
@@ -30,47 +39,133 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 return;
             }
 
-            ImGui.Begin("New scenario", ref _isOpen, PreactGUI.NoDockingNoCollapse);
+            ImGui.Begin("New scenario creator", ref _isOpen, PreactGUI.NoDockingNoCollapse);
 
-            ImGui.InputText("Scenario name", ref scenarioId, 128);
-            ImGui.InputFloat2("Lower left lat/lon", ref _latLon);
-            ImGui.InputFloat2("Domain size", ref _domainSize);
-            ImGui.InputInt("Year of interest", ref _year);
+            if(!_folderSet)
+            {
+                if (ImGui.Button("Set root folder")) 
+                {
+                    OpenSetRootFolder();                    
+                }
+                return;
+            }
+            ImGui.Text($"{nameof(_input.RootFolder)}: {_input.RootFolder}");
 
-            if(ImGui.Button("Create scenario")){ SelectFolderAndSave(); }
+            SimulationInput simIn = _input.Simulation;
+
+            ImGui.SeparatorText("Basic scenario data");
+            ImGui.InputText(nameof(simIn.Name), ref simIn.Name, 128);
+                        
+            ImGui.InputFloat2(nameof(simIn.LowerLeftLatLon), ref _latLon);  
+            ImGui.InputFloat2(nameof(simIn.DomainSize), ref _domainSize);
+
+            CustomTypes.InputDateTimePopup(nameof(simIn.StartDateTime), ref simIn.StartDateTime);
+            CustomTypes.InputDateTimePopup(nameof(simIn.EndDateTime), ref simIn.EndDateTime);
+
+            ImGui.SeparatorText("Evacuation");
+            ImGui.Checkbox("Pedestrian evacuation?", ref _wantPedestrian);
+            if(_wantPedestrian)
+            {
+                ImGui.Checkbox("Have population?", ref _havePopulation);
+                if(_havePopulation)
+                {
+                    if (ImGui.Button("Select population file")) { }
+                }
+                else
+                {
+                    if (ImGui.Button("Step 1: Download WorldPop")) { }
+                    if (ImGui.Button("Step 2: Download OSM data")) { }
+                    if (ImGui.Button("Step 3: Build RouterDb")) { }
+                    if (ImGui.Button("Step 4: Generate population")) { }
+                }
+            }
+
+            ImGui.Separator();
+
+            ImGui.Checkbox("Vehicle evacuation?", ref _wantTraffic);
+            if (_wantTraffic)
+            {
+                ImGui.Checkbox("Have SUMO input?", ref _haveSumo);
+                if (_haveSumo)
+                {
+                    if (ImGui.Button("Select SUMO input file")) { }
+                }
+                else
+                {
+                    if (ImGui.Button("Step 1: Download OSM data")) { }
+                    if (ImGui.Button("Step 2: Generate SUMO input")) { }
+                }
+            }
+
+            ImGui.SeparatorText("Hazards");
+            ImGui.Checkbox("Wildfire spread?", ref _wantWildfire);
+            if (_wantWildfire)
+            {
+                ImGui.Checkbox("Have wildfire landscape?", ref _haveWildfireLandscape);
+                if(_haveWildfireLandscape)
+                {
+                    if (ImGui.Button("Select landscape file")) { };
+                }
+                else
+                {
+                    if (ImGui.Button("Step 1: Download Landfire data")) { }
+                }
+
+                ImGui.Checkbox("Have weather?", ref _haveWeather);
+                if (_haveWeather)
+                {
+                    if (ImGui.Button("Select weather file")) { }
+                }
+                else
+                {
+                    if (ImGui.Button("Step 1: Download weather file")) { }
+                }
+            }
+
+            ImGui.Separator();
+
+            ImGui.Checkbox("Smoke spread?", ref _wantSmoke);
+            if (_wantSmoke)
+            {
+                if(!_wantWildfire)
+                {
+                    ImGui.Text("Smoke dispersion needs wildfire spread active as source term.");
+                }                  
+            }
+
+            ImGui.SeparatorText("Finished?");
+
+            if (ImGui.Button("Generate scenario")) { GenerateScenario(); }
+            ;
 
             ImGui.End();
-
             if (!_isOpen)
             {
+                _folderSet = false;
                 PreactGUI.CloseWindow(Draw);
             }
         }
 
-        private static void SelectFolderAndSave()
+        private static void GenerateScenario()
         {
-            //CreateBaseScenario();
-            string rootFolder = string.Empty;
-            PREACT.Input.PREACTInput input = new PREACT.Input.PREACTInput(rootFolder);
-            input.Simulation.Name = scenarioId;
-            input.Simulation.LowerLeftLatLon = new Vector2d(_latLon.x, _latLon.y);
-            input.Simulation.DomainSize = new Vector2d(_domainSize.x, _domainSize.y);
-
-            ScenarioEditorWindow.SetInput(input);
+            _input.Simulation.LowerLeftLatLon = new Vector2d(_latLon.x, _latLon.y);
+            _input.Simulation.DomainSize = new Vector2d(_domainSize.x, _domainSize.y);
             _isOpen = false;
+            _folderSet = false;
+            string filePath = Path.Combine(_input.RootFolder, _input.Simulation.Name, ".wui");
+            PREACTInput.SaveToDisk(_input, filePath);
+            PreactGUI.Engine.SetInput(_input, filePath);     
+        }
+        private static void OpenSetRootFolder()
+        {
+            FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowserBackend.CancelSaveLoad, FileBrowser.PickMode.Folders, false, null, null, "Set root folder", "Set");
+        }
+        private static void SetRootFolder(string[] paths)
+        {
+            _folderSet = true;
+            _input = new PREACTInput(string.Empty);
+            _input.RootFolder = paths[0];
         }
 
-        /*public static async void CreateBaseData(string[] paths)
-        {
-            _workingData.SetSimulatonData(lowerLatLon, domainSize);
-            Vector2d upperLatLon = _workingData.SimulationInput.Data.GetWGS84FromSimulationPosition(domainSize);
-
-            int.TryParse(_minHouseholdSize, out int min);
-            int.TryParse(_maxHouseholdSize, out int max);
-
-            int.TryParse(_yearOfInterest, out int year);
-
-            await PopulationTools.CreateBaseScenario(paths[0], _scenarioId, min, max, lowerLatLon, upperLatLon, year);
-        }*/
     }
 }

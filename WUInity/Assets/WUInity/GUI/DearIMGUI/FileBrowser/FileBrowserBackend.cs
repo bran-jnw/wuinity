@@ -11,7 +11,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         static string[] geoTiffFilter = new string[] { ".tif", ".tiff" };
         static string[] fuelModelsFilter = new string[] { ".fuel" };
 
-        static void CancelSaveLoad()
+        public static void CancelSaveLoad()
         {
 
         }
@@ -34,7 +34,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
             string initialPath = PreactGUI.Engine.WorkingFolder;
             FileBrowser.ShowSaveDialog(ScenarioEditorWindow.SaveNewInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
         }
-       
 
         /*public static void OpenCreateBaseData()
         {

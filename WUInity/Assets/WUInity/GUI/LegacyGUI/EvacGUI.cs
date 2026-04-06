@@ -23,7 +23,6 @@ namespace WUInity.UI
                 walkSpeedMax = macroIn.WalkingSpeedMinMax.Y.ToString();
                 walkSpeedMod = macroIn.WalkingSpeedModifier.ToString();
                 walkingDistMod = macroIn.WalkingDistanceModifier.ToString();
-                evacOrderTime = evacIn.EvacuationOrderSimTime.ToString();
 
             }
             GUI.Box(new Rect(120, 0, columnWidth + 40, Screen.height - consoleHeight), "");
@@ -74,7 +73,6 @@ namespace WUInity.UI
             float.TryParse(walkSpeedMax, out macroIn.WalkingSpeedMinMax.Y);
             float.TryParse(walkSpeedMod, out macroIn.WalkingSpeedModifier);
             float.TryParse(walkingDistMod, out macroIn.WalkingDistanceModifier);
-            float.TryParse(evacOrderTime, out evacIn.EvacuationOrderSimTime);
         }
     }
 }

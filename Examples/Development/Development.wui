@@ -32,7 +32,6 @@ MaxCars=2
 MaxCarsProbability=1.0
 
 [Evacuation]
-EvacuationOrderStart=0.0
 UseTriggerBufferEvacuation=false
 TriggerBufferFile=fire/trigger_buffer.asc
 
@@ -58,6 +57,7 @@ Color=1.0,0.0,0.0
 
 [EvacuationGroup]
 Name=route85_group
+EvacuationOrderDateTime=2001-06-05T11:00:00
 Default=true
 Demographics=two_cars
 DestinationChoice=EvacGroupCDF
@@ -70,6 +70,7 @@ Color=1.0,1.0,0.0
 
 [EvacuationGroup]
 Name=route121_group
+EvacuationOrderDateTime=2001-06-05T11:00:00
 Demographics=one_car
 DestinationChoice=EvacGroupCDF
 ShapeFile=groups/west.shp
