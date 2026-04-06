@@ -26,7 +26,7 @@ namespace PREACT
         }
     }
 
-    [System.Serializable] public enum DestinationTypes { Exit, Refugee }
+    [System.Serializable] public enum DestinationTypes { Exit, Shelter }
         
     [System.Serializable]
     public class TrafficCellData

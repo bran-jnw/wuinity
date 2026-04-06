@@ -4,17 +4,21 @@ using System.IO;
 
 namespace PREACT.Input
 {
-    public struct EvacuationDestinationInput
+    public class EvacuationDestinationInput
     {
-        public string Name;
-        public Vector2d LatLon;        
-        public DestinationTypes Type;
-        public float MaxFlow; //cars per hour
-        public int MaxVehicles;
-        public int MaxPeople;
-        public bool Blocked;
-        public PREACTColor Color;
+        public string Name = string.Empty;
+        public Vector2d LatLon = Vector2d.zero;        
+        public DestinationTypes Type = DestinationTypes.Exit;
+        public float MaxFlow = -1f; //cars per hour
+        public int MaxVehicles = -1;
+        public int MaxPeople = -1;
+        public bool Blocked = false;
+        public PREACTColor Color = PREACTColor.Random();
         
+        public EvacuationDestinationInput()
+        {
+
+        }
 
         public EvacuationDestinationInput(string name, Vector2d latLon, DestinationTypes type, PREACTColor color, float maxFlow, int maxCars, int maxPeople, bool blocked)
         {
@@ -89,8 +93,8 @@ namespace PREACT.Input
                         case nameof(DestinationTypes.Exit):
                             newInput.Type = DestinationTypes.Exit;
                             break;
-                        case nameof(DestinationTypes.Refugee):
-                            newInput.Type = DestinationTypes.Refugee;
+                        case nameof(DestinationTypes.Shelter):
+                            newInput.Type = DestinationTypes.Shelter;
                             break;
                         default:
                             ++issues;

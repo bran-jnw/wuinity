@@ -12,7 +12,7 @@ namespace PREACT.Input
     [System.Serializable]
     public class TrafficModuleInput
     {
-        public enum TrafficModules { SUMO, MacroTrafficSim, CityFlow }
+        public enum TrafficModules { None, SUMO, MacroTrafficSim, CityFlow }
 
         private TrafficData _data;
         private SUMOInput _sumoInput;

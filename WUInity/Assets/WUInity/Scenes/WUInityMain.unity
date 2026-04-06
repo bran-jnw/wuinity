@@ -485,11 +485,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1238256185070277426, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: darkTheme
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: _tileProvider
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: _options.loadingTexture
       value: 
       objectReference: {fileID: 1148221833}
+    - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: _previewOptions.isPreviewEnabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8976051388658413196, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: _imagery._layerProperty.sourceOptions.layerSource.Name
+      value: Satellite Streets
+      objectReference: {fileID: 0}
     - target: {fileID: 9009419062416531712, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: m_LocalPosition.x

@@ -22,11 +22,20 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
         public static void Open()
         {
+            if (!_isOpen)
+            {
+                PreactGUI.DrawWindow(Draw);
+            }
             _isOpen = true;
         }
+
         public static void Close()
         {
-            _isOpen = false;
+            if(_isOpen)
+            {
+                PreactGUI.CloseWindow(Draw);
+            }
+            _isOpen = false;            
         }
 
         public static void Draw()
@@ -38,42 +47,60 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             ImGui.Begin("Scenario editor", ref _isOpen, PreactGUI.NoDockingNoCollapse);
 
-            if (ImGui.BeginTabBar(""))
+            if (ImGui.BeginTabBar("Scenario"))
             {
                 if (ImGui.BeginTabItem("Run"))
                 {
-                    RunGUI.Draw();
+                    RunTab.Draw();
+
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Simulation"))
+                if (ImGui.BeginTabItem("General"))
                 {
-                    SimulationInputTab.Draw(_input.Simulation);
-                    ImGui.EndTabItem();
-                }
+                    if (ImGui.BeginTabBar("GeneralBar"))
+                    {
+                        if (ImGui.BeginTabItem("Simulation"))
+                        {
+                            SimulationInputTab.Draw(_input.Simulation);
+                            ImGui.EndTabItem();
+                        }
 
-                if (ImGui.BeginTabItem("Weather"))
-                {
-                    WeatherInputGUI.Draw(_input.Weather);
-                    ImGui.EndTabItem();
-                }
+                        if (ImGui.BeginTabItem("Map"))
+                        {
+                            MapInputTab.Draw(_input.Map);
+                            ImGui.EndTabItem();
+                        }
 
-                if (ImGui.BeginTabItem("Population"))
-                {
-                    PopulationInputTab.Draw(_input.Population);
+                        if (ImGui.BeginTabItem("Weather"))
+                        {
+                            WeatherInputTab.Draw(_input.Weather);
+                            ImGui.EndTabItem();
+                        }
+
+                        ImGui.EndTabBar();
+                    }
+
                     ImGui.EndTabItem();
                 }
 
                 if (ImGui.BeginTabItem("Evacuation"))
                 {
+                    if (ImGui.BeginTabBar("EvacuationBar"))
+                    {
+                        EvacuationTabs.Draw(_input, _input.Evacuation, _input.PedestrianModule, _input.TrafficModule);
 
+                        ImGui.EndTabBar();
+                    }                        
 
                     ImGui.EndTabItem();
+
                 }
+                                  
 
                 if (ImGui.BeginTabItem("Hazards"))
                 {
-                    HazardsInputGUI.Draw(_input);
+                    HazardsInputTab.Draw(_input);
                     ImGui.EndTabItem();
                 }
 
@@ -81,6 +108,10 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }            
 
             ImGui.End();
+            if (!_isOpen)
+            {
+                PreactGUI.CloseWindow(Draw);
+            }
         }
 
         public static void SaveInput()

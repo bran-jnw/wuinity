@@ -10,8 +10,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
     {
         private static bool _open;
 
-        private static ImGuiWindowFlags consoleWindow = ImGuiWindowFlags.NoCollapse;
-
         public static void Open()
         {
             _open = true;
@@ -25,12 +23,14 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.zero);
-            ImGui.Begin("Console", ref _open, consoleWindow);           
+            ImGui.Begin("Console", ref _open, ImGuiWindowFlags.NoCollapse);
 
-            foreach (string message in messages)
+            LinkedListNode<string> node = messages.First;
+            while (node != null)
             {
-                ImGui.Text(message);
-            }        
+                ImGui.Text(node.Value);
+                node = node.Next;
+            }
 
             ImGui.End();
             ImGui.PopStyleVar(1);

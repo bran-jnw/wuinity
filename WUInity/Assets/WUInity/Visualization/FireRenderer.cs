@@ -6,8 +6,6 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using UnityEngine;
-using PREACT.Wildfire;
-using PREACT.Dispersion;
 using PREACT.Input;
 using PREACT.Visualization;
 using PREACT.Math;

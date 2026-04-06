@@ -5,6 +5,7 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using PREACT.Evacuation;
 
@@ -16,7 +17,9 @@ namespace PREACT.Input
         private EvacuationData _data;
 
         public EvacuationData Data { get => _data; }
-        public float EvacuationOrderStart = 0.0f;
+        public bool AbsoluteTime = false;
+        public float EvacuationOrderSimTime = 0.0f;
+        public DateTime EvacuationOrderDateTime;
         public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs = new Dictionary<string, EvacuationDestinationInput>(5);
         public Dictionary<string, ResponseCurve> ResponseCurves = new Dictionary<string, ResponseCurve>(5);        
         public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs = new Dictionary<string, EvacuationGroupInput>(5);
@@ -63,10 +66,10 @@ namespace PREACT.Input
             }
 
             //not critical
-            nameOfInput = nameof(EvacuationOrderStart);
+            nameOfInput = nameof(EvacuationOrderSimTime);
             if (inputToParse.TryGetValue(nameOfInput, out userInput))
             {
-                float.TryParse(userInput, out EvacuationOrderStart);
+                float.TryParse(userInput, out EvacuationOrderSimTime);
             }
             else
             {

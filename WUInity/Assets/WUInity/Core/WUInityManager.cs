@@ -351,7 +351,7 @@ namespace WUInity
             }
 
             //temp hack for changing height in smoke sim
-            if (Input.GetKey(KeyCode.KeypadPlus))
+            /*if (Input.GetKey(KeyCode.KeypadPlus))
             {
                 print("Going up.");
                 ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.Hazards.Smoke).IncreaseOutputHeight();
@@ -360,7 +360,7 @@ namespace WUInity
             {
                 print("Going down.");
                 ((PREACT.Dispersion.AdvectDiffuse3D)_engine.Simulation.Hazards.Smoke).DecreaseOutputHeight();
-            }
+            }*/
 
             //always update visuals, even when paused
             if (_engine.Simulation != null)

@@ -6,18 +6,17 @@ using static System.Math;
 
 namespace Assets.WUInity.GUI.DearIMGUI.Input
 {
-    public static class RunGUI
+    public static class RunTab
     {
         static EngineTask _engineTask = new EngineTask();
 
         static string[] ExecutionModeStrings;
         static int executionMode;
 
-        static RunGUI()
+        static RunTab()
         {
             ExecutionModeStrings = Enum.GetNames(typeof(EngineTask.ExecutionMode));
         }
-
 
         public static void Draw()
         {
@@ -41,6 +40,7 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
             {
                 ScenarioEditorWindow.Close();
                 PreactGUI.WUInity.RunSimulation(_engineTask);
+                OutputWindow.Open();
             }
         }        
     }

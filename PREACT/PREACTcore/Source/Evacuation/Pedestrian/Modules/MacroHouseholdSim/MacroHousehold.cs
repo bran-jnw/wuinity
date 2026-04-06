@@ -70,7 +70,7 @@ namespace PREACT.Pedestrian
             carPosition = new Vector2((float)temp.x, (float)temp.y);
             walkingDistance = Vector2.Distance(_homePosition, carPosition) * houseInput.WalkingDistanceModifier;
 
-            ResponseTime = _evacuationGroup.GetWeightedRandomResponseTime(simulation.Input.Evacuation.EvacuationOrderStart);
+            ResponseTime = _evacuationGroup.GetWeightedRandomResponseTime(simulation.Input.Evacuation.EvacuationOrderSimTime);
 
             _travelTime = walkingDistance / walkingSpeed;
             if (ResponseTime == float.MaxValue)

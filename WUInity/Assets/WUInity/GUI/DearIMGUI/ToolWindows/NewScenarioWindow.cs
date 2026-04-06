@@ -8,7 +8,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
 {
     public static class NewScenarioWindow
     {
-        private static bool _open;
+        private static bool _isOpen;
 
         public static string scenarioId = string.Empty;
         public static Vector2 _latLon, _domainSize;
@@ -16,17 +16,21 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
         public static void Open()
         {
-            _open = true;
+            if (!_isOpen)
+            {
+                PreactGUI.DrawWindow(Draw);
+            }
+            _isOpen = true;
         }
 
         public static void Draw()
         {
-            if(!_open)
+            if(!_isOpen)
             {
                 return;
             }
 
-            ImGui.Begin("New scenario", ref _open, PreactGUI.NoDockingNoCollapse);
+            ImGui.Begin("New scenario", ref _isOpen, PreactGUI.NoDockingNoCollapse);
 
             ImGui.InputText("Scenario name", ref scenarioId, 128);
             ImGui.InputFloat2("Lower left lat/lon", ref _latLon);
@@ -36,6 +40,11 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if(ImGui.Button("Create scenario")){ SelectFolderAndSave(); }
 
             ImGui.End();
+
+            if (!_isOpen)
+            {
+                PreactGUI.CloseWindow(Draw);
+            }
         }
 
         private static void SelectFolderAndSave()
@@ -48,7 +57,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             input.Simulation.DomainSize = new Vector2d(_domainSize.x, _domainSize.y);
 
             ScenarioEditorWindow.SetInput(input);
-            _open = false;
+            _isOpen = false;
         }
 
         /*public static async void CreateBaseData(string[] paths)

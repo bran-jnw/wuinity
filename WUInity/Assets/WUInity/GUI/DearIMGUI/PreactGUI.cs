@@ -1,5 +1,7 @@
+using Assets.WUInity.GUI.DearIMGUI.Editors;
 using ImGuiNET;
 using PREACT;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UImGui;
@@ -31,6 +33,17 @@ namespace Assets.WUInity.GUI.DearIMGUI
             UImGuiUtility.Layout -= OnLayout;
         }
 
+        private static event Action Windows;
+        public static void DrawWindow(Action window)
+        {
+            Windows += window;
+        }
+
+        public static void CloseWindow(Action window)
+        {
+            Windows -= window;
+        }
+
         //draws menus
         private void OnLayout(UImGui.UImGui obj)
         {            
@@ -40,11 +53,19 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }
 
             MainDock();
-
-            MenuBarGUI.Draw();
-            NewScenarioWindow.Draw();
-            ScenarioEditorWindow.Draw();
+            MainMenuBar.Draw();      
             ConsoleWindow.Draw(_messages);
+
+            //windows
+            if(Windows != null)
+            {
+                Windows.Invoke();
+            }           
+
+            /*NewScenarioWindow.Draw();
+            ScenarioEditorWindow.Draw();
+            DestinationInputEditWindow.Draw();
+            DemographicsInputEditorWindow.Draw();*/
         }
 
         public static ImGuiWindowFlags NoDockingNoCollapse = ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse;
@@ -111,7 +132,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         public void NewMessage(string message)
         {
             _messages.AddFirst(message);
-            if (_messages.Count > 50)
+            if (_messages.Count > 100)
             {
                 _messages.RemoveLast();
             }

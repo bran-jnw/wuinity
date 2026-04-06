@@ -4,7 +4,7 @@ using PREACT.Input;
 
 namespace Assets.WUInity.GUI.DearIMGUI.Input
 {
-    internal class HazardsInputGUI
+    internal class HazardsInputTab
     {
         static string[] WildfireModulesStrings;
         static int wildfireModuleIndex = 0;
@@ -12,7 +12,7 @@ namespace Assets.WUInity.GUI.DearIMGUI.Input
         static string[] SmokeModulesStrings;
         static int smokeModulIndex = 0;
 
-        static HazardsInputGUI()
+        static HazardsInputTab()
         {
             WildfireModulesStrings = Enum.GetNames(typeof(WildfireModuleInput.WildfireModules));
             SmokeModulesStrings = Enum.GetNames(typeof(SmokeInput.SmokeModules));

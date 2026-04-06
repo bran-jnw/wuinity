@@ -127,7 +127,7 @@ namespace PREACT.Evacuation
 
         void UpdateCapacity()
         {
-            if (_goalType == DestinationTypes.Refugee)
+            if (_goalType == DestinationTypes.Shelter)
             {
                 //track cars and respond
                 if (_maxCars > 0 && _vehicles.Count >= _maxCars && !_blocked)

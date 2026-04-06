@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Assets.WUInity.GUI.DearIMGUI.Input
 {
-    public static class WeatherInputGUI
+    public static class WeatherInputTab
     {
         public static void Draw(PREACT.Input.WeatherInput input)
         {

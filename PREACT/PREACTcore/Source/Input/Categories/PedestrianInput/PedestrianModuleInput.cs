@@ -15,7 +15,7 @@ namespace PREACT.Input
         private MacroHouseholdSimInput _macroHouseholdSimInput;
 
         public bool Enabled = false;
-        public enum PedestrianModules { MacroHouseholdSim, JupedSimSUMO }
+        public enum PedestrianModules { None, MacroHouseholdSim, JupedSimSUMO }
         public PedestrianModules Module = PedestrianModules.MacroHouseholdSim;
 
         //module inputs

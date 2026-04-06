@@ -2,6 +2,7 @@
 using ImGuiNET;
 using PREACT;
 using PREACT.Evacuation;
+using System.Collections.Generic;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
@@ -16,16 +17,17 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 if (ImGui.Button("Create demographics")){ }
                 
-                foreach (DemographicsInput d in input.Demographics.Values)
+                foreach (KeyValuePair<string, DemographicsInput> kV in input.Demographics)
                 {
-                    if (ImGui.TreeNode(d.Name))
+                    DemographicsInput demo = kV.Value;
+                    if (ImGui.TreeNode(demo.Name))
                     {                        
-                        ImGui.InputText(nameof(d.Name), ref d.Name, 64);
-                        ImGui.Checkbox(nameof(d.AllowMoreThanOneCar), ref d.AllowMoreThanOneCar);
-                        if(d.AllowMoreThanOneCar)
+                        ImGui.InputText(nameof(demo.Name), ref demo.Name, 64);
+                        ImGui.Checkbox(nameof(demo.AllowMoreThanOneCar), ref demo.AllowMoreThanOneCar);
+                        if(demo.AllowMoreThanOneCar)
                         {
-                            ImGui.InputInt(nameof(d.MaxCars), ref d.MaxCars);
-                            ImGui.InputFloat(nameof(d.MaxCarsProbability), ref d.MaxCarsProbability);
+                            ImGui.InputInt(nameof(demo.MaxCars), ref demo.MaxCars);
+                            ImGui.InputFloat(nameof(demo.MaxCarsProbability), ref demo.MaxCarsProbability);
                         }
                         if (ImGui.Button("Remove")) { }
 

@@ -1,6 +1,7 @@
-﻿using ImGuiNET;
-using UnityEngine;
+﻿using ILGPU.Runtime.Cuda;
+using ImGuiNET;
 using System.IO;
+using UnityEngine;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
@@ -37,6 +38,8 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             if (darkTheme)
             {
+                ImGui.StyleColorsDark();
+                return;
                 // ----- Colors -----
                 colors[(int)ImGuiCol.Text] = new Vector4(0.95f, 0.95f, 0.95f, 1f);
                 colors[(int)ImGuiCol.TextDisabled] = new Vector4(0.55f, 0.55f, 0.55f, 1f);
@@ -99,6 +102,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }
             else
             {
+                ImGui.StyleColorsLight();
+                return;
+                
                 // ----- Colors (Spectrum Light) -----
                 colors[(int)ImGuiCol.Text] = new Vector4(0.10f, 0.10f, 0.10f, 1f);
                 colors[(int)ImGuiCol.TextDisabled] = new Vector4(0.55f, 0.55f, 0.55f, 1f);
