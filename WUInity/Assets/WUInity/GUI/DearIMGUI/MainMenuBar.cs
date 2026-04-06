@@ -38,7 +38,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Console", ScenarioEditorWindow.HasInput))
+                if (ImGui.BeginMenu("Console"))
                 {
                     if (ImGui.MenuItem("Open")) { ConsoleWindow.Open(); }
                     if (ImGui.MenuItem("Clear")) { }

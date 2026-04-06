@@ -1,8 +1,10 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
+using System.Xml;
 
 namespace PREACT.Traffic
 {
@@ -63,7 +65,7 @@ namespace PREACT.Traffic
             string netEditFilePath = Path.Combine(Path.GetDirectoryName(filePath), valueAttr.Value);
             _network = new SumoNetwork(netEditFilePath, readNetwork);
         }
-    }
+    }  
 
     public class SumoNetwork
     {
@@ -71,10 +73,25 @@ namespace PREACT.Traffic
         public Dictionary<string, SumoEdge> Edges = new Dictionary<string, SumoEdge>();
         public Dictionary<string, SumoLane> Lanes = new Dictionary<string, SumoLane>();
 
+
         public SumoNetwork(string filePath, bool readNetwork)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(filePath);
+            XmlDocument doc;
+
+            bool isGzip = filePath.ToLower().EndsWith("gz");
+            if (isGzip)
+            {
+                //string xmlPath = filePath.Remove(filePath.Length - 3, 3);
+                using var input = File.OpenRead(filePath);
+                using var gzip = new GZipStream(input, CompressionMode.Decompress);
+                doc = new XmlDocument();
+                doc.Load(gzip);
+            }
+            else
+            {
+                doc = new XmlDocument();
+                doc.Load(filePath);
+            }            
 
             XmlElement root = doc.DocumentElement;
             if (root == null)
