@@ -56,11 +56,11 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("General"))
+                if (ImGui.BeginTabItem("Simulation"))
                 {
-                    if (ImGui.BeginTabBar("GeneralBar"))
+                    if (ImGui.BeginTabBar("SimulationBar"))
                     {
-                        if (ImGui.BeginTabItem("Simulation"))
+                        if (ImGui.BeginTabItem("General"))
                         {
                             SimulationInputTab.Draw(_input.Simulation);
                             ImGui.EndTabItem();

@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using PREACT;
 using PREACT.Input;
 using PREACT.Math;
 using PREACT.Tools;
@@ -148,6 +149,12 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
         private static void GenerateScenario()
         {
+            if(_input.Simulation.Name == string.Empty)
+            {
+                Engine.Message(null, Engine.LogType.InputError, $"Parameter {nameof(_input.Simulation.Name)} needs to be properly set.");
+                return;
+            }
+
             _input.Simulation.LowerLeftLatLon = new Vector2d(_latLon.x, _latLon.y);
             _input.Simulation.DomainSize = new Vector2d(_domainSize.x, _domainSize.y);
             _isOpen = false;

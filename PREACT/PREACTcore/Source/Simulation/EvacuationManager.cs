@@ -1,4 +1,5 @@
 ﻿using PREACT.Math;
+using PREACT.Math;
 using System.Collections.Generic;
 using PREACT.Input;
 using PREACT.Pedestrian;
@@ -118,8 +119,6 @@ namespace PREACT.Evacuation
                 return createdModules;
             }
 
-            CreateDroneModule();
-
             return createdModules;
         }
 
@@ -185,11 +184,6 @@ namespace PREACT.Evacuation
             {
                 success = true;
             }
-        }
-
-        private void CreateDroneModule()
-        {
-            //Panos
         }
 
         public void CreateAndRunTriggerBufferModule(Simulation simulation, PREACTInput input, WeatherManager weather, TimeManager time)

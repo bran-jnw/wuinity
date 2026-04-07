@@ -28,7 +28,8 @@ namespace PREACT
         private WeatherManager _weather;
         private SpatialManager _spatial;
         private EvacuationManager _evacuation;
-        private HazardManager _hazards;                             
+        private HazardManager _hazards;
+        private DetectionManager _detection;
 
         private List<SimulationModule> _simulationModules = new List<SimulationModule>();
         private Stopwatch[] _moduleStopwatches;
@@ -54,7 +55,8 @@ namespace PREACT
         public WeatherManager Weather { get => _weather; }
         public SpatialManager Spatial { get => _spatial; }
         public EvacuationManager Evacuation { get => _evacuation; }
-        public HazardManager Hazards { get => _hazards; }                
+        public HazardManager Hazards { get => _hazards; }
+        public DetectionManager Detection { get => _detection; }
 
         //Data
         public int SimulationIndex { get => _simulationIndex; }
@@ -73,7 +75,8 @@ namespace PREACT
             _spatial = new SpatialManager(this);
             _weather = new WeatherManager(this, _time);
             _hazards = new HazardManager(this);
-            _evacuation = new EvacuationManager(this);              
+            _evacuation = new EvacuationManager(this);      
+            _detection = new DetectionManager(this);
         }
 
         /// <summary>
@@ -196,12 +199,18 @@ namespace PREACT
             _time.Step(deltaTime);
 
             //deal with what has happen during time step
-            _hazards.PostStep(_time.SimulationTime);
-            _evacuation.PostStep();
+            PostStep();
 
             //see if we are done or not   
             CheckCompletion();
             UpdatePerformanceTimer(startTime, deltaTime);
+        }
+
+        private void PostStep()
+        {            
+            _hazards.PostStep(_time.SimulationTime);
+            _detection.PostStep();
+            _evacuation.PostStep();            
         }
 
         private void CheckCompletion()
@@ -297,6 +306,7 @@ namespace PREACT
         {
             _state = SimulationState.Initializing;
 
+            //Hazards
             List<SimulationModule> createdModules = _hazards.CreateModules(_weather, _time, out bool success);
             if (success)
             {
@@ -310,6 +320,7 @@ namespace PREACT
                 return;
             }
 
+            //Evacuation
             createdModules = _evacuation.CreateModules(_weather, _time, out success);
             if (success)
             {
@@ -320,6 +331,20 @@ namespace PREACT
             {
                 _stopRun = true;
                 Engine.Message(this, Engine.LogType.Log, "Failed to create all requested evacuation modules, aborting.");
+                return;
+            }
+
+            //Detection
+            createdModules = _detection.CreateModules(_weather, _time, out success);
+            if (success)
+            {
+                _simulationModules.AddRange(createdModules);
+                Engine.Message(this, Engine.LogType.Log, "All requested detection modules initiated successfully.");
+            }
+            else
+            {
+                _stopRun = true;
+                Engine.Message(this, Engine.LogType.Log, "Failed to create all requested detection modules, aborting.");
                 return;
             }
 

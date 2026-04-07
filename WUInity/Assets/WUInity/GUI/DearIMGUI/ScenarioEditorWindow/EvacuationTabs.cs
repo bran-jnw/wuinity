@@ -28,19 +28,12 @@ namespace Assets.WUInity.GUI.DearIMGUI
         {
             if (ImGui.BeginTabItem("General"))
             {
-                /*if (pInput.Module != PedestrianModuleInput.PedestrianModules.None)
-                {       
-                if (ImGui.Checkbox("Absolute time", ref input.AbsoluteTime))
+                ImGui.Checkbox(nameof(eInput.UseTriggerBufferEvacuation), ref eInput.UseTriggerBufferEvacuation);
+                if(eInput.UseTriggerBufferEvacuation)
                 {
-                    //ImGui.InputInt4(nameof(input.EvacuationOrderDateTime), _dateTime)
-                    //input.EvacuationOrderDateTime.Year = 
-                    
+                    if (ImGui.Button("Select trigger buffer file")) { }
+                    ImGui.InputText(nameof(eInput.TriggerBufferFile), ref eInput.TriggerBufferFile, 256);                    
                 }
-                else
-                {
-                    ImGui.InputFloat(nameof(input.EvacuationOrderSimTime), ref input.EvacuationOrderSimTime);
-                }                
-            }*/
 
                 ImGui.EndTabItem();
             }
