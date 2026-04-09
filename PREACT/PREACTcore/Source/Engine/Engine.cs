@@ -118,8 +118,12 @@ namespace PREACT
             }
 
             //now some GDAL/PROJ stuff
-            string projLib = Environment.GetEnvironmentVariable("PROJ_LIB");
-            string projData = Environment.GetEnvironmentVariable("PROJ_DATA");
+            string projLib = Environment.GetEnvironmentVariable("PROJ_LIB", EnvironmentVariableTarget.Machine);
+            string projData = Environment.GetEnvironmentVariable("PROJ_DATA", EnvironmentVariableTarget.Machine);
+            //Engine.Message(null, LogType.Debug, $"PROJ_LIB variable is: {projLib}");
+            //Engine.Message(null, LogType.Debug, $"PROJ_DATA variable is: {projData}");
+            //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_LIB", projLib); //shuld not be needed
+            //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_DATA", projData);
             OSGeo.OSR.Osr.SetPROJSearchPaths(new string[] { projLib, projData });
 
             try
