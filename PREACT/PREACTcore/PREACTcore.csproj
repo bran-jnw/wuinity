@@ -49,47 +49,50 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="ThirdParty\Behave\x64\Behave.dll">
+    <None Update="Runtimes\Native\Behave\x64\Behave.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\Behave\x64\BehaveCore.dll">
+    <None Update="Runtimes\Native\CityFlow\x64\CityFlow.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\CityFlow\x64\CityFlow.dll">
+    <None Update="Runtimes\Native\FOFEM\x64\FOFEM.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\FOFEM\x64\FOFEM.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ThirdParty\GDAL\x64\gdalconst_wrap.dll">
+    <None Update="Runtimes\Native\GDAL\x64\gdalconst_wrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\gdal_wrap.dll">
+    <None Update="Runtimes\Native\GDAL\x64\gdal_wrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\libgdalconst_wrap.so">
+    <None Update="Runtimes\Native\GDAL\x64\libgdalconst_wrap.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\libgdal_wrap.so">
+    <None Update="Runtimes\Native\GDAL\x64\libgdal_wrap.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\libogr_wrap.so">
+    <None Update="Runtimes\Native\GDAL\x64\libogr_wrap.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\libosr_wrap.so">
+    <None Update="Runtimes\Native\GDAL\x64\libosr_wrap.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\ogr_wrap.dll">
+    <None Update="Runtimes\Native\GDAL\x64\ogr_wrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\GDAL\x64\osr_wrap.dll">
+    <None Update="Runtimes\Native\GDAL\x64\osr_wrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\kPERIL\kPERILcore.dll">
+    <None Update="Runtimes\Managed\kPERIL\kPERILcore.dll">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="ThirdParty\Open-Meteo-DotNet\OpenMeteo.dll">
+    <None Update="Runtimes\Managed\Open-Meteo-DotNet\OpenMeteo.dll">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Runtimes\Native\NFDRS4\x64\libNFDRS4core.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Runtimes\Native\NFDRS4\x64\NFDRS4core.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

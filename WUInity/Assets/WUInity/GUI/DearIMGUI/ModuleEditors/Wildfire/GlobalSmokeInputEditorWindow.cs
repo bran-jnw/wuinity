@@ -21,9 +21,10 @@ namespace Assets.WUInity.GUI.DearIMGUI
         public static void Draw()
         {
             ImGui.Begin(nameof(GlobalSmokeInput), ref _isOpen, PreactGUI.NoDockingNoCollapse);
-
-            if (ImGui.Button("Select global smoke file")) { }
+                        
             if (ImGui.Button("Create global smoke file")) { }
+            ImGui.SameLine();
+            if (ImGui.Button("Select global smoke file")) { }            
             ImGui.InputText(nameof(_input.ExtinctionFile), ref _input.ExtinctionFile, 256);
 
             ImGui.Separator();

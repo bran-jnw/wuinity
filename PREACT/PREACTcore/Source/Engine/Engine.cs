@@ -15,6 +15,9 @@ using PREACT.Runtime;
 using System.Threading.Tasks;
 using PREACT.Math;
 using PREACT.Output;
+using System.Reflection;
+using System.Runtime.InteropServices;
+
 
 namespace PREACT
 {    
@@ -78,11 +81,46 @@ namespace PREACT
                 _ENGINE = this;
             }
 
-            Message(null, LogType.Log, "Welcome to PREACT, load or create a new .wui file to run simulations.");
+            SetupNativeLibraries();
 
-            //Environment.SetEnvironmentVariable("Path", null);
-            //Environment.SetEnvironmentVariable("Path", "C:\\Program Files (x86)\\Eclipse\\Sumo\\bin");
-            //Environment.SetEnvironmentVariable("PROJ_LIB", "C:\\Program Files (x86)\\Eclipse\\Sumo\\share\\proj");
+            Message(null, LogType.Log, "Welcome to PREACT, load or create a new .wui file to run simulations.");                     
+        }
+
+        private void SetupNativeLibraries()
+        {
+            string root = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Runtimes", "Native");
+            string behave = Path.Combine(root, "Behave", "x64");
+            string cityFlow = Path.Combine(root, "CityFlow", "x64");
+            string fofem = Path.Combine(root, "FOFEM", "x64");
+            string gdal = Path.Combine(root, "GDAL", "x64");
+            string nfdrs4 = Path.Combine(root, "NFDRS4", "x64");
+
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            string NEXT = isWindows ? ";" : ":";
+            string runtimes = behave + NEXT + cityFlow + NEXT + fofem + NEXT + gdal + NEXT + nfdrs4;
+
+            if (isWindows)
+            {    
+                Environment.SetEnvironmentVariable("PATH", runtimes + ";" + Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine));
+            }
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", runtimes + ":" + Environment.GetEnvironmentVariable("LD_LIBRARY_PATH", EnvironmentVariableTarget.Machine));
+            }
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                string existing = Environment.GetEnvironmentVariable("DYLD_LIBRARY_PATH", EnvironmentVariableTarget.Machine) ?? "";
+                Environment.SetEnvironmentVariable("DYLD_LIBRARY_PATH", runtimes + (string.IsNullOrEmpty(existing) ? "" : ":" + existing));
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+
+            //now some GDAL/PROJ stuff
+            string projLib = Environment.GetEnvironmentVariable("PROJ_LIB");
+            string projData = Environment.GetEnvironmentVariable("PROJ_DATA");
+            OSGeo.OSR.Osr.SetPROJSearchPaths(new string[] { projLib, projData });
 
             try
             {
@@ -100,7 +138,7 @@ namespace PREACT
             catch (Exception e)
             {
                 throw e;
-            }            
+            }
         }
 
         public async void RunSimulations(EngineTask engineTask, int startIndexOffset = 0)

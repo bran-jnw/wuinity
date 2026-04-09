@@ -36,8 +36,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
             CustomTypes.InputDateTimePopup(nameof(input.EndDateTime), ref input.EndDateTime);
 
             ImGui.Checkbox(nameof(input.StopWhenEvacuated), ref input.StopWhenEvacuated);
-
-            //ImGui.SeparatorText(nameof(input.EndDateTime));
         }
 
         private static void DrawVector2d(string name, ref PREACT.Math.Vector2d value)
