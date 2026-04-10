@@ -13,6 +13,10 @@ namespace PREACT.Wildfire
     public abstract class WildfireModule : SimulationModule
     {
         protected double _internalDeltaTime;
+
+        protected double _currentBurnArea;
+        public double CurrentBurnArea { get => _currentBurnArea; }
+
         public WildfireModule(Simulation simulation) : base(simulation)
         {
 

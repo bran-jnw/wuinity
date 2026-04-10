@@ -19,12 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="GeoTimeZone" Version="6.1.0" />
     <PackageReference Include="ILGPU" Version="1.5.3" />
     <PackageReference Include="ILGPU.Algorithms" Version="1.5.3" />
     <PackageReference Include="Itinero" Version="1.5.1" />
     <PackageReference Include="Itinero.IO.Osm" Version="1.5.1" />
     <PackageReference Include="OsmSharp.IO.API" Version="1.0.5" />
+    <PackageReference Include="SGP.NET" Version="1.4.0" />
     <PackageReference Include="System.Text.Json" Version="10.0.5" />
+    <PackageReference Include="TimeZoneConverter" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>

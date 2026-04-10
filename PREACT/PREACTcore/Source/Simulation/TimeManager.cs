@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GeoTimeZone;
+using System;
 
 namespace PREACT
 {    
@@ -9,6 +8,7 @@ namespace PREACT
         DateTime _startDateTime;
         DateTime _endDateTime;
         DateTime _currentDateTime;
+        DateTime _currentUTCDateTime;
         float _simulationTime;
         float _simulationEndTime;
         //string _startDateISO8601;
@@ -19,15 +19,23 @@ namespace PREACT
         public DateTime StartDateTime { get => _startDateTime; }
         public DateTime EndDateTime { get => _endDateTime; }
         public DateTime CurrentDateTime { get => _currentDateTime; }
+        public DateTime CurrentUTCDateTime { get => _currentUTCDateTime; }
         //public string StartDateISO8601 { get => _startDateISO8601; }
         //public string EndDateISO8601 { get => _endDateISO8601; }
 
         public TimeManager(Input.PREACTInput input, Simulation simulation)
         {
             _simulationTime = 0;
-            _startDateTime = input.Simulation.StartDateTime;
+
+            TimeZoneResult iana = TimeZoneLookup.GetTimeZone(simulation.Input.Simulation.LowerLeftLatLon.x, simulation.Input.Simulation.LowerLeftLatLon.y);
+            string windows = TimeZoneConverter.TZConvert.IanaToWindows(iana.Result);
+            TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(windows);
+            DateTimeOffset dto = new DateTimeOffset(input.Simulation.StartDateTime, tz.GetUtcOffset(input.Simulation.StartDateTime));
+
+            _startDateTime = dto.DateTime;
             _currentDateTime = _startDateTime;
-            _endDateTime = input.Simulation.EndDateTime;
+            _currentUTCDateTime = dto.UtcDateTime;
+            _endDateTime = input.Simulation.EndDateTime.ToLocalTime();
             _simulationEndTime = (float)(_endDateTime - _startDateTime).TotalSeconds;
 
             Engine.Message(simulation, Engine.LogType.Debug, $"Simulation will run between {_startDateTime.ToString()} and {_endDateTime.ToString()} for a total of {_simulationEndTime} seconds (unless user has specified to exit early once evacuated.)");
@@ -40,6 +48,7 @@ namespace PREACT
         {
             _simulationTime += deltaTime;
             _currentDateTime = _currentDateTime.AddSeconds(deltaTime);
+            _currentUTCDateTime = _currentUTCDateTime.AddSeconds(deltaTime);
         }
 
         /// <summary>

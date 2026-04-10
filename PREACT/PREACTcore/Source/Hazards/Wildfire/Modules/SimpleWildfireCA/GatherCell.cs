@@ -95,6 +95,7 @@ namespace PREACT.Wildfire
             if(_state == States.CanBurn || _state == States.Active) //need both as CanBurn is when ignited from user input or spotting, Active is when front has reached centroid
             {
                 _state = States.Ignited;
+                _owner.AddBurnArea();
 
                 for (int i = 0; i < 8; ++i)
                 {

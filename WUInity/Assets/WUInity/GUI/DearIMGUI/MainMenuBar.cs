@@ -34,6 +34,15 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     }
                     if (ImGui.MenuItem("Run/edit", canEdit)) { ScenarioEditorWindow.Open(); }
 
+                    //placeholder
+                    if (ImGui.BeginMenu("Detection", ScenarioEditorWindow.HasInput))
+                    {
+                        if (ImGui.MenuItem("Satellites")) { SatelliteWindow.Open(); }
+                        if (ImGui.MenuItem("Drones")) { }
+
+                        ImGui.EndMenu();
+                    }
+
                     bool haveOutput = false;
                     if(PreactGUI.Engine.Simulation != null && (PreactGUI.Engine.Simulation.State == PREACT.Simulation.SimulationState.Running || PreactGUI.Engine.Simulation.State == PREACT.Simulation.SimulationState.Completed))
                     {
@@ -43,6 +52,8 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
                     ImGui.EndMenu();
                 }
+
+                
 
                 if (ImGui.BeginMenu("Console"))
                 {

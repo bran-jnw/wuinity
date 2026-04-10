@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>GeoTimeZone</id>
+    <version>6.1.0</version>
+    <authors>Matt Johnson-Pint,Simon Bartlett</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/mattjohnsonpint/GeoTimeZone</projectUrl>
+    <description>Provides an IANA time zone identifier from latitude and longitude coordinates.</description>
+    <tags>timezone time zone geolocation geo latitude longitude coordinates iana tzdb</tags>
+    <repository type="git" url="https://github.com/mattjohnsonpint/GeoTimeZone" branch="refs/heads/main" commit="73206b43819c89f8b6ec2926b2ca227fc783b938" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.2" />
+      <group targetFramework="net8.0" />
+      <group targetFramework="net9.0" />
+      <group targetFramework=".NETStandard2.0" />
+      <group targetFramework=".NETStandard2.1" />
+    </dependencies>
+  </metadata>
+</package>

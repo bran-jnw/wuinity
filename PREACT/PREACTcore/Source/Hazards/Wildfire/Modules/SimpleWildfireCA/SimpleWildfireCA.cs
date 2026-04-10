@@ -25,6 +25,7 @@ namespace PREACT.Wildfire
         Vector2d _landscapeSize;
         double _internalDeltaTime;
         private List<Vector2int> _ignitedCellIndices;
+        
 
         //Behave stuff
         BehaveCore.FuelModels _fuelModels = null;
@@ -35,7 +36,7 @@ namespace PREACT.Wildfire
         private GatherCell[][] _cells;
         public static readonly GatherCell DeadCell = new GatherCell();
         int _nx, _ny;
-        double _dx, _dy;
+        double _dx, _dy, _cellArea;
 
         public SimpleWildfireCA(Simulation simulation, LandscapeData landscape, List<IgnitionPointInput> ignitionPoints, WeatherManager weather, TimeManager time) : base(simulation)
         {
@@ -47,6 +48,7 @@ namespace PREACT.Wildfire
             _ny = simulation.Input.WildfireModule.Data.LandscapeData.GetCellCountY();
             _dx = simulation.Input.WildfireModule.Data.LandscapeData.RasterCellResolutionX;
             _dy = simulation.Input.WildfireModule.Data.LandscapeData.RasterCellResolutionY;
+            _cellArea = _dx * _dy;
 
             _maxFireIntensityData = new float[_nx * _ny];
             _maxRosDirectionData = new float[_nx, _ny];
@@ -236,6 +238,11 @@ namespace PREACT.Wildfire
             _cellsToIgnite.Clear();
         }
 
+        public void AddBurnArea()
+        {
+            _currentBurnArea += _cellArea;
+        }
+
         private void HandleIgnitionInput(double simulationTime)
         {
             for (int i = 0; i < _ignitionPoints.Count; ++i)
@@ -263,6 +270,7 @@ namespace PREACT.Wildfire
             if (IsInside(xIndex, yIndex))
             {
                 _cells[xIndex][yIndex].IgniteAndSpread(true, ignition.IgnitionTime);
+                _simulation.Detection.RegisterFireIgnition(ignition.LatLon, _cells[xIndex][yIndex].CellData.elevation);
                 Engine.Message(_simulation, Engine.LogType.Log, $"Ignition happened at position [{ignition.SimulationPos.x}, {ignition.SimulationPos.y}] (lat/lon {ignition.LatLon.x}, {ignition.LatLon.y}) as requested by user.");
             }
             else

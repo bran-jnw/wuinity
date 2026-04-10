@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>TimeZoneConverter</id>
+    <version>7.2.0</version>
+    <authors>Matt Johnson-Pint</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/mattjohnsonpint/TimeZoneConverter</projectUrl>
+    <description>Lightweight library to convert quickly between IANA, Windows, and Rails time zone names.</description>
+    <tags>timezone time zone time zone iana tzdb olson timezoneinfo,rails</tags>
+    <repository type="git" url="https://github.com/mattjohnsonpint/TimeZoneConverter" branch="refs/heads/main" commit="f96c7a7d167d9ab93bb8c924fc7413b84f52010c" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.2">
+        <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.ValueTuple" version="4.6.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net8.0" />
+      <group targetFramework="net9.0" />
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>

@@ -180,7 +180,7 @@ namespace PREACT.Math
       __Boxed<double> local2 = (ValueType) this.y;
       objArray[index2] = (object) local2;
       */
-            return "not implemented";
+            return $"{x}, {y}";
         }
 
         public string ToString(string format) {

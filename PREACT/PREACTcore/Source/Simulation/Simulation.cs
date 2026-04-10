@@ -11,6 +11,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using PREACT.Output;
+using PREACT.Detection;
 
 namespace PREACT
 {
@@ -213,7 +214,7 @@ namespace PREACT
         private void PostStep()
         {            
             _hazards.PostStep(_time.SimulationTime);
-            _detection.PostStep();
+            _detection.PostStep(_time, _input.Simulation.DeltaTime);
             _evacuation.PostStep();            
         }
 
