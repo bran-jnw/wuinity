@@ -119,11 +119,13 @@ namespace Assets.WUInity.GUI.DearIMGUI
         {
             _wuinityManager = wuinityManager;
             _engine = engine;
+            StartWindow.Open();
             //_workingData = workingData;
         }
 
         public void UpdateInput(PREACT.Input.PREACTInput input)
         {
+            StartWindow.Close();
             ScenarioEditorWindow.SetInput(input);
             //_workingData.SetSimulatonData(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
         }

@@ -17,25 +17,29 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Scenario", ScenarioEditorWindow.HasInput))
+                if (ImGui.BeginMenu("Scenario"))
                 {
-                    bool edit = false;
-                    if (PreactGUI.Engine.Simulation == null || (PreactGUI.Engine.Simulation.State != PREACT.Simulation.SimulationState.Running && PreactGUI.Engine.Simulation.State != PREACT.Simulation.SimulationState.Initializing))
+                    bool canMakeNew = false;
+                    if (PreactGUI.Engine.Simulation == null || !PreactGUI.Engine.Simulation.IsRunning)
                     {
-                        edit = true;
-                    }
-
-                    if (ImGui.MenuItem("New scenario", edit)) { NewScenarioWindow.Open(); }
+                        canMakeNew = true;
+                    }  
+                    if (ImGui.MenuItem("New scenario", canMakeNew)) { NewScenarioWindow.Open(); }
 
                     ImGui.SeparatorText("Loaded scenario");
-                    if (ImGui.MenuItem("Run/edit", edit)) { ScenarioEditorWindow.Open(); }
+                    bool canEdit = false;
+                    if (PreactGUI.Engine.Simulation != null && !PreactGUI.Engine.Simulation.IsRunning)
+                    {
+                        canEdit = true;
+                    }
+                    if (ImGui.MenuItem("Run/edit", canEdit)) { ScenarioEditorWindow.Open(); }
 
-                    bool output = false;
+                    bool haveOutput = false;
                     if(PreactGUI.Engine.Simulation != null && (PreactGUI.Engine.Simulation.State == PREACT.Simulation.SimulationState.Running || PreactGUI.Engine.Simulation.State == PREACT.Simulation.SimulationState.Completed))
                     {
-                        output = true;
+                        haveOutput = true;
                     }
-                    if (ImGui.MenuItem("Output", output)) { OutputWindow.Open(); }
+                    if (ImGui.MenuItem("Output", haveOutput)) { OutputWindow.Open(); }
 
                     ImGui.EndMenu();
                 }

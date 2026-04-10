@@ -2,13 +2,9 @@
 using PREACT;
 using PREACT.Input;
 using PREACT.Math;
-using PREACT.Tools;
 using SimpleFileBrowser;
-using System;
 using System.IO;
-using UnityEditor.Rendering;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {

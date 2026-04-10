@@ -1,5 +1,5 @@
-﻿using System.IO;
-using SimpleFileBrowser;
+﻿using SimpleFileBrowser;
+using System;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
@@ -33,6 +33,20 @@ namespace Assets.WUInity.GUI.DearIMGUI
             FileBrowser.SetFilters(false, wuiFilter);
             string initialPath = PreactGUI.Engine.WorkingFolder;
             FileBrowser.ShowSaveDialog(ScenarioEditorWindow.SaveNewInput, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
+        }
+
+        private static Action<string> _onFileSet;
+        public static void OpenSetFilePath(Action<string> onFileSet)
+        {
+            _onFileSet = onFileSet;
+
+            FileBrowser.SetFilters(true);
+            string initialPath = PreactGUI.Engine.WorkingFolder;
+            FileBrowser.ShowLoadDialog(SetFilePath, CancelSaveLoad, FileBrowser.PickMode.Files, false, initialPath, null, "Set file", "Set");
+        }
+        private static void SetFilePath(string[] paths)
+        {
+            _onFileSet?.Invoke(paths[0]);
         }
 
         /*public static void OpenCreateBaseData()

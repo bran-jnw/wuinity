@@ -87,16 +87,16 @@ namespace PREACT.Traffic
             return count;
         }
 
-        public static Dictionary<CellIndex, HashSet<SumoEdge>> SortEdgesIntoCells(Dictionary<string, SumoEdge> edges, double minXPos, double minYPos, double cellW, double cellH, int xDim, int yDim)
+        public static Dictionary<CellIndex, HashSet<SumoEdge>> SortEdgesIntoCells(Dictionary<string, SumoEdge> edges, double minXPos, double minYPos, double cellSizeX, double cellSizeY, int xDim, int yDim)
         {
             Dictionary<CellIndex, HashSet<SumoEdge>> grid = new Dictionary<CellIndex, HashSet<SumoEdge>>();
 
-            int maxCells = 4096;
+            const int maxCells = 4096;
             int[] xs = new int[maxCells];
             int[] ys = new int[maxCells];
 
-            double maxXPos = minXPos + xDim * cellW;
-            double maxYPos = minYPos + yDim * cellH;
+            double maxXPos = minXPos + xDim * cellSizeX;
+            double maxYPos = minYPos + yDim * cellSizeY;
 
             foreach (KeyValuePair<string, SumoEdge> kv in edges)
             {
@@ -123,7 +123,7 @@ namespace PREACT.Traffic
                         continue;
                     }
 
-                    int visited = TraverseCells(x0, y0, x1, y1, cellW, cellH, minXPos, minYPos, xs, ys);
+                    int visited = TraverseCells(x0, y0, x1, y1, cellSizeX, cellSizeY, minXPos, minYPos, xs, ys);
 
                     int c = 0;
                     while (c < visited)

@@ -41,8 +41,9 @@ namespace PREACT
 
         //Data
         private int _simulationIndex;
+        private bool _isRunning;
         private bool _isPaused = false;
-        private bool _stopRun;
+        private bool _stopRun = false;
         private bool _haveResults = false;
         private float _stepExecutionTime;        
 
@@ -60,7 +61,8 @@ namespace PREACT
 
         //Data
         public int SimulationIndex { get => _simulationIndex; }
-        public bool IsPaused { get => _isPaused; }        
+        public bool IsPaused { get => _isPaused; }
+        public bool IsRunning { get => _isRunning; }
         public bool HaveResults { get => _haveResults; }         
         public float StepExecutionTime { get => _stepExecutionTime; }                
 
@@ -84,6 +86,7 @@ namespace PREACT
         /// </summary>
         public void Run(bool startWUIshow = false)
         {
+            _isRunning = true;
             _state = SimulationState.Initializing;
             PreRun(startWUIshow);            
 
@@ -104,6 +107,7 @@ namespace PREACT
                         
             PostRun();
             _state = SimulationState.Completed;
+            _isRunning = false;
         }
 
         bool _talkToWUIShow = false;

@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using PREACT.Input;
+using System.IO;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 { 
@@ -24,7 +25,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                         
             if (ImGui.Button("Create global smoke file")) { }
             ImGui.SameLine();
-            if (ImGui.Button("Select global smoke file")) { }            
+            if (ImGui.Button("Select global smoke file")) { FileBrowserBackend.OpenSetFilePath(path => { _input.ExtinctionFile = Path.GetRelativePath(PreactGUI.Engine.WorkingFolder, path); }); }
             ImGui.InputText(nameof(_input.ExtinctionFile), ref _input.ExtinctionFile, 256);
 
             ImGui.Separator();

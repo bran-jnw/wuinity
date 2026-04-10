@@ -470,12 +470,12 @@ namespace PREACT.Traffic
             try
             {
                 Vector2d wildfireOrigin = _simulation.Hazards.Wildfire.GetOriginOffset();
-                double minX = wildfireOrigin.x - _originOffset.x; // now in sumo space
-                double minY = wildfireOrigin.y - _originOffset.y;
-                double cellW = _simulation.Hazards.Wildfire.GetCellSizeX();
-                double cellH = _simulation.Hazards.Wildfire.GetCellSizeY();
+                double minXPos = wildfireOrigin.x - _originOffset.x; // now in sumo space
+                double minYPos = wildfireOrigin.y - _originOffset.y;
+                double cellSizeX = _simulation.Hazards.Wildfire.GetCellSizeX();
+                double cellSizeY = _simulation.Hazards.Wildfire.GetCellSizeY();
 
-                _cellsWithEdges = EdgeCellIntersection.SortEdgesIntoCells(_sumoConfig.Network.Edges, minX, minY, cellW, cellH, _simulation.Hazards.Wildfire.GetCellCountX(), _simulation.Hazards.Wildfire.GetCellCountX());
+                _cellsWithEdges = EdgeCellIntersection.SortEdgesIntoCells(_sumoConfig.Network.Edges, minXPos, minYPos, cellSizeX, cellSizeY, _simulation.Hazards.Wildfire.GetCellCountX(), _simulation.Hazards.Wildfire.GetCellCountX());
                 Engine.Message(null, Engine.LogType.Log, "Number of fire cells that have road junctions and will affect traffic:" + _cellsWithEdges.Count);
             }
             catch (Exception e) 
@@ -534,42 +534,6 @@ namespace PREACT.Traffic
             {
                 LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
             }
-
-            /*//make fire affect edges (based on junction)
-            if (fireCellEdges[x, y] != null)
-            {                
-                for (int i = 0; i < fireCellEdges[x, y].Count; i++)
-                {
-                    //https://sumo.dlr.de/docs/Simulation/Routing.html
-                    //after testing this seems to be the best option
-                    LIBSUMO.Edge.adaptTraveltime(fireCellEdges[x, y][i], double.MaxValue);
-
-                    //collect cars in system that has the edge in their route
-                    foreach (SUMOVehicle car in _sumoVehicles.Values)
-                    {
-                        LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
-                        if (route.Contains(fireCellEdges[x, y][i]))
-                        {
-                            carsToUpdate.Add(car);
-                        }                            
-                    }
-                }
-
-                if(_carsToUpdate.Count == 0)
-                {
-                    Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
-                }
-                else
-                {
-                    Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
-                }
-
-                //then do update for affected cars
-                foreach (SUMOVehicle car in _carsToUpdate)
-                {
-                    LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());
-                }
-            }*/
         }    
 
         public override bool IsNetworkReachable(Vector2d pointLatLon)

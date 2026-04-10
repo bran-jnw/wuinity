@@ -35,6 +35,8 @@ namespace PREACT
         private Visualization.WUIShowCommunicator _wuiShow;
         private WorkingData _workingData;
 
+        string _defaultWorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
         public Simulation Simulation { get => _mainSimulation; }
         public DataStatus DataStatus { get => _dataStatus; }        
         public string WorkingFile { get => _workingFile; }
@@ -48,7 +50,7 @@ namespace PREACT
                 }
                 else
                 {
-                    return AppDomain.CurrentDomain.BaseDirectory;
+                    return _defaultWorkingDirectory;
                 }
             }
         }
@@ -81,10 +83,14 @@ namespace PREACT
                 _ENGINE = this;
             }
 
-            SetupNativeLibraries();
-
-            Message(null, LogType.Log, "Welcome to PREACT, load or create a new .wui file to run simulations.");                     
+            SetupNativeLibraries();                  
         }
+
+        string _projLibPath, _projDataPath, _sumoPath;
+        public string ProjLibPath { get => _projLibPath; }
+        public string ProjDataPath { get => _projDataPath; }
+        public string SumoPath { get => _sumoPath; }
+
 
         private void SetupNativeLibraries()
         {
@@ -99,32 +105,45 @@ namespace PREACT
             string NEXT = isWindows ? ";" : ":";
             string runtimes = behave + NEXT + cityFlow + NEXT + fofem + NEXT + gdal + NEXT + nfdrs4;
 
+            string machineEnvirtonmentVariables;
             if (isWindows)
-            {    
-                Environment.SetEnvironmentVariable("PATH", runtimes + ";" + Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine));
+            {
+                machineEnvirtonmentVariables = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("PATH", runtimes + ";" + machineEnvirtonmentVariables);
             }
             else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", runtimes + ":" + Environment.GetEnvironmentVariable("LD_LIBRARY_PATH", EnvironmentVariableTarget.Machine));
+                machineEnvirtonmentVariables = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH", EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", runtimes + ":" + machineEnvirtonmentVariables);
             }
             else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                string existing = Environment.GetEnvironmentVariable("DYLD_LIBRARY_PATH", EnvironmentVariableTarget.Machine) ?? "";
-                Environment.SetEnvironmentVariable("DYLD_LIBRARY_PATH", runtimes + (string.IsNullOrEmpty(existing) ? "" : ":" + existing));
+                machineEnvirtonmentVariables = Environment.GetEnvironmentVariable("DYLD_LIBRARY_PATH", EnvironmentVariableTarget.Machine) ?? "";
+                Environment.SetEnvironmentVariable("DYLD_LIBRARY_PATH", runtimes + (string.IsNullOrEmpty(machineEnvirtonmentVariables) ? "" : ":" + machineEnvirtonmentVariables));
             }
             else
             {
                 throw new PlatformNotSupportedException();
             }
 
+            string[] variables = machineEnvirtonmentVariables.Split(NEXT);
+            for(int i = 0; i < variables.Length; ++i)
+            {
+                if (variables[i].Contains("Sumo") && variables[i].Contains("bin"))
+                {
+                    _sumoPath = variables[i];
+                    break;
+                }
+            }
+
             //now some GDAL/PROJ stuff
-            string projLib = Environment.GetEnvironmentVariable("PROJ_LIB", EnvironmentVariableTarget.Machine);
-            string projData = Environment.GetEnvironmentVariable("PROJ_DATA", EnvironmentVariableTarget.Machine);
+            _projLibPath = Environment.GetEnvironmentVariable("PROJ_LIB", EnvironmentVariableTarget.Machine);
+            _projDataPath = Environment.GetEnvironmentVariable("PROJ_DATA", EnvironmentVariableTarget.Machine);
             //Engine.Message(null, LogType.Debug, $"PROJ_LIB variable is: {projLib}");
             //Engine.Message(null, LogType.Debug, $"PROJ_DATA variable is: {projData}");
-            //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_LIB", projLib); //shuld not be needed
+            //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_LIB", projLib); //should not be needed
             //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_DATA", projData);
-            OSGeo.OSR.Osr.SetPROJSearchPaths(new string[] { projLib, projData });
+            OSGeo.OSR.Osr.SetPROJSearchPaths(new string[] { _projLibPath, _projDataPath });
 
             try
             {
