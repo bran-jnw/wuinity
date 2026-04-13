@@ -10,9 +10,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 if (ImGui.BeginMenu("File"))
                 {                    
-                    if (ImGui.MenuItem("Load scenario")) { FileBrowserBackend.OpenLoadInput(); }
+                    if (ImGui.MenuItem("Load scenario")) { FileBrowser.OpenLoadInput(); }
                     if (ImGui.MenuItem("Save", ScenarioEditorWindow.HasInput)) { ScenarioEditorWindow.SaveInput(); }
-                    if (ImGui.MenuItem("Save as", ScenarioEditorWindow.HasInput)) { FileBrowserBackend.OpenSaveInput(); }
+                    if (ImGui.MenuItem("Save as", ScenarioEditorWindow.HasInput)) { FileBrowser.OpenSaveInput(); }
 
                     ImGui.EndMenu();
                 }
@@ -66,9 +66,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 if (ImGui.BeginMenu("Tools"))
                 {
                     ImGui.SeparatorText("Download tools");
-                    if (ImGui.MenuItem("Download OSM data")) { }
-                    if (ImGui.MenuItem("Download WorldPop data")) { }
-                    if (ImGui.MenuItem("Download Landfire data")) { }
+                    if (ImGui.MenuItem("Download region data")) { DownloadWindow.Open(); }
 
                     ImGui.SeparatorText("Edit tools");
                     if (ImGui.MenuItem("Landscape editor")) { }

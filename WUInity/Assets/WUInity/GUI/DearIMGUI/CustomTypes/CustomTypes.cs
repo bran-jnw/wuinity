@@ -1,12 +1,31 @@
 ﻿using ImGuiNET;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using PREACT.Math;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
     public static class CustomTypes
     {
+
+        /*public static bool InputDouble2(string label, ref Vector2d value, string format = "%.6f")
+        {
+            Span<double> buffer = stackalloc double[2]
+            {
+                value.x, value.y
+            };
+
+            bool changed = ImGui.InputScalarN(label, ImGuiDataType.Double, buffer, 2, IntPtr.Zero, IntPtr.Zero, format);
+
+            if (changed)
+            {
+                value.x = (float)buffer[0];
+                value.y = (float)buffer[1];
+            }
+
+            return changed;
+        }*/
+
+
         public static bool InputDateTimePopup(string label, ref DateTime value)
         {
             bool changed = false;

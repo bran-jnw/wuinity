@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using System.IO;
 using OsmSharp;
 using OsmSharp.Streams;
-using System;
 
 namespace PREACT.Spatial
 {
+    /// <summary>
+    /// Overpass is used to download OSM data as the default OSM server does not allow big enough areas.
+    /// </summary>
     public class OverpassClient
     {
         private readonly HttpClient _http;

@@ -28,6 +28,15 @@ namespace Assets.WUInity.GUI.DearIMGUI
             _latLon = Vector2.zero;
             _domainSize = Vector2.zero;
         }
+        public static void Close()
+        {
+            if (_isOpen)
+            {
+                PreactGUI.CloseWindow(Draw);
+            }
+            _isOpen = false;
+            _folderSet = false;
+        }
 
         public static void Draw()
         {
@@ -58,6 +67,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             CustomTypes.InputDateTimePopup(nameof(simIn.StartDateTime), ref simIn.StartDateTime);
             CustomTypes.InputDateTimePopup(nameof(simIn.EndDateTime), ref simIn.EndDateTime);
+            if (ImGui.Button("Apply")) { ApplyTimeAndSpace(); }
 
             ImGui.SeparatorText("Evacuation");
             ImGui.Checkbox("Pedestrian evacuation?", ref _wantPedestrian);
@@ -85,7 +95,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 ImGui.Checkbox("Have SUMO input?", ref _haveSumo);
                 if (_haveSumo)
                 {
-                    if (ImGui.Button("Select SUMO input file")) { }
+                    if (ImGui.Button("Set SUMO input file")) { FileBrowser.OpenSetFilePath(path => _input.TrafficModule.SumoInput.ConfigurationFile = path); }
                 }
                 else
                 {
@@ -101,7 +111,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 ImGui.Checkbox("Have wildfire landscape?", ref _haveWildfireLandscape);
                 if(_haveWildfireLandscape)
                 {
-                    if (ImGui.Button("Select landscape file")) { };
+                    if (ImGui.Button("Set landscape file")) { }
                 }
                 else
                 {
@@ -111,7 +121,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 ImGui.Checkbox("Have weather?", ref _haveWeather);
                 if (_haveWeather)
                 {
-                    if (ImGui.Button("Select weather file")) { }
+                    if (ImGui.Button("Select weather file")) { FileBrowser.OpenSetFilePath(path => _input.Weather.WeatherFile = path); }
                 }
                 else
                 {
@@ -138,9 +148,13 @@ namespace Assets.WUInity.GUI.DearIMGUI
             ImGui.End();
             if (!_isOpen)
             {
-                _folderSet = false;
                 PreactGUI.CloseWindow(Draw);
             }
+        }
+
+        private static void ApplyTimeAndSpace()
+        {
+            //Vector2d center = 
         }
 
         private static void GenerateScenario()
@@ -161,7 +175,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         }
         private static void OpenSetRootFolder()
         {
-            FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowserBackend.CancelSaveLoad, FileBrowser.PickMode.Folders, false, null, null, "Set root folder", "Set");
+            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowser.CancelSaveLoad, SimpleFileBrowser.FileBrowser.PickMode.Folders, false, null, null, "Set root folder", "Set");
         }
         private static void SetRootFolder(string[] paths)
         {
