@@ -100,6 +100,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Source\Evacuation\Consequence\Dose\" />
+    <Folder Include="Source\Evacuation\Consequence\Concentration\" />
     <Folder Include="Source\Hazards\Dispersion\Modules\GaussianReleaseGPU\" />
   </ItemGroup>
 

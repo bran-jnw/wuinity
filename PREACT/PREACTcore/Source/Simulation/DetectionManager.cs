@@ -16,7 +16,7 @@ namespace PREACT.Detection
         private Simulation _simulation;
 
         private DroneModule _droneModule;
-        private VIIRS _viirs;
+        private ViirsTracking _viirs;
 
         SatelliteDetectionStatus[] _satelliteDetectionStatus;
 
@@ -25,7 +25,7 @@ namespace PREACT.Detection
         public DetectionManager(Simulation simulation)
         {
             _simulation = simulation;
-            _viirs = new VIIRS();
+            _viirs = new ViirsTracking();
         }
 
         public List<SimulationModule> CreateModules(WeatherManager weather, TimeManager time, out bool success)
@@ -61,7 +61,7 @@ namespace PREACT.Detection
         float _lastCheckTimer = 30f;
         public void PostStep(TimeManager time, float deltaTime)
         {
-            bool checkSatelliteDetection = true;
+            bool checkSatelliteDetection = false;
             _lastCheckTimer += deltaTime;
             if(_lastCheckTimer >= 30f)
             {

@@ -28,7 +28,7 @@ namespace PREACT.Detection
         }
     }
 
-    public class VIIRS
+    public class ViirsTracking
     {
         // from https://db.satnogs.org/
         const string noaa20_0 = "NOAA-20";
@@ -51,7 +51,7 @@ namespace PREACT.Detection
 
         //static TimeSpan _timeSpan = new TimeSpan(0, 0, 30);
 
-        public VIIRS()
+        public ViirsTracking()
         {
             _satellies = new Satellite[] { noaa20, noaa21, s_npp };
             _satellitesStatus = new SatelliteDetectionStatus[_satellies.Length];
