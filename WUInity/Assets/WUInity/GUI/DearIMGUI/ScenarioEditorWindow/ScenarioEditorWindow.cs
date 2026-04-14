@@ -12,6 +12,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         private static bool _isOpen;
         private static PREACT.Input.PREACTInput _input;
 
+        public static PREACT.Input.PREACTInput Input{ get => _input; }
         public static bool HasInput { get => _input == null ? false : true; }
 
         public static void SetInput(PREACT.Input.PREACTInput input)

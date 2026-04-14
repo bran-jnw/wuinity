@@ -183,6 +183,5 @@ namespace Assets.WUInity.GUI.DearIMGUI
             _input = new PREACTInput(string.Empty);
             _input.RootFolder = paths[0];
         }
-
     }
 }

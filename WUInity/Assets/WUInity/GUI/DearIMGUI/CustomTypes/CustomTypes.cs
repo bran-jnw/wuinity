@@ -6,25 +6,13 @@ namespace Assets.WUInity.GUI.DearIMGUI
 {
     public static class CustomTypes
     {
-
-        /*public static bool InputDouble2(string label, ref Vector2d value, string format = "%.6f")
+        public static unsafe bool InputDouble2(string label, ref Vector2d value)
         {
-            Span<double> buffer = stackalloc double[2]
+            fixed (Vector2d* ptr = &value)
             {
-                value.x, value.y
-            };
-
-            bool changed = ImGui.InputScalarN(label, ImGuiDataType.Double, buffer, 2, IntPtr.Zero, IntPtr.Zero, format);
-
-            if (changed)
-            {
-                value.x = (float)buffer[0];
-                value.y = (float)buffer[1];
+                return ImGui.InputScalarN(label, ImGuiDataType.Double, (IntPtr)ptr, 2);
             }
-
-            return changed;
-        }*/
-
+        }
 
         public static bool InputDateTimePopup(string label, ref DateTime value)
         {

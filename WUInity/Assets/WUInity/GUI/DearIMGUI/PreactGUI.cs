@@ -61,11 +61,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 Windows.Invoke();
             }           
-
-            /*NewScenarioWindow.Draw();
-            ScenarioEditorWindow.Draw();
-            DestinationInputEditWindow.Draw();
-            DemographicsInputEditorWindow.Draw();*/
         }
 
         public static ImGuiWindowFlags NoDockingNoCollapse = ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse;
