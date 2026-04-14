@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using PREACT.Math;
 
-namespace PREACT.Population
+namespace PREACT.Tools
 {
     public class WorldPopResponse
     {
@@ -45,12 +45,12 @@ namespace PREACT.Population
         public List<WorldPopResponse> data { get; set; }
     }
 
-    public class WorldPopDownloader
+    public static class WorldPopDownloader
     {
-        private readonly HttpClient _http = new HttpClient();
+        private static readonly HttpClient _http = new HttpClient();
         private const string _worldPopApiUrl = "https://www.worldpop.org/rest/data/pop/wpgp";
 
-        private async Task<string> LatLonToISO3(double lat, double lon)
+        public static async Task<string> LatLonToISO3(double lat, double lon)
         {
             string url = $"https://api.bigdatacloud.net/data/reverse-geocode-client?latitude={lat}&longitude={lon}&localityLanguage=en";
 
@@ -64,14 +64,20 @@ namespace PREACT.Population
 
             // Convert ISO2 to ISO3
             var region = new System.Globalization.RegionInfo(iso2);
+
             return region.ThreeLetterISORegionName;
         }
 
-        public async Task<string> DownloadRegionUTM(int year, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, string outputFolder)
+        public static async Task<string> DownloadRegionUTM(int year, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, string outputFolder, string clippedFileName)
         {
+            if(clippedFileName == null)
+            {
+                clippedFileName = "worldPop_clipped";
+            }
+
             Vector2d center = (lowerLeftLatLon + upperRightLatLon) * 0.5;
             string iso3 = await LatLonToISO3(center.x, center.y);
-            Engine.Message(null, Engine.LogType.Log, $"Identified ISO3: {iso3}.");
+            Engine.Message(null, Engine.LogType.Log, $"Identified ISO3: {iso3}, proceeding to download country WorldPop data, this will take a while if no local cache of country WorldPop is found in folder.");
 
             iso3 = iso3.ToUpperInvariant();
             string yearStr = year.ToString();
@@ -99,7 +105,7 @@ namespace PREACT.Population
                 if (d.popyear == yearStr)
                 {
                     selected = d;
-                    Console.WriteLine($"Selected data Id: {selected.id}, {selected.desc}.");
+                    Engine.Message(null, Engine.LogType.Log, $"Selected data Id: {selected.id}, {selected.desc}.");
                     break;
                 }
             }
@@ -116,29 +122,27 @@ namespace PREACT.Population
 
             //output
             Directory.CreateDirectory(outputFolder);
-            string outputFilePath = Path.Combine(outputFolder, selected.id + ".tif");
-            if (!File.Exists(outputFilePath))
+            string countryFilePath = Path.Combine(outputFolder, iso3 + "_" + selected.id + ".tif");
+            if (!File.Exists(countryFilePath))
             {
+                Engine.Message(null, Engine.LogType.Log, $"No local cache was found, downloading WorldPop for {iso3} and will the proceed to clip to AIO and warp to UTM zone.");
                 //Download the GeoTIFF
                 using (var stream = await _http.GetStreamAsync(selected.files[0]))
                 {
-                    using (var file = File.Create(outputFilePath))
+                    using (var file = File.Create(countryFilePath))
                     {
                         await stream.CopyToAsync(file);
                     }
                 }
             }
 
-            outputFilePath = ExtractRegionAndProjectToUTM(outputFilePath, lowerLeftLatLon, upperRightLatLon);
-
-            return outputFilePath;
+            string clippedFilePath = Path.Combine(outputFolder, clippedFileName + ".tif");
+            return ExtractRegionAndProjectToUTM(countryFilePath, clippedFilePath, lowerLeftLatLon, upperRightLatLon);
         }
 
-        static string ExtractRegionAndProjectToUTM(string inputPath, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon)
+        static string ExtractRegionAndProjectToUTM(string countryFilePath, string clippedFilePath, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon)
         {
-            Gdal.AllRegister();
-
-            string outputPath = "extracted.tif";
+            Engine.Message(null, Engine.LogType.Log, "Starting clipping WorldPop to AIO.");
 
             // Bounding box in the raster's coordinate system
             double west = lowerLeftLatLon.y;
@@ -146,17 +150,17 @@ namespace PREACT.Population
             double east = upperRightLatLon.y;
             double north = upperRightLatLon.x;
 
-            Dataset src = Gdal.Open(inputPath, Access.GA_ReadOnly);
+            Dataset src = Gdal.Open(countryFilePath, Access.GA_ReadOnly);
             if (src == null)
             {
-                Console.WriteLine("Could not open input raster.");
+                Engine.Message(null, Engine.LogType.Log, "Could not open source country WorldPop.");
                 return null;
             }
 
             double[] gt = new double[6];
             src.GetGeoTransform(gt);
 
-            // Convert geospatial coords → pixel coords
+            // Convert geospatial coords to pixel coords
             int pxMin = (int)((west - gt[0]) / gt[1]);
             int pxMax = (int)((east - gt[0]) / gt[1]);
             int pyMin = (int)((north - gt[3]) / gt[5]);
@@ -166,7 +170,7 @@ namespace PREACT.Population
             int height = pyMax - pyMin;
 
             Driver drv = Gdal.GetDriverByName("GTiff");
-            Dataset destinationDataSet = drv.Create(outputPath, width, height, src.RasterCount, DataType.GDT_Float32, null);
+            Dataset destinationDataSet = drv.Create(clippedFilePath, width, height, src.RasterCount, DataType.GDT_Float32, null);
 
             // New geotransform for the clipped raster, https://gdal.org/en/stable/tutorials/geotransforms_tut.html
             double[] newGT = new double[6];
@@ -194,7 +198,7 @@ namespace PREACT.Population
             destinationDataSet.Dispose();
             src.Dispose();
 
-            Console.WriteLine("Clipping complete.");
+            Engine.Message(null, Engine.LogType.Log, "Clipping WorldPop to AIO complete.");
 
             int zone = (int)Mathd.Floor(((east - west) * 0.5 + west + 180) / 6) + 1;
             string epsg;
@@ -207,19 +211,21 @@ namespace PREACT.Population
                 epsg = "EPSG:" + (32700 + zone);   // southern hemisphere
             }
 
-            outputPath = "extracted_UTM.tif";
-            ReprojectToUTM(outputPath, outputPath, epsg);
+            string utmFilePath = Path.Combine(Path.GetDirectoryName(clippedFilePath), Path.GetFileNameWithoutExtension(clippedFilePath) + "_UTM.tif");
+            ReprojectToUTM(clippedFilePath, utmFilePath, epsg);
 
-            return outputPath;
+            return utmFilePath;
         }
 
-        public static void ReprojectToUTM(string inputPath, string outputPath, string targetEPSG)
+        public static void ReprojectToUTM(string sourceFilePath, string utmFilePath, string targetEPSG)
         {
             Gdal.AllRegister();
 
-            Dataset src = Gdal.Open(inputPath, Access.GA_ReadOnly);
+            Dataset src = Gdal.Open(sourceFilePath, Access.GA_ReadOnly);
             if (src == null)
+            {
                 throw new Exception("Could not open input raster.");
+            }                
 
             var warpOptions = new GDALWarpAppOptions(new string[]
             {
@@ -233,7 +239,7 @@ namespace PREACT.Population
 
             //reprojection
             Dataset dst = Gdal.Warp(
-                outputPath,          // destination filename
+                utmFilePath,          // destination filename
                 new Dataset[] { src },       // source datasets
                 warpOptions,
                 progress,

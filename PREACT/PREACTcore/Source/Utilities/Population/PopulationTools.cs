@@ -21,7 +21,7 @@ namespace PREACT.Tools
         public static async Task CreateBaseScenario(string path, string scenarioId, int minHouseholdSize, int maxHouseholdSize, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, int year)
         {
             string osmFilePath = Path.Combine(path, scenarioId + "_osm.xml");
-            await OSMTools.DownloadOMSData(lowerLeftLatLon, upperRightLatLon, osmFilePath);
+            await OSMDownloader.Download(lowerLeftLatLon, upperRightLatLon, osmFilePath);
 
             if(osmFilePath != null)
             {
@@ -40,8 +40,7 @@ namespace PREACT.Tools
                 Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
                 if (success)
                 {
-                    WorldPopDownloader worldPop = new WorldPopDownloader();
-                    string worldPopFilePath = await worldPop.DownloadRegionUTM(year, lowerLeftLatLon, upperRightLatLon, path);
+                    string worldPopFilePath = await WorldPopDownloader.DownloadRegionUTM(year, lowerLeftLatLon, upperRightLatLon, path, null);
 
                     if(worldPopFilePath != null)
                     {

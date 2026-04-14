@@ -273,7 +273,7 @@ namespace WUInity.UI
             _workingData.SetSimulatonData(latLon, domainSize);
             latLon = _workingData.SimulationInput.Data.GetWGS84FromSimulationPosition(new Vector2d(-1000.0, -1000.0));
             Vector2d upperLatLon = _workingData.SimulationInput.Data.GetWGS84FromSimulationPosition(new Vector2d(domainSize.x + 1000.0, domainSize.y + 1000.0));
-            await OSMTools.DownloadOMSData(latLon, upperLatLon, paths[0]);
+            await OSMDownloader.Download(latLon, upperLatLon, paths[0]);
         }
 
         //one button data downlaoder

@@ -63,15 +63,15 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Tools"))
+                if (ImGui.BeginMenu("Utilities"))
                 {
-                    ImGui.SeparatorText("Download tools");
-                    if (ImGui.MenuItem("Download region data")) { DownloadWindow.Open(); }
+                    ImGui.SeparatorText("Download");
+                    if (ImGui.MenuItem("Download data")) { DownloadDataWindow.Open(); }
 
-                    ImGui.SeparatorText("Edit tools");
+                    ImGui.SeparatorText("Edit");
                     if (ImGui.MenuItem("Landscape editor")) { }
 
-                    ImGui.SeparatorText("Viewing tools");
+                    ImGui.SeparatorText("Viewing");
                     if (ImGui.MenuItem("Visualize population")) { }
 
                     ImGui.EndMenu();

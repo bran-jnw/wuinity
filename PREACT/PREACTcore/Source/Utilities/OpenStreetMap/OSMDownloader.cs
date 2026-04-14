@@ -9,9 +9,9 @@ using PREACT.Spatial;
 
 namespace PREACT.Tools
 {
-    public class OSMTools
+    public static class OSMDownloader
     {
-        public static async Task DownloadOMSData(Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, string saveFilePath, int tries = 20)
+        public static async Task Download(Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, string saveFilePath, int tries = 20)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace PREACT.Tools
                     tries++;
                     if(tries < 5)
                     {
-                        await DownloadOMSData(lowerLeftLatLon, upperRightLatLon, saveFilePath, tries);
+                        await Download(lowerLeftLatLon, upperRightLatLon, saveFilePath, tries);
                     }
                     
                 }
