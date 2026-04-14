@@ -2,6 +2,7 @@
 using PREACT.Math;
 using System;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
@@ -13,6 +14,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         private static bool _folderSet;
         private static string _downloadFolder = string.Empty;
         private static bool _useAnderson13 = true;
+        private static string _osmFileName = string.Empty, _weatherFileName = string.Empty;
         //private static string[] _landfireYears = new string[] { "2016", "2020", "2023", "2024" };
  
         public static void Open()
@@ -49,12 +51,11 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }
             ImGui.Begin("Download tool", ref _isOpen, PreactGUI.NoDockingNoCollapse);
 
-            if(!_folderSet)
-            {
-                if (ImGui.Button("Set download folder")) { OpenSetDownloadFolder(); }
+            if (ImGui.Button("Set download folder")) { OpenSetDownloadFolder(); }
+            if (!_folderSet)
+            {                
                 return;
             }
-
             ImGui.Text("Download folder set to:" + _downloadFolder);
 
             ImGui.SeparatorText("Area of interest (AIO)");
@@ -71,15 +72,26 @@ namespace Assets.WUInity.GUI.DearIMGUI
             ImGui.SeparatorText("Landfire data");
             ImGui.Text("Downloads data from Landfire for the specified AIO.");
             ImGui.Checkbox("Use 13 Anderson FBFM?", ref _useAnderson13);
-            if (ImGui.Button("Download landscape")) { Task.Run(() => PREACT.Tools.LandfireLandscapeDownloader.DownloadLandscape(_startDateTime.Year, _useAnderson13, _lowerLeftLatLon, _upperRightLatLon, _downloadFolder)); }
+            if (ImGui.Button("Download landscape")) 
+            { 
+                Task.Run(() => PREACT.Tools.LandfireLandscapeDownloader.Download(_startDateTime.Year, _useAnderson13, _lowerLeftLatLon, _upperRightLatLon, _downloadFolder)); 
+            }
 
             ImGui.SeparatorText("Weather data");
             ImGui.Text("Downloads data from Open-Meteo at the center of AIO and for the entire year of interest.");
-            if (ImGui.Button("Download weather")) { }
+            ImGui.InputText("Weather filename", ref _weatherFileName, 64);
+            if (ImGui.Button("Download weather")) 
+            {
+                Task.Run(() => PREACT.Tools.OpenMeteoDownloader.Download(0.5 * (_lowerLeftLatLon + _upperRightLatLon), _startDateTime, _endDateTime, Path.Combine(_downloadFolder, _weatherFileName + ".csv")));
+            }
 
             ImGui.SeparatorText("OpenStreetMap data");
             ImGui.Text("Downloads OSM data via Overpass for the specified AIO.");
-            if (ImGui.Button("Download OSM")) { }
+            ImGui.InputText("OSM filename", ref _osmFileName, 64);
+            if (ImGui.Button("Download OSM")) 
+            {
+                Task.Run(() => PREACT.Tools.OSMTools.DownloadOMSData(_lowerLeftLatLon, _upperRightLatLon, Path.Combine(_downloadFolder, _osmFileName + ".osm.xml"))); 
+            }
 
             ImGui.End();
             if (!_isOpen)
@@ -90,7 +102,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
         private static void DownloadAll()
         {
-            Task.Run(() => PREACT.Tools.LandfireLandscapeDownloader.DownloadLandscape(_startDateTime.Year, _useAnderson13, _lowerLeftLatLon, _upperRightLatLon, _downloadFolder));
+            Task.Run(() => PREACT.Tools.LandfireLandscapeDownloader.Download(_startDateTime.Year, _useAnderson13, _lowerLeftLatLon, _upperRightLatLon, _downloadFolder));
+            Task.Run(() => PREACT.Tools.OpenMeteoDownloader.Download(0.5 * (_lowerLeftLatLon + _upperRightLatLon), _startDateTime, _endDateTime, Path.Combine(_downloadFolder, _weatherFileName + ".csv")));
+            Task.Run(() => PREACT.Tools.OSMTools.DownloadOMSData(_lowerLeftLatLon, _upperRightLatLon, Path.Combine(_downloadFolder, _osmFileName + ".osm.xml")));
         }
 
         private static void OpenSetDownloadFolder()

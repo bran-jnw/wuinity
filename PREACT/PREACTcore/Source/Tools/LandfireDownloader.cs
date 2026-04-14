@@ -23,7 +23,7 @@ namespace PREACT.Tools
         const int MAX_RETRIES = 5;
         static int[] _availableYears = new int[] { 2016, 2020, 2023, 2024 };
 
-        public static async Task DownloadLandscape(int year, bool useAnderson13, Vector2d lowerLeftLatLon, Vector2d upperRighLatLon, string downloadFolder)
+        public static async Task Download(int year, bool useAnderson13, Vector2d lowerLeftLatLon, Vector2d upperRighLatLon, string downloadFolder)
         {            
             string jobId = await SubmitJobWithRetryAsync(year, useAnderson13, lowerLeftLatLon, upperRighLatLon);
             await PollUntilCompleteAsync(jobId, downloadFolder);
