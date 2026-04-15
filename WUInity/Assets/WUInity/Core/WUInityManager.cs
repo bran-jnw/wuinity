@@ -59,7 +59,7 @@ namespace WUInity
         private Painter _painter;
         public Painter Painter{ get => _painter; }
 
-        [SerializeField] private GodCamera _godCamera;
+        [SerializeField] private OverviewCamera _godCamera;
 
         [Header("Options")]
         public bool DeveloperMode = false;
@@ -143,13 +143,13 @@ namespace WUInity
                 g.SetActive(false);
             }
 
-            _godCamera = FindFirstObjectByType<GodCamera>();
+            _godCamera = FindFirstObjectByType<OverviewCamera>();
             if (_godCamera == null)
             {
                 GameObject g = new GameObject();
                 g.transform.parent = transform;
                 g.name = "GodCamera";
-                _godCamera = g.AddComponent<GodCamera>();
+                _godCamera = g.AddComponent<OverviewCamera>();
             }
             _godCamera.SetManager(this);
 
@@ -707,8 +707,8 @@ namespace WUInity
 
             mOptions.locationOptions.latitudeLongitude = "" + input.Simulation.LowerLeftLatLon.x + "," + input.Simulation.LowerLeftLatLon.y;
             mOptions.locationOptions.zoom = input.Map.ZoomLevel;
-            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
+            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.CameraBounds;// Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
+            /*mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
             //https://wiki.openstreetmap.org/wiki/Zoom_levels
             double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
@@ -716,9 +716,9 @@ namespace WUInity
             int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
             int tilesY = (int)(mapDegrees.y / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)input.Simulation.LowerLeftLatLon.x))) + 1;
             mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;*/
             mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
-            mOptions.placementOptions.snapMapToZero = true;
+            mOptions.placementOptions.snapMapToZero = false;
             mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
 
             if (!_utmMap.IsAccessTokenValid)

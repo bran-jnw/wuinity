@@ -10,12 +10,11 @@ using PREACT;
 
 namespace WUInity
 {
-    public class GodCamera : MonoBehaviour
+    public class OverviewCamera : MonoBehaviour
     {
-        public enum CameraMode { twoD, threeD }
-        CameraMode cMode = CameraMode.twoD;
         [SerializeField] float zoomSpeed = 100.0f;
-        [SerializeField] float lowestY = 200f;
+        [SerializeField] float panBorder = 1000.0f;
+        [SerializeField] float camHeightPos = 200.0f;
         [SerializeField] Camera cam;
         [SerializeField] private LineRenderer _rtsSlection;
 
@@ -67,9 +66,9 @@ namespace WUInity
         private void SetCameraSize(PREACT.Math.Vector2d mapSize)
         {
             _mapSize = mapSize;
-            maxSizeOrtho = 0.5f * Mathf.Min((float)mapSize.x, (float)mapSize.y);
+            maxSizeOrtho = 0.5f * ((float)mapSize.y + 2 * panBorder);
             cam.orthographicSize = maxSizeOrtho;
-            transform.position = new Vector3(0.5f * (float)mapSize.x, 200f, 0.5f * (float)mapSize.y);
+            transform.position = new Vector3(0.5f * (float)mapSize.x, camHeightPos, 0.5f * (float)mapSize.y);
         }
 
         // Update is called once per frame
@@ -80,44 +79,51 @@ namespace WUInity
                 return;
             }
 
-            if (cMode == CameraMode.twoD)
-            {               
-
-                if (Input.GetButtonDown("Fire3"))
-                {
-                    dragging = true;
-                    startMousePos = Input.mousePosition;
-                    startDragPos = transform.position;
-                }
-                else if (Input.GetButtonUp("Fire3"))
-                {
-                    dragging = false;
-                }
-
-                if (dragging)
-                {
-                    float mapWidth = 2.0f * transform.position.y / (Mathf.PI * 0.5f - Mathf.Sin(Mathf.Deg2Rad * cam.fieldOfView * 0.5f));
-                    Vector2 res = new Vector2(Screen.width, Screen.height);
-                    transform.position = startDragPos + mapWidth * (Vector3.left * (Input.mousePosition.x - startMousePos.x) / res.x + (res.y / res.x) * Vector3.back * (Input.mousePosition.y - startMousePos.y) / res.y);                    
-                }
-                else
-                {
-                    float d = Input.mouseScrollDelta.y;
-                    if (d != 0.0f)
-                    {
-                        float mod = transform.position.y * 0.1f;
-                        mod = Mathf.Max(1.0f, mod);
-                        cam.orthographicSize -= zoomSpeed * Mathf.Sign(d) * mod;
-                        cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, 100f, maxSizeOrtho);
-                    }
-                }
-
-                Vector3 clampedPos = transform.position;
-                clampedPos.x = Mathf.Clamp(clampedPos.x, 0f, (float)_mapSize.x);
-                clampedPos.y = 200f;
-                clampedPos.z = Mathf.Clamp(clampedPos.z, 0f, (float)_mapSize.y);
-                transform.position = clampedPos;
+            if (Input.GetButtonDown("Fire3"))
+            {
+                dragging = true;
+                startMousePos = Input.mousePosition;
+                startDragPos = transform.position;
             }
+            else if (Input.GetButtonUp("Fire3"))
+            {
+                dragging = false;
+            }
+
+            if (dragging)
+            {
+                float mapHeight = cam.orthographicSize * 2;
+                float mapWidth = mapHeight * cam.aspect;
+                Vector2 res = new Vector2(Screen.width, Screen.height);
+                float relDeltaX = (Input.mousePosition.x - startMousePos.x) / res.x;
+                float relDeltaY = (Input.mousePosition.y - startMousePos.y) / res.y;
+                transform.position = startDragPos + mapWidth * Vector3.left * relDeltaX + mapHeight * Vector3.back * relDeltaY;
+            }
+            else
+            {
+                float d = Input.mouseScrollDelta.y;
+                if (d != 0.0f)
+                {
+                    float mod = cam.orthographicSize * 0.1f;
+                    mod = Mathf.Max(1.0f, mod);
+                    cam.orthographicSize -= zoomSpeed * Mathf.Sign(d) * mod;
+                    cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, 50f, maxSizeOrtho);
+                }
+            }
+
+            //clamp to within map
+            Vector3 clampedPos = transform.position;
+            clampedPos.y = camHeightPos;
+
+            //float clampMinX = Mathf.Min((float)_mapSize.x * 0.5f, cam.orthographicSize * cam.aspect - panBorder);
+            //float clampMaxX = Mathf.Max((float)_mapSize.x * 0.5f, (float)_mapSize.x + panBorder - cam.orthographicSize * cam.aspect);
+            clampedPos.x = Mathf.Clamp(clampedPos.x, 0f, (float)_mapSize.x);                      
+
+            //float clampMinY = Mathf.Min((float)_mapSize.y * 0.5f, cam.orthographicSize - panBorder);
+            //float clampMaxY = Mathf.Max((float)_mapSize.y * 0.5f, (float)_mapSize.y + panBorder - cam.orthographicSize);
+            clampedPos.z = Mathf.Clamp(clampedPos.z, 0f, (float)_mapSize.y);
+
+            transform.position = clampedPos;
 
             VehicleSelection();
         }
