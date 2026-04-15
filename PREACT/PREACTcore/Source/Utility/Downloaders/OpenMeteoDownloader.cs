@@ -7,7 +7,8 @@ namespace PREACT.Tools
 {
     public static class OpenMeteoDownloader
     {
-        private static OpenMeteo.OpenMeteoClient _client = new OpenMeteo.OpenMeteoClient(true);
+        private static OpenMeteo.OpenMeteoClient _historicalClient = new OpenMeteo.OpenMeteoClient(true);
+        private static OpenMeteo.OpenMeteoClient _forecastClient = new OpenMeteo.OpenMeteoClient(false);
         //"temperature_2m", "relative_humidity_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "cloud_cover", "direct_radiation", "boundary_layer_height" 
         static readonly OpenMeteo.HourlyOptionsParameter[] _parameters = { OpenMeteo.HourlyOptionsParameter.temperature_2m, OpenMeteo.HourlyOptionsParameter.relativehumidity_2m, OpenMeteo.HourlyOptionsParameter.precipitation,
             OpenMeteo.HourlyOptionsParameter.windspeed_10m, OpenMeteo.HourlyOptionsParameter.winddirection_10m, OpenMeteo.HourlyOptionsParameter.cloudcover, OpenMeteo.HourlyOptionsParameter.direct_radiation, OpenMeteo.HourlyOptionsParameter.boundary_layer_height};
@@ -16,12 +17,35 @@ namespace PREACT.Tools
         {
             Engine.Message(null, Engine.LogType.Log, "Starting attempt to dowload weather data.");
 
+            bool forecast = false;
+            OpenMeteo.OpenMeteoClient _client = _historicalClient;
+            if (DateTime.Compare(end, DateTime.Now) > 0)
+            {
+                if((end - DateTime.Now).Days < 16)
+                {
+                    _client = _forecastClient;
+                }
+                else
+                {
+                    Engine.Message(null, Engine.LogType.Log, "Open-meteo only provides 16 days of forecasting, unable to download weather for specified dates.");
+                    return;
+                }                
+            }
+
             //set options to download
             OpenMeteo.WeatherForecastOptions options = new OpenMeteo.WeatherForecastOptions((float)latLon.x, (float)latLon.y);
             options.Windspeed_Unit = OpenMeteo.WindspeedUnitType.ms;
             //canadian FBP needs all year data for FWI/BUI/FFMC etc
-            options.Start_date = new string($"{start.Year}-01-01");
-            options.End_date = new string($"{end.Year}-12-31");
+            if(forecast)
+            {
+                options.Start_date = new string($"{start.Year}-{start.Month}-{start.Day}");
+                options.End_date = new string($"{end.Year}-{end.Month}-{end.Day}");
+            }
+            else
+            {
+                options.Start_date = new string($"{start.Year}-01-01");
+                options.End_date = new string($"{end.Year}-12-31");
+            }
             options.Hourly.Add(_parameters);
 
             OpenMeteo.WeatherForecast? weatherStream = await _client.QueryAsync(options);

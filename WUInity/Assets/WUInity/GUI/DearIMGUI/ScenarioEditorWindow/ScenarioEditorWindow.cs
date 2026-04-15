@@ -21,6 +21,11 @@ namespace Assets.WUInity.GUI.DearIMGUI
             Open();
         }
 
+        public static void ClearInput()
+        {
+            _input = null;
+        }
+
         public static void Open()
         {
             if (!_isOpen)

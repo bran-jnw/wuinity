@@ -684,7 +684,7 @@ namespace WUInity
             _input = input;
             _painter.SetLCPData(_input.WildfireModule.Data.LandscapeData);            
             _godCamera.SetInput(_input);
-            _wuiGUI.UpdateInput(_input);            
+            _wuiGUI.SetInput(_input);            
             //this needs map and evac goals
             _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _destinationMarkerPrefab);
             _simulationDomainVisualizer.SpawnWildfireIgnitionMarkers(_input, _wildfireIgnitionMarkerPrefab);
@@ -787,7 +787,7 @@ namespace WUInity
             _clicks = 0;
             SetWebMercatorMapInteraction(true);
             _pickingOnMap = true;
-            _boundingBoxRenderer.enabled = true;
+            _boundingBoxRenderer.gameObject.SetActive(true);
             _boundingBoxRenderer.startWidth = 0.5f;
             _boundingBoxRenderer.endWidth = 0.5f;
             for (int i = 0; i < _boundingBoxRenderer.positionCount; ++i)
@@ -797,7 +797,7 @@ namespace WUInity
         }
         public void FinishPickOnMap()
         {
-            _boundingBoxRenderer.enabled = false;
+            _boundingBoxRenderer.gameObject.SetActive(false);
             SetWebMercatorMapInteraction(false);
             _pickingOnMap = false;
             _onClicks(_clickLatLons);
@@ -812,12 +812,15 @@ namespace WUInity
 
         public void ShowUTMMap()
         {
+            _boundingBoxRenderer.gameObject.SetActive(false);
             _webMercatorMap.gameObject.SetActive(false);
             _utmMap.gameObject.SetActive(true);
         }
 
         public void ShowWebMercatorMap()
         {
+            _boundingBoxRenderer.gameObject.SetActive(false);
+            _simBorder.gameObject.SetActive(false);
             _godCamera.SetToWebMercatorMode();
             _webMercatorMap.gameObject.SetActive(true);
             _utmMap.gameObject.SetActive(false);

@@ -119,10 +119,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
         }
 
 
-        public void UpdateInput(PREACT.Input.PREACTInput input)
+        public void SetInput(PREACT.Input.PREACTInput input)
         {
             ScenarioEditorWindow.SetInput(input);
-            //_workingData.SetSimulatonData(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
         }
 
         LinkedList<string> _messages = new LinkedList<string>();

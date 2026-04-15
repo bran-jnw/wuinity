@@ -29,7 +29,8 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 _folderSet = false;
                 _latLon = Vector2d.zero;
-            }            
+            }
+            ScenarioEditorWindow.ClearInput();
             PreactGUI.WUInity.ShowWebMercatorMap();
         }
         public static void Close()

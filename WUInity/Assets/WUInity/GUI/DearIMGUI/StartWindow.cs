@@ -44,6 +44,10 @@ namespace Assets.WUInity.GUI.DearIMGUI
             ImGui.Text($"PROJ_DATA path is set to {PreactGUI.Engine.ProjDataPath}");
 
             ImGui.End();    
+            if(!_isOpen)
+            {
+                PreactGUI.CloseWindow(Draw);
+            }
 
         }
     }

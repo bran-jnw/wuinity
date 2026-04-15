@@ -19,16 +19,16 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
                 if (ImGui.BeginMenu("Scenario"))
                 {
-                    bool canMakeNew = false;
-                    if (PreactGUI.Engine.Simulation == null || !PreactGUI.Engine.Simulation.IsRunning)
+                    bool isRunning = false;
+                    if (PreactGUI.Engine.Simulation != null && PreactGUI.Engine.Simulation.IsRunning)
                     {
-                        canMakeNew = true;
+                        isRunning = true;
                     }  
-                    if (ImGui.MenuItem("New scenario", canMakeNew)) { NewScenarioWindow.Open(true); }
+                    if (ImGui.MenuItem("New scenario", !isRunning)) { NewScenarioWindow.Open(true); }
 
                     ImGui.SeparatorText("Loaded scenario");
                     bool canEdit = false;
-                    if (PreactGUI.Engine.Simulation != null && !PreactGUI.Engine.Simulation.IsRunning)
+                    if (ScenarioEditorWindow.HasInput && !isRunning)
                     {
                         canEdit = true;
                     }

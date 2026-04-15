@@ -60,6 +60,7 @@ namespace WUInity
         {
             inactive = true;
             transform.position = new Vector3(0f, 200f, 0f);
+            cam.orthographicSize = 100;
         }
 
         float maxSizeOrtho;
