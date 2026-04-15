@@ -22,7 +22,7 @@ namespace WUInity.UI
             GUI.Box(new Rect(subMenuXOrigin, 0, columnWidth + 40, Screen.height - consoleHeight), "");
             int buttonIndex = 0;
 
-            if (!_wuinityManager.Map.IsAccessTokenValid)
+            if (!_wuinityManager.UTMMap.IsAccessTokenValid)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "ERROR: Mapbox token not valid.");
                 return;

@@ -118,9 +118,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
             //_workingData = workingData;
         }
 
+
         public void UpdateInput(PREACT.Input.PREACTInput input)
         {
-            StartWindow.Close();
             ScenarioEditorWindow.SetInput(input);
             //_workingData.SetSimulatonData(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
         }
@@ -146,7 +146,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
         {
             _simulationRunning = false;
         }
-
 
         public void ApplyTheme()
         {

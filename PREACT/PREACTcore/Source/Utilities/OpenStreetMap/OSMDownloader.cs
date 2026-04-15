@@ -28,7 +28,7 @@ namespace PREACT.Tools
             }
             catch (Exception e)
             {
-                Engine.Message(null, Engine.LogType.Warning, e.Message);
+                Engine.Message(null, Engine.LogType.Log, "OSM downloader says: " + e.Message);
                 if(e.Message.Contains("504")) //timeout
                 {
                     tries++;

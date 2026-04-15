@@ -75,7 +75,7 @@ namespace WUInity.UI
             if(issues == 0)
             {
                 _input.Simulation.LowerLeftLatLon = temp;
-                _wuinityManager.UpdateMap();
+                //_wuinityManager.SetInputMap();
             }           
             double.TryParse(sizeX, out _input.Simulation.DomainSize.x);
             double.TryParse(sizeY, out _input.Simulation.DomainSize.y);

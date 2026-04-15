@@ -24,7 +24,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     {
                         canMakeNew = true;
                     }  
-                    if (ImGui.MenuItem("New scenario", canMakeNew)) { NewScenarioWindow.Open(); }
+                    if (ImGui.MenuItem("New scenario", canMakeNew)) { NewScenarioWindow.Open(true); }
 
                     ImGui.SeparatorText("Loaded scenario");
                     bool canEdit = false;

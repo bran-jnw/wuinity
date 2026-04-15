@@ -56,9 +56,6 @@ namespace WUInity
             }
         }
 
-        private Mapbox.Unity.Map.AbstractMap _mapboxMap;
-        public Mapbox.Unity.Map.AbstractMap Map { get => _mapboxMap; }
-
         private Painter _painter;
         public Painter Painter{ get => _painter; }
 
@@ -71,15 +68,18 @@ namespace WUInity
         [SerializeField] float _renderScale = 1.0f;
         public float RenderScale { get => _renderScale; }
 
-        [Header("Prefabs")]
+        [Header("Prefabs")]        
         [SerializeField] private GameObject _destinationMarkerPrefab;
         [SerializeField] private GameObject _wildfireIgnitionMarkerPrefab;
 
-        [Header("References")]              
-        
+        [Header("References")]
+        [SerializeField] private Mapbox.Examples.QuadTreeCameraMovement _webMercatorCameraMovement;
+        [SerializeField] private Mapbox.Unity.Map.AbstractMap _utmMap;
+        public Mapbox.Unity.Map.AbstractMap UTMMap { get => _utmMap; }
+        [SerializeField] private Mapbox.Unity.Map.AbstractMap _webMercatorMap;
         [SerializeField] private LineRenderer _simBorder;
-        [SerializeField] private LineRenderer _osmBorder;
-                
+        [SerializeField] private LineRenderer _boundingBoxRenderer;
+
         public DataSampleMode dataSampleMode = DataSampleMode.None;
 
         private PreactGUI _wuiGUI;
@@ -95,9 +95,6 @@ namespace WUInity
         public SimulationDomainVisualizerUnity SimulationDomainVisualizer { get => _simulationDomainVisualizer; }
         public FireDomainVisualizerUnity FireDomainVisualizer { get => _fireDomainVisualizer; }
         
-        //List<GameObject> drawnRoad_s;
-        GameObject _directionsGO;
-
         bool _renderHouseholds = false;
         bool _renderTraffic = false;
         bool _renderSmokeDispersion = false;
@@ -123,24 +120,18 @@ namespace WUInity
             }            
 
             _simBorder.gameObject.SetActive(false);
-            _osmBorder.gameObject.SetActive(false);
 
             //gui            
             _wuiGUI = FindAnyObjectByType<PreactGUI>();
-                        
+
+            //map
+            _utmMap.gameObject.SetActive(false);
+            _webMercatorMap.gameObject.SetActive(true);
+            SetWebMercatorMapInteraction(false);
+
             _engine = new Engine(this);
             _workingData = new PREACT.Runtime.WorkingData();
             _wuiGUI.SetManager(this, _engine, _workingData);  
-
-            //map
-            _mapboxMap = FindFirstObjectByType<Mapbox.Unity.Map.AbstractMap>();
-            if (_mapboxMap == null)
-            {
-                GameObject g = new GameObject();
-                g.name = "Mapbox Map";
-                g.transform.parent = transform;
-                _mapboxMap = g.AddComponent<Mapbox.Unity.Map.AbstractMap>();
-            }
 
             _painter = FindFirstObjectByType<Painter>();
             if (_painter == null)
@@ -163,9 +154,7 @@ namespace WUInity
             _godCamera.SetManager(this);
 
             _simulationDomainVisualizer = new SimulationDomainVisualizerUnity(transform);
-            _fireDomainVisualizer = new FireDomainVisualizerUnity(transform);
-
-            
+            _fireDomainVisualizer = new FireDomainVisualizerUnity(transform);            
         }
 
         private void Start()
@@ -194,88 +183,6 @@ namespace WUInity
             }            
         }
 
-        /*public void DrawRoad(RouteCollection routeCollection, int index)
-        {
-            if(_directionsGO == null)
-            {
-                _directionsGO = new GameObject("Directions");
-                _directionsGO.transform.parent = null;
-            }               
-
-            GameObject gO = DrawRoute(routeCollection, index);
-            if (gO != null)
-            {
-                drawnRoad_s.Add(gO);
-            }
-
-            gO.transform.parent = _directionsGO.transform;
-        }   */
-
-        /*GameObject DrawRoute(RouteCollection rC, int index)
-        {
-            List<Vector3> dat = new List<Vector3>();
-            foreach (Itinero.LocalGeo.Coordinate point in rC.GetSelectedRoute().route.Shape)
-            {
-                Vector3 v = Mapbox.Unity.Utilities.Conversions.GeoToWorldPosition(point.Latitude, point.Longitude, MAP.CenterMercator, MAP.WorldRelativeScale).ToVector3xz();
-                v.y = 10f;
-                dat.Add(v);
-            }
-            return CreateLineObject(dat, index);
-        }*/
-
-        public void LoadMapbox(PREACTInput input)
-        {
-            //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
-            Mapbox.Unity.Map.MapOptions mOptions = Map.Options; // new Mapbox.Unity.Map.MapOptions();
-
-            mOptions.locationOptions.latitudeLongitude = "" + input.Simulation.LowerLeftLatLon.x + "," + input.Simulation.LowerLeftLatLon.y;
-            mOptions.locationOptions.zoom = input.Map.ZoomLevel;
-            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
-            //https://wiki.openstreetmap.org/wiki/Zoom_levels
-            double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
-            PREACT.Math.Vector2d mapDegrees = LocalGPWData.SizeToDegrees(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
-            int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
-            int tilesY = (int)(mapDegrees.y / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)input.Simulation.LowerLeftLatLon.x))) + 1;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
-            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
-            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
-            mOptions.placementOptions.snapMapToZero = true;
-            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
-
-            if (!Map.IsAccessTokenValid)
-            {
-                Engine.Message(null, Engine.LogType.SimulationError, "Mapbox token not valid.");
-                return;
-            }
-
-            Engine.Message(null, Engine.LogType.Log, "Starting to load Mapbox map.");
-            Map.Initialize(new Mapbox.Utils.Vector2d(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y), input.Map.ZoomLevel);
-            Engine.Message(null, Engine.LogType.Log, "Map loaded succesfully.");
-
-            //do warping to better fit UTM
-            for (int i = 0; i < Map.transform.childCount; ++i)
-            {
-                Mapbox.Unity.MeshGeneration.Data.UnityTile tile = Map.transform.GetChild(i).GetComponent<Mapbox.Unity.MeshGeneration.Data.UnityTile>();
-                if(tile != null)
-                {
-                    Vector3[] vertices = tile.GetComponent<MeshFilter>().mesh.vertices;
-                    for(int v = 0; v < vertices.Length; ++v)
-                    {
-                        Vector3 worldPos = tile.transform.TransformPoint(vertices[v]);
-                        var wgs84Pos = Map.WorldToGeoPosition(worldPos); //GeoConversions.MetersToLatLon(new Vector2d(worldPos.x, worldPos.z) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
-                        PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Pos.x, wgs84Pos.y);
-                        Vector3 newWorldPos = new Vector3((float)(utmPos.Easting - input.Simulation.Data.UTMOrigin.x), 0f, (float)(utmPos.Northing - input.Simulation.Data.UTMOrigin.y));
-                        vertices[v] = tile.transform.InverseTransformPoint(newWorldPos);
-                    }
-                    tile.GetComponent<MeshFilter>().mesh.SetVertices(vertices);
-                    tile.GetComponent<MeshFilter>().mesh.RecalculateBounds();
-                }
-            }
-            //MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);  
-        }
-
         GameObject CreateLineObject(List<Vector3> points, int index)
         {
             GameObject gO = new GameObject("Route " + index);
@@ -291,22 +198,6 @@ namespace WUInity
             }
             return gO;
         }
-
-        /*public void DeleteDrawnRoads()
-        {
-            if (drawnRoad_s == null)
-            {
-                drawnRoad_s = new List<GameObject>();
-            }
-            else
-            {
-                for (int i = 0; i < drawnRoad_s.Count; i++)
-                {
-                    Destroy(drawnRoad_s[i]);
-                }
-                drawnRoad_s.Clear();
-            }
-        }*/
 
         public void DrawOSMNetwork()
         {
@@ -374,13 +265,46 @@ namespace WUInity
                     EvacuationRenderer.UpdateEvacuationRenderer(_renderHouseholds, _renderTraffic, _engine.Simulation.Evacuation.PedestrianModule, _engine.Simulation.Evacuation.TrafficModule);
                     FireRenderer.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion, _engine.Simulation);
                 }
-            }            
-
-            if (updateOSMBorder)
+            }   
+            
+            if(_pickingOnMap)
             {
-                //UpdateOSMBorder();
-            }                
+                //collect clicks
+                if(Input.GetMouseButtonDown(0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    if (_yPlane.Raycast(ray, out float enter))
+                    {
+                        _webMercatorCameraMovement.enabled = false;
+                        Vector3 pos = ray.GetPoint(enter);
+                        _boundingBoxRenderer.SetPosition(0, new Vector3(pos.x, 10f, pos.z));
+                        var clickLatLon = _webMercatorMap.WorldToGeoPosition(pos);
+                        _clickLatLons[_clicks] = new PREACT.Math.Vector2d(clickLatLon.x, clickLatLon.y);
+                        ++_clicks;
+                        if (_clicks > 1)
+                        {
+                            FinishPickOnMap();
+                        }
+                    }
+                }                
+
+                //update bounding box
+                if (_clicks == 1)
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    float enter;
+                    if (_yPlane.Raycast(ray, out enter))
+                    {
+                        Vector3 pos = ray.GetPoint(enter);
+                        _boundingBoxRenderer.SetPosition(1, new Vector3(pos.x, 10f, _boundingBoxRenderer.GetPosition(0).z));
+                        _boundingBoxRenderer.SetPosition(2, new Vector3(pos.x, 10f, pos.z));
+                        _boundingBoxRenderer.SetPosition(3, new Vector3(_boundingBoxRenderer.GetPosition(0).x, 10f, pos.z));
+                    }
+                }
+            }            
         }
+
+        Plane _yPlane = new Plane(Vector3.up, 0f);
 
         public void UpdateDestinationForVehicles(Vector3 boundingBoxPoint1, Vector3 boundingBoxPoint2, Vector3 manualDestination)
         {
@@ -444,37 +368,15 @@ namespace WUInity
             _engine.CloseSimulations(false);
         }
 
-        bool updateOSMBorder = false;
-        public void SetOSMBorderVisibility(bool visible)
-        {
-            updateOSMBorder = visible;
-            if(_osmBorder != null)
-            {
-                _osmBorder.gameObject.SetActive(updateOSMBorder);
-            }            
-        }
-
         public void UpdateSimBorders()
         {
-            if(!_engine.DataStatus.HaveInput)
-            {
-                return;
-            }
-
-            if(!_simBorder.gameObject.activeSelf)
-            {
-                _simBorder.gameObject.SetActive(true);
-            }
-
+            _simBorder.gameObject.SetActive(true);
             Vector3 upOffset = Vector3.up * 50f;
-            if (_simBorder != null)
-            {
-                _simBorder.SetPosition(0, Vector3.zero + upOffset);
-                _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)_input.Simulation.DomainSize.x);
-                _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)_input.Simulation.DomainSize.y);
-                _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)_input.Simulation.DomainSize.x);
-                _simBorder.SetPosition(4, _simBorder.GetPosition(0));
-            }        
+            _simBorder.SetPosition(0, Vector3.zero + upOffset);
+            _simBorder.SetPosition(1, _simBorder.GetPosition(0) + Vector3.right * (float)_input.Simulation.DomainSize.x);
+            _simBorder.SetPosition(2, _simBorder.GetPosition(1) + Vector3.forward * (float)_input.Simulation.DomainSize.y);
+            _simBorder.SetPosition(3, _simBorder.GetPosition(2) - Vector3.right * (float)_input.Simulation.DomainSize.x);
+            _simBorder.SetPosition(4, _simBorder.GetPosition(0));   
         }
 
         /*void UpdateOSMBorder()
@@ -786,7 +688,10 @@ namespace WUInity
             //this needs map and evac goals
             _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, _destinationMarkerPrefab);
             _simulationDomainVisualizer.SpawnWildfireIgnitionMarkers(_input, _wildfireIgnitionMarkerPrefab);
-            UpdateMap();
+
+            //map stuff
+            ShowUTMMap();
+            LoadUTMMap(_input);
             UpdateSimBorders();
         }
 
@@ -795,9 +700,57 @@ namespace WUInity
             _simulationDomainVisualizer.SpawnEvacuationGoalMarkers(_input, destinations, _destinationMarkerPrefab);
         }
 
-        public void UpdateMap()
+        public void LoadUTMMap(PREACTInput input)
         {
-            LoadMapbox(_input);
+            //Mapbox: calculate the amount of grids needed based on zoom level, coord and size
+            Mapbox.Unity.Map.MapOptions mOptions = _utmMap.Options; // new Mapbox.Unity.Map.MapOptions();
+
+            mOptions.locationOptions.latitudeLongitude = "" + input.Simulation.LowerLeftLatLon.x + "," + input.Simulation.LowerLeftLatLon.y;
+            mOptions.locationOptions.zoom = input.Map.ZoomLevel;
+            mOptions.extentOptions.extentType = Mapbox.Unity.Map.MapExtentType.RangeAroundCenter;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.west = 0;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.south = 0;
+            //https://wiki.openstreetmap.org/wiki/Zoom_levels
+            double degreesPerTile = 360.0 / (Mathf.Pow(2.0f, mOptions.locationOptions.zoom));
+            PREACT.Math.Vector2d mapDegrees = LocalGPWData.SizeToDegrees(input.Simulation.LowerLeftLatLon, input.Simulation.DomainSize);
+            int tilesX = (int)(mapDegrees.x / degreesPerTile) + 1;
+            int tilesY = (int)(mapDegrees.y / (degreesPerTile * Mathf.Cos((Mathf.PI / 180.0f) * (float)input.Simulation.LowerLeftLatLon.x))) + 1;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.east = tilesX;
+            mOptions.extentOptions.defaultExtents.rangeAroundCenterOptions.north = tilesY;
+            mOptions.placementOptions.placementType = Mapbox.Unity.Map.MapPlacementType.AtLocationCenter;
+            mOptions.placementOptions.snapMapToZero = true;
+            mOptions.scalingOptions.scalingType = Mapbox.Unity.Map.MapScalingType.WorldScale;
+
+            if (!_utmMap.IsAccessTokenValid)
+            {
+                Engine.Message(null, Engine.LogType.SimulationError, "Mapbox token not valid.");
+                return;
+            }
+
+            Engine.Message(null, Engine.LogType.Log, "Starting to load Mapbox map.");
+            _utmMap.Initialize(new Mapbox.Utils.Vector2d(input.Simulation.LowerLeftLatLon.x, input.Simulation.LowerLeftLatLon.y), input.Map.ZoomLevel);
+            Engine.Message(null, Engine.LogType.Log, "Map loaded succesfully.");
+
+            //do warping to better fit UTM
+            for (int i = 0; i < _utmMap.transform.childCount; ++i)
+            {
+                Mapbox.Unity.MeshGeneration.Data.UnityTile tile = _utmMap.transform.GetChild(i).GetComponent<Mapbox.Unity.MeshGeneration.Data.UnityTile>();
+                if (tile != null)
+                {
+                    Vector3[] vertices = tile.GetComponent<MeshFilter>().mesh.vertices;
+                    for (int v = 0; v < vertices.Length; ++v)
+                    {
+                        Vector3 worldPos = tile.transform.TransformPoint(vertices[v]);
+                        var wgs84Pos = _utmMap.WorldToGeoPosition(worldPos); //GeoConversions.MetersToLatLon(new Vector2d(worldPos.x, worldPos.z) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
+                        PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Pos.x, wgs84Pos.y);
+                        Vector3 newWorldPos = new Vector3((float)(utmPos.Easting - input.Simulation.Data.UTMOrigin.x), 0f, (float)(utmPos.Northing - input.Simulation.Data.UTMOrigin.y));
+                        vertices[v] = tile.transform.InverseTransformPoint(newWorldPos);
+                    }
+                    tile.GetComponent<MeshFilter>().mesh.SetVertices(vertices);
+                    tile.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                }
+            }
+            //MAP.transform.localScale = new Vector3((float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.x, 1.0f, (float)WUIEngine.RUNTIME_DATA.Simulation.MercatorToUtmScale.y);  
         }
 
         public void NewLogMessage(string message)
@@ -823,5 +776,51 @@ namespace WUInity
         }
 
         public string WorkingFolder { get => _engine.WorkingFolder; }
+
+        private bool _pickingOnMap;
+        private int _clicks = 0;
+        private PREACT.Math.Vector2d[] _clickLatLons = new PREACT.Math.Vector2d[2];
+        private System.Action<PREACT.Math.Vector2d[]> _onClicks;
+        public void PickOnMap(System.Action<PREACT.Math.Vector2d[]> clicks)
+        {
+            _onClicks = clicks;
+            _clicks = 0;
+            SetWebMercatorMapInteraction(true);
+            _pickingOnMap = true;
+            _boundingBoxRenderer.enabled = true;
+            _boundingBoxRenderer.startWidth = 0.5f;
+            _boundingBoxRenderer.endWidth = 0.5f;
+            for (int i = 0; i < _boundingBoxRenderer.positionCount; ++i)
+            {
+                _boundingBoxRenderer.SetPosition(i, Vector3.zero - Vector3.down * 100);
+            }
+        }
+        public void FinishPickOnMap()
+        {
+            _boundingBoxRenderer.enabled = false;
+            SetWebMercatorMapInteraction(false);
+            _pickingOnMap = false;
+            _onClicks(_clickLatLons);
+            _onClicks = null;
+        }
+
+
+        public void SetWebMercatorMapInteraction(bool canInteract)
+        {
+            _webMercatorCameraMovement.enabled = canInteract;
+        }
+
+        public void ShowUTMMap()
+        {
+            _webMercatorMap.gameObject.SetActive(false);
+            _utmMap.gameObject.SetActive(true);
+        }
+
+        public void ShowWebMercatorMap()
+        {
+            _godCamera.SetToWebMercatorMode();
+            _webMercatorMap.gameObject.SetActive(true);
+            _utmMap.gameObject.SetActive(false);
+        }
     }
 }

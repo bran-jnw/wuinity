@@ -182,7 +182,7 @@
 				Debug.Log("Latitude: " + latlongDelta.x + " Longitude: " + latlongDelta.y);
 			}
 
-			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+			if (Input.GetButton("Fire3") && !EventSystem.current.IsPointerOverGameObject())
 			{
 				var mousePosScreen = Input.mousePosition;
 				//assign distance of camera to ground plane to z, otherwise ScreenToWorldPoint() will always return the position of the camera

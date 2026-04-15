@@ -54,7 +54,7 @@ namespace PREACT.Tools
                 fuelModel = $"LF{year}_FBFM40";
             }
 
-            return string.Join(";", $"LF2020_Elev", $"LF2020_SlpD", $"LF2020_Asp", fuelModel , $"LF{year}_CC", $"LF{year}_CH", $"LF{year}_CBH", $"LF{year}_CBD");
+            return string.Join(";", $"LF2020_Elev", $"LF2020_SlpD", $"LF2020_Asp", fuelModel , $"LF{year}_CC", $"LF{year}_CH", $"LF{year}_CBH", $"LF{year}_CBD", "LF2023_FCCS");
         }
         
         private static async Task<string> SubmitJobWithRetryAsync(int year, bool useAnderson13, Vector2d lowerLeftLatLon, Vector2d upperRighLatLon)

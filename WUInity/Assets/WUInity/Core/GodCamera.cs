@@ -52,39 +52,32 @@ namespace WUInity
         public void SetInput(PREACT.Input.PREACTInput input)
         {
             _input = input;
-            SetCameraStartPosition(_input.Simulation.DomainSize);
+            SetCameraSize(_input.Simulation.DomainSize);
+            inactive = false;
         }
 
-        private void SetCameraStartPosition(PREACT.Math.Vector2d mapSize)
+        bool inactive = true;
+        public void SetToWebMercatorMode()
+        {
+            inactive = true;
+            transform.position = new Vector3(0f, 200f, 0f);
+        }
+
+        float maxSizeOrtho;
+        private void SetCameraSize(PREACT.Math.Vector2d mapSize)
         {
             _mapSize = mapSize;
-            float yPos = 0.5f * (float)mapSize.y / Mathf.Tan(Mathf.Deg2Rad * cam.fieldOfView * 0.5f);
-            maximumY = yPos * 1.5f;
-
-            transform.position = new Vector3((float)mapSize.x * 0.5f, yPos, (float)mapSize.y * 0.5f);
-            //rescale clip planes
-            cam.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * cam.fieldOfView * 0.5f) + 1.0f;
+            maxSizeOrtho = 0.5f * Mathf.Min((float)mapSize.x, (float)mapSize.y);
+            cam.orthographicSize = maxSizeOrtho;
+            transform.position = new Vector3(0.5f * (float)mapSize.x, 200f, 0.5f * (float)mapSize.y);
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (_input == null)
+            if (_input == null || inactive)
             {
                 return;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (cMode == CameraMode.twoD)
-                {
-                    cMode = CameraMode.threeD;
-                }
-                else
-                {
-                    cMode = CameraMode.twoD;
-                }
-                SetCameraStartPosition(_input.Simulation.DomainSize);
             }
 
             if (cMode == CameraMode.twoD)
@@ -110,36 +103,20 @@ namespace WUInity
                 else
                 {
                     float d = Input.mouseScrollDelta.y;
-                    if (d != 0.0f || transform.position.y < lowestY)
+                    if (d != 0.0f)
                     {
                         float mod = transform.position.y * 0.1f;
                         mod = Mathf.Max(1.0f, mod);
-                        transform.position -= Vector3.up * zoomSpeed * Mathf.Sign(d) * mod;
-                        if (transform.position.y < lowestY)
-                        {
-                            transform.position = new Vector3(transform.position.x, lowestY, transform.position.z);
-                        }
-                        refreshClipPlanes = true;
+                        cam.orthographicSize -= zoomSpeed * Mathf.Sign(d) * mod;
+                        cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, 100f, maxSizeOrtho);
                     }
                 }
 
                 Vector3 clampedPos = transform.position;
                 clampedPos.x = Mathf.Clamp(clampedPos.x, 0f, (float)_mapSize.x);
-                clampedPos.y = Mathf.Clamp(clampedPos.y, lowestY, maximumY);
+                clampedPos.y = 200f;
                 clampedPos.z = Mathf.Clamp(clampedPos.z, 0f, (float)_mapSize.y);
                 transform.position = clampedPos;
-
-                if(refreshClipPlanes)
-                {
-                    refreshClipPlanes = false;
-                    //rescale clip planes
-                    cam.farClipPlane = transform.position.y / Mathf.Sin(Mathf.PI * 0.5f - Mathf.Deg2Rad * cam.fieldOfView * 0.5f) + 1.0f;
-                    cam.nearClipPlane = cam.farClipPlane * 0.8f;
-                }
-            }
-            else
-            {
-
             }
 
             VehicleSelection();

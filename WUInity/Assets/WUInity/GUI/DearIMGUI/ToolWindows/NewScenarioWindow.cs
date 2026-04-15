@@ -12,21 +12,25 @@ namespace Assets.WUInity.GUI.DearIMGUI
     {
         private static bool _isOpen;
 
-        private static Vector2 _latLon, _domainSize;
+        private static Vector2d _latLon;
         private static PREACTInput _input;
         private static bool _folderSet;
         private static bool _havePopulation, _haveSumo, _haveWildfireLandscape, _haveWeather;
         private static bool _wantPedestrian, _wantTraffic, _wantWildfire, _wantSmoke;
 
-        public static void Open()
+        public static void Open(bool resetInput)
         {
             if (!_isOpen)
             {
                 PreactGUI.DrawWindow(Draw);
             }
             _isOpen = true;
-            _latLon = Vector2.zero;
-            _domainSize = Vector2.zero;
+            if(resetInput)
+            {
+                _folderSet = false;
+                _latLon = Vector2d.zero;
+            }            
+            PreactGUI.WUInity.ShowWebMercatorMap();
         }
         public static void Close()
         {
@@ -34,8 +38,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 PreactGUI.CloseWindow(Draw);
             }
-            _isOpen = false;
-            _folderSet = false;
+            _isOpen = false;            
         }
 
         public static void Draw()
@@ -61,13 +64,21 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             ImGui.SeparatorText("Basic scenario data");
             ImGui.InputText(nameof(simIn.Name), ref simIn.Name, 128);
-                        
-            ImGui.InputFloat2(nameof(simIn.LowerLeftLatLon), ref _latLon);  
-            ImGui.InputFloat2(nameof(simIn.DomainSize), ref _domainSize);
+
+            ImGui.SeparatorText("Area of interest (AIO)");
+            if (ImGui.Button("Set AIO on map"))
+            {
+                Close();
+                PreactGUI.WUInity.PickOnMap(SetAIO);
+            }
+            if(CustomTypes.InputDouble2(nameof(simIn.LowerLeftLatLon), ref _latLon))
+            {
+                simIn.LowerLeftLatLon = _latLon;
+            }
+            CustomTypes.InputDouble2(nameof(simIn.DomainSize), ref simIn.DomainSize);
 
             CustomTypes.InputDateTimePopup(nameof(simIn.StartDateTime), ref simIn.StartDateTime);
             CustomTypes.InputDateTimePopup(nameof(simIn.EndDateTime), ref simIn.EndDateTime);
-            if (ImGui.Button("Apply")) { ApplyTimeAndSpace(); }
 
             ImGui.SeparatorText("Evacuation");
             ImGui.Checkbox("Pedestrian evacuation?", ref _wantPedestrian);
@@ -143,7 +154,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
             ImGui.SeparatorText("Finished?");
 
             if (ImGui.Button("Generate scenario")) { GenerateScenario(); }
-            ;
 
             ImGui.End();
             if (!_isOpen)
@@ -152,9 +162,15 @@ namespace Assets.WUInity.GUI.DearIMGUI
             }
         }
 
-        private static void ApplyTimeAndSpace()
+        private static void SetAIO(Vector2d[] latLons)
         {
-            //Vector2d center = 
+            _latLon = new Vector2d(Mathd.Min(latLons[0].x, latLons[1].x), Mathd.Min(latLons[0].y, latLons[1].y));
+            _input.Simulation.LowerLeftLatLon = _latLon;
+            Vector2d _upperRightLatLon = new Vector2d(Mathd.Max(latLons[0].x, latLons[1].x), Mathd.Max(latLons[0].y, latLons[1].y));
+            var lower = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_latLon.x, _latLon.y);
+            var upper = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(_upperRightLatLon.x, _upperRightLatLon.y);
+            _input.Simulation.DomainSize = new Vector2d(upper.Easting - lower.Easting, upper.Northing - lower.Northing); 
+            Open(false);
         }
 
         private static void GenerateScenario()
@@ -164,9 +180,6 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 Engine.Message(null, Engine.LogType.InputError, $"Parameter {nameof(_input.Simulation.Name)} needs to be properly set.");
                 return;
             }
-
-            _input.Simulation.LowerLeftLatLon = new Vector2d(_latLon.x, _latLon.y);
-            _input.Simulation.DomainSize = new Vector2d(_domainSize.x, _domainSize.y);
             _isOpen = false;
             _folderSet = false;
             string filePath = Path.Combine(_input.RootFolder, _input.Simulation.Name, ".wui");

@@ -70,6 +70,10 @@ namespace PREACT.Tools
 
                 Engine.Message(null, Engine.LogType.Log, $"Saved weather data to {newFilePath}.");
             }
+            else
+            {
+                Engine.Message(null, Engine.LogType.Log, $"{nameof(OpenMeteoDownloader)} failed to download weather data.");
+            }
         }
     }
 }

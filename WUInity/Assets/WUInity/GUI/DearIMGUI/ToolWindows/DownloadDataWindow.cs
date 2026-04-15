@@ -59,9 +59,14 @@ namespace Assets.WUInity.GUI.DearIMGUI
             ImGui.Text("Download folder set to:" + _downloadFolder);
 
             ImGui.SeparatorText("Area of interest (AIO)");
+            if (ImGui.Button("Set AIO on map")) 
+            {
+                Close();
+                PreactGUI.WUInity.PickOnMap(SetAIO); 
+            }
             CustomTypes.InputDouble2(nameof(PREACT.Input.SimulationInput.LowerLeftLatLon), ref _lowerLeftLatLon);
             CustomTypes.InputDouble2("UpperRightLatLon", ref _upperRightLatLon);
-            CustomTypes.InputDouble2(nameof(PREACT.Input.SimulationInput.DomainSize), ref _domainSize);
+            //CustomTypes.InputDouble2(nameof(PREACT.Input.SimulationInput.DomainSize), ref _domainSize);
 
             ImGui.SeparatorText("Time period of interest");
             CustomTypes.InputDateTimePopup(nameof(PREACT.Input.SimulationInput.StartDateTime), ref _startDateTime);
@@ -103,6 +108,13 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 PreactGUI.CloseWindow(Draw);
             }
+        }
+
+        private static void SetAIO(Vector2d[] latLons)
+        {
+            _lowerLeftLatLon = new Vector2d(Mathd.Min(latLons[0].x, latLons[1].x), Mathd.Min(latLons[0].y, latLons[1].y));
+            _upperRightLatLon = new Vector2d(Mathd.Max(latLons[0].x, latLons[1].x), Mathd.Max(latLons[0].y, latLons[1].y));
+            Open();
         }
 
         private static async Task DownloadLandscape()
