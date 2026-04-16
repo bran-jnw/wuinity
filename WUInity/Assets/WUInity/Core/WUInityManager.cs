@@ -120,6 +120,7 @@ namespace WUInity
             }            
 
             _simBorder.gameObject.SetActive(false);
+            _boundingBoxRenderer.gameObject.SetActive(false);
 
             //gui            
             _wuiGUI = FindAnyObjectByType<PreactGUI>();
