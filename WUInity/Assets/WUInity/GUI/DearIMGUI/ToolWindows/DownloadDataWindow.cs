@@ -62,7 +62,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if (ImGui.Button("Set AIO on map")) 
             {
                 Close();
-                PreactGUI.WUInity.PickOnMap(SetAIO); 
+                PreactGUI.WUInity.PickBoundingBoxOnMap(SetAIO); 
             }
             CustomTypes.InputDouble2(nameof(PREACT.Input.SimulationInput.LowerLeftLatLon), ref _lowerLeftLatLon);
             CustomTypes.InputDouble2("UpperRightLatLon", ref _upperRightLatLon);

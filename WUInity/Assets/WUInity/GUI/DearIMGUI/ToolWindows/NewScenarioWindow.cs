@@ -70,7 +70,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if (ImGui.Button("Set AIO on map"))
             {
                 Close();
-                PreactGUI.WUInity.PickOnMap(SetAIO);
+                PreactGUI.WUInity.PickBoundingBoxOnMap(SetAIO);
             }
             if(CustomTypes.InputDouble2(nameof(simIn.LowerLeftLatLon), ref _latLon))
             {

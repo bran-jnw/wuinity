@@ -99,7 +99,9 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     if (ImGui.TreeNode(dest.Name))
                     {
                         if (ImGui.Button("Edit")) { DestinationInputEditWindow.Open(eInput.EvacuationDestinationInputs, dest); }
+                        ImGui.SameLine();
                         if (ImGui.Button("Zoom to")) { }
+                        ImGui.SameLine();
                         if (ImGui.Button("Remove")) { }
 
                         ImGui.TreePop();

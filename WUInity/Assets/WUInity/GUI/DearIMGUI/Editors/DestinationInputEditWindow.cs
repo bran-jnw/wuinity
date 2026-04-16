@@ -42,6 +42,15 @@ namespace Assets.WUInity.GUI.DearIMGUI.Editors
             }           
         }
 
+        public static void Close()
+        {
+            if (_isOpen)
+            {
+                PreactGUI.CloseWindow(Draw);
+            }
+            _isOpen = false;
+        }
+
         public static void Draw()
         {
             if(!_isOpen)
@@ -53,18 +62,29 @@ namespace Assets.WUInity.GUI.DearIMGUI.Editors
 
             ImGui.InputText(nameof(_input.Name), ref _input.Name, 64);
 
+            if(ImGui.Button("Set on map")) 
+            {
+                Close();
+                PreactGUI.WUInity.PickPosOnMap(SetDestinationPos); 
+            }
+            ImGui.SameLine();
             Vector2 latLon = new Vector2((float)_input.LatLon.x, (float)_input.LatLon.y);
-            ImGui.InputFloat2(nameof(_input.LatLon), ref latLon);
-            _input.LatLon.x = latLon.x;
-            _input.LatLon.y = latLon.y;
+            if(ImGui.InputFloat2(nameof(_input.LatLon), ref latLon))
+            {
+                _input.LatLon.x = latLon.x;
+                _input.LatLon.y = latLon.y;
+            }            
 
             _destinationTypeIndex = (int)_input.Type;
             ImGui.Combo(nameof(_input.Type), ref _destinationTypeIndex, DestinationTypesStrings, DestinationTypesStrings.Length);
             _input.Type = (DestinationTypes)_destinationTypeIndex;
 
-            ImGui.InputFloat(nameof(_input.MaxFlow), ref _input.MaxFlow);
-            ImGui.InputInt(nameof(_input.MaxVehicles), ref _input.MaxVehicles);
-            ImGui.InputInt(nameof(_input.MaxPeople), ref _input.MaxPeople);
+            if(_input.Type == DestinationTypes.Shelter)
+            {
+                ImGui.InputFloat(nameof(_input.MaxFlow), ref _input.MaxFlow);
+                ImGui.InputInt(nameof(_input.MaxVehicles), ref _input.MaxVehicles);
+                ImGui.InputInt(nameof(_input.MaxPeople), ref _input.MaxPeople);
+            }            
 
             Vector3 color = new Vector3((float)_input.Color.r, (float)_input.Color.g, (float)_input.Color.b);
             ImGui.ColorEdit3(nameof(_input.Color), ref color);
@@ -73,12 +93,9 @@ namespace Assets.WUInity.GUI.DearIMGUI.Editors
             _input.Color.b = color.z;
 
             if (ImGui.Button("OK")) 
-            {
-                if(_input.Name != _oldKey)
-                {
-                    _inputs.Remove(_oldKey);
-                    _inputs.Add(_input.Name, _input);
-                }
+            {                
+                _inputs.Remove(_oldKey);
+                _inputs.Add(_input.Name, _input);
                 _isOpen = false;
             }
 
@@ -87,6 +104,12 @@ namespace Assets.WUInity.GUI.DearIMGUI.Editors
             {
                 PreactGUI.CloseWindow(Draw);
             }
-        }        
+        }    
+        
+        private static void SetDestinationPos(PREACT.Math.Vector2d simulationPos)
+        {
+            _input.LatLon = ScenarioEditorWindow.Input.Simulation.Data.GetWGS84FromSimulationPosition(simulationPos);
+            Open(_inputs, _input);
+        }
     }
 }

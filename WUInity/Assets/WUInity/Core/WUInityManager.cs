@@ -267,8 +267,21 @@ namespace WUInity
                     FireRenderer.UpdateFireRenderer(_renderFireSpread, _renderSmokeDispersion, _engine.Simulation);
                 }
             }   
-            
-            if(_pickingOnMap)
+
+            if(_pickingPos)
+            {
+                //collect click
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    if (_yPlane.Raycast(ray, out float enter))
+                    {
+                        Vector3 pos = ray.GetPoint(enter);
+                        FinishPickPosOnMap(pos);
+                    }
+                }
+            }            
+            else if(_pickingBoundingBox)
             {
                 //collect clicks
                 if(Input.GetMouseButtonDown(0))
@@ -284,7 +297,7 @@ namespace WUInity
                         ++_clicks;
                         if (_clicks > 1)
                         {
-                            FinishPickOnMap();
+                            FinishPickBoundingBoxOnMap();
                         }
                     }
                 }                
@@ -778,16 +791,18 @@ namespace WUInity
 
         public string WorkingFolder { get => _engine.WorkingFolder; }
 
-        private bool _pickingOnMap;
+        private bool _pickingBoundingBox;
+        private bool _pickingPos;
         private int _clicks = 0;
         private PREACT.Math.Vector2d[] _clickLatLons = new PREACT.Math.Vector2d[2];
         private System.Action<PREACT.Math.Vector2d[]> _onClicks;
-        public void PickOnMap(System.Action<PREACT.Math.Vector2d[]> clicks)
+        private System.Action<PREACT.Math.Vector2d> _onClick;
+        public void PickBoundingBoxOnMap(System.Action<PREACT.Math.Vector2d[]> clicks)
         {
             _onClicks = clicks;
             _clicks = 0;
             SetWebMercatorMapInteraction(true);
-            _pickingOnMap = true;
+            _pickingBoundingBox = true;
             _boundingBoxRenderer.gameObject.SetActive(true);
             _boundingBoxRenderer.startWidth = 0.5f;
             _boundingBoxRenderer.endWidth = 0.5f;
@@ -796,13 +811,26 @@ namespace WUInity
                 _boundingBoxRenderer.SetPosition(i, Vector3.zero - Vector3.down * 100);
             }
         }
-        public void FinishPickOnMap()
+        private void FinishPickBoundingBoxOnMap()
         {
             _boundingBoxRenderer.gameObject.SetActive(false);
             SetWebMercatorMapInteraction(false);
-            _pickingOnMap = false;
+            _pickingBoundingBox = false;
             _onClicks(_clickLatLons);
             _onClicks = null;
+        }
+
+        public void PickPosOnMap(System.Action<PREACT.Math.Vector2d> onClick)
+        {
+            _pickingPos = true;
+            _onClick = onClick;
+        }
+
+        private void FinishPickPosOnMap(Vector3 clickPos)
+        {
+            _pickingPos = false;
+            _onClick(new PREACT.Math.Vector2d(clickPos.x, clickPos.z));
+            _onClick = null;
         }
 
 
