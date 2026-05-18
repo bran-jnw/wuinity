@@ -35,6 +35,7 @@ namespace PREACT.Input
                 return newInput;
             }
 
+            success = true;
             return newInput;
         }
     }

@@ -92,7 +92,7 @@ namespace PREACT.Input
             List<char> chars = new List<char>();
             for(int i = 0; i < input.Length; ++i)
             {
-                if (input[i] != ' ')
+                if (input[i] != ' ' && input[i] != '\t')
                 {
                     chars.Add(input[i]);
                 }

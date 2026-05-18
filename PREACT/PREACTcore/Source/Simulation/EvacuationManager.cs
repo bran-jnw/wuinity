@@ -452,7 +452,7 @@ namespace PREACT.Evacuation
             }
             else //default to closest
             {
-                GetClosestEuclideanDestination(latLon);
+                goal = GetClosestEuclideanDestination(latLon);
             }
 
             if (goal == null)

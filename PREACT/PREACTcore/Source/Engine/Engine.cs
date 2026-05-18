@@ -83,7 +83,7 @@ namespace PREACT
                 _ENGINE = this;
             }
 
-            SetupNativeLibraries();                  
+            SetupNativeLibraries();
         }
 
         string _projLibPath, _projDataPath, _sumoPath;
@@ -144,6 +144,15 @@ namespace PREACT
             //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_LIB", projLib); //should not be needed
             //OSGeo.GDAL.Gdal.SetConfigOption("PROJ_DATA", projData);
             OSGeo.OSR.Osr.SetPROJSearchPaths(new string[] { _projLibPath, _projDataPath });
+
+            // Force PROJ to use SUMO's proj.db. Other installs (e.g. Prometheus) can
+            // put an incompatible proj.db on the search path and cause proj_identify to fail.
+            string sumoProj = FindSumoProjDataPath();
+            if (sumoProj != null)
+            {
+                OSGeo.GDAL.Gdal.SetConfigOption("PROJ_DATA", sumoProj);
+            }
+
 
             try
             {
@@ -657,8 +666,27 @@ namespace PREACT
                         }
                     }
                 }
-            }            
-        } 
+            }
+        }
+
+        private static string FindSumoProjDataPath()
+        {
+            // Walk PATH entries looking for sumo.exe, then resolve ../share/proj relative to its bin dir.
+            string pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            foreach (string dir in pathEnv.Split(Path.PathSeparator))
+            {
+                string sumoExe = Path.Combine(dir, "sumo.exe");
+                if (File.Exists(sumoExe))
+                {
+                    string candidate = Path.GetFullPath(Path.Combine(dir, "..", "share", "proj"));
+                    if (File.Exists(Path.Combine(candidate, "proj.db")))
+                    {
+                        return candidate;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }
 

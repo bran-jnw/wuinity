@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release</Configurations>
@@ -13,6 +13,41 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PREACTcore\PREACTcore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\x64\gdal_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>gdal_wrap.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\x64\gdalconst_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>gdalconst_wrap.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\x64\ogr_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>ogr_wrap.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\x64\osr_wrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>osr_wrap.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\gdal_csharp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>gdal_csharp.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\gdalconst_csharp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>gdalconst_csharp.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\ogr_csharp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>ogr_csharp.dll</Link>
+    </None>
+    <None Include="..\PREACTcore\ThirdParty\GDAL\osr_csharp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>osr_csharp.dll</Link>
+    </None>
   </ItemGroup>
 
 </Project>
