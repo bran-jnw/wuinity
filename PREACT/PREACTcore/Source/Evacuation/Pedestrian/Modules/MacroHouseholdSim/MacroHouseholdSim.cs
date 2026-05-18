@@ -174,7 +174,7 @@ namespace PREACT.Pedestrian
                 //assume all cars in household goes to the same goal, else we have to make a new call to select goal for every car
                 EvacuationDestination evacDest = _simulation.Evacuation.GetEvacuationDestination(household.GetVehicleLatLon(), household.EvacuationGroup);
 
-                if (evacDest.Blocked)
+                if (evacDest != null && evacDest.Blocked)
                 {
                     _simulation.Evacuation.GetBestAvailableDestination(household.EvacuationGroup, household.GetVehicleLatLon());
                 }
