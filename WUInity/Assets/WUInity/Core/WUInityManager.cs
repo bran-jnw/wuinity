@@ -15,6 +15,7 @@ using WUInity.UI;
 using PREACT.Population;
 using WUInity.Visualization;
 using Assets.WUInity.GUI.DearIMGUI;
+using Mapbox.Utils;
 
 namespace WUInity
 {
@@ -755,9 +756,9 @@ namespace WUInity
                     for (int v = 0; v < vertices.Length; ++v)
                     {
                         Vector3 worldPos = tile.transform.TransformPoint(vertices[v]);
-                        var wgs84Pos = _utmMap.WorldToGeoPosition(worldPos); //GeoConversions.MetersToLatLon(new Vector2d(worldPos.x, worldPos.z) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
-                        PREACT.Utility.LatLngUTMConverter.UTMResult utmPos = PREACT.Utility.LatLngUTMConverter.WGS84.convertLatLngToUtm(wgs84Pos.x, wgs84Pos.y);
-                        Vector3 newWorldPos = new Vector3((float)(utmPos.Easting - input.Simulation.Data.UTMOrigin.x), 0f, (float)(utmPos.Northing - input.Simulation.Data.UTMOrigin.y));
+                        Vector2d wgs84Pos = _utmMap.WorldToGeoPosition(worldPos); //GeoConversions.MetersToLatLon(new Vector2d(worldPos.x, worldPos.z) + WUIEngine.RUNTIME_DATA.Simulation.CenterMercator);
+                        PREACT.Math.Vector2d utmSimPos = input.Simulation.Data.GetSimulationPosition(new PREACT.Math.Vector2d(wgs84Pos.x, wgs84Pos.y));
+                        Vector3 newWorldPos = new Vector3((float)utmSimPos.x, 0f, (float)utmSimPos.y);
                         vertices[v] = tile.transform.InverseTransformPoint(newWorldPos);
                     }
                     tile.GetComponent<MeshFilter>().mesh.SetVertices(vertices);

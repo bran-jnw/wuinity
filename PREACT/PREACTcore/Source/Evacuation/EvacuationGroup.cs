@@ -152,7 +152,7 @@ namespace PREACT.Evacuation
                 double y = geom.GetY(0);
                 result.Add(new Vector2d(y, x)); //LonLat in data, LatLon needed
             }
-            else if (type == OSGeo.OGR.wkbGeometryType.wkbLineString)
+            else if (type == OSGeo.OGR.wkbGeometryType.wkbLineString || type == OSGeo.OGR.wkbGeometryType.wkbCircularString)
             {
                 int n = geom.GetPointCount();
                 for (int i = 0; i < n; i++)
