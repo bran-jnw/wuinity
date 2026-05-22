@@ -7,12 +7,12 @@ namespace Assets.WUInity.GUI.DearIMGUI
     public static class FileBrowser
     {
         //filters
-        static string[] wuiFilter = new string[] { ".wui" };
-        static string[] lcpFilter = new string[] { ".lcp", ".tif", ".tiff" };
-        static string[] geoTiffFilter = new string[] { ".tif", ".tiff" };
-        static string[] fuelModelsFilter = new string[] { ".fuel" };
+        public static readonly string[] wuiFilter = new string[] { ".wui" };
+        public static readonly string[] lcpFilter = new string[] { ".lcp", ".tif", ".tiff" };
+        public static readonly string[] geoTiffFilter = new string[] { ".tif", ".tiff" };
+        public static readonly string[] fuelModelsFilter = new string[] { ".fuel" };
 
-        public static void CancelSaveLoad()
+        public static void Cancel()
         {
 
         }
@@ -21,7 +21,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         {
             SimpleFileBrowser.FileBrowser.SetFilters(false, wuiFilter);
             string initialPath = PreactGUI.Engine.WorkingFolder;
-            SimpleFileBrowser.FileBrowser.ShowLoadDialog(LoadInput, CancelSaveLoad, SimpleFileBrowser.FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
+            SimpleFileBrowser.FileBrowser.ShowLoadDialog(LoadInput, Cancel, SimpleFileBrowser.FileBrowser.PickMode.Files, false, initialPath, null, "Load WUI file", "Load");
         }
         private static void LoadInput(string[] paths)
         {
@@ -33,22 +33,37 @@ namespace Assets.WUInity.GUI.DearIMGUI
         {
             SimpleFileBrowser.FileBrowser.SetFilters(false, wuiFilter);
             string initialPath = PreactGUI.Engine.WorkingFolder;
-            SimpleFileBrowser.FileBrowser.ShowSaveDialog(ScenarioEditorWindow.SaveNewInput, CancelSaveLoad, SimpleFileBrowser.FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
+            SimpleFileBrowser.FileBrowser.ShowSaveDialog(ScenarioEditorWindow.SaveNewInput, Cancel, SimpleFileBrowser.FileBrowser.PickMode.Files, false, initialPath, ".wui", "Save file", "Save");
         }
 
+        private static bool _getRelativePath;
         private static Action<string> _onFileSet;
-        public static void OpenSetFilePath(Action<string> onFileSet)
+        public static void OpenSetFilePath(Action<string> onFileSet, string dialogHeader, bool getRelativePath, string[] fileFilter = null)
         {
             _onFileSet = onFileSet;
-            SimpleFileBrowser.FileBrowser.SetFilters(true);
+            _getRelativePath = getRelativePath;
+
+            if(fileFilter == null)
+            {
+                SimpleFileBrowser.FileBrowser.SetFilters(true);
+            }
+            else
+            {
+                SimpleFileBrowser.FileBrowser.SetFilters(true, fileFilter);
+            }
             string initialPath = PreactGUI.Engine.WorkingFolder;
-            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetFilePath, CancelSaveLoad, SimpleFileBrowser.FileBrowser.PickMode.Files, false, initialPath, null, "Set file", "Set");
+            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetFilePath, Cancel, SimpleFileBrowser.FileBrowser.PickMode.Files, false, initialPath, null, dialogHeader, "Set");
         }
+
         private static void SetFilePath(string[] paths)
         {
-            string relativePath = Path.GetRelativePath(PreactGUI.Engine.WorkingFolder, paths[0]);
-            _onFileSet?.Invoke(relativePath);
-            _onFileSet = null;
+            string filePath = paths[0];
+            if (_getRelativePath)
+            {
+                filePath = Path.GetRelativePath(PreactGUI.Engine.WorkingFolder, paths[0]);
+            }            
+            _onFileSet?.Invoke(filePath);
+            //_onFileSet = null;
         }
 
         /*public static void OpenCreateBaseData()

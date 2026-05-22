@@ -36,7 +36,7 @@ namespace PREACT
             if(!Triggered)
             {
                 Triggered = true;                
-                _simulation.Evacuation.BlockDestinationEvent(DestinationName);
+                _simulation.Evacuation.TryBlockDestination(DestinationName);
             }            
         }
 

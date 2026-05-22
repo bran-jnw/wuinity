@@ -191,7 +191,7 @@ namespace PREACT.Traffic
                 if (currentShapeIndex == routeData.route.ShapeMeta.Length)
                 {
                     //check if we can actually arrive based on flow at goal
-                    if (routeData.evacGoal.CarArrives(this, timeStamp, deltaTime))
+                    if (routeData.evacGoal.TryToArrive(this, timeStamp, deltaTime))
                     {
                         hasArrived = true;
                         //reduce anyovershooting distance
@@ -223,7 +223,7 @@ namespace PREACT.Traffic
             }
         }
 
-        public override void Arrive(double deltaTime, double currentTime)
+        public override bool TryToArrive(double deltaTime, double currentTime)
         {
             throw new System.NotImplementedException();
         }

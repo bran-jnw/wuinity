@@ -182,20 +182,28 @@ namespace PREACT.Traffic
                     _sumoVehicles.TryGetValue(arrivedVehicles[i], out vehicle);
                     if(vehicle != null)
                     {
-                        vehicle.Arrive(deltaTime, currentTime);
-                    }
-                    _sumoVehicles.Remove(arrivedVehicles[i]);
-                    _activeVehicles.Remove(vehicle.VehicleId);
-                    //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
-                    if (vehicle.NumberOfPeople > 0)
-                    {
-                        _arrivalData.Add(currentTime + deltaTime);
-                        totalVehiclesArrived++;
-                        totalPeopleArrived += vehicle.NumberOfPeople;
-                    }
-                    else
-                    {
-                        ++totalSumoVehiclesArrived;
+                        bool couldArrive = vehicle.TryToArrive(deltaTime, currentTime);
+                        if(couldArrive)
+                        {
+                            _sumoVehicles.Remove(arrivedVehicles[i]);
+                            _activeVehicles.Remove(vehicle.VehicleId);
+
+                            //if car is internal to SUMO they have 0 passengers from the point of view of the simulation
+                            if (vehicle.NumberOfPeople > 0)
+                            {
+                                _arrivalData.Add(currentTime + deltaTime);
+                                totalVehiclesArrived++;
+                                totalPeopleArrived += vehicle.NumberOfPeople;
+                            }
+                            else
+                            {
+                                ++totalSumoVehiclesArrived;
+                            }                            
+                        }
+                        else
+                        {
+                            RedirectVehicle(vehicle, true);
+                        }
                     }
                 }
             }
@@ -452,9 +460,77 @@ namespace PREACT.Traffic
             }
         }
 
-        public override void UpdateEvacuationGoals()
+        public override void UpdateDestinations()
         {
-            //throw new System.NotImplementedException();
+            foreach (SUMOVehicle vehicle in _sumoVehicles.Values)
+            {
+                if(vehicle.Destination.Blocked)
+                {
+                    RedirectVehicle(vehicle, false);                   
+                }
+            }
+        }
+
+        public void RedirectVehicle(SUMOVehicle vehicle, bool haveArrivedAtDestination)
+        {
+            EvacuationDestination newDestination;
+            bool sameDestination = false;
+            if (vehicle.Destination.Blocked)
+            {
+                newDestination = _simulation.Evacuation.GetBestAvailableDestination(vehicle.SimulationPos);
+            }
+            //this happens when a vehicle has arrived and the flow does not allow them to arrive, but the actual destination is not blocked
+            else
+            {
+                sameDestination = true;
+                newDestination = vehicle.Destination;
+            }
+            
+            bool couldRedirect = false;
+            if (newDestination != null)
+            {
+                try
+                {
+                    Vector2d sumoDestinationPos = newDestination.SimulationPos - _originOffset;
+                    LIBSUMO.TraCIRoadPosition destinationEdge = LIBSUMO.Simulation.convertRoad(sumoDestinationPos.x, sumoDestinationPos.y);
+
+                    //this means that from SUMOs point of view the vehicle is gone (it arrived in sumo as it is not aware of shelter capacity or blocked destinations), so we need to re-inject it
+                    if (haveArrivedAtDestination)
+                    {
+                        Vector2d sumoVehiclePos = vehicle.SimulationPos - _originOffset;
+                        LIBSUMO.TraCIRoadPosition startEdge = LIBSUMO.Simulation.convertRoad(sumoVehiclePos.x, sumoVehiclePos.y);
+
+                        string routeID;
+                        if (sameDestination)
+                        {
+                            routeID = $"preact_route_{vehicle.GetSumoVehicleID()}";
+                        }
+                        else
+                        {
+                            LIBSUMO.TraCIStage route = LIBSUMO.Simulation.findRoute(startEdge.edgeID, destinationEdge.edgeID);
+                            routeID = $"preact_route_{vehicle.GetSumoVehicleID()}_{vehicle.ReinjectionCount}";
+                            LIBSUMO.Route.add(routeID, route.edges);
+                        }
+                        
+                        LIBSUMO.Vehicle.add(vehicle.GetSumoVehicleID(), routeID);//, vehicleType);
+                    }
+                    else
+                    {
+                        LIBSUMO.Vehicle.changeTarget(vehicle.GetSumoVehicleID(), destinationEdge.edgeID);
+                    }                    
+                    vehicle.UpdateDestination(newDestination);
+                    couldRedirect = true; 
+                }
+                catch (Exception e)
+                {
+                    Engine.Message(_simulation, Engine.LogType.Warning, e.Message);
+                }
+            }
+
+            if(!couldRedirect) //we are basically screwed, nowhere to go, sim hould stop on other end
+            {
+
+            }
         }
 
         //List<string>[,] fireCellEdges;
@@ -480,7 +556,7 @@ namespace PREACT.Traffic
             }
             catch (Exception e) 
             {
-                Engine.Message(null, Engine.LogType.SimulationError, e.Message);
+                Engine.Message(_simulation, Engine.LogType.SimulationError, e.Message);
             }            
         }
 
@@ -511,18 +587,26 @@ namespace PREACT.Traffic
                     //collect cars in system that has the edge in their route
                     foreach (SUMOVehicle car in _sumoVehicles.Values)
                     {
-                        LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
-                        if (route.Contains(edge.Id))
+                        try 
                         {
-                            _carsToUpdate.Add(car);
+                            LIBSUMO.StringVector route = LIBSUMO.Vehicle.getRoute(car.GetSumoVehicleID());
+                            if (route.Contains(edge.Id))
+                            {
+                                _carsToUpdate.Add(car);
+                            }
                         }
+                        catch (Exception e)
+                        {
+                            Engine.Message(_simulation, Engine.LogType.Warning, e.Message);
+                        }                    
                     }
                 }
             }
 
             if (_carsToUpdate.Count == 0)
             {
-                Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+                //suppress for now, to much output to make sense of, better to save as damage output or something
+                //Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
             }
             else
             {
@@ -562,7 +646,7 @@ namespace PREACT.Traffic
                     //IMPORTANT!!! Longitude then latitude in SUMO
                     Vector2d sumoPos = simulationPos - _originOffset;
                     LIBSUMO.TraCIRoadPosition destinationEdge = LIBSUMO.Simulation.convertRoad(sumoPos.x, sumoPos.y);
-                    LIBSUMO.Vehicle.changeTarget(((SUMOVehicle)vehicles[i]).VehicleId.ToString(), destinationEdge.edgeID);
+                    LIBSUMO.Vehicle.changeTarget(((SUMOVehicle)vehicles[i]).GetSumoVehicleID(), destinationEdge.edgeID);
                     vehicles[i].UpdateDestination(evacuationDestination);
                 }
                 catch (Exception e)

@@ -63,7 +63,7 @@ namespace PREACT
             float distance = float.MaxValue;
 
             Vector2int cellIndex = _simulation.Spatial.GetWildfireCellIndex(simulationPos, out bool inside);
-            if(inside)
+            if(inside && _wildfireFrontDistance != null)
             {
                 distance = _wildfireFrontDistance[cellIndex.x, cellIndex.y];
             }

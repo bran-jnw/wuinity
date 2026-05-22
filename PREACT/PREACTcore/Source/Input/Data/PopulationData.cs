@@ -106,6 +106,6 @@ namespace PREACT.Input
             }
 
             return householdData;
-        }        
+        }
     }
 }

@@ -279,34 +279,27 @@ namespace PREACT.Evacuation
             }
         }
 
-        public void BlockDestinationEvent(string destinationName)
+        public void TryBlockDestination(string destinationName)
         {
             EvacuationDestination eD;
             if(_evacuationDestinationsDict.TryGetValue(destinationName, out eD))
             {
                 BlockDestination(eD);
-                Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked: " + eD.Name);
-            }            
-        }
-
-        private void BlockDestination(EvacuationDestination eD)
-        {
-            if (!eD.Blocked)
+                Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked by user specified event: " + eD.Name);
+            }
+            else
             {
-                eD.BlockDestination();
-                UpdateEvacuationDestinations();
+                Engine.Message(_simulation, Engine.LogType.Event, $"Could not block the destination {eD.Name} as it does not exist.");
             }
         }
 
-        /// <summary>
-        /// Called from goal when blocked internally.
-        /// </summary>
-        public void GoalBlocked()
+        public void BlockDestination(EvacuationDestination blockedEvacDest)
         {
-            UpdateEvacuationDestinations();
+            blockedEvacDest.BlockDestination();
+            UpdateEvacuationDestinations(blockedEvacDest);
         }
 
-        private void UpdateEvacuationDestinations()
+        private void UpdateEvacuationDestinations(EvacuationDestination evacDestThatTriggeredUpdate)
         {
             //check that we have at least one goal left
             bool allBlocked = true;
@@ -325,14 +318,20 @@ namespace PREACT.Evacuation
                 return;
             }
 
-            //update raster evac routes first as traffic might use some of the updated choices
-            //TODO
-
-            //update cars already in traffic
-            if(_trafficModule != null)
+            //TODO: delay this as nobody can actually know that the destination is closed without arriving there, we need a signaling system and compliance system
+            /*if (_trafficModule != null)
             {
-                _trafficModule.UpdateEvacuationGoals();
-            }            
+                _trafficModule.UpdateDestinations();
+            }*/
+
+            if (evacDestThatTriggeredUpdate.GoalType == DestinationTypes.Shelter)
+            {
+
+            }
+            else if (evacDestThatTriggeredUpdate.GoalType == DestinationTypes.Exit)
+            {
+
+            }       
         }
 
         private void BuildEvacuationDestinationList()
@@ -368,16 +367,16 @@ namespace PREACT.Evacuation
             return _availableEvacuationDestinations[randomChoice];
         }
 
-        private EvacuationDestination GetClosestEuclideanAvailableDestination(Vector2d vehicleLatLon)
+        private EvacuationDestination GetClosestEuclideanDestination(Vector2d currentLatLon, List<EvacuationDestination> destinationsToConsider)
         {
             double closestDistance = double.MaxValue;
-            Vector2d householdPos = _input.Simulation.Data.GetSimulationPosition(vehicleLatLon);
+            Vector2d simPos = _input.Simulation.Data.GetSimulationPosition(currentLatLon);
             EvacuationDestination pickedDestination = null;
 
-            foreach (EvacuationDestination eD in _availableEvacuationDestinations)
+            foreach (EvacuationDestination eD in destinationsToConsider)
             {
                 Vector2d destPos = _input.Simulation.Data.GetSimulationPosition(eD.LatLon);
-                double distance = Vector2d.SqrMagnitude(destPos - householdPos);
+                double distance = Vector2d.SqrMagnitude(destPos - simPos);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
@@ -388,23 +387,15 @@ namespace PREACT.Evacuation
             return pickedDestination;
         }
 
-        private EvacuationDestination GetClosestEuclideanDestination(Vector2d vehicleLatLon)
+        private EvacuationDestination GetClosestEuclideanAvailableDestination(Vector2d currentLatLon)
         {
-            double closestDistance = double.MaxValue;
-            Vector2d householdPos = _input.Simulation.Data.GetSimulationPosition(vehicleLatLon);
-            EvacuationDestination pickedDestination = null;
+            EvacuationDestination pickedDestination = GetClosestEuclideanDestination(currentLatLon, _availableEvacuationDestinations);
+            return pickedDestination;
+        }
 
-            foreach (EvacuationDestination eD in _evacuationDestinations)
-            {
-                Vector2d destPos = _input.Simulation.Data.GetSimulationPosition(eD.LatLon);
-                double distance = Vector2d.SqrMagnitude(destPos - householdPos);
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    pickedDestination = eD;
-                }
-            }
-
+        private EvacuationDestination GetClosestEuclideanDestination(Vector2d currentLatLon)
+        {
+            EvacuationDestination pickedDestination = GetClosestEuclideanDestination(currentLatLon, _evacuationDestinations);
             return pickedDestination;
         }
 
@@ -481,7 +472,7 @@ namespace PREACT.Evacuation
             return pickedGroup;
         }
 
-        public EvacuationDestination GetBestAvailableDestination(EvacuationGroup evacuationGroup, Vector2d latLon)
+        public EvacuationDestination GetBestAvailableDestination(EvacuationGroup evacuationGroup, Vector2d currentLatLon)
         {
             EvacuationDestination result = null;
 
@@ -493,14 +484,21 @@ namespace PREACT.Evacuation
                     result = evacuationGroup.Destinations[i];
                     break;
                 }
-            }
+            }     
 
             //all group choices are blocked, pick something else
             if(result == null)
             {
-                result = GetClosestEuclideanAvailableDestination(latLon);
+                result = GetClosestEuclideanAvailableDestination(currentLatLon);
             }
 
+            return result;
+        }
+
+        public EvacuationDestination GetBestAvailableDestination(Vector2d currentSimulationPos)
+        {
+            Vector2d currentLatLon = _simulation.Spatial.GetWGS84FromSimulationPosition(currentSimulationPos);
+            EvacuationDestination result = GetClosestEuclideanAvailableDestination(currentLatLon);
             return result;
         }
 

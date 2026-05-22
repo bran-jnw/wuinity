@@ -55,7 +55,7 @@ namespace PREACT.Traffic
         public abstract void InsertNewTrafficEvent(TrafficEvent tE);
         public abstract int GetTotalCarsSimulated();        
         public abstract int GetNumberOfCarsInSystem();
-        public abstract void UpdateEvacuationGoals();
+        public abstract void UpdateDestinations();
         public Dictionary<uint, TrafficModuleVehicle> GetActiveVehicles()
         {
             return _activeVehicles;
@@ -92,7 +92,7 @@ namespace PREACT.Traffic
             return vehicles;
         }
 
-        public List<TrafficModuleVehicle> GetVehiclesRadius(List<TrafficModuleVehicle> vehicles, Vector2d center, double radius)
+        public List<TrafficModuleVehicle> GetVehiclesInRadius(List<TrafficModuleVehicle> vehicles, Vector2d center, double radius)
         {
             vehicles.Clear();
             double radiusSqrd = radius * radius;

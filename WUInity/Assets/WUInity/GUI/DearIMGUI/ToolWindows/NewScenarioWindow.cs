@@ -107,7 +107,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 ImGui.Checkbox("Have SUMO input?", ref _haveSumo);
                 if (_haveSumo)
                 {
-                    if (ImGui.Button("Set SUMO input file")) { FileBrowser.OpenSetFilePath(path => _input.TrafficModule.SumoInput.ConfigurationFile = path); }
+                    if (ImGui.Button("Set SUMO input file")) { FileBrowser.OpenSetFilePath(path => _input.TrafficModule.SumoInput.ConfigurationFile = path, "Select SUMOP input file", true); }
                 }
                 else
                 {
@@ -133,7 +133,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 ImGui.Checkbox("Have weather?", ref _haveWeather);
                 if (_haveWeather)
                 {
-                    if (ImGui.Button("Select weather file")) { FileBrowser.OpenSetFilePath(path => _input.Weather.WeatherFile = path); }
+                    if (ImGui.Button("Select weather file")) { FileBrowser.OpenSetFilePath(path => _input.Weather.WeatherFile = path, "Select weather CSV file", true); }
                 }
                 else
                 {
@@ -189,7 +189,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         }
         private static void OpenSetRootFolder()
         {
-            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowser.CancelSaveLoad, SimpleFileBrowser.FileBrowser.PickMode.Folders, false, null, null, "Set root folder", "Set");
+            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowser.Cancel, SimpleFileBrowser.FileBrowser.PickMode.Folders, false, null, null, "Set root folder", "Set");
         }
         private static void SetRootFolder(string[] paths)
         {

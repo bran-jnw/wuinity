@@ -67,22 +67,14 @@ namespace PREACT.Tools
             }
         }
 
-        public static void CreatePopulationFromWorldPop(string minHouseholdSize, string maxHouseholdSize, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
+        public static void CreatePopulationFromWorldPop(int minHouseholdSize, int maxHouseholdSize, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
         {
             success = false;
 
-            int min, max;
-            if (int.TryParse(minHouseholdSize, out min) && int.TryParse(maxHouseholdSize, out max) && min <= max)
+            Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
+            if(success)
             {
-                Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
-                if(success)
-                {
-                    PopulationMap.CreatePopulation(worldPopFilePath, outputFilePath, routerDb, min, max, out success);
-                }                
-            }
-            else
-            {
-                Engine.Message(null, Engine.LogType.Warning, "Could not parse min and/or max household size.");
+                PopulationMap.CreatePopulation(worldPopFilePath, outputFilePath, routerDb, minHouseholdSize, maxHouseholdSize, out success);
             }
         }
 

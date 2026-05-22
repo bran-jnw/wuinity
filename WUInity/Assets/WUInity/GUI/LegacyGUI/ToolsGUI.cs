@@ -229,7 +229,7 @@ namespace WUInity.UI
         }
         private void CreatePopulationFromWorldPop(string[] paths) //string[] paths
         {
-            PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
+            //PopulationTools.CreatePopulationFromWorldPop(_minHouseholdSize, _maxHouseholdSize, _worldPopFilePath, _routerDbFilePath, paths[0], out success);
         }
 
         //convert geotiff to lcp

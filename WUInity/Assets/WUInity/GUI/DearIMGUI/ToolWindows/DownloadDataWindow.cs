@@ -143,7 +143,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
         private static void OpenSetDownloadFolder()
         {
             string initialFolder = PreactGUI.Engine.WorkingFolder;
-            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowser.CancelSaveLoad, SimpleFileBrowser.FileBrowser.PickMode.Folders, false, initialFolder, null, "Set download folder", "Set");
+            SimpleFileBrowser.FileBrowser.ShowLoadDialog(SetRootFolder, FileBrowser.Cancel, SimpleFileBrowser.FileBrowser.PickMode.Folders, false, initialFolder, null, "Set download folder", "Set");
         }
         private static void SetRootFolder(string[] paths)
         {

@@ -16,22 +16,22 @@ namespace PREACT.Traffic
     {
         string _sumoId;      
         double rotation;
-        bool active;
         bool directControlled;
         Vector2 lastPos;
         Vector3 oldVisualPos;
         Vector3 newVisualPos;
         float oldRotation, newRotation;
         protected double _initialSpeedFactor;
+        ushort _reinjectionCount = 0;
 
         public double InitialSpeedFactor { get => _initialSpeedFactor; }
+        public ushort ReinjectionCount{ get => _reinjectionCount; }
 
         public SUMOVehicle(uint carID, string sumoID, LIBSUMO.TraCIPosition initialPos, double angle, uint peopleInCar, EvacuationDestination goal, double individialSpeedFactor) : base(carID, peopleInCar, goal)
         {
             _vehicleId = carID;
             _sumoId = sumoID;
             _worldPosition = new Vector2d(initialPos.x, initialPos.y);  
-            active = true;
             directControlled = false;
             lastPos = new Vector2((float)initialPos.x, (float)initialPos.y);
 
@@ -76,19 +76,16 @@ namespace PREACT.Traffic
             _speedRatio = (float)(LIBSUMO.Vehicle.getSpeed(_sumoId) / LIBSUMO.Vehicle.getAllowedSpeed(_sumoId)); //include? LIBSUMO.Vehicle.getSpeedFactor(_sumoId) *
         }
 
-        public bool IsActive()
+        public override bool TryToArrive(double deltaTime, double currentTime)
         {
-            return active;
-        }
-
-        public override void Arrive(double deltaTime, double currentTime)
-        {
-            active = false;
+            ++_reinjectionCount;
+            bool couldArrive = false;
             if(_destination != null)
             {
-                _destination.CarArrives(this, deltaTime, currentTime);
-            }            
-            //TODO: send message to WUI-nity
+                couldArrive = _destination.TryToArrive(this, deltaTime, currentTime);
+            }
+
+            return couldArrive;
         }
 
         public void TakeDirectControl()

@@ -227,8 +227,11 @@ namespace PREACT.Pedestrian
             }    
 
             _macroHouseholds = new List<MacroHousehold>();
-            int culledOutsideDomain = 0;
-            int culledOutsideGroups = 0;
+            int culledHouseholdsOutsideDomain = 0;
+            int culledPeopleOutsideDomain = 0;
+
+            int culledHouseholdsOutsideGroups = 0;           
+            int culledPeopleOutsideGroups = 0;
             for (int i = 0; i < householdData.Length; ++i)
             {
                 Vector2d pos = _simulation.Spatial.GetSimulationPosition(householdData[i].originLatLon);
@@ -242,7 +245,8 @@ namespace PREACT.Pedestrian
                     {
                         totalPopulation -= householdData[i].peopleCount;
                         --totalHouseholds;
-                        ++culledOutsideGroups;
+                        ++culledHouseholdsOutsideGroups;
+                        culledPeopleOutsideGroups += householdData[i].peopleCount;
                     }
                     else
                     {
@@ -254,12 +258,13 @@ namespace PREACT.Pedestrian
                 {
                     totalPopulation -= householdData[i].peopleCount;
                     --totalHouseholds;
-                    ++culledOutsideDomain;
+                    ++culledHouseholdsOutsideDomain;
+                    culledPeopleOutsideDomain += householdData[i].peopleCount;
                 }
             }
 
-            Engine.Message(_simulation, Engine.LogType.Warning, "Number of households culled outside of defined groups: " + culledOutsideGroups);
-            Engine.Message(_simulation, Engine.LogType.Warning, "Number of households culled outside of defined simulation domain: " + culledOutsideDomain);
+            Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined groups: {culledHouseholdsOutsideGroups}/{culledPeopleOutsideGroups}");
+            Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined simulation domain: {culledHouseholdsOutsideDomain}/{culledPeopleOutsideDomain}");
 
             //sum up the number of people which will not evacuate and total cars
             totalPeopleWhoWillNotEvacuate = 0;
@@ -279,8 +284,9 @@ namespace PREACT.Pedestrian
             householdPositions = new Vector4[totalHouseholds];
             peopleLeft = totalPopulation;
 
-            Engine.Message(_simulation, Engine.LogType.Log, " Total households: " + totalHouseholds);
-            Engine.Message(_simulation, Engine.LogType.Log, " Total cars: " + totalCars);
+            Engine.Message(_simulation, Engine.LogType.Log, " Total active population: " + totalPopulation);
+            Engine.Message(_simulation, Engine.LogType.Log, " Total active households: " + totalHouseholds);
+            Engine.Message(_simulation, Engine.LogType.Log, " Total active cars: " + totalCars);
             Engine.Message(_simulation, Engine.LogType.Log, " Total people who will not evacuate: " + totalPeopleWhoWillNotEvacuate);
         }
 

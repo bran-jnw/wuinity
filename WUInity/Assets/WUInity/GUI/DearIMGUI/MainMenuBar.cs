@@ -69,6 +69,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                     if (ImGui.MenuItem("Download data")) { DownloadDataWindow.Open(); }
 
                     ImGui.SeparatorText("Edit");
+                    if (ImGui.MenuItem("Population editor")) { PopulationEditWindow.Open(); }
                     if (ImGui.MenuItem("Landscape editor")) { }
 
                     ImGui.SeparatorText("Viewing");

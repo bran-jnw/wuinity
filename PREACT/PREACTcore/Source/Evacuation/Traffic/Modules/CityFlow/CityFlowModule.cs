@@ -58,7 +58,7 @@ namespace PREACT.Traffic
             throw new NotImplementedException();
         }
 
-        public override void UpdateEvacuationGoals()
+        public override void UpdateDestinations()
         {
             throw new NotImplementedException();
         }

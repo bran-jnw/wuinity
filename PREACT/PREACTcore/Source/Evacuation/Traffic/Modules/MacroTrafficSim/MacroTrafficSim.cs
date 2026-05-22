@@ -96,7 +96,7 @@ namespace PREACT.Traffic
         }
 
         bool evacGoalsDirty = false;
-        public override void UpdateEvacuationGoals()
+        public override void UpdateDestinations()
         {
             evacGoalsDirty = true;
         }
