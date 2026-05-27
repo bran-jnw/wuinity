@@ -15,7 +15,7 @@ ZoomLevel=13
 WeatherFile=roxborough_weather.csv
 
 [Population]
-PopulationFile=population/big_population.csv
+PopulationFile=population/worldpop_population.csv
 CullOutsideGroups=true
 
 [Demographics]
