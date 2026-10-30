@@ -263,42 +263,105 @@ namespace PREACT.Traffic
                 //TODO: create input for this...
                 string vehicleType = "evacuation_vehicle";
 
+                bool foundRoute = false;
                 try
                 {
                     //IMPORTANT!!! Longitude then latitude in SUMO
                     LIBSUMO.TraCIRoadPosition startRoad = LIBSUMO.Simulation.convertRoad(startLatLon.y, startLatLon.x, true); //lon/lat
-                    LIBSUMO.TraCIRoadPosition destinationRoad = LIBSUMO.Simulation.convertRoad(destinationLatLon.y, destinationLatLon.x, true); //lon/lat
-                    LIBSUMO.TraCIStage route;
-                    //TODO:do we find route based on empty network/pure speed limits or do we take into account current state of network
-                    if(true)
-                    {
-                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, destinationRoad.edgeID);
-                    }
-                    else
-                    {
-                        route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, destinationRoad.edgeID, "", -1, 1);
-                    }
 
-                    bool foundRoute = false;
-                    if (route.edges.Count > 0)
+                    //this first check is needed as otherwise Mono GC (so a Unity problem) might crash everything due to invalid memory access when SUMO returns a bunch of messages that needs to get marashalled, but GC might run at the same time and free memory that SUMO is trying to access
+                    //So essentially this just removes all excess messages from SUMO due to failed routing (edge cannot find lane with permit for vehicle type)
+                    if (CanVehicleStartFromEdge(startRoad.edgeID)) 
                     {
-                        _validStartPositions.Add(startRoad);
-                        foundRoute = true;
-                    }
-                    //if we reach here we need to teleport the car to a new location as no valid route could be found
-                    else
-                    {
-                        TryTeleportVehicle(injectedCar);
-                    }
+                        LIBSUMO.TraCIRoadPosition destinationRoad = LIBSUMO.Simulation.convertRoad(destinationLatLon.y, destinationLatLon.x, true); //lon/lat
+                        LIBSUMO.TraCIStage route;
+
+                        //TODO:do we find route based on empty network/pure speed limits or do we take into account current state of network
+                        if (true)
+                        {
+                            route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, destinationRoad.edgeID);
+                        }
+                        else
+                        {
+                            route = LIBSUMO.Simulation.findRoute(startRoad.edgeID, destinationRoad.edgeID, "", -1, 1);
+                        }
+
+                        if (route.edges.Count > 0)
+                        {
+                            _validStartPositions.Add(startRoad);
+                            foundRoute = true;
+
+                            uint carID = GetNewCarID();
+                            string sumoID = carID.ToString();
+                            string routeID = "preact_route_" + carID;
+                            LIBSUMO.Route.add(routeID, route.edges);
+                            LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
+                            LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
+                            SUMOVehicle car = new SUMOVehicle(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal, LIBSUMO.Vehicle.getSpeedFactor(sumoID));
+                            _sumoVehicles.Add(sumoID, car);
+                            _activeVehicles.Add(car.VehicleId, car);
+                            ++totalVehiclesInjected;
+                        }
+                    }          
                 }
                 catch (Exception e)
                 {
-                    //Engine.Message(null, Engine.LogType.Warning, "Issue injecting vehicle into SUMO: " + e.Message);
+                    Engine.Message(null, Engine.LogType.Warning, "Issue injecting vehicle into SUMO: " + e.Message);
+                }  
+                
+                if(!foundRoute)
+                {
+                    //if we reach here we need to teleport the car to a new location as no valid route could be found
                     TryTeleportVehicle(injectedCar);
-                }              
+                }
             } 
             
             _carsToInject.Clear();
+        }
+
+        public bool CanVehicleStartFromEdge(string fromEdge)
+        {
+            const string vClass = "passenger";
+
+            // 2. Validate the starting edge permissions
+            bool fromValid = false;
+            int fromLaneCount = LIBSUMO.Edge.getLaneNumber(fromEdge);
+            for (int i = 0; i < fromLaneCount; i++)
+            {
+                // Construct the lane ID using SUMO's deterministic naming convention
+                string laneId = $"{fromEdge}_{i}";
+                var allowed = LIBSUMO.Lane.getAllowed(laneId);
+
+                if (allowed.Count == 0 || allowed.Contains("all") || allowed.Contains(vClass))
+                {
+                    fromValid = true;
+                    break;
+                }
+            }
+
+            if (!fromValid)
+                return false; // Start edge blocks this vehicle type entirely
+
+            /*// 3. Validate the destination edge permissions
+            bool toValid = false;
+            int toLaneCount = libsumo.Edge.getLaneNumber(toEdge);
+            for (int i = 0; i < toLaneCount; i++)
+            {
+                string laneId = $"{toEdge}_{i}";
+                var allowed = libsumo.Lane.getAllowed(laneId);
+
+                if (allowed.Count == 0 || allowed.Contains("all") || allowed.Contains(vClass))
+                {
+                    toValid = true;
+                    break;
+                }
+            }
+
+            if (!toValid) return false; // End edge blocks this vehicle type entirely
+
+            // 4. Safe execution: both points verified to accept the vehicle type
+            routeStage = libsumo.Simulation.findRoute(fromEdge, toEdge, vehicleTypeId);*/
+            return true;
         }
 
         private void TryTeleportVehicle(InjectedVehicle injectedVehicle)
@@ -321,11 +384,11 @@ namespace PREACT.Traffic
                 if (route.edges.Count > 0)
                 {
                     foundRoute = true;
-                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected vehicle, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                 }
                 else
                 {
-                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected vehicle, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                 }
             }
             else

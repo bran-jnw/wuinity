@@ -11,8 +11,6 @@ using PREACT.Input;
 using PREACT.Traffic;                          
 using System.IO;
 using PREACT;
-using WUInity.UI;
-using PREACT.Population;
 using WUInity.Visualization;
 using Assets.WUInity.GUI.DearIMGUI;
 using Mapbox.Utils;
@@ -109,6 +107,8 @@ namespace WUInity
         PREACT.Runtime.WorkingData _workingData;
         Engine _engine;
         public Engine Engine { get => _engine; }
+        
+
         private void Awake()
         {
             if (Application.isEditor)
@@ -156,7 +156,7 @@ namespace WUInity
             _godCamera.SetManager(this);
 
             _simulationDomainVisualizer = new SimulationDomainVisualizerUnity(transform);
-            _fireDomainVisualizer = new FireDomainVisualizerUnity(transform);            
+            _fireDomainVisualizer = new FireDomainVisualizerUnity(transform);
         }
 
         private void Start()
