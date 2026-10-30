@@ -442,8 +442,9 @@ namespace PREACT.Population
             success = false;
 
             int xDim, yDim;
-            double xSize, ySize, westUtm, eastUtm, southUtm, northUtm;
-            float[] populationNumbers;
+            double xSize, ySize;
+            float[] peopleCountRaw;
+            double[] GT = new double[6];
 
             string wkt;
             OSGeo.OSR.SpatialReference utm;            
@@ -453,90 +454,152 @@ namespace PREACT.Population
                 wkt = tif.GetProjection();
                 utm = new OSGeo.OSR.SpatialReference(wkt);
 
-                xDim = tif.RasterXSize;
+                xDim = tif.RasterXSize; //cell count
                 yDim = tif.RasterYSize;            
+                
+                //assume these contain UTM coordinates                
+                tif.GetGeoTransform(GT);
 
-                //https://gdal.org/en/stable/tutorials/geotransforms_tut.html
-                //assume these contain UTM coordinates
-                double[] transform = new double[6];
-                tif.GetGeoTransform(transform);
-                westUtm = transform[0];
-                eastUtm = transform[0] + transform[1] * tif.RasterXSize;
-                northUtm = transform[3];
-                southUtm = transform[3] + transform[5] * tif.RasterYSize; //negative cell size when north up
-                xSize = transform[1];
-                ySize = -transform[5];
+                xSize = GT[1]; //meters
+                ySize = GT[5];
 
                 OSGeo.GDAL.Band band = tif.GetRasterBand(1);
-                populationNumbers = new float[xDim * yDim];
-                band.ReadRaster(0, 0, xDim, yDim, populationNumbers, xDim, yDim, 0, 0);
+                peopleCountRaw = new float[xDim * yDim];
+                band.ReadRaster(0, 0, xDim, yDim, peopleCountRaw, xDim, yDim, 0, 0);
             }
 
+            //find "valid" cells with at least one full person that connect to road network
             OSGeo.OSR.SpatialReference wgs84 = new OSGeo.OSR.SpatialReference("");
             wgs84.SetWellKnownGeogCS("WGS84");
             OSGeo.OSR.CoordinateTransformation utmToWGS84 = new OSGeo.OSR.CoordinateTransformation(utm, wgs84);
             double[] inout = new double[2];
-
             Itinero.Router router = new Itinero.Router(routerDb);
+            float totalPeopleRaw = 0;
+            int totalValidPeople = 0;
+            int[] peopleCount = new int[peopleCountRaw.Length]; //want to save a clean integer copy of population count
+            List<int> validCellIndices = new List<int>();
+            List<Vector2d> validNetworkLatLons = new List<Vector2d>();
 
-            using (StreamWriter sW = new StreamWriter(outputFilePath))
+            int linearIndex = 0;
+            for (int yIndex = 0; yIndex < yDim; yIndex++)
             {
-                sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");
-
-                int totalPeople = 0;
-                int totalPeopleOnGrid = 0;
-                for (int i = 0; i < populationNumbers.Length; i++)
+                for (int xIndex = 0; xIndex < xDim; xIndex++)
                 {
-                    int rasterPopCount = (int)(populationNumbers[i] + 0.5f);
-                    if (rasterPopCount > 1)
+                    float peopleInCellRaw = peopleCountRaw[linearIndex];
+                    //tally up people raw
+                    if (peopleInCellRaw > 0)
                     {
-                        totalPeople += rasterPopCount;
+                        totalPeopleRaw += peopleInCellRaw;
+                    }
 
-                        int yIndex = i / xDim;
-                        int xIndex = i - yIndex * xDim;
-                        Vector2d rasterCenter = new Vector2d((xIndex + 0.5f) * xSize + westUtm, (yIndex + 0.5) * ySize + southUtm);
-                        inout[0] = rasterCenter.x;
-                        inout[1] = rasterCenter.y;
+                    int cellPeople = (int)peopleInCellRaw;
+                    if (cellPeople > 0)
+                    {
+                        double xPixelCenter = xIndex + 0.5;
+                        double yLineCenter = yIndex + 0.5;
+
+                        //https://gdal.org/en/stable/tutorials/geotransforms_tut.html
+                        double X_geo = GT[0] + xIndex * GT[1] + yIndex * GT[2];
+                        double Y_geo = GT[3] + xIndex * GT[4] + yIndex * GT[5];
+                        inout[0] = X_geo;
+                        inout[1] = Y_geo;
                         utmToWGS84.TransformPoint(inout);
-                        Vector2d latLon =  new Vector2d(inout[0], inout[1]);
+                        Vector2d latLon = new Vector2d(inout[0], inout[1]);
 
-                        Itinero.RouterPoint latLonOnNetwork = Traffic.RouteCreator.GetValidRouterPoint(router, latLon, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), (float)xSize);
+                        //make sure position is valid
+                        Itinero.RouterPoint latLonOnNetwork = Traffic.RouteCreator.GetValidRouterPoint(router, latLon, Itinero.Osm.Vehicles.Vehicle.Car.Fastest(), (float)xSize * 2); //multiplied by two as it is better to place them locally rather than place them later based on weight
                         if (latLonOnNetwork != null)
                         {
-                            totalPeopleOnGrid += rasterPopCount;
-
-                            int peopleWithoutHouseHold = rasterPopCount;
-                            List<int> householdCounts = new List<int>();
-                            while (peopleWithoutHouseHold > 0)
-                            {
-                                int peopleInThisHousehold = Random.Range(minHouseholdSize, maxHouseholdSize + 1);
-                                if (peopleInThisHousehold > peopleWithoutHouseHold)
-                                {
-                                    peopleInThisHousehold = peopleWithoutHouseHold;
-                                }
-                                householdCounts.Add(peopleInThisHousehold);
-                                peopleWithoutHouseHold -= peopleInThisHousehold;
-                            }
-
-                            for (int j = 0; j < householdCounts.Count; ++j)
-                            {
-                                Vector2d householdStartPos = rasterCenter;
-                                householdStartPos.x += xSize * Random.Range(-0.5f, 0.5f);
-                                householdStartPos.y += ySize * Random.Range(-0.5f, 0.5f);
-                                inout[0] = householdStartPos.x;
-                                inout[1] = householdStartPos.y;
-                                utmToWGS84.TransformPoint(inout);
-
-                                sW.WriteLine(inout[0] + "," + inout[1] + "," + latLonOnNetwork.Latitude + "," + latLonOnNetwork.Longitude + "," + householdCounts[j]);
-                            }
+                            totalValidPeople += cellPeople;
+                            peopleCount[linearIndex] = cellPeople;
+                            validCellIndices.Add(linearIndex);
+                            validNetworkLatLons.Add(new Vector2d(latLonOnNetwork.Latitude, latLonOnNetwork.Longitude)); 
                         }                        
+                    }
+
+                    ++linearIndex;
+                }
+            }
+            Engine.Message(null, Engine.LogType.Log, $"Provided population raster contains {totalPeopleRaw} people (raw).");
+            int totalUnvalidPeople = (int)(0.5f + totalPeopleRaw - totalValidPeople);
+            Engine.Message(null, Engine.LogType.Log, $"{totalValidPeople} people could be placed in cells that are valid (attached to road network), the rest ({totalUnvalidPeople} people) will be distributed based on valid cell weights and random distribution for remainders.");
+
+            //calculate weight of valid cells and add non-valid cells people            
+            int unvalidPeoplePlaced = 0;
+            for (int i = 0; i < validCellIndices.Count; ++i)
+            {
+                int index = validCellIndices[i];
+                float weight = peopleCount[index] / (float)totalValidPeople;
+                int peopleToAddToCell = (int)(weight * totalUnvalidPeople);
+
+                unvalidPeoplePlaced += peopleToAddToCell;
+                peopleCount[index] += peopleToAddToCell;
+            }
+            totalUnvalidPeople -= unvalidPeoplePlaced;
+            Engine.Message(null, Engine.LogType.Log, $"{unvalidPeoplePlaced} people could be placed in cells based on cell weight, the remaining {totalUnvalidPeople} people will be placed randomly.");
+
+            //we likely have a small remainder due to rounding of weights, just place them randomly            
+            for (int i = 0; i < totalUnvalidPeople; i++)
+            {
+                ++totalValidPeople;
+                int randomIndex = Random.Range(0, validCellIndices.Count);
+                randomIndex = validCellIndices[randomIndex];
+                ++peopleCount[randomIndex];
+            }
+
+            //save the data to csv
+            using (StreamWriter sW = new StreamWriter(outputFilePath))
+            {
+                int controlTotalPeople = 0;
+                int totalHouseholds = 0;
+
+                sW.WriteLine("OriginLat,OriginLon,AccessLat,AccessLon,People");            
+
+                for (int i = 0; i < validCellIndices.Count; i++)
+                {
+                    int index = validCellIndices[i];
+                    int row = index / xDim;
+                    int col = index % xDim;
+                    double xPixelCenter = col + 0.5;
+                    double yLineCenter = row + 0.5;
+                    double xGeo = GT[0] + (xPixelCenter * GT[1]) + (yLineCenter * GT[2]);
+                    double yGeo = GT[3] + (xPixelCenter * GT[4]) + (yLineCenter * GT[5]);
+
+                    //now create actual households
+                    int peopleWithoutHouseHold = peopleCount[index];
+                    List<int> householdCounts = new List<int>();
+                    while (peopleWithoutHouseHold > 0)
+                    {
+                        int peopleInThisHousehold = Random.Range(minHouseholdSize, maxHouseholdSize + 1);
+                        if (peopleInThisHousehold > peopleWithoutHouseHold)
+                        {
+                            peopleInThisHousehold = peopleWithoutHouseHold;
+                        }
+                        householdCounts.Add(peopleInThisHousehold);
+                        peopleWithoutHouseHold -= peopleInThisHousehold;
+                        controlTotalPeople += peopleInThisHousehold;
+                    }
+                    totalHouseholds += householdCounts.Count;
+
+                    //place them inside cell
+                    Vector2d rasterCenter = new Vector2d(xGeo, yGeo);
+                    Vector2d latLonOnNetwork = validNetworkLatLons[i];
+
+                    for (int j = 0; j < householdCounts.Count; ++j)
+                    {
+                        Vector2d householdStartPos = rasterCenter;
+                        householdStartPos.x += xSize * Random.Range(-0.5f, 0.5f);
+                        householdStartPos.y += ySize * Random.Range(-0.5f, 0.5f);
+                        inout[0] = householdStartPos.x;
+                        inout[1] = householdStartPos.y;
+                        utmToWGS84.TransformPoint(inout);
+
+                        sW.WriteLine($"{inout[0]},{inout[1]},{latLonOnNetwork.x},{latLonOnNetwork.y},{householdCounts[j]}");
                     }
                 }
 
-                Engine.Message(null, Engine.LogType.Log, $"Number of people found in raster: {totalPeople}. Number of people with access to road network: {totalPeopleOnGrid}.");
-
                 success = true;
-                Engine.Message(null, Engine.LogType.Log, "Generated and saved population to file " + outputFilePath);
+                Engine.Message(null, Engine.LogType.Log, $"Generated and saved population to file {outputFilePath}, totalling {controlTotalPeople} people in {totalHouseholds} households.");
             }
         }
 

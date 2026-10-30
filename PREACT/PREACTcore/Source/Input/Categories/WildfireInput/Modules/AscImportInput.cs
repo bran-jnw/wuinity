@@ -25,7 +25,7 @@ namespace PREACT.Input
 
         }
 
-        public static AscImportInput Parse(string[] inputLines, int startIndex, string rootFolder, out bool success)
+        public static AscImportInput Parse(SimulationInput simInput, string[] inputLines, int startIndex, string rootFolder, out bool success)
         {
             success = false;
             int issues = 0;            
@@ -42,11 +42,8 @@ namespace PREACT.Input
             else
             {
                 success = false;
-                PREACTInput.InputNotFoundMessage(nameOfInput);
-            }
-            if (!success)
-            {
-                return newInput;
+                newInput.StartDateTime = simInput.StartDateTime;
+                PREACTInput.InputNotFoundMessage(nameOfInput, false, simInput.StartDateTime.ToString());
             }
 
             //critical

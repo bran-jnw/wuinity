@@ -192,7 +192,7 @@ namespace PREACT.Wildfire
             }
             else
             {
-                Engine.Message(null, Engine.LogType.SimulationError, "Time of arrival file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, $"Time of arrival file ({TOAFile}) not found.");
                 return;
             }
 
@@ -202,7 +202,7 @@ namespace PREACT.Wildfire
             }
             else
             {
-                Engine.Message(null, Engine.LogType.SimulationError, "Rate of spread file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, $"Rate of spread file ({ROSFile}) not found.");
                 return;
             }
 
@@ -212,7 +212,7 @@ namespace PREACT.Wildfire
             }
             else
             {
-                Engine.Message(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, $"Fireline intensity file ({FIFile}) not found.");
                 return;
             }
 
@@ -222,7 +222,7 @@ namespace PREACT.Wildfire
             }
             else
             {
-                Engine.Message(null, Engine.LogType.SimulationError, "Fireline intensity file not found.");
+                Engine.Message(null, Engine.LogType.SimulationError, $"Spread direction file ({SDFile}) not found.");
                 return;
             }
 

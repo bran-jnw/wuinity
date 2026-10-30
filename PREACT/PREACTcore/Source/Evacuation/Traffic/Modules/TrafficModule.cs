@@ -14,16 +14,16 @@ namespace PREACT.Traffic
     public abstract class TrafficModule : SimulationModule
     {
         protected List<double> _arrivalData;
-        protected List<InjectedCar> _carsToInject;
+        protected List<InjectedVehicle> _carsToInject;
         protected Dictionary<uint, TrafficModuleVehicle> _activeVehicles;
 
-        protected struct InjectedCar
+        protected struct InjectedVehicle
         {
             public Vector2d startLatLon;
             public EvacuationDestination evacuationDestination;
             public uint numberOfPeopleInCar;
 
-            public InjectedCar(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
+            public InjectedVehicle(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
             {
                 this.startLatLon = startLatLon;
                 this.evacuationDestination = evacuationGoal;
@@ -34,7 +34,7 @@ namespace PREACT.Traffic
         public TrafficModule(Simulation simulation) : base(simulation)
         {
             _arrivalData = new List<double>();
-            _carsToInject = new List<InjectedCar>();
+            _carsToInject = new List<InjectedVehicle>();
             _activeVehicles = new Dictionary<uint, TrafficModuleVehicle>();
         }
 
@@ -47,10 +47,10 @@ namespace PREACT.Traffic
         /// <param name="numberOfPeopleInCar"></param>
         public void InsertNewCar(Vector2d startLatLon, EvacuationDestination evacuationGoal, uint numberOfPeopleInCar)
         {
-            _carsToInject.Add(new InjectedCar(startLatLon, evacuationGoal, numberOfPeopleInCar));
+            _carsToInject.Add(new InjectedVehicle(startLatLon, evacuationGoal, numberOfPeopleInCar));
         }
 
-        public abstract void HandleNewCars();
+        public abstract void HandleNewVehicles();
         
         public abstract void InsertNewTrafficEvent(TrafficEvent tE);
         public abstract int GetTotalCarsSimulated();        

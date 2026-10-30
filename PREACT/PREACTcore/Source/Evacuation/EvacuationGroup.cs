@@ -114,8 +114,8 @@ namespace PREACT.Evacuation
                 for (int i = 0; i < layerCount; ++i)
                 {
                     OSGeo.OGR.Layer layer = dataSource.GetLayerByIndex(i);
-                    int featureCount = (int)layer.GetFeatureCount(0);
-                    for (int j = 0; j < featureCount; ++j)
+                    long featureCount = layer.GetFeatureCount(0);
+                    for (long j = 0; j < featureCount; ++j)
                     {
                         OSGeo.OGR.Feature feature = layer.GetFeature(j);
                         OSGeo.OGR.Geometry geometry = feature.GetGeometryRef();
@@ -130,6 +130,7 @@ namespace PREACT.Evacuation
                 dataSource.Dispose();
             }
 
+            //transform polygon into simulation space
             for(int i = 0; i < rawPoints.Count; ++i)
             {
                 Vector2d localPos = simulation.Input.Simulation.Data.GetSimulationPosition(rawPoints[i]);
@@ -140,6 +141,8 @@ namespace PREACT.Evacuation
                 _boundingBoxMin.y = Mathd.Min(localPos.y, _boundingBoxMin.y);
                 _boundingBoxMax.y = Mathd.Max(localPos.y, _boundingBoxMax.y);
             }
+
+            Engine.Message(simulation, Engine.LogType.Debug, $"Evacuation group {_name} bounding box (built by {rawPoints.Count} vertices): ({_boundingBoxMin.x}, {_boundingBoxMax.x}) to ({_boundingBoxMin.y}, {_boundingBoxMax.y}).");
         }
 
         private void WalkGeometry(OSGeo.OGR.Geometry geom, List<Vector2d> result)

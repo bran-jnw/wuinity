@@ -89,11 +89,10 @@ namespace PREACT.Evacuation
             if (_trafficModule != null)
             {
                 _pathfindingStopwatch.Start();
-                _trafficModule.HandleNewCars();
+                _trafficModule.HandleNewVehicles();
                 _pathfindingStopwatch.Stop();
             }
         }
-
 
         public List<SimulationModule> CreateModules(WeatherManager weather, TimeManager time, out bool success)
         {

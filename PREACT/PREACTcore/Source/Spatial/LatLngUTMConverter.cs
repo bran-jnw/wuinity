@@ -144,7 +144,8 @@ namespace PREACT.Utility
             var LatRad = toRadians(latitude);
             var LongRad = toRadians(LongTemp);
 
-            if (LongTemp >= 8 && LongTemp <= 13 && latitude > 54.5 && latitude < 58)
+            //This fixes are Norway and Svalbard exceptions for UTM zones, but it messes with Swedish west coast 
+            /*if (LongTemp >= 8 && LongTemp <= 13 && latitude > 54.5 && latitude < 58)
             {
                 ZoneNumber = 32;
             }
@@ -153,10 +154,11 @@ namespace PREACT.Utility
                 ZoneNumber = 32;
             }
             else
-            {
-                ZoneNumber = (int) ((LongTemp + 180) / 6) + 1;
+            {*/
+            ZoneNumber = (int) ((LongTemp + 180) / 6) + 1;
 
-                if (latitude >= 72.0 && latitude < 84.0)
+                //just use the simplified formula as that is what is expected from e.g. QGIS
+                /*if (latitude >= 72.0 && latitude < 84.0)
                 {
                     if (LongTemp >= 0.0 && LongTemp < 9.0)
                     {
@@ -174,8 +176,8 @@ namespace PREACT.Utility
                     {
                         ZoneNumber = 37;
                     }
-                }
-            }
+                }*/
+            //}
 
             var LongOrigin = (ZoneNumber - 1) * 6 - 180 + 3;  //+3 puts origin in middle of zone
             var LongOriginRad = toRadians(LongOrigin);

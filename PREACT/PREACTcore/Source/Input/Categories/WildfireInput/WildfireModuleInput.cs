@@ -124,7 +124,7 @@ namespace PREACT.Input
                 int lineindex;
                 if (headerLineIndex.TryGetValue(nameOfInput, out lineindex))
                 {
-                    _ascImportInput = AscImportInput.Parse(inputLines, lineindex, rootFolder, out success);
+                    _ascImportInput = AscImportInput.Parse(simulationInput, inputLines, lineindex, rootFolder, out success);
                 }
                 else
                 {

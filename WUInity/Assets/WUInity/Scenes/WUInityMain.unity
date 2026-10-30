@@ -680,6 +680,11 @@ PrefabInstance:
       propertyPath: darkTheme
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4476905737892227413, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
+        type: 3}
+      propertyPath: _fontAtlasConfiguration
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: _utmMap
@@ -688,7 +693,7 @@ PrefabInstance:
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}
       propertyPath: AutoLoadExample
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5242892331520954218, guid: a2b03fa81a4f1ef4f8a212a5d07ab0d3,
         type: 3}

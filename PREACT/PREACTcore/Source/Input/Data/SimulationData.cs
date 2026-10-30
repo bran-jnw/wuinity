@@ -52,9 +52,12 @@ namespace PREACT.Input
             LatLngUTMConverter.UTMResult utmPos = LatLngUTMConverter.WGS84.convertLatLngToUtm(latLon.x, latLon.y);
             if(utmPos.ZoneNumber != _utmData.ZoneNumber)
             {
+                Engine.Message(null, Engine.LogType.Warning, $"Requested lat/lon is in a different UTM zone ({utmPos.ZoneNumber}{utmPos.ZoneLetter}) than the simulation main zone ({_utmData.ZoneNumber}{_utmData.ZoneLetter}), projection might be inaccurate.");
+
                 int utmZone = GetUtmZone(_lowerLeftLatLon.y);
                 string utmEPSG = GetUtmEpsg(_lowerLeftLatLon.x, _lowerLeftLatLon.y);
                 (double easting, double northing) eastNorth = Wgs84ToUtm(latLon.x, latLon.y, utmEPSG);
+
                 return new Vector2d(eastNorth.easting, eastNorth.northing) - _utmOrigin;
             }
             else

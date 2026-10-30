@@ -251,9 +251,9 @@ namespace PREACT.Traffic
             return _maxUsage;
         }
 
-        public override void HandleNewCars()
+        public override void HandleNewVehicles()
         {
-            foreach (InjectedCar injectedCar in _carsToInject)
+            foreach (InjectedVehicle injectedCar in _carsToInject)
             {
                 EvacuationDestination evacuationGoal = injectedCar.evacuationDestination;
                 uint numberOfPeopleInCar = injectedCar.numberOfPeopleInCar;
@@ -261,7 +261,7 @@ namespace PREACT.Traffic
                 Vector2d destinationLatLon = evacuationGoal.LatLon;
 
                 //TODO: create input for this...
-                string vehicleType = "evacuation_car";
+                string vehicleType = "evacuation_vehicle";
 
                 try
                 {
@@ -286,47 +286,66 @@ namespace PREACT.Traffic
                         foundRoute = true;
                     }
                     //if we reach here we need to teleport the car to a new location as no valid route could be found
-                    else if (_validStartPositions.Count > 0)
-                    {
-                        int randomStart = Math.Random.Range(0, _validStartPositions.Count);   
-                        //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
-                        route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, destinationRoad.edgeID);    
-                        if(route.edges.Count > 0)
-                        {
-                            foundRoute = true;
-                            Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
-                        }
-                        else
-                        {
-                            Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
-                        }
-                    }
                     else
                     {
-                        Engine.Message(null, Engine.LogType.Warning, $"Car could not be injected as no valid route was found or cached. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
-                    }
-
-                    if(foundRoute)
-                    {
-                        uint carID = GetNewCarID();
-                        string sumoID = carID.ToString();
-                        string routeID = "preact_route_" + carID;
-                        LIBSUMO.Route.add(routeID, route.edges);
-                        LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
-                        LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
-                        SUMOVehicle car = new SUMOVehicle(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal, LIBSUMO.Vehicle.getSpeedFactor(sumoID));
-                        _sumoVehicles.Add(sumoID, car);
-                        _activeVehicles.Add(car.VehicleId, car);
-                        ++totalVehiclesInjected;
+                        TryTeleportVehicle(injectedCar);
                     }
                 }
                 catch (Exception e)
                 {
-                    Engine.Message(null, Engine.LogType.Warning, "Issue injecting vehicle into SUMO: " + e.Message);
+                    //Engine.Message(null, Engine.LogType.Warning, "Issue injecting vehicle into SUMO: " + e.Message);
+                    TryTeleportVehicle(injectedCar);
                 }              
             } 
             
             _carsToInject.Clear();
+        }
+
+        private void TryTeleportVehicle(InjectedVehicle injectedVehicle)
+        {
+            EvacuationDestination evacuationGoal = injectedVehicle.evacuationDestination;
+            uint numberOfPeopleInCar = injectedVehicle.numberOfPeopleInCar;
+            Vector2d startLatLon = injectedVehicle.startLatLon;
+            Vector2d destinationLatLon = evacuationGoal.LatLon;
+
+            bool foundRoute = false;
+            LIBSUMO.TraCIStage route = null;
+
+            if (_validStartPositions.Count > 0)
+            {
+                LIBSUMO.TraCIRoadPosition destinationRoad = LIBSUMO.Simulation.convertRoad(destinationLatLon.y, destinationLatLon.x, true); //lon/lat
+
+                int randomStart = Math.Random.Range(0, _validStartPositions.Count);
+                //TODO: actually save start/goal pairs as we might try to generate route from a random start position to a non-reachable current goal of the car
+                route = LIBSUMO.Simulation.findRoute(_validStartPositions[randomStart].edgeID, destinationRoad.edgeID);
+                if (route.edges.Count > 0)
+                {
+                    foundRoute = true;
+                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                }
+                else
+                {
+                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected car, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                }
+            }
+            else
+            {
+                Engine.Message(null, Engine.LogType.Warning, $"Car could not be injected and teleported as no valid route was found or cached. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+            }
+
+            if (foundRoute && route != null)
+            {
+                uint carID = GetNewCarID();
+                string sumoID = carID.ToString();
+                string routeID = "preact_route_" + carID;
+                LIBSUMO.Route.add(routeID, route.edges);
+                LIBSUMO.Vehicle.add(sumoID, routeID);//, vehicleType);
+                LIBSUMO.TraCIPosition startPos = LIBSUMO.Vehicle.getPosition(sumoID);
+                SUMOVehicle car = new SUMOVehicle(carID, sumoID, startPos, 0, numberOfPeopleInCar, evacuationGoal, LIBSUMO.Vehicle.getSpeedFactor(sumoID));
+                _sumoVehicles.Add(sumoID, car);
+                _activeVehicles.Add(car.VehicleId, car);
+                ++totalVehiclesInjected;
+            }
         }
 
         public override bool IsSimulationDone()

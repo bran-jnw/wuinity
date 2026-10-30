@@ -3,7 +3,6 @@ using ImGuiNET;
 using PREACT;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UImGui;
 using UnityEngine;
 using WUInity;
@@ -14,7 +13,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
     {
         [SerializeField]
         private bool darkTheme = false; 
-        string fontFilePath = $"{Application.dataPath}/WUInity/GUI/DearIMGUI/Fonts/AdobeClean-Regular.otf"; //MS_Sans_Serif.ttf
+        string fontFilePath = $"{Application.dataPath}/StreamingAssets/AdobeClean-Regular.otf"; //MS_Sans_Serif.ttf
 
         static WUInityManager _wuinityManager;
         static Engine _engine;

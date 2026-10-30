@@ -30,7 +30,10 @@ namespace PREACT
 
         public void PostStep(float simulationTime)
         {
-            CalculateWildfireDistanceTransform(simulationTime);
+            if(_wildfire != null)
+            {
+                CalculateWildfireDistanceTransform(simulationTime);
+            }            
         }
                 
         private void CalculateWildfireDistanceTransform(float simulationTime)

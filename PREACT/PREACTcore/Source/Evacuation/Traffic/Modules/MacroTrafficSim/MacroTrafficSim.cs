@@ -57,9 +57,9 @@ namespace PREACT.Traffic
             Engine.Message(null, Engine.LogType.Log, "Macro traffic sim initiated.");
         }
 
-        public override void HandleNewCars()
+        public override void HandleNewVehicles()
         {
-            foreach (InjectedCar injectedCar in _carsToInject)
+            foreach (InjectedVehicle injectedCar in _carsToInject)
             {
                 RouteData routeData = GetRouteData(injectedCar);
                 MacroVehicle car = new MacroVehicle(routeData, injectedCar.numberOfPeopleInCar, GetNewCarID());
@@ -69,7 +69,7 @@ namespace PREACT.Traffic
             _carsToInject.Clear();
         }
 
-        private RouteData GetRouteData(InjectedCar car)
+        private RouteData GetRouteData(InjectedVehicle car)
         {
             //TODO: here we have to select aroute by quering the route creator
             throw new NotImplementedException();

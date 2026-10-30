@@ -68,7 +68,7 @@ namespace PREACT.Traffic
             throw new NotImplementedException();
         }
 
-        public override void HandleNewCars()
+        public override void HandleNewVehicles()
         {
             throw new NotImplementedException();
         }
