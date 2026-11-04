@@ -110,6 +110,8 @@ namespace PREACT.Input
             List<int> destinationLineIndices = new List<int>();            
             List<int> responseLineIndices = new List<int>();
             List<int> groupLineIndices = new List<int>();
+            List<int> householdDemographicsLineIndices = new List<int>();
+            List<int> vehicleDemographicsLineIndices = new List<int>();
             List<int> demographicsLineIndices = new List<int>();
 
             //first index all headers
@@ -137,6 +139,14 @@ namespace PREACT.Input
                     else if (line.Equals("EvacuationGroup"))
                     {
                         groupLineIndices.Add(i);
+                    }
+                    else if (line.Equals("HouseholdDemographics"))
+                    {
+                        householdDemographicsLineIndices.Add(i);
+                    }
+                    else if (line.Equals("VehicleDemographics"))
+                    {
+                        vehicleDemographicsLineIndices.Add(i);
                     }
                     else if (line.Equals("Demographics"))
                     {
@@ -292,7 +302,7 @@ namespace PREACT.Input
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {
                 ReadingInputMessage(nameOfInput);
-                newInput.Population.Parse(inputLines, lineindex, demographicsLineIndices, newInput.PedestrianModule, rootFolder, out success);
+                newInput.Population.Parse(inputLines, lineindex, householdDemographicsLineIndices, vehicleDemographicsLineIndices, demographicsLineIndices, newInput.PedestrianModule, rootFolder, out success);
             }
             else if(newInput.PedestrianModule.Enabled)
             {
@@ -460,8 +470,7 @@ namespace PREACT.Input
             if (!File.Exists(filePath))
             {
                 success = false;
-                nameOfInput += "(" + inputData + ")";
-                PREACTInput.InputNotFoundMessage(nameOfInput, critical);
+                Engine.Message(null, Engine.LogType.InputError, $"Could not find file {inputData} defined by {nameOfInput}.");
             }
         }
 

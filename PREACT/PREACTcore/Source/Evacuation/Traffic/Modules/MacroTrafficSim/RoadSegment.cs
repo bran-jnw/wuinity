@@ -99,7 +99,7 @@ namespace PREACT.Traffic
         {
             TrafficModuleInput tO = simulation.Input.TrafficModule;
             //reasonable? not for now
-            /*if(cars.Count == 1)
+            /*if(vehicleCount.Count == 1)
             {
                 return Random.Range(0.8f, 0.9f) * SpeedLimit;
             }*/
@@ -132,7 +132,7 @@ namespace PREACT.Traffic
                 float beta = -101.57f * D_L * D_L * D_L + 49.43f * D_L * D_L - 9.2755f * D_L + 1.0f;
 
                 //these are not needed as we implement the linear equatíon using lerp
-                //float k_j = 100.0f; // number from above, as in max density is 100 cars per km and lane
+                //float k_j = 100.0f; // number from above, as in max density is 100 vehicleCount per km and lane
                 //float k = k_j * (1.0f - speed / (speedLimit * beta));
 
                 //this is probably all that is needed? since we base speed on speed limit and not direct proportion to density

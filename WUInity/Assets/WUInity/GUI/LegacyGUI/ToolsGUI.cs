@@ -12,7 +12,7 @@ namespace WUInity.UI
     {
         private bool populationMenuDirty = true;
         private bool _reScaling = false, _filteringOSM = false, _creatingPopulationMap = false;
-        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _minHouseholdSize, _maxHouseholdSize, _latitude, _longitude, _domainSizeX, _domainSizeY, _scenarioId, _yearOfInterest;
+        private string _desiredPopulation, _xBorder, _yBorder, _populationMapCellSize, _latitude, _longitude, _domainSizeX, _domainSizeY, _scenarioId, _yearOfInterest;
         bool success;
 
         bool ParseVector2d(string x, string y, out Vector2d v)
@@ -61,9 +61,6 @@ namespace WUInity.UI
             _domainSizeY = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _domainSizeY);
             ++buttonIndex;
             GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Min/max household size");
-            ++buttonIndex;
-            _minHouseholdSize = GUI.TextField(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _minHouseholdSize);
-            _maxHouseholdSize = GUI.TextField(new Rect(buttonColumnStart + columnWidth * 0.55f, buttonIndex * (buttonHeight + 5) + 10, columnWidth * 0.45f, buttonHeight), _maxHouseholdSize);
             ++buttonIndex;
             //base data creation
             if (GUI.Button(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Create base data"))
@@ -292,12 +289,9 @@ namespace WUInity.UI
             _workingData.SetSimulatonData(lowerLatLon, domainSize);
             Vector2d upperLatLon = _workingData.SimulationInput.Data.GetWGS84FromSimulationPosition(domainSize);
 
-            int.TryParse(_minHouseholdSize, out int min);
-            int.TryParse(_maxHouseholdSize, out int max);
-
             int.TryParse(_yearOfInterest, out int year);
 
-            await PopulationTools.CreateBaseScenario(paths[0], _scenarioId, min, max, lowerLatLon, upperLatLon, year);
+            //await PopulationTools.CreateBaseScenario(paths[0], _scenarioId, lowerLatLon, upperLatLon, year);
         }
     }
 }

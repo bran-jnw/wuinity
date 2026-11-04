@@ -437,7 +437,7 @@ namespace PREACT.Population
             }
         }
 
-        public static void CreatePopulation(string worldPopFilePath, string outputFilePath, Itinero.RouterDb routerDb, int minHouseholdSize, int maxHouseholdSize, out bool success)
+        public static void CreatePopulation(int totalPeopleCountTarget, string worldPopFilePath, string outputFilePath, Itinero.RouterDb routerDb, Evacuation.HouseholdDemographics householdDemographics, out bool success)
         {
             success = false;
 
@@ -480,19 +480,27 @@ namespace PREACT.Population
             List<int> validCellIndices = new List<int>();
             List<Vector2d> validNetworkLatLons = new List<Vector2d>();
 
+            //tally up all people for scaling and diagnostics
+            for(int i = 0; i < peopleCountRaw.Length; i++)
+            {
+                float peopleInCellRaw = peopleCountRaw[i];
+                //tally up people raw
+                if (peopleInCellRaw > 0)
+                {
+                    totalPeopleRaw += peopleInCellRaw;
+                }
+            }
+            Engine.Message(null, Engine.LogType.Log, $"Provided population raster contains {totalPeopleRaw} people (raw).");
+            float scalingFactor = totalPeopleCountTarget  <= 0 ? 1.0f : totalPeopleCountTarget / totalPeopleRaw;
+            float totalPeopleRawScaled = totalPeopleRaw * scalingFactor;            
+
             int linearIndex = 0;
             for (int yIndex = 0; yIndex < yDim; yIndex++)
             {
                 for (int xIndex = 0; xIndex < xDim; xIndex++)
                 {
-                    float peopleInCellRaw = peopleCountRaw[linearIndex];
-                    //tally up people raw
-                    if (peopleInCellRaw > 0)
-                    {
-                        totalPeopleRaw += peopleInCellRaw;
-                    }
-
-                    int cellPeople = (int)peopleInCellRaw;
+                    float peopleInCellRawScaled = peopleCountRaw[linearIndex] * scalingFactor;
+                    int cellPeople = (int)peopleInCellRawScaled;
                     if (cellPeople > 0)
                     {
                         double xPixelCenter = xIndex + 0.5;
@@ -520,8 +528,7 @@ namespace PREACT.Population
                     ++linearIndex;
                 }
             }
-            Engine.Message(null, Engine.LogType.Log, $"Provided population raster contains {totalPeopleRaw} people (raw).");
-            int totalUnvalidPeople = (int)(0.5f + totalPeopleRaw - totalValidPeople);
+            int totalUnvalidPeople = (int)(0.5f + totalPeopleRawScaled - totalValidPeople);
             Engine.Message(null, Engine.LogType.Log, $"{totalValidPeople} people could be placed in cells that are valid (attached to road network), the rest ({totalUnvalidPeople} people) will be distributed based on valid cell weights and random distribution for remainders.");
 
             //calculate weight of valid cells and add non-valid cells people            
@@ -570,7 +577,7 @@ namespace PREACT.Population
                     List<int> householdCounts = new List<int>();
                     while (peopleWithoutHouseHold > 0)
                     {
-                        int peopleInThisHousehold = Random.Range(minHouseholdSize, maxHouseholdSize + 1);
+                        int peopleInThisHousehold = householdDemographics.SampleHouseholdSize();
                         if (peopleInThisHousehold > peopleWithoutHouseHold)
                         {
                             peopleInThisHousehold = peopleWithoutHouseHold;

@@ -9,7 +9,7 @@ namespace PREACT.Input
         public string Name = string.Empty;
         public Vector2d LatLon = Vector2d.zero;        
         public DestinationTypes Type = DestinationTypes.Exit;
-        public float MaxFlow = -1f; //cars per hour
+        public float MaxFlow = -1f; //vehicleCount per hour
         public int MaxVehicles = -1;
         public int MaxPeople = -1;
         public bool Blocked = false;

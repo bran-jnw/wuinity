@@ -12,9 +12,9 @@ using System.Linq;
 
 namespace PREACT.Pedestrian
 {
-    public class HouseHoldPlacer
+    public class HouseholdPlacer
     {
-        public HouseHoldPlacer(string osmPBFFile) 
+        public HouseholdPlacer(string osmPBFFile) 
         {
             //get total amount of desired people per square
 

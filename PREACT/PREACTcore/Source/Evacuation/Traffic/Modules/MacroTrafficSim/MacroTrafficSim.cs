@@ -37,7 +37,7 @@ namespace PREACT.Traffic
             oldTotalCars = 0;
 
             output = new List<string>();            
-            string start = "Time [s],Injected cars,Exiting cars,Current cars in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
+            string start = "Time [s],Injected vehicleCount,Exiting vehicleCount,Current vehicleCount in system, Exiting people, Avg. v [km/h], Min. v [km/h]";
 
             for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
             {
@@ -45,7 +45,7 @@ namespace PREACT.Traffic
                 start += ", " + _simulation.Evacuation.Destinations[i].Name + " flow";
             }
             output.Add(start);
-            //string output = "Time(s),Injected cars,Exiting cars,Current cars in system";
+            //string output = "Time(s),Injected vehicleCount,Exiting vehicleCount,Current vehicleCount in system";
             //SaveToFile(output, true);
 
             reverseLanes = false;
@@ -105,7 +105,7 @@ namespace PREACT.Traffic
         {
             evacGoalsDirty = false;
 
-            //TODO: Do we need to re-calc traffic density data since some cars are gone after update loop?  Conservative not to (and cheaper)
+            //TODO: Do we need to re-calc traffic density data since some vehicleCount are gone after update loop?  Conservative not to (and cheaper)
             foreach (KeyValuePair<int, RoadSegment> t in roadSegments)
             {
                 Vector2d startPos = new Vector2d(t.Value.goalCoord.Latitude, t.Value.goalCoord.Longitude);
@@ -128,7 +128,7 @@ namespace PREACT.Traffic
                     for (int i = 0; i < t.Value.vehicles.Count; i++)
                     {
                         MacroVehicle vehicle = t.Value.vehicles[i];
-                        //only update if goal is blocked, cars on the same road (density data) might be going different places
+                        //only update if goal is blocked, vehicleCount on the same road (density data) might be going different places
                         if(vehicle.routeData.evacGoal.Blocked)
                         {
                             if (!vehicle.hasArrived)
@@ -195,10 +195,10 @@ namespace PREACT.Traffic
                 averageSpeed += densitySpeed;
                 minSpeed = densitySpeed < minSpeed ? densitySpeed : minSpeed;
 
-                //sort the cars in distance left, shortest distance goes first https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object
+                //sort the vehicleCount in distance left, shortest distance goes first https://stackoverflow.com/questions/3309188/how-to-sort-a-listt-by-a-property-in-the-object
                 roadSegment.Value.vehicles.Sort((x, y) => x.currentDistanceLeft.CompareTo(y.currentDistanceLeft));
 
-                //go through all cars on road segment
+                //go through all vehicleCount on road segment
                 for (int j = 0; j < roadSegment.Value.vehicles.Count; ++j)
                 {
                     //our traffic density is flagged as stopped upstreams so no car should move
@@ -236,7 +236,7 @@ namespace PREACT.Traffic
                                 roadSegment.Value.upstreamMovementBlocked = true;
                             }
                         }
-                        //we also have to check if we move to any place that previous cars have already moved to that did not exists prior
+                        //we also have to check if we move to any place that previous vehicleCount have already moved to that did not exists prior
                         else if (newRoadSegments.TryGetValue(newHash, out nextSegment))
                         {
                             if (nextSegment.CanAddCar())
@@ -265,7 +265,7 @@ namespace PREACT.Traffic
                         vehicle.MoveCar((float)currentTime, (float)deltaTime, speed);
                     }                    
 
-                    //flag cars that have arrived
+                    //flag vehicleCount that have arrived
                     if (vehicle.hasArrived)
                     {
                         vehiclesToRemove.Add(vehicle);
@@ -274,7 +274,7 @@ namespace PREACT.Traffic
                 }                
             }
 
-            //this fixes cars waiting to get in to the system, but not cars already in the system waiting to get to a new road
+            //this fixes vehicleCount waiting to get in to the system, but not vehicleCount already in the system waiting to get to a new road
             for (int i = 0; i < carsOnHold.Count; i++)
             {
                 MacroVehicle car = carsOnHold[i];
@@ -319,7 +319,7 @@ namespace PREACT.Traffic
                 minSpeed *= 3.6f;
             }   
 
-            //saves output time, injected cars at time step, cars who reached destination during time step, cars in system at given time step            
+            //saves output time, injected vehicleCount at time step, vehicleCount who reached destination during time step, vehicleCount in system at given time step            
             string newOut = currentTime + "," + (totalCarsSimulated - oldTotalCars) + "," + vehiclesToRemove.Count + "," + carsInSystem.Count + "," + exitingPeople + ", " + averageSpeed + "," + minSpeed;
             for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
             {
@@ -330,7 +330,7 @@ namespace PREACT.Traffic
             output.Add(newOut);
             oldTotalCars = totalCarsSimulated;
 
-            //remove cars that has arrived
+            //remove vehicleCount that has arrived
             for (int i = 0; i < vehiclesToRemove.Count; ++i)
             {
                 carsInSystem.Remove(vehiclesToRemove[i]);

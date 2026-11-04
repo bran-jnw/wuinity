@@ -37,7 +37,7 @@ namespace PREACT.Output
         {
             if (_simulation.Input.TrafficModule.Enabled)
             {
-                Engine.Message(_simulation, Engine.LogType.Log, " Total cars in simulation: " + _simulation.Evacuation.TrafficModule.GetTotalCarsSimulated());
+                Engine.Message(_simulation, Engine.LogType.Log, " Total vehicleCount in simulation: " + _simulation.Evacuation.TrafficModule.GetTotalCarsSimulated());
                 _simulation.Evacuation.TrafficModule.SaveToFile(_simulation.SimulationIndex);
                 SaveArrivalData();
             }

@@ -19,7 +19,7 @@ namespace PREACT.Evacuation
         private Vector2d _latLon;
         private Vector2d _simulationPos;
         private PREACTColor _color;
-        private float _maxFlow = -1f; //cars per hour
+        private float _maxFlow = -1f; //vehicleCount per hour
         private string _name = string.Empty;
         private DestinationTypes _goalType = DestinationTypes.Exit;
         private int _maxVehicles = -1;
@@ -114,7 +114,7 @@ namespace PREACT.Evacuation
             //now we need to see if there is any restriciton on flow
             if (_maxFlow <= 0 || _currentVehicleFlow < _maxFlow)
             {
-                //add new cars and people that has arrived during timestep
+                //add new vehicleCount and people that has arrived during timestep
                 ++_timeStepVehicles;
                 _vehicles.Add(arrivingVehicle);
                 _currentPeople += arrivingVehicle.NumberOfPeople;               
@@ -166,7 +166,7 @@ namespace PREACT.Evacuation
         {
             if (_goalType == DestinationTypes.Shelter)
             {
-                //track vehicles and respond
+                //track vehicleCount and respond
                 if (_maxVehicles > 0 && _vehicles.Count >= _maxVehicles && !_blocked)
                 {
                     _blocked = true;
@@ -191,7 +191,7 @@ namespace PREACT.Evacuation
 
                 if(_blocked)
                 {
-                    Engine.Message(_simulation, Engine.LogType.Event, "Shelter " + _name + " has reached people capacity, arriving vehicles will be re-directed.");
+                    Engine.Message(_simulation, Engine.LogType.Event, "Shelter " + _name + " has reached people capacity, arriving vehicleCount will be re-directed.");
                 }
             }
         }        

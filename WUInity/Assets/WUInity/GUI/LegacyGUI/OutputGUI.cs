@@ -39,8 +39,8 @@ namespace WUInity.UI
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "People staying: " + dummy);
                 ++buttonIndex;
 
-                //toatl cars
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total cars: " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalCars());
+                //toatl vehicleCount
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Total vehicleCount: " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalCars());
                 ++buttonIndex;
             }         
 
@@ -88,12 +88,12 @@ namespace WUInity.UI
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.Evacuation.PedestrianModule.GetPeopleLeft() + " / " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalPopulation());
                 ++buttonIndex;
 
-                //cars reached by pedestrians
+                //vehicleCount reached by pedestrians
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + _engine.Simulation.Evacuation.PedestrianModule.GetCarsReached());
                 ++buttonIndex;
             }
 
-            //cars still left
+            //vehicleCount still left
             if (_input.TrafficModule.Enabled && _engine.Simulation.Evacuation.TrafficModule != null)
             {
                 GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars left: " + _engine.Simulation.Evacuation.TrafficModule.GetNumberOfCarsInSystem() + " / " + _engine.Simulation.Evacuation.TrafficModule.GetTotalCarsSimulated());

@@ -449,9 +449,9 @@ namespace WUInity
                     if (currenttrafficDensityData != null && currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x] != null)
                     {
                         int peopleInCars = currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x].peopleCount;
-                        int cars = currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x].carCount;
+                        int vehicleCount = currenttrafficDensityData[x + y * _input.Evacuation.Data.CellCount.x].carCount;
 
-                        dataSampleString += " | People in cars: " + peopleInCars + " (Cars: " + cars + "). Total people " + (people + peopleInCars);
+                        dataSampleString += " | People in vehicleCount: " + peopleInCars + " (Cars: " + vehicleCount + "). Total people " + (people + peopleInCars);
                     }
                 }*/
             }

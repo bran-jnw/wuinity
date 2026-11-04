@@ -249,7 +249,7 @@ namespace PREACT.Traffic
             //check that at least 1 route is not null to make sure we have a valid route to go somewhere
             if (!foundOneValidRoute)
             {
-                //TODO: fix what happens when cars get stuck
+                //TODO: fix what happens when vehicleCount get stuck
                 Engine.Message(simulation, Engine.LogType.SimulationError, "No routes found for car, will get stuck.");
                 return null;
             }

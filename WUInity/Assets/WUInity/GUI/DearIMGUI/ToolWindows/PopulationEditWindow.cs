@@ -1,16 +1,13 @@
 ﻿using ImGuiNET;
-using PREACT.Math;
-using System;
 using System.IO;
 
 namespace Assets.WUInity.GUI.DearIMGUI
 {
     public static class PopulationEditWindow
     {
-        private static bool _isOpen;
-        private static bool _folderSet;
-        private static string _downloadFolder = string.Empty;
-        private static string _routerDbFilePath = string.Empty, _worldPopFilePath; 
+        private static bool _isOpen, _folderSet, _setPopulationCountTarget = false;
+        private static string _downloadFolder = string.Empty, _routerDbFilePath = string.Empty, _worldPopFilePath = string.Empty, _householdDemographicsFilePath = string.Empty;
+        private static int _populationCountTarget;
 
         public static void Open()
         {
@@ -49,7 +46,12 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             if (ImGui.Button("Create routerDb")) { FileBrowser.OpenSetFilePath(CreateRouterDb, "Select OSM file", false); }
 
-            if (ImGui.Button("Create population from WorldPop")) { FileBrowser.OpenSetFilePath(SetRouterDb, "Select RouterDb file", false); }
+            ImGui.Checkbox("Set population target", ref _setPopulationCountTarget);
+            if (_setPopulationCountTarget)
+            {
+                ImGui.InputInt("Population target count", ref _populationCountTarget);
+            }
+            if (ImGui.Button("Create population from WorldPop")) { FileBrowser.OpenSetFilePath(SetHouseholdDemographics, "Select household demograhics file", false); }
             if (ImGui.Button("Scale population")) { }            
 
             ImGui.End();
@@ -57,6 +59,24 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 PreactGUI.CloseWindow(Draw);
             }
+        }
+
+        static void SetHouseholdDemographics(string householdDemographicsFilePath)
+        {
+            if(_populationCountTarget <= 0)
+            {
+                PREACT.Engine.Message(null, PREACT.Engine.LogType.Warning, "Please set a valid target population count.");
+                return;
+            }
+
+            if(!_setPopulationCountTarget)
+            {
+                _populationCountTarget = 0;
+            }
+
+            _householdDemographicsFilePath = householdDemographicsFilePath;
+            PREACT.Engine.Message(null, PREACT.Engine.LogType.Log, $"Household demographics file path set to {_householdDemographicsFilePath}");
+            FileBrowser.OpenSetFilePath(SetRouterDb, "Select RouterDb file", false);
         }
 
         static void CreateRouterDb(string osmFilePath)
@@ -78,7 +98,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             _worldPopFilePath = worldPopFilePath;
             PREACT.Engine.Message(null, PREACT.Engine.LogType.Log, $"WorldPop file path set to {_worldPopFilePath}");
             string outputFilePath = Path.Combine(_downloadFolder, "population.csv");
-            PREACT.Tools.PopulationTools.CreatePopulationFromWorldPop(1, 5, _worldPopFilePath, _routerDbFilePath, outputFilePath, out bool success);
+            PREACT.Tools.PopulationTools.CreatePopulationFromWorldPop(_populationCountTarget, _householdDemographicsFilePath, _worldPopFilePath, _routerDbFilePath, outputFilePath, out bool success);
         }
 
         private static void OpenSetWorkingFolder()

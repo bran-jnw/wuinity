@@ -21,7 +21,7 @@ namespace PREACT.Evacuation
         private List<double> _destinationsCDF;
         private List<ResponseCurve> _responseCurves;
         private List<double> _responseCurvesCDF;
-        private DemographicsInput _demographics;
+        private Demographics _demographics;
 
         private List<Vector2d> _shapePolygonLocal;
         private Vector2d _boundingBoxMin;
@@ -33,10 +33,10 @@ namespace PREACT.Evacuation
         public bool Default { get => _default; }
         public List<EvacuationDestination> Destinations { get => _destinations; }
         public DestinationChoices DestinationChoice { get => _destinationChoice; }
-        public DemographicsInput Demographics { get => _demographics; }
+        public Demographics Demographics { get => _demographics; }
 
 
-        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, DemographicsInput> allDemographics, Simulation simulation)
+        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
         {
             _name = groupInput.Name;
             _evacuationOrderDateTime = groupInput.EvacuationOrderDateTime;
@@ -86,7 +86,7 @@ namespace PREACT.Evacuation
         }
 
         public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, 
-            EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, DemographicsInput> allDemographics, Simulation simulation)
+            EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
         {
             EvacuationGroup[] groups = new EvacuationGroup[groupsInput.Count];
             int index = 0;
@@ -259,7 +259,7 @@ namespace PREACT.Evacuation
         {
             Vector2d householdPos = simulation.Input.Simulation.Data.GetSimulationPosition(startLatLon);
             double closestDistance = double.MaxValue;
-            EvacuationDestination closestDestination = null;
+            EvacuationDestination closestDestination = Destinations[0];
 
             for (int i = 0; i < Destinations.Count; ++i)
             {

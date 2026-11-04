@@ -59,13 +59,8 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 _input.Default = true;
             }
 
-            ImGui.InputText(nameof(_input.Name), ref _input.Name, 64);
-            ImGui.Checkbox(nameof(_input.AllowMoreThanOneCar), ref _input.AllowMoreThanOneCar);
-            if (_input.AllowMoreThanOneCar)
-            {
-                ImGui.InputInt(nameof(_input.MaxCars), ref _input.MaxCars);
-                ImGui.InputFloat(nameof(_input.MaxCarsProbability), ref _input.MaxCarsProbability);
-            }
+            ImGui.InputText(nameof(_input.HouseholdDemographics), ref _input.HouseholdDemographics, 64);
+            ImGui.InputText(nameof(_input.VehicleDemographics), ref _input.VehicleDemographics, 64);
 
             if (ImGui.Button("OK"))
             {

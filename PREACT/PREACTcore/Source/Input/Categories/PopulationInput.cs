@@ -14,16 +14,20 @@ namespace PREACT.Input
         private PopulationData _data;
 
         public PopulationData Data { get => _data; }
-        public string PopulationFile = string.Empty;
-        public Dictionary<string, Evacuation.DemographicsInput> Demographics = new Dictionary<string, Evacuation.DemographicsInput>(5);
+        public string PopulationFile = string.Empty;        
         public bool CullOutsideGroups = false;
+
+        public Dictionary<string, Evacuation.HouseholdDemographicsInput> HouseholdDemographics = new Dictionary<string, Evacuation.HouseholdDemographicsInput>(5);
+        public Dictionary<string, Evacuation.VehicleDemographicsInput> VehicleDemographics = new Dictionary<string, Evacuation.VehicleDemographicsInput>(5);
+        public Dictionary<string, Evacuation.DemographicsInput> Demographics = new Dictionary<string, Evacuation.DemographicsInput>(5);
+        
 
         public PopulationInput()
         {
             _data = new PopulationData();
         }
 
-        public void Parse(string[] inputLines, int startIndex, List<int> demographicsLinesIndices, PedestrianModuleInput pedestrianInput, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, List<int> householdDemographicsLinesIndices, List<int> vehicleDemographicsLinesIndices, List<int> demographicsLinesIndices, PedestrianModuleInput pedestrianInput, string rootFolder, out bool success)
         {
             if (!pedestrianInput.Enabled)
             {
@@ -35,7 +39,19 @@ namespace PREACT.Input
             Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
             string nameOfInput, userInput;
 
-            Evacuation.DemographicsInput.Parse(Demographics, inputLines, demographicsLinesIndices, out success);
+            Evacuation.HouseholdDemographicsInput.Parse(HouseholdDemographics, inputLines, householdDemographicsLinesIndices, rootFolder, out success);
+            if (!success)
+            {
+                return;
+            }
+
+            Evacuation.VehicleDemographicsInput.Parse(VehicleDemographics, inputLines, vehicleDemographicsLinesIndices, rootFolder, out success);
+            if (!success)
+            {
+                return;
+            }
+
+            Evacuation.DemographicsInput.Parse(HouseholdDemographics, VehicleDemographics, Demographics, inputLines, demographicsLinesIndices, rootFolder, out success);
             if(!success)
             {
                 return;

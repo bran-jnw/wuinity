@@ -49,7 +49,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if (sim.Evacuation.PedestrianModule != null)
             {
                 ImGui.BulletText($"People staying: {sim.Evacuation.PedestrianModule.GetPeopleStaying()}");
-                ImGui.BulletText($"Total vehicles: {sim.Evacuation.PedestrianModule.GetTotalCars()}");
+                ImGui.BulletText($"Total vehicleCount: {sim.Evacuation.PedestrianModule.GetTotalCars()}");
             }
 
             ImGui.SeparatorText("Simulation state");
@@ -109,7 +109,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
                 ImGui.BulletText($"Vehicles reached: {sim.Evacuation.PedestrianModule.GetCarsReached()}");                
             }
 
-            //vehicles still left
+            //vehicleCount still left
             if (sim.Input.TrafficModule.Enabled && sim.Evacuation.TrafficModule != null)
             {
                 ImGui.BulletText($"Vehicles left: {sim.Evacuation.TrafficModule.GetNumberOfCarsInSystem()} / {sim.Evacuation.TrafficModule.GetTotalCarsSimulated()}");                

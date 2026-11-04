@@ -17,40 +17,42 @@ namespace PREACT.Tools
 {
     public static class PopulationTools
     {
-
-        public static async Task CreateBaseScenario(string path, string scenarioId, int minHouseholdSize, int maxHouseholdSize, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, int year)
+        public static async Task CreateBaseScenario(int peopleCountTarget, string householdDemographicsFilePath, string path, string scenarioId, Vector2d lowerLeftLatLon, Vector2d upperRightLatLon, int year)
         {
-            string osmFilePath = Path.Combine(path, scenarioId + "_osm.xml");
-            await OSMDownloader.Download(lowerLeftLatLon, upperRightLatLon, osmFilePath);
+            Evacuation.HouseholdDemographics? householdDemographics = Evacuation.HouseholdDemographics.Parse(householdDemographicsFilePath, out bool success);
+            if (success && householdDemographics != null)
+            {
+                string osmFilePath = Path.Combine(path, scenarioId + "_osm.xml");
+                await OSMDownloader.Download(lowerLeftLatLon, upperRightLatLon, osmFilePath);
 
-            if(osmFilePath != null)
-            {
-                string sumoNetFilePath = Path.Combine(path, scenarioId + "_net.net.xml");
-                Process.Start("netconvert", $"--osm {osmFilePath} -o {sumoNetFilePath}"); //this needs no callback
-            }
-            else
-            {
-                return;
-            }
+                if (osmFilePath != null)
+                {
+                    string sumoNetFilePath = Path.Combine(path, scenarioId + "_net.net.xml");
+                    Process.Start("netconvert", $"--osm {osmFilePath} -o {sumoNetFilePath}"); //this needs no callback
+                }
+                else
+                {
+                    return;
+                }
 
-            string routerDbFilePath = Path.Combine(path, scenarioId + ".routerdb");
-            RoutingData.CreateAndSaveRouterDb(osmFilePath, routerDbFilePath, out bool success);
-            if (success)
-            {
-                Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
+                string routerDbFilePath = Path.Combine(path, scenarioId + ".routerdb");
+                RoutingData.CreateAndSaveRouterDb(osmFilePath, routerDbFilePath, out success);
                 if (success)
                 {
-                    string worldPopFilePath = await WorldPopDownloader.DownloadRegionUTM(year, lowerLeftLatLon, upperRightLatLon, path, null);
-
-                    if(worldPopFilePath != null)
+                    Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
+                    if (success)
                     {
-                        string populationFilePath = Path.Combine(path, scenarioId + "_population.csv");
-                        PopulationMap.CreatePopulation(worldPopFilePath, populationFilePath, routerDb, minHouseholdSize, maxHouseholdSize, out success);
-                    }                        
+                        string worldPopFilePath = await WorldPopDownloader.DownloadRegionUTM(year, lowerLeftLatLon, upperRightLatLon, path, null);
+
+                        if (worldPopFilePath != null)
+                        {
+                            string populationFilePath = Path.Combine(path, scenarioId + "_population.csv");
+                            PopulationMap.CreatePopulation(peopleCountTarget, worldPopFilePath, populationFilePath, routerDb, householdDemographics, out success);
+                        }
+                    }
                 }
             }
         }
-
 
         public static void ScaleTotalPopulation(PopulationMap populationMap, int desiredPopulation, out bool success)
         {
@@ -67,14 +69,18 @@ namespace PREACT.Tools
             }
         }
 
-        public static void CreatePopulationFromWorldPop(int minHouseholdSize, int maxHouseholdSize, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
+        public static void CreatePopulationFromWorldPop(int peopleCountTarget, string householdDemographicsFilePath, string worldPopFilePath, string routerDbFilePath, string outputFilePath, out bool success)
         {
             success = false;
 
             Itinero.RouterDb routerDb = RoutingData.LoadRouterDb(routerDbFilePath, out success);
             if(success)
             {
-                PopulationMap.CreatePopulation(worldPopFilePath, outputFilePath, routerDb, minHouseholdSize, maxHouseholdSize, out success);
+                Evacuation.HouseholdDemographics? householdDemographics = Evacuation.HouseholdDemographics.Parse(householdDemographicsFilePath, out success);
+                if (success && householdDemographics != null)
+                {
+                    PopulationMap.CreatePopulation(peopleCountTarget, worldPopFilePath, outputFilePath, routerDb, householdDemographics, out success);
+                }                
             }
         }
 

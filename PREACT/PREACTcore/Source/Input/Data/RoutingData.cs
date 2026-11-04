@@ -64,7 +64,7 @@ namespace PREACT.Input
                         source = new XmlOsmStreamSource(stream);
                     }
 
-                    // create the network for cars only.
+                    // create the network for vehicleCount only.
                     LoadSettings settings = new LoadSettings();
                     settings.KeepNodeIds = true; //use to enable measure flow at nodes
                     settings.KeepWayIds = true; //can be used to calc density easier?

@@ -169,7 +169,7 @@ namespace PREACT.Visualization
         private byte[] GetDestinationsData()
         {            
             List<Evacuation.EvacuationDestination> destinations = _engine.Simulation.Evacuation.Destinations;
-            //name, type, total cars, total people, total travel time, average travel time
+            //name, type, total vehicleCount, total people, total travel time, average travel time
             List<byte> data = new List<byte>();
             for(int i = 0; i < destinations.Count; ++i)
             {
@@ -258,7 +258,7 @@ namespace PREACT.Visualization
                 return;
             }
 
-            //this should only contain cars of interest/active, should not track only "moving" cars as that might not visualize queueing cars correctly
+            //this should only contain vehicleCount of interest/active, should not track only "moving" vehicleCount as that might not visualize queueing vehicleCount correctly
             Dictionary<uint, Traffic.TrafficModuleVehicle> activeVehicles = _engine.Simulation.Evacuation.TrafficModule.GetActiveVehicles();
 
             //we only have dummy data
@@ -326,7 +326,7 @@ namespace PREACT.Visualization
                 }
 
                 int numberofCarsToSend = sendBytes.Length - (numberOfBlockedCars * 16);
-                int maxChunkSize = 16 * 1024; //send max 1024 cars at a time
+                int maxChunkSize = 16 * 1024; //send max 1024 vehicleCount at a time
                 for (int x = 0; x < numberofCarsToSend; x += maxChunkSize)
                 {
                     int targetSize = 0;

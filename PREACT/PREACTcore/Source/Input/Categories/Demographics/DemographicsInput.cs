@@ -6,17 +6,17 @@ namespace PREACT.Evacuation
     public class DemographicsInput
     {
         public string Name = string.Empty;
-        public bool AllowMoreThanOneCar = true;
-        public int MaxCars = 2;
-        public float MaxCarsProbability = 0.3f;
+        public string HouseholdDemographics = string.Empty;
+        public string VehicleDemographics = string.Empty;
         public bool Default = false;
+
 
         public DemographicsInput() 
         {
             
         }
 
-        public static void Parse(Dictionary<string, DemographicsInput> newInputs, string[] inputLines, List<int> demographicsLineIndices, out bool success)
+        public static void Parse(Dictionary<string, HouseholdDemographicsInput> householdDemographicsInput, Dictionary<string, VehicleDemographicsInput> vehicleDemographicsInput, Dictionary<string, DemographicsInput> newInputs, string[] inputLines, List<int> demographicsLineIndices, string rootFolder, out bool success)
         {
             success = false;
             newInputs.Clear();
@@ -44,36 +44,46 @@ namespace PREACT.Evacuation
                 if (!success)
                 {
                     break;
-                }                               
+                }
 
-                nameOfInput = nameof(AllowMoreThanOneCar);
+                nameOfInput = nameof(HouseholdDemographics);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    bool.TryParse(userInput, out newInput.AllowMoreThanOneCar);
+                    newInput.HouseholdDemographics = userInput;
+                    success = householdDemographicsInput.TryGetValue(userInput, out HouseholdDemographicsInput householdDemographics);
+                    if(!success)
+                    {
+                        PREACTInput.MissingReferenceToOtherInput(nameOfInput, userInput);
+                    }
                 }
                 else
                 {
+                    success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput);
                 }
+                if (!success)
+                {
+                    break;
+                }
 
-                nameOfInput = nameof(MaxCars);
+                nameOfInput = nameof(VehicleDemographics);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    int.TryParse(userInput, out newInput.MaxCars);
+                    newInput.VehicleDemographics = userInput;
+                    success = vehicleDemographicsInput.TryGetValue(userInput, out VehicleDemographicsInput vehicleDemographics);
+                    if (!success)
+                    {
+                        PREACTInput.MissingReferenceToOtherInput(nameOfInput, userInput);
+                    }
                 }
                 else
                 {
+                    success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput);
-                }
-
-                nameOfInput = nameof(MaxCarsProbability);
-                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                }               
+                if(!success)
                 {
-                    float.TryParse(userInput, out newInput.MaxCarsProbability);
-                }
-                else
-                {
-                    PREACTInput.InputNotFoundMessage(nameOfInput);
+                    continue;
                 }
 
                 //not critical

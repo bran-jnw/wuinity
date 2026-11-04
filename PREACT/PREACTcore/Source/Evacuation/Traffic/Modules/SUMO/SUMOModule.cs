@@ -61,11 +61,11 @@ namespace PREACT.Traffic
                 _validStartPositions = new List<LIBSUMO.TraCIRoadPosition>();
 
                 output = new List<string>();
-                string header = "Time(s),Total cars injected, Total cars arrived,Current cars in system,Exiting people,Total Sumo cars injected,Total Sumo cars arrived";
+                string header = "Time(s),Total vehicleCount injected, Total vehicleCount arrived,Current vehicleCount in system,Exiting people,Total Sumo vehicleCount injected,Total Sumo vehicleCount arrived";
                 for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
                 {
                     header += "," + _simulation.Evacuation.Destinations[i].Name + " people arrived";
-                    header += "," + _simulation.Evacuation.Destinations[i].Name + " cars arrived";
+                    header += "," + _simulation.Evacuation.Destinations[i].Name + " vehicleCount arrived";
                     header += "," + _simulation.Evacuation.Destinations[i].Name + " flow [veh./h]";
                 }
                 output.Add(header);
@@ -172,7 +172,7 @@ namespace PREACT.Traffic
                 }
             }     
 
-            //check if any cars have arrived
+            //check if any vehicleCount have arrived
             if (LIBSUMO.Simulation.getArrivedNumber() > 0)
             {
                 LIBSUMO.StringVector arrivedVehicles = LIBSUMO.Simulation.getArrivedIDList();
@@ -208,7 +208,7 @@ namespace PREACT.Traffic
                 }
             }
 
-            //Time(s),Total cars injected, Total cars arrived,Current cars in system, Exiting people
+            //Time(s),Total vehicleCount injected, Total vehicleCount arrived,Current vehicleCount in system, Exiting people
             string dataLine = currentTime + "," + totalVehiclesInjected + "," + totalVehiclesArrived + "," + currentVehiclessInSystem + "," + totalPeopleArrived + "," + totalSumoVehiclesInjected + "," + totalSumoVehiclesArrived;
             for (int i = 0; i < _simulation.Evacuation.Destinations.Count; ++i)
             {
@@ -666,7 +666,7 @@ namespace PREACT.Traffic
                     //after testing this seems to be the best option
                     LIBSUMO.Edge.adaptTraveltime(edge.Id, double.MaxValue);
 
-                    //collect cars in system that has the edge in their route
+                    //collect vehicleCount in system that has the edge in their route
                     foreach (SUMOVehicle car in _sumoVehicles.Values)
                     {
                         try 
@@ -688,14 +688,14 @@ namespace PREACT.Traffic
             if (_carsToUpdate.Count == 0)
             {
                 //suppress for now, to much output to make sense of, better to save as damage output or something
-                //Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicles.");
+                //Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads but did not affect any vehicleCount.");
             }
             else
             {
-                Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicles.");
+                Engine.Message(_simulation, Engine.LogType.Log, "Cell " + x + "," + y + " has been ignited and affects roads, notifying vehicleCount.");
             }
 
-            //then do update for affected cars
+            //then do update for affected vehicleCount
             foreach (SUMOVehicle car in _carsToUpdate)
             {
                 LIBSUMO.Vehicle.rerouteTraveltime(car.GetSumoVehicleID());

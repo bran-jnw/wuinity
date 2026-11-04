@@ -28,7 +28,7 @@ namespace PREACT.Evacuation
         List<EvacuationDestination> _evacuationDestinations;
         List<EvacuationDestination> _availableEvacuationDestinations;
         EvacuationGroup[] _evacuationGroups;
-        DemographicsInput _defaultDemographics;
+        Demographics _defaultDemographics;
 
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
         public TrafficModule TrafficModule { get => _trafficModule; }
@@ -36,15 +36,26 @@ namespace PREACT.Evacuation
 
         //Data, move?
         public List<EvacuationDestination> Destinations { get => _evacuationDestinations; }
-        public DemographicsInput DefaultDemographics { get => _defaultDemographics; }
+        public Demographics DefaultDemographics { get => _defaultDemographics; }
+        Dictionary<string, HouseholdDemographics> _householdDemographics;
+        Dictionary<string, VehicleDemographics> _vehicleDemographics;
+        Dictionary<string, Demographics> _demographics;
+
+
 
         public EvacuationManager(Simulation simulation)
         {
             _simulation = simulation;
             _input = _simulation.Input;
+
+            _vehicleDemographics = VehicleDemographics.CreateVehicleDemographicsFromInput(_input.RootFolder, _input.Population.VehicleDemographics);
+            _householdDemographics = HouseholdDemographics.CreateHouseholdDemographicsFromInput(_input.RootFolder, _input.Population.HouseholdDemographics);
+            _demographics = Demographics.CreateDemographicsFromInput(_input.Population.Demographics, _householdDemographics, _vehicleDemographics);
+            SetDefaulDemographics(_demographics);
+
             _evacuationDestinationsDict = EvacuationDestination.CreateEvacacuationDestinationsFromInput(_simulation, _input.Evacuation.EvacuationDestinationInputs);
-            SetDefaulDemographics(_input.Population.Demographics);
-            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _input.Population.Demographics, _simulation);
+            
+            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _demographics, _simulation);
             SetDefaulEvacuationtGroup(); //just sets default group fallback
             BuildEvacuationDestinationList(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
@@ -85,7 +96,7 @@ namespace PREACT.Evacuation
 
         private void HandleNewVehicles()
         {
-            //handle/inject cars that arrived this timestep
+            //handle/inject vehicleCount that arrived this timestep
             if (_trafficModule != null)
             {
                 _pathfindingStopwatch.Start();
@@ -411,9 +422,9 @@ namespace PREACT.Evacuation
             }
         }
 
-        private void SetDefaulDemographics(Dictionary<string, DemographicsInput> demographics)
+        private void SetDefaulDemographics(Dictionary<string, Demographics> demographics)
         {
-            foreach(DemographicsInput d in demographics.Values)
+            foreach(Demographics d in demographics.Values)
             {
                 if(d.Default)
                 {

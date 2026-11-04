@@ -22,7 +22,7 @@ namespace PREACT.Pedestrian
         public float ResponseTime;
         public int peopleInHousehold;
         public bool reachedCar;
-        public int cars;
+        public int vehicleCount;
         public bool isMoving;
         public float walkingDistance;
         private float _travelTime;
@@ -51,17 +51,7 @@ namespace PREACT.Pedestrian
 
             _houseHoldData = householdData;
             peopleInHousehold = householdData.peopleCount;
-            cars = 1;
-            if (evacuationGroup.Demographics.AllowMoreThanOneCar)
-            {
-                if (peopleInHousehold >= 2)
-                {
-                    if (Random.valueF <= evacuationGroup.Demographics.MaxCarsProbability)
-                    {
-                        cars = Mathf.Min(peopleInHousehold, evacuationGroup.Demographics.MaxCars);
-                    }
-                }
-            }
+            vehicleCount = Mathd.Min(peopleInHousehold, evacuationGroup.Demographics.VehicleDemographics.SampleVehicleCount(peopleInHousehold));
 
             reachedCar = false;
             Vector2d temp = simulation.Spatial.GetSimulationPosition(householdData.originLatLon);
@@ -73,7 +63,7 @@ namespace PREACT.Pedestrian
             ResponseTime = _evacuationGroup.GetWeightedRandomResponseTime((float)simulation.Time.GetSimulationTime(_evacuationGroup.EvacuationOrderDateTime));
 
             _travelTime = walkingDistance / walkingSpeed;
-            if (ResponseTime == float.MaxValue)
+            if (ResponseTime == float.MaxValue || vehicleCount == 0)
             {
                 evacuationTime = float.MaxValue;
             }
