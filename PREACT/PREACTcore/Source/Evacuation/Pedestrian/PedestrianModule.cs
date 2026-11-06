@@ -5,6 +5,8 @@
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+
 namespace PREACT.Pedestrian
 {
     public abstract class PedestrianModule : SimulationModule
@@ -18,9 +20,10 @@ namespace PREACT.Pedestrian
         public abstract int GetTotalCars();
         public abstract int GetPeopleStaying();
         public abstract int GetPeopleLeft();
-        public abstract int GetCarsReached();
+        public abstract int GetVehiclesReached();
         public abstract int GetTotalPopulation();
         public abstract int GetTotalHouseHolds();
+        public abstract void SendEvacuationSignal(double simulationTime, Evacuation.EvacuationGroup evacuationGroup);
     }
 }
 

@@ -89,7 +89,7 @@ namespace WUInity.UI
                 ++buttonIndex;
 
                 //vehicleCount reached by pedestrians
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + _engine.Simulation.Evacuation.PedestrianModule.GetCarsReached());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Cars reached: " + _engine.Simulation.Evacuation.PedestrianModule.GetVehiclesReached());
                 ++buttonIndex;
             }
 

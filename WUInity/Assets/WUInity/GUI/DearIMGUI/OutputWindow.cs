@@ -106,7 +106,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             if (sim.Input.PedestrianModule.Enabled && sim.Evacuation.PedestrianModule != null)
             {
                 ImGui.BulletText($"People left: {sim.Evacuation.PedestrianModule.GetPeopleLeft()} /  {sim.Evacuation.PedestrianModule.GetTotalPopulation()}");
-                ImGui.BulletText($"Vehicles reached: {sim.Evacuation.PedestrianModule.GetCarsReached()}");                
+                ImGui.BulletText($"Vehicles reached: {sim.Evacuation.PedestrianModule.GetVehiclesReached()}");                
             }
 
             //vehicleCount still left

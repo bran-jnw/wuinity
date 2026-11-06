@@ -7,6 +7,7 @@ using PREACT.Wildfire;
 using PREACT.Traffic;
 using System.Diagnostics;
 using System.IO;
+using PREACT.Events;
 
 namespace PREACT.Evacuation
 {
@@ -27,7 +28,7 @@ namespace PREACT.Evacuation
         Dictionary<string, EvacuationDestination> _evacuationDestinationsDict;
         List<EvacuationDestination> _evacuationDestinations;
         List<EvacuationDestination> _availableEvacuationDestinations;
-        EvacuationGroup[] _evacuationGroups;
+        Dictionary<string, EvacuationGroup> _evacuationGroups;
         Demographics _defaultDemographics;
 
         public PedestrianModule PedestrianModule { get => _pedestrianModule; }
@@ -72,7 +73,7 @@ namespace PREACT.Evacuation
             //handle all damage/impact on road network
             AffectRoadNetwork();
 
-            //check if any goal has been blocked by fire, this is done after everything has progressed the current time step
+            //check if any destination has been blocked by fire, this is done after everything has progressed the current time step
             UpdateDestinationsWildfireStatus();
 
             //inject vehicles from all sources
@@ -289,18 +290,40 @@ namespace PREACT.Evacuation
             }
         }
 
-        public void TryBlockDestination(string destinationName)
+        public void IssueEvacuationOrder(EvacuationOrderEvent evacuationOrderEvent)
         {
-            EvacuationDestination eD;
-            if(_evacuationDestinationsDict.TryGetValue(destinationName, out eD))
+            
+            for (int i = 0; i < evacuationOrderEvent.EvacuationGroups.Count; ++i)
             {
-                BlockDestination(eD);
-                Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked by user specified event: " + eD.Name);
+                EvacuationGroup eG;
+                if (_evacuationGroups.TryGetValue(evacuationOrderEvent.EvacuationGroups[i], out eG))
+                {
+                    _pedestrianModule.SendEvacuationSignal(_simulation.Time.SimulationTime, eG);
+                    Engine.Message(_simulation, Engine.LogType.Event, $"Group {eG.Name} was isues an evacuation order via user specified event ({evacuationOrderEvent.Name}).");
+                }
+                else
+                {
+                    Engine.Message(_simulation, Engine.LogType.Event, $"Could not signal the group {eG.Name} to evacuate as it does not exist.");
+                }
             }
-            else
+            
+        }
+
+        public void BlockDestinations(BlockDestinationEvent blockDestinationEvent)
+        {
+            for(int i = 0; i < blockDestinationEvent.Destinations.Count; ++i)
             {
-                Engine.Message(_simulation, Engine.LogType.Event, $"Could not block the destination {eD.Name} as it does not exist.");
-            }
+                EvacuationDestination eD;
+                if (_evacuationDestinationsDict.TryGetValue(blockDestinationEvent.Destinations[i], out eD))
+                {
+                    BlockDestination(eD);
+                    Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked by user specified event: " + eD.Name);
+                }
+                else
+                {
+                    Engine.Message(_simulation, Engine.LogType.Event, $"Could not block the destination {eD.Name} as it does not exist.");
+                }
+            }            
         }
 
         public void BlockDestination(EvacuationDestination blockedEvacDest)
@@ -311,7 +334,7 @@ namespace PREACT.Evacuation
 
         private void UpdateEvacuationDestinations(EvacuationDestination evacDestThatTriggeredUpdate)
         {
-            //check that we have at least one goal left
+            //check that we have at least one destination left
             bool allBlocked = true;
             _availableEvacuationDestinations.Clear();
             foreach (EvacuationDestination eD in _evacuationDestinations)
@@ -324,7 +347,7 @@ namespace PREACT.Evacuation
             }
             if (allBlocked)
             {
-                _simulation.Stop("All destinations are unavailable, stopping simulation.", false);
+                _simulation.Stop("All _destinations are unavailable, stopping simulation.", false);
                 return;
             }
 
@@ -412,11 +435,11 @@ namespace PREACT.Evacuation
 
         private void SetDefaulEvacuationtGroup()
         {
-            for(int i = 0; i < _evacuationGroups.Length; ++i)
+            foreach(EvacuationGroup eG in _evacuationGroups.Values)
             {
-                if (_evacuationGroups[i].Default)
+                if (eG.Default)
                 {
-                    _defaultEvacuationGroup = _evacuationGroups[i];
+                    _defaultEvacuationGroup = eG;
                     break;
                 }
             }
@@ -436,32 +459,32 @@ namespace PREACT.Evacuation
 
         public EvacuationDestination GetEvacuationDestination(Vector2d latLon, EvacuationGroup evacuationGroup)
         {
-            EvacuationDestination goal = null;
+            EvacuationDestination destination = null;
 
             if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupCDF)
             {
-                goal = evacuationGroup.GetWeightedRandomDestination();
+                destination = evacuationGroup.GetWeightedRandomDestination();
             }
             else if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean)
             {
-                goal = evacuationGroup.GetClosestEuclideanDestination(latLon, _simulation);
+                destination = evacuationGroup.GetClosestEuclideanDestination(latLon, _simulation);
             }
             else if (evacuationGroup.DestinationChoice == DestinationChoices.Random)
             {
-                goal = GetRandomEvacuationDestination();
+                destination = GetRandomEvacuationDestination();
 
             }
             else //default to closest
             {
-                goal = GetClosestEuclideanDestination(latLon);
+                destination = GetClosestEuclideanDestination(latLon);
             }
 
-            if (goal == null)
+            if (destination == null)
             {
                 Engine.Message(_simulation, Engine.LogType.SimulationError, "Issue with assigning evacuation destination, traffic simulation will not run.");
             }
 
-            return goal;
+            return destination;
         }
 
         public EvacuationGroup GetEvacuationGroup(Vector2d latLon, out bool insideGroup)
@@ -469,11 +492,11 @@ namespace PREACT.Evacuation
             EvacuationGroup pickedGroup = _defaultEvacuationGroup;
             insideGroup = false;
 
-            for (int i = 0; i < _evacuationGroups.Length; ++i)
+            foreach (EvacuationGroup eG in _evacuationGroups.Values)
             {
-                if (_evacuationGroups[i].LatLonBelongsToGroup(latLon, _simulation))
+                if (eG.LatLonBelongsToGroup(latLon, _simulation))
                 {
-                    pickedGroup = _evacuationGroups[i];
+                    pickedGroup = eG;
                     insideGroup = true;
                     break;
                 }

@@ -6,6 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using PREACT.Events;
 using PREACT.Input;
 
 namespace PREACT.Input
@@ -17,6 +18,8 @@ namespace PREACT.Input
 
         public EventsData Data { get => _data; }
         public List<string> BlockGoalEventFiles = new List<string>();
+
+        List<PREACTEvent> _events;        
 
         public EventsInput()
         {

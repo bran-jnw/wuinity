@@ -44,7 +44,7 @@ namespace PREACT.Traffic
                 //see here for options https://sumo.dlr.de/docs/sumo.html, setting input file, start and end time
                 LIBSUMO.Simulation.start(new LIBSUMO.StringVector(new String[] { "sumo", "-c", configFile, "-b", "0.0", "-e", _simulation.Time.SimulationEndTime.ToString() }));
 
-                //check if destinations are valid, if not abort
+                //check if _destinations are valid, if not abort
                 ValidateDestinations(simulation.Evacuation.Destinations, out bool allValid);
                 if(!allValid)
                 {
@@ -576,7 +576,7 @@ namespace PREACT.Traffic
                     Vector2d sumoDestinationPos = newDestination.SimulationPos - _originOffset;
                     LIBSUMO.TraCIRoadPosition destinationEdge = LIBSUMO.Simulation.convertRoad(sumoDestinationPos.x, sumoDestinationPos.y);
 
-                    //this means that from SUMOs point of view the vehicle is gone (it arrived in sumo as it is not aware of shelter capacity or blocked destinations), so we need to re-inject it
+                    //this means that from SUMOs point of view the vehicle is gone (it arrived in sumo as it is not aware of shelter capacity or blocked _destinations), so we need to re-inject it
                     if (haveArrivedAtDestination)
                     {
                         Vector2d sumoVehiclePos = vehicle.SimulationPos - _originOffset;

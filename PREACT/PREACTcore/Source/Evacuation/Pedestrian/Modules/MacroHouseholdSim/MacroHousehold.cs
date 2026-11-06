@@ -18,17 +18,21 @@ namespace PREACT.Pedestrian
     /// </summary>
     public class MacroHousehold
     {
-        public float evacuationTime;
-        public float ResponseTime;
-        public int peopleInHousehold;
-        public bool reachedCar;
+        public enum State{ Routine, PreEvacuation, Defending, WalkingToVehicle, WaitingForPickup, EvacByVehicle, EvacByFoot, Evacuated }
+
+
+        private State _state;
+        private float _evacuationStartTime, _startMovingTime, _reachVehicleTime;
+        private int _peopleInHousehold;
+       
         public int vehicleCount;
-        public bool isMoving;
-        public float walkingDistance;
         private float _travelTime;
 
+        public int PeopleInHousehold { get => _peopleInHousehold; }
+        public State CurrentState { get => _state; }
+
         PopulationData.HouseholdData _houseHoldData;
-        Vector2 _homePosition, carPosition;
+        Vector2 _homePosition, vehiclePosition;
         EvacuationGroup _evacuationGroup;
 
         public EvacuationGroup EvacuationGroup { get => _evacuationGroup; }
@@ -38,11 +42,6 @@ namespace PREACT.Pedestrian
         /// Creates a household that will move as a unit.
         /// evacuation time is determined based in distance/walking speed and response time
         /// </summary>
-        /// <param name="humanRaster"></param>
-        /// <param name="nodeCenter"></param>
-        /// <param name="peopleInHousehold"></param>
-        /// <param name="walkingSpeed"></param>
-        /// <param name="responseTime"></param>
         public MacroHousehold(PopulationData.HouseholdData householdData, float walkingSpeed, EvacuationGroup evacuationGroup, Simulation simulation)
         {
             PopulationInput popInput = simulation.Input.Population;
@@ -50,33 +49,87 @@ namespace PREACT.Pedestrian
             _evacuationGroup = evacuationGroup;            
 
             _houseHoldData = householdData;
-            peopleInHousehold = householdData.peopleCount;
-            vehicleCount = Mathd.Min(peopleInHousehold, evacuationGroup.Demographics.VehicleDemographics.SampleVehicleCount(peopleInHousehold));
+            _peopleInHousehold = householdData.peopleCount;
+            vehicleCount = Mathd.Min(PeopleInHousehold, evacuationGroup.Demographics.VehicleDemographics.SampleVehicleCount(PeopleInHousehold));
 
-            reachedCar = false;
             Vector2d temp = simulation.Spatial.GetSimulationPosition(householdData.originLatLon);
             _homePosition = new Vector2((float)temp.x, (float)temp.y);           
             temp = simulation.Spatial.GetSimulationPosition(householdData.roadAccessLatLon);
-            carPosition = new Vector2((float)temp.x, (float)temp.y);
-            walkingDistance = Vector2.Distance(_homePosition, carPosition) * houseInput.WalkingDistanceModifier;
-
-            ResponseTime = _evacuationGroup.GetWeightedRandomResponseTime((float)simulation.Time.GetSimulationTime(_evacuationGroup.EvacuationOrderDateTime));
-
+            vehiclePosition = new Vector2((float)temp.x, (float)temp.y);
+            float walkingDistance = Vector2.Distance(_homePosition, vehiclePosition) * houseInput.WalkingDistanceModifier;  
             _travelTime = walkingDistance / walkingSpeed;
-            if (ResponseTime == float.MaxValue || vehicleCount == 0)
+
+            _state = State.Routine;        
+        }
+
+        public void Step(MacroHouseholdSim sim, double simulationTime, double deltaTime)
+        {
+            if(_state == State.Routine ||_state == State.Defending || _state == State.EvacByVehicle)
             {
-                evacuationTime = float.MaxValue;
+                return;
+            }
+
+            if(_state == State.PreEvacuation)
+            {
+                if(simulationTime >= _startMovingTime && vehicleCount > 0)
+                {
+                    _state = State.WalkingToVehicle;
+                }
+                else
+                {
+                    _state = State.WaitingForPickup;
+                }
+            }
+            else if(_state == State.WalkingToVehicle)
+            {
+                if (simulationTime >= _reachVehicleTime)
+                {
+                    _state = State.EvacByVehicle;
+                    sim.ReachedVehicle(this);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This can be triggered by either an order or a threshold (fire proximity, smoke density etc.)
+        /// </summary>
+        /// <param name="simulationTime"></param>
+        public void StartEvacuation(double simulationTime, MacroHouseholdSim sim)
+        {
+            if(_state != State.Routine)
+            {
+                //TODO: if new evacuation trigger is more urgent than previous, we could update the response time and travel time to reflect that
+                return;
+            }
+
+            float responseTime = _evacuationGroup.GetWeightedRandomResponseTime();
+            if (responseTime == float.MaxValue || vehicleCount == 0)
+            {
+                _reachVehicleTime = float.MaxValue;
             }
             else
             {
-                evacuationTime = _travelTime + ResponseTime;
+                _reachVehicleTime = (float)simulationTime + responseTime + _travelTime;
+            }  
+                        
+            
+            //set our state
+            if(responseTime == float.MaxValue)
+            {
+                _state = State.Defending;
             }
-            isMoving = false;            
-        }
-
-        public void StartEvacuation(double simulationTime)
-        {
-            evacuationTime = (float)simulationTime + _travelTime;
+            else
+            {
+                if (responseTime == 0.0)
+                {
+                    _state = State.WalkingToVehicle;
+                }
+                else
+                {
+                    _state = State.PreEvacuation;
+                }
+                sim.HouseholdReacted(this);
+            }   
         }
 
         public Vector2d GetVehicleLatLon()
@@ -87,24 +140,24 @@ namespace PREACT.Pedestrian
         public Vector4 GetPositionAndState(double time)
         {
             //states are used in shader to apply color
-            float state = 0.375f;
-            if(evacuationTime == float.MaxValue)
+            float state = 0.375f; //idle or preparing
+            if(_state == State.Defending)
             {
                 state = 0.125f;
             }
-            else if(time >= evacuationTime)
+            else if(_state == State.EvacByVehicle)
             {
                 state = 0.875f;
             }
-            else if(isMoving)
+            else if(_state == State.WalkingToVehicle)
             {
                 state = 0.625f;
             }
 
-            double ratio = (time - ResponseTime) / (evacuationTime - ResponseTime);
+            double ratio = (time - _startMovingTime) / (_reachVehicleTime - _startMovingTime);
             ratio = Mathd.Clamp01(ratio);
-            Vector2 position = Vector2.Lerp(_homePosition, carPosition, (float)ratio);
-            return new Vector4(position.X, position.Y, peopleInHousehold, state);
+            Vector2 position = Vector2.Lerp(_homePosition, vehiclePosition, (float)ratio);
+            return new Vector4(position.X, position.Y, PeopleInHousehold, state);
         }
     }
 }

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using PREACT.Output;
 using PREACT.Detection;
+using PREACT.Events;
 
 namespace PREACT
 {
@@ -390,9 +391,9 @@ namespace PREACT
                     for (int i = 0; i < _input.Events.Data.BlockDestinationEvents.Count; i++)
                     {
                         BlockDestinationEvent bGE = _input.Events.Data.BlockDestinationEvents[i];
-                        if (_time.SimulationTime >= bGE.StartTime && !bGE.Triggered)
+                        if (_time.CurrentDateTime >= bGE.TriggerDateTime && !bGE.Triggered)
                         {
-                            bGE.ApplyEffects();
+                            bGE.TriggerEvent(this);
                         }
                     }
                 }

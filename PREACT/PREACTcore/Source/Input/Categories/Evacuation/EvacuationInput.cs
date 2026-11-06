@@ -54,7 +54,7 @@ namespace PREACT.Input
                 return;
             }
 
-            //critical, must be done after response curves and destinations
+            //critical, must be done after response curves and _destinations
             EvacuationGroupInput.Parse(EvacuationGroupInputs, inputLines, evacuationGroupLineIndices, EvacuationDestinationInputs, ResponseCurves, simulationInput, population, rootFolder, out success);
             if (!success)
             {

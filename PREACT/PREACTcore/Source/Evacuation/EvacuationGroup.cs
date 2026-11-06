@@ -22,6 +22,7 @@ namespace PREACT.Evacuation
         private List<ResponseCurve> _responseCurves;
         private List<double> _responseCurvesCDF;
         private Demographics _demographics;
+        private List<Pedestrian.MacroHousehold> _groupHouseholds;
 
         private List<Vector2d> _shapePolygonLocal;
         private Vector2d _boundingBoxMin;
@@ -34,6 +35,8 @@ namespace PREACT.Evacuation
         public List<EvacuationDestination> Destinations { get => _destinations; }
         public DestinationChoices DestinationChoice { get => _destinationChoice; }
         public Demographics Demographics { get => _demographics; }
+        
+        public List<Pedestrian.MacroHousehold> Households { get => _groupHouseholds; }
 
 
         public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
@@ -83,16 +86,18 @@ namespace PREACT.Evacuation
 
             string shapeFilePath = System.IO.Path.Combine(simulation.Input.RootFolder, groupInput.ShapeFile);
             CreateShapeFilePolygon(simulation, shapeFilePath);
+
+            _groupHouseholds = new List<Pedestrian.MacroHousehold>();
         }
 
-        public static EvacuationGroup[] CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, 
+        public static Dictionary<string, EvacuationGroup> CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, 
             EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
         {
-            EvacuationGroup[] groups = new EvacuationGroup[groupsInput.Count];
+            Dictionary<string, EvacuationGroup> groups = new Dictionary<string, EvacuationGroup>(groupsInput.Count);
             int index = 0;
             foreach(EvacuationGroupInput eGI in groupsInput.Values)
             {
-                groups[index] = new EvacuationGroup(eGI, allDestinations, allResponseCurves, allDemographics, simulation);
+                groups.Add(eGI.Name, new EvacuationGroup(eGI, allDestinations, allResponseCurves, allDemographics, simulation));
                 ++index;
             }
 
@@ -251,7 +256,7 @@ namespace PREACT.Evacuation
             }
 
             //this should not happen, but keep as backup as we do not want to return null
-            Engine.Message(null, Engine.LogType.Warning, "The evacuation destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");            
+            Engine.Message(null, Engine.LogType.Warning, "The evacuation _destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");            
             return eD;
         }
 
@@ -275,7 +280,7 @@ namespace PREACT.Evacuation
             return closestDestination;
         }
 
-        public float GetWeightedRandomResponseTime(float evacuationOrderStart)
+        public float GetWeightedRandomResponseTime()
         {
             float responseTime = float.MaxValue;
             float r = Random.valueF;
@@ -296,13 +301,17 @@ namespace PREACT.Evacuation
             {
                 if (r <= pickedCurve.DataPoints[i].Probability)
                 {
-                    //offset with evacuation order time
-                    responseTime = Random.Range(pickedCurve.DataPoints[i - 1].Time, pickedCurve.DataPoints[i].Time) + evacuationOrderStart;
+                    responseTime = Random.Range(pickedCurve.DataPoints[i - 1].Time, pickedCurve.DataPoints[i].Time);
                     break;
                 }
             }
 
             return responseTime;
+        }        
+
+        public void RegisterHousehold(Pedestrian.MacroHousehold mH)
+        {
+            _groupHouseholds.Add(mH);
         }
     }
 }
