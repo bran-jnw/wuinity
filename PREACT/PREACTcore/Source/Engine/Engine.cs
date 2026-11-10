@@ -529,7 +529,7 @@ namespace PREACT
         public void LoadInputFromFile(string filePath, out bool success)
         {
             _dataStatus.HaveInput = false;
-            PREACTInput input = PREACTInput.LoadFromDisk(filePath, out success);
+            PREACTInput input = PREACTInput.LoadFromFile(filePath, out success);
             if(success)
             {
                 _input = input;

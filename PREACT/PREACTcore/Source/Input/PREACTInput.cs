@@ -46,7 +46,7 @@ namespace PREACT.Input
             WUIShow = new WUIShowInput();
         }
 
-        public static void SaveToDisk(PREACTInput input, string saveFilePath)
+        public static void SaveToFile(PREACTInput input, string saveFilePath)
         {
             //TODO: fix new format save
             //string json = UnityEngine.JsonUtility.ToJson(WUIEngine.INPUT, true);
@@ -57,7 +57,7 @@ namespace PREACT.Input
             Engine.Message(null, Engine.LogType.Log, " Input file " + saveFilePath + " saved.");       
         }
 
-        public static PREACTInput LoadFromDisk(string filePath, out bool success)
+        public static PREACTInput LoadFromFile(string filePath, out bool success)
         {
             success = false;
             string rootFolder = Path.GetDirectoryName(filePath);
@@ -113,6 +113,7 @@ namespace PREACT.Input
             List<int> householdDemographicsLineIndices = new List<int>();
             List<int> vehicleDemographicsLineIndices = new List<int>();
             List<int> demographicsLineIndices = new List<int>();
+            List<int> eventsLineIndices = new List<int>();
 
             //first index all headers
             for (int i = 0; i < inputLines.Length; ++i)
@@ -151,6 +152,10 @@ namespace PREACT.Input
                     else if (line.Equals("Demographics"))
                     {
                         demographicsLineIndices.Add(i);
+                    }
+                    else if (line.Equals("Event"))
+                    {
+                        eventsLineIndices.Add(i);
                     }
                     else
                     {
@@ -316,17 +321,9 @@ namespace PREACT.Input
             }
 
             //events
-            nameOfInput = nameof(Events);
-            if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
-            {
-                ReadingInputMessage(nameOfInput);
-                newInput.Events.Parse(inputLines, lineindex, rootFolder, out success);
-            }
-            else
-            {
-                Engine.Message(null, Engine.LogType.Warning, nameOfInput + " header not found, no events will be added.");
-            }
-            if (!success)
+            ReadingInputMessage("Events");
+            newInput.Events.Parse(inputLines, eventsLineIndices, out success);
+            if(!success)
             {
                 return null;
             }

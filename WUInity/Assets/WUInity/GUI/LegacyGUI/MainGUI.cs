@@ -61,7 +61,7 @@ namespace WUInity.UI
                 else
                 {
                     ParseMainData();
-                    PREACT.Input.PREACTInput.SaveToDisk(_input, _wuinityManager.WorkingFolder);
+                    PREACT.Input.PREACTInput.SaveToFile(_input, _wuinityManager.WorkingFolder);
                 }
             }
             ++buttonIndex;
@@ -190,7 +190,7 @@ namespace WUInity.UI
             string name = Path.GetFileNameWithoutExtension(paths[0]);
             _input.Simulation.Name = name;
 
-            PREACT.Input.PREACTInput.SaveToDisk(_input, paths[0]);
+            PREACT.Input.PREACTInput.SaveToFile(_input, paths[0]);
         }
 
         void OpenLoadInput()

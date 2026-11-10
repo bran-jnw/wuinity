@@ -184,7 +184,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             _isOpen = false;
             _folderSet = false;
             string filePath = Path.Combine(_input.RootFolder, _input.Simulation.Name, ".wui");
-            PREACTInput.SaveToDisk(_input, filePath);
+            PREACTInput.SaveToFile(_input, filePath);
             PreactGUI.Engine.SetInput(_input, filePath);     
         }
         private static void OpenSetRootFolder()

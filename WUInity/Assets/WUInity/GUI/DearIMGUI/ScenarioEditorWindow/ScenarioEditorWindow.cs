@@ -123,13 +123,13 @@ namespace Assets.WUInity.GUI.DearIMGUI
         public static void SaveInput()
         {
             //ParseMainData();
-            PREACT.Input.PREACTInput.SaveToDisk(_input, PreactGUI.Engine.WorkingFile);
+            PREACT.Input.PREACTInput.SaveToFile(_input, PreactGUI.Engine.WorkingFile);
         }
 
         public static void SaveNewInput(string[] paths)
         {
             //ParseMainData();
-            PREACT.Input.PREACTInput.SaveToDisk(_input, paths[0]);
+            PREACT.Input.PREACTInput.SaveToFile(_input, paths[0]);
             PreactGUI.Engine.LoadInputFromFile(paths[0], out bool success);
         }
     }

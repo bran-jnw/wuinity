@@ -8,45 +8,69 @@
 using System.Collections.Generic;
 using PREACT.Events;
 using PREACT.Input;
+using System;
 
 namespace PREACT.Input
 {
     [System.Serializable]
     public class EventsInput
     {
-        private EventsData _data;
+        //private EventsData _data;
 
-        public EventsData Data { get => _data; }
-        public List<string> BlockGoalEventFiles = new List<string>();
+        //public EventsData Data { get => _data; }
 
-        List<PREACTEvent> _events;        
+        public List<EvacuationOrderEventInput> EvacuationOrderEventInputs = new List<EvacuationOrderEventInput>(5);
+        public List<BlockDestinationEventInput> BlockDestinationEventInputs = new List<BlockDestinationEventInput>(5);
+        
 
         public EventsInput()
         {
-            _data = new EventsData();
+            //_data = new EventsData();
         }
 
-        public void Parse(string[] inputLines, int startIndex, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, List<int> eventsLineIndices, out bool success)
         {
             success = false;
-            int issues = 0;                     
-            Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, startIndex);
-            string nameOfInput, userInput;
+            EvacuationOrderEventInputs.Clear();
+            BlockDestinationEventInputs.Clear();
+            PREACTEventInput newEvent = new PREACTEventInput();
 
-            //not critical
-            nameOfInput = nameof(BlockGoalEventFiles);
-            if (inputToParse.TryGetValue(nameOfInput, out userInput))
+            for (int i = 0; i < eventsLineIndices.Count; ++i)
             {
-                string[] data = userInput.Split(',');
-                BlockGoalEventFiles.AddRange(data);
-                PREACTInput.CheckIfFilesExists(nameOfInput, data, rootFolder, out success);
-            }
-            else
-            {
-                PREACTInput.InputNotFoundMessage(nameOfInput);
+                int issues = 0;
+                Dictionary<string, string> inputToParse = PREACTInput.GetHeaderInput(inputLines, eventsLineIndices[i]);
+                string nameOfInput, userInput;
+
+                //General
+                PREACTEventInput.Parse(inputToParse, newEvent, out success);
+                if (!success)
+                {
+                    return;
+                }
+
+                if(newEvent.Type == PREACTEventInput.EventType.EvacuationOrder)
+                {
+                    EvacuationOrderEventInput evacuationOrderEventInput = EvacuationOrderEventInput.Parse(inputLines, eventsLineIndices[i], out success);
+                    if (success)
+                    {
+                        EvacuationOrderEventInputs.Add(evacuationOrderEventInput);
+                    }
+                }
+                else if(newEvent.Type == PREACTEventInput.EventType.BlockDestination)
+                {
+                    BlockDestinationEventInput blockDestinationEventInput = BlockDestinationEventInput.Parse(inputLines, eventsLineIndices[i], out success);
+                    if (success)
+                    {
+                        BlockDestinationEventInputs.Add(blockDestinationEventInput);
+                    }
+                }
+                if(!success)
+                {
+                    return;
+                }   
             }
 
-            _data.LoadAll(this, rootFolder, out success);
+            //_data.LoadAll(this, rootFolder, out success);
         }
     }
 }
