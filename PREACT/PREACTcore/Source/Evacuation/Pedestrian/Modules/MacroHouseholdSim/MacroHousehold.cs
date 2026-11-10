@@ -18,11 +18,11 @@ namespace PREACT.Pedestrian
     /// </summary>
     public class MacroHousehold
     {
-        public enum State{ Routine, PreEvacuation, Defending, WalkingToVehicle, WaitingForPickup, EvacByVehicle, EvacByFoot, Evacuated }
+        public enum State{ Routine, PreEvacuation, Defending, WalkingToAccessPoint, WaitingForPickup, EvacByVehicle, EvacByFoot, Evacuated }
 
 
         private State _state;
-        private float _evacuationStartTime, _startMovingTime, _reachVehicleTime;
+        private float _evacuationAwareTime, _startMovingTime, _reachVehicleTime;
         private int _peopleInHousehold;
        
         public int vehicleCount;
@@ -71,21 +71,25 @@ namespace PREACT.Pedestrian
 
             if(_state == State.PreEvacuation)
             {
-                if(simulationTime >= _startMovingTime && vehicleCount > 0)
+                if(simulationTime >= _startMovingTime)                    
                 {
-                    _state = State.WalkingToVehicle;
-                }
-                else
-                {
-                    _state = State.WaitingForPickup;
-                }
+                    _state = State.WalkingToAccessPoint;
+                    
+                }                
             }
-            else if(_state == State.WalkingToVehicle)
+            else if(_state == State.WalkingToAccessPoint)
             {
                 if (simulationTime >= _reachVehicleTime)
                 {
-                    _state = State.EvacByVehicle;
-                    sim.ReachedVehicle(this);
+                    if (vehicleCount > 0)
+                    {
+                        _state = State.EvacByVehicle;
+                        sim.ReachedVehicle(this);
+                    }
+                    else
+                    {
+                        _state = State.WaitingForPickup;
+                    }                    
                 }
             }
         }
@@ -102,13 +106,18 @@ namespace PREACT.Pedestrian
                 return;
             }
 
+            _evacuationAwareTime = (float)simulationTime;
+
             float responseTime = _evacuationGroup.GetWeightedRandomResponseTime();
             if (responseTime == float.MaxValue || vehicleCount == 0)
             {
+                
                 _reachVehicleTime = float.MaxValue;
+                _startMovingTime = float.MaxValue;
             }
             else
             {
+                _startMovingTime = (float)simulationTime + responseTime;
                 _reachVehicleTime = (float)simulationTime + responseTime + _travelTime;
             }  
                         
@@ -122,7 +131,7 @@ namespace PREACT.Pedestrian
             {
                 if (responseTime == 0.0)
                 {
-                    _state = State.WalkingToVehicle;
+                    _state = State.WalkingToAccessPoint;
                 }
                 else
                 {
@@ -140,22 +149,13 @@ namespace PREACT.Pedestrian
         public Vector4 GetPositionAndState(double time)
         {
             //states are used in shader to apply color
-            float state = 0.375f; //idle or preparing
-            if(_state == State.Defending)
-            {
-                state = 0.125f;
-            }
-            else if(_state == State.EvacByVehicle)
-            {
-                state = 0.875f;
-            }
-            else if(_state == State.WalkingToVehicle)
-            {
-                state = 0.625f;
-            }
+            float state = ((int)_state + 0.5f) * 0.125f;
 
-            double ratio = (time - _startMovingTime) / (_reachVehicleTime - _startMovingTime);
-            ratio = Mathd.Clamp01(ratio);
+            double ratio = Mathd.Clamp01((time - _startMovingTime) / (_reachVehicleTime - _startMovingTime));
+            if(_state == State.Routine)
+            {
+                ratio = 0.0;
+            }
             Vector2 position = Vector2.Lerp(_homePosition, vehiclePosition, (float)ratio);
             return new Vector4(position.X, position.Y, PeopleInHousehold, state);
         }

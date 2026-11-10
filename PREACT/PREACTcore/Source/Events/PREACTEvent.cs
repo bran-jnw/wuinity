@@ -17,13 +17,17 @@ namespace PREACT.Events
     {
         private string _name;
         public DateTime TriggerDateTime;
+        public double TriggerSimulationTime;
         public bool Triggered;
 
         public string Name { get => _name; }
 
-        public PREACTEvent(string name)
+        public PREACTEvent(PREACTEventInput input, double simulationTime)
         {
-            _name = name;
+            _name = input.Name;
+            TriggerDateTime = input.TriggerDateTime;
+            TriggerSimulationTime = simulationTime;
+            Triggered = false;
         }
 
 

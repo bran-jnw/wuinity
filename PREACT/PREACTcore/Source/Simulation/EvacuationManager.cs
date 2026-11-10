@@ -42,7 +42,7 @@ namespace PREACT.Evacuation
         Dictionary<string, VehicleDemographics> _vehicleDemographics;
         Dictionary<string, Demographics> _demographics;
 
-
+        List<PREACTEvent> _events;
 
         public EvacuationManager(Simulation simulation)
         {
@@ -60,10 +60,28 @@ namespace PREACT.Evacuation
             SetDefaulEvacuationtGroup(); //just sets default group fallback
             BuildEvacuationDestinationList(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
+
+            _events = new List<PREACTEvent>(_input.Events.BlockDestinationEventInputs.Count + _input.Events.EvacuationOrderEventInputs.Count);
+            for (int i = 0; i < _input.Events.EvacuationOrderEventInputs.Count; i++)
+            {
+                EvacuationOrderEventInput evacEvent = _input.Events.EvacuationOrderEventInputs[i];
+                double simTime = _simulation.Time.GetSimulationTime(evacEvent.TriggerDateTime);
+                _events.Add(new EvacuationOrderEvent(evacEvent, simTime, _evacuationGroups));
+            }
+            for (int i = 0; i < _input.Events.BlockDestinationEventInputs.Count; i++)
+            {
+                //_events.Add(new BlockDestination(_input.Events.BlockDestinationEventInputs[i]));
+            }
+        }       
+        
+        public void Step()
+        {
+            UpdateEvents();
         }
 
         public void PostStep()
         {
+
             //check for distance to wildfire front, affect evacuees
             if(_simulation.Hazards.Wildfire != null)
             {
@@ -78,6 +96,17 @@ namespace PREACT.Evacuation
 
             //inject vehicles from all sources
             HandleNewVehicles();
+        }
+
+        private void UpdateEvents()
+        {
+            for (int i = 0; i < _events.Count; i++)
+            {
+                if (!_events[i].Triggered && _simulation.Time.SimulationTime >= _events[i].TriggerSimulationTime)
+                {
+                    _events[i].TriggerEvent(_simulation);
+                }
+            }
         }
 
         private void AffectRoadNetwork()
@@ -291,22 +320,13 @@ namespace PREACT.Evacuation
         }
 
         public void IssueEvacuationOrder(EvacuationOrderEvent evacuationOrderEvent)
-        {
-            
+        {            
             for (int i = 0; i < evacuationOrderEvent.EvacuationGroups.Count; ++i)
             {
-                EvacuationGroup eG;
-                if (_evacuationGroups.TryGetValue(evacuationOrderEvent.EvacuationGroups[i], out eG))
-                {
-                    _pedestrianModule.SendEvacuationSignal(_simulation.Time.SimulationTime, eG);
-                    Engine.Message(_simulation, Engine.LogType.Event, $"Group {eG.Name} was isues an evacuation order via user specified event ({evacuationOrderEvent.Name}).");
-                }
-                else
-                {
-                    Engine.Message(_simulation, Engine.LogType.Event, $"Could not signal the group {eG.Name} to evacuate as it does not exist.");
-                }
-            }
-            
+                EvacuationGroup eG = evacuationOrderEvent.EvacuationGroups[i];
+                _pedestrianModule.SendEvacuationSignal(_simulation.Time.SimulationTime, eG);
+                Engine.Message(_simulation, Engine.LogType.Event, $"Group {eG.Name} was isues an evacuation order via user specified evacEvent ({evacuationOrderEvent.Name}).");
+            }            
         }
 
         public void BlockDestinations(BlockDestinationEvent blockDestinationEvent)
@@ -317,7 +337,7 @@ namespace PREACT.Evacuation
                 if (_evacuationDestinationsDict.TryGetValue(blockDestinationEvent.Destinations[i], out eD))
                 {
                     BlockDestination(eD);
-                    Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked by user specified event: " + eD.Name);
+                    Engine.Message(_simulation, Engine.LogType.Event, "Goal blocked by user specified evacEvent: " + eD.Name);
                 }
                 else
                 {

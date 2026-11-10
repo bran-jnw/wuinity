@@ -11,8 +11,6 @@ using System;
 
 namespace PREACT.Evacuation
 {
-    public enum TimeInputs { Absolute, Relative }
-
     public struct ResponseDataPoint
     {
         public float Probability;
@@ -32,7 +30,6 @@ namespace PREACT.Evacuation
     public struct ResponseCurve
     {
         public string Name;
-        public TimeInputs TimeInput;
         public ResponseDataPoint[] DataPoints;
 
 
@@ -40,14 +37,12 @@ namespace PREACT.Evacuation
         {
             Name = name;
             DataPoints = dataPoints;
-            TimeInput = TimeInputs.Relative;
         }
 
         public ResponseCurve(List<ResponseDataPoint> dataPoints, string name)
         {
             Name = name;
             DataPoints = dataPoints.ToArray();
-            TimeInput = TimeInputs.Relative;
         }
 
         public void SetDataPoints(List<ResponseDataPoint> dataPoints)
@@ -85,34 +80,6 @@ namespace PREACT.Evacuation
                     break;
                 }
 
-                //critical
-                nameOfInput = nameof(TimeInput);
-                if (inputToParse.TryGetValue(nameOfInput, out userInput))
-                {
-                    switch (userInput)
-                    {
-                        case nameof(TimeInputs.Absolute):
-                            newInput.TimeInput = TimeInputs.Absolute;
-                            break;
-                        case nameof(TimeInputs.Relative):
-                            newInput.TimeInput = TimeInputs.Relative;
-                            break;
-                        default:
-                            ++issues;
-                            PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
-                            break;
-                    }
-                }
-                else
-                {
-                    success = false;
-                    PREACTInput.InputNotFoundMessage(nameOfInput, true);
-                }
-                if (!success)
-                {
-                    break;
-                }
-
                 //this one is a bit special as each line does not have a name
                 int startIndex = responseCurveLineIndices[i] + 3; //skip header, name line and time relation
                 int endIndex = startIndex + inputToParse.Count - 2; //remove name and timeinput line from count
@@ -125,22 +92,7 @@ namespace PREACT.Evacuation
                     {
                         ResponseDataPoint dataPoint = new ResponseDataPoint();
 
-                        if(newInput.TimeInput == TimeInputs.Relative)
-                        {
-                            issues += float.TryParse(data[0], out dataPoint.Time) ? 0 : 1;
-                        }
-                        else
-                        {
-                            DateTime dateTime;
-                            if(DateTime.TryParse(data[0], out dateTime))
-                            {
-                                dataPoint.Time = (float)(dateTime - simulationInput.StartDateTime).TotalSeconds;
-                            }
-                            else
-                            {
-                                ++issues;
-                            }
-                        }                        
+                        issues += float.TryParse(data[0], out dataPoint.Time) ? 0 : 1;                       
                         issues += float.TryParse(data[1], out dataPoint.Probability) ? 0 : 1;
 
                         if (issues > 0)

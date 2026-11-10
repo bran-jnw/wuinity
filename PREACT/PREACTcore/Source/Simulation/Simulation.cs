@@ -179,7 +179,8 @@ namespace PREACT
                 _engine.WUIShow.SendData(_time.SimulationTime);
             }
 
-            UpdateEvents();
+            //update events
+            _evacuation.Step();
 
             //step all modules forward in time            
             float deltaTime = _input.Simulation.DeltaTime;
@@ -378,26 +379,6 @@ namespace PREACT
         public void ToggleRealtime()
         {
             _runRealtime = !_runRealtime;
-        }
-
-        //TODO: move
-        private void UpdateEvents()
-        {
-            if (_input.TrafficModule.Enabled)
-            {
-                //check for global events
-                if (_input.Events.Data.BlockDestinationEvents != null)
-                {
-                    for (int i = 0; i < _input.Events.Data.BlockDestinationEvents.Count; i++)
-                    {
-                        BlockDestinationEvent bGE = _input.Events.Data.BlockDestinationEvents[i];
-                        if (_time.CurrentDateTime >= bGE.TriggerDateTime && !bGE.Triggered)
-                        {
-                            bGE.TriggerEvent(this);
-                        }
-                    }
-                }
-            }
         }
 
         private static void StepModule(Stopwatch timer, SimulationModule module, double currentTime, double deltaTime)

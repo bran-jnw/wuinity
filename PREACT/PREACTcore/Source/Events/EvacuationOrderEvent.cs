@@ -7,20 +7,27 @@
 
 using System.Collections.Generic;
 using System;
+using PREACT.Input;
+using PREACT.Evacuation;
 
 namespace PREACT.Events
 {
     public class EvacuationOrderEvent : PREACTEvent
     {        
-        private List<string> _evacuationGroups;
+        private List<EvacuationGroup> _evacuationGroups;
         
-        public List<string> EvacuationGroups { get => _evacuationGroups; }
+        public List<EvacuationGroup> EvacuationGroups { get => _evacuationGroups; }
 
-        public EvacuationOrderEvent(string name, DateTime triggerTime, List<string> evacuationGroups) : base(name)
+        public EvacuationOrderEvent(EvacuationOrderEventInput input, double simulationTime, Dictionary<string, EvacuationGroup> evacuationGroups) : base(input, simulationTime)
         {
-            TriggerDateTime = triggerTime;
-            Triggered = false;
-            _evacuationGroups = evacuationGroups;
+            _evacuationGroups = new List<EvacuationGroup>();
+            foreach (string groupName in input.EvacuationGroups)
+            {
+                if (evacuationGroups.TryGetValue(groupName, out EvacuationGroup group))
+                {
+                    _evacuationGroups.Add(group);
+                }
+            }
         }
 
         public override void TriggerEvent(Simulation simulation)

@@ -6,8 +6,7 @@
 //You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.IO;
-using System;
+using PREACT.Input;
 
 namespace PREACT.Events
 {
@@ -17,11 +16,9 @@ namespace PREACT.Events
 
         public List<string> Destinations { get => _destinations; }
 
-        public BlockDestinationEvent(string name, DateTime triggerTime, List<string> destinations) : base(name)
+        public BlockDestinationEvent(PREACTEventInput input, double simulationTime, List<string> destinations) : base(input, simulationTime)
         {
-            TriggerDateTime = triggerTime;
             _destinations = destinations;
-            Triggered = false;
         }
 
         public override void TriggerEvent(Simulation simulation)
@@ -31,31 +28,6 @@ namespace PREACT.Events
                 Triggered = true;
                 simulation.Evacuation.BlockDestinations(this);
             }
-        }
-
-        public static BlockDestinationEvent LoadBlockGoalEvent(string filePath, out bool success)
-        {
-            success = false;
-            BlockDestinationEvent blockDestinationEvent = null;
-
-            if (File.Exists(filePath))
-            {
-                string[] dataLines = File.ReadAllLines(filePath);
-                //skip first line (header)
-                for (int j = 1; j < dataLines.Length; j++)
-                {
-                    //TODO:                    
-                }
-
-                //blockDestinationEvent = new BlockDestinationEvent(0, string.Empty);
-                success = true;
-            }
-            else
-            {
-                Engine.Message(null, Engine.LogType.Warning, "Goal blocking event file not found in " + filePath + " and could not be loaded");
-            }
-
-            return blockDestinationEvent;
         }
     }
 }
