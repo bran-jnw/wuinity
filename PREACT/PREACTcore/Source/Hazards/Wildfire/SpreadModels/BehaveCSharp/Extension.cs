@@ -22,7 +22,7 @@ namespace PREACT.Wildfire.Behave
         public double[][] m_rosArray;      //!< 2x array with spread rates in it
 
         double m_prob;          //!< prob of faster spread rates
-        double m_latProb;       //!< Probability of lateral fuel combination
+        double m_latProb;       //!< CumulativeProbability of lateral fuel combination
         long m_blocks;        //!< number of allocations (blocks)
         long m_cols;          //!< number of columns in block
         long m_rows;          //!< number of rows in block

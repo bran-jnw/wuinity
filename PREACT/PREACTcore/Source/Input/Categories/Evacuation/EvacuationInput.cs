@@ -16,9 +16,10 @@ namespace PREACT.Input
         private EvacuationData _data;
 
         public EvacuationData Data { get => _data; }
-        public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs = new Dictionary<string, EvacuationDestinationInput>(5);
-        public Dictionary<string, ResponseCurve> ResponseCurves = new Dictionary<string, ResponseCurve>(5);        
-        public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs = new Dictionary<string, EvacuationGroupInput>(5);
+        public Dictionary<string, EvacuationDestinationInput> EvacuationDestinationInputs = new Dictionary<string, EvacuationDestinationInput>(8);
+        public Dictionary<string, ResponseCurve> ResponseCurves = new Dictionary<string, ResponseCurve>(8);        
+        public Dictionary<string, EvacuationGroupInput> EvacuationGroupInputs = new Dictionary<string, EvacuationGroupInput>(8);
+        public Dictionary<string, EvacuationBehaviorInput> EvacuationBehaviorInputs = new Dictionary<string, EvacuationBehaviorInput>(8);
         public bool UseTriggerBufferEvacuation = false;
         public string TriggerBufferFile = string.Empty;
 
@@ -27,7 +28,7 @@ namespace PREACT.Input
             _data = new EvacuationData();
         }
 
-        public void Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, PopulationInput population, PedestrianModuleInput pedestrianInput, TrafficModuleInput trafficInput, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, string rootFolder, out bool success)
+        public void Parse(string[] inputLines, int startIndex, SimulationInput simulationInput, EventsInput eventsInput, PopulationInput population, PedestrianModuleInput pedestrianInput, TrafficModuleInput trafficInput, List<int> destinationLineIndices, List<int> responseCurveLineIndices, List<int> evacuationGroupLineIndices, List<int> evacuationBehaviorLineIndices, string rootFolder, out bool success)
         {
             if (!pedestrianInput.Enabled && !trafficInput.Enabled)
             {
@@ -54,8 +55,15 @@ namespace PREACT.Input
                 return;
             }
 
+            //critical
+            EvacuationBehaviorInput.Parse(EvacuationBehaviorInputs, inputLines, evacuationBehaviorLineIndices, simulationInput, out success);
+            if (!success)
+            {
+                return;
+            }
+
             //critical, must be done after response curves and _destinations
-            EvacuationGroupInput.Parse(EvacuationGroupInputs, inputLines, evacuationGroupLineIndices, EvacuationDestinationInputs, ResponseCurves, simulationInput, population, rootFolder, out success);
+            EvacuationGroupInput.Parse(EvacuationGroupInputs, inputLines, evacuationGroupLineIndices, EvacuationDestinationInputs, ResponseCurves, EvacuationBehaviorInputs, simulationInput, population, rootFolder, out success);
             if (!success)
             {
                 return;

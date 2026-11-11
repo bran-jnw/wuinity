@@ -114,6 +114,7 @@ namespace PREACT.Input
             List<int> vehicleDemographicsLineIndices = new List<int>();
             List<int> demographicsLineIndices = new List<int>();
             List<int> eventsLineIndices = new List<int>();
+            List<int> evacuationBehaviorLineIndices = new List<int>();
 
             //first index all headers
             for (int i = 0; i < inputLines.Length; ++i)
@@ -156,6 +157,10 @@ namespace PREACT.Input
                     else if (line.Equals("Event"))
                     {
                         eventsLineIndices.Add(i);
+                    }
+                    else if (line.Equals("EvacuationBehavior"))
+                    {
+                        evacuationBehaviorLineIndices.Add(i);
                     }
                     else
                     {
@@ -333,7 +338,7 @@ namespace PREACT.Input
             if (headerLineIndices.TryGetValue(nameOfInput, out lineindex))
             {                    
                 ReadingInputMessage(nameOfInput);
-                newInput.Evacuation.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, newInput.Population, newInput.PedestrianModule, newInput.TrafficModule, destinationLineIndices, responseLineIndices, groupLineIndices, rootFolder, out success);
+                newInput.Evacuation.Parse(inputLines, lineindex, newInput.Simulation, newInput.Events, newInput.Population, newInput.PedestrianModule, newInput.TrafficModule, destinationLineIndices, responseLineIndices, groupLineIndices, evacuationBehaviorLineIndices, rootFolder, out success);
             }
             else if(newInput.PedestrianModule.Enabled || newInput.TrafficModule.Enabled)
             {

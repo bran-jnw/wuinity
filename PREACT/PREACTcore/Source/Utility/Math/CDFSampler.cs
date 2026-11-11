@@ -11,18 +11,27 @@ namespace PREACT.Utility.Math
         private readonly T[] _associatedData;
         private readonly int _length;
 
-        public CDFSampler(double[] cdf, T[] associatedData)
+
+        public CDFSampler(double[] probabilities, T[] associatedData)
         {
-            _cdf = cdf ?? throw new ArgumentNullException(nameof(cdf));
+            _cdf = probabilities ?? throw new ArgumentNullException(nameof(probabilities));
             _associatedData = associatedData ?? throw new ArgumentNullException(nameof(associatedData));
 
-            if (cdf.Length != associatedData.Length)
+            if (probabilities.Length != associatedData.Length)
                 throw new ArgumentException("CDF array and associated data array must be the same length.");
 
-            if (cdf.Length == 0)
+            if (probabilities.Length == 0)
                 throw new ArgumentException("Arrays cannot be empty.");
 
-            _length = cdf.Length;
+            _length = probabilities.Length;
+
+            //make probabilities into CDF
+            double cumulative = 0;
+            for (int i = 0; i < _length; i++)
+            {
+                cumulative += probabilities[i];
+                _cdf[i] = cumulative;
+            }
         }
 
         /// <summary>

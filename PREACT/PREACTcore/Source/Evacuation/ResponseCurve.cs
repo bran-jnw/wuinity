@@ -13,13 +13,13 @@ namespace PREACT.Evacuation
 {
     public struct ResponseDataPoint
     {
-        public float Probability;
+        public float CumulativeProbability;
         public float Time;
 
-        public ResponseDataPoint(float time, float probability)
+        public ResponseDataPoint(float time, float cumProb)
         {
             Time = time;
-            Probability = probability;
+            CumulativeProbability = cumProb;
         }
     }
 
@@ -48,6 +48,22 @@ namespace PREACT.Evacuation
         public void SetDataPoints(List<ResponseDataPoint> dataPoints)
         {
             DataPoints = dataPoints.ToArray();
+        }
+
+        public float DrawSample()
+        {
+            float responseTime = float.MaxValue;
+            float r = Math.Random.valueF;
+            for (int i = 1; i < DataPoints.Length; i++) //skip first as that is always zero cumProb
+            {
+                if (r <= DataPoints[i].CumulativeProbability)
+                {
+                    responseTime = Math.Random.Range(DataPoints[i - 1].Time, DataPoints[i].Time);
+                    break;
+                }
+            }
+
+            return responseTime;
         }
 
         public static void Parse(Dictionary<string, ResponseCurve> newInputs, string[] inputLines, List<int> responseCurveLineIndices, SimulationInput simulationInput, out bool success)
@@ -81,8 +97,8 @@ namespace PREACT.Evacuation
                 }
 
                 //this one is a bit special as each line does not have a name
-                int startIndex = responseCurveLineIndices[i] + 3; //skip header, name line and time relation
-                int endIndex = startIndex + inputToParse.Count - 2; //remove name and timeinput line from count
+                int startIndex = responseCurveLineIndices[i] + 2; //skip header, name line and time relation
+                int endIndex = startIndex + inputToParse.Count - 1; //remove name and timeinput line from count
                 List<ResponseDataPoint> points = new List<ResponseDataPoint>(endIndex - startIndex);
                 for (int j = startIndex; j < endIndex; ++j)
                 {
@@ -93,7 +109,7 @@ namespace PREACT.Evacuation
                         ResponseDataPoint dataPoint = new ResponseDataPoint();
 
                         issues += float.TryParse(data[0], out dataPoint.Time) ? 0 : 1;                       
-                        issues += float.TryParse(data[1], out dataPoint.Probability) ? 0 : 1;
+                        issues += float.TryParse(data[1], out dataPoint.CumulativeProbability) ? 0 : 1;
 
                         if (issues > 0)
                         {

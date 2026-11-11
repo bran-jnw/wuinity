@@ -80,7 +80,7 @@ namespace PREACT.Pedestrian
                     householdPositions[householdIndex] = household.GetPositionAndState(currentTime);
                     ++householdIndex;
 
-                    if(household.CurrentState == MacroHousehold.State.Defending)
+                    if(household.CurrentState == MacroHousehold.MovementState.Defending)
                     {
                         totalHouseholdsLeft++;
                         continue;
@@ -88,7 +88,7 @@ namespace PREACT.Pedestrian
 
                     household.Step(this, currentTime, deltaTime);
 
-                    if(household.CurrentState == MacroHousehold.State.EvacByVehicle)
+                    if(household.CurrentState == MacroHousehold.MovementState.EvacByVehicle)
                     {
                         //walkingDistance += household.walkingDistance;
                         ++householdsDone;
@@ -162,7 +162,7 @@ namespace PREACT.Pedestrian
             ++totalHouseholdsReacted;
             totalPeopleReacted += household.PeopleInHousehold;
             //for now waiting for pickup counts as staying until we have a model that can actually pick them up
-            if(household.CurrentState == MacroHousehold.State.Defending || household.CurrentState == MacroHousehold.State.WaitingForPickup)
+            if(household.CurrentState == MacroHousehold.MovementState.Defending || household.CurrentState == MacroHousehold.MovementState.WaitingForPickup)
             {
                 totalPeopleWhoWillNotEvacuate += household.PeopleInHousehold;
             }
@@ -312,7 +312,7 @@ namespace PREACT.Pedestrian
             {
                 MacroHousehold household = _macroHouseholds[i];
                 //if we are doing nothing or preparing as preparation might be sped up
-                if(household.CurrentState == MacroHousehold.State.Routine || household.CurrentState == MacroHousehold.State.PreEvacuation)
+                if(household.CurrentState == MacroHousehold.MovementState.Routine || household.CurrentState == MacroHousehold.MovementState.PreEvacuation)
                 {
                     float distance = _simulation.Hazards.DistanceToWildfire(_macroHouseholds[i].HomePosition);
                     if (distance <= 500.0)

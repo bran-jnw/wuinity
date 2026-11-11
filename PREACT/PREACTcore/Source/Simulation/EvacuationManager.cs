@@ -24,6 +24,7 @@ namespace PREACT.Evacuation
 
 
         PREACTInput _input;
+        Dictionary<string, EvacuationBehavior> _evacuationBehaviors;
         EvacuationGroup _defaultEvacuationGroup;        
         Dictionary<string, EvacuationDestination> _evacuationDestinationsDict;
         List<EvacuationDestination> _evacuationDestinations;
@@ -56,7 +57,8 @@ namespace PREACT.Evacuation
 
             _evacuationDestinationsDict = EvacuationDestination.CreateEvacacuationDestinationsFromInput(_simulation, _input.Evacuation.EvacuationDestinationInputs);
             
-            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _demographics, _simulation);
+            _evacuationBehaviors = EvacuationBehavior.CreateBehaviorsFromInput(_simulation, _input.Evacuation.EvacuationBehaviorInputs, _input.Evacuation.ResponseCurves);
+            _evacuationGroups = EvacuationGroup.CreateGroupsFromInput(_input.Evacuation.EvacuationGroupInputs, _evacuationBehaviors, _evacuationDestinationsDict, _input.Evacuation.ResponseCurves, _demographics, _simulation);
             SetDefaulEvacuationtGroup(); //just sets default group fallback
             BuildEvacuationDestinationList(); //duplicate of destination but in an array, needed for random pull of destination
             BuildAvailableEvacuationDestinations();
@@ -481,9 +483,9 @@ namespace PREACT.Evacuation
         {
             EvacuationDestination destination = null;
 
-            if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupCDF)
+            if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupProbability)
             {
-                destination = evacuationGroup.GetWeightedRandomDestination();
+                destination = evacuationGroup.GetProbableDestination();
             }
             else if (evacuationGroup.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean)
             {

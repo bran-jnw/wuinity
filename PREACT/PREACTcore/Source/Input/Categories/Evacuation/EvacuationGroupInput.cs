@@ -2,21 +2,19 @@
 using PREACT.Math;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using PREACT.Utility.Math;
 
 namespace PREACT.Evacuation
 {
-    public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupCDF, EvacGroupClosestEuclidean };
+    public enum DestinationChoices { Random, ClosestEuclidean, EvacGroupProbability, EvacGroupClosestEuclidean };
 
     public class EvacuationGroupInput
     {
         public string Name = string.Empty;
         public PREACTColor Color = PREACTColor.white;
-        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupCDF;
-        public List<string> Destinations = new List<string>(16);
-        public List<double> DestinationsCDF = new List<double>(16);
-        public List<string> ResponseCurves = new List<string>(16);
-        public List<double> ResponseCurvesCDF = new List<double>(16);
+        public DestinationChoices DestinationChoice = DestinationChoices.EvacGroupProbability;
+        public List<(string, double)> Destinations = new List<(string, double)>(8);
+        public List<(string, double)> EvacuationBehaviors = new List<(string, double)>(8);
         public string Demographics = string.Empty;
         public string ShapeFile = string.Empty;
         public bool Default = false;
@@ -27,7 +25,8 @@ namespace PREACT.Evacuation
         }
 
         public static void Parse(Dictionary<string, EvacuationGroupInput> newInputs, string[] inputLines, List<int> evacGroupLineIndices, 
-            Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, SimulationInput simulation, PopulationInput population, string rootFolder, out bool success)
+            Dictionary<string, EvacuationDestinationInput> destinationInputs, Dictionary<string, ResponseCurve> responseCurves, Dictionary<string, EvacuationBehaviorInput> evacBehaviorInputs,
+            SimulationInput simulation, PopulationInput population, string rootFolder, out bool success)
         {            
             success = false;
             newInputs.Clear();
@@ -69,8 +68,8 @@ namespace PREACT.Evacuation
                         case nameof(DestinationChoices.ClosestEuclidean):
                             newInput.DestinationChoice = DestinationChoices.ClosestEuclidean;
                             break;
-                        case nameof(DestinationChoices.EvacGroupCDF):
-                            newInput.DestinationChoice = DestinationChoices.EvacGroupCDF;
+                        case nameof(DestinationChoices.EvacGroupProbability):
+                            newInput.DestinationChoice = DestinationChoices.EvacGroupProbability;
                             break;
                         case nameof(DestinationChoices.EvacGroupClosestEuclidean):
                             newInput.DestinationChoice = DestinationChoices.EvacGroupClosestEuclidean;
@@ -121,19 +120,23 @@ namespace PREACT.Evacuation
                 nameOfInput = nameof(Destinations);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    success = true;
-                    string[] data = userInput.Split(',');
-                    for (int j = 0; j < data.Length; ++j)
+                    success = ReferenceProbabilityPairs.TryParse(userInput, newInput.Destinations);
+                    if(success)
                     {
-                        if (destinationInputs.ContainsKey(data[j]))
+                        //validate data
+                        for (int j = 0; j < newInput.Destinations.Count; ++j)
                         {
-                            newInput.Destinations.Add(data[j]);
+                            if (!destinationInputs.ContainsKey(newInput.Destinations[j].Item1))
+                            {
+                                success = false;
+                                PREACTInput.MissingReferenceToOtherInput(nameOfInput, newInput.Destinations[j].Item1);
+                            }
                         }
-                        else
-                        {
-                            success = false;
-                            PREACTInput.MissingReferenceToOtherInput(nameOfInput, data[j]);
-                        }
+                    }
+                    else
+                    {
+                        success = false;
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                     }
                 }
                 else
@@ -141,62 +144,32 @@ namespace PREACT.Evacuation
                     success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput, true);
                 }
-                if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupCDF || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
+                if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupProbability || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
                 {
                     break;
                 }
 
-                //maybe critical
-                if (newInput.Destinations.Count == 1)
+                //critical
+                nameOfInput = nameof(EvacuationBehaviors);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    newInput.DestinationsCDF.Add(1.0);
-                }
-                else
-                {
-                    nameOfInput = nameof(DestinationsCDF);
-                    if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                    success = ReferenceProbabilityPairs.TryParse(userInput, newInput.EvacuationBehaviors);
+                    if (success)
                     {
-                        string[] data = userInput.Split(',');
-                        for (int j = 0; j < data.Length; ++j)
+                        //validate data
+                        for (int j = 0; j < newInput.EvacuationBehaviors.Count; ++j)
                         {
-                            double cumulativeProbability;
-                            success = double.TryParse(data[j], out cumulativeProbability);
-                            if (success)
+                            if (!evacBehaviorInputs.ContainsKey(newInput.EvacuationBehaviors[j].Item1))
                             {
-                                newInput.DestinationsCDF.Add(cumulativeProbability);
-                            }
-                            else
-                            {
-                                PREACTInput.CouldNotInterpretInputMessage(nameOfInput, data[j]);
-                                break;
+                                success = false;
+                                PREACTInput.MissingReferenceToOtherInput(nameOfInput, newInput.EvacuationBehaviors[j].Item1);
                             }
                         }
                     }
                     else
                     {
                         success = false;
-                        PREACTInput.InputNotFoundMessage(nameOfInput, true);
-                    }
-                    if (newInput.Destinations.Count != newInput.DestinationsCDF.Count)
-                    {
-                        success = false;
-                        PREACTInput.IncorrectInputCount(nameOfInput);
-                    }
-                    if (!success && (newInput.DestinationChoice == DestinationChoices.EvacGroupCDF || newInput.DestinationChoice == DestinationChoices.EvacGroupClosestEuclidean))
-                    {
-                        break;
-                    }
-                }
-
-                //critical
-                nameOfInput = nameof(ResponseCurves);
-                if (inputToParse.TryGetValue(nameOfInput, out userInput))
-                {
-                    success = true;
-                    string[] data = userInput.Split(',');
-                    for (int j = 0; j < data.Length; ++j)
-                    {
-                        newInput.ResponseCurves.Add(data[j]);
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                     }
                 }
                 else
@@ -207,48 +180,6 @@ namespace PREACT.Evacuation
                 if (!success)
                 {
                     break;
-                }
-
-                //maybe critical
-                if (newInput.ResponseCurves.Count == 1)
-                {
-                    newInput.ResponseCurvesCDF.Add(1.0);
-                }
-                else
-                {
-                    nameOfInput = nameof(ResponseCurvesCDF);
-                    if (inputToParse.TryGetValue(nameOfInput, out userInput))
-                    {
-                        string[] data = userInput.Split(',');
-                        for (int j = 0; j < data.Length; ++j)
-                        {
-                            double cumulativeProbability;
-                            success = double.TryParse(data[j], out cumulativeProbability);
-                            if (success)
-                            {
-                                newInput.ResponseCurvesCDF.Add(cumulativeProbability);
-                            }
-                            else
-                            {
-                                PREACTInput.CouldNotInterpretInputMessage(nameOfInput, data[j]);
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        success = false;
-                        PREACTInput.InputNotFoundMessage(nameOfInput, true);
-                    }
-                    if (newInput.ResponseCurves.Count != newInput.ResponseCurvesCDF.Count)
-                    {
-                        success = false;
-                        PREACTInput.IncorrectInputCount(nameOfInput);
-                    }
-                    if (!success)
-                    {
-                        break;
-                    }
                 }
 
                 //maybe critical

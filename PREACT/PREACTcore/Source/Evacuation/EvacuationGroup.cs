@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using PREACT.Math;
+using PREACT.Utility.Math;
 
 namespace PREACT.Evacuation
 {
@@ -16,10 +17,9 @@ namespace PREACT.Evacuation
         private DestinationChoices _destinationChoice;
         private PREACTColor _color;
         private bool _default;
+        private CDFSampler<EvacuationBehavior> _evacuationBehaviorsCDF;
         private List<EvacuationDestination> _destinations;
-        private List<double> _destinationsCDF;
-        private List<ResponseCurve> _responseCurves;
-        private List<double> _responseCurvesCDF;
+        private CDFSampler<EvacuationDestination> _destinationsCDF;        
         private Demographics _demographics;
         private List<Pedestrian.MacroHousehold> _groupHouseholds;
 
@@ -37,7 +37,7 @@ namespace PREACT.Evacuation
         public List<Pedestrian.MacroHousehold> Households { get => _groupHouseholds; }
 
 
-        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
+        public EvacuationGroup(EvacuationGroupInput groupInput, Dictionary<string, EvacuationBehavior> allBehaviors, Dictionary<string, EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
         {
             _name = groupInput.Name;
             _destinationChoice = groupInput.DestinationChoice;
@@ -49,37 +49,41 @@ namespace PREACT.Evacuation
                 _demographics = simulation.Evacuation.DefaultDemographics;
             }
 
+            //create behaviors
+            EvacuationBehavior[] behaviors = new EvacuationBehavior[groupInput.EvacuationBehaviors.Count];
+            double[] behaviorProbabilities = new double[groupInput.EvacuationBehaviors.Count];
+            for (int i = 0; i < groupInput.EvacuationBehaviors.Count; ++i)
+            {
+                EvacuationBehavior behavior;
+                if (allBehaviors.TryGetValue(groupInput.EvacuationBehaviors[i].Item1, out behavior))
+                {
+                    behaviors[i] = behavior;
+                    behaviorProbabilities[i] = groupInput.EvacuationBehaviors[i].Item2;
+                }
+                else
+                {
+                    Engine.Message(simulation, Engine.LogType.SimulationError, "When creating evacuation groups a referenced behavior was not found.");
+                }
+            }
+            _evacuationBehaviorsCDF = new CDFSampler<EvacuationBehavior>(behaviorProbabilities, behaviors);
+
             //this is where we need to "re-build" the information from input
             _destinations = new List<EvacuationDestination>(groupInput.Destinations.Count);
-            for(int i = 0; i < groupInput.Destinations.Count; ++i)
+            double[] destinationProbabilities = new double[groupInput.Destinations.Count];
+            for (int i = 0; i < groupInput.Destinations.Count; ++i)
             {
                 EvacuationDestination eD;
-                if (allDestinations.TryGetValue(groupInput.Destinations[i], out eD))
+                if (allDestinations.TryGetValue(groupInput.Destinations[i].Item1, out eD))
                 {
-                    Destinations.Add(eD);
+                    _destinations.Add(eD);
+                    destinationProbabilities[i] = groupInput.Destinations[i].Item2;
                 }
                 else
                 {
                     Engine.Message(simulation, Engine.LogType.SimulationError, "When creating evacuation groups a referenced group name was not found.");
                 }
             }
-            _destinationsCDF = groupInput.DestinationsCDF;
-
-            _responseCurves = new List<ResponseCurve>(groupInput.ResponseCurves.Count);
-            for (int i = 0; i < groupInput.ResponseCurves.Count; ++i)
-            {
-                ResponseCurve rC;
-                if (allResponseCurves.TryGetValue(groupInput.ResponseCurves[i], out rC))
-                {
-                    _responseCurves.Add(rC);
-                }
-                else
-                {
-                    Engine.Message(simulation, Engine.LogType.SimulationError, "When creating evacuation groups a referenced response curve was not found.");
-                }
-            }
-
-            _responseCurvesCDF = groupInput.ResponseCurvesCDF;
+            _destinationsCDF = new CDFSampler<EvacuationDestination>(destinationProbabilities, _destinations.ToArray());           
 
             string shapeFilePath = System.IO.Path.Combine(simulation.Input.RootFolder, groupInput.ShapeFile);
             CreateShapeFilePolygon(simulation, shapeFilePath);
@@ -87,14 +91,19 @@ namespace PREACT.Evacuation
             _groupHouseholds = new List<Pedestrian.MacroHousehold>();
         }
 
-        public static Dictionary<string, EvacuationGroup> CreateGroupsFromInput(Dictionary<string, EvacuationGroupInput> groupsInput, Dictionary<string, 
-            EvacuationDestination> allDestinations, Dictionary<string, ResponseCurve> allResponseCurves, Dictionary<string, Demographics> allDemographics, Simulation simulation)
+        public static Dictionary<string, EvacuationGroup> CreateGroupsFromInput(
+            Dictionary<string, EvacuationGroupInput> groupsInput,
+            Dictionary<string, EvacuationBehavior> allEvacuationBehaviors,
+            Dictionary<string, EvacuationDestination> allDestinations, 
+            Dictionary<string, ResponseCurve> allResponseCurves, 
+            Dictionary<string, Demographics> allDemographics, 
+            Simulation simulation)
         {
             Dictionary<string, EvacuationGroup> groups = new Dictionary<string, EvacuationGroup>(groupsInput.Count);
             int index = 0;
             foreach(EvacuationGroupInput eGI in groupsInput.Values)
             {
-                groups.Add(eGI.Name, new EvacuationGroup(eGI, allDestinations, allResponseCurves, allDemographics, simulation));
+                groups.Add(eGI.Name, new EvacuationGroup(eGI, allEvacuationBehaviors, allDestinations, allResponseCurves, allDemographics, simulation));
                 ++index;
             }
 
@@ -239,22 +248,14 @@ namespace PREACT.Evacuation
             return result;
         }
 
-        public EvacuationDestination GetWeightedRandomDestination()
+        public EvacuationBehavior GetProbableEvacuationBehavior()
         {
-            float randomChoice = Random.valueF;
-            EvacuationDestination eD = Destinations[0];            
+            return _evacuationBehaviorsCDF.DrawSample();
+        }
 
-            for (int i = 0; i < _destinationsCDF.Count; i++)
-            {
-                if (randomChoice <= _destinationsCDF[i])
-                {
-                    return Destinations[i];
-                }
-            }
-
-            //this should not happen, but keep as backup as we do not want to return null
-            Engine.Message(null, Engine.LogType.Warning, "The evacuation _destinations specified have cumulative probability under 1.0 and a higher probability was drawn, using last user destination specified as fallback.");            
-            return eD;
+        public EvacuationDestination GetProbableDestination()
+        {
+            return _destinationsCDF.DrawSample();
         }
 
         public EvacuationDestination GetClosestEuclideanDestination(Vector2d startLatLon, Simulation simulation)
@@ -275,36 +276,7 @@ namespace PREACT.Evacuation
             }
             
             return closestDestination;
-        }
-
-        public float GetWeightedRandomResponseTime()
-        {
-            float responseTime = float.MaxValue;
-            float r = Random.valueF;
-            //get curve index from evac group
-            ResponseCurve pickedCurve = _responseCurves[0];
-            for (int i = 0; i < _responseCurves.Count; i++)
-            {
-                if (r <= _responseCurvesCDF[i])
-                {
-                    pickedCurve = _responseCurves[i];
-                    break;
-                }
-            }
-
-            //need new random
-            r = Random.valueF;            
-            for (int i = 1; i < pickedCurve.DataPoints.Length; i++) //skip first as that is always zero probability
-            {
-                if (r <= pickedCurve.DataPoints[i].Probability)
-                {
-                    responseTime = Random.Range(pickedCurve.DataPoints[i - 1].Time, pickedCurve.DataPoints[i].Time);
-                    break;
-                }
-            }
-
-            return responseTime;
-        }        
+        }               
 
         public void RegisterHousehold(Pedestrian.MacroHousehold mH)
         {

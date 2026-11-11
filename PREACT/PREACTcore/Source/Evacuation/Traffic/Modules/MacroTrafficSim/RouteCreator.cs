@@ -286,7 +286,7 @@ namespace PREACT.Traffic
             {
                 if (evacGroup != null)
                 {
-                    EvacuationDestination goal = evacGroup.GetWeightedRandomDestination();
+                    EvacuationDestination goal = evacGroup.GetProbableDestination();
                     rC.SelectForcedNonBlocked(goal, simulation);
                 }
                 else
