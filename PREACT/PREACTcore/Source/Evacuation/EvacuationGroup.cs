@@ -282,5 +282,26 @@ namespace PREACT.Evacuation
         {
             _groupHouseholds.Add(mH);
         }
+
+        public List<Pedestrian.MacroHousehold> GetNeighbors(Pedestrian.MacroHousehold mH, double radius)
+        {
+            List<Pedestrian.MacroHousehold>  neighbors = new List<Pedestrian.MacroHousehold>();
+            Vector2d householdPos = mH.HomePosition;
+            double radiusSquared = radius * radius;
+            for (int i = 0; i < _groupHouseholds.Count; ++i)
+            {
+                if (_groupHouseholds[i] == mH)
+                {
+                    continue;
+                }
+                double distanceSquared = Vector2d.SqrMagnitude(householdPos -_groupHouseholds[i].HomePosition);
+                if (distanceSquared <= radiusSquared)
+                {
+                    neighbors.Add(_groupHouseholds[i]);
+                }
+            }
+
+            return neighbors;
+        }
     }
 }

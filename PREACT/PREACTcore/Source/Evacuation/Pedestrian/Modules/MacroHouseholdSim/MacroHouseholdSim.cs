@@ -80,7 +80,7 @@ namespace PREACT.Pedestrian
                     householdPositions[householdIndex] = household.GetPositionAndState(currentTime);
                     ++householdIndex;
 
-                    if(household.CurrentState == MacroHousehold.MovementState.Defending)
+                    if(household.CurrentMovementState == MacroHousehold.MovementState.Defending)
                     {
                         totalHouseholdsLeft++;
                         continue;
@@ -88,7 +88,7 @@ namespace PREACT.Pedestrian
 
                     household.Step(this, currentTime, deltaTime);
 
-                    if(household.CurrentState == MacroHousehold.MovementState.EvacByVehicle)
+                    if(household.CurrentMovementState == MacroHousehold.MovementState.EvacByVehicle)
                     {
                         //walkingDistance += household.walkingDistance;
                         ++householdsDone;
@@ -153,7 +153,7 @@ namespace PREACT.Pedestrian
             for(int i = 0; i < evacuationGroup.Households.Count; i++)
             {
                 MacroHousehold household = evacuationGroup.Households[i];
-                household.StartEvacuation(simulationTime, this);
+                household.ReceiveEvacuationOrder(simulationTime, this);
             }
         }
 
@@ -162,7 +162,7 @@ namespace PREACT.Pedestrian
             ++totalHouseholdsReacted;
             totalPeopleReacted += household.PeopleInHousehold;
             //for now waiting for pickup counts as staying until we have a model that can actually pick them up
-            if(household.CurrentState == MacroHousehold.MovementState.Defending || household.CurrentState == MacroHousehold.MovementState.WaitingForPickup)
+            if(household.CurrentMovementState == MacroHousehold.MovementState.Defending || household.CurrentMovementState == MacroHousehold.MovementState.WaitingForPickup)
             {
                 totalPeopleWhoWillNotEvacuate += household.PeopleInHousehold;
             }
@@ -279,6 +279,11 @@ namespace PREACT.Pedestrian
                 }
             }
 
+            for(int i = 0; i < _macroHouseholds.Count; ++i)
+            {
+                _macroHouseholds[i].CollectNeighbors();
+            }
+
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined groups: {culledHouseholdsOutsideGroups}/{culledPeopleOutsideGroups}");
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined simulation domain: {culledHouseholdsOutsideDomain}/{culledPeopleOutsideDomain}");
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people without vehicles: {householdswithoutVehicles}/{peoplewithoutVehicles}");
@@ -312,12 +317,12 @@ namespace PREACT.Pedestrian
             {
                 MacroHousehold household = _macroHouseholds[i];
                 //if we are doing nothing or preparing as preparation might be sped up
-                if(household.CurrentState == MacroHousehold.MovementState.Routine || household.CurrentState == MacroHousehold.MovementState.PreEvacuation)
+                if(household.CurrentMovementState == MacroHousehold.MovementState.Routine || household.CurrentMovementState == MacroHousehold.MovementState.PreEvacuation)
                 {
                     float distance = _simulation.Hazards.DistanceToWildfire(_macroHouseholds[i].HomePosition);
                     if (distance <= 500.0)
                     {
-                        household.StartEvacuation(simulationTime, this);
+                        household.ReceiveEvacuationOrder(simulationTime, this);
                     }
                 }
                            
