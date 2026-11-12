@@ -57,6 +57,7 @@ namespace PREACT.Pedestrian
             return totalHouseholds; 
         }
 
+        int tick = 0;
         /// <summary>
         /// Advances the macro human simulation.
         /// Loops through all cells and all households per cell and check if they have reached their goal (car)
@@ -64,21 +65,22 @@ namespace PREACT.Pedestrian
         /// <param name="deltaTime"></param>
         /// <param name="currentTime"></param>
         public override void Step(double currentTime, double deltaTime)
-        {            
+        {
+            ++tick;
+            int startIndex = tick % 8;
+
             if (!evacuationDone)
             {                
                 float walkingDistance = 0f;
                 int householdsDone = 0;
-                int householdIndex = 0;
                 int totalHouseholdsLeft = 0; 
 
-                for (int i = 0; i < _macroHouseholds.Count; ++i)
+                for (int i = startIndex; i < _macroHouseholds.Count; i += 8)
                 {
                     MacroHousehold household = _macroHouseholds[i];
 
                     //update position array for visualization
-                    householdPositions[householdIndex] = household.GetPositionAndState(currentTime);
-                    ++householdIndex;
+                    householdPositions[i] = household.GetPositionAndState(currentTime);
 
                     if(household.CurrentMovementState == MacroHousehold.MovementState.Defending)
                     {
@@ -86,7 +88,7 @@ namespace PREACT.Pedestrian
                         continue;
                     }
 
-                    household.Step(this, currentTime, deltaTime);
+                    household.Step(this, currentTime, deltaTime * 8);
 
                     if(household.CurrentMovementState == MacroHousehold.MovementState.EvacByVehicle)
                     {
