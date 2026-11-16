@@ -10,9 +10,10 @@ namespace PREACT.Input
         public List<(string, double)> AwakeResponseCurves = new List<(string, double)>(8);
         public List<(string, double)> AsleepResponseCurves = new List<(string, double)>(8);
         public List<(string, double)> DireResponseCurves = new List<(string, double)>(8);
-        public List<string> ResponseTriggers = new List<string>(8);
+        public List<string> BehaviorTriggers = new List<string>(8);
         public double InformationAwareness = 1.0;
         public double InformationCompliance = 1.0;
+        public double UseMultipleVehiclesProbability = 0.0;
 
         public EvacuationBehaviorInput()
         {
@@ -108,14 +109,14 @@ namespace PREACT.Input
                 }
 
                 //not critical
-                nameOfInput = nameof(ResponseTriggers);
+                nameOfInput = nameof(BehaviorTriggers);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
                     string[] triggers = userInput.Split(',');
-                    newInput.ResponseTriggers.Clear();
+                    newInput.BehaviorTriggers.Clear();
                     for (int j = 0; j < triggers.Length; ++j)
                     {
-                        newInput.ResponseTriggers.Add(triggers[j]);
+                        newInput.BehaviorTriggers.Add(triggers[j]);
                     }
                 }
                 else
@@ -140,13 +141,9 @@ namespace PREACT.Input
                 }
                 else
                 {
-                    success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput, false, newInput.InformationAwareness.ToString());
                 }
-                if (!success)
-                {
-                    return;
-                }
+                success = true;
 
                 //not critical
                 nameOfInput = nameof(InformationCompliance);
@@ -160,15 +157,27 @@ namespace PREACT.Input
                 }
                 else
                 {
-                    success = false;
                     PREACTInput.InputNotFoundMessage(nameOfInput, false, newInput.InformationCompliance.ToString());
                 }
-                if (!success)
-                {
-                    return;
-                }
+                success = true;
 
-                if(success)
+                //not critical
+                nameOfInput = nameof(UseMultipleVehiclesProbability);
+                if (inputToParse.TryGetValue(nameOfInput, out userInput))
+                {
+                    success = double.TryParse(userInput, out newInput.UseMultipleVehiclesProbability);
+                    if (!success)
+                    {
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
+                    }
+                }
+                else
+                {
+                    PREACTInput.InputNotFoundMessage(nameOfInput, false, newInput.UseMultipleVehiclesProbability.ToString());
+                }
+                success = true;
+
+                if (success)
                 {
                     newInputs.Add(newInput.Name, newInput);
                 }

@@ -47,7 +47,7 @@ namespace PREACT.Evacuation
                 using (StreamReader sr = new StreamReader(filePath))
                 {
                     List<int> data = new List<int>();
-                    List<double> cdf = new List<double>();
+                    List<double> probabilities = new List<double>();
                     sr.ReadLine(); // skip header
                     while (!sr.EndOfStream)
                     {
@@ -60,7 +60,7 @@ namespace PREACT.Evacuation
                                 if (int.TryParse(parts[0], out int householdSize) && double.TryParse(parts[1], out double cumProb))
                                 {
                                     data.Add(householdSize);
-                                    cdf.Add(cumProb);
+                                    probabilities.Add(cumProb);
                                 }
                                 else
                                 {
@@ -76,9 +76,9 @@ namespace PREACT.Evacuation
                         }
                     }
 
-                    if (data.Count > 0 && cdf.Count > 0)
+                    if (data.Count > 0 && probabilities.Count > 0)
                     {
-                        result = new HouseholdDemographics(data, cdf);
+                        result = new HouseholdDemographics(data, probabilities);
                         success = true;
 
                     }

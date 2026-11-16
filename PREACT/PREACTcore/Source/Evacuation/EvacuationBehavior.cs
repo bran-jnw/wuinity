@@ -10,19 +10,24 @@ namespace PREACT.Evacuation
     {
         private string _name;
         private List<string> ResponseTriggers = new List<string>(8);
-        private double _informationAwareness;
-        private double _informationCompliance;
+        private double _informationAwareness = 1.0;
+        private double _informationCompliance = 1.0;
+        private double _useMultipleVehiclesProbability = 0.0;
 
         private CDFSampler<ResponseCurve> _awakeResponseCurvesCDF;
         private CDFSampler<ResponseCurve> _asleepResponseCurvesCDF;
         private CDFSampler<ResponseCurve> _direResponseCurvesCDF;
 
+
+        public double UseMultipleVehiclesProbability { get => _useMultipleVehiclesProbability; }
+
         public EvacuationBehavior(Simulation simulation, EvacuationBehaviorInput input, Dictionary<string, ResponseCurve> allResponseCurves)
         {
             _name = input.Name;
-            ResponseTriggers = input.ResponseTriggers;
+            ResponseTriggers = input.BehaviorTriggers;
             _informationAwareness = input.InformationAwareness;
             _informationCompliance = input.InformationCompliance;
+            _useMultipleVehiclesProbability = input.UseMultipleVehiclesProbability;
 
             //awake
             ResponseCurve[] awakeResponseCurves = new ResponseCurve[input.AwakeResponseCurves.Count];

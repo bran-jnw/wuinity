@@ -62,20 +62,20 @@ namespace PREACT.Evacuation
                                 if (int.TryParse(rowData[0], out int householdSize))
                                 {
                                     List<int> numberofVehicles = new List<int>();
-                                    List<double> cdf = new List<double>();
+                                    List<double> probabilities = new List<double>();
 
                                     for (int i = 1; i < rowData.Length; ++i)
                                     {
-                                        if (double.TryParse(rowData[i], out double cumProb))
+                                        if (double.TryParse(rowData[i], out double prob))
                                         {
                                             numberofVehicles.Add(i-1);
-                                            cdf.Add(cumProb);
+                                            probabilities.Add(prob);
                                         }
                                     }
 
                                     if (numberofVehicles.Count > 0)
                                     {
-                                        cdfs.Add(householdSize, new Utility.Math.CDFSampler<int>(cdf.ToArray(), numberofVehicles.ToArray()));
+                                        cdfs.Add(householdSize, new Utility.Math.CDFSampler<int>(probabilities.ToArray(), numberofVehicles.ToArray()));
                                     }
                                     else
                                     {

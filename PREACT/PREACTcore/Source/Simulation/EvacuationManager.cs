@@ -128,7 +128,7 @@ namespace PREACT.Evacuation
 
         private void HandleNewVehicles()
         {
-            //handle/inject vehicleCount that arrived this timestep
+            //handle/inject _vehicleCount that arrived this timestep
             if (_trafficModule != null)
             {
                 _pathfindingStopwatch.Start();

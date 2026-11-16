@@ -240,9 +240,9 @@ namespace PREACT
         {
             PreSimulations(engineTask);
 
-            //we run them in batches as running everything at once will likely overload the CPU cores, and we might waste a lot of processing power since we could terminate early if we reach convergence
+            //we run them in BATCHES as running everything at once will likely overload the CPU cores, and we might waste a lot of processing power since we could terminate early if we reach convergence
             int batches = engineTask.NumberOfRuns / engineTask.BatchSize + (engineTask.NumberOfRuns % engineTask.BatchSize > 0 ? 1 : 0);
-            Message(null, LogType.Log, "Running a max total of " + batches +" batches with a batch size (parallel simulations) of " + engineTask.BatchSize);
+            Message(null, LogType.Log, "Running a max total of " + batches +" BATCHES with a batch size (parallel simulations) of " + engineTask.BatchSize);
             int simulationIndex = engineTask.SimulationIndexOffset;
             for (int i = 0; i < batches; ++i)
             {

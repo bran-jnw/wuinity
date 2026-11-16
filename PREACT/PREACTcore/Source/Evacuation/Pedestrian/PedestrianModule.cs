@@ -17,7 +17,7 @@ namespace PREACT.Pedestrian
         }
 
         public abstract void ReactToWildfire(double simulationTime);
-        public abstract int GetTotalCars();
+        public abstract int GetTotalVehicles();
         public abstract int GetPeopleStaying();
         public abstract int GetPeopleLeft();
         public abstract int GetVehiclesReached();

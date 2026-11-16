@@ -29,12 +29,12 @@ namespace PREACT.Traffic
             _cityFlow.nextStep();
             var vehicles = _cityFlow.getVehicles(true);
             //GetVehicles(engine);
-            /*for (int j = 0; j < vehicleCount; ++j)
+            /*for (int j = 0; j < _vehicleCount; ++j)
             {
                 IntPtr b = _cityFlow.veh
                 string c = Marshal.PtrToStringAnsi(b);
                 //MonoBehaviour.print(c);
-                //print(vehicleCount);
+                //print(_vehicleCount);
             }*/
         }
 

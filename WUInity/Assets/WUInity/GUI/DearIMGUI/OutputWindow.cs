@@ -44,13 +44,8 @@ namespace Assets.WUInity.GUI.DearIMGUI
             ImGui.SeparatorText("General");
             ImGui.BulletText($"{nameof(sim.Time.SimulationTime)}: {(int)sim.Time.SimulationTime} s");
             ImGui.BulletText($"{nameof(sim.Time.CurrentDateTime)}: {sim.Time.CurrentDateTime.ToString(CultureInfo.CurrentCulture)}");
-            ImGui.BulletText($"{nameof(sim.Input.Population.Data.TotalPopulation)}: {sim.Input.Population.Data.TotalPopulation}");                        
-
-            if (sim.Evacuation.PedestrianModule != null)
-            {
-                ImGui.BulletText($"People staying: {sim.Evacuation.PedestrianModule.GetPeopleStaying()}");
-                ImGui.BulletText($"Total vehicleCount: {sim.Evacuation.PedestrianModule.GetTotalCars()}");
-            }
+            ImGui.BulletText($"Total input population: {sim.Input.Population.Data.TotalPopulation}");
+            ImGui.BulletText($"Total input households: {sim.Input.Population.Data.Households.Length}");
 
             ImGui.SeparatorText("Simulation state");
             if (sim.State == Simulation.SimulationState.Running)
@@ -105,30 +100,34 @@ namespace Assets.WUInity.GUI.DearIMGUI
 
             if (sim.Input.PedestrianModule.Enabled && sim.Evacuation.PedestrianModule != null)
             {
+                ImGui.BulletText($"Active total population: {sim.Evacuation.PedestrianModule.GetTotalPopulation()}");
+                ImGui.BulletText($"Active total households: {sim.Evacuation.PedestrianModule.GetTotalHouseHolds()}");
+                ImGui.BulletText($"Active total vehicles available: {sim.Evacuation.PedestrianModule.GetTotalVehicles()}");
+
+                ImGui.BulletText($"People not leaving: {sim.Evacuation.PedestrianModule.GetPeopleStaying()}");   
                 ImGui.BulletText($"People left: {sim.Evacuation.PedestrianModule.GetPeopleLeft()} /  {sim.Evacuation.PedestrianModule.GetTotalPopulation()}");
-                ImGui.BulletText($"Vehicles reached: {sim.Evacuation.PedestrianModule.GetVehiclesReached()}");                
+                ImGui.BulletText($"Vehicles reached: {sim.Evacuation.PedestrianModule.GetVehiclesReached()}");
+
+                for (int i = 0; i < sim.Evacuation.Destinations.Count; i++)
+                {
+                    string name = sim.Evacuation.Destinations[i].Name;
+                    ImGui.BulletText($"{name}: {sim.Evacuation.Destinations[i].CurrentPeople} ({sim.Evacuation.Destinations[i].Vehicles.Count})");
+
+                }
+                ImGui.BulletText($"Total evacuated: {sim.Evacuation.GetTotalEvacuated()} / {sim.Evacuation.PedestrianModule.GetTotalPopulation() - sim.Evacuation.PedestrianModule.GetPeopleStaying()}");
             }
 
-            //vehicleCount still left
+            //_vehicleCount still left
             if (sim.Input.TrafficModule.Enabled && sim.Evacuation.TrafficModule != null)
             {
                 ImGui.BulletText($"Vehicles left: {sim.Evacuation.TrafficModule.GetNumberOfCarsInSystem()} / {sim.Evacuation.TrafficModule.GetTotalCarsSimulated()}");                
             }
 
-            if (sim.Input.PedestrianModule.Enabled)
-            {
-                for (int i = 0; i < sim.Evacuation.Destinations.Count; i++)
-                {
-                    string name = sim.Evacuation.Destinations[i].Name;
-                    ImGui.BulletText($"{name}: {sim.Evacuation.Destinations[i].CurrentPeople} ({ sim.Evacuation.Destinations[i].Vehicles.Count})");
-                    
-                }
-                ImGui.BulletText($"Total evacuated: {sim.Evacuation.GetTotalEvacuated()} / {sim.Evacuation.PedestrianModule.GetTotalPopulation() - sim.Evacuation.PedestrianModule.GetPeopleStaying()}");                
-            }
-
-            ImGui.SeparatorText("Wildfire spread");
+            
             if (sim.Input.WildfireModule.Enabled && sim.State == Simulation.SimulationState.Running)
             {
+                ImGui.SeparatorText("Wildfire spread");
+
                 ImGui.BulletText($"Active cells (FireMesh): {sim.Hazards.Wildfire.GetActiveCellCount()}");
                 //fire visual mode
                 ImGui.SeparatorText("Fire display mode");

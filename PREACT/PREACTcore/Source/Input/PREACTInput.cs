@@ -115,6 +115,7 @@ namespace PREACT.Input
             List<int> demographicsLineIndices = new List<int>();
             List<int> eventsLineIndices = new List<int>();
             List<int> evacuationBehaviorLineIndices = new List<int>();
+            List<int> behaviorTriggerLineIndices = new List<int>();
 
             //first index all headers
             for (int i = 0; i < inputLines.Length; ++i)
@@ -161,6 +162,10 @@ namespace PREACT.Input
                     else if (line.Equals("EvacuationBehavior"))
                     {
                         evacuationBehaviorLineIndices.Add(i);
+                    }
+                    else if (line.Equals("BehaviorTrigger"))
+                    {
+                        behaviorTriggerLineIndices.Add(i);
                     }
                     else
                     {

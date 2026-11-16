@@ -38,8 +38,8 @@ namespace PREACT
             {
                 ScottPlot.Plot timeTraffic = new ScottPlot.Plot(512, 512);
                 timeTraffic.AddScatterLines(xData, yData);
-                timeTraffic.Title("Average cumulative arrival of vehicleCount");
-                timeTraffic.YLabel("Number of vehicleCount [-]");
+                timeTraffic.Title("Average cumulative arrival of _vehicleCount");
+                timeTraffic.YLabel("Number of _vehicleCount [-]");
                 timeTraffic.XLabel("Time [h]");
                 //string plotPath = timeTraffic.SaveFig(System.IO.Path.Combine(WUIEngine.OUTPUT_FOLDER, "traffic_avg.png"));
                 byte[] byteData = timeTraffic.GetImageBytes();

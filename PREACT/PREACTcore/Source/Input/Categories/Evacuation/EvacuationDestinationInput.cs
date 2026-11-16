@@ -1,6 +1,7 @@
 using PREACT.Math;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace PREACT.Input
 {
@@ -9,27 +10,14 @@ namespace PREACT.Input
         public string Name = string.Empty;
         public Vector2d LatLon = Vector2d.zero;        
         public DestinationTypes Type = DestinationTypes.Exit;
-        public float MaxFlow = -1f; //vehicleCount per hour
+        public float MaxFlow = -1f; //_vehicleCount per hour
         public int MaxVehicles = -1;
         public int MaxPeople = -1;
-        public bool Blocked = false;
         public PREACTColor Color = PREACTColor.Random();
         
         public EvacuationDestinationInput()
         {
 
-        }
-
-        public EvacuationDestinationInput(string name, Vector2d latLon, DestinationTypes type, PREACTColor color, float maxFlow, int maxCars, int maxPeople, bool blocked)
-        {
-            Name = name;
-            LatLon = latLon;
-            Type = type;            
-            Color = color;
-            MaxFlow = maxFlow;
-            MaxVehicles = maxCars;
-            MaxPeople = maxPeople;
-            Blocked = blocked;
         }
 
         public static void Parse(Dictionary<string, EvacuationDestinationInput> newInputs, string[] inputLines, List<int> destinationLineIndices, out bool success)
@@ -88,18 +76,10 @@ namespace PREACT.Input
                 nameOfInput = nameof(Type);
                 if (inputToParse.TryGetValue(nameOfInput, out userInput))
                 {
-                    switch (userInput)
+                    success = Enum.TryParse<DestinationTypes>(userInput, out newInput.Type);
+                    if(!success)
                     {
-                        case nameof(DestinationTypes.Exit):
-                            newInput.Type = DestinationTypes.Exit;
-                            break;
-                        case nameof(DestinationTypes.Shelter):
-                            newInput.Type = DestinationTypes.Shelter;
-                            break;
-                        default:
-                            ++issues;
-                            Engine.Message(null, Engine.LogType.SimulationError, nameOfInput + " was not recognized." + PREACTInput.pleaseCheckInput);
-                            break;
+                        PREACTInput.CouldNotInterpretInputMessage(nameOfInput, userInput);
                     }
                 }
                 else
@@ -157,22 +137,6 @@ namespace PREACT.Input
                 if(!success)
                 {
                     newInput.MaxPeople = -1;
-                }
-
-                //not critical
-                nameOfInput = nameof(Blocked);
-                if (inputToParse.TryGetValue(nameOfInput, out userInput))
-                {
-                    success = bool.TryParse(userInput, out newInput.Blocked);
-                }
-                else
-                {
-                    success = false;
-                    PREACTInput.InputNotFoundMessage(nameOfInput);
-                }
-                if(!success)
-                {
-                    newInput.Blocked = false;
                 }
 
                 //not critical

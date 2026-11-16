@@ -29,11 +29,11 @@ namespace PREACT.Pedestrian
 		private float _startMovingTime;
 		private float _reachAccessPointTime;
 		private int _peopleInHousehold;
-		public int vehicleCount;
+		private int _vehicleCount;
 		private float _travelTime;
 		private PopulationData.HouseholdData _houseHoldData;
 		private Vector2d _homePosition;
-		private Vector2d vehiclePosition;
+		private Vector2d _vehiclePosition;
 		private EvacuationGroup _evacuationGroup;
 		private EvacuationBehavior _evacuationBehavior;
 		private List<MacroHousehold> _neighbors;
@@ -44,6 +44,7 @@ namespace PREACT.Pedestrian
 		public EvacuationGroup EvacuationGroup => _evacuationGroup;
 		public Vector2d HomePosition => _homePosition;
 		public AwarenessState CurrentAwarenessState => _awarenessState;
+		public int VehicleCount { get => _vehicleCount; }
 		
 
 		/// <summary>
@@ -58,12 +59,14 @@ namespace PREACT.Pedestrian
 			_evacuationBehavior = evacuationGroup.GetProbableEvacuationBehavior();
 			_houseHoldData = householdData;
 			_peopleInHousehold = householdData.peopleCount;
-			vehicleCount = Mathd.Min(PeopleInHousehold, evacuationGroup.Demographics.VehicleDemographics.SampleVehicleCount(PeopleInHousehold));
+
+			_vehicleCount = Mathd.Min(PeopleInHousehold, evacuationGroup.Demographics.VehicleDemographics.SampleVehicleCount(_peopleInHousehold));
+
 			Vector2d temp = simulation.Spatial.GetSimulationPosition(householdData.originLatLon);
 			_homePosition = new Vector2d(temp.x, temp.y);
 			temp = simulation.Spatial.GetSimulationPosition(householdData.roadAccessLatLon);
-			vehiclePosition = new Vector2d(temp.x, temp.y);
-			float walkingDistance = (float)Vector2d.Distance(_homePosition, vehiclePosition) * houseInput.WalkingDistanceModifier;
+			_vehiclePosition = new Vector2d(temp.x, temp.y);
+			float walkingDistance = (float)Vector2d.Distance(_homePosition, _vehiclePosition) * houseInput.WalkingDistanceModifier;
 			_travelTime = walkingDistance / walkingSpeed;
 			_movementState = MovementState.Routine;
 		}
@@ -75,8 +78,6 @@ namespace PREACT.Pedestrian
 
 		public void Step(MacroHouseholdSim sim, double simulationTime, double deltaTime)
 		{
-			simulationTime += deltaTime;
-
 			if (_movementState == MovementState.Routine)
 			{
 				if (CheckShadowEvacuation(deltaTime))
@@ -105,15 +106,24 @@ namespace PREACT.Pedestrian
 			{
 				if(simulationTime >= _reachAccessPointTime)
 				{
-                    if (vehicleCount > 0)
+                    int usedVehicles;
+
+                    if (_vehicleCount > 0)
                     {
                         _movementState = MovementState.EvacByVehicle;
-                        sim.ReachedVehicle(this);
+						usedVehicles = 1;
+                        if (_vehicleCount > 1 && _peopleInHousehold > 1)
+						{
+							usedVehicles = Random.valueD < _evacuationBehavior.UseMultipleVehiclesProbability ? 2 : 1;
+                        }						
                     }
                     else
                     {
+						usedVehicles = 0;
                         _movementState = MovementState.WaitingForPickup;
                     }
+
+                    sim.ReachedAccessPoint(this, usedVehicles);
                 }				
 			}
 		}
@@ -204,7 +214,7 @@ namespace PREACT.Pedestrian
             }
         }
 
-		public Vector2d GetVehicleLatLon()
+		public Vector2d GetAccessPointLatLon()
 		{
 			return _houseHoldData.roadAccessLatLon;
 		}
@@ -218,7 +228,7 @@ namespace PREACT.Pedestrian
 			{
 				ratio = 0.0;
 			}
-			Vector2d position = Vector2d.Lerp(_homePosition, vehiclePosition, ratio);
+			Vector2d position = Vector2d.Lerp(_homePosition, _vehiclePosition, ratio);
 			return new Vector4((float)position.x, (float)position.y, PeopleInHousehold, state);
 		}
 	}
