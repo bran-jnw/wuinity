@@ -23,8 +23,8 @@ namespace PREACT.Pedestrian
         List<string> output;
 
         Vector4[] householdPositions;
-        int totalPopulation, totalHouseholds, _totalVehicles;
-        int peopleLeft;
+        int _totalPopulation, _totalHouseholds, _totalVehicles;
+        int _peopleRemaining, _householdsRemaining;
         int _totalPeopleWhoWillNotEvacuate, _totalHouseholdsWhoWillNotEvacuate;
         int _peopleWaitingForPickup, _householdsWaitingForPickup;
         int totalHouseholdsReacted = 0, totalPeopleReacted = 0;
@@ -38,17 +38,17 @@ namespace PREACT.Pedestrian
         {
             PopulateSimulation(simulation.Input.Population.Data.Households);
             output = new List<string>();
-            output.Add("Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total _vehicleCount activated,Avg. walking dist.");
+            output.Add("Time(s),Households remaining,People remaining,Total households responded, Total people responded,Total households reached access point,Total people reached access point,Total vehicles used");
         }
 
         public override int GetTotalPopulation()
         {
-            return totalPopulation;
+            return _totalPopulation;
         }
 
         public override int GetTotalHouseHolds()
         {
-            return totalHouseholds; 
+            return _totalHouseholds; 
         }
 
         int tick = 0;
@@ -68,9 +68,7 @@ namespace PREACT.Pedestrian
 
             if (!evacuationDone)
             {                
-                float walkingDistance = 0f;
-                int householdsDone = 0;
-                int totalHouseholdsLeft = 0; 
+                //int totalHouseholdsLeft = 0; 
 
                 for (int i = startIndex; i < _macroHouseholds.Count; i += BATCHES)
                 {
@@ -79,39 +77,18 @@ namespace PREACT.Pedestrian
                     //update position array for visualization
                     householdPositions[i] = household.GetPositionAndState(currentTime);
 
-                    if(household.CurrentMovementState == MacroHousehold.MovementState.Defending)
-                    {
-                        totalHouseholdsLeft++;
-                        continue;
-                    }
-
                     household.Step(this, currentTime, deltaTime);
-
-                    if(household.CurrentMovementState == MacroHousehold.MovementState.EvacByVehicle)
-                    {
-                        //walkingDistance += household.walkingDistance;
-                        ++householdsDone;
-                    }
-                    else
-                    {
-                        ++totalHouseholdsLeft;
-                    }
                 }
 
-                peopleLeft = totalPopulation - _peopleReachedAccessPoint;
-                if (peopleLeft - _totalPeopleWhoWillNotEvacuate == 0)
+                _peopleRemaining = _totalPopulation - _peopleReachedAccessPoint;
+                _householdsRemaining = _totalHouseholds - _householdsReachedAccessPoint;
+                if (_peopleRemaining - _totalPeopleWhoWillNotEvacuate == 0)
                 {
                     evacuationDone = true;
                 }
 
-                float avgWalkDist = 0f;
-                if (householdsDone > 0)
-                {
-                    avgWalkDist = walkingDistance / householdsDone;
-                }
-
-                //Time(s),Households left,People left,Total households responded, Total people responded,Total households reached car,Total people reached car,Total _vehicleCount activated,Avg. walking dist.
-                output.Add(currentTime + "," + totalHouseholdsLeft + "," + peopleLeft + "," + totalHouseholdsReacted + "," + totalPeopleReacted + "," + _householdsReachedAccessPoint + "," + _peopleReachedAccessPoint + "," + _vehiclesReached + "," + avgWalkDist);
+                //Time(s),Households remaining,People remaining,Total households responded, Total people responded,Total households reached car,Total people reached car,Total _vehicleCount activated,Avg. walking dist.
+                output.Add(currentTime + "," + _householdsRemaining + "," + _peopleRemaining + "," + totalHouseholdsReacted + "," + totalPeopleReacted + "," + _householdsReachedAccessPoint + "," + _peopleReachedAccessPoint + "," + _vehiclesReached);
                 //string output = currentTime + "," +  peopleWhoReachedCar";
                 //SaveToFile(output, false);
             }
@@ -127,9 +104,9 @@ namespace PREACT.Pedestrian
             return householdPositions;
         }
 
-        public override int GetPeopleLeft()
+        public override int GetPeopleRemaining()
         {
-            return peopleLeft;
+            return _peopleRemaining;
         }
 
         public override int GetPeopleStaying()
@@ -227,11 +204,11 @@ namespace PREACT.Pedestrian
 
         private void PopulateSimulation(PopulationData.HouseholdData[] householdData)
         {       
-            totalPopulation = 0;
-            totalHouseholds = householdData.Length;
+            _totalPopulation = 0;
+            _totalHouseholds = householdData.Length;
             for (int i = 0; i < householdData.Length; i++)
             {
-                totalPopulation += householdData[i].peopleCount;
+                _totalPopulation += householdData[i].peopleCount;
             }    
 
             _macroHouseholds = new List<MacroHousehold>();
@@ -254,8 +231,8 @@ namespace PREACT.Pedestrian
                     EvacuationGroup eG = _simulation.Evacuation.GetEvacuationGroup(householdData[i].originLatLon, out bool insideGroup);
                     if(!insideGroup && _simulation.Input.Population.CullOutsideGroups)
                     {
-                        totalPopulation -= householdData[i].peopleCount;
-                        --totalHouseholds;
+                        _totalPopulation -= householdData[i].peopleCount;
+                        --_totalHouseholds;
                         ++culledHouseholdsOutsideGroups;
                         culledPeopleOutsideGroups += householdData[i].peopleCount;                        
                     }
@@ -277,8 +254,8 @@ namespace PREACT.Pedestrian
                 }
                 else
                 {
-                    totalPopulation -= householdData[i].peopleCount;
-                    --totalHouseholds;
+                    _totalPopulation -= householdData[i].peopleCount;
+                    --_totalHouseholds;
                     ++culledHouseholdsOutsideDomain;
                     culledPeopleOutsideDomain += householdData[i].peopleCount;
                 }
@@ -292,12 +269,12 @@ namespace PREACT.Pedestrian
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined groups: {culledHouseholdsOutsideGroups}/{culledPeopleOutsideGroups}");
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined simulation domain: {culledHouseholdsOutsideDomain}/{culledPeopleOutsideDomain}");
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people without vehicles: {householdswithoutVehicles}/{peoplewithoutVehicles}");
-            Engine.Message(_simulation, Engine.LogType.Log, $"Total included population: {totalPopulation}.");
-            Engine.Message(_simulation, Engine.LogType.Log, $"Total included households: {totalHouseholds}.");
+            Engine.Message(_simulation, Engine.LogType.Log, $"Total included population: {_totalPopulation}.");
+            Engine.Message(_simulation, Engine.LogType.Log, $"Total included households: {_totalHouseholds}.");
             Engine.Message(_simulation, Engine.LogType.Log, $"Total vehicle count: {_totalVehicles}.");
 
-            householdPositions = new Vector4[totalHouseholds];
-            peopleLeft = totalPopulation;            
+            householdPositions = new Vector4[_totalHouseholds];
+            _peopleRemaining = _totalPopulation;            
         }
 
         /// <summary>

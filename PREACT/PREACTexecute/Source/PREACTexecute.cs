@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PREACT
 {
-    internal class PREACTexecute :IExternalManager
+    internal class PREACTexecute : IExternalManager
     {
         Engine _engine;
         PREACTInput? _input;

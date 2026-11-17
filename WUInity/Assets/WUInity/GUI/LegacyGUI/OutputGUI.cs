@@ -85,7 +85,7 @@ namespace WUInity.UI
             if (_input.PedestrianModule.Enabled && _engine.Simulation.Evacuation.PedestrianModule != null)
             {
                 //pedestrians still left
-                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.Evacuation.PedestrianModule.GetPeopleLeft() + " / " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalPopulation());
+                GUI.Label(new Rect(buttonColumnStart, buttonIndex * (buttonHeight + 5) + 10, columnWidth, buttonHeight), "Pedestrians left: " + _engine.Simulation.Evacuation.PedestrianModule.GetPeopleRemaining() + " / " + _engine.Simulation.Evacuation.PedestrianModule.GetTotalPopulation());
                 ++buttonIndex;
 
                 //_vehicleCount reached by pedestrians
