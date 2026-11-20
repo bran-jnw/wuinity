@@ -13,7 +13,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	///	Vector Tile Factory
 	/// Vector data is much more detailed compared to terrain and image data so we have a different structure to process
 	/// vector data(compared to other factories). First of all, how does the vector data itself structured? Vector tile
-	/// data contains 'vector layers' as immediate children.And then each of these vector layers contains a number of
+	/// data contains 'vector layers' as immediate childCount.And then each of these vector layers contains a number of
 	/// 'features' inside.I.e.vector data for a tile has 'building', 'road', 'landuse' etc layers. Then building layer
 	/// has a number of polygon features, road layer has line features etc.
 	/// Similar to this, vector tile factory contains bunch of 'layer visualizers' and each one of them corresponds to

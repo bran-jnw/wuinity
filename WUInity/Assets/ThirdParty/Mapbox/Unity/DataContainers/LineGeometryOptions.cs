@@ -48,7 +48,7 @@ namespace Mapbox.Unity.Map
 		/// <summary>
 		/// Sets the type of line joints
 		/// </summary>
-		/// <param name="join">Type of the joint</param>
+		/// <param name="join">householdType of the joint</param>
 		public void SetJoinType(LineJoinType join)
 		{
 			if ((int)JoinType != (int)join)
@@ -61,7 +61,7 @@ namespace Mapbox.Unity.Map
 		/// <summary>
 		/// Sets the type of line beginging and ending caps
 		/// </summary>
-		/// <param name="join">Type of the line begin and end caps</param>
+		/// <param name="join">householdType of the line begin and end caps</param>
 		public void SetCapType(LineCapType cap)
 		{
 			if ((int)CapType != (int)cap)

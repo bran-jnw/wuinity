@@ -27,6 +27,8 @@ namespace PREACT
         private EngineOutput _engineOutput;
         private IExternalManager _externalManager;
         private Simulation[] _simulations;
+        double cumulativeTotalEvacTime = 0.0f;
+        int convergedInSequence;
         private Simulation _mainSimulation; //this one talks to any visualizer         
         private PREACTInput _input;
         private DataStatus _dataStatus;
@@ -175,6 +177,8 @@ namespace PREACT
             Message(null, LogType.Log, "Will try to run a max total of " + engineTask.NumberOfRuns + " simulations unless aborted early (convergence met, user stoppage or simulation error)." );
             _consoleLog.Clear();
 
+            convergedInSequence = 0;
+            cumulativeTotalEvacTime = 0.0f;
             try
             {    
                 Task task;
@@ -242,7 +246,7 @@ namespace PREACT
 
             //we run them in BATCHES as running everything at once will likely overload the CPU cores, and we might waste a lot of processing power since we could terminate early if we reach convergence
             int batches = engineTask.NumberOfRuns / engineTask.BatchSize + (engineTask.NumberOfRuns % engineTask.BatchSize > 0 ? 1 : 0);
-            Message(null, LogType.Log, "Running a max total of " + batches +" BATCHES with a batch size (parallel simulations) of " + engineTask.BatchSize);
+            Message(null, LogType.Log, "Running a max total of " + batches +" batches with a batch size (parallel simulations) of " + engineTask.BatchSize);
             int simulationIndex = engineTask.SimulationIndexOffset;
             for (int i = 0; i < batches; ++i)
             {
@@ -464,8 +468,6 @@ namespace PREACT
             SimulationOutput.SaveLogToDisk(_consoleLog, Path.Combine(OutputFolder, _input.Simulation.Name + ".log"));
         }
 
-        double cumulativeTotalEvacTime = 0.0f;
-        int convergedInSequence = 0;
         List<List<double>> trafficArrivalDataCollection;
         /// <summary>
         /// Each simulation calls this function when it is done to see if evacuation time has vonverged and simulations should be stopped.
@@ -512,6 +514,7 @@ namespace PREACT
             }
             else
             {
+                convergedInSequence = 1;
                 cumulativeTotalEvacTime += RSET;
             }
         }
@@ -570,19 +573,6 @@ namespace PREACT
                 return;
             }
 
-            if (simulation != null)
-            {
-                if(simulation.State == Simulation.SimulationState.Running)
-                {
-                    message = "[Simulation# " + simulation.SimulationIndex + ", " + simulation.Time.CurrentDateTime.ToString() + "s] " + message;
-                }
-                else
-                {
-                    message = $"[Simulation# { simulation.SimulationIndex}] {message}";
-                }
-                
-            }
-
             if (logType == LogType.Warning)
             {
                 message = "WARNING: " + message;
@@ -599,7 +589,7 @@ namespace PREACT
             {
                 message = "EXCEPTION: " + message;
             }
-            else if(logType == LogType.Debug)
+            else if (logType == LogType.Debug)
             {
                 message = "!!!DEBUG!!!: " + message;
             }
@@ -607,7 +597,20 @@ namespace PREACT
             {
                 message = "LOG: " + message;
             }*/
-            message = "[" + DateTime.Now.ToLongTimeString() + "] " + message;
+            message = $"[{DateTime.Now.ToLongTimeString()}] {message}";
+
+            if (simulation != null)
+            {
+                if(simulation.State == Simulation.SimulationState.Running)
+                {
+                    message = $"[Simulation# {simulation.SimulationIndex}, {simulation.Time.CurrentDateTime.ToString()}] {message}";
+                }
+                else
+                {
+                    message = $"[Simulation# { simulation.SimulationIndex}] {message}";
+                }
+                
+            }            
 
             _ENGINE._consoleLog.Add(message);
 

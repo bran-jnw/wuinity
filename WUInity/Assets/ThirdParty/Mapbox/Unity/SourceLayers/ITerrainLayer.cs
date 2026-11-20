@@ -9,7 +9,7 @@ namespace Mapbox.Unity.Map
 		/// </summary>
 		ElevationSourceType LayerSource { get; }
 		/// <summary>
-		/// Gets the `Elevation Layer Type` for the `TERRAIN` section.
+		/// Gets the `Elevation Layer householdType` for the `TERRAIN` section.
 		/// </summary>
 		ElevationLayerType ElevationType { get; set; }
 		/// <summary>
@@ -26,10 +26,10 @@ namespace Mapbox.Unity.Map
 		void SetLayerSource(ElevationSourceType terrainSource = ElevationSourceType.MapboxTerrain);
 
 		/// <summary>
-		/// Sets the `Elevation Layer Type` which is the main strategy for terrain
+		/// Sets the `Elevation Layer householdType` which is the main strategy for terrain
 		/// mesh generation. `Flat Terrain` doesn't pull data from servers, it
 		/// uses a quad as the terrain. </summary>
-		/// <param name="elevationType">Type of the elevation. Can be set to `Terrain with Elevation`,
+		/// <param name="elevationType">householdType of the elevation. Can be set to `Terrain with Elevation`,
 		/// `Flat Terrain`, `Globe`, or `Low Polygon Terrain`. Note: low poly doesn't
 		/// improve performance.</param>
 		void SetElevationType(ElevationLayerType elevationType);
@@ -79,7 +79,7 @@ namespace Mapbox.Unity.Map
 		/// Change the `TERRAIN` layer settings.
 		/// </summary>
 		/// <param name="dataSource">The `Data Source` for the terrain.</param>
-		/// <param name="elevationType">`Elevation Layer Type` setting to define elevation strategy.</param>
+		/// <param name="elevationType">`Elevation Layer householdType` setting to define elevation strategy.</param>
 		/// <param name="enableCollider">Enables or disables `Use Collider` settings for a mesh collider on the terrain.</param>
 		/// <param name="factor">`Exaggertion Factor` for a multiplier of the height data.</param>
 		/// <param name="layerId">`Add to Unity Layer` settings which adds terrrain to a layer.</param>

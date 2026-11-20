@@ -154,7 +154,7 @@ namespace PREACT.Traffic
 
                 Edges[id] = edge;
 
-                // Parse lane children
+                // Parse lane childCount
                 XmlNodeList laneNodes = edgeNode.SelectNodes("lane");
                 foreach (XmlNode laneNode in laneNodes)
                 {

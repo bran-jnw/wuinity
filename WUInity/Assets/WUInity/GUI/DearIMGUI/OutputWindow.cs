@@ -102,7 +102,7 @@ namespace Assets.WUInity.GUI.DearIMGUI
             {
                 ImGui.BulletText($"Active total population: {sim.Evacuation.PedestrianModule.GetTotalPopulation()}");
                 ImGui.BulletText($"Active total households: {sim.Evacuation.PedestrianModule.GetTotalHouseHolds()}");
-                ImGui.BulletText($"Active total vehicles available: {sim.Evacuation.PedestrianModule.GetTotalVehicles()}");
+                ImGui.BulletText($"Active total vehicleCount available: {sim.Evacuation.PedestrianModule.GetTotalVehicles()}");
 
                 ImGui.BulletText($"People not leaving: {sim.Evacuation.PedestrianModule.GetPeopleStaying()}");   
                 ImGui.BulletText($"People remaining: {sim.Evacuation.PedestrianModule.GetPeopleRemaining()} /  {sim.Evacuation.PedestrianModule.GetTotalPopulation()}");

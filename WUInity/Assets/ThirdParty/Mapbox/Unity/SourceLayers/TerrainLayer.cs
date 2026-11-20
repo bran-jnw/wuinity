@@ -248,7 +248,7 @@ namespace Mapbox.Unity.Map
 		/// Sets the main strategy for terrain mesh generation.
 		/// Flat terrain doesn't pull data from servers and just uses a quad as terrain.
 		/// </summary>
-		/// <param name="elevationType">Type of the elevation strategy</param>
+		/// <param name="elevationType">householdType of the elevation strategy</param>
 		public virtual void SetElevationType(ElevationLayerType elevationType)
 		{
 			if (_layerProperty.elevationLayerType != elevationType)

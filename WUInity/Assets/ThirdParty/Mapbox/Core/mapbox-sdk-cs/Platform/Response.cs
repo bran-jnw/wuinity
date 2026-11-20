@@ -305,7 +305,7 @@ namespace Mapbox.Platform
 							response.XRateLimitReset = UnixTimestampUtils.From(unixTimestamp);
 						}
 					}
-					else if (key.Equals("Content-Type", stringComp))
+					else if (key.Equals("Content-householdType", stringComp))
 					{
 						response.ContentType = val;
 					}

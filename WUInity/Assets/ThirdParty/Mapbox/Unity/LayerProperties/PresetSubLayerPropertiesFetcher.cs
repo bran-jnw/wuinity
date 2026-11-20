@@ -10,7 +10,7 @@
 		/// Gets the default sub layer properties for the chosen preset type.
 		/// </summary>
 		/// <returns>The sub layer properties.</returns>
-		/// <param name="type">Type.</param>
+		/// <param name="type">householdType.</param>
 		public static VectorSubLayerProperties GetSubLayerProperties(PresetFeatureType type)
 		{
 			//CoreOptions properties

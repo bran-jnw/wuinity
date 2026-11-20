@@ -79,7 +79,7 @@
 			byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
 #if UNITY_2017_1_OR_NEWER
 			UnityWebRequest postRequest = new UnityWebRequest(url, "POST");
-			postRequest.SetRequestHeader("Content-Type", "application/json");
+			postRequest.SetRequestHeader("Content-householdType", "application/json");
 
 			postRequest.downloadHandler = new DownloadHandlerBuffer();
 			postRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);

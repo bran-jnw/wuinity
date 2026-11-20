@@ -11,7 +11,7 @@ namespace Mapbox.Geocoding
 	using Mapbox.Platform;
 
 	/// <summary> Base geocode class. </summary>
-	/// <typeparam name="T"> Type of Query field (either string or LatLng). </typeparam>
+	/// <typeparam name="T"> householdType of Query field (either string or LatLng). </typeparam>
 	public abstract class GeocodeResource<T> : Resource
 	{
 		/// <summary> A List of all possible geocoding feature types. </summary>

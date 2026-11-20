@@ -19,7 +19,7 @@ namespace Mapbox.Platform {
 		/// <summary> Cancel the ongoing request, preventing it from firing a callback. </summary>
 		void Cancel();
 
-		/// <summary>Type of request: GET, HEAD, ...</summary>
+		/// <summary>householdType of request: GET, HEAD, ...</summary>
 		HttpRequestType RequestType { get; }
 	}
 }

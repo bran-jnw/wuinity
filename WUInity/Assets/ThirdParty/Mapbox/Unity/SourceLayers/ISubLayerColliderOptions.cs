@@ -7,7 +7,7 @@ namespace Mapbox.Unity.SourceLayers
 		/// <summary>
 		/// Enable/Disable feature colliders and sets the type of colliders to use.
 		/// </summary>
-		/// <param name="colliderType">Type of the collider to use on features.</param>
+		/// <param name="colliderType">householdType of the collider to use on features.</param>
 		void SetFeatureCollider(ColliderType colliderType);
 	}
 }

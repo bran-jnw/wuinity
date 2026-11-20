@@ -384,16 +384,16 @@ namespace PREACT.Traffic
                 if (route.edges.Count > 0)
                 {
                     foundRoute = true;
-                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected vehicle, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                    Engine.Message(_simulation, Engine.LogType.Warning, $"No route could be found for the injected vehicle, so it was teleported to a valid location. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                 }
                 else
                 {
-                    Engine.Message(null, Engine.LogType.Warning, $"No route could be found for the injected vehicle, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                    Engine.Message(_simulation, Engine.LogType.Warning, $"No route could be found for the injected vehicle, tried teleporting but no valid route could be found. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
                 }
             }
             else
             {
-                Engine.Message(null, Engine.LogType.Warning, $"Car could not be injected and teleported as no valid route was found or cached. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
+                Engine.Message(_simulation, Engine.LogType.Warning, $"Car could not be injected and teleported as no valid route was found or cached. Origin (lat/lon) {startLatLon.x}, {startLatLon.y}, dest. (lat/lon) {destinationLatLon.x}, {destinationLatLon.y}.");
             }
 
             if (foundRoute && route != null)
@@ -733,7 +733,7 @@ namespace PREACT.Traffic
                 }
                 catch (Exception e)
                 {
-                    Engine.Message(null, Engine.LogType.Warning, e.Message);
+                    Engine.Message(_simulation, Engine.LogType.Warning, e.Message);
                 }
             }
         }

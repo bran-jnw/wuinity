@@ -14,7 +14,7 @@ namespace Mapbox.MapMatching
 	using Mapbox.VectorTile.ExtensionMethods;
 
 	/// <summary> Base geocode class. </summary>
-	/// <typeparam name="T"> Type of Query field (either string or LatLng). </typeparam>
+	/// <typeparam name="T"> householdType of Query field (either string or LatLng). </typeparam>
 	public class MapMatchingResource : Resource
 	{
 
@@ -99,7 +99,7 @@ namespace Mapbox.MapMatching
 
 
 		/// <summary>
-		/// <para>Type of returned overview geometry.</para>
+		/// <para>householdType of returned overview geometry.</para>
 		/// <para>Can be full (the most detailed geometry available), simplified (a simplified version of the full geometry), or none (no overview geometry).</para>
 		/// <para>The default is  simplified.</para>
 		/// </summary>

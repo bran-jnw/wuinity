@@ -152,7 +152,7 @@ namespace KDTree
         }
 
         /// <summary>
-        /// Bubble a parent down through the children so it goes in the right place.
+        /// Bubble a parent down through the childCount so it goes in the right place.
         /// </summary>
         /// <param name="iParent">The index of the parent.</param>
         private void SiftDown(int iParent)

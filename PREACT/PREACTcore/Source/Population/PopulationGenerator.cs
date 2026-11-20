@@ -118,7 +118,7 @@ namespace EvacuationPopulationSimulator
             Console.WriteLine("\n--- Synthetic Population Structural Diagnostics ---");
             Console.WriteLine($"Total Generated Citizens: {totalPopulation:N0}");
             Console.WriteLine($"Average Household Size:  {(double)totalPopulation / targetHouseholds:F2} persons");
-            Console.WriteLine($"Total Evacuation Assets: {totalVehicles:N0} vehicles");
+            Console.WriteLine($"Total Evacuation Assets: {totalVehicles:N0} vehicleCount");
             Console.WriteLine($"HNs Gated by Dependents: {((double)householdsWithDependents / targetHouseholds) * 100:F1}% (Will delay evacuation)");
         }
 
@@ -130,7 +130,7 @@ namespace EvacuationPopulationSimulator
             {
                 Household hh = new Household { Id = i };
 
-                // Dependency 1: Size Distribution determines the structural Family Template Type
+                // Dependency 1: Size Distribution determines the structural Family Template householdType
                 double sizeRoll = _rand.NextDouble();
                 int size;
                 if (sizeRoll < 0.28) { size = 1; hh.Type = HouseholdType.Single; }
@@ -173,7 +173,7 @@ namespace EvacuationPopulationSimulator
                         break;
 
                     case HouseholdType.MultiGenerational:
-                        // High density dependency: Grandparent, parents, and children present
+                        // High density dependency: Grandparent, parents, and childCount present
                         hh.Members.Add(CreatePerson(referenceAge)); // Middle generation parent
                         int spouseAgeMG = GenerateAgeFromBellCurve(referenceAge, 3, 18, 85);
                         hh.Members.Add(CreatePerson(spouseAgeMG));
@@ -182,7 +182,7 @@ namespace EvacuationPopulationSimulator
                         int grandparentAge = GenerateAgeFromBellCurve(referenceAge + 25, 4, 60, 95);
                         hh.Members.Add(CreatePerson(grandparentAge));
 
-                        // Remaining slots allocated to children
+                        // Remaining slots allocated to childCount
                         while (hh.Members.Count < size)
                         {
                             int childAge = _rand.Next(0, Math.Min(referenceAge - 19, 22));

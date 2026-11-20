@@ -38,7 +38,7 @@ namespace Mapbox.MapMatching
 	}
 
 
-	/// <summary>Type of returned overview geometry. </summary>
+	/// <summary>householdType of returned overview geometry. </summary>
 	public enum Overview
 	{
 		/// <summary>The most detailed geometry available </summary>

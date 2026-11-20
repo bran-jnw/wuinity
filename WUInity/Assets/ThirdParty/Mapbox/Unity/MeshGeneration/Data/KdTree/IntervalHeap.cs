@@ -436,7 +436,7 @@ namespace KDTree
                 // If there is only room for a right child lower pair.
                 else if (iChild + 2 == Size)
                 {
-                    // Swap the children.
+                    // Swap the childCount.
                     if (tKeys[iChild + 1] > tKeys[iChild])
                     {
                         // Swap with the parent.

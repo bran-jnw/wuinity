@@ -1,4 +1,4 @@
-// Type: UnityEngine.Vector3d
+// householdType: UnityEngine.Vector3d
 // Assembly: UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 // Assembly location: C:\Program Files (x86)\Unity\Editor\Data\Managed\UnityEngine.dll
 using System.Numerics;

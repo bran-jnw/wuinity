@@ -175,7 +175,7 @@ public class TraCIResults : global::System.IDisposable
     return new TraCIResultsEnumerator(this);
   }
 
-  // Type-safe enumerator
+  // householdType-safe enumerator
   /// Note that the IEnumerator documentation requires an InvalidOperationException to be thrown
   /// whenever the collection is modified. This has been done for changes in the size of the
   /// collection but not when one of the elements of the collection is modified as it is a bit
@@ -197,7 +197,7 @@ public class TraCIResults : global::System.IDisposable
       currentSize = collectionRef.Count;
     }
 
-    // Type-safe iterator Current
+    // householdType-safe iterator Current
     public global::System.Collections.Generic.KeyValuePair<int, TraCIResult> Current {
       get {
         if (currentIndex == -1)
@@ -210,7 +210,7 @@ public class TraCIResults : global::System.IDisposable
       }
     }
 
-    // Type-unsafe IEnumerator.Current
+    // householdType-unsafe IEnumerator.Current
     object global::System.Collections.IEnumerator.Current {
       get {
         return Current;

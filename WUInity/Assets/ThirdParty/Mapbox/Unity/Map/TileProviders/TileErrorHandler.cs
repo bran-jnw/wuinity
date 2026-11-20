@@ -71,7 +71,7 @@ namespace Mapbox.Unity.Map.TileProviders
 		private string printMessage(List<Exception> exceptions, TileErrorEventArgs e)
 		{
 			return string.Format(
-				"{0} Exception(s) caused on the tile. Tile ID:{1} Tile Type:{4}{2}{3}"
+				"{0} Exception(s) caused on the tile. Tile ID:{1} Tile householdType:{4}{2}{3}"
 				, exceptions.Count
 				, e.TileId
 				, Environment.NewLine

@@ -39,7 +39,7 @@ namespace KDTree
 
         // Stem only
         /// <summary>
-        /// The left and right children.
+        /// The left and right childCount.
         /// </summary>
         protected internal KDNode<T> pLeft, pRight;
         /// <summary>
@@ -83,7 +83,7 @@ namespace KDTree
 
         #region External Operations
         /// <summary>
-        /// The number of items in this leaf node and all children.
+        /// The number of items in this leaf node and all childCount.
         /// </summary>
         public int Size { get; private set; }
 
@@ -267,16 +267,16 @@ namespace KDTree
         }
 
         /// <summary>
-        /// Split this leaf node by creating left and right children, then moving all the children of
+        /// Split this leaf node by creating left and right childCount, then moving all the childCount of
         /// this node into the respective buckets.
         /// </summary>
         private void SplitLeafNode()
         {
-            // Create the new children.
+            // Create the new childCount.
             pRight = new KDNode<T>(iDimensions, iBucketCapacity);
             pLeft  = new KDNode<T>(iDimensions, iBucketCapacity);
 
-            // Move each item in this leaf into the children.
+            // Move each item in this leaf into the childCount.
             for (int i = 0; i < Size; ++i)
             {
                 // Store.

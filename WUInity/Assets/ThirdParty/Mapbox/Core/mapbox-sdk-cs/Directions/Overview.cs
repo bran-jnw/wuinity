@@ -7,7 +7,7 @@
 namespace Mapbox.Directions
 {
 	/// <summary> 
-	///     Type of returned overview geometry. Can be  full (the most detailed geometry available),  
+	///     householdType of returned overview geometry. Can be  full (the most detailed geometry available),  
 	///     simplified (a simplified version of the full geometry), or  false (no overview geometry).  
 	/// </summary>
 	public sealed class Overview

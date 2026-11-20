@@ -96,7 +96,7 @@ namespace PREACT.Evacuation
             //check if any destination has been blocked by fire, this is done after everything has progressed the current time step
             UpdateDestinationsWildfireStatus();
 
-            //inject vehicles from all sources
+            //inject vehicleCount from all sources
             HandleNewVehicles();
         }
 

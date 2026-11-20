@@ -38,7 +38,7 @@ namespace PREACT.Pedestrian
         {
             PopulateSimulation(simulation.Input.Population.Data.Households);
             output = new List<string>();
-            output.Add("Time(s),Households remaining,People remaining,Total households responded, Total people responded,Total households reached access point,Total people reached access point,Total vehicles used");
+            output.Add("Time(s),Households remaining,People remaining,Total households responded, Total people responded,Total households reached access point,Total people reached access point,Total vehicleCount used");
         }
 
         public override int GetTotalPopulation()
@@ -268,7 +268,7 @@ namespace PREACT.Pedestrian
 
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined groups: {culledHouseholdsOutsideGroups}/{culledPeopleOutsideGroups}");
             Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people culled outside of defined simulation domain: {culledHouseholdsOutsideDomain}/{culledPeopleOutsideDomain}");
-            Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people without vehicles: {householdswithoutVehicles}/{peoplewithoutVehicles}");
+            Engine.Message(_simulation, Engine.LogType.Warning, $"Number of households/people without vehicleCount: {householdswithoutVehicles}/{peoplewithoutVehicles}");
             Engine.Message(_simulation, Engine.LogType.Log, $"Total included population: {_totalPopulation}.");
             Engine.Message(_simulation, Engine.LogType.Log, $"Total included households: {_totalHouseholds}.");
             Engine.Message(_simulation, Engine.LogType.Log, $"Total vehicle count: {_totalVehicles}.");

@@ -67,7 +67,7 @@ namespace Mapbox.Platform
 		/// <param name="items"> Array of option strings. </param>
 		/// <param name="separator"> Character to use for separating items in arry. Defaults to ",". </param>
 		/// <returns>Comma-separated string of options.</returns>
-		/// <typeparam name="U">Type in the array.</typeparam>
+		/// <typeparam name="U">householdType in the array.</typeparam>
 		protected static string GetUrlQueryFromArray<U>(U[] items, string separator = ",")
 		{
 			return string.Join(separator, items.Select(item => item.ToString()).ToArray());
